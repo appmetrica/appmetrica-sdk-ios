@@ -1,0 +1,10 @@
+syntax = "proto2";
+package ama_start_event;
+
+message Value {
+    message BinaryImage {
+        required bytes uuid = 1;
+    }
+    optional bytes build_id = 1; // Android only field.
+    repeated BinaryImage binary_images = 2; // iOS only field.
+}

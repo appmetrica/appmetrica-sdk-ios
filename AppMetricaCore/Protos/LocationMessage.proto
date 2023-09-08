@@ -1,0 +1,39 @@
+syntax = "proto2";
+option optimize_for = LITE_RUNTIME;
+package ama;
+
+enum LocationProvider {
+    PROVIDER_UNKNOWN = 0;
+    PROVIDER_GPS = 1;
+    PROVIDER_NETWORK = 3;
+}
+
+message LocationMessage {
+
+    message Location {
+        required uint64 incremental_id = 1;
+        required uint64 collect_timestamp = 2;
+        optional uint64 timestamp = 3;
+        required double latitude = 4;
+        required double longitude = 5;
+        optional uint32 precision = 6;
+        optional uint32 direction = 7;
+        optional uint32 speed = 8;
+        optional int32 altitude = 9;
+        optional LocationProvider provider = 10 [default = PROVIDER_UNKNOWN];
+    }
+
+    message Visit {
+        optional uint64 incremental_id = 1;
+        optional uint64 collect_timestamp = 2;
+        optional uint64 arrival_timestamp = 3;
+        optional uint64 departure_timestamp = 4;
+        optional double latitude = 5;
+        optional double longitude = 6;
+        optional double precision = 7;
+    }
+
+    repeated Location location = 1;
+    reserved 2;
+    repeated Visit visits = 3;
+}

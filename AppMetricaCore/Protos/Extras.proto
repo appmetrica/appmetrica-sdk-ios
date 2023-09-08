@@ -1,0 +1,11 @@
+syntax = "proto2";
+option optimize_for = LITE_RUNTIME;
+package ama;
+
+message Extras {
+  message ExtraEntry {
+    required bytes key = 1;
+    required bytes value = 2;
+  }
+  repeated ExtraEntry extras = 1;
+}

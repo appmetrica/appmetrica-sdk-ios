@@ -1,0 +1,79 @@
+syntax = "proto2";
+option optimize_for = LITE_RUNTIME;
+package ama;
+
+message Revenue
+{
+    message Receipt
+    {
+        optional bytes data = 1; // binary object without any encoding or compression
+        reserved 2;
+        optional bytes transaction_id = 3; // to determine transaction within receipt
+    }
+
+    optional uint32 quantity = 1 [default = 1];
+    optional double price = 2;
+    required bytes currency = 3; // ISO 4217
+    optional bytes product_id = 4; // arbitrary string
+    optional bytes payload = 5; // arbitrary JSON, same rules as for EVENT_CLIENT
+
+    optional Receipt receipt = 6; // data for revenue validation
+
+    optional int64 price_micros = 7; // Price value in micros(price * 10^6). If this field is filled, price field is ignored. Used in Android(3.7.0+) and iOS (3.7.0+).
+
+    optional bool auto_collected = 8 [default = false];
+
+    enum BuyerDevice {
+        BUYER_UNDEFINED = 0;
+        THIS = 1;
+        ANOTHER = 2;
+    }
+//    optional BuyerDevice guessed_buyer_device = 9 [default = BUYER_UNDEFINED]; // Could not be determined on iOS
+
+    enum InAppType {
+        PURCHASE = 1;
+        SUBSCRIPTION = 2;
+    }
+    optional InAppType in_app_type = 10 [default = PURCHASE];
+
+    message Transaction {
+        enum State {
+            STATE_UNDEFINED = 0;
+            PURCHASED = 1;
+            RESTORED = 2;
+        }
+
+        optional bytes id = 1; // id of transaction that brought money. See also secondary_id
+        optional uint64 time = 2; // transaction time in seconds
+        optional State state = 3 [default = STATE_UNDEFINED]; // iOS only
+        optional bytes secondary_id = 4; // id of secondary transaction. For example, id of restored purchase or id of subscription transaction is this is renewal
+        optional uint64 secondary_time = 5; // time of original transaction in seconds. See secondary_id
+    }
+
+    optional Transaction transaction_info = 11;
+
+    message SubscriptionInfo {
+        message Period {
+            enum TimeUnit {
+                UNKNOWN = 0;
+                DAY = 1;
+                WEEK = 2;
+                MONTH = 3;
+                YEAR = 4;
+            }
+            optional uint32 number = 1;
+            optional TimeUnit time_unit = 2;
+        }
+        optional bool auto_renewing = 1;
+        optional Period subscription_period = 2;
+
+        message Introductory {
+            optional int64 price_micros = 1;
+            optional Period period = 2;
+            optional uint32 number_of_periods = 3;
+            optional bytes id = 4 ;
+        }
+        optional Introductory introductory_info = 3;
+    }
+    optional SubscriptionInfo subscription_info = 12;
+}

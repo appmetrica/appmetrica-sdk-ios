@@ -1,0 +1,29 @@
+syntax = "proto2";
+option optimize_for = LITE_RUNTIME;
+package ama;
+
+message SessionData {
+    message AppState {
+        optional bytes locale = 1;
+        optional bytes app_version_name = 2;
+        required bool app_debuggable = 3;
+        optional bytes kit_version = 4;
+        optional bytes kit_version_name = 5;
+        optional bytes kit_build_type = 6;
+        required uint32 kit_build_number = 7;
+        optional bytes os_version = 8;
+        required int32 os_api_level = 9;
+        required bool is_rooted = 10;
+        optional bytes uuid = 11;
+        optional bytes device_id = 12;
+        optional bytes ifv = 13;
+        optional bytes ifa = 14;
+        required bool lat = 15;
+        optional bytes app_build_number = 16;
+    }
+    required int64 session_id = 1;
+    optional bytes attribution_id = 2;
+    optional int32 server_time_offset = 3;
+    required AppState app_state = 4;
+    reserved 5;
+}

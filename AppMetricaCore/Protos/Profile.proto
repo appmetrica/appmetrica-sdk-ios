@@ -1,0 +1,37 @@
+syntax = "proto2";
+option optimize_for = LITE_RUNTIME;
+package ama;
+
+message Profile
+{
+    message AttributeMetaInfo
+    {
+        optional bool set_if_undefined = 1 [default = false]; // If set to true, all following attribute changes will be ignored.
+        optional bool reset = 2 [default = false]; // If set to true, the attribute will be reset if possible.
+    }
+
+    message AttributeValue
+    {
+        optional bytes string_value = 1; // required for Type.STRING
+        optional double number_value = 2; // required for Type.NUMBER
+        optional double counter_modification = 3; // required for Type.COUNTER
+        optional bool bool_value = 4; // required for Type.BOOL
+    }
+
+    message Attribute
+    {
+        required bytes name = 1; // Unique among attributes of each type. Attributes of different types could have the same names.
+
+        enum Type
+        {
+            STRING = 0;
+            NUMBER = 1;
+            COUNTER = 2;
+            BOOL = 3;
+        }
+        required Type type = 2;
+        required AttributeMetaInfo meta_info = 3;
+        required AttributeValue value = 4;
+    }
+    repeated Attribute attributes = 1; // Array of attributes
+}

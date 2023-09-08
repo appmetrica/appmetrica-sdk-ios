@@ -1,0 +1,32 @@
+
+#import "AMACore.h"
+#import "AMAConfigurationDatabaseSchemeMigrationTo2.h"
+#import "AMAStorageKeys.h"
+#import "FMDB.h"
+#import "AMASession.h"
+
+@implementation AMAConfigurationDatabaseSchemeMigrationTo2
+
+- (NSUInteger)schemeVersion
+{
+    return 2;
+}
+
+- (BOOL)applyTransactionalMigrationToDatabase:(FMDatabase *)db
+{
+    BOOL result = YES;
+
+    result = [db executeUpdate:@"ALTER TABLE sessions ADD api_key INTEGER NOT NULL DEFAULT 0"];
+
+    if (result) {
+        result = [db executeUpdate:@"ALTER TABLE sessions ADD type INTEGER NOT NULL DEFAULT 0"];
+    }
+    if (result) {
+        result = [db executeUpdate:@"UPDATE OR REPLACE sessions SET type = ? WHERE id = -1",
+                                   @(AMASessionTypeBackground)];
+    }
+
+    return result;
+}
+
+@end

@@ -1,0 +1,141 @@
+syntax = "proto2";
+option optimize_for = LITE_RUNTIME;
+package ama;
+
+
+message RequestParameters {
+    optional string uuid = 1;
+    optional string device_id = 2;
+}
+
+message Time {
+    required uint64 timestamp = 1;
+    required sint32 time_zone = 2;
+    reserved 3 to 4;
+}
+
+message ReportMessage {
+
+    enum OptionalBool {
+        OPTIONAL_BOOL_UNDEFINED = -1;
+        OPTIONAL_BOOL_FALSE = 0;
+        OPTIONAL_BOOL_TRUE = 1;
+    }
+    
+    reserved 1 to 2;
+
+    message Location {
+        required double lat = 1;
+        required double lon = 2;
+        optional uint64 timestamp = 3;
+        optional uint32 precision = 4;
+        optional uint32 direction = 5;
+        optional uint32 speed = 6;
+        optional int32 altitude = 7;
+    }
+
+    message Session {
+        required uint64 id = 1;
+
+        message SessionDesc {
+            required Time start_time = 1;
+            required string locale = 2;
+
+            reserved 3;
+
+            enum SessionType {
+                SESSION_FOREGROUND = 0;
+                SESSION_BACKGROUND = 1;
+                SESSION_DIAGNOSTIC = 2;
+            }
+            optional SessionType session_type = 5;
+        }
+
+        required SessionDesc session_desc = 2;
+
+        message Event {
+            required uint64 number_in_session = 1;
+            required uint64 time = 2;
+
+            enum EventType {
+                EVENT_INIT = 1;
+                EVENT_START = 2;
+                EVENT_CRASH = 3;
+                EVENT_CLIENT = 4;
+                EVENT_REFERRER = 5;
+                EVENT_ERROR = 6;
+                EVENT_ALIVE = 7;
+                 reserved 8 to 12;
+                EVENT_FIRST = 13;
+                 reserved 14 to 15;
+                EVENT_OPEN = 16;
+                EVENT_UPDATE = 17;
+                EVENT_PROFILE = 20;
+                EVENT_REVENUE = 21;
+                 reserved 22 to 24;
+                EVENT_PROTOBUF_ANR = 25;
+                EVENT_PROTOBUF_CRASH = 26;
+                EVENT_PROTOBUF_ERROR = 27;
+                 reserved 28;
+                EVENT_CLEANUP = 29;
+                reserved 30 to 34;
+                EVENT_ECOMMERCE = 35;
+                reserved 36;
+                EVENT_ASA_TOKEN = 37;
+                EVENT_WEBVIEW_SYNC = 38;
+                reserved 39;
+                EVENT_AD_REVENUE = 40;
+            }
+            required uint32 type = 3;
+            optional string name = 4;
+            optional bytes value = 5;
+            optional Location location = 6;
+            reserved 7;
+            optional string environment = 8;
+
+            reserved 9;
+            
+            optional uint32 bytes_truncated = 10;
+
+            enum EncodingType {
+                NONE = 0;
+                RSA_AES_CBC = 1;
+                GZIP = 2;
+            }
+            optional EncodingType encoding_type = 12 [default = NONE];
+            optional OptionalBool location_tracking_enabled = 13 [default = OPTIONAL_BOOL_UNDEFINED];
+            optional bytes profile_id = 14;
+
+            optional OptionalBool first_occurrence = 15 [default = OPTIONAL_BOOL_UNDEFINED];
+            optional uint64 global_number = 16;
+            optional uint64 number_of_type = 17;
+            
+            enum EventSource {
+                NATIVE = 0;
+                JS = 1;
+            }
+            optional EventSource source = 22 [default = NATIVE];
+            optional bool attribution_id_changed = 23 [default = false];
+            optional uint64 open_id = 24 [default = 1];
+
+            message ExtrasEntry {
+                optional bytes key = 1;
+                optional bytes value = 2;
+            }
+            repeated ExtrasEntry extras = 25;
+        }
+        repeated Event events = 3;
+    }
+    repeated Session sessions = 3;
+
+    optional RequestParameters report_request_parameters = 4;
+    reserved 5 to 6;
+
+    message EnvironmentVariable
+    {
+        required string name = 1;
+        required string value = 2;
+    }
+    repeated EnvironmentVariable app_environment = 7;
+    reserved 10;
+}

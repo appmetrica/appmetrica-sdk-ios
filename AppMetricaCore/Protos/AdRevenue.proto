@@ -1,0 +1,30 @@
+syntax = "proto2";
+option optimize_for = LITE_RUNTIME;
+package ama;
+
+message AdRevenue {
+    enum AdType {
+        UNKNOWN = 0;
+        NATIVE = 1;
+        BANNER = 2;
+        REWARDED = 3;
+        INTERSTITIAL = 4;
+        MREC = 5;
+        OTHER = 6;
+    }
+    message Decimal {
+        optional int64 mantissa = 1 [default = 0]; // Decimal value mantissa(signed)
+        optional int32 exponent = 2 [default = 0]; // Decimal value exponent(aka scale)
+    }
+    optional bytes data_source = 1 [default = "manual"];
+    optional Decimal ad_revenue = 2;
+    optional bytes currency = 3;
+    optional AdType ad_type = 4 [default = UNKNOWN];
+    optional bytes ad_network = 5;
+    optional bytes ad_unit_id = 6;
+    optional bytes ad_unit_name = 7;
+    optional bytes ad_placement_id = 8;
+    optional bytes ad_placement_name = 9;
+    optional bytes precision = 10;
+    optional bytes payload = 11; // in JSON format
+}

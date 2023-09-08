@@ -1,0 +1,66 @@
+syntax = "proto2";
+option optimize_for = LITE_RUNTIME;
+package ama;
+
+message EventData {
+    message Payload {
+        enum EncryptionType {
+            NONE = 0;
+            AES = 1;
+            RSA_AES = 2 [deprecated = true];
+            GZIP = 3;
+        }
+        enum ValueType {
+            EMPTY = 0;
+            STRING = 1;
+            BINARY = 2;
+            FILE = 3;
+        }
+        optional bytes name = 1;
+        required ValueType value_type = 2;
+        optional bytes value_data = 3;
+        required EncryptionType encryption_type = 4;
+        required uint32 bytes_truncated = 5;
+    }
+    message Location {
+        required double latitude = 1;
+        required double longitude = 2;
+        required double altitude = 3;
+        optional double timestamp = 4;
+        required double horizontal_accuracy = 5;
+        required double vertical_accuracy = 6;
+        required double direction = 7;
+        required double speed = 8;
+    }
+
+    required Payload payload = 1;
+
+    required double time_offset = 2;
+    required uint32 global_number = 3;
+    required uint32 number_of_type = 4;
+    optional bool first_occurrence = 5;
+
+    reserved 6;
+    optional Location location = 7;
+    optional bool location_enabled = 8;
+
+    reserved 9 to 11;
+
+    optional bytes user_profile_id = 12;
+
+    optional bytes app_environment = 13; // JSON-string with one-level dictionary
+    optional bytes event_environment = 14; // JSON-string with one-level dictionary
+    enum EventSource {
+        NATIVE = 0;
+        JS = 1;
+    }
+    optional EventSource source = 15 [default = NATIVE];
+    optional bool attribution_id_changed = 16 [default = false];
+    optional uint64 open_id = 17 [default = 1];
+
+    message ExtraEntry {
+        required bytes key = 1;
+        required bytes value = 2;
+    }
+    repeated ExtraEntry extras = 18;
+}

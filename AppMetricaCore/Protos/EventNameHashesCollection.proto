@@ -1,0 +1,11 @@
+syntax = "proto2";
+option optimize_for = LITE_RUNTIME;
+package ama;
+
+message EventNameHashesCollection
+{
+    required bytes current_version = 1;
+    required uint32 hashes_count_from_current_version = 2;
+    required bool handle_new_events_as_unknown = 3;
+    repeated uint64 event_name_hashes = 4;
+}

@@ -1,0 +1,43 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "FMDB",
+        "repositoryURL": "https://github.com/ccgus/fmdb.git",
+        "state": {
+          "branch": null,
+          "revision": "61e51fde7f7aab6554f30ab061cc588b28a97d04",
+          "version": "2.7.7"
+        }
+      },
+      {
+        "package": "Kiwi",
+        "repositoryURL": "https://github.com/appmetrica/Kiwi",
+        "state": {
+          "branch": null,
+          "revision": "a265276ad551a65c9b2e3762b0363e007b16f10e",
+          "version": "3.0.1-spm"
+        }
+      },
+      {
+        "package": "KSCrash",
+        "repositoryURL": "https://github.com/kstenerud/KSCrash",
+        "state": {
+          "branch": null,
+          "revision": "9e72c018a0ba455a89cf5770dea6e1d5258744b6",
+          "version": "1.15.27"
+        }
+      },
+      {
+        "package": "protobuf-c",
+        "repositoryURL": "https://github.com/appmetrica/protobuf-c",
+        "state": {
+          "branch": null,
+          "revision": "2dd4ca0d49a317570347d9bc1e85ee1bc5660d01",
+          "version": "1.2.2-spm"
+        }
+      }
+    ]
+  },
+  "version": 1
+}

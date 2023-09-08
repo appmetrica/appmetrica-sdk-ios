@@ -1,0 +1,253 @@
+
+syntax = "proto2";
+option optimize_for = LITE_RUNTIME;
+package ama;
+
+message IOSCrashReport {
+
+  message BytesPair {
+    optional bytes key = 1;
+    optional bytes value = 2;
+  }
+
+  message Info {
+    optional bytes version = 1; // Version of crash reporter
+    required bytes id = 2; // Identifier of crash
+    // required bytes process_name (removed: duplicates field in System)
+    required int64 timestamp = 3; // Timestamp of crash (UTC)
+    // required bytes type (removed: unused)
+
+    message VirtualMachineInfo {
+      optional bytes virtual_machine = 1; // Plugin name (flutter, unity, etc)
+      optional bytes virtual_machine_version = 2;
+      repeated BytesPair plugin_environment =3; //Some key-value attributes defined by plugins
+    }
+
+    optional VirtualMachineInfo virtual_machine_info = 4;
+  }
+
+  message BinaryImage {
+    required uint64 address = 1; // Base address in memory (KSCrash: image_addr)
+    // required uint64 image_vmaddr (removed: unused)
+    required uint64 size = 2; // Size in bytes (KSCrash: image_size)
+    required int32 cpu_type = 3; // CPU_TYPE_* from https://opensource.apple.com/source/cctools/cctools-836/include/mach/machine.h
+    required int32 cpu_subtype = 4; // CPU_SUBTYPE_* from https://opensource.apple.com/source/cctools/cctools-836/include/mach/machine.h
+    required int32 major_version = 5; // First part of version
+    required int32 minor_version = 6; // Second part of version
+    required int32 revision_version = 7; // Third part of version
+    required bytes path = 8; // Absolute path to binary image (KSCrash: name)
+    required bytes uuid = 9; // Raw 16 bytes of binary image UUID
+    optional bytes crash_info_message = 10; // 'message' from __crash_info section of binary (https://opensource.apple.com/source/WebKit2/WebKit2-7605.3.8/Platform/spi/Cocoa/CrashReporterClientSPI.h)
+    optional bytes crash_info_message2 = 11; // 'message2' from __crash_info section of binary (see link above)
+  }
+
+  message System {
+    enum BuildType {
+      UNKNOWN = 0;
+      SIMULATOR = 1; // Build for simulator
+      DEBUG = 2; // Build with DEBUG define (only for internal builds where AppMetrica integrated by sources)
+      TEST = 3; // Build for AdHoc/Testflight
+      APP_STORE = 4; // Build for AppStore
+    }
+    message Memory {
+      required uint64 size = 1; // Device memory size in bytes (full, base on sysctl('hw.memsize'))
+      required uint64 usable = 2; // Device memory size in bytes (active + inactive + wire + free, based on host_statistics)
+      required uint64 free = 3; // Device memory size in bytes (free, based on host_statistics)
+    }
+    message ApplicationStats {
+      required bool application_active = 1; // Before/after entering forground app is in inactive state (https://nda.ya.ru/3UXTo2)
+      required bool application_in_foreground = 2; // App was in foreground when crashed
+      required uint32 launches_since_last_crash = 3;
+      required uint32 sessions_since_last_crash = 4;
+      required double active_time_since_last_crash = 5; // Acount of time (in seconds) spent in foreground state of application since last launch
+      required double background_time_since_last_crash = 6; // As previous one but in background state
+      required uint32 sessions_since_launch = 7; // Sessions are calculated by KSCrash logic
+      required double active_time_since_launch = 8;
+      required double background_time_since_launch = 9;
+    }
+
+    // required bytes system_name (removed: duplicates report protocol) OS name (i.e. iOS/tvOS)
+    // required bytes system_version (removed: duplicates report protocol) OS version (i.e. 12.1.2/10.2)
+    // required bytes machine (removed: duplicates report protocol) Device name (i.e. iPhone11,2)
+    // required bytes model (removed: duplicates report protocol) For simulator it's "simulator" here
+    optional bytes kernel_version = 1; // Kernel version like an output of `uname -v`
+    optional bytes os_build_number = 2; // Build number of OS (i.e 14D27) (KSCrash: os_version)
+    // required bool jailbroken (removed: unused)
+    optional int64 boot_timestamp = 3; // Timestamp of device boot (UTC)
+    optional int64 app_start_timestamp = 4; // Timestamp of app start (UTC)
+    optional bytes executable_path = 5; // Absolute path to app binary (KSCrash: CFBundleExecutablePath)
+    // required bytes CFBundleExecutable (removed: last path component of executable_path)
+    // required bytes bundle_identifier (removed: duplicates report protocol) Application bundle identifier (KSCrash: CFBundleIdentifier) (ClickHouse: AppID)
+    // required bytes CFBundleName (removed: unused)
+    // required bytes app_build_number (removed: duplicates report protocol) Build number of application (KSCrash: CFBundleVersion)
+    // required bytes app_version (removed: duplicates report protocol) Version of application (KSCrash: CFBundleShortVersionString)
+    // required bytes app_uuid (removed: unused)
+    optional bytes cpu_arch = 6; // String representation of sysctl('hw.cputype') and sysctl('hw.cpusubtype'). See https://opensource.apple.com/source/cctools/cctools-836/include/mach/machine.h and KSCrash
+    optional int32 cpu_type = 7; // CPU_TYPE_* from https://opensource.apple.com/source/cctools/cctools-836/include/mach/machine.h
+    optional int32 cpu_subtype = 8; // CPU_SUBTYPE_* from https://opensource.apple.com/source/cctools/cctools-836/include/mach/machine.h
+    optional int32 binary_cpu_type = 9; // Binary compilation arch (see cpu_type)
+    optional int32 binary_cpu_subtype = 10; // Binary compilation arch (see cpu_subtype)
+    // required bytes time_zone (removed: unused)
+    optional bytes process_name = 11; // Name of app process
+    optional int64 process_id = 12; // PID of app process
+    optional int64 parent_process_id = 13; // PID of parrent process
+    // required bytes device_app_hash (removed: unused)
+    optional BuildType build_type = 14; // Type of application build
+    optional int64 storage = 15; // Device storage size in bytes (full)
+    optional Memory memory = 16; // Information about device memory state
+    optional ApplicationStats application_stats = 17; // Application usage information
+  }
+
+  message Crash {
+    message Backtrace {
+      message Frame {
+        optional uint64 instruction_addr = 1; // Absolute address, required for native crashes
+        optional bytes object_name = 2;
+        optional uint64 object_addr = 3;
+        optional bytes symbol_name = 4; // Full representation of "function". Class name and method name are combined here if present
+        optional uint64 symbol_addr = 5;
+        optional uint64 line_of_code = 6; // For crashes and errors from native code and virtual machines (plugins)
+        optional bytes source_file_name = 7; // For crashes and errors from native code and virtual machines (plugins)
+        optional bytes class_name = 8; // For crashes and errors from plugins only
+        optional bytes method_name = 9; // For crashes and errors from plugins only - in plugins we have more details than symbol name
+        optional uint32 column_of_code = 10; // For crashes and errors from plugins only - in plugins we have more details than symbol name
+      }
+      repeated Frame frames = 1; // Backtrace frames (KSCrash: contents)
+      // required int32 skipped (removed: always zero now)
+    }
+
+    message Error {
+
+      message Mach {
+        required int32 exception_type = 1; // Mach exception type from https://opensource.apple.com/source/xnu/xnu-792/osfmk/mach/exception_types.h (KSCrash: exception)
+        // optional bytes exception_name (removed: use exception_type)
+        required int64 code = 2; // Exception code from https://opensource.apple.com/source/xnu/xnu-792/osfmk/mach/kern_return.h
+        // optional bytes code_name (removed: use code)
+        required int64 subcode = 3;
+      }
+
+      message Signal {
+        required int32 signal = 1; // System signal (i.e. SIGPIPE, SIGKILL, SIGABRT)
+        // required bytes name (removed: use signal)
+        required int32 code = 2; // Signal code from https://opensource.apple.com/source/xnu/xnu-4570.31.3/bsd/sys/signal.h (see "Values for si_code")
+        // optional bytes code_name (removed: use code)
+      }
+
+      message NsException {
+        optional bytes name = 1; // Name field of NSException object
+        optional bytes user_info = 2; // String representation of user info field(which is a dictionary) of NSException object
+      }
+
+      message CppException {
+        optional bytes name = 1; // Name of C++ crash from __cxxabiv1::__cxa_current_exception_type()->name()
+      }
+
+      message NonFatal {
+        enum NonFatalType {
+          CUSTOM = 0; //Error with custom grouping based on identifier field
+          NSERROR = 1; //Error with default grouping based on stacktrace
+          VIRTUAL_MACHINE = 2; //Error from virtual machine like sdk plugins (flutter, unity, etc) and default grouping based on stacktrace
+          VIRTUAL_MACHINE_CUSTOM = 3; //Error from virtual machine like sdk plugin (flutter, unity, etc) and custom crouping based on identifier field
+        }
+        message Custom { //For NonFatalType in {CUSTOM, VIRTUAL_MACHINE_CUSTOM}
+          required bytes identifier = 1; // Identifier of an error to group by
+          optional bytes message = 2; // Short description of an error
+          optional bytes class_name = 3; // Name of the error class
+        }
+        message VirtualMachineError { //For NonFatalType = VIRTUAL_MACHINE
+          optional bytes class_name = 1;
+          optional bytes message = 2;
+        }
+        message NsError { //For NonFataType = NSERROR
+          required bytes domain = 1; // Error domain (see NSError)
+          required int64 code = 2; // Error code (see NSError)
+        }
+
+        required NonFatalType type = 1; // Type of non-fatal
+        optional bytes parameters = 2; // JSON-string with plain (single-level) map
+        optional Backtrace backtrace = 3; // Call stack provided by user
+
+        optional Custom custom = 4; // Specific information for type in (CUSTOM, VIRTUAL_MACHINE_CUSTOM)
+        optional NsError nserror = 5; // Specific information for type = NSERROR
+        optional VirtualMachineError virtual_machine_error = 6; // Specific information for type = VIRTUAL_MACHINE
+      }
+
+      message VirtualMachineCrash { //For crashes and errors from plugins
+        optional bytes class_name = 1;
+        optional bytes message = 2;
+        optional VirtualMachineCrash cause = 3;
+      }
+
+      // All possible crash types handled by KSCrash
+      enum CrashType {
+        MACH_EXCEPTION = 0;
+        SIGNAL = 1;
+        CPP_EXCEPTION = 2;
+        NSEXCEPTION = 3; // Native ObjC exceptions
+        MAIN_THREAD_DEADLOCK = 4;
+        USER_REPORTED = 5;
+        NON_FATAL = 6; // Errors
+        VIRTUAL_MACHINE_CRASH = 7; //Crashes from plugins
+        VIRTUAL_MACHINE_ERROR = 8; //Error with default grouping
+        VIRTUAL_MACHINE_CUSTOM_ERROR = 9; //Error group is defined by user-defined identifier
+      }
+
+      optional uint64 address = 1; // Address that caused the fault
+      optional bytes reason = 2; // Short description of why the crash occurred
+      required CrashType type = 3; // Type
+
+      optional Mach mach = 4; // Mach information is always available for iOS crashes, but may be empty for crashes from plugins
+      optional Signal signal = 5; // Signal information is always available
+      optional NsException nsexception = 6; // Available if type == NSEXCEPTION
+      optional CppException cpp_exception = 7; // Available if type == CPP_EXCEPTION
+      repeated NonFatal non_fatals_chain = 8; // Chain of errors. Available if type == NON_FATAL. Single item possible if type == VIRTUAL_MACHINE_ERROR
+      optional VirtualMachineCrash virtual_machine_crash = 9; //Available if type in {VIRTUAL_MACHINE_CRASH}
+    }
+
+    message Thread {
+
+      message Registers {
+        message Register {
+          required bytes name = 1; // Name of register (i.e. fp, x0, x11)
+          required uint64 value = 2;
+        }
+        repeated Register basic = 1;
+        repeated Register exception = 2; // i.e. exception, esr, far
+      }
+
+      message Stack {
+        enum GrowDirection {
+          PLUS = 0;
+          MINUS = 1;
+        }
+
+        required GrowDirection grow_direction = 1;
+        required uint64 dump_start = 2;
+        required uint64 dump_end = 3;
+        required uint64 stack_pointer = 4;
+        required bool overflow = 5;
+        optional bytes contents = 6; // Bytes of thread stack
+      }
+
+      optional Backtrace backtrace = 1;
+      optional Registers registers = 2;
+      optional Stack stack = 3; // Dump of thread stack (memory bytes before and after SP(stack pointer))
+      required uint32 index = 4; // Thread index
+      required bool crashed = 5; // Wheter thread has crashed
+      // required bool current_thread (removed: unused)
+      optional bytes name = 6; // Name of the thread
+      optional bytes dispatch_queue_name = 7; // Name of the dispatch queue (KSCrash: dispatch_queue)
+    }
+
+    required Error error = 1; // General crash information
+    repeated Thread threads = 2; // State of threads
+  }
+
+  required Info info = 1; // Crash meta-info
+  repeated BinaryImage binary_images = 2; // Loaded binary images
+  // required Process process (removed: unused, because we don't handle zombies)
+  optional System system = 3; // Device, OS and app state
+  required Crash crash = 4;
+  // required bytes user_info (removed: used only by AppMetrica SDK to match session) JSON string with AppMetrica state info
+  // required Debug debug (removed: contains console log, but we don't activate this feature of KSCrash)
+}

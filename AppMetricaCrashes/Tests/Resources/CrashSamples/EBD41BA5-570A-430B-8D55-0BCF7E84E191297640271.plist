@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>crashType</key>
+	<string>EXC_CRASH (SIGABRT)</string>
+	<key>environment</key>
+	<dict>
+		<key>TestEnvironmentKey</key>
+		<string>TestEnvironmentValue</string>
+	</dict>
+	<key>queueNames</key>
+	<array>
+		<string>com.apple.main-thread</string>
+		<string>com.apple.libdispatch-manager</string>
+	</array>
+	<key>timestamp</key>
+	<date>2015-04-08T17:47:34Z</date>
+</dict>
+</plist>
