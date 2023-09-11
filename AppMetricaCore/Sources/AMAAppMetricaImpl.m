@@ -58,7 +58,7 @@
                                     AMADispatchStrategyDelegate,
                                     AMAHostStateProviderDelegate,
                                     AMAReporterDelegate,
-                                    AMAStartupProvidingDelegate>
+                                    AMAExtendedStartupObservingDelegate>
 
 @property (nonatomic, copy, readwrite) NSString *apiKey;
 
@@ -84,8 +84,8 @@
 
 @property (nonatomic, strong) NSHashTable *startupCompletionObservers;
 
-@property (nonatomic, strong) id<AMAStartupProviding> additionalStartupObserver;
-@property (nonatomic, strong) id<AMAReporterStorageControlling> extendedReporterStorageController;
+@property (nonatomic, strong) NSHashTable *extendedStartupCompletionObservers;
+@property (nonatomic, strong) NSHashTable *extendedReporterStorageControllersTable;
 
 @end
 
@@ -108,8 +108,8 @@
         _strategiesContainer = [AMADispatchStrategiesContainer new];
         _preactivationActionHistory = [[AMAPreactivationActionHistory alloc] init];
         _startupCompletionObservers = [NSHashTable weakObjectsHashTable];
-        _additionalStartupObserver = nil;
-        _extendedReporterStorageController = nil;
+        _extendedStartupCompletionObservers = [NSHashTable weakObjectsHashTable];
+        _extendedReporterStorageControllersTable = [NSHashTable weakObjectsHashTable];
         _stateReportingController = [[AMAInternalStateReportingController alloc] initWithExecutor:executor];
         _extensionsReportController = [[AMAExtensionsReportController alloc] init];
         _permissionsController = [[AMAPermissionsController alloc] init];
@@ -365,7 +365,7 @@
             onSetupComplete();
         }
     }];
-    [self.extendedReporterStorageController restoreState];
+    [self restoreExtendedReporterStorageState];
 
     [reporter reportFirstEventIfNeeded];
 
@@ -392,8 +392,7 @@
     [self.stateReportingController registerStorage:reporterStorage.stateStorage forApiKey:apiKey];
     
     id<AMAKeyValueStorageProviding> reporterStorageProvider = (id<AMAKeyValueStorageProviding>)reporterStorage.keyValueStorageProvider;
-    [self.extendedReporterStorageController setupWithReporter:reporterStorageProvider
-                                                    forAPIKey:apiKey];
+    [self setupReporterForExtendedReporterStorage:reporterStorageProvider apiKey:self.apiKey];
 }
 
 - (AMAReporter *)createReporterWithApiKey:(NSString *)apiKey
@@ -667,7 +666,7 @@
 - (void)postSetupMainReporterWithStorage:(AMAReporterStorage *)reporterStorage
 {
     id<AMAKeyValueStorageProviding> reporterStorageProvider = (id<AMAKeyValueStorageProviding>)reporterStorage.keyValueStorageProvider;
-    [self.extendedReporterStorageController setupWithMainReporter:reporterStorageProvider forAPIKey:self.apiKey];
+    [self setupMainReporterForExtendedReporterStorage:reporterStorageProvider apiKey:self.apiKey];
     
     self.searchAdsController = [[AMASearchAdsController alloc] initWithApiKey:self.apiKey
                                                                      executor:self.executor
@@ -784,33 +783,6 @@
     }];
 }
 
-#pragma mark - AMAStartupControllerDelegate
-
-- (void)startupControllerDidFinishWithSuccess:(AMAStartupController *)controller
-{
-    AMALogInfo(@"Startup finished with success");
-    [self notifyOnStartupCompleted];
-
-    [self execute:^{
-        [[AMALocationManager sharedManager] updateLocationManagerForCurrentStatus];
-        [self.strategiesContainer dispatchMoreIfNeeded];
-        [self reportPermissionsIfNeeded];
-    }];
-}
-
-- (void)startupController:(AMAStartupController *)controller didFailWithError:(NSError *)error
-{
-    AMALogInfo(@"Startup failed with error: %@", error);
-    [self notifyOnStartupFailedWithError:error];
-}
-
-#pragma mark - AMAStartupProvidingDelegate
-
-- (void)startupUpdatedWithResponse:(NSDictionary *)response
-{
-    [self notifyOnAdditionalStartupCompleted:response];
-}
-
 #pragma mark - AMADispatcherDelegate
 
 - (void)dispatcherDidPerformReport:(AMADispatcher *)dispatcher
@@ -834,6 +806,35 @@
     }];
 }
 
+#pragma mark - AMAStartupControllerDelegate -
+
+- (void)startupControllerDidFinishWithSuccess:(AMAStartupController *)controller
+{
+    AMALogInfo(@"Startup finished with success");
+    [self notifyOnStartupCompleted];
+
+    [self execute:^{
+        [[AMALocationManager sharedManager] updateLocationManagerForCurrentStatus];
+        [self.strategiesContainer dispatchMoreIfNeeded];
+        [self reportPermissionsIfNeeded];
+    }];
+}
+
+- (void)startupController:(AMAStartupController *)controller didFailWithError:(NSError *)error
+{
+    AMALogInfo(@"Startup failed with error: %@", error);
+    [self notifyOnStartupFailedWithError:error];
+}
+
+#pragma mark - AMAExtendedStartupObservingDelegate -
+
+- (void)startupUpdatedWithResponse:(NSDictionary *)response
+{
+    [self notifyOnAdditionalStartupCompleted:response];
+}
+
+#pragma mark - Startup observing -
+
 - (void)notifyOnStartupCompleted
 {
     [self execute:^{
@@ -851,14 +852,11 @@
 {
     [self execute:^{
         if (self.startupController.upToDate) {
-            if (self.additionalStartupObserver != nil) {
-                AMALogInfo(@"Notify about extended startup observer");
-                AMAStartupStorageProvider *startupStorageProvider = [[AMAStartupStorageProvider alloc] init];
-                AMACachingStorageProvider *cachingStorageProvider = [[AMACachingStorageProvider alloc] init];
-                [self.additionalStartupObserver startupUpdatedWithAdditionalParameters:response
-                                                                startupStorageProvider:startupStorageProvider
-                                                                cachingStorageProvider:cachingStorageProvider];
-            }
+            AMALogInfo(@"Notify about extended startup %lu observers",
+                       (unsigned long)self.extendedStartupCompletionObservers.count);
+            [self.extendedStartupCompletionObservers.allObjects
+                makeObjectsPerformSelector:@selector(startupUpdatedWithParameters:)
+                withObject:response];
         }
     }];
 }
@@ -876,33 +874,31 @@
     }];
 }
 
+- (void)setExtendedStartupObservers:(NSMutableSet<id<AMAExtendedStartupObserving>> *)observers
+{
+    AMALogInfo(@"Setup extended startup observers: %@", observers);
+    [self execute:^{
+        if (observers != nil) {
+            for (id<AMAExtendedStartupObserving> observer in [observers allObjects]) {
+                [self.extendedStartupCompletionObservers addObject:observer];
+                
+                AMAStartupStorageProvider *startupStorageProvider = [[AMAStartupStorageProvider alloc] init];
+                AMACachingStorageProvider *cachingStorageProvider = [[AMACachingStorageProvider alloc] init];
+                [observer setupStartupProvider:startupStorageProvider
+                        cachingStorageProvider:cachingStorageProvider];
+                
+                [self.startupController addAdditionalStartupParameters:observer.startupRequestParameters];
+            }
+        }
+    }];
+}
+
 - (void)addStartupCompletionObserver:(id<AMAStartupCompletionObserving>)observer
 {
     AMALogInfo(@"Add startup observer: %@", observer);
     [self execute:^{
         if (observer != nil) {
             [self.startupCompletionObservers addObject:observer];
-        }
-    }];
-}
-
-- (void)setAdditionalStartupProvider:(id<AMAStartupProviding>)provider
-{
-    AMALogInfo(@"Add extended startup observer: %@", provider);
-    [self execute:^{
-        if (provider != nil) {
-            self.additionalStartupObserver = provider;
-        }
-    }];
-    [self.startupController setAdditionalStartupParameters:provider.startupRequestParameters];
-}
-
-- (void)setExtendedReporterStorageController:(id<AMAReporterStorageControlling>)controller
-{
-    AMALogInfo(@"Register extended reporter storage controller: %@", controller);
-    [self execute:^{
-        if (controller != nil) {
-            self.extendedReporterStorageController = controller;
         }
     }];
 }
@@ -915,7 +911,53 @@
     }];
 }
 
-#pragma mark - Environment
+#pragma mark - Reporter Storage observing -
+
+- (void)setExtendedReporterStorageControllers:(NSMutableSet<id<AMAReporterStorageControlling>> *)controllers
+{
+    AMALogInfo(@"Register extended reporter storage controllers: %@", controllers);
+    [self execute:^{
+        if (controllers != nil) {
+            for (id<AMAReporterStorageControlling> controller in [controllers allObjects]) {
+                [self.extendedReporterStorageControllersTable addObject:controller];
+            }
+        }
+    }];
+}
+
+- (void)restoreExtendedReporterStorageState
+{
+    [self execute:^{
+        AMALogInfo(@"Restore state for extended reporter storage %lu controllers",
+                   (unsigned long)self.extendedReporterStorageControllersTable.count);
+        [self.extendedReporterStorageControllersTable.allObjects
+            makeObjectsPerformSelector:@selector(restoreState)];
+    }];
+}
+
+- (void)setupReporterForExtendedReporterStorage:(id<AMAKeyValueStorageProviding>)storageProvider apiKey:(NSString *)apiKey
+{
+    [self execute:^{
+        AMALogInfo(@"Setup main reporter for extended reporter storage %lu controllers",
+                   (unsigned long)self.extendedReporterStorageControllersTable.count);
+        for (id<AMAReporterStorageControlling> controller in [self.extendedReporterStorageControllersTable allObjects]) {
+            [controller setupWithReporter:storageProvider forAPIKey:apiKey];
+        }
+    }];
+}
+
+- (void)setupMainReporterForExtendedReporterStorage:(id<AMAKeyValueStorageProviding>)storageProvider apiKey:(NSString *)apiKey
+{
+    [self execute:^{
+        AMALogInfo(@"Setup reporter for extended reporter storage %lu controllers",
+                   (unsigned long)self.extendedReporterStorageControllersTable.count);
+        for (id<AMAReporterStorageControlling> controller in [self.extendedReporterStorageControllersTable allObjects]) {
+            [controller setupWithMainReporter:storageProvider forAPIKey:apiKey];
+        }
+    }];
+}
+
+#pragma mark - Environment -
 
 - (void)setAppEnvironmentValue:(NSString *)value forKey:(NSString *)key
 {

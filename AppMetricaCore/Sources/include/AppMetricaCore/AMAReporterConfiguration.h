@@ -9,13 +9,13 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, copy, nullable, readonly) NSString *apiKey;
 
-/** A boolean value indicating whether statistics sending to the AppMetrica server is enabled.
+/** A boolean value indicating whether data sending to the AppMetrica server is enabled.
 
  @note Disabling this option doesn't affect data sending from the main apiKey.
 
- By default, the statistics sending is enabled.
+ By default, the data sending is enabled.
  */
-@property (nonatomic, assign, readonly) BOOL statisticsSending;
+@property (nonatomic, assign, readonly) BOOL dataSendingEnabled;
 
 /** Session timeout (in seconds).
  Time interval which determines for how long the application is considered active after being resigned.
@@ -68,13 +68,13 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface AMAMutableReporterConfiguration : AMAReporterConfiguration
 
-/** A boolean value indicating whether statistics sending to the AppMetrica server is enabled.
+/** A boolean value indicating whether data sending to the AppMetrica server is enabled.
 
  @note Disabling this option doesn't affect data sending from the main apiKey.
 
- By default, the statistics sending is enabled.
+ By default, the data sending is enabled.
  */
-@property (nonatomic, assign) BOOL statisticsSending;
+@property (nonatomic, assign) BOOL dataSendingEnabled;
 
 /** Session timeout (in seconds).
  Time interval which determines for how long the application is considered active after being resigned.

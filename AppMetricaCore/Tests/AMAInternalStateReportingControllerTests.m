@@ -3,7 +3,7 @@
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
 #import "AMAInternalStateReportingController.h"
 #import "AMAMetricaConfigurationTestUtilities.h"
-#import "AMAStatisticsRestrictionController.h"
+#import "AMADataSendingRestrictionController.h"
 #import "AMAReporter.h"
 #import "AMAReporterStateStorage.h"
 #import "AMAReporterNotifications.h"
@@ -17,7 +17,7 @@ describe(@"AMAInternalStateReportingController", ^{
     NSDictionary *const expectedParameters = @{ @"stat_sending": @{ @"disabled": @YES } };
 
     AMACurrentQueueExecutor *__block executor = nil;
-    AMAStatisticsRestrictionController *__block restrictionController = nil;
+    AMADataSendingRestrictionController *__block restrictionController = nil;
     AMAStartupParametersConfiguration *__block configuration = nil;
     NSNotificationCenter *__block notificationCenter = nil;
     AMAReporterStateStorage *__block stateStorage = nil;
@@ -29,9 +29,9 @@ describe(@"AMAInternalStateReportingController", ^{
 
     beforeEach(^{
         executor = [[AMACurrentQueueExecutor alloc] init];
-        restrictionController = [AMAStatisticsRestrictionController nullMock];
+        restrictionController = [AMADataSendingRestrictionController nullMock];
         [restrictionController stub:@selector(restrictionForApiKey:)
-                          andReturn:theValue(AMAStatisticsRestrictionForbidden)];
+                          andReturn:theValue(AMADataSendingRestrictionForbidden)];
 
         [AMAMetricaConfigurationTestUtilities stubConfigurationWithNullMock];
         AMAMetricaConfiguration *metricaConfiguration = [AMAMetricaConfiguration sharedInstance];
@@ -128,7 +128,7 @@ describe(@"AMAInternalStateReportingController", ^{
             context(@"Stat sending enabled", ^{
                 beforeEach(^{
                     [restrictionController stub:@selector(restrictionForApiKey:)
-                                      andReturn:theValue(AMAStatisticsRestrictionAllowed)];
+                                      andReturn:theValue(AMADataSendingRestrictionAllowed)];
                 });
                 it(@"Should not update report date", ^{
                     [[stateStorage shouldNot] receive:@selector(markStateSentNow)];

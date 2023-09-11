@@ -12,7 +12,7 @@
 #import "AMAReporterStateStorage.h"
 #import "AMASessionsCleaner.h"
 #import "AMAReportRequestModel.h"
-#import "AMAStatisticsRestrictionController.h"
+#import "AMADataSendingRestrictionController.h"
 #import "AMAIncrementableValueStorageMock.h"
 #import "AMAReachability.h"
 #import "AMAReporterStoragesContainer.h"
@@ -42,7 +42,7 @@ describe(@"AMADispatcher", ^{
     AMAIncrementableValueStorageMock *__block requestIdentifierStorage = nil;
     AMAReporterStateStorage *__block stateStorage = nil;
     AMAReporterStorage *__block reporterStorage = nil;
-    AMAStatisticsRestrictionController *__block restrictionController = nil;
+    AMADataSendingRestrictionController *__block restrictionController = nil;
     AMADispatcher *__block dispatcher = nil;
 
     id<AMADispatcherDelegate> __block delegate = nil;
@@ -71,9 +71,9 @@ describe(@"AMADispatcher", ^{
 
         cleaner = [AMASessionsCleaner nullMock];
 
-        restrictionController = [AMAStatisticsRestrictionController nullMock];
+        restrictionController = [AMADataSendingRestrictionController nullMock];
         [restrictionController stub:@selector(shouldReportToApiKey:) andReturn:theValue(YES)];
-        [AMAStatisticsRestrictionController stub:@selector(sharedInstance) andReturn:restrictionController];
+        [AMADataSendingRestrictionController stub:@selector(sharedInstance) andReturn:restrictionController];
 
         requestIdentifierStorage = [[AMAIncrementableValueStorageMock alloc] init];
         requestIdentifierStorage.currentMockValue = @1;
@@ -217,7 +217,7 @@ describe(@"AMADispatcher", ^{
 
             it(@"Should call delegate", ^{
                 NSError *expectedError = [NSError errorWithDomain:kAMADispatcherErrorDomain
-                                                             code:AMADispatcherReportErrorStatisticsSendingForbidden
+                                                             code:AMADispatcherReportErrorDataSendingForbidden
                                                          userInfo:@{ kAMADispatcherErrorApiKeyUserInfoKey: apiKey }];
                 [[(id)delegate should] receive:@selector(dispatcher:didFailToReportWithError:)
                                  withArguments:dispatcher, expectedError];

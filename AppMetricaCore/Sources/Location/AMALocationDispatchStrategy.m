@@ -3,7 +3,7 @@
 #import "AMALocationDispatchStrategy.h"
 #import "AMALocationStorage.h"
 #import "AMALocationCollectingConfiguration.h"
-#import "AMAStatisticsRestrictionController.h"
+#import "AMADataSendingRestrictionController.h"
 
 static NSTimeInterval const kAMADelayAfterFailedRequest = 10.0;
 
@@ -46,7 +46,7 @@ static NSTimeInterval const kAMADelayAfterFailedRequest = 10.0;
 - (BOOL)shouldSendLocation
 {
     BOOL shouldSend = NO;
-    if ([[AMAStatisticsRestrictionController sharedInstance] shouldEnableLocationSending]) {
+    if ([[AMADataSendingRestrictionController sharedInstance] shouldEnableLocationSending]) {
         id<AMALSSLocationsProviding> state = [self.storage locationStorageState];
         shouldSend = shouldSend || state.locationsCount >= self.configuration.recordsCountToForceFlush;
         shouldSend = shouldSend || [self timeIntervalForNextSendWithState:state] <= 0.0;
@@ -59,7 +59,7 @@ static NSTimeInterval const kAMADelayAfterFailedRequest = 10.0;
 - (BOOL)shouldSendVisit
 {
     BOOL shouldSend = NO;
-    if ([[AMAStatisticsRestrictionController sharedInstance] shouldEnableLocationSending]) {
+    if ([[AMADataSendingRestrictionController sharedInstance] shouldEnableLocationSending]) {
         shouldSend = [self.storage locationStorageState].visitsCount > 0;
     }
 

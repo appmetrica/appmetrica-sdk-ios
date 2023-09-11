@@ -10,7 +10,7 @@ typedef NS_ENUM(NSInteger, AMADispatcherReportErrorCode) {
     AMADispatcherReportErrorNoHosts,
     AMADispatcherReportErrorNoDeviceId,
     AMADispatcherReportErrorNetwork,
-    AMADispatcherReportErrorStatisticsSendingForbidden,
+    AMADispatcherReportErrorDataSendingForbidden,
     AMADispatcherReportErrorNoNetworkAvailiable,
     AMADispatcherReportErrorDidNotCheckInitialAttribution,
 };

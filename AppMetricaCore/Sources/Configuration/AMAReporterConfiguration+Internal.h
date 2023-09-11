@@ -5,7 +5,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface AMAReporterConfiguration (Internal)
 
-@property (nonatomic, strong, nullable, readonly) NSNumber *statisticsSendingState;
+@property (nonatomic, strong, nullable, readonly) NSNumber *dataSendingEnabledState;
 
 - (instancetype)initWithoutApiKey;
 

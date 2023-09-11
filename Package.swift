@@ -104,7 +104,7 @@ let package = Package(
         //MARK: - AppMetrica CoreExtension
         .target(
             target: .coreExtension,
-            dependencies: [.core, .coreUtils],
+            dependencies: [.core, .storageUtils],
             searchPaths: ["./**"]
         ),
         

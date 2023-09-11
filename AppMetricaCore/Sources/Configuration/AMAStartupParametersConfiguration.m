@@ -259,5 +259,4 @@ BOOL_PROPERTY(dynamicLibraryCrashHookEnabled, setDynamicLibraryCrashHookEnabled,
 }
 #endif
 
-
 @end

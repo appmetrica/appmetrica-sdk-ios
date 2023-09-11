@@ -14,7 +14,7 @@
 @property (nonatomic, assign, readwrite) BOOL logs;
 @property (nonatomic, copy, readwrite) NSString *userProfileID;
 
-@property (nonatomic, strong, nullable, readwrite) NSNumber *statisticsSendingState;
+@property (nonatomic, strong, nullable, readwrite) NSNumber *dataSendingEnabledState;
 
 @end
 
@@ -48,7 +48,7 @@
 
 - (void)setDefaultValues
 {
-    _statisticsSendingState = nil;
+    _dataSendingEnabledState = nil;
     _sessionTimeout = kAMASessionValidIntervalInSecondsDefault;
     _dispatchPeriod = kAMADefaultDispatchPeriodSeconds;
     _maxReportsCount = kAMAManualReporterDefaultMaxReportsCount;
@@ -73,14 +73,14 @@
         mutableConfiguration.maxReportsInDatabaseCount = self.maxReportsInDatabaseCount;
         mutableConfiguration.logs = self.logs;
         mutableConfiguration.userProfileID = self.userProfileID;
-        mutableConfiguration.statisticsSendingState = self.statisticsSendingState;
+        mutableConfiguration.dataSendingEnabledState = self.dataSendingEnabledState;
     }
     return mutableConfiguration;
 }
 
-- (BOOL)statisticsSending
+- (BOOL)dataSendingEnabled
 {
-    return self.statisticsSendingState != nil ? [self.statisticsSendingState boolValue] : YES;
+    return self.dataSendingEnabledState != nil ? [self.dataSendingEnabledState boolValue] : YES;
 }
 
 #if AMA_ALLOW_DESCRIPTIONS
@@ -89,11 +89,11 @@
 {
     return [NSString stringWithFormat:@"%@ apiKey=%@, sessionTimeout=%@, dispatchPeriod=%@, "
                                        "maxReportsCount=%@, maxReportsInDatabaseCount=%@, "
-                                       "logs=%@, userProfileID=%@, statisticsSendingState=%@",
+                                       "logs=%@, userProfileID=%@, dataSendingEnabledState=%@",
                                        [super description], self.apiKey, @(self.sessionTimeout),
                                        @(self.dispatchPeriod), @(self.maxReportsCount),
                                        @(self.maxReportsInDatabaseCount), @(self.logs), self.userProfileID,
-                                       self.statisticsSendingState];
+                                       self.dataSendingEnabledState];
 }
 
 #endif
@@ -102,7 +102,7 @@
 
 @implementation AMAMutableReporterConfiguration
 
-@dynamic statisticsSending;
+@dynamic dataSendingEnabled;
 @dynamic sessionTimeout;
 @dynamic maxReportsInDatabaseCount;
 @dynamic maxReportsCount;
@@ -127,14 +127,14 @@
         configuration.maxReportsInDatabaseCount = self.maxReportsInDatabaseCount;
         configuration.logs = self.logs;
         configuration.userProfileID = self.userProfileID;
-        configuration.statisticsSendingState = self.statisticsSendingState;
+        configuration.dataSendingEnabledState = self.dataSendingEnabledState;
     }
     return configuration;
 }
 
-- (void)setStatisticsSending:(BOOL)enabled
+- (void)setDataSendingEnabled:(BOOL)enabled
 {
-    self.statisticsSendingState = @(enabled);
+    self.dataSendingEnabledState = @(enabled);
 }
 
 @end

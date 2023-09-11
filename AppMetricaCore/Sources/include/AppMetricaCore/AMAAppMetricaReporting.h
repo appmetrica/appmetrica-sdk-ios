@@ -72,13 +72,13 @@ NS_SWIFT_NAME(reportEvent(name:params:onFailure:));
  */
 - (void)pauseSession;
 
-/** Enables/disables statistics sending to the AppMetrica server.
+/** Enables/disables data sending to the AppMetrica server.
 
  @note Disabling this option doesn't affect data sending from the main apiKey.
 
- @param enabled Flag indicating whether the statistics sending is enabled. By default, the sending is enabled.
+ @param enabled Flag indicating whether the data sending is enabled. By default, the sending is enabled.
  */
-- (void)setStatisticsSending:(BOOL)enabled;
+- (void)setDataSendingEnabled:(BOOL)enabled;
 
 /** Sends all stored events from the buffer.
 

@@ -1,33 +1,33 @@
 
 #import <Kiwi/Kiwi.h>
-#import "AMAStatisticsRestrictionController.h"
+#import "AMADataSendingRestrictionController.h"
 #import "AMAMetricaConfigurationTestUtilities.h"
 
-SPEC_BEGIN(AMAStatisticsRestrictionControllerTests)
+SPEC_BEGIN(AMADataSendingRestrictionControllerTests)
 
-describe(@"AMAStatisticsRestrictionController", ^{
+describe(@"AMADataSendingRestrictionController", ^{
 
     NSString *const mainApiKey = @"MAIN";
     NSString *const firstApiKey = @"FIRST";
     NSString *const secondApiKey = @"SECOND";
 
-    AMAStatisticsRestrictionController *__block controller = nil;
+    AMADataSendingRestrictionController *__block controller = nil;
 
     beforeEach(^{
-        controller = [[AMAStatisticsRestrictionController alloc] init];
+        controller = [[AMADataSendingRestrictionController alloc] init];
     });
 
     context(@"Main key not activated", ^{
         beforeEach(^{
-            [controller setMainApiKeyRestriction:AMAStatisticsRestrictionNotActivated];
+            [controller setMainApiKeyRestriction:AMADataSendingRestrictionNotActivated];
         });
         context(@"First API key not activated", ^{
             beforeEach(^{
-                [controller setReporterRestriction:AMAStatisticsRestrictionNotActivated forApiKey:firstApiKey];
+                [controller setReporterRestriction:AMADataSendingRestrictionNotActivated forApiKey:firstApiKey];
             });
             context(@"Second API key not activated", ^{
                 beforeEach(^{
-                    [controller setReporterRestriction:AMAStatisticsRestrictionNotActivated forApiKey:secondApiKey];
+                    [controller setReporterRestriction:AMADataSendingRestrictionNotActivated forApiKey:secondApiKey];
                 });
                 it(@"Should not report to main API key", ^{
                     [[theValue([controller shouldReportToApiKey:mainApiKey]) should] beNo];
@@ -47,7 +47,7 @@ describe(@"AMAStatisticsRestrictionController", ^{
             });
             context(@"Second API key allowed", ^{
                 beforeEach(^{
-                    [controller setReporterRestriction:AMAStatisticsRestrictionAllowed forApiKey:secondApiKey];
+                    [controller setReporterRestriction:AMADataSendingRestrictionAllowed forApiKey:secondApiKey];
                 });
                 it(@"Should report to main API key", ^{
                     [[theValue([controller shouldReportToApiKey:mainApiKey]) should] beYes];
@@ -67,7 +67,7 @@ describe(@"AMAStatisticsRestrictionController", ^{
             });
             context(@"Second API key forbidden", ^{
                 beforeEach(^{
-                    [controller setReporterRestriction:AMAStatisticsRestrictionForbidden forApiKey:secondApiKey];
+                    [controller setReporterRestriction:AMADataSendingRestrictionForbidden forApiKey:secondApiKey];
                 });
                 it(@"Should report to main API key", ^{
                     [[theValue([controller shouldReportToApiKey:mainApiKey]) should] beYes];
@@ -88,11 +88,11 @@ describe(@"AMAStatisticsRestrictionController", ^{
         });
         context(@"First API key allowed", ^{
             beforeEach(^{
-                [controller setReporterRestriction:AMAStatisticsRestrictionAllowed forApiKey:firstApiKey];
+                [controller setReporterRestriction:AMADataSendingRestrictionAllowed forApiKey:firstApiKey];
             });
             context(@"Second API key allowed", ^{
                 beforeEach(^{
-                    [controller setReporterRestriction:AMAStatisticsRestrictionAllowed forApiKey:secondApiKey];
+                    [controller setReporterRestriction:AMADataSendingRestrictionAllowed forApiKey:secondApiKey];
                 });
                 it(@"Should report to main API key", ^{
                     [[theValue([controller shouldReportToApiKey:mainApiKey]) should] beYes];
@@ -112,7 +112,7 @@ describe(@"AMAStatisticsRestrictionController", ^{
             });
             context(@"Second API key forbidden", ^{
                 beforeEach(^{
-                    [controller setReporterRestriction:AMAStatisticsRestrictionForbidden forApiKey:secondApiKey];
+                    [controller setReporterRestriction:AMADataSendingRestrictionForbidden forApiKey:secondApiKey];
                 });
                 it(@"Should report to main API key", ^{
                     [[theValue([controller shouldReportToApiKey:mainApiKey]) should] beYes];
@@ -133,11 +133,11 @@ describe(@"AMAStatisticsRestrictionController", ^{
         });
         context(@"First API key forbidden", ^{
             beforeEach(^{
-                [controller setReporterRestriction:AMAStatisticsRestrictionForbidden forApiKey:firstApiKey];
+                [controller setReporterRestriction:AMADataSendingRestrictionForbidden forApiKey:firstApiKey];
             });
             context(@"Second API key forbidden", ^{
                 beforeEach(^{
-                    [controller setReporterRestriction:AMAStatisticsRestrictionForbidden forApiKey:secondApiKey];
+                    [controller setReporterRestriction:AMADataSendingRestrictionForbidden forApiKey:secondApiKey];
                 });
                 it(@"Should report to main API key", ^{
                     [[theValue([controller shouldReportToApiKey:mainApiKey]) should] beYes];
@@ -160,15 +160,15 @@ describe(@"AMAStatisticsRestrictionController", ^{
 
     context(@"Main key allowed", ^{
         beforeEach(^{
-            [controller setMainApiKeyRestriction:AMAStatisticsRestrictionAllowed];
+            [controller setMainApiKeyRestriction:AMADataSendingRestrictionAllowed];
         });
         context(@"First API key not activated", ^{
             beforeEach(^{
-                [controller setReporterRestriction:AMAStatisticsRestrictionNotActivated forApiKey:firstApiKey];
+                [controller setReporterRestriction:AMADataSendingRestrictionNotActivated forApiKey:firstApiKey];
             });
             context(@"Second API key not activated", ^{
                 beforeEach(^{
-                    [controller setReporterRestriction:AMAStatisticsRestrictionNotActivated forApiKey:secondApiKey];
+                    [controller setReporterRestriction:AMADataSendingRestrictionNotActivated forApiKey:secondApiKey];
                 });
                 it(@"Should report to main API key", ^{
                     [[theValue([controller shouldReportToApiKey:mainApiKey]) should] beYes];
@@ -188,7 +188,7 @@ describe(@"AMAStatisticsRestrictionController", ^{
             });
             context(@"Second API key allowed", ^{
                 beforeEach(^{
-                    [controller setReporterRestriction:AMAStatisticsRestrictionAllowed forApiKey:secondApiKey];
+                    [controller setReporterRestriction:AMADataSendingRestrictionAllowed forApiKey:secondApiKey];
                 });
                 it(@"Should report to main API key", ^{
                     [[theValue([controller shouldReportToApiKey:mainApiKey]) should] beYes];
@@ -208,7 +208,7 @@ describe(@"AMAStatisticsRestrictionController", ^{
             });
             context(@"Second API key forbidden", ^{
                 beforeEach(^{
-                    [controller setReporterRestriction:AMAStatisticsRestrictionForbidden forApiKey:secondApiKey];
+                    [controller setReporterRestriction:AMADataSendingRestrictionForbidden forApiKey:secondApiKey];
                 });
                 it(@"Should report to main API key", ^{
                     [[theValue([controller shouldReportToApiKey:mainApiKey]) should] beYes];
@@ -229,11 +229,11 @@ describe(@"AMAStatisticsRestrictionController", ^{
         });
         context(@"First API key allowed", ^{
             beforeEach(^{
-                [controller setReporterRestriction:AMAStatisticsRestrictionAllowed forApiKey:firstApiKey];
+                [controller setReporterRestriction:AMADataSendingRestrictionAllowed forApiKey:firstApiKey];
             });
             context(@"Second API key allowed", ^{
                 beforeEach(^{
-                    [controller setReporterRestriction:AMAStatisticsRestrictionAllowed forApiKey:secondApiKey];
+                    [controller setReporterRestriction:AMADataSendingRestrictionAllowed forApiKey:secondApiKey];
                 });
                 it(@"Should report to main API key", ^{
                     [[theValue([controller shouldReportToApiKey:mainApiKey]) should] beYes];
@@ -253,7 +253,7 @@ describe(@"AMAStatisticsRestrictionController", ^{
             });
             context(@"Second API key forbidden", ^{
                 beforeEach(^{
-                    [controller setReporterRestriction:AMAStatisticsRestrictionForbidden forApiKey:secondApiKey];
+                    [controller setReporterRestriction:AMADataSendingRestrictionForbidden forApiKey:secondApiKey];
                 });
                 it(@"Should report to main API key", ^{
                     [[theValue([controller shouldReportToApiKey:mainApiKey]) should] beYes];
@@ -274,11 +274,11 @@ describe(@"AMAStatisticsRestrictionController", ^{
         });
         context(@"First API key forbidden", ^{
             beforeEach(^{
-                [controller setReporterRestriction:AMAStatisticsRestrictionForbidden forApiKey:firstApiKey];
+                [controller setReporterRestriction:AMADataSendingRestrictionForbidden forApiKey:firstApiKey];
             });
             context(@"Second API key forbidden", ^{
                 beforeEach(^{
-                    [controller setReporterRestriction:AMAStatisticsRestrictionForbidden forApiKey:secondApiKey];
+                    [controller setReporterRestriction:AMADataSendingRestrictionForbidden forApiKey:secondApiKey];
                 });
                 it(@"Should report to main API key", ^{
                     [[theValue([controller shouldReportToApiKey:mainApiKey]) should] beYes];
@@ -302,18 +302,18 @@ describe(@"AMAStatisticsRestrictionController", ^{
     context(@"Main key forbidden", ^{
         beforeEach(^{
             [controller setMainApiKey:mainApiKey];
-            [controller setMainApiKeyRestriction:AMAStatisticsRestrictionForbidden];
+            [controller setMainApiKeyRestriction:AMADataSendingRestrictionForbidden];
         });
         it(@"Should return actual restirction", ^{
-            [[theValue([controller restrictionForApiKey:mainApiKey]) should] equal:theValue(AMAStatisticsRestrictionForbidden)];
+            [[theValue([controller restrictionForApiKey:mainApiKey]) should] equal:theValue(AMADataSendingRestrictionForbidden)];
         });
         context(@"First API key not activated", ^{
             beforeEach(^{
-                [controller setReporterRestriction:AMAStatisticsRestrictionNotActivated forApiKey:firstApiKey];
+                [controller setReporterRestriction:AMADataSendingRestrictionNotActivated forApiKey:firstApiKey];
             });
             context(@"Second API key not activated", ^{
                 beforeEach(^{
-                    [controller setReporterRestriction:AMAStatisticsRestrictionNotActivated forApiKey:secondApiKey];
+                    [controller setReporterRestriction:AMADataSendingRestrictionNotActivated forApiKey:secondApiKey];
                 });
                 it(@"Should not report to main API key", ^{
                     [[theValue([controller shouldReportToApiKey:mainApiKey]) should] beNo];
@@ -333,7 +333,7 @@ describe(@"AMAStatisticsRestrictionController", ^{
             });
             context(@"Second API key allowed", ^{
                 beforeEach(^{
-                    [controller setReporterRestriction:AMAStatisticsRestrictionAllowed forApiKey:secondApiKey];
+                    [controller setReporterRestriction:AMADataSendingRestrictionAllowed forApiKey:secondApiKey];
                 });
                 it(@"Should not report to main API key", ^{
                     [[theValue([controller shouldReportToApiKey:mainApiKey]) should] beNo];
@@ -353,7 +353,7 @@ describe(@"AMAStatisticsRestrictionController", ^{
             });
             context(@"Second API key forbidden", ^{
                 beforeEach(^{
-                    [controller setReporterRestriction:AMAStatisticsRestrictionAllowed forApiKey:secondApiKey];
+                    [controller setReporterRestriction:AMADataSendingRestrictionAllowed forApiKey:secondApiKey];
                 });
                 it(@"Should not report to main API key", ^{
                     [[theValue([controller shouldReportToApiKey:mainApiKey]) should] beNo];
@@ -374,14 +374,14 @@ describe(@"AMAStatisticsRestrictionController", ^{
         });
         context(@"First API key allowed", ^{
             beforeEach(^{
-                [controller setReporterRestriction:AMAStatisticsRestrictionAllowed forApiKey:firstApiKey];
+                [controller setReporterRestriction:AMADataSendingRestrictionAllowed forApiKey:firstApiKey];
             });
             it(@"Should return actual restirction", ^{
-                [[theValue([controller restrictionForApiKey:firstApiKey]) should] equal:theValue(AMAStatisticsRestrictionAllowed)];
+                [[theValue([controller restrictionForApiKey:firstApiKey]) should] equal:theValue(AMADataSendingRestrictionAllowed)];
             });
             context(@"Second API key allowed", ^{
                 beforeEach(^{
-                    [controller setReporterRestriction:AMAStatisticsRestrictionAllowed forApiKey:secondApiKey];
+                    [controller setReporterRestriction:AMADataSendingRestrictionAllowed forApiKey:secondApiKey];
                 });
                 it(@"Should not report to main API key", ^{
                     [[theValue([controller shouldReportToApiKey:mainApiKey]) should] beNo];
@@ -401,10 +401,10 @@ describe(@"AMAStatisticsRestrictionController", ^{
             });
             context(@"Second API key forbidden", ^{
                 beforeEach(^{
-                    [controller setReporterRestriction:AMAStatisticsRestrictionForbidden forApiKey:secondApiKey];
+                    [controller setReporterRestriction:AMADataSendingRestrictionForbidden forApiKey:secondApiKey];
                 });
                 it(@"Should return actual restirction", ^{
-                    [[theValue([controller restrictionForApiKey:secondApiKey]) should] equal:theValue(AMAStatisticsRestrictionForbidden)];
+                    [[theValue([controller restrictionForApiKey:secondApiKey]) should] equal:theValue(AMADataSendingRestrictionForbidden)];
                 });
                 it(@"Should not report to main API key", ^{
                     [[theValue([controller shouldReportToApiKey:mainApiKey]) should] beNo];
@@ -425,11 +425,11 @@ describe(@"AMAStatisticsRestrictionController", ^{
         });
         context(@"First API key forbidden", ^{
             beforeEach(^{
-                [controller setReporterRestriction:AMAStatisticsRestrictionForbidden forApiKey:firstApiKey];
+                [controller setReporterRestriction:AMADataSendingRestrictionForbidden forApiKey:firstApiKey];
             });
             context(@"Second API key forbidden", ^{
                 beforeEach(^{
-                    [controller setReporterRestriction:AMAStatisticsRestrictionForbidden forApiKey:secondApiKey];
+                    [controller setReporterRestriction:AMADataSendingRestrictionForbidden forApiKey:secondApiKey];
                 });
                 it(@"Should not report to main API key", ^{
                     [[theValue([controller shouldReportToApiKey:mainApiKey]) should] beNo];

@@ -1,6 +1,6 @@
 
 #import <Foundation/Foundation.h>
-#import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
+#import <AppMetricaStorageUtils/AppMetricaStorageUtils.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -17,13 +17,15 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
-@protocol AMAStartupProviding <NSObject>
+@protocol AMAExtendedStartupObserving <NSObject>
 
 - (NSDictionary *)startupRequestParameters;
 
-- (void)startupUpdatedWithAdditionalParameters:(NSDictionary *)parameters
-                        startupStorageProvider:(id<AMAStartupStorageProviding>)startupStorageProvider
-                        cachingStorageProvider:(id<AMACachingStorageProviding>)cachingStorageProvider;
+- (void)startupUpdatedWithParameters:(NSDictionary *)parameters;
+
+- (void)setupStartupProvider:(id<AMAStartupStorageProviding>)startupStorageProvider
+      cachingStorageProvider:(id<AMACachingStorageProviding>)cachingStorageProvider;
+
 @end
 
 NS_ASSUME_NONNULL_END

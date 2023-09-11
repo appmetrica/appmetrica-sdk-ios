@@ -1,7 +1,7 @@
 
 #import <Foundation/Foundation.h>
 
-@class AMAStatisticsRestrictionController;
+@class AMADataSendingRestrictionController;
 @class AMAReporterStateStorage;
 @protocol AMAExecuting;
 
@@ -12,7 +12,7 @@
 
 - (instancetype)initWithExecutor:(id<AMAExecuting>)executor;
 - (instancetype)initWithExecutor:(id<AMAExecuting>)executor
-           restrictionController:(AMAStatisticsRestrictionController *)restrictionController;
+           restrictionController:(AMADataSendingRestrictionController *)restrictionController;
 
 - (void)registerStorage:(AMAReporterStateStorage *)stateStorage forApiKey:(NSString *)apiKey;
 

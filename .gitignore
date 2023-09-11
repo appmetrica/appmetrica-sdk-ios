@@ -1,15 +1,3 @@
-# AppMetrica specific
-
-Publishing/archives
-Publishing/previous*
-Publishing/metricaFramework*
-Publishing/scripts/size_report.html
-*.mo
-
-# JS code generating
-Publishing/scripts/js/addJsInterfaceScript_compiled.js
-Publishing/scripts/js/js_compiled_generated.h
-
 # Created by https://www.gitignore.io/api/objective-c
 
 ### Objective-C ###

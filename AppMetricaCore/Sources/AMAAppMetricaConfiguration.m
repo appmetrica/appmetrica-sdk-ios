@@ -9,7 +9,7 @@
 
 @property (nonatomic, copy, readwrite) NSString *apiKey;
 @property (nonatomic, strong, nullable) NSNumber *locationTrackingState;
-@property (nonatomic, strong, nullable) NSNumber *statisticsSendingState;
+@property (nonatomic, strong, nullable) NSNumber *dataSendingEnabledState;
 
 @end
 
@@ -38,7 +38,7 @@
     _handleActivationAsSessionStart = NO;
     _sessionsAutoTracking = YES;
     _locationTrackingState = nil;
-    _statisticsSendingState = nil;
+    _dataSendingEnabledState = nil;
     _location = nil;
     _crashReporting = YES;
     _logs = NO;
@@ -92,14 +92,14 @@
     return self.locationTrackingState != nil ? [self.locationTrackingState boolValue] : YES;
 }
 
-- (void)setStatisticsSending:(BOOL)enabled
+- (void)setDataSendingEnabled:(BOOL)enabled
 {
-    self.statisticsSendingState = @(enabled);
+    self.dataSendingEnabledState = @(enabled);
 }
 
-- (BOOL)statisticsSending
+- (BOOL)dataSendingEnabled
 {
-    return self.statisticsSendingState != nil ? [self.statisticsSendingState boolValue] : YES;
+    return self.dataSendingEnabledState != nil ? [self.dataSendingEnabledState boolValue] : YES;
 }
 
 @end

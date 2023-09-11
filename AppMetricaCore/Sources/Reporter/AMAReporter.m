@@ -22,7 +22,7 @@
 #import "AMAEventLogger.h"
 #import "AMAEventFirstOccurrenceController.h"
 #import "AMAEventNameHashesStorageFactory.h"
-#import "AMAStatisticsRestrictionController.h"
+#import "AMADataSendingRestrictionController.h"
 #import "AMAInternalEventsReporter.h"
 #import "AMAErrorLogger.h"
 #import "AMAAppMetrica.h"
@@ -320,12 +320,12 @@
     return newSession;
 }
 
-- (void)setStatisticsSending:(BOOL)enabled
+- (void)setDataSendingEnabled:(BOOL)enabled
 {
-    AMAStatisticsRestriction restriction = enabled
-        ? AMAStatisticsRestrictionAllowed
-        : AMAStatisticsRestrictionForbidden;
-    [[AMAStatisticsRestrictionController sharedInstance] setReporterRestriction:restriction forApiKey:self.apiKey];
+    AMADataSendingRestriction restriction = enabled
+        ? AMADataSendingRestrictionAllowed
+        : AMADataSendingRestrictionForbidden;
+    [[AMADataSendingRestrictionController sharedInstance] setReporterRestriction:restriction forApiKey:self.apiKey];
 }
 
 - (void)reportEvent:(NSString *)eventName

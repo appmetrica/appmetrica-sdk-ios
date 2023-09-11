@@ -124,13 +124,13 @@ NS_SWIFT_NAME(reportEvent(name:parameters:onFailure:));
  */
 + (void)setUserProfileID:(nullable NSString *)userProfileID;
 
-/** Enables/disables statistics sending to the AppMetrica server.
+/** Enables/disables data sending to the AppMetrica server.
 
  @note Disabling this option also turns off data sending from the reporters that initialized for different apiKey.
 
- @param enabled Flag indicating whether the statistics sending is enabled. By default, the sending is enabled.
+ @param enabled Flag indicating whether the data sending is enabled. By default, the sending is enabled.
  */
-+ (void)setStatisticsSending:(BOOL)enabled;
++ (void)setDataSendingEnabled:(BOOL)enabled;
 
 /** Enables/disables location reporting to AppMetrica.
  If enabled and location set via setLocation: method - that location would be used.

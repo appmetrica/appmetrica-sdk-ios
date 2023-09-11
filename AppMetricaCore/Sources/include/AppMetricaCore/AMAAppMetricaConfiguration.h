@@ -52,13 +52,13 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, assign) BOOL sessionsAutoTracking;
 
-/** A boolean value indicating whether statistics sending to the AppMetrica server is enabled.
+/** A boolean value indicating whether data sending to the AppMetrica server is enabled.
 
  @note Disabling this option also turns off data sending from the reporters that initialized for different apiKey.
 
- By default, the statistics sending is enabled.
+ By default, the data sending is enabled.
  */
-@property (nonatomic, assign) BOOL statisticsSending;
+@property (nonatomic, assign) BOOL dataSendingEnabled;
 
 /** Maximum number of reports stored in the database.
 

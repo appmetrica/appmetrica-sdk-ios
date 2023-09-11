@@ -20,7 +20,7 @@ typedef NS_ERROR_ENUM(AMAStartupRequestsErrorDomain, AMAStartupRequestsErrorCode
 
 @end
 
-@protocol AMAStartupProvidingDelegate <NSObject>
+@protocol AMAExtendedStartupObservingDelegate <NSObject>
 
 @required
 - (void)startupUpdatedWithResponse:(NSDictionary *)response;
@@ -31,7 +31,7 @@ typedef NS_ERROR_ENUM(AMAStartupRequestsErrorDomain, AMAStartupRequestsErrorCode
 
 @property (nonatomic, assign, readonly) BOOL upToDate;
 @property (nonatomic, weak) id<AMAStartupControllerDelegate> delegate;
-@property (nonatomic, weak) id<AMAStartupProvidingDelegate> extendedDelegate;
+@property (nonatomic, weak) id<AMAExtendedStartupObservingDelegate> extendedDelegate;
 
 - (instancetype)init NS_UNAVAILABLE;
 + (instancetype)new NS_UNAVAILABLE;
@@ -43,7 +43,7 @@ typedef NS_ERROR_ENUM(AMAStartupRequestsErrorDomain, AMAStartupRequestsErrorCode
        timeoutRequestsController:(AMATimeoutRequestsController *)timeoutRequestsController
            startupResponseParser:(AMAStartupResponseParser *)startupResponseParser;
 
-- (void)setAdditionalStartupParameters:(NSDictionary *)parameters;
+- (void)addAdditionalStartupParameters:(NSDictionary *)parameters;
 
 - (void)update;
 - (void)cancel;

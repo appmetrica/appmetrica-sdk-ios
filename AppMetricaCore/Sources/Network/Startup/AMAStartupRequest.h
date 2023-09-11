@@ -3,6 +3,6 @@
 
 @interface AMAStartupRequest : AMAGenericRequest
 
-- (void)setAdditionalStartupParameters:(NSDictionary *)parameters;
+- (void)addAdditionalStartupParameters:(NSDictionary *)parameters;
 
 @end

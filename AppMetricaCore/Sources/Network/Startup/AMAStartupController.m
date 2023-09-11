@@ -98,10 +98,10 @@ NSErrorDomain const AMAStartupRequestsErrorDomain = @"AMAStartupRequestsErrorDom
     }
 }
 
-- (void)setAdditionalStartupParameters:(NSDictionary *)parameters
+- (void)addAdditionalStartupParameters:(NSDictionary *)parameters
 {
     @synchronized (self) {
-        [self.startupRequest setAdditionalStartupParameters:parameters];
+        [self.startupRequest addAdditionalStartupParameters:parameters];
     }
 }
 

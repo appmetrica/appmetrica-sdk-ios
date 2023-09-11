@@ -3,7 +3,7 @@
 #import "AMAInternalStateReportingController.h"
 #import "AMAMetricaConfiguration.h"
 #import "AMAStartupParametersConfiguration.h"
-#import "AMAStatisticsRestrictionController.h"
+#import "AMADataSendingRestrictionController.h"
 #import "AMAAppMetrica+Internal.h"
 #import "AMAReporter.h"
 #import "AMAReporterNotifications.h"
@@ -14,7 +14,7 @@ static NSTimeInterval const kAMADefaultInterval = 5 * 60 * 60;
 @interface AMAInternalStateReportingController ()
 
 @property (nonatomic, strong, readonly) id<AMAExecuting> executor;
-@property (nonatomic, strong, readonly) AMAStatisticsRestrictionController *restrictionController;
+@property (nonatomic, strong, readonly) AMADataSendingRestrictionController *restrictionController;
 @property (nonatomic, strong, readonly) NSMutableDictionary *reporterStateStorages;
 
 @end
@@ -24,11 +24,11 @@ static NSTimeInterval const kAMADefaultInterval = 5 * 60 * 60;
 - (instancetype)initWithExecutor:(id<AMAExecuting>)executor
 {
     return [self initWithExecutor:executor
-            restrictionController:[AMAStatisticsRestrictionController sharedInstance]];
+            restrictionController:[AMADataSendingRestrictionController sharedInstance]];
 }
 
 - (instancetype)initWithExecutor:(id<AMAExecuting>)executor
-           restrictionController:(AMAStatisticsRestrictionController *)restrictionController
+           restrictionController:(AMADataSendingRestrictionController *)restrictionController
 {
     self = [super init];
     if (self != nil) {
@@ -72,23 +72,23 @@ static NSTimeInterval const kAMADefaultInterval = 5 * 60 * 60;
     [self trigger];
 }
 
-- (BOOL)shouldSendForRestriction:(AMAStatisticsRestriction)restriction lastSendDate:(NSDate *)lastSendDate
+- (BOOL)shouldSendForRestriction:(AMADataSendingRestriction)restriction lastSendDate:(NSDate *)lastSendDate
 {
     BOOL shouldSend = YES;
     NSNumber *sendIntervalNumber =
         [AMAMetricaConfiguration sharedInstance].startup.statSendingDisabledReportingInterval;
     NSTimeInterval sendInterval = sendIntervalNumber != nil ? [sendIntervalNumber doubleValue] : kAMADefaultInterval;
 
-    shouldSend = shouldSend && restriction == AMAStatisticsRestrictionForbidden;
+    shouldSend = shouldSend && restriction == AMADataSendingRestrictionForbidden;
     shouldSend = shouldSend && [[NSDate date] timeIntervalSinceDate:lastSendDate] >= sendInterval;
     return shouldSend;
 }
 
-- (NSDictionary *)stateForRestriction:(AMAStatisticsRestriction)restriction
+- (NSDictionary *)stateForRestriction:(AMADataSendingRestriction)restriction
 {
     return @{
         @"stat_sending": @{
-            @"disabled": [NSNumber numberWithBool:restriction == AMAStatisticsRestrictionForbidden],
+            @"disabled": [NSNumber numberWithBool:restriction == AMADataSendingRestrictionForbidden],
         },
     };
 }
@@ -101,7 +101,7 @@ static NSTimeInterval const kAMADefaultInterval = 5 * 60 * 60;
             statesToSend = [NSMutableDictionary dictionary];
             NSMutableDictionary *dict = self.reporterStateStorages;
             [dict enumerateKeysAndObjectsUsingBlock:^(NSString *apiKey, AMAReporterStateStorage *storage, BOOL *stop) {
-                AMAStatisticsRestriction restriction = [self.restrictionController restrictionForApiKey:apiKey];
+                AMADataSendingRestriction restriction = [self.restrictionController restrictionForApiKey:apiKey];
                 if ([self shouldSendForRestriction:restriction lastSendDate:storage.lastStateSendDate]) {
                     statesToSend[apiKey] = [self stateForRestriction:restriction];
                     [storage markStateSentNow];

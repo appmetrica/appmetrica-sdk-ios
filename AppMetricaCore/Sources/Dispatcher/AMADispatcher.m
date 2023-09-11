@@ -11,7 +11,7 @@
 #import "AMAMetricaPersistentConfiguration.h"
 #import "AMAStartupParametersConfiguration.h"
 #import "AMAReportRequestModel.h"
-#import "AMAStatisticsRestrictionController.h"
+#import "AMADataSendingRestrictionController.h"
 #import "AMAReachability.h"
 #import "AMAReporterStoragesContainer.h"
 #import "AMAReporterStorage.h"
@@ -158,9 +158,9 @@ NSString *const kAMADispatcherErrorApiKeyUserInfoKey = @"kAMADispatcherErrorApiK
 - (BOOL)canPerformDispatchWithApiKey:(NSString *)apiKey error:(NSError **)error
 {
     AMAReachability *reachability = [AMAReachability sharedInstance];
-    if ([[AMAStatisticsRestrictionController sharedInstance] shouldReportToApiKey:apiKey] == NO) {
-        AMALogWarn(@"Can't report to apiKey %@, statistics sending is disabled", apiKey);
-        *error = [self errorWithCode:AMADispatcherReportErrorStatisticsSendingForbidden apiKey:apiKey];
+    if ([[AMADataSendingRestrictionController sharedInstance] shouldReportToApiKey:apiKey] == NO) {
+        AMALogWarn(@"Can't report to apiKey %@, data sending is disabled", apiKey);
+        *error = [self errorWithCode:AMADispatcherReportErrorDataSendingForbidden apiKey:apiKey];
     }
     else if ([AMAMetricaConfiguration sharedInstance].startup.reportHosts.count == 0) {
         AMALogWarn(@"Can't report to apiKey %@, reportHost is unknown", apiKey);

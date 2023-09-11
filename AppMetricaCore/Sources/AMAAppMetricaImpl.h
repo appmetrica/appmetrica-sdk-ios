@@ -24,7 +24,7 @@
 #if !TARGET_OS_TV
 @protocol AMAJSControlling;
 #endif
-@protocol AMAStartupProviding;
+@protocol AMAExtendedStartupObserving;
 @protocol AMAReporterStorageControlling;
 
 NS_ASSUME_NONNULL_BEGIN
@@ -96,8 +96,8 @@ NS_ASSUME_NONNULL_BEGIN
 #endif
 - (void)reportUrl:(NSURL *)url ofType:(NSString *)type isAuto:(BOOL)isAuto;
 
-- (void)setAdditionalStartupProvider:(id<AMAStartupProviding>)provider;
-- (void)setExtendedReporterStorageController:(id<AMAReporterStorageControlling>)controller;
+- (void)setExtendedStartupObservers:(NSMutableSet<id<AMAExtendedStartupObserving>> *)observers;
+- (void)setExtendedReporterStorageControllers:(NSMutableSet<id<AMAReporterStorageControlling>> *)controllers;
 
 @end
 

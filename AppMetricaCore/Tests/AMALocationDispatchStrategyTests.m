@@ -4,7 +4,7 @@
 #import "AMALocationDispatchStrategy.h"
 #import "AMALocationStorage.h"
 #import "AMALocationCollectingConfiguration.h"
-#import "AMAStatisticsRestrictionController.h"
+#import "AMADataSendingRestrictionController.h"
 
 SPEC_BEGIN(AMALocationDispatchStrategyTests)
 
@@ -14,7 +14,7 @@ describe(@"AMALocationDispatchStrategy", ^{
     NSTimeInterval const maxAge = 10.0;
 
     NSDate *__block now = nil;
-    AMAStatisticsRestrictionController *__block restrictionController = nil;
+    AMADataSendingRestrictionController *__block restrictionController = nil;
     AMALocationStorage *__block storage = nil;
     NSObject<AMALSSLocationsProviding> *__block storageState = nil;
     AMALocationCollectingConfiguration *__block configuration = nil;
@@ -22,9 +22,9 @@ describe(@"AMALocationDispatchStrategy", ^{
     AMALocationDispatchStrategy *__block strategy = nil;
 
     beforeEach(^{
-        restrictionController = [AMAStatisticsRestrictionController nullMock];
+        restrictionController = [AMADataSendingRestrictionController nullMock];
         [restrictionController stub:@selector(shouldEnableLocationSending) andReturn:theValue(YES)];
-        [AMAStatisticsRestrictionController stub:@selector(sharedInstance) andReturn:restrictionController];
+        [AMADataSendingRestrictionController stub:@selector(sharedInstance) andReturn:restrictionController];
         storageState = [KWMock nullMockForProtocol:@protocol(AMALSSLocationsProviding)];
         storage = [AMALocationStorage nullMock];
         [storage stub:@selector(locationStorageState) andReturn:storageState];

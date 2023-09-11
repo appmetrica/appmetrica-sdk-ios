@@ -28,7 +28,7 @@
     id<AMAKeyValueStoring> storage = [self.database.storageProvider nonPersistentStorageForKeys:keys
                                                                                           error:&error];
     if (error != nil) {
-        AMALogAssert(@"Failed to load extra startup parameters: %@ for keys: %@", error, keys);
+        AMALogAssert(@"Failed to load startup parameters: %@ for keys: %@", error, keys);
         storage = self.database.storageProvider.emptyNonPersistentStorage;
     }
     return storage;

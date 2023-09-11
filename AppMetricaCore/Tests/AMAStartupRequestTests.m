@@ -48,25 +48,38 @@ describe(@"AMAStartupRequest", ^{
             [[userAgentHeader[@"User-Agent"] should] equal:userAgent];
         });
         
-        
-        it(@"Should append additional parameters if neeeded", ^{
-            NSDictionary *extendedParatemers = @{@"ab": @1,
-                                                 @"eg": @18,
-                                                 @"sp": @0,
-                                                 @"features": @"ab,eg,sp"};
+        it(@"Should append additional parameters correctly", ^{
+            NSDictionary *firstExtendedParatemers = @{@"ab": @"1",
+                                                      @"eg": @"101",
+                                                      @"wrng": @7,
+                                                      @"features": @"ab,eg,sp,ab"};
+            NSDictionary *secondExtendedParatemers = @{@"sp": @"0",
+                                                       @"wrongDict": @{},
+                                                       @"wrongArray": @[],
+                                                       @19: @"qwe",
+                                                       @"features": @[@"qq,ww,tt"]};
             
-            [request setAdditionalStartupParameters:extendedParatemers];
+            [request addAdditionalStartupParameters:firstExtendedParatemers];
+            [request addAdditionalStartupParameters:secondExtendedParatemers];
             
-            NSMutableString *expectedFeatures = [AMAStartupParameters parameters][@"features"];
-            [expectedFeatures appendString:@",ab,eg,sp"];
+            NSArray *allFeatures = [[[AMAStartupParameters parameters][@"features"]
+                                     stringByAppendingString:@",ab,eg,sp"]
+                                     componentsSeparatedByString:@","];
+            NSString *expectedUniqueFeatures = [[[NSSet setWithArray:allFeatures] allObjects] componentsJoinedByString:@","];
             
             NSDictionary *getParameters = [request GETParameters];
             
-            [[getParameters[@"features"] should] equal:expectedFeatures];
+            [[getParameters[@"features"] should] equal:expectedUniqueFeatures];
             
-            [[getParameters[@"ab"] should] equal:theValue(1)];
-            [[getParameters[@"eg"] should] equal:theValue(18)];
-            [[getParameters[@"sp"] should] equal:theValue(0)];
+            [[getParameters[@"ab"] should] equal:@"1"];
+            [[getParameters[@"eg"] should] equal:@"101"];
+            [[getParameters[@"sp"] should] equal:@"0"];
+            
+            NSArray *keys = [getParameters allKeys];
+            [[keys shouldNot] contain:@"wrng"];
+            [[keys shouldNot] contain:@"wrongDict"];
+            [[keys shouldNot] contain:@"wrongArray"];
+            [[keys shouldNot] contain:@19];
         });
     });
 });

@@ -16,7 +16,7 @@
 #import "AMAErrorLogger.h"
 #import "AMADeepLinkController.h"
 #import "AMAInternalEventsReporter.h"
-#import "AMAStatisticsRestrictionController.h"
+#import "AMADataSendingRestrictionController.h"
 #import "AMAUserProfile.h"
 #import "AMARevenueInfo.h"
 #import "AMADatabaseQueueProvider.h"
@@ -31,12 +31,12 @@
 #import <AppMetricaPlatform/AppMetricaPlatform.h>
 #import "AMAAdProvider.h"
 
-static NSMutableSet<Class<AMAModuleActivationDelegate>> *activationDelegates;
-static NSMutableSet<Class<AMAEventFlushableDelegate>> *eventFlushableDelegates;
+static NSMutableSet<Class<AMAModuleActivationDelegate>> *activationDelegates = nil;
+static NSMutableSet<Class<AMAEventFlushableDelegate>> *eventFlushableDelegates = nil;
 
 static id<AMAAdProviding> adProvider = nil;
-static id<AMAStartupProviding> startupProvider = nil;
-static id<AMAReporterStorageControlling> reporterStorageController = nil;
+static NSMutableSet<id<AMAExtendedStartupObserving>> *startupObservers = nil;
+static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControllers = nil;
 
 @implementation AMAAppMetrica
 
@@ -94,24 +94,44 @@ static id<AMAReporterStorageControlling> reporterStorageController = nil;
 + (void)registerExternalService:(AMAServiceConfiguration *)configuration
 {
     @synchronized(self) {
-        if (configuration.startupProvider != nil) {
-            startupProvider = configuration.startupProvider;
+        if (configuration.startupObserver != nil) {
+            [[self class] addStartupObserver:configuration.startupObserver];
         }
         if (configuration.reporterStorageController != nil) {
-            reporterStorageController = configuration.reporterStorageController;
+            [[self class] addReporterStorageController:configuration.reporterStorageController];
         }
+    }
+}
+
++ (void)addStartupObserver:(id<AMAExtendedStartupObserving>)observer
+{
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        startupObservers = [[NSMutableSet alloc] init];
+    });
+    @synchronized(self) {
+        [startupObservers addObject:observer];
+    }
+}
+
++ (void)addReporterStorageController:(id<AMAReporterStorageControlling>)controller
+{
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        reporterStorageControllers = [[NSMutableSet alloc] init];
+    });
+    @synchronized(self) {
+        [reporterStorageControllers addObject:controller];
     }
 }
 
 + (void)setupExternalService
 {
-    id<AMAStartupProviding> startupProvider = [[self class] sharedStartupProvider];
-    if (startupProvider != nil) {
-        [[self sharedImpl] setAdditionalStartupProvider:startupProvider];
+    if (startupObservers != nil) {
+        [[self sharedImpl] setExtendedStartupObservers:startupObservers];
     }
-    id<AMAReporterStorageControlling> reporterStorageController = [[self class] sharedReporterStorageController];
-    if (startupProvider != nil) {
-        [[self sharedImpl] setExtendedReporterStorageController:reporterStorageController];
+    if (reporterStorageControllers != nil) {
+        [[self sharedImpl] setExtendedReporterStorageControllers:reporterStorageControllers];
     }
 }
 
@@ -198,16 +218,16 @@ static id<AMAReporterStorageControlling> reporterStorageController = nil;
     }];
 }
 
-+ (void)importStatisticsSendingConfiguration:(AMAAppMetricaConfiguration *)configuration
++ (void)importDataSendingEnabledConfiguration:(AMAAppMetricaConfiguration *)configuration
 {
-    AMAStatisticsRestriction restriction = AMAStatisticsRestrictionUndefined;
-    if (configuration.statisticsSendingState != nil) {
-        restriction = [configuration.statisticsSendingState boolValue]
-            ? AMAStatisticsRestrictionAllowed
-            : AMAStatisticsRestrictionForbidden;
+    AMADataSendingRestriction restriction = AMADataSendingRestrictionUndefined;
+    if (configuration.dataSendingEnabledState != nil) {
+        restriction = [configuration.dataSendingEnabledState boolValue]
+            ? AMADataSendingRestrictionAllowed
+            : AMADataSendingRestrictionForbidden;
     }
 
-    AMAStatisticsRestrictionController *controller = [AMAStatisticsRestrictionController sharedInstance];
+    AMADataSendingRestrictionController *controller = [AMADataSendingRestrictionController sharedInstance];
     [controller setMainApiKey:configuration.apiKey];
     [controller setMainApiKeyRestriction:restriction];
 }
@@ -234,7 +254,7 @@ static id<AMAReporterStorageControlling> reporterStorageController = nil;
     appConfiguration.maxReportsInDatabaseCount = configuration.maxReportsInDatabaseCount;
     appConfiguration.dispatchPeriod = configuration.dispatchPeriod;
     appConfiguration.logs = configuration.logs;
-    appConfiguration.statisticsSending = configuration.statisticsSending;
+    appConfiguration.dataSendingEnabled = configuration.dataSendingEnabled;
     metricaConfiguration.appConfiguration = [appConfiguration copy];
 
     metricaConfiguration.inMemory.handleFirstActivationAsUpdate = configuration.handleFirstActivationAsUpdate;
@@ -279,7 +299,7 @@ static id<AMAReporterStorageControlling> reporterStorageController = nil;
     AMAMetricaConfiguration *metricaConfiguration = [AMAMetricaConfiguration sharedInstance];
 
     [self importLocationConfiguration:configuration];
-    [self importStatisticsSendingConfiguration:configuration];
+    [self importDataSendingEnabledConfiguration:configuration];
 
     metricaConfiguration.persistent.userStartupHosts = configuration.customHosts;
     [[self sharedImpl] setPreloadInfo:configuration.preloadInfo];
@@ -383,12 +403,12 @@ static id<AMAReporterStorageControlling> reporterStorageController = nil;
     [[self sharedLogConfigurator] setChannel:AMA_LOG_CHANNEL enabled:enabled];
 }
 
-+ (void)setStatisticsSending:(BOOL)enabled
++ (void)setDataSendingEnabled:(BOOL)enabled
 {
-    AMAStatisticsRestriction restriction = enabled
-        ? AMAStatisticsRestrictionAllowed
-        : AMAStatisticsRestrictionForbidden;
-    [[AMAStatisticsRestrictionController sharedInstance] setMainApiKeyRestriction:restriction];
+    AMADataSendingRestriction restriction = enabled
+        ? AMADataSendingRestrictionAllowed
+        : AMADataSendingRestrictionForbidden;
+    [[AMADataSendingRestrictionController sharedInstance] setMainApiKeyRestriction:restriction];
 }
 
 #if TARGET_OS_IOS
@@ -511,13 +531,13 @@ static id<AMAReporterStorageControlling> reporterStorageController = nil;
             [AMAErrorLogger logMetricaActivationWithAlreadyPresentedKeyError];
         }
         else {
-            AMAStatisticsRestriction restriction = AMAStatisticsRestrictionUndefined;
-            if (configuration.statisticsSendingState != nil) {
-                restriction = [configuration.statisticsSendingState boolValue]
-                    ? AMAStatisticsRestrictionAllowed
-                    : AMAStatisticsRestrictionForbidden;
+            AMADataSendingRestriction restriction = AMADataSendingRestrictionUndefined;
+            if (configuration.dataSendingEnabledState != nil) {
+                restriction = [configuration.dataSendingEnabledState boolValue]
+                    ? AMADataSendingRestrictionAllowed
+                    : AMADataSendingRestrictionForbidden;
             }
-            [[AMAStatisticsRestrictionController sharedInstance] setReporterRestriction:restriction
+            [[AMADataSendingRestrictionController sharedInstance] setReporterRestriction:restriction
                                                                               forApiKey:configuration.apiKey];
 
             [[AMAMetricaConfiguration sharedInstance] setConfiguration:configuration];
@@ -536,7 +556,7 @@ static id<AMAReporterStorageControlling> reporterStorageController = nil;
 
     @synchronized (self) {
         if ([self isReporterCreatedForAPIKey:apiKey] == NO) {
-            [[AMAStatisticsRestrictionController sharedInstance] setReporterRestriction:AMAStatisticsRestrictionUndefined
+            [[AMADataSendingRestrictionController sharedInstance] setReporterRestriction:AMADataSendingRestrictionUndefined
                                                                               forApiKey:apiKey];
         }
         AMAReporterConfiguration *configuration = [[AMAReporterConfiguration alloc] initWithApiKey:apiKey];
@@ -698,20 +718,6 @@ static id<AMAReporterStorageControlling> reporterStorageController = nil;
         }
     });
     return logConfigurator;
-}
-
-+ (id<AMAStartupProviding>)sharedStartupProvider
-{
-    @synchronized (self) {
-        return startupProvider;
-    }
-}
-
-+ (id<AMAReporterStorageControlling>)sharedReporterStorageController
-{
-    @synchronized (self) {
-        return reporterStorageController;
-    }
 }
 
 #pragma mark - Private & Testing Availability

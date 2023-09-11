@@ -4,6 +4,6 @@
 @interface AMAAppMetricaConfiguration (Internal)
 
 @property (nonatomic, strong, nullable, readonly) NSNumber *locationTrackingState;
-@property (nonatomic, strong, nullable, readonly) NSNumber *statisticsSendingState;
+@property (nonatomic, strong, nullable, readonly) NSNumber *dataSendingEnabledState;
 
 @end

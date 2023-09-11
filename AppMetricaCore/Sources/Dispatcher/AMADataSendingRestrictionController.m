@@ -1,25 +1,25 @@
 
 #import "AMACore.h"
-#import "AMAStatisticsRestrictionController.h"
+#import "AMADataSendingRestrictionController.h"
 #import "AMAMetricaInMemoryConfiguration.h"
 
-typedef BOOL(^kAMARestrictionMatchBlock)(NSString *apiKey, AMAStatisticsRestriction restriction);
+typedef BOOL(^kAMARestrictionMatchBlock)(NSString *apiKey, AMADataSendingRestriction restriction);
 
-@interface AMAStatisticsRestrictionController ()
+@interface AMADataSendingRestrictionController ()
 
 @property (nonatomic, copy) NSString *mainApiKey;
-@property (nonatomic, assign) AMAStatisticsRestriction mainRestriction;
+@property (nonatomic, assign) AMADataSendingRestriction mainRestriction;
 @property (nonatomic, strong, readonly) NSMutableDictionary<NSString *, NSNumber *> *reporterRestrictions;
 
 @end
 
-@implementation AMAStatisticsRestrictionController
+@implementation AMADataSendingRestrictionController
 
 - (instancetype)init
 {
     self = [super init];
     if (self != nil) {
-        _mainRestriction = AMAStatisticsRestrictionNotActivated;
+        _mainRestriction = AMADataSendingRestrictionNotActivated;
         _reporterRestrictions = [NSMutableDictionary dictionary];
     }
     return self;
@@ -29,15 +29,15 @@ typedef BOOL(^kAMARestrictionMatchBlock)(NSString *apiKey, AMAStatisticsRestrict
 
 + (instancetype)sharedInstance
 {
-    static AMAStatisticsRestrictionController *instance = nil;
+    static AMADataSendingRestrictionController *instance = nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        instance = [[AMAStatisticsRestrictionController alloc] init];
+        instance = [[AMADataSendingRestrictionController alloc] init];
     });
     return instance;
 }
 
-- (void)setMainApiKeyRestriction:(AMAStatisticsRestriction)restriction
+- (void)setMainApiKeyRestriction:(AMADataSendingRestriction)restriction
 {
     @synchronized (self) {
         if ([self shouldUpdateRestriction:self.mainRestriction withNewRestriction:restriction]) {
@@ -62,14 +62,14 @@ typedef BOOL(^kAMARestrictionMatchBlock)(NSString *apiKey, AMAStatisticsRestrict
     }
     @synchronized (self) {
         BOOL shouldReport = YES;
-        AMAStatisticsRestriction apiKeyRestriction =
-            (AMAStatisticsRestriction)[self.reporterRestrictions[apiKey] unsignedIntegerValue];
+        AMADataSendingRestriction apiKeyRestriction =
+            (AMADataSendingRestriction)[self.reporterRestrictions[apiKey] unsignedIntegerValue];
 
-        if (self.mainRestriction == AMAStatisticsRestrictionForbidden) {
+        if (self.mainRestriction == AMADataSendingRestrictionForbidden) {
             shouldReport = NO;
         }
         else {
-            shouldReport = shouldReport && apiKeyRestriction != AMAStatisticsRestrictionForbidden;
+            shouldReport = shouldReport && apiKeyRestriction != AMADataSendingRestrictionForbidden;
             shouldReport = shouldReport && [self anyIsActivated];
 
             if (shouldReport && [apiKey isEqualToString:kAMAMetricaLibraryApiKey]) {
@@ -81,19 +81,19 @@ typedef BOOL(^kAMARestrictionMatchBlock)(NSString *apiKey, AMAStatisticsRestrict
     }
 }
 
-- (AMAStatisticsRestriction)restrictionForApiKey:(NSString *)apiKey
+- (AMADataSendingRestriction)restrictionForApiKey:(NSString *)apiKey
 {
     if (apiKey == nil) {
-        return AMAStatisticsRestrictionNotActivated;
+        return AMADataSendingRestrictionNotActivated;
     }
     @synchronized (self) {
         return [apiKey isEqualToString:self.mainApiKey]
             ? self.mainRestriction
-            : (AMAStatisticsRestriction)[self.reporterRestrictions[apiKey] unsignedIntegerValue];
+            : (AMADataSendingRestriction)[self.reporterRestrictions[apiKey] unsignedIntegerValue];
     }
 }
 
-- (void)setReporterRestriction:(AMAStatisticsRestriction)restriction forApiKey:(NSString *)apiKey
+- (void)setReporterRestriction:(AMADataSendingRestriction)restriction forApiKey:(NSString *)apiKey
 {
     if (apiKey == nil) {
         return;
@@ -111,11 +111,11 @@ typedef BOOL(^kAMARestrictionMatchBlock)(NSString *apiKey, AMAStatisticsRestrict
 
 #pragma mark - Private -
 
-- (BOOL)shouldUpdateRestriction:(AMAStatisticsRestriction)restriction
-             withNewRestriction:(AMAStatisticsRestriction)newRestriction
+- (BOOL)shouldUpdateRestriction:(AMADataSendingRestriction)restriction
+             withNewRestriction:(AMADataSendingRestriction)newRestriction
 {
-    return restriction == AMAStatisticsRestrictionNotActivated
-            || newRestriction != AMAStatisticsRestrictionUndefined;
+    return restriction == AMADataSendingRestrictionNotActivated
+            || newRestriction != AMADataSendingRestrictionUndefined;
 }
 
 
@@ -124,7 +124,7 @@ typedef BOOL(^kAMARestrictionMatchBlock)(NSString *apiKey, AMAStatisticsRestrict
     BOOL __block result = matcher(nil, self.mainRestriction);
     if (result) {
         [self.reporterRestrictions enumerateKeysAndObjectsUsingBlock:^(NSString *apiKey, NSNumber *flag, BOOL *stop) {
-            AMAStatisticsRestriction restriction = (AMAStatisticsRestriction)[flag unsignedIntegerValue];
+            AMADataSendingRestriction restriction = (AMADataSendingRestriction)[flag unsignedIntegerValue];
             if (matcher(apiKey, restriction) == NO) {
                 result = NO;
                 *stop = YES;
@@ -137,28 +137,28 @@ typedef BOOL(^kAMARestrictionMatchBlock)(NSString *apiKey, AMAStatisticsRestrict
 - (BOOL)anyOtherIsAllowedOrUndefinedForApiKey:(NSString *)apiKey
 {
     BOOL invertedStatement =
-        [self allRestrictionsMatch:^BOOL(NSString *restrictionApiKey, AMAStatisticsRestriction restriction) {
+        [self allRestrictionsMatch:^BOOL(NSString *restrictionApiKey, AMADataSendingRestriction restriction) {
             if ([restrictionApiKey isEqualToString:apiKey]) {
                 return YES;
             }
-            return restriction != AMAStatisticsRestrictionAllowed
-                && restriction != AMAStatisticsRestrictionUndefined;
+            return restriction != AMADataSendingRestrictionAllowed
+                && restriction != AMADataSendingRestrictionUndefined;
         }];
     return invertedStatement == NO;
 }
 
 - (BOOL)anyIsActivated
 {
-    BOOL invertedStatement = [self allRestrictionsMatch:^BOOL(NSString *apiKey, AMAStatisticsRestriction restriction) {
-        return restriction == AMAStatisticsRestrictionNotActivated;
+    BOOL invertedStatement = [self allRestrictionsMatch:^BOOL(NSString *apiKey, AMADataSendingRestriction restriction) {
+        return restriction == AMADataSendingRestrictionNotActivated;
     }];
     return invertedStatement == NO;
 }
 
 - (BOOL)allAreNotForbidden
 {
-    return [self allRestrictionsMatch:^BOOL(NSString *apiKey, AMAStatisticsRestriction restriction) {
-        return restriction != AMAStatisticsRestrictionForbidden;
+    return [self allRestrictionsMatch:^BOOL(NSString *apiKey, AMADataSendingRestriction restriction) {
+        return restriction != AMADataSendingRestrictionForbidden;
     }];
 }
 
@@ -172,8 +172,8 @@ typedef BOOL(^kAMARestrictionMatchBlock)(NSString *apiKey, AMAStatisticsRestrict
 {
     @synchronized (self) {
         BOOL __block shouldEnable = YES;
-        if (self.mainRestriction != AMAStatisticsRestrictionNotActivated) {
-            shouldEnable = shouldEnable && self.mainRestriction != AMAStatisticsRestrictionForbidden;
+        if (self.mainRestriction != AMADataSendingRestrictionNotActivated) {
+            shouldEnable = shouldEnable && self.mainRestriction != AMADataSendingRestrictionForbidden;
         }
         else {
             shouldEnable = shouldEnable && [self allAreNotForbidden];
