@@ -1629,7 +1629,7 @@
   "AppMetricaWebKit/Sources/include/AppMetricaWebKit/AMAJSController.h":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaWebKit/Sources/include/AppMetricaWebKit/AMAJSController.h",
   "AppMetricaWebKit/Sources/include/AppMetricaWebKit/AppMetricaWebKit.h":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaWebKit/Sources/include/AppMetricaWebKit/AppMetricaWebKit.h",
   "AppMetricaWebKit/Tests/AMAJSControllerTests.m":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaWebKit/Tests/AMAJSControllerTests.m",
-  "CONTRIBUTING":"mobile/metrika/ios/appmetrica-sdk/public/CONTRIBUTING",
+  "CONTRIBUTING.md":"mobile/metrika/ios/appmetrica-sdk/public/CONTRIBUTING.md",
   "LICENSE":"mobile/metrika/ios/appmetrica-sdk/public/LICENSE",
   "Package.resolved":"mobile/metrika/ios/appmetrica-sdk/public/Package.resolved",
   "Package.swift":"mobile/metrika/ios/appmetrica-sdk/public/Package.swift",
