@@ -29,8 +29,6 @@ extern NSString *const kAMABackgroundUnhandedExceptionReason;
 
 - (void)updateCrashContextQuickly:(BOOL)isQuickly;
 
-- (void)instantFeaturesConfigurationDidUpdate:(AMAInstantFeaturesConfiguration *)configuration;
-
 @end
 
 SPEC_BEGIN(AMACrashReporterTests)
@@ -69,29 +67,6 @@ describe(@"AMACrashReporter", ^{
         secondCrashProcessor = [KWMock nullMockForProtocol:@protocol(AMACrashProcessing)];
         crashProcessors = [NSMutableArray array];
         crashReporter.crashProcessors = crashProcessors;
-    });
-
-    context(@"AMAInstantFeaturesObserver", ^{
-    
-    AMAInstantFeaturesConfiguration *__block instant = nil;
-    
-        beforeEach(^{
-            instant = [AMAInstantFeaturesConfiguration nullMock];
-        });
-    
-        it(@"Should enable cxa_throw swap", ^{
-            [instant stub:@selector(dynamicLibraryCrashHookEnabled) andReturn:theValue(YES)];
-            
-            [[crashLoader should] receive:@selector(enableSwapOfCxaThrow)];
-            [crashReporter instantFeaturesConfigurationDidUpdate:instant];
-        });
-    
-        it(@"Should not enable cxa_throw swap", ^{
-            [instant stub:@selector(dynamicLibraryCrashHookEnabled) andReturn:theValue(NO)];
-            
-            [[crashLoader shouldNot] receive:@selector(enableSwapOfCxaThrow)];
-            [crashReporter instantFeaturesConfigurationDidUpdate:instant];
-        });
     });
          
     context(@"Should dispatch probably unhandled crash detecting enabled from configuration to crash loader", ^{
@@ -181,40 +156,6 @@ describe(@"AMACrashReporter", ^{
                                                      hostStateProvider:nil];
             [crashReporter setConfiguration:configuration];
             [[registeredApiKeys should] equal:apiKeys];
-        });
-    
-        context(@"Instant features", ^{
-            
-            AMAInstantFeaturesConfiguration *__block instant = nil;
-            
-            beforeEach(^{
-                [AMAMetricaConfigurationTestUtilities stubConfigurationWithNullMock];
-                instant = [AMAMetricaConfiguration sharedInstance].instant;
-            });
-            
-            it(@"Should ask instant configuration", ^{
-                [[instant should] receive:@selector(dynamicLibraryCrashHookEnabled)];
-                [crashReporter setConfiguration:configuration];
-            });
-            
-            it(@"Should enable cxa_throw swap", ^{
-                [instant stub:@selector(dynamicLibraryCrashHookEnabled) andReturn:theValue(YES)];
-                
-                [[crashLoader should] receive:@selector(enableSwapOfCxaThrow)];
-                [crashReporter setConfiguration:configuration];
-            });
-            
-            it(@"Should not enable cxa_throw swap", ^{
-                [instant stub:@selector(dynamicLibraryCrashHookEnabled) andReturn:theValue(NO)];
-                
-                [[crashLoader shouldNot] receive:@selector(enableSwapOfCxaThrow)];
-                [crashReporter setConfiguration:configuration];
-            });
-            
-            it(@"Should add itself to observers", ^{
-                [[instant should] receive:@selector(addAMAObserver:) withArguments:crashReporter];
-                [crashReporter setConfiguration:configuration];
-            });
         });
 
         context(@"Notify crash state", ^{

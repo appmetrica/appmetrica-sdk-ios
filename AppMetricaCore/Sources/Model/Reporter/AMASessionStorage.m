@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import <AppMetricaStorageUtils/AppMetricaStorageUtils.h>
 #import "AMASessionStorage+Migration.h"
 #import "AMADatabaseProtocol.h"
@@ -10,7 +9,6 @@
 #import "AMAMetricaConfiguration.h"
 #import "AMAStartupParametersConfiguration.h"
 #import "AMADate.h"
-#import "AMAErrorsFactory.h"
 #import "AMADatabaseHelper.h"
 
 @interface AMASessionStorage ()

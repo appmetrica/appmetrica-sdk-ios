@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import <AppMetricaStorageUtils/AppMetricaStorageUtils.h>
 #import "AMAPersistentTimeoutConfiguration.h"
 #import "AMATimeoutConfiguration.h"

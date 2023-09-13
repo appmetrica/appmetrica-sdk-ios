@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMAUniquePriorityQueue.h"
 
 @interface AMAUniquePriorityQueue ()

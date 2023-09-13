@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMAGenderAttribute.h"
 #import "AMAStringAttribute.h"
 #import "AMAInvalidUserProfileUpdateFactory.h"

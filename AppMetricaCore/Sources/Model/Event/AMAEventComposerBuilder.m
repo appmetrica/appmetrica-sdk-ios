@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMAEventComposerBuilder.h"
 #import "AMAEventComposer.h"
 #import "AMAFilledLocationComposer.h"

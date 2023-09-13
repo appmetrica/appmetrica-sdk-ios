@@ -1,4 +1,5 @@
 
+#import <AppMetricaEncodingUtils/AppMetricaEncodingUtils.h>
 #import "AMACore.h"
 #import "AMAEventBuilder.h"
 #import "AMAEvent.h"
@@ -123,6 +124,7 @@
             break;
         case AMAEventValueTypeString: {
             NSError *serializationError = nil;
+            //TODO: rewrite event parameters
             NSString *stringValue = [AMAJSONSerialization stringWithJSONObject:data error:&serializationError];
             
             if (serializationError != nil) {

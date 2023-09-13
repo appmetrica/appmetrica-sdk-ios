@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMAPermissionKeys.h"
 
 AMAPermissionKey const kAMAPermissionKeyLocationWhenInUse = @"NSLocationWhenInUseUsageDescription";

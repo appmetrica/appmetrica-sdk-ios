@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMAProhibitingAttributeUpdateValidator.h"
 
 @interface AMAProhibitingAttributeUpdateValidator ()

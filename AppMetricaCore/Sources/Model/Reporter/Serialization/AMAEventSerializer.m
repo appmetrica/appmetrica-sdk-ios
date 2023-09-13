@@ -9,7 +9,6 @@
 #import "AMAFileEventValue.h"
 #import "EventData.pb-c.h"
 #import "AMAReporterDatabaseEncodersFactory.h"
-#import "AMAErrorsFactory.h"
 #import "AMATypeSafeDictionaryHelper.h"
 #import "AMAModelSerialization.h"
 #import <CoreLocation/CoreLocation.h>

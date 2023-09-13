@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMATableDescriptionProvider.h"
 #import "AMADatabaseConstants.h"
 

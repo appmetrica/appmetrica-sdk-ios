@@ -1,7 +1,5 @@
 
-#import <Foundation/Foundation.h>
-
-#import "AMACore.h"
+#import <AppMetricaNetwork/AppMetricaNetwork.h>
 
 @class AMAReportPayload;
 

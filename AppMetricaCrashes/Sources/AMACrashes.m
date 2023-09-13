@@ -10,7 +10,6 @@
 
 @implementation AMACrashes
 
-//TODO: Flags from `AMAAppMetricaConfiguration+Extended`?
 + (void)didActivateWithConfiguration:(AMAModuleActivationConfiguration *)configuration
 {
     

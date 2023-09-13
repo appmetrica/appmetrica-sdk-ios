@@ -1,5 +1,6 @@
 
 #import <Kiwi/Kiwi.h>
+#import "AMACore.h"
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
 #import "AMAAdRevenueInfoConverter.h"
 #import "AMAAdRevenueInfoModel.h"
@@ -106,7 +107,7 @@ describe(@"AMAAdRevenueInfoConverter", ^{
                 @"Passed dictionary is not a valid serializable JSON object: {\n    \"Wrong JSON object\" ="
                 "     {\n                (\n            foo,\n            bar\n        ) = bar;\n    };\n}";
                 NSError *expectedError = [NSError errorWithDomain:kAMAAppMetricaErrorDomain
-                                                             code:AMAAppMetricaEventErrorCodeJsonSerializationError
+                                                             code:AMAAppMetricaInternalEventJsonSerializationError
                                                          userInfo:@{ NSLocalizedDescriptionKey: desription }];
                 NSError *error = nil;
                 AMAAdRevenueInfoModel *result = [AMAAdRevenueInfoConverter convertAdRevenueInfo:adRevenueInfo error:&error];

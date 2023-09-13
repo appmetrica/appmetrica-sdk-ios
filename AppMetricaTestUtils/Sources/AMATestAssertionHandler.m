@@ -40,12 +40,18 @@
     }
 }
 
--(void)handleFailureInMethod:(SEL)selector object:(id)object file:(NSString *)fileName lineNumber:(NSInteger)line description:(NSString *)format, ...
+-(void)handleFailureInMethod:(SEL)selector object:(id)object
+                        file:(NSString *)fileName
+                  lineNumber:(NSInteger)line
+                 description:(NSString *)format, ...
 {
     //ignore assert
 }
 
--(void)handleFailureInFunction:(NSString *)functionName file:(NSString *)fileName lineNumber:(NSInteger)line description:(NSString *)format, ...
+-(void)handleFailureInFunction:(NSString *)functionName
+                          file:(NSString *)fileName
+                    lineNumber:(NSInteger)line
+                   description:(NSString *)format, ...
 {
     //ignore assert
 }

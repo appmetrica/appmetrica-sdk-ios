@@ -1,5 +1,5 @@
 
-#import "AMACore.h"
+#import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
 #import "AMAEventStorage+Migration.h"
 #import "AMAEvent.h"
 #import "AMASession.h"
@@ -8,8 +8,6 @@
 #import "AMADatabaseHelper.h"
 #import "AMAEventSerializer.h"
 #import "AMAEventNumbersFiller.h"
-#import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
-#import "AMAErrorsFactory.h"
 
 @interface AMAEventStorage ()
 

@@ -85,7 +85,7 @@ describe(@"AMAErrorsFactory", ^{
                 [[error.domain should] equal:domain];
             });
             it(@"Should use correct code", ^{
-                [[theValue(error.code) should] equal:theValue(1006)];
+                [[theValue(error.code) should] equal:theValue(AMAAppMetricaEventErrorCodeInvalidBacktrace)];
             });
             it(@"Should use correct description", ^{
                 NSString *description = @"Backtrace is null or empty";

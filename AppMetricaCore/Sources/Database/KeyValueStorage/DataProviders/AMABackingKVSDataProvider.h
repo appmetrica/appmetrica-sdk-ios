@@ -1,6 +1,5 @@
 
 #import <UIKit/UIKit.h>
-#import "AMACore.h"
 #import "AMAUnderlyingKVSDataProviderTypes.h"
 
 @interface AMABackingKVSDataProvider : NSObject <AMAKeyValueStorageDataProviding>

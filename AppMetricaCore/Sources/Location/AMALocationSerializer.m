@@ -1,11 +1,11 @@
 
-#import "AMACore.h"
+#import <AppMetricaProtobufUtils/AppMetricaProtobufUtils.h>
 #import <CoreLocation/CoreLocation.h>
+#import "AMACore.h"
 #import "LocationMessage.pb-c.h"
 #import "AMALocationSerializer.h"
 #import "AMALocation.h"
 #import "AMAVisit.h"
-#import <AppMetricaProtobufUtils/AppMetricaProtobufUtils.h>
 
 @implementation AMALocationSerializer
 

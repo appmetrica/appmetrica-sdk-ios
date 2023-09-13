@@ -1,6 +1,5 @@
 
 #import <Foundation/Foundation.h>
-#import "AMACore.h"
 #import "AMAEventTypes.h"
 #import "AMAEventEncryptionType.h"
 #import "AMAOptionalBool.h"

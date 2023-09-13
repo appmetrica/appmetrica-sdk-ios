@@ -1,5 +1,5 @@
 
-#import "AMACore.h"
+#import "AMAAppMetrica.h"
 #import "AMASharedReporterProvider.h"
 
 @interface AMASharedReporterProvider ()

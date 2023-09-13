@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMAFilledOpenIDComposer.h"
 #import "AMAReporterStateStorage.h"
 

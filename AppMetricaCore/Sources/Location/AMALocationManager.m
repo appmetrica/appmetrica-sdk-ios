@@ -1,13 +1,13 @@
 
-#import "AMACore.h"
 #import <CoreLocation/CoreLocation.h>
+#import <AppMetricaPlatform/AppMetricaPlatform.h>
+#import "AMACore.h"
 #import "AMALocationManager.h"
 #import "AMAStartupPermissionController.h"
 #import "AMALocationCollectingController.h"
 #import "AMALocationCollectingConfiguration.h"
 #import "AMAMetricaConfiguration.h"
 #import "AMAMetricaPersistentConfiguration.h"
-#import <AppMetricaPlatform/AppMetricaPlatform.h>
 
 @interface AMALocationManager () <CLLocationManagerDelegate>
 

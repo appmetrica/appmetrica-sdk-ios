@@ -3,8 +3,6 @@
 #import "AMAAppOpenWatcher.h"
 #import "AMADeepLinkController.h"
 
-#import <UIKit/UIKit.h>
-
 @interface AMAAppOpenWatcher ()
 
 @property (nonatomic, strong, readonly) NSNotificationCenter *notificationCenter;

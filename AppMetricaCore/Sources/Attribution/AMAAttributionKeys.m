@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMAAttributionKeys.h"
 
 NSString *const AMAAttributionKeyShowScreen = @"show_screen";

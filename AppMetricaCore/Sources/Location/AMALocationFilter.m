@@ -1,8 +1,6 @@
 
-#import "AMACore.h"
 #import "AMALocationFilter.h"
 #import "AMALocationCollectingConfiguration.h"
-
 #import <CoreLocation/CoreLocation.h>
 
 @interface AMALocationFilter ()

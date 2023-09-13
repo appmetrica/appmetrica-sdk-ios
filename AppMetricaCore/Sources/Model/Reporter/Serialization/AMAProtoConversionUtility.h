@@ -1,7 +1,6 @@
 
 #import <Foundation/Foundation.h>
 #import <protobuf-c/protobuf-c.h>
-
 #import "AMAOptionalBool.h"
 #import "AMAEventSource.h"
 #import "EventData.pb-c.h"

@@ -11,7 +11,7 @@
 static NSString *const kAMAStartupResponseEnabledKey = @"enabled";
 static NSString *const kAMAStartupResponseURLsKey = @"urls";
 
-@interface AMAStartupResponseParser()
+@interface AMAStartupResponseParser ()
 
 @property (nonatomic, strong, readonly) AMAAttributionModelParser *attributionModelParser;
 
@@ -137,8 +137,6 @@ static NSString *const kAMAStartupResponseURLsKey = @"urls";
             [self enabledPropertyValueFromDictionary:features[@"visits_collecting"]];
         configuration.permissionsCollectingEnabled =
             [self enabledPropertyValueFromDictionary:features[@"permissions_collecting"]];
-        configuration.dynamicLibraryCrashHookEnabled =
-            [self enabledPropertyValueFromDictionary:features[@"dynamic_library_crash_hook"]];
 
         configuration.initialCountry = [self countryFromDictionary:parsedData[@"locale"]];
 
@@ -146,7 +144,6 @@ static NSString *const kAMAStartupResponseURLsKey = @"urls";
         NSDictionary *permissionsDictionary = [AMAStartupPermissionSerializer permissionsWithArray:permissions];
         configuration.permissionsString =
             [AMAStartupPermissionSerializer JSONStringWithPermissions:permissionsDictionary];
-        
         
         NSMutableDictionary *extendedParameters = [NSMutableDictionary dictionary];
         NSArray *extendedKeys = @[@"get_ad", @"report_ad"];

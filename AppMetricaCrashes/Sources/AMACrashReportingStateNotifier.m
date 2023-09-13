@@ -1,7 +1,6 @@
 
 #import "AMACrashReportingStateNotifier.h"
 
-//TODO: Need migration?
 NSString *const kAMACrashReportingStateEnabledKey = @"appmetrica_crash_enabled";
 NSString *const kAMACrashReportingStateCrashedLastLaunchKey = @"appmetrica_crash_crashed_last_launch";
 

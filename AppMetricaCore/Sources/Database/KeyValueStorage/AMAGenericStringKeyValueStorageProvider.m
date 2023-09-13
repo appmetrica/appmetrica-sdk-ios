@@ -1,12 +1,10 @@
 
-#import "AMACore.h"
 #import "AMAGenericStringKeyValueStorageProvider.h"
 #import "AMAStringDatabaseKeyValueStorageConverter.h"
 #import "AMASyncKeyValueStorageDataProvider.h"
 #import "AMAInMemoryKeyValueStorageDataProvider.h"
 #import "AMAKeyValueStorage.h"
 #import "AMACachingKeyValueStorage.h"
-#import "AMAErrorsFactory.h"
 
 @interface AMAGenericStringKeyValueStorageProvider ()
 

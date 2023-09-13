@@ -2,7 +2,6 @@
 #import "AMACore.h"
 #import "AMADatabaseKVSDataProvider.h"
 #import "AMADatabaseConstants.h"
-#import "AMAErrorsFactory.h"
 #import "FMDB.h"
 
 @interface AMADatabaseKVSDataProvider ()

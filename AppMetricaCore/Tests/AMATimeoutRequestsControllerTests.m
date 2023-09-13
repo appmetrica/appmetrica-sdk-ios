@@ -1,6 +1,5 @@
 
 #import <Kiwi/Kiwi.h>
-#import "AMACore.h"
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
 #import "AMATimeoutRequestsController.h"
 #import "AMATimeoutConfiguration.h"

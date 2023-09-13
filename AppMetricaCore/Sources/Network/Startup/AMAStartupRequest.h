@@ -1,5 +1,5 @@
 
-#import "AMACore.h"
+#import <AppMetricaNetwork/AppMetricaNetwork.h>
 
 @interface AMAStartupRequest : AMAGenericRequest
 

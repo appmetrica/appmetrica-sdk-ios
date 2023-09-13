@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMAStorageKeys.h"
 
 NSString *const AMAStorageStringKeyASATokenEndReportingInterval = @"asa.token.reporting.end";

@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMAStackTraceElement.h"
 
 @implementation AMAStackTraceElement

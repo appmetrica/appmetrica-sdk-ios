@@ -2,7 +2,6 @@
 #import <Kiwi/Kiwi.h>
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
 #import "AMADatabaseQueueProvider.h"
-#import "AMACore.h"
 @import FMDB;
 #import <sqlite3.h>
 #import "AMAFMDatabaseQueue.h"

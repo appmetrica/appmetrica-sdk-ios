@@ -1,6 +1,5 @@
 
 #import <Kiwi/Kiwi.h>
-#import "AMACore.h"
 #import "AMAAppMetricaPlugins.h"
 #import "AMAPluginErrorDetails.h"
 #import "AMAAppMetrica+Internal.h"

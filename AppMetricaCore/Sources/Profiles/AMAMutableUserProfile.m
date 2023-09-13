@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMAUserProfile+Internal.h"
 
 @implementation AMAMutableUserProfile

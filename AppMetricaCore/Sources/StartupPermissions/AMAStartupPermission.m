@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMAStartupPermission.h"
 
 @implementation AMAStartupPermission

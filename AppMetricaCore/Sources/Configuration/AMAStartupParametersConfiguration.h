@@ -47,8 +47,6 @@
 @property (nonatomic, strong) NSNumber *locationAccurateDistanceFilter;
 @property (nonatomic, strong) NSNumber *locationPausesLocationUpdatesAutomatically;
 
-@property (nonatomic, assign) BOOL dynamicLibraryCrashHookEnabled;
-
 @property (nonatomic, strong) NSNumber *ASATokenFirstDelay;
 @property (nonatomic, strong) NSNumber *ASATokenReportingInterval;
 @property (nonatomic, strong) NSNumber *ASATokenEndReportingInterval;

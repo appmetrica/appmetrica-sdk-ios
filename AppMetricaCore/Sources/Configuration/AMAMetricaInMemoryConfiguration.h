@@ -39,11 +39,11 @@ extern BOOL const kAMADefaultAppOpenTrackingEnabled;
 @property (atomic, assign) NSUInteger backgroundSessionTimeout;
 @property (atomic, assign) NSUInteger updateSessionStampInterval;
 
-@property (atomic, assign, readonly) BOOL metricaStarted;
-@property (atomic, assign, readonly) BOOL metricaImplCreated;
+@property (atomic, assign, readonly) BOOL appMetricaStarted;
+@property (atomic, assign, readonly) BOOL appMetricaImplCreated;
 
-- (void)markMetricaStarted;
-- (void)markMetricaImplCreated;
+- (void)markAppMetricaStarted;
+- (void)markAppMetricaImplCreated;
 
 @end
 

@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMAConfigurationDatabaseSchemeMigrationTo11.h"
 #import "FMDB.h"
 

@@ -1,5 +1,5 @@
 
-#import "AMACore.h"
+#import <AppMetricaEncodingUtils/AppMetricaEncodingUtils.h>
 #import "AMADatabaseIntegrityStorageFactory.h"
 #import "AMADatabaseIntegrityStorage.h"
 #import "AMAKeyValueStorageProvidersFactory.h"

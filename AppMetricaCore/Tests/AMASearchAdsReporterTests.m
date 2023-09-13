@@ -93,7 +93,7 @@ describe(@"AMASearchAdsReporter", ^{
                 [reporter reportAttributionSuccessWithInfo:attributionInfo];
                 NSDictionary *parameters = spy.argument;
 
-                [[parameters[@"code"] should] equal:@(AMAAppMetricaEventErrorCodeJsonSerializationError)];
+                [[parameters[@"code"] should] equal:@(AMAAppMetricaInternalEventJsonSerializationError)];
                 [[parameters[@"domain"] should] equal:kAMAAppMetricaErrorDomain];
                 [[parameters[@"data"] should] containString:@"foo = bar"];
             });

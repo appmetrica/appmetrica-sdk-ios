@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMAAttributionMapping.h"
 #import "AMAClientEventCondition.h"
 #import "AMAECommerceEventCondition.h"

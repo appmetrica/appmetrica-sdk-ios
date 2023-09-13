@@ -1,8 +1,6 @@
 
-#import "AMACore.h"
 #import "AMAAttributionChecker.h"
 #import "AMAAttributionModelConfiguration.h"
-#import "AMAECommerce+Internal.h"
 #import "AMAEvent.h"
 #import "AMAMetricaConfiguration.h"
 #import "AMAMetricaPersistentConfiguration.h"
@@ -13,7 +11,6 @@
 #import "AMARevenueInfoModel.h"
 #import "AMARevenueDeduplicator.h"
 #import "AMAReporter.h"
-#import "AMALightECommerceEvent.h"
 #import "AMALightECommerceEventConverter.h"
 #import "AMALightRevenueEventConverter.h"
 #import "AMALightRevenueEvent.h"

@@ -1,7 +1,6 @@
 
-#import "AMACore.h"
-#import "AMADatabaseHelper.h"
 #import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
+#import "AMADatabaseHelper.h"
 #import "FMDB.h"
 
 @implementation AMADatabaseHelper

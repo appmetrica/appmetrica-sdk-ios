@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMAECommerce+Internal.h"
 
 @implementation AMAECommercePayload

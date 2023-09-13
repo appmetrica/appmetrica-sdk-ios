@@ -2,7 +2,6 @@
 #import "AMACore.h"
 #import "AMAAttributionConvertingUtils.h"
 #import "AMAAttributionKeys.h"
-#import "AMAErrorsFactory.h"
 
 NSString *const kAMAAttributionConvertingErrorDomain = @"io.appmetrica.AMAAttributionConverting";
 

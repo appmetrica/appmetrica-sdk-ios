@@ -1,9 +1,7 @@
 
 #import "AMACore.h"
 #import "AMARevenueInfoModelFactory.h"
-
 #import <StoreKit/StoreKit.h>
-
 #import "AMASubscriptionPeriod.h"
 #import "AMATransactionInfoModel.h"
 #import "AMASubscriptionInfoModel.h"

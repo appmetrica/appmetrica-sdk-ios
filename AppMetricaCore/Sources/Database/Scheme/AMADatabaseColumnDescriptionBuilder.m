@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMADatabaseColumnDescriptionBuilder.h"
 
 @interface AMADatabaseColumnDescriptionBuilder ()

@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMAPluginErrorDetails.h"
 #import "AMAStackTraceElement.h"
 

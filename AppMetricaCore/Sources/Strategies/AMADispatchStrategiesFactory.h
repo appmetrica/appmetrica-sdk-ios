@@ -1,6 +1,5 @@
 
 #import <Foundation/Foundation.h>
-
 #import "AMADispatchStrategyMask.h"
 
 @protocol AMADispatchStrategyDelegate;

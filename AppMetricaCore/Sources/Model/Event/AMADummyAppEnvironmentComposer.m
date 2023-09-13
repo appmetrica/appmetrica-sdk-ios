@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMADummyAppEnvironmentComposer.h"
 
 @implementation AMADummyAppEnvironmentComposer

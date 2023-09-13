@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMAMetricaInMemoryConfiguration.h"
 #import <AppMetricaPlatform/AppMetricaPlatform.h>
 
@@ -27,8 +26,8 @@ NSString *const kAMAMetricaLibraryApiKey = @"20799a27-fa80-4b36-b2db-0f8141f2418
 
 @interface AMAMetricaInMemoryConfiguration ()
 
-@property (atomic, assign, readwrite) BOOL metricaStarted;
-@property (atomic, assign, readwrite) BOOL metricaImplCreated;
+@property (atomic, assign, readwrite) BOOL appMetricaStarted;
+@property (atomic, assign, readwrite) BOOL appMetricaImplCreated;
 
 @end
 
@@ -66,14 +65,14 @@ NSString *const kAMAMetricaLibraryApiKey = @"20799a27-fa80-4b36-b2db-0f8141f2418
     return _appBuildUID;
 }
 
-- (void)markMetricaStarted
+- (void)markAppMetricaStarted
 {
-    self.metricaStarted = YES;
+    self.appMetricaStarted = YES;
 }
 
-- (void)markMetricaImplCreated
+- (void)markAppMetricaImplCreated
 {
-    self.metricaImplCreated = YES;
+    self.appMetricaImplCreated = YES;
 }
 
 @end

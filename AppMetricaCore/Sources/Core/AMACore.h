@@ -28,9 +28,5 @@
 
 #import "AMATime.h"
 #import <AppMetricaLog/AppMetricaLog.h>
-#import <AppMetricaNetwork/AppMetricaNetwork.h>
 #import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
-#import <AppMetricaHostState/AppMetricaHostState.h>
-#import <AppMetricaStorageUtils/AppMetricaStorageUtils.h>
 #import "AppMetricaCoreExtension.h"
-#import <AppMetricaEncodingUtils/AppMetricaEncodingUtils.h>

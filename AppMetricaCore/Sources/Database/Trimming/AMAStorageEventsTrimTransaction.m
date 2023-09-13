@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMAStorageEventsTrimTransaction.h"
 #import "AMAEventTypes.h"
 #import "AMADatabaseProtocol.h"

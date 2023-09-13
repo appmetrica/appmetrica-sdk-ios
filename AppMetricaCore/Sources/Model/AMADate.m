@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMADate.h"
 
 @implementation AMADate

@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMAVisit.h"
 
 @implementation AMAVisit

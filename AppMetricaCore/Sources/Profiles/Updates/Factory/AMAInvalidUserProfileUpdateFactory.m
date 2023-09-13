@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMAInvalidUserProfileUpdateFactory.h"
 #import "AMAUserProfileUpdate.h"
 #import "AMAProhibitingAttributeUpdateValidator.h"

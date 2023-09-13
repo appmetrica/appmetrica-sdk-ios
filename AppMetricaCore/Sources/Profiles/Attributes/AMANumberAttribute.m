@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMANumberAttribute.h"
 #import "AMAAttributeUpdate.h"
 #import "AMANumberAttributeValueUpdate.h"

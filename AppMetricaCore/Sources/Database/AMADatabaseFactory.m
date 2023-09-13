@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMADatabaseFactory.h"
 #import "AMADatabase.h"
 #import "AMADatabaseConstants.h"
@@ -55,7 +54,7 @@
 //12 - move reportsURL into reportHosts
 //13 - add location_enabled to events
 //14 - add user_profile_id to events
-//15 - add encryption_type to events, fix identity file path
+//15 - add encryption_type to events
 //16 - add session_id and attribution_id to sessions, add first_occurrence to events
 //17 - add startup.had.first to kv
 //18 - add global_number and number_of_type to events
@@ -261,7 +260,6 @@ static NSUInteger const kAMALocationDatabaseSchemaVersion = 2;
 
 + (id<AMAKeyValueStorageDataProviding>)backingDataProviderWithSuiteNamePostfix:(NSString *)suiteNamePostfix
 {
-    //TODO: Migration
     NSString *suiteName = [@"io.appmetrica." stringByAppendingString:suiteNamePostfix];
     NSUserDefaults *defaults = [[NSUserDefaults alloc] initWithSuiteName:suiteName];
     return [[AMAUserDefaultsKVSDataProvider alloc] initWithUserDefaults:defaults];

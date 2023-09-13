@@ -1,5 +1,5 @@
+
 #import <Kiwi/Kiwi.h>
-#import "AMACore.h"
 #import "AMAAppMetrica.h"
 #import "AMARevenueInfoModelFormatter.h"
 #import "AMARevenueInfoMutableModel.h"
@@ -211,7 +211,7 @@ describe(@"AMARevenueInfoModelFormatter", ^{
             });
             it(@"Should return model with truncated value", ^{
                 NSData *expectedReceiptData =
-                    [@"<truncated data was not sent, see https://nda.ya.ru/t/40z6Prmt6fHZXq>" dataUsingEncoding:NSUTF8StringEncoding];
+                    [@"<truncated data was not sent, exceeded the limit of 180kb>" dataUsingEncoding:NSUTF8StringEncoding];
                 [[[formatter formattedRevenueModel:revenueInfoModel error:nil].receiptData should] equal:expectedReceiptData];
             });
             it(@"Should not fill error", ^{

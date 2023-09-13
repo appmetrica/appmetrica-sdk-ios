@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMARevenueInfo.h"
 
 static NSUInteger const kAMARevenueInfoDefaultQuantity = 1;

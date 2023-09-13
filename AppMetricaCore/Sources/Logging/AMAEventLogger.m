@@ -1,9 +1,7 @@
 
-#import "AMACore.h"
 #import "AMAEventLogger.h"
 #import "AMAEvent.h"
-#import "AMAMetricaConfiguration.h"
-#import "AMAReporterConfiguration.h"
+#import "AMACore.h"
 
 static NSUInteger const kAMAEventLogAPIKeyPrefixLength = 8;
 static NSUInteger const kAMAEventLogAPIKeySuffixLength = 4;

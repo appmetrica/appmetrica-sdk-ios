@@ -1,7 +1,6 @@
 
 #import "AMAMetricaConfigurationTestUtilities.h"
 #import "AMAMockDatabase.h"
-#import "AMACore.h"
 #import "AMAKeychainBridgeMock.h"
 #import <Kiwi/Kiwi.h>
 #import "AMAInstantFeaturesConfiguration.h"

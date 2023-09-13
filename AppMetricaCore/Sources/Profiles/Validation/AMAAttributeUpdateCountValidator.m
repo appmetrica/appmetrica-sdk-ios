@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMAAttributeUpdateCountValidator.h"
 #import "AMAUserProfileLogger.h"
 #import "AMAUserProfileModel.h"

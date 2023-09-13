@@ -1,6 +1,6 @@
 
-#import "AMACore.h"
 #import <AppMetricaStorageUtils/AppMetricaStorageUtils.h>
+#import <AppMetricaPlatform/AppMetricaPlatform.h>
 #import "AMAMetricaConfiguration.h"
 #import "AMAMetricaInMemoryConfiguration.h"
 #import "AMAInstantFeaturesConfiguration.h"
@@ -12,7 +12,6 @@
 #import "AMAFallbackKeychain.h"
 #import "AMAKeychain.h"
 #import "AMAKeychainBridge.h"
-#import <AppMetricaPlatform/AppMetricaPlatform.h>
 
 // Keychain identifiers
 // Declared without `static` keywords (e.g. extern by default) in order to be used in Sample Application

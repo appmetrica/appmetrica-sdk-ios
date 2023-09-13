@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMAReportEventsBatch.h"
 
 @implementation AMAReportEventsBatch

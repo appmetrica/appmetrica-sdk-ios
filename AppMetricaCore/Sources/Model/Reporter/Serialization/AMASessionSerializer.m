@@ -7,7 +7,6 @@
 #import "AMADate.h"
 #import "SessionData.pb-c.h"
 #import "AMAReporterDatabaseEncodersFactory.h"
-#import "AMAErrorsFactory.h"
 #import "AMATypeSafeDictionaryHelper.h"
 #import <AppMetricaProtobufUtils/AppMetricaProtobufUtils.h>
 
@@ -30,7 +29,7 @@
     return self;
 }
 
-#pragma mark - Serialization
+#pragma mark - Serialization -
 
 - (NSDictionary *)dictionaryForSession:(AMASession *)session error:(NSError **)error
 {

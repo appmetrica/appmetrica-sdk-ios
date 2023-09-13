@@ -1,6 +1,5 @@
 
 #import <Kiwi/Kiwi.h>
-#import "AMACore.h"
 #import "AMAStartupRequest.h"
 #import "AMAIdentifiersTestUtilities.h"
 #import "AMAStartupClientIdentifierFactory.h"
@@ -54,6 +53,8 @@ describe(@"AMAStartupRequest", ^{
                                                       @"wrng": @7,
                                                       @"features": @"ab,eg,sp,ab"};
             NSDictionary *secondExtendedParatemers = @{@"sp": @"0",
+                                                       @"": @"empty",
+                                                       @"empty": @"",
                                                        @"wrongDict": @{},
                                                        @"wrongArray": @[],
                                                        @19: @"qwe",
@@ -80,6 +81,8 @@ describe(@"AMAStartupRequest", ^{
             [[keys shouldNot] contain:@"wrongDict"];
             [[keys shouldNot] contain:@"wrongArray"];
             [[keys shouldNot] contain:@19];
+            [[keys shouldNot] contain:@""];
+            [[keys shouldNot] contain:@"empty"];
         });
     });
 });

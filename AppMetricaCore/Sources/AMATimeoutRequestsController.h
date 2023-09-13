@@ -1,6 +1,5 @@
 
 #import <Foundation/Foundation.h>
-
 #import "AMAPersistentTimeoutConfiguration.h"
 
 @protocol AMAResettableIterable;

@@ -2,7 +2,6 @@
 #import <UIKit/UIKit.h>
 #import <Kiwi/Kiwi.h>
 #import <AppMetricaStorageUtils/AppMetricaStorageUtils.h>
-#import "AMACore.h"
 #import "AMAMetricaPersistentConfiguration.h"
 #import "AMAMetricaInMemoryConfiguration.h"
 #import "AMAMockDatabase.h"

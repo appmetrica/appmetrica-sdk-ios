@@ -1,10 +1,9 @@
 
-#import "AMACore.h"
+#import <AppMetricaStorageUtils/AppMetricaStorageUtils.h>
 #import "AMAMigrationUtils.h"
 #import "AMAStorageKeys.h"
 #import "AMADatabaseProtocol.h"
 #import "AMAOptionalBool.h"
-#import <AppMetricaStorageUtils/AppMetricaStorageUtils.h>
 #import "FMDB.h"
 
 @implementation AMAMigrationUtils

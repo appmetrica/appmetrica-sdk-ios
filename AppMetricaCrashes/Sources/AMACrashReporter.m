@@ -426,13 +426,4 @@ NSString *const kAMABackgroundUnhandedExceptionReason = @"Detected probable unha
     }
 }
 
-#pragma mark - AMAInstantFeaturesObserver
-
-//- (void)instantFeaturesConfigurationDidUpdate:(AMAInstantFeaturesConfiguration *)configuration
-//{
-//    if (configuration.dynamicLibraryCrashHookEnabled) {
-//        [self.crashLoader enableSwapOfCxaThrow];
-//    }
-//}
-
 @end

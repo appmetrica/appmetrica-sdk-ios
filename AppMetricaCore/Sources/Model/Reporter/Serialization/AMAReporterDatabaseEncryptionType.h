@@ -7,7 +7,6 @@ typedef NS_ENUM(NSUInteger, AMAReporterDatabaseEncryptionType) {
     AMAReporterDatabaseEncryptionTypeAES = 0,
 
     // AES-128 encryption with GZip compression
-    //TODO: io.appmetrica.sdk?
     // The key is af9dca1be79a4197a04b42242850c6c2 (hex), iv is md5(bundleID ?: "io.appmetrica.sdk")
     AMAReporterDatabaseEncryptionTypeGZipAES = 1,
 };

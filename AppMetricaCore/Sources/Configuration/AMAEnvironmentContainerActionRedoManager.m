@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMAEnvironmentContainerActionRedoManager.h"
 #import "AMAEnvironmentContainerActionHistory.h"
 #import "AMAEnvironmentContainer.h"

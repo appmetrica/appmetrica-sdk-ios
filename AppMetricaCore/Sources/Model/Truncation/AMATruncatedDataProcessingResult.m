@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMATruncatedDataProcessingResult.h"
 
 @implementation AMATruncatedDataProcessingResult

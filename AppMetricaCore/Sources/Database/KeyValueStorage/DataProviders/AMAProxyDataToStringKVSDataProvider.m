@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMAProxyDataToStringKVSDataProvider.h"
 
 @interface AMAProxyDataToStringKVSDataProvider()

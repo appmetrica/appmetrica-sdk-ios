@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMAReporterStorage.h"
 #import "AMADatabaseFactory.h"
 #import "AMADatabaseProtocol.h"

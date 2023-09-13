@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMAAttributeNameProvider.h"
 
 NSString *const kAMAAttributeNameProviderPredefinedAttributePrefix = @"appmetrica";

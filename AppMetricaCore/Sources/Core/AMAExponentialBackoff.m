@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMAExponentialBackoff.h"
 
 static NSInteger const kAMAExponentialBackoffMaxRetryCount = 31;

@@ -5,9 +5,7 @@
 #import "AMAStorageKeys.h"
 #import "AMAKeychainStoring.h"
 #import "AMAPersistentTimeoutConfiguration.h"
-#import "AMAMetricaInMemoryConfiguration.h"
 #import "AMAAttributionModelConfiguration.h"
-#import <UIKit/UIKit.h>
 
 NSString *const kAMADeviceIDStorageKey = @"AMAMetricaPersistentConfigurationDeviceIDStorageKey";
 NSString *const kAMADeviceIDHashStorageKey = @"AMAMetricaPersistentConfigurationDeviceIDHashStorageKey";

@@ -486,20 +486,6 @@ describe(@"AMAStartupParametersConfiguration", ^{
                 configuration.permissionsCollectingEnabled = value.boolValue;
             });
         });
-        context(@"dynamicLibraryCrashHookEnabled", ^{
-            NSString *const key = @"libs.dynamic.hook.enabled";
-            it(@"Should return valid value", ^{
-                [[theValue(configuration.dynamicLibraryCrashHookEnabled) should] beYes];
-            });
-            it(@"Should return NO by default", ^{
-                [storage stub:@selector(boolNumberForKey:error:) andReturn:nil];
-                [[theValue(configuration.dynamicLibraryCrashHookEnabled) should] beNo];
-            });
-            it(@"Should save valid value", ^{
-                [[storage should] receive:@selector(saveBoolNumber:forKey:error:) withArguments:value, key, kw_any()];
-                configuration.dynamicLibraryCrashHookEnabled = value.boolValue;
-            });
-        });
     });
 
     context(@"String values", ^{

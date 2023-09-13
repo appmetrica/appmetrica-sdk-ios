@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMALocation.h"
 
 @implementation AMALocation

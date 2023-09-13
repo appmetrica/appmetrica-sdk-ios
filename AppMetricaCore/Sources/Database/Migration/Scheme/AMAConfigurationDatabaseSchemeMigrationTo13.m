@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMAConfigurationDatabaseSchemeMigrationTo13.h"
 #import "AMAMigrationUtils.h"
 

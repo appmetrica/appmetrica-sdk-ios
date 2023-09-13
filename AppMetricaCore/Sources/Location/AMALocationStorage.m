@@ -1,5 +1,5 @@
 
-#import "AMACore.h"
+#import <AppMetricaEncodingUtils/AppMetricaEncodingUtils.h>
 #import <AppMetricaStorageUtils/AppMetricaStorageUtils.h>
 #import "AMALocationStorage.h"
 #import "AMALocationCollectingConfiguration.h"

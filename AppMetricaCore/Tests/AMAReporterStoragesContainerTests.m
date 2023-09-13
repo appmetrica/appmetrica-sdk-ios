@@ -4,7 +4,6 @@
 #import "AMAEnvironmentContainer.h"
 #import "AMAReporterStorage.h"
 #import "AMAMetricaConfiguration.h"
-#import "AMACore.h"
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
 
 SPEC_BEGIN(AMAReporterStoragesContainerTests)

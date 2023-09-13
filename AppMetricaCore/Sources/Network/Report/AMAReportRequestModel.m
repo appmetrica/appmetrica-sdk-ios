@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import <AppMetricaPlatform/AppMetricaPlatform.h>
 #import "AMAReportRequestModel.h"
 #import "AMAReportEventsBatch.h"

@@ -1,6 +1,6 @@
 
 #import <Foundation/Foundation.h>
-#import "AMACore.h"
+#import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
 
 @interface AMAHostProviderMock : NSObject <AMAResettableIterable>
 

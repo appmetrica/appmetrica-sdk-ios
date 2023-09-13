@@ -13,7 +13,6 @@
 @class AMAECommerce;
 @class AMAAppMetricaConfiguration;
 @class AMACustomEventParameters;
-
 @protocol AMAExecuting;
 @protocol AMAStartupCompletionObserving;
 @protocol AMAAppMetricaReporting;
@@ -96,8 +95,8 @@ NS_ASSUME_NONNULL_BEGIN
 #endif
 - (void)reportUrl:(NSURL *)url ofType:(NSString *)type isAuto:(BOOL)isAuto;
 
-- (void)setExtendedStartupObservers:(NSMutableSet<id<AMAExtendedStartupObserving>> *)observers;
-- (void)setExtendedReporterStorageControllers:(NSMutableSet<id<AMAReporterStorageControlling>> *)controllers;
+- (void)setExtendedStartupObservers:(NSSet<id<AMAExtendedStartupObserving>> *)observers;
+- (void)setExtendedReporterStorageControllers:(NSSet<id<AMAReporterStorageControlling>> *)controllers;
 
 @end
 

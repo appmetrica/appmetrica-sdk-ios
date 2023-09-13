@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMADatabaseObjectProvider.h"
 #import "FMDB.h"
 

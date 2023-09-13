@@ -1,38 +1,26 @@
 
-#import <AppMetricaWebKit/AppMetricaWebKit.h>
 #import <Kiwi/Kiwi.h>
+#import <AppMetricaWebKit/AppMetricaWebKit.h>
+#import <AppMetricaPlatform/AppMetricaPlatform.h>
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
 #import "AMAReporter.h"
-#import "AMAMetricaInMemoryConfiguration.h"
-#import "AMAAppMetrica+Internal.h"
 #import "AMAAppMetricaImplTestFactory.h"
 #import "AMAAppMetrica+TestUtilities.h"
-#import "AMADispatchStrategiesContainer.h"
-#import "AMADispatchStrategy+Private.h"
 #import "AMALocationManager.h"
 #import "AMATestNetwork.h"
 #import "AMAAppStateManagerTestHelper.h"
-#import "AMADispatchStrategyMask.h"
 #import "AMAMetricaConfigurationTestUtilities.h"
-#import "AMAAppMetricaConfiguration+Extended.h"
-#import "AMAEventBuilder.h"
 #import "AMAFailureDispatcherTestHelper.h"
 #import "AMAStartupItemsChangedNotifier+Tests.h"
-#import "AMADeepLinkController.h"
-#import "AMAStartupController.h"
 #import "AMAInternalEventsReporter.h"
-#import "AMAUserProfile.h"
-#import "AMAProfileAttribute.h"
-#import "AMARevenueInfo.h"
-#import "AMAAdRevenueInfo.h"
 #import "AMAStartupHostProvider.h"
 #import "AMAReporterTestHelper.h"
-#import "AMAReporterStorage.h"
-#import "AMAReporterStateStorage.h"
 #import "AMATimeoutRequestsController.h"
 #import "AMAUUIDProvider.h"
 #import "AMAStartupResponseParser.h"
 #import "AMAAppMetricaPluginsImpl.h"
+#import "AMAAdProvider.h"
+#import "AMADataSendingRestrictionController.h"
 
 @interface AMAAppMetricaImpl () <AMAStartupControllerDelegate>
 
@@ -48,7 +36,8 @@ describe(@"AMAAppMetrica", ^{
     
     AMAAppStateManagerTestHelper *__block stateHelper = nil;
     AMAReporterTestHelper *__block reporterTestHelper = nil;
-    AMAAppMetricaImpl * __block impl = nil;
+    AMAAppMetricaImpl *__block impl = nil;
+    AMAAdProvider *__block adProvider = nil;
     
     beforeEach(^{
         [AMATestNetwork stubHTTPRequestWithBlock:nil];
@@ -59,6 +48,8 @@ describe(@"AMAAppMetrica", ^{
         stateHelper = [[AMAAppStateManagerTestHelper alloc] init];
         [stateHelper stubApplicationState];
         [AMAFailureDispatcherTestHelper stubFailureDispatcher];
+        adProvider = [AMAAdProvider nullMock];
+        [AMAAdProvider stub:@selector(sharedInstance) andReturn:adProvider];
     };
     void (^stubMetrica)(void) = ^{
         stubMetricaDependencies();
@@ -95,13 +86,71 @@ describe(@"AMAAppMetrica", ^{
     void (^activate)(void) = ^{
         [AMAAppMetrica activateWithConfiguration:[[AMAAppMetricaConfiguration alloc] initWithApiKey:apiKey]];
     };
-    context(@"Sets location", ^{
+    void (^stubMetricaStarted)(BOOL) = ^(BOOL started) {
+        [[AMAMetricaConfiguration sharedInstance].inMemory stub:@selector(appMetricaStarted)
+                                                      andReturn:theValue(started)];
+    };
+    
+    context(@"Handling Invalid APIKey", ^{
+        __block AMATestAssertionHandler *handler = nil;
+        beforeEach(^{
+            stubMetrica();
+            handler = [AMATestAssertionHandler new];
+            [handler beginAssertIgnoring];
+        });
+        afterEach(^{
+            [handler endAssertIgnoring];
+        });
+        
+        it(@"Should not activate if APIKey is not valid", ^{
+            [[impl shouldNot] receive:@selector(activateWithConfiguration:)];
+            
+            [AMAAppMetrica activateWithConfiguration:[[AMAAppMetricaConfiguration alloc] initWithApiKey:@"---"]];
+        });
+        it(@"Should not activate if APIKey is not valid", ^{
+            stubMetricaStarted(YES);
+            [[impl shouldNot] receive:@selector(activateWithConfiguration:)];
+            
+            activate();
+        });
+        it(@"Should not activate if reporter is created for api key", ^{
+            [AMAAppMetrica stub:@selector(isReporterCreatedForAPIKey:) andReturn:theValue(YES)];
+            [[impl shouldNot] receive:@selector(activateWithConfiguration:)];
+            
+            activate();
+        });
+    });
+    context(@"Location Manager", ^{
         it(@"Should set location to location manager", ^{
             stubMetrica();
             CLLocation *location = [[CLLocation alloc] initWithLatitude:11.0 longitude:12.0];
             [AMAAppMetrica setLocation:location];
             AMALocationManager *locationManager = [AMALocationManager sharedManager];
             [[theValue([location test_isEqualToLocation:[locationManager currentLocation]]) should] beYes];
+        });
+        
+        it(@"Should set location tracking enabled", ^{
+            AMALocationManager *locationManager = [AMALocationManager sharedManager];
+            [[locationManager should] receive:@selector(setTrackLocationEnabled:)
+                                withArguments:theValue(YES)];
+            
+            [AMAAppMetrica setLocationTracking:YES];
+        });
+        
+        it(@"Should set accurate location tracking enabled", ^{
+            AMALocationManager *locationManager = [AMALocationManager sharedManager];
+            [[locationManager should] receive:@selector(setAccurateLocationEnabled:)
+                                withArguments:theValue(YES)];
+            
+            [AMAAppMetrica setAccurateLocationTracking:YES];
+        });
+        
+        it(@"Should set allows background location updates", ^{
+            AMALocationManager *locationManager = [AMALocationManager sharedManager];
+            [[locationManager should] receive:@selector(setAllowsBackgroundLocationUpdates:)
+                                withArguments:theValue(YES)];
+            
+            [AMAAppMetrica setAllowsBackgroundLocationUpdates:YES];
         });
     });
     context(@"Set UserProfile ID", ^{
@@ -238,7 +287,8 @@ describe(@"AMAAppMetrica", ^{
         });
         it(@"Should call impl with URL of type \"open\"", ^{
             activate();
-            [[mockedImpl should] receive:@selector(reportUrl:ofType:isAuto:) withArguments:URL, @"open", theValue(NO)];
+            [[mockedImpl should] receive:@selector(reportUrl:ofType:isAuto:)
+                           withArguments:URL, @"open", theValue(NO)];
             [AMAAppMetrica handleOpenURL:URL];
         });
     });
@@ -252,28 +302,43 @@ describe(@"AMAAppMetrica", ^{
         });
         it(@"Should not call impl if metrica is not started", ^{
             [[mockedImpl shouldNot] receive:@selector(reportUrl:ofType:isAuto:)];
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+            
             [AMAAppMetrica reportReferralUrl:url];
-#pragma clang diagnostic pop
         });
         it(@"Should call impl with URL of type \"referral\"", ^{
             activate();
-            [[mockedImpl should] receive:@selector(reportUrl:ofType:isAuto:) withArguments:url, @"referral", theValue(NO)];
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+            [[mockedImpl should] receive:@selector(reportUrl:ofType:isAuto:)
+                           withArguments:url, @"referral", theValue(NO)];
+            
             [AMAAppMetrica reportReferralUrl:url];
-#pragma clang diagnostic pop
         });
     });
     
-    context(@"User info", ^{
-        NSString *userID = @"0834hvbiudvhepjoavhisg98ygerpihvh98ends";
+    context(@"Public", ^{
         beforeEach(^{
             stubMetrica();
         });
         
-        
+        context(@"Should set data sending enabled", ^{
+            AMADataSendingRestrictionController *__block restrictionController = nil;
+            
+            beforeEach(^{
+                restrictionController = [AMADataSendingRestrictionController stubbedNullMockForDefaultInit];
+                [AMADataSendingRestrictionController stub:@selector(sharedInstance) andReturn:restrictionController];
+            });
+            
+            it(@"Should set allowed restriction", ^{
+                [[restrictionController should] receive:@selector(setMainApiKeyRestriction:) withArguments:theValue(AMADataSendingRestrictionAllowed)];
+                
+                [AMAAppMetrica setDataSendingEnabled:YES];
+            });
+            
+            it(@"Should set forbidden restriction", ^{
+                [[restrictionController should] receive:@selector(setMainApiKeyRestriction:) withArguments:theValue(AMADataSendingRestrictionForbidden)];
+                
+                [AMAAppMetrica setDataSendingEnabled:NO];
+            });
+        });
         
         context(@"When Metrica started", ^{
             
@@ -313,12 +378,11 @@ describe(@"AMAAppMetrica", ^{
                 [[AMAAppMetrica sharedImpl] addStartupCompletionObserver:identifierChangedNotifier];
                 [[AMAAppMetrica sharedImpl] stub:@selector(startupItemsNotifier)
                                           andReturn:identifierChangedNotifier];
-                [[AMAMetricaConfiguration sharedInstance].inMemory stub:@selector(metricaStarted)
-                                                              andReturn:theValue(YES)];
+                stubMetricaStarted(YES);
             });
             it(@"Should pass provided queue", ^{
                 [AMAAppMetrica requestStartupIdentifiersWithCompletionQueue:providedQueue
-                                                               completionBlock:^(NSDictionary *identifiers, NSError *error) {
+                                                            completionBlock:^(NSDictionary *identifiers, NSError *error) {
                     //do nothing
                 }];
                 
@@ -332,10 +396,10 @@ describe(@"AMAAppMetrica", ^{
                 NSError *(^errorFromReporting)(void) = ^NSError * {
                     NSError *__block resultError = nil;
                     [AMAAppMetrica reportEventWithType:0
-                                                     name:@""
-                                                    value:@""
-                                              environment:@{}
-                                                onFailure:^(NSError *error) {
+                                                  name:@""
+                                                 value:@""
+                                           environment:@{}
+                                             onFailure:^(NSError *error) {
                         resultError = error;
                     }];
                     return resultError;
@@ -348,77 +412,168 @@ describe(@"AMAAppMetrica", ^{
                     [[theValue(errorFromReporting().code) should] equal:theValue(AMAAppMetricaEventErrorCodeInitializationError)];
                 });
             });
-            context(@"Activated Metrica", ^{
+            context(@"Event with type", ^{
+                NSUInteger const eventType = 1234;
+                NSString *const eventName = @"name";
+                NSString *const eventValue = @"value";
+                NSDictionary *const environment = @{ @"a": @"b" };
+                
                 it(@"Should report event with custom type", ^{
                     activate();
-                    
-                    NSUInteger eventType = 1234;
-                    NSString *eventName = @"name";
-                    NSString *eventValue = @"value";
-                    NSDictionary *environment = @{ @"a": @"b" };
                     AMAReporter *reporter = reporterTestHelper.appReporter;
                     [[reporter should] receive:@selector(reportEventWithType:name:value:environment:extras:onFailure:)
                                  withArguments:theValue(eventType), eventName, eventValue, environment, nil, nil];
                     [AMAAppMetrica reportEventWithType:eventType
-                                                     name:eventName
-                                                    value:eventValue
-                                              environment:environment
-                                                onFailure:nil];
+                                                  name:eventName
+                                                 value:eventValue
+                                           environment:environment
+                                             onFailure:nil];
+                });
+                
+                
+                it(@"Should not report event with custom type if metrica is not activated", ^{
+                    AMAReporter *reporter = reporterTestHelper.appReporter;
+                    [[reporter shouldNot] receive:@selector(reportEventWithType:name:value:environment:extras:onFailure:)];
+                    [AMAAppMetrica reportEventWithType:eventType
+                                                  name:eventName
+                                                 value:eventValue
+                                           environment:environment
+                                             onFailure:nil];
                 });
             });
         });
         context(@"Profile event type", ^{
+            AMAUserProfile *__block profile = nil;
+            
             beforeEach(^{
-                [[AMAMetricaConfiguration sharedInstance].inMemory stub:@selector(metricaStarted)
-                                                              andReturn:theValue(YES)];
+                stubMetricaStarted(YES);
+                profile = [AMAUserProfile nullMock];
+                [profile stub:@selector(copy) andReturn:profile];
             });
             it(@"Should report event", ^{
-                AMAUserProfile *profile = [AMAUserProfile nullMock];
-                [profile stub:@selector(copy) andReturn:profile];
                 [[impl should] receive:@selector(reportUserProfile:onFailure:)
                          withArguments:profile, nil];
+                
+                [AMAAppMetrica reportUserProfile:profile onFailure:nil];
+            });
+            
+            it(@"Should not report event if metrica is not started", ^{
+                stubMetricaStarted(NO);
+                
+                [[impl shouldNot] receive:@selector(reportUserProfile:onFailure:)];
+                
                 [AMAAppMetrica reportUserProfile:profile onFailure:nil];
             });
         });
         context(@"Revenue event type", ^{
+            AMARevenueInfo *__block revenueInfo = nil;
+            
             beforeEach(^{
-                [[AMAMetricaConfiguration sharedInstance].inMemory stub:@selector(metricaStarted)
-                                                              andReturn:theValue(YES)];
+                stubMetricaStarted(YES);
+                revenueInfo = [AMARevenueInfo nullMock];
+                [revenueInfo stub:@selector(copy) andReturn:revenueInfo];
             });
             it(@"Should report event", ^{
-                AMARevenueInfo *revenueInfo = [AMARevenueInfo nullMock];
-                [revenueInfo stub:@selector(copy) andReturn:revenueInfo];
                 [[impl should] receive:@selector(reportRevenue:onFailure:)
                          withArguments:revenueInfo, nil];
+                
+                [AMAAppMetrica reportRevenue:revenueInfo onFailure:nil];
+            });
+            
+            it(@"Should not report event if metrica is not started", ^{
+                stubMetricaStarted(NO);
+                
+                [[impl shouldNot] receive:@selector(reportRevenue:onFailure:)];
+                
                 [AMAAppMetrica reportRevenue:revenueInfo onFailure:nil];
             });
         });
+        context(@"Ecommerce event type", ^{
+            AMAECommerce *__block ecommerce = nil;
+            
+            beforeEach(^{
+                stubMetricaStarted(YES);
+                ecommerce = [AMAECommerce nullMock];
+                [ecommerce stub:@selector(copy) andReturn:ecommerce];
+            });
+            it(@"Should report event", ^{
+                [[impl should] receive:@selector(reportECommerce:onFailure:)
+                         withArguments:ecommerce, nil];
+                
+                [AMAAppMetrica reportECommerce:ecommerce onFailure:nil];
+            });
+            
+            it(@"Should not report event if metrica is not started", ^{
+                stubMetricaStarted(NO);
+                
+                [[impl shouldNot] receive:@selector(reportECommerce:onFailure:)];
+                
+                [AMAAppMetrica reportECommerce:ecommerce onFailure:nil];
+            });
+        });
         context(@"AdRevenue event type", ^{
-            it(@"Should report event if metrica is started", ^{
-                [[AMAMetricaConfiguration sharedInstance].inMemory stub:@selector(metricaStarted)
-                                                              andReturn:theValue(YES)];
-                AMAAdRevenueInfo *adRevenueInfo = [AMAAdRevenueInfo nullMock];
+            AMAAdRevenueInfo *__block adRevenueInfo = nil;
+            
+            beforeEach(^{
+                stubMetricaStarted(YES);
+                adRevenueInfo = [AMAAdRevenueInfo nullMock];
                 [adRevenueInfo stub:@selector(copy) andReturn:adRevenueInfo];
+            });
+            
+            it(@"Should report event if metrica is started", ^{
                 [[impl should] receive:@selector(reportAdRevenue:onFailure:)
                          withArguments:adRevenueInfo, nil];
+                
                 [AMAAppMetrica reportAdRevenue:adRevenueInfo onFailure:nil];
             });
             it(@"Should not report event if metrica is not started", ^{
-                [[AMAMetricaConfiguration sharedInstance].inMemory stub:@selector(metricaStarted)
-                                                              andReturn:theValue(NO)];
-                AMAAdRevenueInfo *adRevenueInfo = [AMAAdRevenueInfo nullMock];
-                [adRevenueInfo stub:@selector(copy) andReturn:adRevenueInfo];
+                stubMetricaStarted(NO);
+                
                 [[impl shouldNot] receive:@selector(reportAdRevenue:onFailure:)];
+                
                 [AMAAppMetrica reportAdRevenue:adRevenueInfo onFailure:nil];
             });
         });
+        context(@"Should report event", ^{
+            NSString *const message = @"msg";
+            NSDictionary *const parameters = @{@"key": @"value"};
+            
+            beforeEach(^{
+                stubMetricaStarted(YES);
+            });
+            
+            it(@"Should call report event with parameters", ^{
+                [[AMAAppMetrica should] receive:@selector(reportEvent:parameters:onFailure:)
+                         withArguments:message, nil, kw_any()];
+                
+                [AMAAppMetrica reportEvent:message onFailure:nil];
+            });
+            
+            it(@"Should report event if metrica is started", ^{
+                [[impl should] receive:@selector(reportEvent:parameters:onFailure:)
+                         withArguments:message, parameters, kw_any()];
+                
+                [AMAAppMetrica reportEvent:message parameters:parameters onFailure:nil];
+            });
+            it(@"Should not report event if metrica is not started", ^{
+                stubMetricaStarted(NO);
+                
+                [[impl shouldNot] receive:@selector(reportEvent:parameters:onFailure:)];
+                
+                [AMAAppMetrica reportEvent:message parameters:parameters onFailure:nil];
+            });
+        });
         context(@"Init web view reporting", ^{
-            it(@"Should init", ^{
-                [[AMAMetricaConfiguration sharedInstance].inMemory stub:@selector(metricaStarted)
-                                                              andReturn:theValue(YES)];
+            AMAJSController *__block jsController = nil;
+            
+            beforeEach(^{
+                stubMetricaStarted(YES);
+                
                 WKUserContentController *controller = [WKUserContentController nullMock];
-                AMAJSController *jsController = [[AMAJSController alloc] initWithUserContentController:controller];
-
+                jsController = [[AMAJSController alloc] initWithUserContentController:controller];
+            });
+            
+            it(@"Should init", ^{
                 [[impl should] receive:@selector(setupWebViewReporting:)
                          withArguments:jsController];
 
@@ -426,10 +581,7 @@ describe(@"AMAAppMetrica", ^{
                                               onFailure:nil];
             });
             it(@"Should not init if metrica is not started", ^{
-                [[AMAMetricaConfiguration sharedInstance].inMemory stub:@selector(metricaStarted)
-                                                              andReturn:theValue(NO)];
-                WKUserContentController *controller = [WKUserContentController nullMock];
-                AMAJSController *jsController = [[AMAJSController alloc] initWithUserContentController:controller];
+                stubMetricaStarted(NO);
 
                 [[impl shouldNot] receive:@selector(setupWebViewReporting:)];
 
@@ -467,8 +619,7 @@ describe(@"AMAAppMetrica", ^{
                 stubMetrica();
                 UUIDProvider = [AMAUUIDProvider nullMock];
                 [AMAUUIDProvider stub:@selector(sharedInstance) andReturn:UUIDProvider];
-                [[AMAMetricaConfiguration sharedInstance].inMemory stub:@selector(metricaStarted)
-                                                              andReturn:theValue(YES)];
+                stubMetricaStarted(YES);
             });
             
             context(@"No identifiers", ^{
@@ -579,10 +730,19 @@ describe(@"AMAAppMetrica", ^{
             context(@"Sends events", ^{
                 beforeEach(^{
                     stubMetrica();
-                    [[AMAMetricaConfiguration sharedInstance].inMemory markMetricaStarted];
+                    stubMetricaStarted(YES);
                 });
-                it(@"Should invoke delegates sendEventsBuffer method", ^{
+                it(@"Should sendEventsBuffer if metrica is started", ^{
                     [[impl should] receive:@selector(sendEventsBuffer)];
+                    
+                    [AMAAppMetrica sendEventsBuffer];
+                });
+                
+                it(@"Should not sendEventsBuffer if metrica is started", ^{
+                    stubMetricaStarted(NO);
+                    
+                    [[impl shouldNot] receive:@selector(sendEventsBuffer)];
+                    
                     [AMAAppMetrica sendEventsBuffer];
                 });
             });
@@ -607,8 +767,7 @@ describe(@"AMAAppMetrica", ^{
             });
             context(@"After activation", ^{
                 beforeEach(^{
-                    [[AMAMetricaConfiguration sharedInstance].inMemory stub:@selector(metricaStarted)
-                                                                  andReturn:theValue(YES)];
+                    stubMetricaStarted(YES);
                 });
                 context(@"Auto tracking enabled", ^{
                     beforeEach(^{
@@ -642,9 +801,190 @@ describe(@"AMAAppMetrica", ^{
                         [AMAAppMetrica resumeSession];
                     });
                 });
+                
+                it(@"Should return library version", ^{
+                    NSString *version = @"11.22.63";
+                    [AMAPlatformDescription stub:@selector(SDKVersionName) andReturn:version];
+                    
+                    [[[AMAAppMetrica libraryVersion] should] equal:version];
+                });
+                
+                context(@"Environment", ^{
+                    NSString *const value = @"value";
+                    NSString *const key = @"value";
+                    beforeEach(^{
+                        [[AMAMetricaConfiguration sharedInstance].inMemory stub:@selector(appMetricaImplCreated)
+                                                                      andReturn:theValue(YES)];
+                    });
+                    it(@"Should set error environment if metrica impl is started", ^{
+                        [[impl should] receive:@selector(setErrorEnvironmentValue:forKey:)
+                                 withArguments:value, key];
+                        
+                        [AMAAppMetrica setErrorEnvironmentValue:value forKey:key];
+                    });
+                    it(@"Should sync error environment if metrica is not started", ^{
+                        [[AMAMetricaConfiguration sharedInstance].inMemory stub:@selector(appMetricaImplCreated)
+                                                                      andReturn:theValue(NO)];
+                        [[impl shouldNot] receive:@selector(setErrorEnvironmentValue:forKey:)];
+                        [[AMAAppMetricaImpl should] receive:@selector(syncSetErrorEnvironmentValue:forKey:)
+                                 withArguments:value, key];
+
+                        [AMAAppMetrica setErrorEnvironmentValue:value forKey:key];
+                    });
+                    
+                    it(@"Should set app environment", ^{
+                        [[impl should] receive:@selector(setAppEnvironmentValue:forKey:)
+                                 withArguments:value, key];
+                        
+                        [AMAAppMetrica setAppEnvironmentValue:value forKey:key];
+                    });
+                    
+                    it(@"Should clear app environment", ^{
+                        [[impl should] receive:@selector(clearAppEnvironment)];
+                        
+                        [AMAAppMetrica clearAppEnvironment];
+                    });
+                });
+            });
+        });
+        
+        context(@"Extended Availability", ^{
+            it(@"Should register activation delegate", ^{
+                AMAModuleActivationConfiguration *configuration = [AMAModuleActivationConfiguration stubbedNullMockForInit:@selector(initWithApiKey:appVersion:appBuildNumber:)];
+                id activationDelegate = [KWMock nullMock];
+    
+                [AMAAppMetrica addActivationDelegate:activationDelegate];
+    
+                [[activationDelegate should] receive:@selector(didActivateWithConfiguration:) withArguments:configuration];
+    
+    
+                id startupObserver = [KWMock nullMockForProtocol:@protocol(AMAExtendedStartupObserving)];
+                id reporterStorageController = [KWMock nullMockForProtocol:@protocol(AMAReporterStorageControlling)];
+    
+                __auto_type *config = [[AMAServiceConfiguration alloc] initStartupObserver:startupObserver
+                                                                 reporterStorageController:reporterStorageController];
+                
+                activate();
+            });
+            
+            it(@"Should register event flushable delegate", ^{
+                stubMetricaStarted(YES);
+    
+                AMAModuleActivationConfiguration *configuration = [AMAModuleActivationConfiguration stubbedNullMockForInit:@selector(initWithApiKey:appVersion:appBuildNumber:)];
+                id eventFlushableDelegate = [KWMock nullMock];
+    
+                [AMAAppMetrica addEventFlushableDelegate:eventFlushableDelegate];
+    
+                [[eventFlushableDelegate should] receive:@selector(sendEventsBuffer)];
+    
+                [AMAAppMetrica sendEventsBuffer];
+            });
+            
+            context(@"Service Configuration", ^{
+                it(@"Should register Startup observer", ^{
+                    id startupObserver = [KWMock nullMockForProtocol:@protocol(AMAExtendedStartupObserving)];
+                    NSMutableSet *observers = [NSMutableSet stubbedNullMockForDefaultInit];
+                    
+                    __auto_type *config = [[AMAServiceConfiguration alloc] initStartupObserver:startupObserver
+                                                                     reporterStorageController:nil];
+                    
+                    [AMAAppMetrica registerExternalService:config];
+                    
+                    [[impl should] receive:@selector(setExtendedStartupObservers:) withArguments:observers];
+                    
+                    activate();
+                });
+                
+                it(@"Should register reporter storage controller", ^{
+                    id reporterStorageController = [KWMock nullMockForProtocol:@protocol(AMAReporterStorageControlling)];
+                    NSMutableSet *controllers = [NSMutableSet stubbedNullMockForDefaultInit];
+                    
+                    __auto_type *config = [[AMAServiceConfiguration alloc] initStartupObserver:nil
+                                                                     reporterStorageController:reporterStorageController];
+                    
+                    [AMAAppMetrica registerExternalService:config];
+                    
+                    [[impl should] receive:@selector(setExtendedReporterStorageControllers:) withArguments:controllers];
+                    
+                    activate();
+                });
+            });
+            
+            it(@"Should register external AdController to core AdProvider", ^{
+                id adController = [KWMock nullMockForProtocol:@protocol(AMAAdProviding)];
+
+                [AMAAppMetrica registerAdProvider:adController];
+
+                [[adProvider should] receive:@selector(setupAdProvider:) withArguments:adController];
+
+                activate();
+            });
+            
+            it(@"Should return yes if api key is valid", ^{
+                [AMAIdentifierValidator stub:@selector(isValidUUIDKey:) andReturn:theValue(YES)];
+                
+                [[theValue([AMAAppMetrica isAPIKeyValid:@"api-key"]) should] beYes];
+            });
+            
+            it(@"Should return yes if AppMetrica started", ^{
+                stubMetricaStarted(YES);
+                
+                [[theValue([AMAAppMetrica isAppMetricaStarted]) should] beYes];
+            });
+            
+            it(@"Should return yes if reporter is created for api key", ^{
+                [[AMAMetricaConfiguration sharedInstance].inMemory stub:@selector(appMetricaImplCreated)
+                                                              andReturn:theValue(YES)];
+                [impl stub:@selector(isReporterCreatedForAPIKey:) andReturn:theValue(YES)];
+                
+                [[theValue([AMAAppMetrica isReporterCreatedForAPIKey:@"api-key"]) should] beYes];
+            });
+            
+            it(@"Should report event with parameters", ^{
+                stubMetricaStarted(YES);
+                AMACustomEventParameters *parameters = [AMACustomEventParameters stubbedNullMockForInit:@selector(initWithEventType:)];
+                
+                [[impl should] receive:@selector(reportEventWithParameters:onFailure:)
+                         withArguments:parameters, kw_any()];
+                
+                [AMAAppMetrica reportEventWithParameters:parameters onFailure:nil];
+            });
+            
+            it(@"Should not report event with parameters if metrica is not activated", ^{
+                stubMetricaStarted(NO);
+                AMACustomEventParameters *parameters = [AMACustomEventParameters stubbedNullMockForInit:@selector(initWithEventType:)];
+                
+                [[impl shouldNot] receive:@selector(reportEventWithParameters:onFailure:)];
+                
+                [AMAAppMetrica reportEventWithParameters:parameters onFailure:nil];
             });
         });
     });
+    
+    context(@"Session Extras", ^{
+        AMAAppMetricaImpl *__block mockedImpl = nil;
+        beforeEach(^{
+            mockedImpl = [AMAAppMetricaImpl nullMock];
+            stubMetrica();
+            [AMAAppMetrica stub:@selector(sharedImpl) andReturn:mockedImpl];
+        });
+        
+        it(@"Should set session extras", ^{
+            NSData *data = [NSData nullMock];
+            NSString *key = @"sesion.extras";
+            
+            [[mockedImpl should] receive:@selector(setSessionExtras:forKey:) withArguments:data, key];
+            
+            [AMAAppMetrica setSessionExtras:data forKey:key];
+        });
+        
+        it(@"Should clear session extras", ^{
+            [[mockedImpl should] receive:@selector(clearSessionExtra)];
+            
+            [AMAAppMetrica clearSessionExtra];
+        });
+    });
+    
     context(@"Plugin extension", ^{
         AMAAppMetricaPluginsImpl *__block pluginImpl = nil;
         beforeEach(^{

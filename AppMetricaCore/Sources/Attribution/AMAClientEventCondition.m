@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMAClientEventCondition.h"
 
 @interface AMAClientEventCondition()

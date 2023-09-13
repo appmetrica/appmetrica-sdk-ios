@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMAConversionAttributionModelConfiguration.h"
 #import "AMAAttributionMapping.h"
 

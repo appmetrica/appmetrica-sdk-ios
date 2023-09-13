@@ -7,6 +7,7 @@
 @property (nonatomic, assign, readonly) NSUInteger truncatedPairsCount;
 
 - (instancetype)init NS_UNAVAILABLE;
+- (instancetype)new NS_UNAVAILABLE;
 
 - (instancetype)initWithPairs:(NSDictionary<NSString *, NSString *> *)pairs
           truncatedPairsCount:(NSUInteger)truncatedPairsCount;

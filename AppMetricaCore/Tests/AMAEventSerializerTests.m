@@ -11,7 +11,6 @@
 #import "AMAFileEventValue.h"
 #import "EventData.pb-c.h"
 #import "AMAReporterDatabaseEncodersFactory.h"
-#import "AMAErrorsFactory.h"
 
 SPEC_BEGIN(AMAEventSerializerTests)
 

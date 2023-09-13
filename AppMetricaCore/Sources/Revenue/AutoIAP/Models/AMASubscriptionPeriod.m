@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMASubscriptionPeriod.h"
 
 @implementation AMASubscriptionPeriod

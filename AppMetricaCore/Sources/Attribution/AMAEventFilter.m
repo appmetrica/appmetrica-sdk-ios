@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMAEventFilter.h"
 #import "AMARevenueEventCondition.h"
 #import "AMAClientEventCondition.h"

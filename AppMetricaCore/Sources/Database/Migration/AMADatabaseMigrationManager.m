@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMADatabaseMigrationManager.h"
 #import "AMADatabaseProtocol.h"
 #import "AMADatabaseConstants.h"

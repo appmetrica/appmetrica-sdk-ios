@@ -48,7 +48,6 @@ NSString *const kAMADeviceTypeWatch = @"watch";
 
 + (NSString *)SDKBundleName
 {
-    //TODO: Migration?
     return @"io.appmetrica";
 }
 

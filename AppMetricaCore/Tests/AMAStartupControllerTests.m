@@ -1,6 +1,8 @@
 
 #import <Kiwi/Kiwi.h>
+#import <AppMetricaNetwork/AppMetricaNetwork.h>
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
+#import <AppMetricaPlatform/AppMetricaPlatform.h>
 #import "AMATime.h"
 #import "AMAStartupController.h"
 #import "AMAMetricaConfigurationTestUtilities.h"
@@ -9,13 +11,12 @@
 #import "AMACore.h"
 #import "AMATestNetwork.h"
 #import "AMAHostProviderMock.h"
-#import "AMACore.h"
 #import "AMAStartupResponseParser.h"
 #import "AMATimeoutRequestsController.h"
 #import "AMAUUIDProvider.h"
 #import "AMAAttributionController.h"
 #import "AMAAttributionModelConfiguration.h"
-#import <AppMetricaPlatform/AppMetricaPlatform.h>
+#import "AMAStartupRequest.h"
 
 @interface AMAStartupController()
 
@@ -362,11 +363,10 @@ describe(@"AMAStartupController", ^{
 
             [[theValue(result) should] beYes];
         });
-
+        
         it(@"Shoud stop changing hosts and make network requests if startup received and report of success", ^{
             NSError *error = [NSError errorWithDomain:@"test error" code:400 userInfo:nil];
             NSUInteger succesfullHostIndex = 1;
-
 
             AMAStartupResponse *response = [AMAStartupResponse nullMock];
             [startupController stub:@selector(parseResponse:data:) andReturn:response];
@@ -411,7 +411,7 @@ describe(@"AMAStartupController", ^{
 
             [AMAHTTPRequestor stub:@selector(requestorWithRequest:) withBlock:^id(NSArray *params) {
                 AMAHTTPRequestor *httpRequestor = [[AMAHTTPRequestor alloc] initWithRequest:params[0]];
-
+                
                 [httpRequestor stub:@selector(start) withBlock:^id(NSArray *params) {
                     [httpRequestor.delegate httpRequestor:httpRequestor didFinishWithData:nil response:nil];
                     return nil;
@@ -427,6 +427,39 @@ describe(@"AMAStartupController", ^{
                           hostProvider.numberOfTimesHitReset == 1;
 
             [[theValue(result) should] beYes];
+        });
+        
+        it(@"Shoud dispatch extended startup to observer", ^{
+            NSDictionary *extendedResponse = [NSDictionary dictionary];
+            AMAStartupResponse *response = [AMAStartupResponse nullMock];
+            [startupController stub:@selector(parseResponse:data:) andReturn:response];
+            [startupController stub:@selector(parseExtendedResponse:data:) andReturn:extendedResponse];
+            
+            [AMAHTTPRequestor stub:@selector(requestorWithRequest:)
+                         withBlock:^id(NSArray *params) {
+                AMAHTTPRequestor *httpRequestor = [[AMAHTTPRequestor alloc] initWithRequest:params[0]];
+                
+                [httpRequestor stub:@selector(start) withBlock:^id(NSArray *params) {
+                    NSHTTPURLResponse *response =
+                    [[NSHTTPURLResponse alloc] initWithURL:[NSURL URLWithString:hostProvider.current]
+                                                statusCode:200
+                                               HTTPVersion:(__bridge NSString *)kCFHTTPVersion1_1
+                                              headerFields:nil];
+                    [httpRequestor.delegate httpRequestor:httpRequestor
+                                        didFinishWithData:nil
+                                                 response:response];
+                    return nil;
+                }];
+                return httpRequestor;
+            }];
+            
+            id observer = [KWMock nullMockForProtocol:@protocol(AMAExtendedStartupObservingDelegate)];
+            
+            startupController.extendedDelegate = observer;
+            
+            [[(NSObject *)observer should] receive:@selector(startupUpdatedWithResponse:)
+                                     withArguments:extendedResponse];
+            [startupController update];
         });
 
         it(@"Shoud not change host if network is not available and should not report of failure", ^{
@@ -453,6 +486,17 @@ describe(@"AMAStartupController", ^{
                 hostProvider.numberOfTimesHitReset == 1;
 
             [[theValue(result) should] beYes];
+        });
+    });
+    context(@"Extended startup parameters", ^{
+        it(@"Should add additional startup parameters", ^{
+            NSDictionary *parameters = @{@"er":@"ee"};
+            AMAStartupRequest *request = [AMAStartupRequest stubbedNullMockForDefaultInit];
+            AMAStartupController *controller = currentQueueStartupController();
+            
+            [[request should] receive:@selector(addAdditionalStartupParameters:)
+                        withArguments:parameters];
+            [controller addAdditionalStartupParameters:parameters];
         });
     });
 });

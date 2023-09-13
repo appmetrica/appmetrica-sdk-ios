@@ -1,7 +1,9 @@
 
 #import <Kiwi/Kiwi.h>
+#import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
 #import <AppMetricaWebKit/AppMetricaWebKit.h>
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
+#import <AppMetricaPlatform/AppMetricaPlatform.h>
 #import "AMAAppMetricaImpl+TestUtilities.h"
 #import "AMAAppMetricaImplTestFactory.h"
 #import "AMADispatcher.h"
@@ -21,7 +23,6 @@
 #import "AMAReporterConfiguration.h"
 #import "AMASessionStorage.h"
 #import "AMAAppMetrica+Internal.h"
-#import "AMAErrorsFactory.h"
 #import "AMAAppMetrica+TestUtilities.h"
 #import "AMADispatchStrategyMask.h"
 #import "AMAMetricaConfigurationTestUtilities.h"
@@ -38,7 +39,6 @@
 #import "AMAStartupController.h"
 #import "AMAPermissionsController.h"
 #import "AMAExtensionsReportController.h"
-#import "AMAInternalStateReportingController.h"
 #import "AMAAppOpenWatcher.h"
 #import "AMAAutoPurchasesWatcher.h"
 #import "AMAAdServicesReportingController.h"
@@ -47,9 +47,18 @@
 #import "AMADeepLinkController.h"
 #import "AMAPluginErrorDetails.h"
 #import "AMAAdRevenueInfo.h"
+#import "AMAECommerce.h"
+#import "AMAStartupStorageProvider.h"
+#import "AMACachingStorageProvider.h"
+#import "AMAExtrasContainer.h"
+#import "AMAReporterStoragesContainer.h"
+#import "AMAStartupItemsChangedNotifier.h"
 
 static NSString *const kAMAEnvironmentTestKey = @"TestEnvironmentKey";
 static NSString *const kAMAEnvironmentTestValue = @"TestEnvironmentValue";
+
+@interface AMAAppMetricaImpl () <AMAExtendedStartupObservingDelegate>
+@end
 
 SPEC_BEGIN(AMAAppMetricaImplTests)
 
@@ -65,7 +74,6 @@ describe(@"AMAAppMetricaImpl", ^{
     AMAPermissionsController *__block permissionsController = nil;
     AMAExtensionsReportController *__block extensionsReportController = nil;
     AMADispatchStrategiesContainer *__block dispatchStrategiesContainer = nil;
-    AMAInternalStateReportingController *__block stateReportingController = nil;
     AMAAppOpenWatcher *__block appOpenWatcher = nil;
     AMAAdServicesReportingController *__block adServicesReportingController = nil;
     AMAAutoPurchasesWatcher *__block autoPurchasesWatcher = nil;
@@ -73,6 +81,7 @@ describe(@"AMAAppMetricaImpl", ^{
     AMADispatchingController *__block dispatchingController = nil;
     AMADeepLinkController *__block deeplinkController = nil;
     AMAInternalEventsReporter *__block internalEventsReporter = nil;
+    AMAStartupItemsChangedNotifier *__block startupNotifier = nil;
 
     beforeEach(^{
         [AMALocationManager stub:@selector(sharedManager)];
@@ -87,7 +96,6 @@ describe(@"AMAAppMetricaImpl", ^{
                                                                                                      provider:
                                                                                                      executor:)];
         dispatchStrategiesContainer = [AMADispatchStrategiesContainer stubbedNullMockForDefaultInit];
-        stateReportingController = [AMAInternalStateReportingController stubbedNullMockForInit:@selector(initWithExecutor:)];
         
         appOpenWatcher = [AMAAppOpenWatcher stubbedNullMockForDefaultInit];
         autoPurchasesWatcher = [AMAAutoPurchasesWatcher stubbedNullMockForInit:@selector(initWithExecutor:)];
@@ -105,6 +113,7 @@ describe(@"AMAAppMetricaImpl", ^{
                                                                   buildNumber:100];
         reporterTestHelper = [[AMAReporterTestHelper alloc] init];
         eventStorage = [reporterTestHelper appReporterForApiKey:apiKey].reporterStorage.eventStorage;
+        startupNotifier = [AMAStartupItemsChangedNotifier stubbedNullMockForDefaultInit];
         appMetricaImpl =
         [AMAAppMetricaImplTestFactory createCurrentQueueImplWithReporterHelper:reporterTestHelper
                                                              hostStateProvider:hostStateProvider];
@@ -301,6 +310,17 @@ describe(@"AMAAppMetricaImpl", ^{
             [[event shouldNot] beNil];
         });
     });
+    
+    context(@"Sends ECOMMERCE events", ^{
+        it(@"Should save ECOMMERCE event", ^{
+            [appMetricaImpl activateWithConfiguration:configuration];
+            AMAECommerce *eCommerce = [AMAECommerce nullMock];
+            [appMetricaImpl reportECommerce:eCommerce onFailure:nil];
+
+            AMAEvent *event = [eventStorage amatest_savedEventWithType:AMAEventTypeECommerce];
+            [[event shouldNot] beNil];
+        });
+    });
 
     context(@"Sends REVENUE events", ^{
         it(@"Should save REVENUE event", ^{
@@ -340,7 +360,26 @@ describe(@"AMAAppMetricaImpl", ^{
         NSUInteger const eventType = 1234;
         it(@"Should save event with custom EventType", ^{
             [appMetricaImpl activateWithConfiguration:configuration];
-            [appMetricaImpl reportEventWithType:eventType name:@"" value:@"" environment:@{} extras:nil onFailure:nil];
+            [appMetricaImpl reportEventWithType:eventType
+                                           name:@""
+                                          value:@""
+                                    environment:@{}
+                                         extras:nil
+                                      onFailure:nil];
+
+            AMAEvent *event = [eventStorage amatest_savedEventWithType:eventType];
+            [[event shouldNot] beNil];
+        });
+    });
+    
+    context(@"Sends events with Custom parameters", ^{
+        NSUInteger const eventType = 1234;
+        it(@"Should save event with custom parameters", ^{
+            [appMetricaImpl activateWithConfiguration:configuration];
+            AMACustomEventParameters *params = [[AMACustomEventParameters alloc] initWithEventType:1234];
+            
+            [appMetricaImpl reportEventWithParameters:params
+                                            onFailure:nil];
 
             AMAEvent *event = [eventStorage amatest_savedEventWithType:eventType];
             [[event shouldNot] beNil];
@@ -437,17 +476,9 @@ describe(@"AMAAppMetricaImpl", ^{
             [[dispatchStrategiesContainer should] receive:@selector(shutdown)];
             hostStateProvider.hostState = AMAHostAppStateBackground;
         });
-        it(@"Should trigger state reporting start", ^{
-            [[stateReportingController should] receive:@selector(start)];
-            hostStateProvider.hostState = AMAHostAppStateForeground;
-        });
         it(@"Sends update permissions", ^{
             [[permissionsController should] receive:@selector(updateIfNeeded)];
             hostStateProvider.hostState = AMAHostAppStateForeground;
-        });
-        it(@"Should trigger state reporting shutdown", ^{
-            [[stateReportingController should] receive:@selector(shutdown)];
-            hostStateProvider.hostState = AMAHostAppStateBackground;
         });
         it(@"Should not call shutdown on termination", ^{
             [[appMetricaImpl shouldNot] receive:@selector(shutdown)];
@@ -606,17 +637,186 @@ describe(@"AMAAppMetricaImpl", ^{
             [appMetricaImpl activateWithConfiguration:configuration];
         });
     });
-    context(@"State reporting should register storage", ^{
-        it(@"Should register storage", ^{
-            [[stateReportingController should] receive:@selector(registerStorage:forApiKey:)];
-            [appMetricaImpl activateWithConfiguration:configuration];
+    
+    context(@"Extended", ^{
+        context(@"Startup observer", ^{
+            NSDictionary *const startupParameters = @{@"key": @"value"};
+            NSArray *__block observers = nil;
+            beforeEach(^{
+                observers = @[[KWMock nullMockForProtocol:@protocol(AMAExtendedStartupObserving)],
+                              [KWMock nullMockForProtocol:@protocol(AMAExtendedStartupObserving)]];
+            });
+            it(@"Should setup startup observers", ^{
+                id startupStorageProvider = [AMAStartupStorageProvider stubbedNullMockForDefaultInit];
+                id cachingStorageProvider = [AMACachingStorageProvider stubbedNullMockForDefaultInit];
+                
+                for (id<AMAExtendedStartupObserving> observer in observers) {
+                    [(NSObject *)observer stub:@selector(startupRequestParameters) andReturn:startupParameters];
+                    
+                    [[(NSObject *)observer should] receive:@selector(setupStartupProvider:cachingStorageProvider:)
+                                             withArguments:startupStorageProvider,cachingStorageProvider];
+                }
+                
+                [appMetricaImpl setExtendedStartupObservers:[NSSet setWithArray:observers]];
+                [appMetricaImpl activateWithConfiguration:configuration];
+            });
+            it(@"Should add startup parameters", ^{
+                for (id<AMAExtendedStartupObserving> observer in observers) {
+                    [(NSObject *)observer stub:@selector(startupRequestParameters) andReturn:startupParameters];
+                }
+                
+                [[startupController should] receive:@selector(addAdditionalStartupParameters:)
+                                          withCount:2
+                                          arguments:startupParameters];
+                
+                [appMetricaImpl setExtendedStartupObservers:[NSSet setWithArray:observers]];
+                [appMetricaImpl activateWithConfiguration:configuration];
+            });
+            it(@"Should dispatch startup response", ^{
+                [startupController stub:@selector(upToDate) andReturn:theValue(YES)];
+                for (id<AMAExtendedStartupObserving> observer in observers) {
+                    [[(NSObject *)observer should] receive:@selector(startupUpdatedWithParameters:)
+                                             withArguments:startupParameters];
+                }
+                
+                [appMetricaImpl setExtendedStartupObservers:[NSSet setWithArray:observers]];
+                [appMetricaImpl startupUpdatedWithResponse:startupParameters];
+            });
+        });
+        context(@"Reporter storage controller", ^{
+            NSArray *__block controllers = nil;
+            beforeEach(^{
+                controllers = @[[KWMock nullMockForProtocol:@protocol(AMAReporterStorageControlling)],
+                                [KWMock nullMockForProtocol:@protocol(AMAReporterStorageControlling)]];
+            });
+            it(@"Should setup reporter storage controller", ^{
+                for (id<AMAReporterStorageControlling> controller in controllers) {
+                    [[(NSObject *)controller should] receive:@selector(restoreState) withCount:1];
+                    [[(NSObject *)controller should] receive:@selector(setupWithMainReporter:forAPIKey:) withCount:1];
+                    [[(NSObject *)controller should] receive:@selector(setupWithReporter:forAPIKey:) withCount:1];
+                }
+                
+                [appMetricaImpl setExtendedReporterStorageControllers:[NSSet setWithArray:controllers]];
+                [appMetricaImpl activateWithConfiguration:configuration];
+            });
         });
     });
-    context(@"Report Login SDK Event", ^{
-        AMAInternalEventsReporter *__block internalEventsReporter = nil;
+    context(@"Session extras", ^{
+        NSString *const key = @"key";
+        it(@"Should assert on set session extras if reporter is nil", ^{
+            NSData *data = [NSData data];
+            
+            [[theBlock(^{
+                [appMetricaImpl setSessionExtras:data forKey:key];
+            }) should] raise];
+        });
+        it(@"Should remove session extras if data is empty", ^{
+            NSData *data = [NSData data];
+            
+            AMAExtrasContainer *extrasContainer = [AMAExtrasContainer stubbedNullMockForInit:@selector(initWithDictionaryExtras:)];
+            [[extrasContainer should] receive:@selector(removeValueForKey:) withArguments:key];
+            
+            [appMetricaImpl activateWithConfiguration:configuration];
+            [appMetricaImpl setSessionExtras:data forKey:key];
+        });
+        it(@"Should set session extras if reporter is data is not nil", ^{
+            NSData *data = [key dataUsingEncoding:NSUTF8StringEncoding];
+            
+            AMAExtrasContainer *extrasContainer = [AMAExtrasContainer stubbedNullMockForInit:@selector(initWithDictionaryExtras:)];
+            [[extrasContainer should] receive:@selector(addValue:forKey:) withArguments:data, key];
+            
+            [appMetricaImpl activateWithConfiguration:configuration];
+            [appMetricaImpl setSessionExtras:data forKey:key];
+        });
+        
+        it(@"Should clear session extras if reporter is not nil", ^{
+            AMAExtrasContainer *extrasContainer = [AMAExtrasContainer stubbedNullMockForInit:@selector(initWithDictionaryExtras:)];
+            [[extrasContainer should] receive:@selector(clearExtras)];
+            
+            [appMetricaImpl activateWithConfiguration:configuration];
+            [appMetricaImpl clearSessionExtra];
+        });
+        
+        it(@"Should assert on clear session extras if reporter is nil", ^{
+            [[theBlock(^{
+                [appMetricaImpl clearSessionExtra];
+            }) should] raise];
+        });
+    });
+    context(@"Error environment value", ^{
+        NSString *const key = @"key";
+        NSString *const value = @"value";
+        AMAEnvironmentContainer *__block container = nil;
         beforeEach(^{
-            internalEventsReporter = [AMAInternalEventsReporter nullMock];
-            [AMAAppMetrica stub:@selector(sharedInternalEventsReporter) andReturn:internalEventsReporter];
+            container = [AMAReporterStoragesContainer sharedInstance].errorEnvironment;
+        });
+        it(@"Should sync set error environment value", ^{
+            [[container should] receive:@selector(addValue:forKey:) withArguments:value, key];
+            
+            [AMAAppMetricaImpl syncSetErrorEnvironmentValue:value forKey:key];
+        });
+        it(@"Should set error environment value", ^{
+            [[container should] receive:@selector(addValue:forKey:) withArguments:value, key];
+            
+            [appMetricaImpl setErrorEnvironmentValue:value forKey:key];
+        });
+    });
+    
+    context(@"Startup identifiers", ^{
+        dispatch_queue_t __block queue = nil;
+        AMAIdentifiersCompletionBlock __block identifiersBlock = nil;
+        beforeEach(^{
+            queue = [AMAQueuesFactory serialQueueForIdentifierObject:self domain:@"Tests"];
+            identifiersBlock = ^(NSDictionary<NSString *,id> * identifiers,
+                                 NSError * error) {};
+        });
+        it(@"Should dispatch request identifiers with all keys", ^{
+            [[appMetricaImpl should] receive:@selector(requestStartupIdentifiersWithKeys:
+                                                       completionQueue:
+                                                       completionBlock:
+                                                       notifyOnError:)
+            withArguments:[AMAStartupItemsChangedNotifier allIdentifiersKeys], queue, identifiersBlock, theValue(YES)];
+            
+            [appMetricaImpl requestStartupIdentifiersWithCompletionQueue:queue
+                                                         completionBlock:identifiersBlock
+                                                           notifyOnError:YES];
+        });
+        
+        it(@"Should request identifiers from startup notifier with notify on error enabled", ^{
+            NSArray *keys = @[@"key1", @"key2"];
+            NSDictionary *options = @{ kAMARequestIdentifiersOptionCallbackModeKey :
+                                           kAMARequestIdentifiersOptionCallbackInAnyCase };
+            
+            [[startupNotifier should] receive:@selector(requestStartupItemsWithKeys:options:queue:completion:)
+                         withArguments:keys, options, queue, identifiersBlock];
+            
+            [appMetricaImpl requestStartupIdentifiersWithKeys:keys
+                                              completionQueue:queue
+                                              completionBlock:identifiersBlock
+                                                notifyOnError:YES];
+        });
+        
+        it(@"Should request identifiers from startup notifier with notify on error disabled", ^{
+            NSArray *keys = @[@"key1", @"key2"];
+            NSDictionary *options = @{ kAMARequestIdentifiersOptionCallbackModeKey :
+                                           kAMARequestIdentifiersOptionCallbackOnSuccess };
+            
+            [[startupNotifier should] receive:@selector(requestStartupItemsWithKeys:options:queue:completion:)
+                         withArguments:keys, options, queue, identifiersBlock];
+            
+            [appMetricaImpl requestStartupIdentifiersWithKeys:keys
+                                              completionQueue:queue
+                                              completionBlock:identifiersBlock
+                                                notifyOnError:NO];
+        });
+        
+        it(@"Should update startup controller on request identifiers", ^{
+            [[startupController should] receive:@selector(update)];
+            
+            [appMetricaImpl requestStartupIdentifiersWithKeys:@[]
+                                              completionQueue:queue
+                                              completionBlock:identifiersBlock
+                                                notifyOnError:NO];
         });
     });
 });

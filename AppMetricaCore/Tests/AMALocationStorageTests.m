@@ -1,6 +1,5 @@
 
 #import <Kiwi/Kiwi.h>
-#import "AMACore.h"
 #import "AMALocationStorage.h"
 #import "AMALocationCollectingConfiguration.h"
 #import "AMALocationSerializer.h"

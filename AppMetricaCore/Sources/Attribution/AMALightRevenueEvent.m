@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMALightRevenueEvent.h"
 
 @implementation AMALightRevenueEvent

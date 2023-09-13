@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMAEvent.h"
 #import "AMAReportsController.h"
 #import "AMADispatcher.h"
@@ -17,8 +16,6 @@
 #import "AMAReporterStorage.h"
 #import "AMAReporterStateStorage.h"
 #import "AMADatabaseProtocol.h"
-#import "AMAPersistentTimeoutConfiguration.h"
-#import "AMATimeoutRequestsController.h"
 
 NSString *const kAMADispatcherErrorDomain = @"io.appmetrica.AMADispatcher";
 NSString *const kAMADispatcherErrorApiKeyUserInfoKey = @"kAMADispatcherErrorApiKeyUserInfoKey";

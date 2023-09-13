@@ -81,7 +81,7 @@
 
 - (void)didAddEventNotification:(NSNotification *)notification
 {
-    // skip testing identity
+    // skip testing
 }
 
 - (void)initializeSearchAdsController

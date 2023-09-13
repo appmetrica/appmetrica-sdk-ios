@@ -73,7 +73,6 @@
 - (void)reportOpenEvent:(NSDictionary *)parameters
           reattribution:(BOOL)reattribution
               onFailure:(void (^)(NSError *error))onFailure;
-- (void)reportInternalState:(NSDictionary *)state onFailure:(void (^)(NSError *error))onFailure;
 - (void)reportPermissionsEventWithPermissions:(NSString *)permissions onFailure:(void (^)(NSError *error))onFailure;
 - (void)reportCleanupEvent:(NSDictionary *)parameters onFailure:(void (^)(NSError *error))onFailure;
 - (void)reportASATokenEventWithParameters:(NSDictionary *)parameters onFailure:(void (^)(NSError *error))onFailure;

@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMADispatchStrategiesFactory.h"
 #import "AMATimerDispatchStrategy.h"
 #import "AMAEventCountDispatchStrategy.h"

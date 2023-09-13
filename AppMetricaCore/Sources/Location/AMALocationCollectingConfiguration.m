@@ -1,7 +1,6 @@
 
 #import "AMACore.h"
 #import <CoreLocation/CoreLocation.h>
-
 #import "AMALocationCollectingConfiguration.h"
 #import "AMAMetricaConfiguration.h"
 #import "AMAStartupParametersConfiguration.h"

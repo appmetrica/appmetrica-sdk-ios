@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMAStorageTrimManager.h"
 #import "AMANotificationsListener.h"
 #import "AMADatabaseProtocol.h"
@@ -8,7 +7,6 @@
 #import "AMAPlainStorageTrimmer.h"
 #import "AMAReporterNotifications.h"
 #import "AMAEventsCountStorageTrimmer.h"
-#import <UIKit/UIKit.h>
 
 @interface AMAStorageTrimManager ()
 

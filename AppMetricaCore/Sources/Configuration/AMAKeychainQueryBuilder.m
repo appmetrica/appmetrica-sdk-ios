@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMAKeychainQueryBuilder.h"
 
 @interface AMAKeychainQueryBuilder ()

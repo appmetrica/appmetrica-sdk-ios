@@ -2,7 +2,6 @@
 #import <Kiwi/Kiwi.h>
 #import "AMACore.h"
 #import "AMATypeSafeDictionaryHelper.h"
-#import "AMAErrorsFactory.h"
 
 static NSNumber *extractor(id value, NSError **error)
 {

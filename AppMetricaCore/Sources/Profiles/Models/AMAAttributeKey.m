@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMAAttributeKey.h"
 
 @implementation AMAAttributeKey

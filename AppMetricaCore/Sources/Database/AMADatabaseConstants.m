@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMADatabaseConstants.h"
 
 NSString *const kAMADatabaseKeySchemaVersion = @"schema.version";

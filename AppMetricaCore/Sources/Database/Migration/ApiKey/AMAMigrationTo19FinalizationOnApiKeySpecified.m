@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import <AppMetricaStorageUtils/AppMetricaStorageUtils.h>
 #import "AMAMigrationTo19FinalizationOnApiKeySpecified.h"
 #import "AMADatabaseProtocol.h"
@@ -8,7 +7,6 @@
 #import "AMAReporterStorage.h"
 #import "AMAReporterStateStorage+Migration.h"
 
-//TODO: Remove migration
 @implementation AMAMigrationTo19FinalizationOnApiKeySpecified
 
 - (NSString *)migrationKey

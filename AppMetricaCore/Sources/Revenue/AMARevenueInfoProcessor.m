@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMARevenueInfoProcessor.h"
 #import "AMARevenueInfoModelValidator.h"
 #import "AMARevenueInfoModelSerializer.h"

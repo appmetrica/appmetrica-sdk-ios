@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMARevenueAttributionModelConfiguration.h"
 #import "AMABoundMapping.h"
 #import "AMACurrencyMapping.h"

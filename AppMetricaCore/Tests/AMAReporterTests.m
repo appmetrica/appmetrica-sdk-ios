@@ -52,6 +52,8 @@
 #import "AMAErrorsFactory.h"
 #import "AMAStackTraceElement.h"
 #import "AMAAppMetrica+Internal.h"
+#import "AMAEventFirstOccurrenceController.h"
+#import "AMAEventValueFactory.h"
 
 @interface AMAReporterStorage (Test)
 
@@ -1054,7 +1056,17 @@ describe(@"AMAReporter", ^{
             [[theValue(reporter.reporterStorage.stateStorage.openID) should] equal:theValue(prevOpenId + 2)];
         });
         context(@"Reattribution", ^{
-            // TODO(bamx23): add tests
+            context(@"Storage", ^{
+                AMAReporter *__block reporter = nil;
+                beforeEach(^{
+                    reporter = [reporterTestHelper appReporterForApiKey:apiKey];
+                });
+                it(@"Should increment open id", ^{
+                    [[reporter.reporterStorage.stateStorage should] receive:@selector(incrementOpenID)];
+                    
+                    [reporter reportOpenEvent:@{@"link":@"l"} reattribution:NO onFailure:nil];
+                });
+            });
             context(@"Attribution id changed flag", ^{
                 AMAReporter *__block reporter = nil;
                 beforeEach(^{
@@ -1409,7 +1421,7 @@ describe(@"AMAReporter", ^{
             [reporter reportEvent:testEventName parameters:@{ @"key" : condition } onFailure:^(NSError *error) {
                 reportError = error;
             }];
-            [[theValue(reportError.code) should] equal:theValue(AMAAppMetricaEventErrorCodeJsonSerializationError)];
+            [[theValue(reportError.code) should] equal:theValue(AMAAppMetricaInternalEventJsonSerializationError)];
         });
         it(@"Should not call block if there's no error", ^{
             BOOL __block didCallBlock = NO;
@@ -1806,12 +1818,6 @@ describe(@"AMAReporter", ^{
                     [[error should] beNil];
                     [[event.createdAt should] equal:parameters.creationDate];
                 });
-
-                //TODO: Fix test for file type event?
-//                it(@"Should correctly set the event's data", ^{
-//                    [[error should] beNil];
-//                    [[[event.value dataWithError:NULL] should] equal:parameters.data];
-//                });
 
                 it(@"Should correctly set the event's app environment", ^{
                     [[error should] beNil];

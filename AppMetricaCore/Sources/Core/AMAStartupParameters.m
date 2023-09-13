@@ -1,10 +1,8 @@
 
-#import "AMACore.h"
 #import "AMAStartupParameters.h"
 #import "AMAStartupClientIdentifier.h"
 #import "AMAStartupClientIdentifierFactory.h"
 #import "AMAMetricaConfiguration.h"
-#import "AMAMetricaInMemoryConfiguration.h"
 #import "AMAMetricaPersistentConfiguration.h"
 #import "AMAStartupParametersConfiguration.h"
 #import <AppMetricaPlatform/AppMetricaPlatform.h>

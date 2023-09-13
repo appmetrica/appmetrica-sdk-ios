@@ -14,8 +14,6 @@ describe(@"AMAIncrementableValueStorage", ^{
     AMARollbackHolder *__block rollbackHolder = nil;
     AMAIncrementableValueStorage *__block valueStorage = nil;
 
-    // TODO(bamx23): Add tests for rollback
-
     beforeEach(^{
         storage = [KWMock nullMockForProtocol:@protocol(AMAKeyValueStoring)];
         rollbackHolder = [[AMARollbackHolder alloc] init];
@@ -71,6 +69,28 @@ describe(@"AMAIncrementableValueStorage", ^{
             [[storage should] receive:@selector(saveLongLongNumber:forKey:error:)
                         withArguments:@24, storageKey, kw_any()];
             [valueStorage nextInStorage:storage rollback:rollbackHolder error:nil];
+        });
+        
+        it(@"Should subscribe on rollback", ^{
+            [[rollbackHolder should] receive:@selector(subscribeOnRollback:)];
+            
+            [valueStorage nextInStorage:storage rollback:rollbackHolder error:nil];
+        });
+        
+        it(@"Should set rollback true if failed to save value", ^{
+            [storage stub:@selector(saveLongLongNumber:forKey:error:) andReturn:theValue(NO)];
+            
+            [valueStorage nextInStorage:storage rollback:rollbackHolder error:nil];
+            
+            [[theValue(rollbackHolder.rollback) should] beYes];
+        });
+        
+        it(@"Should set rollback false if saved value", ^{
+            [storage stub:@selector(saveLongLongNumber:forKey:error:) andReturn:theValue(YES)];
+            
+            [valueStorage nextInStorage:storage rollback:rollbackHolder error:nil];
+            
+            [[theValue(rollbackHolder.rollback) should] beNo];
         });
 
         context(@"Identifier in storage", ^{

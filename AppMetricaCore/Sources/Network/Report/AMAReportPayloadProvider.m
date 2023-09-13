@@ -9,8 +9,6 @@
 #import "AMAReportPayload.h"
 #import "AMAMetricaConfiguration.h"
 #import "AMAMetricaInMemoryConfiguration.h"
-#import "AMAErrorsFactory.h"
-
 #import <CoreGraphics/CGBase.h>
 
 NSString *const kAMAReportPayloadProviderErrorDomain = @"io.appmetrica.AMAReportPayloadProvider";

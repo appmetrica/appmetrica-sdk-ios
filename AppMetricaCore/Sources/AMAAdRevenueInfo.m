@@ -1,8 +1,7 @@
 
-#import "AMACore.h"
 #import "AMAAdRevenueInfo.h"
 
-@interface AMAAdRevenueInfo()
+@interface AMAAdRevenueInfo ()
 
 @property (nonatomic, assign, readwrite) AMAAdType adType;
 @property (nonatomic, copy, readwrite, nullable) NSString *adNetwork;

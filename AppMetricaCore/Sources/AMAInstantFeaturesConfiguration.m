@@ -3,6 +3,7 @@
 #import "AMAStorageKeys.h"
 #import "AMAStartupParametersConfiguration.h"
 #import "AMAJSONFileKVSDataProvider.h"
+#import "AMACore.h"
 
 @interface AMAInstantFeaturesConfiguration ()
 
@@ -43,26 +44,6 @@
 
 #pragma mark - Public -
 
-#pragma mark dynamicLibraryCrashHookEnabled
-
-- (void)setDynamicLibraryCrashHookEnabled:(BOOL)value
-{
-    BOOL shouldNotify = NO;
-    NSNumber *number = [self.backingFileStorage objectForKey:AMAStorageStringKeyLibsDynamicCrashHookEnabled error:NULL];
-    if (number == nil || number.boolValue != value) {
-        [self.backingFileStorage saveObject:@(value) forKey:AMAStorageStringKeyLibsDynamicCrashHookEnabled error:NULL];
-        shouldNotify = YES;
-    }
-    if (shouldNotify) {
-        [self notify];
-    }
-}
-
-- (BOOL)dynamicLibraryCrashHookEnabled
-{
-    return [[self.backingFileStorage objectForKey:AMAStorageStringKeyLibsDynamicCrashHookEnabled error:NULL] boolValue];
-}
-
 - (void)setUUID:(NSString *)value
 {
     NSString *uuid = [self.backingFileStorage objectForKey:AMAStorageStringKeyUUID error:NULL];
@@ -74,43 +55,6 @@
 - (NSString *)UUID
 {
     return [self.backingFileStorage objectForKey:AMAStorageStringKeyUUID error:NULL];
-}
-
-#pragma mark - Private -
-
-- (void)notify
-{
-    [self.observers makeObjectsPerformSelector:@selector(instantFeaturesConfigurationDidUpdate:) withObject:self];
-}
-
-#pragma mark - AMABroadcasting
-
-- (NSArray *)observers
-{
-    @synchronized (self.observersTable) {
-        return self.observersTable.allObjects;
-    }
-}
-
-- (void)addAMAObserver:(id<AMAInstantFeaturesObserver>)observer
-{
-    @synchronized (self.observersTable) {
-        [self.observersTable addObject:observer];
-    }
-}
-
-- (void)removeAMAObserver:(id<AMAInstantFeaturesObserver>)observer
-{
-    @synchronized (self.observersTable) {
-        [self.observersTable removeObject:observer];
-    }
-}
-
-#pragma mark - AMAStartupCompletionObserving
-
-- (void)startupUpdateCompletedWithConfiguration:(AMAStartupParametersConfiguration *)configuration
-{
-    self.dynamicLibraryCrashHookEnabled = configuration.dynamicLibraryCrashHookEnabled;
 }
 
 @end

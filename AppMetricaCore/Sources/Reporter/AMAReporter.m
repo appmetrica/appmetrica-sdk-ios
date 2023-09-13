@@ -1,6 +1,6 @@
 
-#import "AMAReporter.h"
 #import <AppMetricaPlatform/AppMetricaPlatform.h>
+#import "AMAReporter.h"
 #import "AMAReporterNotifications.h"
 #import "AMASession.h"
 #import "AMAApplicationStateManager.h"
@@ -590,12 +590,6 @@
     }];
 }
 
-- (void)reportInternalState:(NSDictionary *)state onFailure:(void (^)(NSError *error))onFailure
-{
-    //TODO: remove
-//    [self.diagnosticEventsController reportInternalState:state onFailure:onFailure];
-}
-
 - (void)reportPermissionsEventWithPermissions:(NSString *)permissions
                                     onFailure:(void (^)(NSError *error))onFailure
 {
@@ -855,7 +849,7 @@
     if (onNewSession != nil) { onNewSession(newSession); }
 
     if ([self isSessionFinished:currentSession] == NO) {
-        // TODO(https://nda.ya.ru/t/peuw2IWM6fHZUY): Current session should become last again
+        // TODO:(https://nda.ya.ru/t/peuw2IWM6fHZUY) Current session should become last again
         NSError *internalError = nil;
         if ([self.reporterStorage.sessionStorage saveSessionAsLastSession:currentSession error:&internalError]) {
             AMALogInfo(@"Reporter %@ refreshed oid of current active session <%@>", self, currentSession);
@@ -945,9 +939,9 @@
         AMAReporter *sdkReporter = (AMAReporter *)[AMAAppMetrica reporterForApiKey:kAMAMetricaLibraryApiKey];
         if (token != nil) {
             initAdditionalParams[@"asaToken"] = token;
-            [sdkReporter reportEvent:@"AppleSearchAdsTokenSuccess" onFailure:nil]; //TODO: (glinnik) Move to proper place
+            [sdkReporter reportEvent:@"AppleSearchAdsTokenSuccess" onFailure:nil]; //TODO: Move to proper place
         }
-//        else if (error != nil) { //TODO: (glinnik) handle error
+//        else if (error != nil) { //TODO: (Crashes) handle error
 //            [sdkReporter reportNSError:error onFailure:nil];
 //        }
     }

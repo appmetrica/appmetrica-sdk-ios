@@ -23,7 +23,6 @@ NS_ASSUME_NONNULL_BEGIN
                    rollback:(nullable AMARollbackHolder *)rollbackHolder
                       error:(NSError **)error;
 
-//TODO: Migration?
 - (BOOL)updateValue:(NSNumber *)value storage:(id<AMAKeyValueStoring>)storage error:(NSError **)error;
 
 @end

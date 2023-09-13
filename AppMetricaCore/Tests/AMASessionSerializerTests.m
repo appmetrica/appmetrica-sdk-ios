@@ -11,7 +11,6 @@
 #import "AMADate.h"
 #import "SessionData.pb-c.h"
 #import "AMAReporterDatabaseEncodersFactory.h"
-#import "AMAErrorsFactory.h"
 #import "AMAMetricaConfigurationTestUtilities.h"
 
 SPEC_BEGIN(AMASessionSerializerTests)

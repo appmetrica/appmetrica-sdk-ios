@@ -1,6 +1,5 @@
 
 #import "AMAHostProviderMock.h"
-#import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
 
 @interface AMAHostProviderMock ()
 

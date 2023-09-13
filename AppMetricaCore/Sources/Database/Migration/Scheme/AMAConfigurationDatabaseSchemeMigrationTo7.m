@@ -1,7 +1,5 @@
 
-#import "AMACore.h"
 #import "AMAConfigurationDatabaseSchemeMigrationTo7.h"
-
 #import "FMDB.h"
 
 @implementation AMAConfigurationDatabaseSchemeMigrationTo7

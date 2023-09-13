@@ -16,7 +16,6 @@
 #import "AMAStartupItemsChangedNotifier.h"
 #import "AMAInstantFeaturesConfiguration.h"
 #import "AMAInternalEventsReporter.h"
-#import "AMAInternalStateReportingController.h"
 #import "AMALocationManager.h"
 #import "AMAMetricaConfiguration.h"
 #import "AMAMetricaInMemoryConfiguration.h"
@@ -74,7 +73,6 @@
 @property (nonatomic, strong) AMAStartupItemsChangedNotifier *startupItemsNotifier;
 @property (nonatomic, strong) AMASearchAdsController *searchAdsController;
 @property (nonatomic, strong) AMAAdServicesReportingController *adServicesController;
-@property (nonatomic, strong) AMAInternalStateReportingController *stateReportingController;
 @property (nonatomic, strong) AMAExtensionsReportController *extensionsReportController;
 @property (nonatomic, strong) AMAPermissionsController *permissionsController;
 @property (nonatomic, strong, readonly) AMAAppOpenWatcher *appOpenWatcher;
@@ -110,7 +108,6 @@
         _startupCompletionObservers = [NSHashTable weakObjectsHashTable];
         _extendedStartupCompletionObservers = [NSHashTable weakObjectsHashTable];
         _extendedReporterStorageControllersTable = [NSHashTable weakObjectsHashTable];
-        _stateReportingController = [[AMAInternalStateReportingController alloc] initWithExecutor:executor];
         _extensionsReportController = [[AMAExtensionsReportController alloc] init];
         _permissionsController = [[AMAPermissionsController alloc] init];
         _appOpenWatcher = [[AMAAppOpenWatcher alloc] init];
@@ -131,7 +128,6 @@
 
         [[AMALocationManager sharedManager] start];
         self.stateProvider.delegate = self;
-        [self addStartupCompletionObserver:[AMAMetricaConfiguration sharedInstance].instant];
         [self addStartupCompletionObserver:self.extensionsReportController];
     }
     return self;
@@ -214,7 +210,7 @@
     }];
 }
 
-- (void)reportEventWithParameters:(AMACustomEventParameters * )parameters
+- (void)reportEventWithParameters:(AMACustomEventParameters *)parameters
                         onFailure:(nullable void (^)(NSError *error))onFailure;
 {
     
@@ -278,8 +274,7 @@
 #if !TARGET_OS_TV
 - (void)setupWebViewReporting:(id<AMAJSControlling>)controller
 {
-    [controller setUpWebViewReporting:self.executor withReporter:(id<AMAJSReporting>)self.reporter];
-//                       FIXME: (https://nda.ya.ru/t/1-uPWaow6fHZr5) Remove this cast^
+    [controller setUpWebViewReporting:self.executor withReporter:self.reporter];
 }
 #endif
 
@@ -388,11 +383,9 @@
                                                                     delegate:self
                                                    executionConditionChecker:executionConditionChecker];
     [self updateStrategiesContainer:strategies];
-
-    [self.stateReportingController registerStorage:reporterStorage.stateStorage forApiKey:apiKey];
     
     id<AMAKeyValueStorageProviding> reporterStorageProvider = (id<AMAKeyValueStorageProviding>)reporterStorage.keyValueStorageProvider;
-    [self setupReporterForExtendedReporterStorage:reporterStorageProvider apiKey:self.apiKey];
+    [self setupReporterForExtendedReporterStorage:reporterStorageProvider apiKey:apiKey];
 }
 
 - (AMAReporter *)createReporterWithApiKey:(NSString *)apiKey
@@ -570,13 +563,11 @@
     [self reportDatabaseInconsistencyStateIfNeeded];
     [self notifyOnStartupCompleted];
     [self triggerSearchAdsRequest];
-    [self startStateReportingController];
     [self reportPermissionsIfNeeded];
 }
 
 - (void)shutdown
 {
-    [self shutdownStateReportingController];
     [self shutdownStrategies];
     [self shutdownDispatcher];
     [self shutdownReporter];
@@ -719,13 +710,6 @@
     }];
 }
 
-- (void)startStateReportingController
-{
-    [self execute:^{
-        [self.stateReportingController start];
-    }];
-}
-
 - (void)shutdownReachability
 {
     [self execute:^{
@@ -753,13 +737,6 @@
 {
     [self execute:^{
         [self.strategiesContainer shutdown];
-    }];
-}
-
-- (void)shutdownStateReportingController
-{
-    [self execute:^{
-        [self.stateReportingController shutdown];
     }];
 }
 
@@ -840,23 +817,10 @@
     [self execute:^{
         if (self.startupController.upToDate) {
             AMALogInfo(@"Notify about startup %lu observers",
-                               (unsigned long)self.startupCompletionObservers.count);
-            [self.startupCompletionObservers.allObjects
-                makeObjectsPerformSelector:@selector(startupUpdateCompletedWithConfiguration:)
-                withObject:[AMAMetricaConfiguration sharedInstance].startup];
-        }
-    }];
-}
-
-- (void)notifyOnAdditionalStartupCompleted:(NSDictionary *)response
-{
-    [self execute:^{
-        if (self.startupController.upToDate) {
-            AMALogInfo(@"Notify about extended startup %lu observers",
-                       (unsigned long)self.extendedStartupCompletionObservers.count);
-            [self.extendedStartupCompletionObservers.allObjects
-                makeObjectsPerformSelector:@selector(startupUpdatedWithParameters:)
-                withObject:response];
+                       (unsigned long)self.startupCompletionObservers.count);
+            for (id<AMAStartupCompletionObserving> observer in self.startupCompletionObservers) {
+                [observer startupUpdateCompletedWithConfiguration:[AMAMetricaConfiguration sharedInstance].startup];
+            }
         }
     }];
 }
@@ -874,12 +838,25 @@
     }];
 }
 
-- (void)setExtendedStartupObservers:(NSMutableSet<id<AMAExtendedStartupObserving>> *)observers
+- (void)notifyOnAdditionalStartupCompleted:(NSDictionary *)response
+{
+    [self execute:^{
+        if (self.startupController.upToDate) {
+            AMALogInfo(@"Notify about extended startup %lu observers",
+                       (unsigned long)self.extendedStartupCompletionObservers.count);
+            for (id<AMAExtendedStartupObserving> observer in self.extendedStartupCompletionObservers) {
+                [observer startupUpdatedWithParameters:response];
+            }
+        }
+    }];
+}
+
+- (void)setExtendedStartupObservers:(NSSet<id<AMAExtendedStartupObserving>> *)observers
 {
     AMALogInfo(@"Setup extended startup observers: %@", observers);
     [self execute:^{
         if (observers != nil) {
-            for (id<AMAExtendedStartupObserving> observer in [observers allObjects]) {
+            for (id<AMAExtendedStartupObserving> observer in observers) {
                 [self.extendedStartupCompletionObservers addObject:observer];
                 
                 AMAStartupStorageProvider *startupStorageProvider = [[AMAStartupStorageProvider alloc] init];
@@ -911,14 +888,14 @@
     }];
 }
 
-#pragma mark - Reporter Storage observing -
+#pragma mark - Reporter Storage controlling -
 
-- (void)setExtendedReporterStorageControllers:(NSMutableSet<id<AMAReporterStorageControlling>> *)controllers
+- (void)setExtendedReporterStorageControllers:(NSSet<id<AMAReporterStorageControlling>> *)controllers
 {
     AMALogInfo(@"Register extended reporter storage controllers: %@", controllers);
     [self execute:^{
         if (controllers != nil) {
-            for (id<AMAReporterStorageControlling> controller in [controllers allObjects]) {
+            for (id<AMAReporterStorageControlling> controller in controllers) {
                 [self.extendedReporterStorageControllersTable addObject:controller];
             }
         }
@@ -930,8 +907,9 @@
     [self execute:^{
         AMALogInfo(@"Restore state for extended reporter storage %lu controllers",
                    (unsigned long)self.extendedReporterStorageControllersTable.count);
-        [self.extendedReporterStorageControllersTable.allObjects
-            makeObjectsPerformSelector:@selector(restoreState)];
+        for (id<AMAReporterStorageControlling> controller in self.extendedReporterStorageControllersTable) {
+            [controller restoreState];
+        }
     }];
 }
 
@@ -940,7 +918,7 @@
     [self execute:^{
         AMALogInfo(@"Setup main reporter for extended reporter storage %lu controllers",
                    (unsigned long)self.extendedReporterStorageControllersTable.count);
-        for (id<AMAReporterStorageControlling> controller in [self.extendedReporterStorageControllersTable allObjects]) {
+        for (id<AMAReporterStorageControlling> controller in self.extendedReporterStorageControllersTable) {
             [controller setupWithReporter:storageProvider forAPIKey:apiKey];
         }
     }];
@@ -951,7 +929,7 @@
     [self execute:^{
         AMALogInfo(@"Setup reporter for extended reporter storage %lu controllers",
                    (unsigned long)self.extendedReporterStorageControllersTable.count);
-        for (id<AMAReporterStorageControlling> controller in [self.extendedReporterStorageControllersTable allObjects]) {
+        for (id<AMAReporterStorageControlling> controller in self.extendedReporterStorageControllersTable) {
             [controller setupWithMainReporter:storageProvider forAPIKey:apiKey];
         }
     }];

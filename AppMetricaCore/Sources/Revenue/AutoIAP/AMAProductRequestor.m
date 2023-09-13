@@ -1,7 +1,6 @@
 
 #import "AMACore.h"
 #import "AMAProductRequestor.h"
-
 #import "AMAMetricaDynamicFrameworks.h"
 
 @interface AMAProductRequestor ()

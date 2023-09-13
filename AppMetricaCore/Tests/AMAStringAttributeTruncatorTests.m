@@ -1,6 +1,5 @@
 
 #import <Kiwi/Kiwi.h>
-#import "AMACore.h"
 #import "AMAStringAttributeTruncator.h"
 #import "AMAUserProfileLogger.h"
 

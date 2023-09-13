@@ -1,12 +1,10 @@
 
-#import "AMACore.h"
 #import "AMAAttributionController.h"
 #import "AMAAttributionModelConfiguration.h"
 #import "AMAReporter.h"
 #import "AMAAttributionChecker.h"
 #import "AMAMetricaConfiguration.h"
 #import "AMAMetricaPersistentConfiguration.h"
-#import "AMAStartupParametersConfiguration.h"
 
 @interface AMAAttributionController()
 

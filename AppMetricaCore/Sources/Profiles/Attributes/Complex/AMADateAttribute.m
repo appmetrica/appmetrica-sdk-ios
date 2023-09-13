@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMADateAttribute.h"
 #import "AMAInvalidUserProfileUpdateFactory.h"
 #import "AMAStringAttribute.h"

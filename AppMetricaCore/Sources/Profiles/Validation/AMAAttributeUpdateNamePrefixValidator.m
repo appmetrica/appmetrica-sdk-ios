@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMAAttributeUpdateNamePrefixValidator.h"
 #import "AMAUserProfileLogger.h"
 #import "AMAAttributeNameProvider.h"

@@ -6,7 +6,6 @@ NSString *const kAMAUserDefaultsStringKeyPreviousOSVersion = @"previous.os_versi
 NSString *const kAMAUserDefaultsStringKeyAppWasTerminated = @"app.was.terminated";
 NSString *const kAMAUserDefaultsStringKeyAppWasInBackground = @"app.was.in.background";
 
-//TODO: Need migration?
 static NSString *const kAMAUserDefaultsKeyPrefix =  @"io.appmetrica.sdk.";
 
 @implementation AMAUserDefaultsStorage

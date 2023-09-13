@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMADispatchStrategy.h"
 #import "AMAReporterStorage.h"
 #import "AMAReportExecutionConditionChecker.h"

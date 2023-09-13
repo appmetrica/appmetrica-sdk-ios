@@ -1,7 +1,6 @@
 
 #import <Kiwi/Kiwi.h>
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
-#import "AMACore.h"
 #import "AMAStartupParameters.h"
 #import "AMAStartupClientIdentifier.h"
 #import "AMAStartupClientIdentifierFactory.h"

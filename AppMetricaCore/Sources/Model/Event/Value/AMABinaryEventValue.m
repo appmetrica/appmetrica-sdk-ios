@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMABinaryEventValue.h"
 
 @implementation AMABinaryEventValue

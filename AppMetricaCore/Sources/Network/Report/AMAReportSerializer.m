@@ -1,6 +1,8 @@
 
-#import "AMACore.h"
+#import <CoreLocation/CoreLocation.h>
 #import <AppMetricaPlatform/AppMetricaPlatform.h>
+#import <AppMetricaProtobufUtils/AppMetricaProtobufUtils.h>
+#import "AMACore.h"
 #import "AMAReportSerializer.h"
 #import "AMAProtoConversionUtility.h"
 #import "AppMetrica.pb-c.h"
@@ -12,9 +14,6 @@
 #import "AMAFileEventValue.h"
 #import "AMASession.h"
 #import "AMADate.h"
-#import "AMAErrorsFactory.h"
-#import <CoreLocation/CoreLocation.h>
-#import <AppMetricaProtobufUtils/AppMetricaProtobufUtils.h>
 
 NSString *const kAMAReportSerializerErrorDomain = @"kAMAReportSerializerErrorDomain";
 NSString *const kAMAReportSerializerErrorKeyActualSize = @"kAMAReportSerializerErrorKeyActualSize";

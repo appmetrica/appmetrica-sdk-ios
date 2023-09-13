@@ -11,8 +11,7 @@ static NSUInteger const kAMATransactionIDLength = 200;
 static NSUInteger const kAMAReceiptDataSize = 180 * 1024;
 static NSUInteger const kAMAPayloadStringLength = 30 * 1024;
 
-//TODO: Remove
-static NSString *const kAMATruncatedReceiptDataString = @"<truncated data was not sent, see https://nda.ya.ru/t/40z6Prmt6fHZXq>";
+static NSString *const kAMATruncatedReceiptDataString = @"<truncated data was not sent, exceeded the limit of 180kb>";
 
 @interface AMARevenueInfoModelFormatter ()
 

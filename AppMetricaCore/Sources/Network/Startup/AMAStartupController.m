@@ -249,12 +249,16 @@ NSErrorDomain const AMAStartupRequestsErrorDomain = @"AMAStartupRequestsErrorDom
 
 #pragma mark - AMAHTTPRequestDelegate
 
-- (void)httpRequestor:(AMAHTTPRequestor *)requestor didFinishWithError:(NSError *)error response:(NSHTTPURLResponse *)response
+- (void)httpRequestor:(AMAHTTPRequestor *)requestor
+   didFinishWithError:(NSError *)error
+             response:(NSHTTPURLResponse *)response
 {
     [self reportErrorWithRequest:requestor error:error];
 }
 
-- (void)httpRequestor:(AMAHTTPRequestor *)requestor didFinishWithData:(NSData *)data response:(NSHTTPURLResponse *)response
+- (void)httpRequestor:(AMAHTTPRequestor *)requestor
+    didFinishWithData:(NSData *)data
+             response:(NSHTTPURLResponse *)response
 {
     BOOL canAcceptResponse = NO;
     AMAStartupResponse *startupResponse = nil;

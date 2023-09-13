@@ -1,7 +1,6 @@
 
 #import "AMACore.h"
 #import <CoreLocation/CoreLocation.h>
-
 #import "AMAPermissionsExtractor.h"
 #import "AMAPermission.h"
 #import "AMAAdProvider.h"

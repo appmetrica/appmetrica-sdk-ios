@@ -1,6 +1,5 @@
 
 #import <StoreKit/StoreKit.h>
-
 #import "AMAPurchasesDefines.h"
 
 @class AMAProductRequestor;

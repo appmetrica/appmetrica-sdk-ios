@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMAStartEventValueSerializer.h"
 #import "EventStart.pb-c.h"
 #import <AppMetricaProtobufUtils/AppMetricaProtobufUtils.h>

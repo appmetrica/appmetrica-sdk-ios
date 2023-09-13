@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMAEventTypeResolver.h"
 
 @implementation AMAEventTypeResolver

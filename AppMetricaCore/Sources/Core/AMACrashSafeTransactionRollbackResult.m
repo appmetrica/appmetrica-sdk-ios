@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMACrashSafeTransactionRollbackResult.h"
 
 @implementation AMACrashSafeTransactionRollbackResult

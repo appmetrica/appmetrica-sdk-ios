@@ -1,5 +1,5 @@
 
-#import "AMACore.h"
+#import <AppMetricaEncodingUtils/AppMetricaEncodingUtils.h>
 #import "AMAStartupResponseEncoderFactory.h"
 
 @implementation AMAStartupResponseEncoderFactory

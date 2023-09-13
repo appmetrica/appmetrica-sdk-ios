@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMASessionsCleaner.h"
 #import "AMASession.h"
 #import "AMAEvent.h"
@@ -11,7 +10,6 @@
 #import "AMADatabaseHelper.h"
 #import "AMAEventsCleanupInfo.h"
 #import "AMAEventsCleaner.h"
-#import "AMAErrorsFactory.h"
 
 @interface AMASessionsCleaner ()
 

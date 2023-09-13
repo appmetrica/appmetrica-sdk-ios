@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMAStringEventValue.h"
 
 @implementation AMAStringEventValue

@@ -1,9 +1,7 @@
 
+#import <StoreKit/StoreKit.h>
 #import "AMACore.h"
 #import "AMASKAdNetworkRequestor.h"
-
-#import <StoreKit/StoreKit.h>
-
 #import "AMAMetricaDynamicFrameworks.h"
 #import "AMAMetricaConfiguration.h"
 #import "AMAMetricaPersistentConfiguration.h"

@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMABoundMapping.h"
 
 static NSString *const kAMABound = @"bound";

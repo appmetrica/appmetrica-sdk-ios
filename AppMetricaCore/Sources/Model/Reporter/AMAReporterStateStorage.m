@@ -1,12 +1,10 @@
 
-#import "AMACore.h"
 #import "AMAReporterStateStorage+Migration.h"
 #import "AMADatabaseProtocol.h"
 #import "AMAEnvironmentContainer.h"
 #import "AMAExtrasContainer.h"
 #import "AMAModelSerialization.h"
 #import "Extras.pb-c.h"
-#import "AMAErrorsFactory.h"
 #import <AppMetricaProtobufUtils/AppMetricaProtobufUtils.h>
 
 static NSString *const kAMAKeyFirstEventSent = @"session_first_event_sent";
@@ -136,7 +134,7 @@ static NSString *const kAMAKeyLastASATokenSendDate = @"last_asa_token_send_date"
     }
     self.extrasContainer = [self restoreExtrasFromStorage:loadedStorage];
     [self.extrasContainer addObserver:self
-                            withBlock:^(AMAReporterStateStorage *observer, AMAExtrasContainer *extras){
+                            withBlock:^(AMAReporterStateStorage *observer, AMAExtrasContainer *extras) {
                                 [observer syncExtrasContainer:extras];
                             }];
     
@@ -261,7 +259,6 @@ static NSString *const kAMAKeyLastASATokenSendDate = @"last_asa_token_send_date"
     AMAExtrasContainer *container = [AMAExtrasContainer containerWithDictionary:extras];
     return container;
 }
-
 
 - (void)syncEnvironmentContainer:(AMAEnvironmentContainer *)environmentContainer
 {

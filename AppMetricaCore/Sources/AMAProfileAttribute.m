@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMAProfileAttribute.h"
 #import "AMAStringAttribute.h"
 #import "AMANumberAttribute.h"

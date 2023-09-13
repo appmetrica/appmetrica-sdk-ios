@@ -1,5 +1,6 @@
 
 #import <Kiwi/Kiwi.h>
+#import <AppMetricaTestUtils/AppMetricaTestUtils.h>
 #import "AMAStartupResponseParser.h"
 #import "AMAStartupParametersConfiguration.h"
 #import "AMAMetricaConfigurationTestUtilities.h"
@@ -9,7 +10,6 @@
 #import "AMAPair.h"
 #import "AMAAttributionModelParser.h"
 #import "AMAAttributionModelConfiguration.h"
-#import <AppMetricaTestUtils/AppMetricaTestUtils.h>
 
 SPEC_BEGIN(AMAStartupResponseParserTests)
 
@@ -26,15 +26,6 @@ describe(@"AMAStartupResponseParser", ^{
 
     context(@"response", ^{
         NSString *response = @"{"
-            "\"browsers\" : {"
-                "\"list\" : ["
-                    "{"
-                        "\"package_id\" : \"safari\","
-                        "\"min_interval_seconds\" : 1209600,"
-                        "\"first_delay_seconds\" : 259200"
-                    "}"
-                "]"
-            "},"
             "\"features\" : {"
                 "\"list\" : {"
                     "\"easy_attribution\" : {"
@@ -49,22 +40,10 @@ describe(@"AMAStartupResponseParser", ^{
                     "\"extensions_collecting\" : {"
                         "\"enabled\" : true"
                     "},"
-                    "\"dynamic_library_crash_hook\" : {"
-                        "\"enabled\" : true"
-                    "},"
                     "\"auto_app_open_enabled\" : {"
                          "\"enabled\" : false"
                     "},"
-                    "\"ssl_pinning\" : {"
-                        "\"enabled\" : true"
-                    "}"
                 "}"
-            "},"
-            "\"easy_collecting\" : {"
-                "\"min_interval_seconds\" : 1209600,"
-                "\"first_delay_seconds\" : 259200,"
-                "\"min_successful_request_interval_seconds\" : 7200,"
-                "\"min_failed_request_interval_seconds\" : 3600"
             "},"
             "\"locale\" : {"
                 "\"country\" : {"
@@ -78,7 +57,7 @@ describe(@"AMAStartupResponseParser", ^{
             "\"queries\" : {"
                 "\"list\" : {"
                     "\"applications\" : {"
-                        "\"url\" : \"https://startup.tst.mobile.appmetrica.io/identity.bin\""
+                        "\"url\" : \"https://startup.tst.mobile.appmetrica.io/app.bin\""
                     "},"
                     "\"host\" : {"
                         "\"url\" : \"https://startup.tst.mobile.appmetrica.io/host.bin\""
@@ -207,36 +186,6 @@ describe(@"AMAStartupResponseParser", ^{
                     "}"
                 "]"
             "},"
-            "\"user_defaults_collecting\" : {"
-                "\"com.apple.apsd\" : ["
-                    "["
-                        "\"APSPersistentTopics\","
-                        "\"com.apple.usernotifications.aps\","
-                        "\"opportunistic\""
-                    "],"
-                    "["
-                        "\"APSPersistentTopics\","
-                        "\"com.apple.usernotifications.aps\","
-                        "\"nonWaking\""
-                    "],"
-                    "["
-                        "\"APSPersistentTopics\","
-                        "\"com.apple.usernotifications.aps\","
-                        "\"ignored\""
-                    "]"
-                "],"
-                "\"com.apple.mt\" : ["
-                    "["
-                        "\"KeepAppsUpToDateAppList\""
-                    "]"
-                "],"
-                "\"com.apple.EmojiPreferences\" : ["
-                    "["
-                        "\"EMFDefaultsKey\","
-                        "\"EMFRecentsKey\""
-                    "]"
-                "]"
-            "},"
             "\"startup_update\" : {"
                 "\"interval_seconds\" : 100500"
             "}"
@@ -265,9 +214,6 @@ describe(@"AMAStartupResponseParser", ^{
                 setResponseWithString(response);
             });
 
-            it(@"Should parse dynamic_library_crash_hook feature", ^{
-                [[theValue(parsedConfiguration.dynamicLibraryCrashHookEnabled) should] beYes];
-            });
             it(@"Should parse device ID", ^{
                 [[parsedResponse.deviceID should] equal:@"369f5c559986d404dd6a2cd61d8ab82a"];
             });
@@ -455,41 +401,6 @@ describe(@"AMAStartupResponseParser", ^{
                     [[parsedConfiguration.attributionDeeplinkConditions[3].value should] beNil];
                 });
             });
-
-            context(@"UserDefaults collecting", ^{
-
-                it(@"Should parse only valid configurations", ^{
-                    NSString *invalid = @"{"
-                                        "\"user_defaults_collecting\" : {"
-                                            "\"com.apple.apsd\" : ["
-                                                "\"Invalid\","
-                                                "["
-                                                    "\"APSPersistentTopics\","
-                                                    "\"com.apple.usernotifications.aps\","
-                                                    "\"nonWaking\""
-                                                "],"
-                                                "["
-                                                    "\"APSPersistentTopics\","
-                                                    "\"com.apple.usernotifications.aps\","
-                                                    "\"ignored\""
-                                                "]"
-                                                "],"
-                                            "\"com.apple.mt\" : ["
-                                                "["
-                                                    "\"KeepAppsUpToDateAppList\""
-                                                "]"
-                                            "],"
-                                            "\"com.apple.EmojiPreferences\" : ["
-                                                "["
-                                                    "\"EMFDefaultsKey\","
-                                                    "\"EMFRecentsKey\""
-                                                "]"
-                                            "]"
-                                        "}"
-                                    "}";
-                    setResponseWithString(invalid);
-                });
-            });
             
             context(@"Startup update", ^{
                 it(@"Should parse interval", ^{
@@ -578,7 +489,20 @@ describe(@"AMAStartupResponseParser", ^{
                 }) shouldNot] raise];
             });
         });
+        
+        context(@"Extended response", ^{
+            it(@"Should parse extended response", ^{
+                NSData *data = [response dataUsingEncoding:NSUTF8StringEncoding];
+                NSDictionary *expected = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
+                
+                NSDictionary *parsedExtended = [parser extendedStartupResponseWithHTTPResponse:nil
+                                                                                          data:data
+                                                                                         error:nil];
+                
+                [[parsedExtended should] equal:expected];
 
+            });
+        });
     });
 });
 

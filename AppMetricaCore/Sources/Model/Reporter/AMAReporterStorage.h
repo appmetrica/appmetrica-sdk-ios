@@ -1,6 +1,5 @@
 
 #import <Foundation/Foundation.h>
-#import "AMACore.h"
 
 @protocol AMADatabaseKeyValueStorageProviding;
 @protocol AMAKeyValueStoring;

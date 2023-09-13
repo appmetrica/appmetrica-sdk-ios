@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMATransactionInfoModel.h"
 
 @interface AMATransactionInfoModel ()

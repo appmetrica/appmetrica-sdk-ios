@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMADeepLinkController.h"
 #import "AMADeepLinkPayloadFactory.h"
 #import "AMAReporter.h"

@@ -23,7 +23,6 @@
 
 + (NSDictionary *)query
 {
-    //TODO: Migrate keychain?
     return @{(__bridge id)kSecClass: (__bridge id)kSecClassGenericPassword,
              (__bridge id)kSecAttrAccount: @"AMAAppIdentifierPrefix",
              (__bridge id)kSecAttrService: @"AMADeviceDescription",

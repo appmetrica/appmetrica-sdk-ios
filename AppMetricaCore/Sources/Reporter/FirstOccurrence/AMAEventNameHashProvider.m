@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMAEventNameHashProvider.h"
 #import <CommonCrypto/CommonCrypto.h>
 

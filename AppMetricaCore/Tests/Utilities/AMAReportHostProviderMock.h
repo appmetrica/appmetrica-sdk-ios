@@ -2,7 +2,6 @@
 #import <Foundation/Foundation.h>
 #import "AMAReportHostProvider.h"
 
-
 @interface AMAReportHostProviderMock : AMAReportHostProvider
 
 @property (nonatomic, assign, readonly) NSUInteger numberOfTimesHitNext;

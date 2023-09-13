@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMAEventsCleaner.h"
 #import "AMADatabaseProtocol.h"
 #import "AMAEventsCleanupInfo.h"
@@ -7,7 +6,6 @@
 #import "AMADatabaseHelper.h"
 #import "AMAReporterProviding.h"
 #import "AMAReporter.h"
-#import "AMAErrorsFactory.h"
 
 @interface AMAEventsCleaner ()
 

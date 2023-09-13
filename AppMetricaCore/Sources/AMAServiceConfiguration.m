@@ -21,6 +21,7 @@
     NSMutableString *description = [NSMutableString stringWithFormat:@"<%@: ", super.description];
     [description appendFormat:@", self.startupObserver=%@", self.startupObserver];
     [description appendFormat:@", self.reporterStorageController=%@", self.reporterStorageController];
+    [description appendString:@">"];
     return description;
 }
 #endif

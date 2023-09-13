@@ -1,10 +1,9 @@
 
 #import "AMASessionExpirationHandler.h"
-
-#import "AMACore.h"
 #import "AMADate.h"
 #import "AMAMetricaConfiguration.h"
 #import "AMAMetricaInMemoryConfiguration.h"
+#import "AMAReporterConfiguration.h"
 #import "AMASession.h"
 
 static NSTimeInterval const kAMAMinimalValuableTimeUnit = 0.1;

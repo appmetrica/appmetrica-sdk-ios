@@ -1,5 +1,5 @@
 
-#import "AMACore.h"
+#import <AppMetricaEncodingUtils/AppMetricaEncodingUtils.h>
 #import "AMAEncryptedFileStorageFactory.h"
 #import "AMAEncryptedFileStorage.h"
 

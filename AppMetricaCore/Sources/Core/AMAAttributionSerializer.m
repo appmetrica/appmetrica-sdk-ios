@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMAAttributionSerializer.h"
 #import "AMAPair.h"
 

@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMASubscriptionInfoModel.h"
 
 @interface AMASubscriptionInfoModel ()

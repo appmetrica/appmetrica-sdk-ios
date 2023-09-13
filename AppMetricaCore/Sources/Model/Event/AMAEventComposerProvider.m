@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMAEventComposerProvider.h"
 #import "AMAEventComposer.h"
 #import "AMAEventComposerBuilder.h"

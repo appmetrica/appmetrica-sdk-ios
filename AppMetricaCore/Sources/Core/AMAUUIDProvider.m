@@ -1,11 +1,11 @@
 
-#import "AMACore.h"
 #import <AppMetricaStorageUtils/AppMetricaStorageUtils.h>
 #import "AMAUUIDProvider.h"
 #import "AMAMetricaConfiguration.h"
 #import "AMAStorageKeys.h"
 #import "AMAInstantFeaturesConfiguration.h"
 #import "AMADatabaseFactory.h"
+#import "AMACore.h"
 
 @interface AMAUUIDProvider()
 

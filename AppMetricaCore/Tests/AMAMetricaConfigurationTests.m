@@ -61,20 +61,20 @@ describe(@"AMAMetricaConfiguration", ^{
 
     context(@"Sets metrica started", ^{
         it(@"Should have metrica started initially NO", ^{
-            [[theValue(configuration.inMemory.metricaStarted) should] beNo];
+            [[theValue(configuration.inMemory.appMetricaStarted) should] beNo];
         });
         it(@"Should set metrica started", ^{
-            [configuration.inMemory markMetricaStarted];
-            [[theValue(configuration.inMemory.metricaStarted) should] beYes];
+            [configuration.inMemory markAppMetricaStarted];
+            [[theValue(configuration.inMemory.appMetricaStarted) should] beYes];
         });
     });
     context(@"Sets metrica impl created", ^{
         it(@"Should have metrica impl created initially NO", ^{
-            [[theValue(configuration.inMemory.metricaImplCreated) should] beNo];
+            [[theValue(configuration.inMemory.appMetricaImplCreated) should] beNo];
         });
         it(@"Should set metrica impl created", ^{
-            [configuration.inMemory markMetricaImplCreated];
-            [[theValue(configuration.inMemory.metricaImplCreated) should] beYes];
+            [configuration.inMemory markAppMetricaImplCreated];
+            [[theValue(configuration.inMemory.appMetricaImplCreated) should] beYes];
         });
     });
     context(@"Sets first startup update date", ^{

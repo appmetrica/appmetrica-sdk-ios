@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMALocationStorageState.h"
 
 @implementation AMALocationStorageState

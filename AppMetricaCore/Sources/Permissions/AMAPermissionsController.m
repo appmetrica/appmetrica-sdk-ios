@@ -1,7 +1,6 @@
 
 #import "AMACore.h"
 #import "AMAPermissionsController.h"
-
 #import "AMAPermissionsConfiguration.h"
 #import "AMAPermissionsSerializer.h"
 #import "AMAPermissionsExtractor.h"

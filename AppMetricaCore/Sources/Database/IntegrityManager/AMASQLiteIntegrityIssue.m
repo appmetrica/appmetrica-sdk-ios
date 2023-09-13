@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMASQLiteIntegrityIssue.h"
 
 @implementation AMASQLiteIntegrityIssue

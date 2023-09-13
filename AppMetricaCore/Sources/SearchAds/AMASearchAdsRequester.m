@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMASearchAdsRequester.h"
 
 #if !TARGET_OS_TV

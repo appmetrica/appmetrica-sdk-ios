@@ -1,5 +1,4 @@
 #import "AMAExtrasContainer.h"
-#import "AMACore.h"
 
 @interface AMAExtrasContainer ()
 @property (nonnull, nonatomic, strong) NSMapTable *observers;

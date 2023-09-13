@@ -68,8 +68,6 @@ NS_ASSUME_NONNULL_BEGIN
  @param accurateLocationEnabled Indicates whether accurate location retrieval should be enabled.
  Has effect only when locationTrackingEnabled is 'YES', and location is not set manually.
  */
-
-//TODO: по умолчанию выключить для public, для internal как было
 + (void)setAccurateLocationTracking:(BOOL)accurateLocationEnabled;
 
 /** Enable/disable background location updates tracking.
@@ -78,7 +76,6 @@ NS_ASSUME_NONNULL_BEGIN
  @param allowsBackgroundLocationUpdates Indicates whether background location updating should be enabled.
  @see https://developer.apple.com/reference/corelocation/cllocationmanager/1620568-allowsbackgroundlocationupdates
  */
-//TODO: по умолчанию выключить для public, для internal как было
 + (void)setAllowsBackgroundLocationUpdates:(BOOL)allowsBackgroundLocationUpdates;
 
 /** Reports a custom event.

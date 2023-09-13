@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMAEncryptedFileStorage.h"
 
 @interface AMAEncryptedFileStorage ()

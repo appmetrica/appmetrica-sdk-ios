@@ -5,6 +5,7 @@
 #import "AMAInstantFeaturesConfiguration.h"
 #import "AMAMetricaConfiguration.h"
 #import "AMADatabaseFactory.h"
+#import "AMACore.h"
 
 SPEC_BEGIN(AMAUUIDProviderTests)
 

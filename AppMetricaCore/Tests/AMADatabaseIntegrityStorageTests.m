@@ -1,7 +1,6 @@
 
 #import <Kiwi/Kiwi.h>
 #import <AppMetricaStorageUtils/AppMetricaStorageUtils.h>
-#import "AMACore.h"
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
 #import "AMADatabaseIntegrityStorage.h"
 #import "AMATestKVSProvider.h"

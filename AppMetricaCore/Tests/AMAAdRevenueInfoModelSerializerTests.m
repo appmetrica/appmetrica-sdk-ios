@@ -1,6 +1,5 @@
 
 #import <Kiwi/Kiwi.h>
-#import "AMACore.h"
 #import "AMAAdRevenueInfoModelSerializer.h"
 #import "AdRevenue.pb-c.h"
 #import "AMAAdRevenueInfoModel.h"

@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMAKeyValueStorageProvidersFactory.h"
 #import "AMADatabaseKeyValueStorageProvider.h"
 #import "AMAGenericStringKeyValueStorageProvider.h"

@@ -213,7 +213,6 @@
                                   withIntermediateDirectories:YES
                                                    attributes:nil
                                                         error:nil];
-        // TODO(bamx23): Create private tests category rather than stubing this method
         [AMAFileUtility stub:@selector(persistentPathForApiKey:) andReturn:persistentDirectory];
         database = (NSObject<AMADatabaseProtocol> *)[AMADatabaseFactory reporterDatabaseForApiKey:apiKey
                                                                                     eventsCleaner:eventsCleaner];

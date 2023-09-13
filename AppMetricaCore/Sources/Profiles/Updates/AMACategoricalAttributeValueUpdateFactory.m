@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMACategoricalAttributeValueUpdateFactory.h"
 #import "AMAUndefinedAwareAttributeValueUpdate.h"
 #import "AMAResetAwareAttributeValueUpdate.h"

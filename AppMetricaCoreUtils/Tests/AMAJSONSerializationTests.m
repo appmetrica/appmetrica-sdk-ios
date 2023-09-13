@@ -1,5 +1,6 @@
 #import <XCTest/XCTest.h>
 #import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
+#import <AppMetricaTestUtils/AppMetricaTestUtils.h>
 
 @interface AMAJSONSerializationTests : XCTestCase
 
@@ -33,6 +34,21 @@
 #ifdef DEBUG
     XCTAssertThrows([AMAJSONSerialization stringWithJSONObject:@"abc" error:nil], @"Should throw");
 #endif
+    
+    AMATestAssertionHandler *handler = [AMATestAssertionHandler new];
+    [handler beginAssertIgnoring];
+
+    NSError *error = nil;
+    NSString *invalidWithError = [AMAJSONSerialization stringWithJSONObject:@"abc" error:&error];
+
+    XCTAssertNil(invalidWithError, @"Should return nil if failed to serialize");
+    XCTAssertEqualObjects(error.domain, kAMAAppMetricaErrorDomain, @"Should fill error domain");
+    XCTAssertEqual(error.code, AMAAppMetricaInternalEventJsonSerializationError, @"Should fill error code");
+    XCTAssertEqualObjects(error.localizedDescription,
+                          @"Passed dictionary is not a valid serializable JSON object: {\n    \"Wrong JSON object\" = abc;\n}",
+                          @"Should have correct description");
+
+    [handler endAssertIgnoring];
 }
 
 - (void)testDataWithJSONObject
@@ -49,17 +65,22 @@
     
 #ifdef DEBUG
     XCTAssertThrows([AMAJSONSerialization dataWithJSONObject:@1 error:nil], @"Should throw assert if json is invalid");
-#else
+#endif
+    
+    AMATestAssertionHandler *handler = [AMATestAssertionHandler new];
+    [handler beginAssertIgnoring];
+    
     NSError *error = nil;
-    NSString *invalidWithError = [AMAJSONSerialization dataWithJSONObject:@"abc" error:&error];
+    NSData *invalidWithError = [AMAJSONSerialization dataWithJSONObject:@"abc" error:&error];
     
     XCTAssertNil(invalidWithError, @"Should return nil if failed to serialize");
     XCTAssertEqualObjects(error.domain, kAMAAppMetricaErrorDomain, @"Should fill error domain");
-    XCTAssertEqual(error.code, AMAAppMetricaEventErrorCodeJsonSerializationError, @"Should fill error code");
+    XCTAssertEqual(error.code, AMAAppMetricaInternalEventJsonSerializationError, @"Should fill error code");
     XCTAssertEqualObjects(error.localizedDescription,
                           @"Passed dictionary is not a valid serializable JSON object: {\n    \"Wrong JSON object\" = abc;\n}",
                           @"Should have correct description");
-#endif
+    
+    [handler endAssertIgnoring];
 }
 
 - (void)testDictionaryWithJSONString
@@ -132,20 +153,6 @@
     XCTAssertEqualObjects(error.domain, kAMAAppMetricaInternalErrorDomain, @"Should fill error domain");
     XCTAssertEqual(error.code, AMAAppMetricaInternalEventErrorCodeUnexpectedDeserialization, @"Should fill error code");
     XCTAssertNotNil(error.userInfo[kAMAAppMetricaInternalErrorResultObjectKey], @"Should contain value in userInfo");
-}
-
-- (void)testMalformedJSONError
-{
-    NSString *const domain = @"io.appmetrica";
-    NSError *error = [AMAJSONSerialization malformedJSONError:@{ @[ @"foo", @"bar" ]: @"foo" }];
-    
-    XCTAssertEqualObjects(error.domain, domain, @"Should use correct domain");
-    
-    XCTAssertEqual(error.code, 1002, @"Should use correct code");
-    
-    NSString *expectedLocalizedDescription = @"Passed dictionary is not a valid serializable JSON object: "
-    "{\n        (\n        foo,\n        bar\n    ) = foo;\n}";
-    XCTAssertEqualObjects(error.localizedDescription, expectedLocalizedDescription, @"Should have correct description");
 }
 
 @end

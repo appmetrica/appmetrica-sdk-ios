@@ -3,7 +3,6 @@
 #import "AMAKeychain.h"
 #import "AMAKeychainQueryBuilder.h"
 #import "AMAKeychainBridge.h"
-#import "AMAErrorsFactory.h"
 
 NSString *const kAMAKeychainErrorDomain = @"kAMAKeychainErrorDomain";
 NSString *const kAMAKeychainErrorKeyCode = @"kAMAKeychainErrorKeyCode";

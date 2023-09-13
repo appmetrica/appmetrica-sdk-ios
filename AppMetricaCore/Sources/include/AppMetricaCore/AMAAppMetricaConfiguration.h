@@ -91,9 +91,10 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign) BOOL allowsBackgroundLocationUpdates;
 
 /** Enable/disable accurate location retrieval for internal location manager.
+ 
+ Disabled by default.
  Has effect only when locationTrackingEnabled is 'YES', and location is not set manually.
  */
-
 @property (nonatomic, assign) BOOL accurateLocationTracking;
 
 /** Set/get custom dispatch period. Interval in seconds between sending events to the server.

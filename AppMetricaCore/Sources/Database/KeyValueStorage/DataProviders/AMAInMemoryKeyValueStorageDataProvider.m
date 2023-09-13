@@ -1,8 +1,6 @@
 
-#import "AMACore.h"
 #import "AMAInMemoryKeyValueStorageDataProvider.h"
 #import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
-#import "AMAErrorsFactory.h"
 
 @interface AMAInMemoryKeyValueStorageDataProvider ()
 

@@ -1,8 +1,6 @@
 
-#import "AMACore.h"
 #import "AMASyncKeyValueStorageDataProvider.h"
 #import "AMADatabaseProtocol.h"
-#import "AMAErrorsFactory.h"
 
 @interface AMASyncKeyValueStorageDataProvider ()
 

@@ -1,5 +1,6 @@
 
 #import <Kiwi/Kiwi.h>
+#import "AMACore.h"
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
 #import <AppMetricaPlatform/AppMetricaPlatform.h>
 #import "AMAEventBuilder.h"

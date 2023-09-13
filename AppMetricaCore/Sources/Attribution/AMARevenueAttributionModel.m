@@ -4,13 +4,10 @@
 #import "AMARevenueAttributionModel.h"
 #import "AMAAttributionModelConfiguration.h"
 #import "AMARevenueAttributionModelConfiguration.h"
-#import "AMAEventSumBoundBasedModelHelper.h"
 #import "AMACurrencyMapping.h"
 #import "AMAEventFilter.h"
 #import "AMARevenueEventCondition.h"
-#import "AMAECommerce+Internal.h"
 #import "AMAECommerceEventCondition.h"
-#import "AMAECommerce.h"
 #import "AMALightECommerceEvent.h"
 #import "AMALightRevenueEvent.h"
 

@@ -22,7 +22,7 @@
 
 + (NSError *)internalInconsistencyError
 {
-    return [AMAErrorUtilities errorWithCode:AMAAppMetricaEventErrorCodeInternalInconsistency
+    return [AMAErrorUtilities errorWithCode:AMAAppMetricaInternalEventErrorCodeInternalInconsistency
                                 description:@"Database inconsistency error"];
 }
 

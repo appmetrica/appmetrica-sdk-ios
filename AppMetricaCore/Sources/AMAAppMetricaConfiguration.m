@@ -39,6 +39,7 @@
     _sessionsAutoTracking = YES;
     _locationTrackingState = nil;
     _dataSendingEnabledState = nil;
+    _accurateLocationTracking = NO;
     _location = nil;
     _crashReporting = YES;
     _logs = NO;

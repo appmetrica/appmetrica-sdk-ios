@@ -23,9 +23,15 @@
 - (void)addAdditionalStartupParameters:(NSDictionary *)parameters
 {
     @synchronized (self) {
-        for (NSString *key in parameters) {
+        NSDictionary *filteredParams = [AMACollectionUtilities compactMapValuesOfDictionary:parameters
+                                                                                  withBlock:^id(id key, id value) {
+            BOOL validKey = [key isKindOfClass:NSString.class] && [key length] > 0;
+            BOOL validValue = [value isKindOfClass:NSString.class] && [value length] > 0;
+            return validKey && validValue ? value : nil;
+        }];
+        for (NSString *key in filteredParams) {
             id value = parameters[key];
-            if ([key isEqual:@"features"] && [value isKindOfClass:[NSString class]]) {
+            if ([key isEqual:@"features"]) {
                 NSString *currentFeatures = self.additionalParameters[key];
                 if (currentFeatures != nil) {
                     self.additionalParameters[key] = [NSString stringWithFormat:@"%@,%@", currentFeatures, value];
@@ -35,9 +41,7 @@
                 }
             }
             else {
-                if ([key isKindOfClass:[NSString class]] && [value isKindOfClass:[NSString class]]) {
-                    self.additionalParameters[key] = value;
-                }
+                self.additionalParameters[key] = value;
             }
         }
     }
@@ -69,7 +73,7 @@
     return parameters;
 }
 
-#pragma mark - Private
+#pragma mark - Private -
 
 - (void)appendAdditionalParameters:(NSMutableDictionary *)parameters
 {
@@ -86,6 +90,5 @@
         }
     }
 }
-
 
 @end

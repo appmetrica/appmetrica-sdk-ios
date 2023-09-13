@@ -1,12 +1,10 @@
 
-#import "AMACore.h"
 #import <AppMetricaStorageUtils/AppMetricaStorageUtils.h>
+#import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
 #import "AMAStartupParametersConfiguration.h"
 #import "AMAStorageKeys.h"
 #import "AMAPair.h"
 #import "AMAAttributionSerializer.h"
-#import "AMAAttributionModelConfiguration.h"
-#import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
 
 @implementation AMAStartupParametersConfiguration
 
@@ -134,8 +132,6 @@ BOOL_PROPERTY(permissionsCollectingEnabled, setPermissionsCollectingEnabled, AMA
 BOOL_PROPERTY(extensionsCollectingEnabled, setExtensionsCollectingEnabled, AMAStorageStringKeyExtensionsReportingEnabled);
 BOOL_PROPERTY(locationCollectingEnabled, setLocationCollectingEnabled, AMAStorageStringKeyLocationCollectingEnabled);
 BOOL_PROPERTY(locationVisitsCollectingEnabled, setLocationVisitsCollectingEnabled, AMAStorageStringKeyLocationVisitsCollectingEnabled);
-//TODO: Move dynamicLibraryCrashHookEnabled to Crashes!
-BOOL_PROPERTY(dynamicLibraryCrashHookEnabled, setDynamicLibraryCrashHookEnabled, AMAStorageStringKeyLibsDynamicCrashHookEnabled);
 
 
 - (NSArray<AMAPair *> *)attributionDeeplinkConditions

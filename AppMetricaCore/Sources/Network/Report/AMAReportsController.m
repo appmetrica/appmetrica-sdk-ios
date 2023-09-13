@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMAReportsController.h"
 #import "AMAReportHostProvider.h"
 #import "AMAReportRequest.h"
@@ -7,7 +6,6 @@
 #import "AMAApplicationStateManager.h"
 #import "AMAReportRequestModel.h"
 #import "AMAReportPayload.h"
-#import "AMAErrorsFactory.h"
 #import "AMARequestModelSplitter.h"
 #import "AMAAppMetrica+Internal.h"
 #import "AMAInternalEventsReporter.h"

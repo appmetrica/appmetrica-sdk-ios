@@ -1,7 +1,7 @@
 
 #import <Foundation/Foundation.h>
 
-@protocol AMAAppMetricaReporting ;
+@protocol AMAAppMetricaReporting;
 
 @protocol AMAReporterProviding <NSObject>
 

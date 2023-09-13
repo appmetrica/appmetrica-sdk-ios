@@ -5,7 +5,6 @@
 #import "AMAStartupPermissionController.h"
 #import "AMALocationCollectingController.h"
 #import "AMALocationCollectingConfiguration.h"
-#import "AMACore.h"
 #import <AppMetricaPlatform/AppMetricaPlatform.h>
 
 SPEC_BEGIN(AMALocationManagerTests)

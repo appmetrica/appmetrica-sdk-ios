@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMASQLiteIntegrityIssueParser.h"
 #import "AMASQLiteIntegrityIssue.h"
 #import <sqlite3.h>

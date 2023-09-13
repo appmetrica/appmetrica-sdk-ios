@@ -6,7 +6,6 @@
 #import "AMAAppMetricaImplTestFactory.h"
 #import "AMAEvent.h"
 #import "AMASession.h"
-#import "AMACore.h"
 #import "AMAEventStorage+TestUtilities.h"
 #import "AMAMetricaConfigurationTestUtilities.h"
 #import "AMADate.h"

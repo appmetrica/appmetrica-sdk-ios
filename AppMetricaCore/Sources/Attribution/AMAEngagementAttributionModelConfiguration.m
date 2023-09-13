@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMAEngagementAttributionModelConfiguration.h"
 #import "AMABoundMapping.h"
 #import "AMAClientEventCondition.h"

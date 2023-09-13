@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import <AppMetricaPlatform/AppMetricaPlatform.h>
 #import "AMAConfigurationDatabaseSchemeMigrationTo19.h"
 #import "AMAReporterStoragesContainer.h"

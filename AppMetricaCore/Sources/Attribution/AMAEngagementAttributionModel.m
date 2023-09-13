@@ -3,8 +3,6 @@
 #import "AMAEngagementAttributionModel.h"
 #import "AMAEventTypes.h"
 #import "AMAEventCountByKeyHelper.h"
-#import "AMAMetricaConfiguration.h"
-#import "AMAMetricaPersistentConfiguration.h"
 #import "AMAAttributionModelConfiguration.h"
 #import "AMAAttributionMapping.h"
 #import "AMAEngagementAttributionModelConfiguration.h"
@@ -80,7 +78,7 @@ static NSString *const key = @"engagement";
     return [self.boundMappingChecker check:[NSDecimalNumber zero] mappings:self.config.boundMappings];
 }
 
-#pragma mark Private
+#pragma mark Private -
 
 - (NSNumber *)checkAttributionWithType:(AMAEventType)type
                       conditionChecker:(BOOL (^)(AMAEventFilter *))conditionChecker

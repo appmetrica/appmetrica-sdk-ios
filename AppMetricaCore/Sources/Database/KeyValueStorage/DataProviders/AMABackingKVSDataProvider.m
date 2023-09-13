@@ -1,7 +1,5 @@
 
-#import "AMACore.h"
 #import "AMABackingKVSDataProvider.h"
-#import "AMAErrorsFactory.h"
 #import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
 
 @interface AMABackingKVSDataProvider()

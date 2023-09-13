@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMAFilledErrorEnvironmentComposer.h"
 #import "AMAReporterStateStorage.h"
 #import "AMAEnvironmentContainer.h"

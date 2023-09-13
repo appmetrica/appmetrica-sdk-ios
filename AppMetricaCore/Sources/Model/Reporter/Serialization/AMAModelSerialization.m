@@ -1,6 +1,5 @@
 
 #import "AMAModelSerialization.h"
-#import "AMACore.h"
 #import <AppMetricaProtobufUtils/AppMetricaProtobufUtils.h>
 
 @implementation AMAModelSerialization

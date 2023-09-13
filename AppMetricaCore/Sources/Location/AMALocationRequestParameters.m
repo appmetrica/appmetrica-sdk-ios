@@ -1,12 +1,11 @@
 
-#import "AMACore.h"
+#import <AppMetricaPlatform/AppMetricaPlatform.h>
 #import "AMALocationRequestParameters.h"
 #import "AMAStartupClientIdentifierFactory.h"
 #import "AMAStartupClientIdentifier.h"
 #import "AMAMetricaConfiguration.h"
 #import "AMAMetricaInMemoryConfiguration.h"
 #import "AMAAdProvider.h"
-#import <AppMetricaPlatform/AppMetricaPlatform.h>
 
 @implementation AMALocationRequestParameters
 

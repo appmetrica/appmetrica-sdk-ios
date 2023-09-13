@@ -1,5 +1,6 @@
 
 #import <Kiwi/Kiwi.h>
+#import <AppMetricaCore/AppMetricaCore.h>
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
 #import "AMAInternalEventsReporter.h"
 #import "AMAStubReporterProvider.h"
@@ -16,7 +17,7 @@ describe(@"AMAInternalEventsReporter", ^{
 
     beforeEach(^{
         executor = [AMACurrentQueueExecutor new];
-        reporterMock = [KWMock nullMockForProtocol:@protocol(AMAAppMetricaReporting )];
+        reporterMock = [KWMock nullMockForProtocol:@protocol(AMAAppMetricaReporting)];
         AMAStubReporterProvider *reporterProvider = [AMAStubReporterProvider new];
         reporterProvider.reporter = reporterMock;
         

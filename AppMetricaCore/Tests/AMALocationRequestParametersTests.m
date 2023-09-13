@@ -2,7 +2,6 @@
 #import <Kiwi/Kiwi.h>
 #import "AMALocationRequestParameters.h"
 #import "AMAMetricaConfigurationTestUtilities.h"
-#import "AMACore.h"
 #import "AMAStartupClientIdentifierFactory.h"
 #import "AMAStartupClientIdentifier.h"
 #import "AMAIdentifiersTestUtilities.h"

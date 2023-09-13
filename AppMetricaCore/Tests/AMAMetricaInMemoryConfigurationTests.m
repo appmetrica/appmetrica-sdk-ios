@@ -1,6 +1,5 @@
 
 #import <Kiwi/Kiwi.h>
-#import "AMACore.h"
 #import "AMAMetricaInMemoryConfiguration.h"
 #import <AppMetricaPlatform/AppMetricaPlatform.h>
 
@@ -66,20 +65,20 @@ describe(@"AMAMetricaInMemoryConfiguration", ^{
     });
     context(@"Started flag", ^{
         it(@"Should be NO", ^{
-            [[theValue(configuration.metricaStarted) should] beNo];
+            [[theValue(configuration.appMetricaStarted) should] beNo];
         });
         it(@"Should be YES after marked", ^{
-            [configuration markMetricaStarted];
-            [[theValue(configuration.metricaStarted) should] beYes];
+            [configuration markAppMetricaStarted];
+            [[theValue(configuration.appMetricaStarted) should] beYes];
         });
     });
     context(@"Impl created flag", ^{
         it(@"Should be NO", ^{
-            [[theValue(configuration.metricaImplCreated) should] beNo];
+            [[theValue(configuration.appMetricaImplCreated) should] beNo];
         });
         it(@"Should be YES after marked", ^{
-            [configuration markMetricaImplCreated];
-            [[theValue(configuration.metricaImplCreated) should] beYes];
+            [configuration markAppMetricaImplCreated];
+            [[theValue(configuration.appMetricaImplCreated) should] beYes];
         });
     });
 

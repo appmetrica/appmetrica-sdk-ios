@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMAInternalEventsReporter.h"
 #import "AMAReporter.h"
 #import "AMAReporterProviding.h"

@@ -101,7 +101,7 @@
 {
     NSString *errorMsg =
     [NSString stringWithFormat:@"Passed dictionary is not a valid serializable JSON object: %@", params];
-    return [AMAErrorUtilities errorWithCode:AMAAppMetricaEventErrorCodeJsonSerializationError
+    return [AMAErrorUtilities errorWithCode:AMAAppMetricaInternalEventJsonSerializationError
                                 description:errorMsg];
 }
 

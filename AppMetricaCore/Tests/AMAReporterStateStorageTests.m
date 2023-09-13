@@ -15,7 +15,6 @@ SPEC_BEGIN(AMAReporterStateStorageTests)
 describe(@"AMAReporterStateStorage", ^{
 
     NSDate *const lastStateSendDate = [NSDate dateWithTimeIntervalSince1970:23];
-    NSDate *const lastIdentitySendDate = [NSDate dateWithTimeIntervalSince1970:42];
     NSDate *const lastASATokenSendDate = [NSDate dateWithTimeIntervalSince1970:21];
 
     NSDate *__block now = nil;
@@ -163,7 +162,6 @@ describe(@"AMAReporterStateStorage", ^{
                 [kvStorage saveString:profileID forKey:@"profile_id" error:nil];
 
                 [kvStorage saveDate:lastStateSendDate forKey:@"last_state_send_date" error:nil];
-                [kvStorage saveDate:lastIdentitySendDate forKey:@"last_identity_send_date" error:nil];
                 [kvStorage saveDate:lastASATokenSendDate forKey:@"last_asa_token_send_date" error:NULL];
                 [kvStorage saveData:extrasData forKey:@"extras" error:nil];
 

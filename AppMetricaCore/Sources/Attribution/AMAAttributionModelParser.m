@@ -1,5 +1,6 @@
-#import "AMAAttributionModelConfiguration.h"
+
 #import "AMACore.h"
+#import "AMAAttributionModelConfiguration.h"
 #import "AMAAttributionModelParser.h"
 #import "AMAAttributionConvertingUtils.h"
 #import "AMAAttributionMapping.h"
@@ -13,8 +14,6 @@
 #import "AMARevenueAttributionModelConfiguration.h"
 #import "AMACurrencyMapping.h"
 #import "AMAEngagementAttributionModelConfiguration.h"
-#import "AMAInternalEventsReporter.h"
-#import "AMAAppMetrica.h"
 #import "AMAAppMetrica+Internal.h"
 
 static NSString *const kAMAKeySendingStopTimeSeconds = @"sending_stop_time_seconds";

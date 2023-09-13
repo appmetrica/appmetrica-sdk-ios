@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMALightECommerceEventConverter.h"
 #import "AMAECommerceUtils.h"
 #import "AMALightECommerceEvent.h"

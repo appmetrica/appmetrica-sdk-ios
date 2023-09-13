@@ -1,8 +1,6 @@
 
-#import "AMACore.h"
 #import "AMAConfigurationDatabaseSchemeMigrationTo4.h"
 #import "AMAMigrationUtils.h"
-
 #import "FMDB.h"
 
 @implementation AMAConfigurationDatabaseSchemeMigrationTo4

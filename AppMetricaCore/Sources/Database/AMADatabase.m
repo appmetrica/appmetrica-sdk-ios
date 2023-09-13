@@ -1,18 +1,13 @@
 
-#import "AMACore.h"
+#import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
 #import "AMADatabase.h"
 #import "AMADatabaseConstants.h"
 #import "AMATableSchemeController.h"
 #import "AMADatabaseMigrationManager.h"
 #import "AMAStorageTrimManager.h"
-#import "AMAKeyValueStorageConverting.h"
-#import "AMADatabaseKVSDataProvider.h"
-#import "AMASyncKeyValueStorageDataProvider.h"
-#import "AMAInMemoryKeyValueStorageDataProvider.h"
 #import "AMADatabaseQueueProvider.h"
 #import "AMADatabaseIntegrityManager.h"
 #import "AMADatabaseHelper.h"
-#import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
 #import "FMDB.h"
 
 @interface AMADatabase () <AMADatabaseIntegrityManagerDelegate>

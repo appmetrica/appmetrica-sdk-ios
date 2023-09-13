@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import <AppMetricaPlatform/AppMetricaPlatform.h>
 #import "AMASession.h"
 #import "AMADate.h"

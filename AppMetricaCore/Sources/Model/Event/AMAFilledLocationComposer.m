@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMAFilledLocationComposer.h"
 #import "AMALocationManager.h"
 

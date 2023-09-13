@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMAReporterNotifications.h"
 
 NSString *const kAMAReporterDidAddEventNotification = @"AMAReporterDidAddEventNotification";

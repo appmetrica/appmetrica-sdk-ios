@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMAPair.h"
 
 @implementation AMAPair

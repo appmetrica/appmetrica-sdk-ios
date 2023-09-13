@@ -1,6 +1,5 @@
 
 #import <Foundation/Foundation.h>
-
 #import "AMAPermissionKeys.h"
 
 @class AMAPermission;

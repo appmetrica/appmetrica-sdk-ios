@@ -1,6 +1,5 @@
 
 #import <Foundation/Foundation.h>
-#import "AMAEventTypes.h"
 
 @interface AMAEventCountByKeyHelper : NSObject
 

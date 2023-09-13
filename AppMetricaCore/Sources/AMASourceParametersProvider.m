@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMASourceParametersProvider.h"
 #import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
 #import <AppMetricaPlatform/AppMetricaPlatform.h>

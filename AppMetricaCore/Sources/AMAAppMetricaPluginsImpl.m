@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMAAppMetricaPluginsImpl.h"
 #import "AMAPluginErrorDetails.h"
 #import "AMAAppMetrica+Internal.h"
@@ -55,7 +54,7 @@
     }
     //https://nda.ya.ru/t/ImTM_Nm86fAGJu
     //TODO: Use resume session
-    [[AMAAppMetrica sharedHostStateProvider] forceUpdateToForeground];
+//    [[AMAAppMetrica sharedHostStateProvider] forceUpdateToForeground];
 }
 
 @end

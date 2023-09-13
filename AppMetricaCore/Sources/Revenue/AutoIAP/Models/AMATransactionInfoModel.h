@@ -1,6 +1,5 @@
 
 #import <Foundation/Foundation.h>
-
 #import "AMAPurchasesDefines.h"
 
 @interface AMATransactionInfoModel : NSObject

@@ -1,6 +1,6 @@
 
 #import <Foundation/Foundation.h>
-#import "AMACore.h"
+#import <AppMetricaHostState/AppMetricaHostState.h>
 
 @protocol AMAExecuting;
 @protocol AMAReporterProviding;

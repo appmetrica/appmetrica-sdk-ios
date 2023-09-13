@@ -20,7 +20,7 @@ static NSString *const kAMABundleName = @"AppMetrica_AppMetricaCoreTests";
     if (testTargetBundle == nil) {
         @throw [NSException exceptionWithName:@"NoModuleBundle"
                                        reason:@"Can't locate test target module"
-                                     userInfo:@{ NSURLErrorKey : testTargetBundle }];
+                                     userInfo:@{ NSURLErrorKey : resource }];
     }
     return testTargetBundle;
 #else

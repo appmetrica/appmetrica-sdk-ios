@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMADummyLocationComposer.h"
 
 @implementation AMADummyLocationComposer

@@ -8,7 +8,6 @@
 #import "AMAEvent.h"
 #import "AMALocationManager.h"
 #import "AMAMetricaConfigurationTestUtilities.h"
-#import "AMACore.h"
 #import "AMAReportEventsBatch.h"
 #import "AMAReportPayload.h"
 #import "AMAReportPayloadEncoderFactory.h"

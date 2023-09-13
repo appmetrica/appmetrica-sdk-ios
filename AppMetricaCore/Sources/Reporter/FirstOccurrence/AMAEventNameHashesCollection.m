@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMAEventNameHashesCollection.h"
 
 @implementation AMAEventNameHashesCollection

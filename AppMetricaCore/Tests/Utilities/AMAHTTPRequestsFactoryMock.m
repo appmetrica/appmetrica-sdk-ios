@@ -38,7 +38,7 @@
 
 + (instancetype)successWithCode:(NSInteger)code data:(NSData *)data headers:(NSDictionary *)headers
 {
-    NSString *anyHost = @"https://ya.ru/any"; // TODO(bamx23): Use one from request when needed
+    NSString *anyHost = @"https://appmetrica.io/any";
     NSHTTPURLResponse *response = [[NSHTTPURLResponse alloc] initWithURL:[NSURL URLWithString:anyHost]
                                                               statusCode:code
                                                              HTTPVersion:(__bridge NSString *)kCFHTTPVersion1_1
@@ -53,7 +53,7 @@
 + (instancetype)failureWithCode:(NSInteger)code error:(NSError *)error
 {
     return [[[self class] alloc] initWithReponseType:AMAHTTPRequestsMockResponseTypeFailure
-                                            response:nil // TODO(bamx23): Implement when needed
+                                            response:nil
                                           statusCode:code
                                                error:error
                                               result:nil];

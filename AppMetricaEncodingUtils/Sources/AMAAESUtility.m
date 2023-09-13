@@ -19,7 +19,6 @@
 
 + (NSData *)defaultIv
 {
-    //TODO: Is IV hardcoded backend?
     NSString *sourceString = [AMAPlatformDescription appID] ?: [AMAPlatformDescription SDKBundleName];
     const char *pointer = [sourceString UTF8String];
     unsigned char *md5Buffer = malloc(CC_MD5_DIGEST_LENGTH);

@@ -1,5 +1,4 @@
 
-#import "AMACore.h"
 #import "AMAAutoPurchasesWatcher.h"
 #import "AMAReporter.h"
 #import "AMARevenueInfoModel.h"

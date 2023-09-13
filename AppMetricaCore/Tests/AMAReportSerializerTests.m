@@ -8,7 +8,6 @@
 #import "AMAApplicationStateManager.h"
 #import "AMABinaryEventValue.h"
 #import "AMADate.h"
-#import "AMAErrorsFactory.h"
 #import "AMAEvent.h"
 #import "AMAFileEventValue.h"
 #import "AMAReportEventsBatch.h"

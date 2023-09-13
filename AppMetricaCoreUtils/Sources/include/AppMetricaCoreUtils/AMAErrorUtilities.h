@@ -9,18 +9,18 @@ extern NSString *const kAMAAppMetricaInternalErrorResultObjectKey;
 typedef NS_ERROR_ENUM(kAMAAppMetricaErrorDomain, AMAAppMetricaEventErrorCode) {
     AMAAppMetricaEventErrorCodeInitializationError = 1000,
     AMAAppMetricaEventErrorCodeInvalidName = 1001,
-    AMAAppMetricaEventErrorCodeJsonSerializationError = 1002,
-    AMAAppMetricaEventErrorCodeInvalidRevenueInfo = 1003,
-    AMAAppMetricaEventErrorCodeEmptyUserProfile = 1004,
-    AMAAppMetricaEventErrorCodeInternalInconsistency = 1005,
-    AMAAppMetricaEventErrorCodeInvalidBacktrace = 1006,
-    AMAAppMetricaEventErrorCodeInvalidAdRevenueInfo = 1007,
+    AMAAppMetricaEventErrorCodeInvalidRevenueInfo = 1002,
+    AMAAppMetricaEventErrorCodeEmptyUserProfile = 1003,
+    AMAAppMetricaEventErrorCodeInvalidBacktrace = 1004,
+    AMAAppMetricaEventErrorCodeInvalidAdRevenueInfo = 1005,
 };
 
 typedef NS_ERROR_ENUM(kAMAAppMetricaInternalErrorDomain, AMAAppMetricaInternalEventErrorCode) {
     AMAAppMetricaInternalEventErrorCodeRecrash = 2000,
     AMAAppMetricaInternalEventErrorCodeUnexpectedDeserialization = 2001,
     AMAAppMetricaInternalEventErrorCodeUnsupportedReportVersion = 2002,
+    AMAAppMetricaInternalEventErrorCodeInternalInconsistency = 2003,
+    AMAAppMetricaInternalEventJsonSerializationError = 2004,
     AMAAppMetricaInternalEventErrorCodeNamedError = 3000,
 };
 
