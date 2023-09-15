@@ -141,7 +141,11 @@ describe(@"AMAECommerceEventCondition", ^{
             });
         });
     });
-
+    
+    it(@"Should conform to AMAJSONSerializable", ^{
+        AMAECommerceEventCondition *condition = [[AMAECommerceEventCondition alloc] init];
+        [[condition should] conformToProtocol:@protocol(AMAJSONSerializable)];
+    });
 });
 
 SPEC_END

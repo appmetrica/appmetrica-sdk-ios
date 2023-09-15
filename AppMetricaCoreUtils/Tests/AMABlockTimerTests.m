@@ -47,6 +47,11 @@ describe(@"AMABlockTimer", ^{
         [timer performSelector:@selector(timerDidFire:) withObject:baseTimerMock];
         [[theValue(executed) should] beYes];
     });
+    it(@"Should comform to AMATimerDelegate", ^{
+        AMABlockTimer *timer = [[AMABlockTimer alloc] initWithTimeout:0
+                                                                block:^(AMABlockTimer * _Nonnull sender) {}];
+        [[timer should] conformToProtocol:@protocol(AMATimerDelegate)];
+    });
 });
 
 SPEC_END

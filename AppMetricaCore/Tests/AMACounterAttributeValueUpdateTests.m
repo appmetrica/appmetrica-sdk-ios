@@ -29,6 +29,9 @@ describe(@"AMACounterAttributeValueUpdate", ^{
         [[value.counterValue should] equal:@(delta)];
     });
 
+    it(@"Should conform to AMAAttributeValueUpdate", ^{
+        [[update should] conformToProtocol:@protocol(AMAAttributeValueUpdate)];
+    });
 });
 
 SPEC_END

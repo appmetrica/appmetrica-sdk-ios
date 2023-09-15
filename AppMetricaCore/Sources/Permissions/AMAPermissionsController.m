@@ -5,7 +5,7 @@
 #import "AMAPermissionsSerializer.h"
 #import "AMAPermissionsExtractor.h"
 
-@interface AMAPermissionsController()
+@interface AMAPermissionsController ()
 
 @property (nonatomic, strong, readonly) AMAPermissionsConfiguration *configuration;
 @property (nonatomic, strong, readonly) id<AMADateProviding> dateProvider;

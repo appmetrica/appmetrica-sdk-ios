@@ -192,6 +192,10 @@ describe(@"AMAStartupItemsChangedNotifier", ^{
             [[theValue(defaultBlockIsCalled) should] beNo];
         });
     });
+    
+    it(@"Should conform to AMAStartupCompletionObserving", ^{
+        [[notifier should] conformToProtocol:@protocol(AMAStartupCompletionObserving)];
+    });
 });
 
 SPEC_END

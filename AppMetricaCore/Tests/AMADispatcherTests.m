@@ -406,7 +406,10 @@ describe(@"AMADispatcher", ^{
         });
 
     });
-
+    
+    it(@"Should conform to AMAReportsControllerDelegate", ^{
+        [[dispatcher should] conformToProtocol:@protocol(AMAReportsControllerDelegate)];
+    });
 });
 
 SPEC_END

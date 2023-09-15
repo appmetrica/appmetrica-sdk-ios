@@ -149,6 +149,9 @@ describe(@"AMAProxyDataToStringKVSDataProvider", ^{
             [dataProvider saveObjectsDictionary:@{ @"a" : NSNull.null} error:NULL];
         });
     });
+    it(@"Should conform to AMAKeyValueStorageDataProviding", ^{
+        [[dataProvider should] conformToProtocol:@protocol(AMAKeyValueStorageDataProviding)];
+    });
 });
 
 SPEC_END

@@ -262,7 +262,10 @@ describe(@"AMASearchAdsController", ^{
         });
 
     });
-
+    
+    it(@"Should conform to AMASearchAdsRequesterDelegate", ^{
+        [[controller should] conformToProtocol:@protocol(AMASearchAdsRequesterDelegate)];
+    });
 });
 
 SPEC_END

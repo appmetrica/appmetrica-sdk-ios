@@ -42,7 +42,7 @@ static NSString *const kAMAKeyError = @"error";
 static NSString *const kAMAKeyModel = @"model";
 static NSString *const kAMAKeyJSON = @"json";
 
-@interface AMAAttributionModelParser()
+@interface AMAAttributionModelParser ()
 
 @property (nonatomic, strong, readonly) AMAInternalEventsReporter *reporter;
 

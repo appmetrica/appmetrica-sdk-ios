@@ -33,6 +33,10 @@ describe(@"AMAHostStatePublisher", ^{
         
         [hostStatePublisher hostStateDidChange];
     });
+    
+    it(@"Should comform to AMABroadcasting", ^{
+        [[hostStatePublisher should] conformToProtocol:@protocol(AMABroadcasting)];
+    });
 });
 
 SPEC_END

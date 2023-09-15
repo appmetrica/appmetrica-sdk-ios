@@ -34,6 +34,10 @@ describe(@"AMAArrayIterator", ^{
         id result = [iterator next];
         [[result should] beNil];
     });
+    
+    it(@"Should comform to AMAIterable", ^{
+        [[iterator should] conformToProtocol:@protocol(AMAIterable)];
+    });
 });
 
 SPEC_END

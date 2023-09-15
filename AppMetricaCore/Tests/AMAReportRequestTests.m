@@ -574,6 +574,9 @@ describe(@"AMAReportRequestTests", ^{
             });
         });
     });
+    it(@"Should be subclass of AMAGenericRequest", ^{
+        [[createReportRequest() should] beKindOfClass:AMAGenericRequest.class];
+    });
 });
 
 SPEC_END

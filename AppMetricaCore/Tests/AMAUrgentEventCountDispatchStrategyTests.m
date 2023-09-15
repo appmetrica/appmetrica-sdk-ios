@@ -124,6 +124,10 @@ describe(@"AMAUrgentEventCountDispatchStrategy", ^{
             [[theValue([strategy canBeExecuted:controller]) should] beNo];
         });
     });
+    
+    it(@"Should be subclass of DispatchStrategy", ^{
+        [[mockEnv(0) should] beKindOfClass:AMAEventCountDispatchStrategy.class];
+    });
 });
 
 SPEC_END

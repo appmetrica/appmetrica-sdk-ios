@@ -115,6 +115,9 @@ describe(@"AMAStringAttributeTruncator", ^{
         });
     });
 
+    it(@"Should conform to AMAStringTruncating", ^{
+        [[truncator should] conformToProtocol:@protocol(AMAStringTruncating)];
+    });
 });
 
 SPEC_END

@@ -341,6 +341,9 @@ describe(@"AMALocationManager", ^{
             });
         });
     });
+    it(@"Should conform to CLLocationManagerDelegate", ^{
+        [[[AMALocationManager sharedManager] should] conformToProtocol:@protocol(CLLocationManagerDelegate)];
+    });
 });
 
 SPEC_END

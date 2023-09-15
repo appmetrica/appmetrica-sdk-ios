@@ -10,7 +10,7 @@
 #import "AMAOpenIDComposer.h"
 #import "AMAExtrasComposer.h"
 
-@interface AMAEventComposer()
+@interface AMAEventComposer ()
 
 @property(nonatomic, strong, readonly) id<AMAProfileIdComposer> profileIdComposer;
 @property(nonatomic, strong, readonly) id<AMALocationComposer> locationComposer;

@@ -1152,7 +1152,13 @@ describe(@"AMAReportsController", ^{
         });
 
     });
-
+    
+    it(@"Should conform to AMAHTTPRequestDelegate", ^{
+        [[controller should] conformToProtocol:@protocol(AMAHTTPRequestDelegate)];
+    });
+    it(@"Should conform to AMAReportPayloadProviderDelegate", ^{
+        [[controller should] conformToProtocol:@protocol(AMAReportPayloadProviderDelegate)];
+    });
 });
 
 SPEC_END

@@ -53,7 +53,10 @@ describe(@"AMALocationRequest", ^{
             [[userAgentHeader[@"User-Agent"] should] equal:userAgent];
         });
     });
-
+    
+    it(@"Should be subclass of AMAGenericRequest", ^{
+        [[request should] beKindOfClass:AMAGenericRequest.class];
+    });
 });
 
 SPEC_END

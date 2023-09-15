@@ -63,6 +63,9 @@ describe(@"AMAGapExecutionCondition", ^{
             [condition shouldExecute];
         });
     });
+    it(@"Should comform to AMAExecutionCondition", ^{
+        [[condition should] conformToProtocol:@protocol(AMAExecutionCondition)];
+    });
 });
 
 SPEC_END

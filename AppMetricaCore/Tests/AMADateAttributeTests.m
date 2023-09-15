@@ -177,6 +177,9 @@ describe(@"AMADateAttribute", ^{
         });
     });
 
+    it(@"Should conform to AMABirthDateAttribute", ^{
+        [[attribute should] conformToProtocol:@protocol(AMABirthDateAttribute)];
+    });
 });
 
 SPEC_END

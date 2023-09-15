@@ -52,6 +52,11 @@ describe(@"AMABoundMapping", ^{
             [[theValue([first compare:second]) should] equal:theValue(NSOrderedAscending)];
         });
     });
+    
+    it(@"Should conform to AMAJSONSerializable", ^{
+        AMABoundMapping *mapping = [[AMABoundMapping alloc] init];
+        [[mapping should] conformToProtocol:@protocol(AMAJSONSerializable)];
+    });
 });
 
 SPEC_END

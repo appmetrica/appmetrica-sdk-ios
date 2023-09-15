@@ -23,23 +23,23 @@ describe(@"AMAApplicationState", ^{
                                                                  appBuildNumber:@"1.1.1"];
     });
 
-    it(@"should conform to AMADictionaryRepresentation protocol", ^{
+    it(@"Should conform to AMADictionaryRepresentation protocol", ^{
         [[appState should] conformToProtocol:@protocol(AMADictionaryRepresentation)];
     });
     
-    it(@"should conform to NSCopying protocol", ^{
+    it(@"Should conform to NSCopying protocol", ^{
         [[appState should] conformToProtocol:@protocol(NSCopying)];
     });
     
-    it(@"should conform to NSMutableCopying protocol", ^{
+    it(@"Should conform to NSMutableCopying protocol", ^{
         [[appState should] conformToProtocol:@protocol(NSMutableCopying)];
     });
     
-    it(@"shoudl compare empty app states", ^{
+    it(@"Should compare empty app states", ^{
         [[[AMAApplicationState new] should] equal:[AMAApplicationState new]];
     });
 
-    context(@"when initialized with dictionary", ^{
+    context(@"When initialized with dictionary", ^{
         NSDictionary *const kAMATestDictionary = @{
             @"app_build_number": @"200",
             @"app_debuggable": @"1",

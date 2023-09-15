@@ -240,7 +240,10 @@ describe(@"AMAGenericStringKeyValueStorageProvider", ^{
             });
         });
     });
-
+    
+    it(@"Should conform to AMAKeyValueStorageProviding", ^{
+        [[provider should] conformToProtocol:@protocol(AMAKeyValueStorageProviding)];
+    });
 });
 
 SPEC_END

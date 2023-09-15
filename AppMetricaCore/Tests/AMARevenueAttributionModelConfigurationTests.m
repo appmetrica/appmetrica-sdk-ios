@@ -105,6 +105,11 @@ describe(@"AMARevenueAttributionModelConfiguration", ^{
             [[[config JSON] should] equal:expectedJSON];
         });
     });
+    
+    it(@"Should conform to AMAJSONSerializable", ^{
+        __auto_type *configuration = [[AMARevenueAttributionModelConfiguration alloc] init];
+        [[configuration should] conformToProtocol:@protocol(AMAJSONSerializable)];
+    });
 });
 
 SPEC_END

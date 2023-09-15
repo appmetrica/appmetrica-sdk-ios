@@ -1009,7 +1009,6 @@ describe(@"AMAAppMetrica", ^{
                 
                 activate();
             });
-            
             it(@"Should register event flushable delegate", ^{
                 stubMetricaStarted(YES);
     
@@ -1021,6 +1020,55 @@ describe(@"AMAAppMetrica", ^{
                 [[eventFlushableDelegate should] receive:@selector(sendEventsBuffer)];
     
                 [AMAAppMetrica sendEventsBuffer];
+            });
+            it(@"Should return extended reporter", ^{
+                stubMetricaStarted(NO);
+                
+                activate();
+                
+                id extendedReporter = [AMAAppMetrica extendedReporterForApiKey:apiKey];
+                id reporter = [AMAAppMetrica reporterForApiKey:apiKey];
+                
+                [[extendedReporter should] beNonNil];
+                [[extendedReporter should] equal:reporter];
+            });
+            it(@"Should mark external services configured on main reporter activation", ^{
+                stubMetricaStarted(NO);
+                [[AMAMetricaConfiguration sharedInstance].inMemory stub:@selector(externalServicesConfigured) andReturn:theValue(NO)];
+    
+                [[[AMAMetricaConfiguration sharedInstance].inMemory should] receive:@selector(markExternalServicesConfigured)];
+                
+                activate();
+            });
+            it(@"Should mark external services configured on secondary reporter activation", ^{
+                stubMetricaStarted(NO);
+                [[AMAMetricaConfiguration sharedInstance].inMemory stub:@selector(externalServicesConfigured) andReturn:theValue(NO)];
+    
+                [[[AMAMetricaConfiguration sharedInstance].inMemory should] receive:@selector(markExternalServicesConfigured)];
+                
+                [AMAAppMetrica activateReporterWithConfiguration:[[AMAReporterConfiguration alloc] initWithApiKey:apiKey]];
+            });
+            it(@"Should not setup external services on main activation if already configured", ^{
+                stubMetricaStarted(NO);
+                [[AMAMetricaConfiguration sharedInstance].inMemory stub:@selector(externalServicesConfigured) andReturn:theValue(YES)];
+    
+                [[[AMAMetricaConfiguration sharedInstance].inMemory shouldNot] receive:@selector(markExternalServicesConfigured)];
+                [[impl shouldNot] receive:@selector(setExtendedStartupObservers:)];
+                [[impl shouldNot] receive:@selector(setExtendedReporterStorageControllers:)];
+                [[adProvider shouldNot] receive:@selector(setupAdProvider:)];
+                
+                activate();
+            });
+            it(@"Should not setup external services on secondary reporter activation if already configured", ^{
+                stubMetricaStarted(NO);
+                [[AMAMetricaConfiguration sharedInstance].inMemory stub:@selector(externalServicesConfigured) andReturn:theValue(YES)];
+    
+                [[[AMAMetricaConfiguration sharedInstance].inMemory shouldNot] receive:@selector(markExternalServicesConfigured)];
+                [[impl shouldNot] receive:@selector(setExtendedStartupObservers:)];
+                [[impl shouldNot] receive:@selector(setExtendedReporterStorageControllers:)];
+                [[adProvider shouldNot] receive:@selector(setupAdProvider:)];
+                
+                [AMAAppMetrica activateReporterWithConfiguration:[[AMAReporterConfiguration alloc] initWithApiKey:apiKey]];
             });
             context(@"Service Configuration", ^{
                 context(@"Startup observer", ^{

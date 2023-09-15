@@ -72,7 +72,15 @@ describe(@"AMABuildUID", ^{
         
         [[buildUID.stringValue should] beNonNil];
     });
-
+    
+    it(@"Should comform to NSCopying", ^{
+        AMABuildUID *buildUID = [AMABuildUID buildUID];
+        [[buildUID should] conformToProtocol:@protocol(NSCopying)];
+    });
+    it(@"Should comform to NSSecureCoding", ^{
+        AMABuildUID *buildUID = [AMABuildUID buildUID];
+        [[buildUID should] conformToProtocol:@protocol(NSSecureCoding)];
+    });
 });
 
 SPEC_END

@@ -140,7 +140,10 @@ describe(@"AMACompositeDataEncoder", ^{
             });
         });
     });
-
+    
+    it(@"Should comform to AMADataEncoding", ^{
+        [[encoder should] conformToProtocol:@protocol(AMADataEncoding)];
+    });
 });
 
 SPEC_END

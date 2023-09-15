@@ -67,6 +67,9 @@ describe(@"AMAGZipDataEncoder", ^{
         [[error should] beNonNil];
     });
     
+    it(@"Should comform to AMADataEncoding", ^{
+        [[encoder should] conformToProtocol:@protocol(AMADataEncoding)];
+    });
 });
 
 SPEC_END

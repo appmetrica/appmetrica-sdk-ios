@@ -6,7 +6,7 @@
 #import "AMAMetricaConfiguration.h"
 #import "AMAMetricaPersistentConfiguration.h"
 
-@interface AMAAttributionController()
+@interface AMAAttributionController ()
 
 @property (nonatomic, assign, readwrite) BOOL inited;
 

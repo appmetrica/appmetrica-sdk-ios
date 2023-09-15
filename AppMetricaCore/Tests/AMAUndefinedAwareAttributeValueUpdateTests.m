@@ -157,6 +157,9 @@ describe(@"AMAUndefinedAwareAttributeValueUpdate", ^{
         });
     });
 
+    it(@"Should conform to AMAAttributeValueUpdate", ^{
+        [[update should] conformToProtocol:@protocol(AMAAttributeValueUpdate)];
+    });
 });
 
 SPEC_END

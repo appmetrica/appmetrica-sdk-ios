@@ -51,6 +51,11 @@ describe(@"AMARevenueEventCondition", ^{
             [[theValue([condition checkEvent:NO]) should] beYes];
         });
     });
+    
+    it(@"Should conform to AMAJSONSerializable", ^{
+        AMARevenueEventCondition *condition = [[AMARevenueEventCondition alloc] init];
+        [[condition should] conformToProtocol:@protocol(AMAJSONSerializable)];
+    });
 });
 
 SPEC_END

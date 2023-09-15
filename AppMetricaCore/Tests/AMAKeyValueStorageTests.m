@@ -516,7 +516,10 @@ describe(@"AMAKeyValueStorage", ^{
             });
         });
     });
-
+    
+    it(@"Should conform to AMAKeyValueStoring", ^{
+        [[storage should] conformToProtocol:@protocol(AMAKeyValueStoring)];
+    });
 });
 
 SPEC_END

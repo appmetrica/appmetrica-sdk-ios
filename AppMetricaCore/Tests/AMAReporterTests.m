@@ -1732,6 +1732,22 @@ describe(@"AMAReporter", ^{
             });
         });
     });
+    
+    context(@"Protocols", ^{
+        __block id reporter = nil;
+        beforeEach(^{
+            reporter = [reporterTestHelper appReporterForApiKey:apiKey];
+        });
+        it(@"Should conform to AMAAppMetricaReporting", ^{
+            [[(NSObject *)reporter should] conformToProtocol:@protocol(AMAAppMetricaReporting)];
+        });
+        it(@"Should conform to AMAAppMetricaExtendedReporting", ^{
+            [[(NSObject *)reporter should] conformToProtocol:@protocol(AMAAppMetricaExtendedReporting)];
+        });
+        it(@"Should conform to AMAJSReporting", ^{
+            [[(NSObject *)reporter should] conformToProtocol:@protocol(AMAJSReporting)];
+        });
+    });
 });
 
 SPEC_END

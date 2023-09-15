@@ -6,7 +6,7 @@
 #import "AMAMetricaPersistentConfiguration.h"
 #import "AMABoundMappingChecker.h"
 
-@interface AMAEventSumBoundBasedModelHelper()
+@interface AMAEventSumBoundBasedModelHelper ()
 
 @property (nonatomic, strong, readonly) AMABoundMappingChecker *boundMappingChecker;
 

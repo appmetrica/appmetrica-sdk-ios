@@ -101,7 +101,10 @@ describe(@"AMABytesStringTruncator", ^{
             });
         });
     });
-
+    
+    it(@"Should comform to AMAStringTruncating", ^{
+        [[truncator should] conformToProtocol:@protocol(AMAStringTruncating)];
+    });
 });
 
 SPEC_END

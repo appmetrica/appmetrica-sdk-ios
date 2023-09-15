@@ -40,7 +40,13 @@ describe(@"AMAPermissiveTruncator", ^{
             [[theValue(called) should] beNo];
         });
     });
-
+    
+    it(@"Should comform to AMAStringTruncating", ^{
+        [[truncator should] conformToProtocol:@protocol(AMAStringTruncating)];
+    });
+    it(@"Should comform to AMADataTruncating", ^{
+        [[truncator should] conformToProtocol:@protocol(AMADataTruncating)];
+    });
 });
 
 SPEC_END

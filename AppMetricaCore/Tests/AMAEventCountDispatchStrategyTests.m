@@ -135,6 +135,10 @@ describe(@"AMAEventCountDispatchStrategy", ^{
             [[theValue([strategy canBeExecuted:controller]) should] beNo];
         });
 	});
+    
+    it(@"Should be subclass of DispatchStrategy", ^{
+        [[strategy should] beKindOfClass:AMADispatchStrategy.class];
+    });
 });
 
 SPEC_END

@@ -42,6 +42,9 @@ describe(@"AMACustomCounterAttribute", ^{
         });
     });
 
+    it(@"Should conform to AMACustomCounterAttribute", ^{
+        [[attribute should] conformToProtocol:@protocol(AMACustomCounterAttribute)];
+    });
 });
 
 SPEC_END

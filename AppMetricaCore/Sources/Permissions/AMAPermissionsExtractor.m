@@ -5,7 +5,7 @@
 #import "AMAPermission.h"
 #import "AMAAdProvider.h"
 
-@interface AMAPermissionsExtractor()
+@interface AMAPermissionsExtractor ()
 
 - (AMAPermissionGrantType)ATTStatus API_AVAILABLE(ios(14.0));
 

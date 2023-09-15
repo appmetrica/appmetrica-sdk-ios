@@ -8,7 +8,7 @@
 #import "AMAEventTypes.h"
 #import "AMAReporterStateStorage.h"
 
-@interface AMAEventComposerProvider()
+@interface AMAEventComposerProvider ()
 
 @property(nonatomic, strong, readonly) AMAReporterStateStorage *stateStorage;
 @property(nonatomic, strong, readonly) NSDictionary<NSNumber *, AMAEventComposer *> *composers;

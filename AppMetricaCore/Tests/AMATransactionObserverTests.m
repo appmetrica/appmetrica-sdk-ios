@@ -126,6 +126,9 @@ describe(@"AMATransactionObserver", ^{
             [observer paymentQueue:paymentQueueMock updatedTransactions:@[ transaction, second, third ]];
         });
     });
+    it(@"Should conform to SKPaymentTransactionObserver", ^{
+        [[observer should] conformToProtocol:@protocol(SKPaymentTransactionObserver)];
+    });
 });
 
 SPEC_END

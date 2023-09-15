@@ -287,7 +287,14 @@ describe(@"AMADatabaseKeyValueStorageDataProvider", ^{
             });
         });
     });
-
+    
+    it(@"Should conform to AMAKeyValueStorageDataProviding", ^{
+        AMADatabaseKVSDataProvider *provider =
+            [[AMADatabaseKVSDataProvider alloc] initWithDatabase:nil
+                                                       tableName:kAMAKeyValueTableName
+                                                  objectProvider:nil];
+        [[provider should] conformToProtocol:@protocol(AMAKeyValueStorageDataProviding)];
+    });
 });
 
 SPEC_END

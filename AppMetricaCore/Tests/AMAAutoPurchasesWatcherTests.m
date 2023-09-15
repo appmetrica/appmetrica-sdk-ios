@@ -105,6 +105,14 @@ describe(@"AMAAutoPurchasesWatcher", ^{
             });
         });
     });
+    context(@"Protocols", ^{
+        it(@"Should conform to AMATransactionObserverDelegate", ^{
+            [[watcher should] conformToProtocol:@protocol(AMATransactionObserverDelegate)];
+        });
+        it(@"Should conform to AMAProductRequestorDelegate", ^{
+            [[watcher should] conformToProtocol:@protocol(AMAProductRequestorDelegate)];
+        });
+    });
 });
 
 SPEC_END

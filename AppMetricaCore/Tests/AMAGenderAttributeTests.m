@@ -65,6 +65,9 @@ describe(@"AMAGenderAttribute", ^{
         });
     });
 
+    it(@"Should conform to AMAGenderAttribute", ^{
+        [[attribute should] conformToProtocol:@protocol(AMAGenderAttribute)];
+    });
 });
 
 SPEC_END

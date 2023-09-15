@@ -72,6 +72,9 @@ describe(@"AMAAttributeKey", ^{
         });
     });
 
+    it(@"Should conform to NSCopying", ^{
+        [[key should] conformToProtocol:@protocol(NSCopying)];
+    });
 });
 
 SPEC_END

@@ -90,6 +90,9 @@ describe(@"AMANumberAttribute", ^{
         });
     });
 
+    it(@"Should conform to AMACustomNumberAttribute", ^{
+        [[attribute should] conformToProtocol:@protocol(AMACustomNumberAttribute)];
+    });
 });
 
 SPEC_END

@@ -15,7 +15,7 @@
 #import "AMAFilledOpenIDComposer.h"
 #import "AMAOpenIDComposer.h"
 
-@interface AMAEventComposer()
+@interface AMAEventComposer ()
 
 @property(nonatomic, strong, readonly) id profileIdComposer;
 @property(nonatomic, strong, readonly) id locationComposer;

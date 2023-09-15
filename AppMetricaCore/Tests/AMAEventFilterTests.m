@@ -91,6 +91,11 @@ describe(@"AMAEventFilter", ^{
             [[[filter JSON] should] equal:expectedJSON];
         });
     });
+    
+    it(@"Should conform to AMAJSONSerializable", ^{
+        AMAEventFilter *filter = [[AMAEventFilter alloc] init];
+        [[filter should] conformToProtocol:@protocol(AMAJSONSerializable)];
+    });
 });
 
 SPEC_END

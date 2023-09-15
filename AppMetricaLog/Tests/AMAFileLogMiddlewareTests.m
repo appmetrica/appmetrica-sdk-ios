@@ -18,7 +18,8 @@ static const NSUInteger maxBufferLength = 1024;
 
 @implementation AMAFileLogMiddlewareTests
 
-- (void)setUp {
+- (void)setUp
+{
     [super setUp];
 
     if( pipe(_out_pipe) != 0 ) {
@@ -41,7 +42,8 @@ static const NSUInteger maxBufferLength = 1024;
     self.middleware = [[AMAFileLogMiddleware alloc] initWithFileHandle:handle];
 }
 
-- (void)tearDown {
+- (void)tearDown
+{
     self.handle = nil;
     close(_out_pipe[0]);
     close(_out_pipe[1]);
@@ -50,7 +52,8 @@ static const NSUInteger maxBufferLength = 1024;
     [super tearDown];
 }
 
-- (NSString *)bufferString {
+- (NSString *)bufferString
+{
     fflush(_stream);
     [self.handle synchronizeFile];
     read(_out_pipe[0], _buffer, maxBufferLength);
@@ -58,32 +61,42 @@ static const NSUInteger maxBufferLength = 1024;
     return str;
 }
 
-- (void)testAppendNewLine {
+- (void)testAppendNewLine
+{
     [self.middleware logMessage:@"" level:AMALogLevelNotify];
 
     NSString *loggedString = self.bufferString;
     XCTAssertEqualObjects(loggedString, @"\n");
 }
 
-- (void)testLogAsciiMessages {
+- (void)testLogAsciiMessages
+{
     [self.middleware logMessage:@"Hello log" level:AMALogLevelNotify];
 
     NSString *log = self.bufferString;
     XCTAssertEqualObjects(log, @ "Hello log\n");
 }
 
-- (void)testLogCyrillicMessages {
+- (void)testLogCyrillicMessages
+{
     [self.middleware logMessage:@"Привет йогурт" level:AMALogLevelNotify];
 
     NSString *log = self.bufferString;
     XCTAssertEqualObjects(log, @"Привет йогурт\n");
 }
 
-- (void)testLogNilStrings {
+- (void)testLogNilStrings
+{
     [self.middleware logMessage:nil level:AMALogLevelNotify];
 
     NSString *log = self.bufferString;
     XCTAssertEqualObjects(log, @"");
+}
+
+- (void)testConformance
+{
+    XCTAssertTrue([self.middleware conformsToProtocol:@protocol(AMALogMiddleware)],
+                  @"Should conform to AMALogMiddleware");
 }
 
 @end

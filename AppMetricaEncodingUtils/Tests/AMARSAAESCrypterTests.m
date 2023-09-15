@@ -62,7 +62,10 @@ describe(@"AMARSAAESCrypter", ^{
             [[error shouldNot] beNil];
         });
     });
-
+    
+    it(@"Should comform to AMADataEncoding", ^{
+        [[crypter should] conformToProtocol:@protocol(AMADataEncoding)];
+    });
 });
 
 SPEC_END

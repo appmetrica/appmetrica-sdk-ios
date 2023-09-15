@@ -68,6 +68,13 @@ describe(@"AMAHostStateProvider", ^{
         [[hostStateProviderDelegate should] receive:@selector(hostStateDidChange:) withArguments:theValue(AMAHostAppStateTerminated)];
         [provider hostStateProviderDidChangeHostState];
     });
+    
+    it(@"Should comform to AMAHostStateProviding", ^{
+        [[provider should] conformToProtocol:@protocol(AMAHostStateProviding)];
+    });
+    it(@"Should comform to AMAHostStateProviderObserver", ^{
+        [[provider should] conformToProtocol:@protocol(AMAHostStateProviderObserver)];
+    });
 });
 
 SPEC_END

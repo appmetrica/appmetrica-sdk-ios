@@ -40,6 +40,10 @@ describe(@"AMASelfReportExecutionConditionChecker", ^{
             });
         });
     });
+    
+    it(@"Should conform to AMAReportExecutionConditionChecker", ^{
+        [[checker should] conformToProtocol:@protocol(AMAReportExecutionConditionChecker)];
+    });
 });
 
 SPEC_END

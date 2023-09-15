@@ -10,7 +10,7 @@ NSString *const kAMAKeychainErrorKeyCode = @"kAMAKeychainErrorKeyCode";
 static NSString *const AMAKeychainAvailabilityCheckObjectKey = @"AMAKeychainAvailabilityCheckObjectKey";
 static NSString *const AMAKeychainAvailabilityCheckObject = @"AMAKeychainAvailabilityCheckObject";
 
-@interface AMAKeychain()
+@interface AMAKeychain ()
 
 @property (nonatomic, strong) AMAKeychainQueryBuilder *queryBuilder;
 @property (nonatomic, strong) AMAKeychainBridge *bridge;

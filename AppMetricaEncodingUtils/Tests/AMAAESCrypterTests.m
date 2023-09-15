@@ -35,7 +35,10 @@ describe(@"AMAAESCrypter", ^{
         NSData *decodedData = [crypter decodeData:encodedData error:NULL];
         [[decodedData should] equal:data];
     });
-
+    
+    it(@"Should comform to AMADataEncoding", ^{
+        [[crypter should] conformToProtocol:@protocol(AMADataEncoding)];
+    });
 });
 
 SPEC_END

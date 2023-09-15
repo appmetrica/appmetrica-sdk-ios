@@ -227,6 +227,9 @@ describe(@"AMABinaryDatabaseKeyValueStorageConverter", ^{
         });
     });
 
+    it(@"Should conform to AMAKeyValueStorageConverting", ^{
+        [[converter should] conformToProtocol:@protocol(AMAKeyValueStorageConverting)];
+    });
 });
 
 SPEC_END

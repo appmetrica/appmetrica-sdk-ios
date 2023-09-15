@@ -412,6 +412,9 @@ describe(@"AMAJSONFileKeyValueStorageDataProvider", ^{
         });
     });
     
+    it(@"Should conform to AMAKeyValueStorageDataProviding", ^{
+        [[provider should] conformToProtocol:@protocol(AMAKeyValueStorageDataProviding)];
+    });
 });
 
 SPEC_END

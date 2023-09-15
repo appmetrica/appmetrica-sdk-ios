@@ -7,7 +7,7 @@ static uint32_t const kAMAValidAPIKeyUInt = 21784;
 
 static NSString *const kAMAValidAppBuildNumber = @"3417";
 
-SPEC_BEGIN(AMAMetricaParametersScannerSpec)
+SPEC_BEGIN(AMAMetricaParametersScannerTests)
 
 describe(@"AMAMetricaParametersScanner", ^{
     context(@"Should scan APIKey", ^{

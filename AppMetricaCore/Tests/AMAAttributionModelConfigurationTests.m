@@ -176,6 +176,11 @@ describe(@"AMAAttributionModelConfiguration", ^{
             [[[config JSON] should] equal:expectedJSON];
         });
     });
+    
+    it(@"Should conform to AMAJSONSerializable", ^{
+        __auto_type *configuration = [[AMAAttributionModelConfiguration alloc] init];
+        [[configuration should] conformToProtocol:@protocol(AMAJSONSerializable)];
+    });
 });
 
 SPEC_END

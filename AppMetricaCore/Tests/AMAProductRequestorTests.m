@@ -118,6 +118,9 @@ describe(@"AMAProductRequestor", ^{
             });
         });
     });
+    it(@"Should conform to SKProductsRequestDelegate", ^{
+        [[requestor should] conformToProtocol:@protocol(SKProductsRequestDelegate)];
+    });
 });
 
 SPEC_END

@@ -56,6 +56,9 @@ describe(@"AMAAdController", ^{
             }
         });
     });
+    it(@"Should comform to AMAAdProviding", ^{
+        [[adController should] conformToProtocol:@protocol(AMAAdProviding)];
+    });
 });
 
 SPEC_END

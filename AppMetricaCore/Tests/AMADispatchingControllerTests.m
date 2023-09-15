@@ -155,7 +155,6 @@ describe(@"AMADispatchingController", ^{
             [controller dispatcherWillFinishDispatching:dispatcher];
         });
     });
-
 });
 
 SPEC_END

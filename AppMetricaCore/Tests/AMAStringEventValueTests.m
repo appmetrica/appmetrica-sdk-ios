@@ -49,7 +49,10 @@ describe(@"AMAStringEventValue", ^{
             [[theValue(value.encryptionType) should] equal:theValue(AMAEventEncryptionTypeNoEncryption)];
         });
     });
-
+    
+    it(@"Should conform to AMAEventValueProtocol", ^{
+        [[value should] conformToProtocol:@protocol(AMAEventValueProtocol)];
+    });
 });
 
 SPEC_END

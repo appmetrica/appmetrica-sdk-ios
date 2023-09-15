@@ -193,6 +193,10 @@ describe(@"AMADatabaseKeyValueStorageProvider", ^{
             }];
         });
     });
+    
+    it(@"Should conform to AMADatabaseKeyValueStorageProviding", ^{
+        [[provider should] conformToProtocol:@protocol(AMADatabaseKeyValueStorageProviding)];
+    });
 });
 
 SPEC_END

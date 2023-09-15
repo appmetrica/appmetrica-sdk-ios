@@ -8,7 +8,7 @@
 static NSUInteger const kAMADefaultMaxTimeout = 600;
 static NSUInteger const kAMADefaultMultiplier = 1;
 
-@interface AMATimeoutRequestsController()
+@interface AMATimeoutRequestsController ()
 
 @property (nonatomic, strong, readonly) AMAHostType hostType;
 @property (nonatomic, strong, readonly) id<AMADateProviding> dateProvider;

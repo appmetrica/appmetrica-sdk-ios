@@ -5,7 +5,7 @@
 #import "AMAECommerceSerializer.h"
 #import <AppMetricaProtobufUtils/AppMetricaProtobufUtils.h>
 
-@interface AMALightECommerceEventConverter()
+@interface AMALightECommerceEventConverter ()
 
 @property (nonatomic, strong, readonly) AMAECommerceSerializer *serializer;
 

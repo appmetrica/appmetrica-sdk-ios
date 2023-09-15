@@ -5,7 +5,7 @@
 #import "AMAReporterStorage.h"
 #import "AMAReportExecutionConditionChecker.h"
 
-SPEC_BEGIN(AMADispatchStrategiesFactoryTestsSpec)
+SPEC_BEGIN(AMADispatchStrategiesFactoryTests)
 
 describe(@"AMADispatchStrategiesFactoryTests", ^{
     it(@"Test important strategy creation", ^{

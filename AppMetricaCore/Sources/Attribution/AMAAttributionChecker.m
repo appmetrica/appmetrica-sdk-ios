@@ -15,7 +15,7 @@
 #import "AMALightRevenueEventConverter.h"
 #import "AMALightRevenueEvent.h"
 
-@interface AMAAttributionChecker()
+@interface AMAAttributionChecker ()
 
 @property (nonatomic, strong, readonly) AMAAttributionModelConfiguration *config;
 @property (nonatomic, strong, readonly) AMAReporter *reporter;

@@ -2,7 +2,7 @@
 #import <Kiwi/Kiwi.h>
 #import "AMAReachability+TestUtilities.h"
 
-SPEC_BEGIN(AMAReachabilityTestsSpec)
+SPEC_BEGIN(AMAReachabilityTests)
 
 describe(@"AMAReachabilityTests", ^{
 	context(@"Provides correct network status", ^{

@@ -94,6 +94,10 @@ describe(@"AMAApplicationHostStateProvider", ^{
             [center postNotificationName:UIApplicationWillTerminateNotification object:nil];
         });
     });
+    
+    it(@"Should comform to AMAHostStateControlling", ^{
+        [[provider should] conformToProtocol:@protocol(AMAHostStateControlling)];
+    });
 });
 
 SPEC_END

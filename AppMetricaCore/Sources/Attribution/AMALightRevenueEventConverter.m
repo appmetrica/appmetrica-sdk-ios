@@ -8,7 +8,7 @@
 #import "AMARevenueInfoModelSerializer.h"
 #import <AppMetricaProtobufUtils/AppMetricaProtobufUtils.h>
 
-@interface AMALightRevenueEventConverter()
+@interface AMALightRevenueEventConverter ()
 
 @property (nonatomic, strong, readonly) AMARevenueInfoModelSerializer *serializer;
 

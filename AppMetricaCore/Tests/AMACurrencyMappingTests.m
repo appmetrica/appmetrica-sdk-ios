@@ -117,6 +117,11 @@ describe(@"AMACurrencyMapping", ^{
             [[error should] beNil];
         });
     });
+    
+    it(@"Should conform to AMAJSONSerializable", ^{
+        AMACurrencyMapping *mapping = [[AMACurrencyMapping alloc] init];
+        [[mapping should] conformToProtocol:@protocol(AMAJSONSerializable)];
+    });
 });
 
 SPEC_END

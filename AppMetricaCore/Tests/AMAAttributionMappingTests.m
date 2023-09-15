@@ -68,6 +68,10 @@ describe(@"AMAAttributionMapping", ^{
             [[[mapping JSON] should] equal:expectedJSON];
         });
     });
+    it(@"Should conform to AMAJSONSerializable", ^{
+        AMAAttributionMapping *mapping = [[AMAAttributionMapping alloc] init];
+        [[mapping should] conformToProtocol:@protocol(AMAJSONSerializable)];
+    });
 });
 
 SPEC_END

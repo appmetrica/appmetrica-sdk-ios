@@ -13,6 +13,7 @@
 
 NSString *const kAMAReportPayloadProviderErrorDomain = @"io.appmetrica.AMAReportPayloadProvider";
 
+//TODO: Add unit-tests
 @interface AMAReportPayloadProvider () <AMAReportSerializerDelegate>
 
 @property (nonatomic, strong, readonly) id<AMADataEncoding> encoder;

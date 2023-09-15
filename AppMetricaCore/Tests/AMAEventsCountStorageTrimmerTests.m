@@ -104,6 +104,10 @@ describe(@"AMAEventsCountStorageTrimmer", ^{
         [trimmer handleEventAdding];
         [trimmer trimDatabase:database];
     });
+    
+    it(@"Should conform to AMAStorageTrimming", ^{
+        [[trimmer should] conformToProtocol:@protocol(AMAStorageTrimming)];
+    });
 });
 
 SPEC_END

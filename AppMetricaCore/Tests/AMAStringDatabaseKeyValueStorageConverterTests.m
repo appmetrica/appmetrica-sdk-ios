@@ -216,6 +216,9 @@ describe(@"AMAStringDatabaseKeyValueStorageConverter", ^{
         });
     });
 
+    it(@"Should conform to AMAKeyValueStorageConverting", ^{
+        [[converter should] conformToProtocol:@protocol(AMAKeyValueStorageConverting)];
+    });
 });
 
 SPEC_END

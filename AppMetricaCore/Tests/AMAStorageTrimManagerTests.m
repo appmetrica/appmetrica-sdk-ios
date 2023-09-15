@@ -149,6 +149,10 @@ describe(@"AMAStorageTrimManager", ^{
                 });
             });
         });
+        
+        it(@"Should conform to AMAStorageTrimming", ^{
+            [[trimmer should] conformToProtocol:@protocol(AMAStorageTrimming)];
+        });
     });
 });
 

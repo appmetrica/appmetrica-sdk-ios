@@ -109,6 +109,12 @@ describe(@"AMAStringAttribute", ^{
         });
     });
 
+    it(@"Should conform to AMACustomStringAttribute", ^{
+        [[attribute should] conformToProtocol:@protocol(AMACustomStringAttribute)];
+    });
+    it(@"Should conform to AMANameAttribute", ^{
+        [[attribute should] conformToProtocol:@protocol(AMANameAttribute)];
+    });
 });
 
 SPEC_END

@@ -39,6 +39,9 @@ describe(@"AMAPredefinedAttributeUserProfileUpdateProvider", ^{
         [[[provider updateWithAttributeName:name type:type valueUpdate:valueUpdate] should] equal:userProfileUpdate];
     });
 
+    it(@"Should conform to AMAUserProfileUpdateProviding", ^{
+        [[provider should] conformToProtocol:@protocol(AMAUserProfileUpdateProviding)];
+    });
 });
 
 SPEC_END

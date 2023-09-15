@@ -2,7 +2,7 @@
 #import "AMABackingKVSDataProvider.h"
 #import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
 
-@interface AMABackingKVSDataProvider()
+@interface AMABackingKVSDataProvider ()
 
 @property (nonatomic, copy, readonly) AMAKVSProviderSource providerSource;
 @property (nonatomic, copy, readonly) AMAKVSProviderSource backingProviderSource;

@@ -382,7 +382,10 @@ describe(@"AMACachingKeyValueStorage", ^{
             [storage saveJSONArray:value forKey:key error:nil];
         });
     });
-
+    
+    it(@"Should conform to AMAKeyValueStoring", ^{
+        [[storage should] conformToProtocol:@protocol(AMAKeyValueStoring)];
+    });
 });
 
 SPEC_END

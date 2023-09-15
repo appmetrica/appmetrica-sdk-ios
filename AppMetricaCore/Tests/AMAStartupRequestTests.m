@@ -84,6 +84,9 @@ describe(@"AMAStartupRequest", ^{
             [[keys shouldNot] contain:@""];
             [[keys shouldNot] contain:@"empty"];
         });
+        it(@"Should be subclass of AMAGenericRequest", ^{
+            [[request should] beKindOfClass:AMAGenericRequest.class];
+        });
     });
 });
 

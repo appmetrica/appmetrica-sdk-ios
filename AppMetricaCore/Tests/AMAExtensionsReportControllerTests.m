@@ -104,7 +104,10 @@ describe(@"AMAExtensionsReportController", ^{
             [controller reportIfNeeded];
         });
     });
-
+    
+    it(@"Should conform to AMAStartupCompletionObserving", ^{
+        [[controller should] conformToProtocol:@protocol(AMAStartupCompletionObserving)];
+    });
 });
 
 SPEC_END

@@ -10,16 +10,18 @@ SPEC_BEGIN(AMADummyComposersTests)
 
 describe(@"AMADummyComposers", ^{
     context(@"Compose", ^{
+        let(appEvniromnentComposer, ^id{return [AMADummyAppEnvironmentComposer new];});
         context(@"AppEnvironment", ^{
-            AMADummyAppEnvironmentComposer *composer = [AMADummyAppEnvironmentComposer new];
             it(@"Should return nil", ^{
-                [[[composer compose] should] beNil];
+                [[[appEvniromnentComposer compose] should] beNil];
+            });
+            it(@"Should conform to AMAAppEnvironmentComposer", ^{
+                [[appEvniromnentComposer should] conformToProtocol:@protocol(AMAAppEnvironmentComposer)];
             });
         });
         context(@"ErrorEnvironment", ^{
-            AMADummyErrorEnvironmentComposer *composer = [AMADummyErrorEnvironmentComposer new];
             it(@"Should return nil", ^{
-                [[[composer compose] should] beNil];
+                [[[appEvniromnentComposer compose] should] beNil];
             });
         });
         context(@"Location", ^{

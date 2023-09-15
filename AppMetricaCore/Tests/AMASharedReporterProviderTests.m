@@ -24,7 +24,10 @@ describe(@"AMASharedReporterProvider", ^{
         id reporter = [provider reporter];
         [[reporter should] equal:expectedReporter];
     });
-
+    
+    it(@"Should conform to AMAReporterProviding", ^{
+        [[provider should] conformToProtocol:@protocol(AMAReporterProviding)];
+    });
 });
 
 SPEC_END

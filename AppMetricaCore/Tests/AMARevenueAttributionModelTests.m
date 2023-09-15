@@ -430,6 +430,11 @@ describe(@"AMARevenueAttributionModel", ^{
             });
         });
     });
+    
+    it(@"Should conform to AMAAttributionModel", ^{
+        AMARevenueAttributionModel *model = [[AMARevenueAttributionModel alloc] init];
+        [[model should] conformToProtocol:@protocol(AMAAttributionModel)];
+    });
 });
 
 SPEC_END

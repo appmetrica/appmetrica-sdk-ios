@@ -3,7 +3,7 @@
 #import "AMAEnvironmentContainer.h"
 #import "AMAEnvironmentLimiter.h"
 
-SPEC_BEGIN(AMAEnvironmentContainerTestsSpec)
+SPEC_BEGIN(AMAEnvironmentContainerTests)
 
 describe(@"AMAEnvironmentContainer", ^{
     context(@"with appropriate limit", ^{

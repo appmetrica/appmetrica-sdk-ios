@@ -88,7 +88,10 @@ describe(@"AMARSAKey", ^{
             });
         });
     });
-
+    
+    it(@"Should comform to NSCopying", ^{
+        [[key should] conformToProtocol:@protocol(NSCopying)];
+    });
 });
 
 SPEC_END

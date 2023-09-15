@@ -82,7 +82,10 @@ describe(@"AMABinaryEventValue", ^{
             [[theValue(value.encryptionType) should] equal:theValue(AMAEventEncryptionTypeGZip)];
         });
     });
-
+    
+    it(@"Should conform to AMAEventValueProtocol", ^{
+        [[value should] conformToProtocol:@protocol(AMAEventValueProtocol)];
+    });
 });
 
 SPEC_END

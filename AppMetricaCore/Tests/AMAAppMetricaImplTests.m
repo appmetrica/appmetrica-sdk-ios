@@ -840,6 +840,27 @@ describe(@"AMAAppMetricaImpl", ^{
                                                 notifyOnError:NO];
         });
     });
+    
+    context(@"Protocols", ^{
+        it(@"Should conform to AMAStartupControllerDelegate", ^{
+            [[appMetricaImpl should] conformToProtocol:@protocol(AMAStartupControllerDelegate)];
+        });
+        it(@"Should conform to AMADispatcherDelegate", ^{
+            [[appMetricaImpl should] conformToProtocol:@protocol(AMADispatcherDelegate)];
+        });
+        it(@"Should conform to AMADispatchStrategyDelegate", ^{
+            [[appMetricaImpl should] conformToProtocol:@protocol(AMADispatchStrategyDelegate)];
+        });
+        it(@"Should conform to AMAHostStateProviderDelegate", ^{
+            [[appMetricaImpl should] conformToProtocol:@protocol(AMAHostStateProviderDelegate)];
+        });
+        it(@"Should conform to AMAReporterDelegate", ^{
+            [[appMetricaImpl should] conformToProtocol:@protocol(AMAReporterDelegate)];
+        });
+        it(@"Should conform to AMAExtendedStartupObservingDelegate", ^{
+            [[appMetricaImpl should] conformToProtocol:@protocol(AMAExtendedStartupObservingDelegate)];
+        });
+    });
 });
 
 SPEC_END

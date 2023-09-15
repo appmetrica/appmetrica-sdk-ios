@@ -151,7 +151,10 @@ describe(@"AMAFileEventValue", ^{
             });
         });
     });
-
+    
+    it(@"Should conform to AMAEventValueProtocol", ^{
+        [[eventValue should] conformToProtocol:@protocol(AMAEventValueProtocol)];
+    });
 });
 
 SPEC_END

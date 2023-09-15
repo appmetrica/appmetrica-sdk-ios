@@ -1,7 +1,7 @@
 
 #import "AMAProxyDataToStringKVSDataProvider.h"
 
-@interface AMAProxyDataToStringKVSDataProvider()
+@interface AMAProxyDataToStringKVSDataProvider ()
 
 @property (nonatomic, copy, readonly) id<AMAKeyValueStorageDataProviding> dataProvider;
 

@@ -8,7 +8,7 @@
 
 static NSTimeInterval const kAMAMinimalValuableTimeUnit = 0.1;
 
-@interface AMASessionExpirationHandler()
+@interface AMASessionExpirationHandler ()
 
 @property (nonatomic, strong) AMAMetricaConfiguration *configuration;
 @property (nonatomic, copy) NSString *apiKey;

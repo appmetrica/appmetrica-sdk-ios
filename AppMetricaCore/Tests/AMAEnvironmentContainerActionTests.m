@@ -12,12 +12,16 @@ describe(@"AMAEnvironmentContainerAction", ^{
             return [AMAEnvironmentContainerClearAction new];
         });
 
-        it(@"should clear container", ^{
+        it(@"Should clear container", ^{
             AMAEnvironmentContainer *container = [AMAEnvironmentContainer new];
             [container addValue:@"foo" forKey:@"bar"];
             [action applyToContainer:container];
             NSDictionary *environment = container.dictionaryEnvironment;
             [[environment should] haveCountOf:0];
+        });
+        
+        it(@"Should conform to AMAEnvironmentContainerAction", ^{
+            [[action should] conformToProtocol:@protocol(AMAEnvironmentContainerAction)];
         });
     });
 
@@ -32,6 +36,10 @@ describe(@"AMAEnvironmentContainerAction", ^{
                 [action applyToContainer:container];
                 NSDictionary *environment = container.dictionaryEnvironment;
                 [[environment should] equal:@{@"bar" : @"foo"}];
+            });
+            
+            it(@"Should conform to AMAEnvironmentContainerAction", ^{
+                [[action should] conformToProtocol:@protocol(AMAEnvironmentContainerAction)];
             });
         });
 

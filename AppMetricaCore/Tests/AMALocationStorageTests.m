@@ -526,7 +526,6 @@ describe(@"AMALocationStorage", ^{
             });
         });
     });
-
 });
 
 SPEC_END

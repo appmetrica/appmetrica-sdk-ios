@@ -368,6 +368,9 @@ describe(@"AMABackingKVSDataProvider", ^{
             }];
         });
     });
+    it(@"Should conform to AMAKeyValueStorageDataProviding", ^{
+        [[backingDataProvider should] conformToProtocol:@protocol(AMAKeyValueStorageDataProviding)];
+    });
 });
 
 SPEC_END

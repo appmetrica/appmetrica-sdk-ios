@@ -642,6 +642,11 @@ describe(@"AMAConversionAttributionModel", ^{
             [[[conversion checkAttributionForClientEvent:@"client name #2"] should] equal:@1];
         });
     });
+    
+    it(@"Should conform to AMAAttributionModel", ^{
+        AMAConversionAttributionModel *model = [[AMAConversionAttributionModel alloc] init];
+        [[model should] conformToProtocol:@protocol(AMAAttributionModel)];
+    });
 });
 
 SPEC_END

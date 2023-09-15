@@ -119,6 +119,9 @@ describe(@"AMAReportHostProvider", ^{
         
     });
     
+    it(@"Should conform to AMAResettableIterable", ^{
+        [[provider should] conformToProtocol:@protocol(AMAResettableIterable)];
+    });
 });
 
 SPEC_END

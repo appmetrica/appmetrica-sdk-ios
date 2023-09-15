@@ -29,6 +29,9 @@ describe(@"AMANumberAttributeValueUpdate", ^{
         [[value.numberValue should] equal:@(numberValue)];
     });
 
+    it(@"Should conform to AMAAttributeValueUpdate", ^{
+        [[update should] conformToProtocol:@protocol(AMAAttributeValueUpdate)];
+    });
 });
 
 SPEC_END

@@ -2,7 +2,7 @@
 #import "AMACore.h"
 #import "AMANotificationsListener.h"
 
-@interface AMANotificationsListener()
+@interface AMANotificationsListener ()
 
 @property (nonatomic, strong) id<AMAExecuting> executor;
 @property (nonatomic, strong) NSMapTable *objectCallbacks;

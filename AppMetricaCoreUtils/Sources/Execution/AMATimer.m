@@ -2,7 +2,7 @@
 #import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
 #import "AMACoreUtilsLogging.h"
 
-@interface AMATimer()
+@interface AMATimer ()
 
 @property (nonatomic, strong, readwrite) NSDate *startDate;
 

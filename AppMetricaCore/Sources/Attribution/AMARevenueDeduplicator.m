@@ -5,7 +5,7 @@
 #import "AMAMetricaConfiguration.h"
 #import "AMAAttributionModelConfiguration.h"
 
-@interface AMARevenueDeduplicator()
+@interface AMARevenueDeduplicator ()
 
 @property (nonatomic, strong, readonly) AMAAttributionModelConfiguration *config;
 @property (nonatomic, strong) NSMutableArray<NSString *> *savedIds;

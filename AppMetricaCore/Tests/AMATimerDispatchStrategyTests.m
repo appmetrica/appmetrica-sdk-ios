@@ -73,6 +73,10 @@ describe(@"AMATimerDispatchStrategy", ^{
             [[theValue([timerStrategy canBeExecuted:controller]) should] beNo];
         });
     });
+    
+    it(@"Should be subclass of DispatchStrategy", ^{
+        [[timerStrategy should] beKindOfClass:AMADispatchStrategy.class];
+    });
 });
 
 SPEC_END

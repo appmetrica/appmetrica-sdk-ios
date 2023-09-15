@@ -45,6 +45,9 @@ describe(@"AMADefaultReportExecutionConditionChecker", ^{
             });
         });
     });
+    it(@"Should conform to AMAReportExecutionConditionChecker", ^{
+        [[conditionChecker should] conformToProtocol:@protocol(AMAReportExecutionConditionChecker)];
+    });
 });
 
 SPEC_END

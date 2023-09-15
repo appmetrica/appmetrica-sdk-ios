@@ -103,7 +103,6 @@ describe(@"AMADatabaseQueueProvider", ^{
             provider.logsEnabled = YES;
         });
     });
-
 });
 
 SPEC_END

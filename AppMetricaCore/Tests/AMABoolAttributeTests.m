@@ -134,6 +134,12 @@ describe(@"AMABoolAttribute", ^{
         });
     });
 
+    it(@"Should conform to AMACustomBoolAttribute", ^{
+        [[attribute should] conformToProtocol:@protocol(AMACustomBoolAttribute)];
+    });
+    it(@"Should conform to AMANotificationsEnabledAttribute", ^{
+        [[attribute should] conformToProtocol:@protocol(AMANotificationsEnabledAttribute)];
+    });
 });
 
 SPEC_END

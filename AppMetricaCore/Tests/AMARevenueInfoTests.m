@@ -134,7 +134,6 @@ describe(@"AMARevenueInfo", ^{
             });
         });
     });
-
 });
 
 SPEC_END

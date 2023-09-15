@@ -34,6 +34,11 @@ describe(@"AMAClientEventCondition", ^{
             [[theValue([condition checkEvent:@"wrong name"]) should] beNo];
         });
     });
+    
+    it(@"Should conform to AMAJSONSerializable", ^{
+        AMAClientEventCondition *condition = [[AMAClientEventCondition alloc] init];
+        [[condition should] conformToProtocol:@protocol(AMAJSONSerializable)];
+    });
 });
 
 SPEC_END

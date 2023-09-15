@@ -179,8 +179,10 @@ describe(@"AMAKeychainTests", ^{
                 [[[indiKeychain stringValueForKey:@"foo" error:nil] should] equal:@"bar"];
             });
         });
+        it(@"Should conform to AMAKeychainStoring", ^{
+            [[keychain should] conformToProtocol:@protocol(AMAKeychainStoring)];
+        });
     });
-
 });
 
 SPEC_END

@@ -455,6 +455,10 @@ describe(@"AMAEngagementAttributionModel", ^{
             [[[engagement checkInitialAttribution] should] equal:@10];
         });
     });
+    
+    it(@"Should conform to AMAAttributionModel", ^{
+        [[engagement should] conformToProtocol:@protocol(AMAAttributionModel)];
+    });
 });
 
 SPEC_END

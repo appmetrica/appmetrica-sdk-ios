@@ -105,7 +105,10 @@ describe(@"AMAIntervalExecutionCondition", ^{
             [[theValue([condition shouldExecute]) should] beYes];
         });
     });
-
+    
+    it(@"Should comform to AMAExecutionCondition", ^{
+        [[condition should] conformToProtocol:@protocol(AMAExecutionCondition)];
+    });
 });
 
 SPEC_END

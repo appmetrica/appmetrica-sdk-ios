@@ -171,6 +171,9 @@ describe(@"AMAFallbackKeychainTests", ^{
                 [[[fallbackKeychain stringValueForKey:key error:nil] should] equal:fallbackKeychainValue];
             });
         });
+        it(@"Should conform to AMAKeychainStoring", ^{
+            [[fallbackKeychain should] conformToProtocol:@protocol(AMAKeychainStoring)];
+        });
     });
 });
 

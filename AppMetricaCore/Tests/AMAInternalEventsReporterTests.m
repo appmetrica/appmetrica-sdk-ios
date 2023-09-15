@@ -321,6 +321,9 @@ describe(@"AMAInternalEventsReporter", ^{
         });
     });
 
+    it(@"Should conform to AMAHostStateProviderDelegate", ^{
+        [[reporter should] conformToProtocol:@protocol(AMAHostStateProviderDelegate)];
+    });
 });
 
 SPEC_END

@@ -101,6 +101,10 @@ describe(@"AMAAppMetricaPlugins", ^{
 //            [pluginsImpl handlePluginInitFinished];
 //        });
 //    });
+    
+    it(@"Should conform to AMAAppMetricaPlugins", ^{
+        [[pluginsImpl should] conformToProtocol:@protocol(AMAAppMetricaPlugins)];
+    });
 });
 
 SPEC_END

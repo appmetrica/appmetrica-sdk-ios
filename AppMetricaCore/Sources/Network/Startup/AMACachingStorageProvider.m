@@ -1,8 +1,5 @@
 
 #import "AMACachingStorageProvider.h"
-#import "AMAMetricaConfiguration.h"
-#import "AMAMetricaPersistentConfiguration.h"
-#import "AMAStartupParametersConfiguration.h"
 #import "AMADatabaseProtocol.h"
 #import "AMADatabaseFactory.h"
 
@@ -16,9 +13,14 @@
 
 - (instancetype)init
 {
+    return [self initWithDatabase:AMADatabaseFactory.configurationDatabase];
+}
+
+- (instancetype)initWithDatabase:(id<AMADatabaseProtocol>)database
+{
     self = [super init];
     if (self != nil) {
-        _database = AMADatabaseFactory.configurationDatabase;
+        _database = database;
     }
     return self;
 }

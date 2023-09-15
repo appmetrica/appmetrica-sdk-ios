@@ -55,6 +55,9 @@ describe(@"AMAAttributeUpdateNameLengthValidator", ^{
         });
     });
 
+    it(@"Should conform to AMAAttributeUpdateValidating", ^{
+        [[validator should] conformToProtocol:@protocol(AMAAttributeUpdateValidating)];
+    });
 });
 
 SPEC_END
