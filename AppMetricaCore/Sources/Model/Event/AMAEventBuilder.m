@@ -149,7 +149,7 @@
     event.bytesTruncated += (parameters.bytesTruncated + bytesTruncated);
     event.appEnvironment = parameters.appEnvironment;
     event.errorEnvironment = parameters.errorEnvironment;
-    event.extras = parameters.extras;
+    [self fillEvent:event withExtras:parameters.extras];
     event.createdAt = parameters.isPast ? parameters.creationDate : event.createdAt;
 
     return event;
@@ -526,8 +526,10 @@
 - (void)fillEvent:(AMAEvent *)event
        withExtras:(NSDictionary<NSString *, NSData *> *)eventExtras
 {
+    // event.extras contains session extras
     NSMutableDictionary *result = [NSMutableDictionary dictionaryWithDictionary:event.extras];
 
+    // merge it with event extras, session extras has priority under event extras
     for (NSString *key in eventExtras) {
         result[key] = result[key] ?: eventExtras[key];
     }
