@@ -25,6 +25,7 @@
 #endif
 @protocol AMAExtendedStartupObserving;
 @protocol AMAReporterStorageControlling;
+@protocol AMAAppMetricaExtendedReporting;
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -53,6 +54,21 @@ NS_ASSUME_NONNULL_BEGIN
                 environment:(nullable NSDictionary *)environment
                      extras:(nullable NSDictionary<NSString *, NSData *> *)extras
                   onFailure:(nullable void (^)(NSError *))onFailure;
+- (void)reportBinaryEventWithType:(NSUInteger)eventType
+                             data:(NSData *)data
+                          gZipped:(BOOL)gZipped
+                      environment:(nullable NSDictionary *)environment
+                           extras:(nullable NSDictionary<NSString *, NSData *> *)extras
+                        onFailure:(nullable void (^)(NSError *error))onFailure;
+- (void)reportFileEventWithType:(NSUInteger)eventType
+                           data:(NSData *)data
+                       fileName:(NSString *)fileName
+                        gZipped:(BOOL)gZipped
+                      encrypted:(BOOL)encrypted
+                      truncated:(BOOL)truncated
+                    environment:(nullable NSDictionary *)environment
+                         extras:(nullable NSDictionary<NSString *, NSData *> *)extras
+                      onFailure:(nullable void (^)(NSError *error))onFailure;
 - (void)reportEventWithParameters:(AMACustomEventParameters * )parameters
                         onFailure:(nullable void (^)(NSError *error))onFailure;
 
@@ -69,7 +85,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)startDispatcher;
 
-- (id<AMAAppMetricaReporting >)manualReporterForConfiguration:(AMAReporterConfiguration *)configuration;
+- (id<AMAAppMetricaExtendedReporting>)manualReporterForConfiguration:(AMAReporterConfiguration *)configuration;
 - (BOOL)isReporterCreatedForAPIKey:(NSString *)apiKey;
 
 - (void)setUserProfileID:(NSString *)userProfileID;

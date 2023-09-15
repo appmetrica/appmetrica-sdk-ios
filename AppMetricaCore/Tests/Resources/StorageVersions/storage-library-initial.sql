@@ -18,7 +18,6 @@ INSERT INTO `kv` VALUES ('141aee51-f778-4951-adb8-97d811aa06e1session_first_even
 INSERT INTO `kv` VALUES ('20799a27-fa80-4b36-b2db-0f8141f24180session_first_event_sent','YES');
 INSERT INTO `kv` VALUES ('141aee51-f778-4951-adb8-97d811aa06e1session_init_event_sent','YES');
 INSERT INTO `kv` VALUES ('user.startup.hosts','["https:\/\/startup.tst.mobile.appmetrica.net"]');
-INSERT INTO `kv` VALUES ('easy.attribution.enabled',0);
 INSERT INTO `kv` VALUES ('startup.hosts','["https:\/\/unavailable.startup.tst.mobile.appmetrica.net","https:\/\/startup.tst.mobile.appmetrica.net"]');
 INSERT INTO `kv` VALUES ('startup.updated_at',1530709485.14214);
 INSERT INTO `kv` VALUES ('uuid','a56a9864140fd546578030b4df5dd418');

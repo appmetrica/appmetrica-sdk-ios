@@ -14,7 +14,7 @@
 @class AMARevenueInfo;
 @class AMAECommerce;
 @class AMAAdRevenueInfo;
-@protocol AMAAppMetricaReporting ;
+@protocol AMAAppMetricaReporting;
 @protocol AMAAppMetricaPlugins;
 
 #if !TARGET_OS_TV
@@ -207,14 +207,14 @@ NS_SWIFT_NAME(requestStartupIdentifiers(keys:completionQueue:completionBlock:));
  */
 + (void)activateReporterWithConfiguration:(AMAReporterConfiguration *)configuration;
 
-/** Returns id<AMAAppMetricaReporting > that can send events to specific API key.
+/** Returns id<AMAAppMetricaReporting> that can send events to specific API key.
  To customize configuration of reporter activate with 'activateReporterWithConfiguration:' method first.
 
  @param apiKey Api key to send events to.
- @return id<AMAAppMetricaReporting > that conforms to AMAAppMetricaReporting  and handles
+ @return id<AMAAppMetricaReporting> that conforms to AMAAppMetricaReporting and handles
  sending events to specified apikey
  */
-+ (nullable id<AMAAppMetricaReporting >)reporterForApiKey:(NSString *)apiKey NS_SWIFT_NAME(reporter(for:));
++ (nullable id<AMAAppMetricaReporting>)reporterForApiKey:(NSString *)apiKey NS_SWIFT_NAME(reporter(for:));
 
 /**
  * Sets referral URL for this installation. This might be required to track some specific traffic sources like Facebook.

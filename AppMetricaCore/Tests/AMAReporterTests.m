@@ -958,25 +958,6 @@ describe(@"AMAReporter", ^{
         });
     });
 
-    context(@"Sends AUTO_APP_OPEN events", ^{
-        AMAReporter * __block reporter = nil;
-        beforeEach(^{
-            reporter = [reporterTestHelper appReporterForApiKey:apiKey];
-        });
-        it(@"Should save AUTO_APP_OPEN event", ^{
-            NSDictionary *autoAppOpenParameters = @{ @"link" : @"test_link" };
-            [reporter reportAutoAppOpen:autoAppOpenParameters onFailure:nil];
-            AMAEvent *event = [eventStorage() amatest_savedEventWithType:AMAEventTypeStatboxExp];
-            [[event shouldNot] beNil];
-            [[event.name should] equal:@"auto_app_open"];
-            AMAStringEventValue *stringEventValue = (AMAStringEventValue *)event.value;
-            NSData *data = [stringEventValue.value dataUsingEncoding:NSUTF8StringEncoding];
-            NSDictionary *actualJson = [NSJSONSerialization JSONObjectWithData:data
-                                                                       options:kNilOptions
-                                                                         error:nil];
-            [[actualJson should] equal:autoAppOpenParameters];
-        });
-    });
     context(@"Sends JS client event", ^{
         AMAReporter * __block reporter = nil;
         beforeEach(^{
@@ -1063,7 +1044,7 @@ describe(@"AMAReporter", ^{
                 });
                 it(@"Should increment open id", ^{
                     [[reporter.reporterStorage.stateStorage should] receive:@selector(incrementOpenID)];
-                    
+
                     [reporter reportOpenEvent:@{@"link":@"l"} reattribution:NO onFailure:nil];
                 });
             });
@@ -1693,358 +1674,61 @@ describe(@"AMAReporter", ^{
         });
     });
     
-    context(@"Reporting events", ^{
-        
-        let(reporter, ^{ return [reporterTestHelper appReporterForApiKey:apiKey]; });
-        let(parameters, ^{ return [[AMACustomEventParameters alloc] initWithEventType:AMAEventTypeClient]; });
+    context(@"Reporting custom events", ^{
         let(error, ^NSError *{ return nil; });
-
-        it(@"Should report event correctly if session is current", ^{
-            [reporter reportEventWithParameters:parameters onFailure:^(NSError *anError) {
-                error = anError;
-            }];
-            // Since the session is current, no error is expected
-            [[error should] beNil];
-            AMASession *session = [sessionStorage() lastSessionWithError:nil];
-            AMAEvent *event = [eventStorage() amatest_savedEventWithType:AMAEventTypeClient];
-            // Event is expected to be saved with the session's oid
-            [[event.sessionOid should] equal:session.oid];
-        });
+        let(reporter, ^{ return [reporterTestHelper appReporterForApiKey:apiKey]; });
         
-        it(@"Should report event correctly if session is in the past", ^{
-            parameters.isPast = YES;
-            NSDate *pastDate = [NSDate dateWithTimeIntervalSinceNow:-3600]; // an hour ago
-            parameters.creationDate = pastDate;
-            [reporter reportEventWithParameters:parameters onFailure:^(NSError *anError) {
-                error = anError;
-            }];
-            [[error should] beNil];
-            AMASession *session = [sessionStorage() lastSessionWithError:nil];
-            AMAEvent *event = [eventStorage() amatest_savedEventWithType:AMAEventTypeClient];
-            [[event.sessionOid should] equal:session.oid];
-        });
-        
-        it(@"Should handle session creation failure correctly", ^{
-            // Stub sessionStorage to simulate a session creation failure
-            AMASessionStorage *mockSessionStorage = [AMASessionStorage nullMock];
-            NSError *testError = [NSError errorWithDomain:@"test" code:2 userInfo:nil];
-            [mockSessionStorage stub:@selector(newBackgroundSessionCreatedAt:error:) withBlock:^id(NSArray *params) {
-                [AMATestUtilities fillObjectPointerParameter:params[1] withValue:testError];
-                return nil;
-            }];
-            [reporter.reporterStorage stub:@selector(sessionStorage) andReturn:mockSessionStorage];
-            
-            [reporter reportEventWithParameters:parameters onFailure:^(NSError *anError) {
-                error = anError;
-            }];
-            // Expect the onFailure block to be called with an error
-            [[error should] beNonNil];
-            [[error should] equal:[AMAErrorUtilities errorByAddingUnderlyingError:testError
-                                                                          toError:[AMAErrorsFactory internalInconsistencyError]]];
-        });
-        
-        it(@"Should report event correctly when last session is older than backgroundSessionTimeout", ^{
-            NSDate *oldSessionDate = [NSDate dateWithTimeIntervalSinceNow:-2*backgroundSessionTimeout];
-            [reporter.reporterStorage.sessionStorage newBackgroundSessionCreatedAt:oldSessionDate error:nil];
-            
-            [reporter reportEventWithParameters:parameters onFailure:^(NSError *anError) {
-                error = anError;
-            }];
-            
-            AMASession *session = [reporter.reporterStorage.sessionStorage lastSessionWithError:nil];
-            [[session should] beNonNil];
-        });
-        
-        it(@"Should not report event when the creation date is in the future", ^{
-            parameters.creationDate = [NSDate dateWithTimeIntervalSinceNow:3600]; // an hour into the future
-            [sessionStorage() newGeneralSessionCreatedAt:NSDate.new error:nil];
-            
-            [reporter reportEventWithParameters:parameters onFailure:^(NSError *anError) {
-                error = anError;
-            }];
-            
-            // Expect the onFailure block to be called with an error
-            [[error should] beNonNil];
-        });
-        
-        it(@"Should report event correctly with past date within backgroundSessionTimeout", ^{
-            parameters.creationDate = [NSDate dateWithTimeIntervalSinceNow:-0.5*backgroundSessionTimeout]; // half an hour ago
-            
-            [reporter reportEventWithParameters:parameters onFailure:^(NSError *anError) {
-                error = anError;
-            }];
-            
-            AMASession *session = [reporter.reporterStorage.sessionStorage lastSessionWithError:nil];
-            // Expect a session to exist
-            [[session should] beNonNil];
-        });
-        context(@"When the parameters are checked for consistency", ^{
+        context(@"String events", ^{
             __block AMAEvent *event;
-            __block NSError *error;
-
-            let(parameters, ^{
-                AMACustomEventParameters *parameters = [[AMACustomEventParameters alloc] initWithEventType:AMAEventTypeClient];
-                parameters.name = @"test event";
-                parameters.creationDate = [NSDate date];
-                parameters.data = [@"test data" dataUsingEncoding:NSUTF8StringEncoding];
-                parameters.valueType = AMAEventValueTypeFile;
-                parameters.GZipped = YES;
-                parameters.appEnvironment = @{@"appEnvKey": @"appEnvValue"};
-                parameters.errorEnvironment = @{@"errorEnvKey": @"errorEnvValue"};
-                parameters.extras = @{@"extraKey": [@"extraValue" dataUsingEncoding:NSUTF8StringEncoding]};
-                parameters.isPast = NO;
-                parameters.bytesTruncated = 10;
-                return parameters;
+            beforeEach(^{
+                [reporter reportEventWithType:AMAEventTypeClient
+                                         name:nil
+                                        value:nil
+                                  environment:nil
+                                       extras:nil
+                                    onFailure:^(NSError *anError) { error = anError; }];
+                event = [eventStorage() amatest_savedEventWithType:AMAEventTypeClient];
             });
-            
-            context(@"When the plain parameters are checked", ^{
-                beforeEach(^{
-                    [reporter reportEventWithParameters:parameters
-                                              onFailure:^(NSError *anError) { error = anError; }];
-                    event = [eventStorage() amatest_savedEventWithType:AMAEventTypeClient];
-                });
-
-                it(@"Should correctly set the event's name", ^{
-                    [[error should] beNil];
-                    [[event.name should] equal:parameters.name];
-                });
-
-                it(@"Should correctly set the event's type", ^{
-                    [[error should] beNil];
-                    [[theValue(event.type) should] equal:theValue(parameters.eventType)];
-                });
-
-                it(@"Should correctly set the event's creation date", ^{
-                    [[error should] beNil];
-                    [[event.createdAt should] equal:parameters.creationDate];
-                });
-
-                it(@"Should correctly set the event's app environment", ^{
-                    [[error should] beNil];
-                    [[event.appEnvironment should] equal:parameters.appEnvironment];
-                });
-
-                it(@"Should correctly set the event's error environment", ^{
-                    [[error should] beNil];
-                    [[event.errorEnvironment should] equal:parameters.errorEnvironment];
-                });
-
-                it(@"Should correctly set the event's extras", ^{
-                    [[error should] beNil];
-                    [[event.extras should] equal:parameters.extras];
-                });
-
-                it(@"Should correctly set the event's bytes truncated", ^{
-                    [[error should] beNil];
-                    [[theValue(event.bytesTruncated) should] equal:theValue(parameters.bytesTruncated)];
-                });
-            });
-            
-            context(@"When the future and the past are checked", ^{
-                it(@"Should report event to current session correctly", ^{
-                    parameters.isPast = NO;
-
-                    [reporter reportEventWithParameters:parameters onFailure:^(NSError *anError) {
-                        error = anError;
-                    }];
-
-                    // Since the session is current, no error is expected
-                    [[error should] beNil];
-
-                    AMASession *session = [sessionStorage() lastSessionWithError:nil];
-                    AMAEvent *event = [eventStorage() amatest_savedEventWithType:AMAEventTypeClient];
-
-                    // Event is expected to be saved with the session's oid
-                    [[event.sessionOid should] equal:session.oid];
-                    
-                    // Time since session start should not be negative
-                    [[theValue(event.timeSinceSession) should] beGreaterThanOrEqualTo:theValue(0.f)];
-                });
-
-                it(@"Should report past event correctly", ^{
-                    parameters.isPast = YES;
-
-                    [reporter reportEventWithParameters:parameters onFailure:^(NSError *anError) {
-                        error = anError;
-                    }];
-
-                    // No error is expected
-                    [[error should] beNil];
-
-                    AMASession *session = [sessionStorage() amatest_existingOrNewBackgroundSessionCreatedAt:parameters.creationDate];
-                    AMAEvent *event = [eventStorage() amatest_savedEventWithType:AMAEventTypeClient];
-
-                    // Event is expected to be saved with the session's oid
-                    [[event.sessionOid should] equal:session.oid];
-
-                    // Time since session start should be calculated correctly for past event
-                    NSTimeInterval expectedTimeSinceSession = [parameters.creationDate timeIntervalSinceDate:session.startDate.deviceDate];
-                    [[theValue(event.timeSinceSession) should] equal:theValue(expectedTimeSinceSession)];
-                });
+            it(@"Should save event", ^{
+                [[error should] beNil];
+                [[event shouldNot] beNil];
             });
         });
-        context(@"When reporting in the past", ^{
-            it(@"Should use last session when the event fits into it", ^{
-                AMASession *session =
-                    [sessionStorage() newGeneralSessionCreatedAt:[NSDate dateWithTimeIntervalSinceNow:-1800]
-                                                           error:NULL]; // 30 minutes ago
-                [sessionStorage() finishSession:session atDate:NSDate.date error:NULL];
-
-                parameters.eventType = AMAEventTypeClient;
-                parameters.name = @"test event";
-                parameters.creationDate =
-                    [session.pauseTime dateByAddingTimeInterval:-(foregroundSessionTimeout - 1)];
-                parameters.isPast = YES;
-
-                [reporter reportEventWithParameters:parameters onFailure:^(NSError *anError) {
-                    error = anError;
-                }];
-
+        context(@"Binary events", ^{
+            NSData *__block data = [@"data" dataUsingEncoding:NSUTF8StringEncoding];
+            __block AMAEvent *event;
+            beforeEach(^{
+                [reporter reportBinaryEventWithType:AMAEventTypeClient
+                                               data:data
+                                            gZipped:YES
+                                        environment:nil
+                                             extras:nil
+                                          onFailure:^(NSError *anError) { error = anError; }];
+                event = [eventStorage() amatest_savedEventWithType:AMAEventTypeClient];
+            });
+            it(@"Should save event", ^{
                 [[error should] beNil];
-                AMAEvent *resultEvent = [eventStorage() amatest_savedEventWithType:AMAEventTypeClient];
-                [[resultEvent.sessionOid should] equal:session.oid];
-                [[resultEvent.name should] equal:parameters.name];
+                [[event shouldNot] beNil];
             });
-
-            it(@"Should use previous session when the event doesn't fit into last session but fits into previous", ^{
-                AMASession *previousSession =
-                    [sessionStorage() newGeneralSessionCreatedAt:[NSDate dateWithTimeIntervalSinceNow:-3600]
-                                                           error:NULL]; // 60 minutes ago
-                [sessionStorage() finishSession:previousSession atDate:[NSDate dateWithTimeIntervalSinceNow:-1800]
-                                          error:NULL]; // 30 minutes ago
-
-                // Create a last session. It is not valid as it is not finished
-                AMASession *lastSession = [sessionStorage() newGeneralSessionCreatedAt:NSDate.date error:NULL];
-
-                parameters.eventType = AMAEventTypeClient;
-                parameters.name = @"test event";
-                parameters.creationDate =
-                    [previousSession.pauseTime dateByAddingTimeInterval:-(foregroundSessionTimeout - 1)];
-                parameters.isPast = YES;
-
-                [reporter reportEventWithParameters:parameters onFailure:^(NSError *anError) {
-                    error = anError;
-                }];
-
-                // Event should be reported successfully and should belong to the previous session
+        });
+        context(@"File events", ^{
+            NSData *__block data = [@"data" dataUsingEncoding:NSUTF8StringEncoding];
+            __block AMAEvent *event;
+            beforeEach(^{
+                [reporter reportFileEventWithType:AMAEventTypeClient
+                                             data:data
+                                         fileName:@""
+                                          gZipped:YES
+                                        encrypted:YES
+                                        truncated:YES
+                                      environment:nil
+                                           extras:nil
+                                        onFailure:^(NSError *anError) { error = anError; }];
+                event = [eventStorage() amatest_savedEventWithType:AMAEventTypeClient];
+            });
+            it(@"Should save event", ^{
                 [[error should] beNil];
-                AMAEvent *resultEvent = [eventStorage() amatest_savedEventWithType:AMAEventTypeClient];
-                [[resultEvent.sessionOid should] equal:previousSession.oid];
-                [[resultEvent.name should] equal:parameters.name];
-            });
-            
-            context(@"When reporting an event that doesn't fit into either the last session or the previous session", ^{
-                let(previousSession, ^{
-                    return [sessionStorage() newGeneralSessionCreatedAt:[NSDate dateWithTimeIntervalSinceNow:-5400]
-                                                                  error:NULL]; // 90 minutes ago
-                });
-                
-                let(currentSession, ^{
-                    return [sessionStorage() newGeneralSessionCreatedAt:[NSDate dateWithTimeIntervalSinceNow:-3600]
-                                                                  error:NULL]; // 60 minutes ago
-                });
-                
-                beforeEach(^{
-                    [sessionStorage() finishSession:previousSession atDate:[NSDate dateWithTimeIntervalSinceNow:-3600]
-                                              error:NULL]; // 60 minutes ago
-                    
-                    parameters.eventType = AMAEventTypeClient;
-                    parameters.name = @"test event";
-                    parameters.creationDate = [previousSession.startDate.deviceDate dateByAddingTimeInterval:-1];
-                    parameters.isPast = YES;
-                    
-                    [reporter reportEventWithParameters:parameters onFailure:^(NSError *anError) {
-                        error = anError;
-                    }];
-                });
-                
-                it(@"Should create a new session", ^{
-                    [[error should] beNil];
-                    AMAEvent *resultEvent = [eventStorage() amatest_savedEventWithType:AMAEventTypeClient];
-                    [[resultEvent.sessionOid shouldNot] equal:currentSession.oid];
-                    [[resultEvent.sessionOid shouldNot] equal:previousSession.oid];
-                    [[resultEvent.name should] equal:parameters.name];
-                });
-                
-                it(@"Current session should become last after creating the new session", ^{
-                    [[[sessionStorage() amatest_lastSessionWithType:AMASessionTypeGeneral].sessionID should]
-                        equal:currentSession.sessionID];
-                });
-            });
-            
-            context(@"When AppState is involved", ^{
-                let(appState, ^{
-                    return [AMAApplicationState objectWithDictionaryRepresentation:@{@"uuid" : @"12345"}];
-                });
-                
-                let(session, ^{
-                    return [sessionStorage() newFinishedBackgroundSessionCreatedAt:[NSDate dateWithTimeIntervalSinceNow:-1800]
-                                                                          appState:appState
-                                                                             error:NULL]; // 30 minutes ago
-                });
-                
-                context(@"when AppState is present and equal to the session's AppState", ^{
-                    beforeEach(^{
-                        parameters.eventType = AMAEventTypeClient;
-                        parameters.name = @"test event";
-                        parameters.creationDate = [session.startDate.deviceDate dateByAddingTimeInterval:1];
-                        parameters.isPast = YES;
-                        parameters.appState = appState;
-                        
-                        [reporter reportEventWithParameters:parameters onFailure:^(NSError *anError) {
-                            error = anError;
-                        }];
-                    });
-                    
-                    it(@"Should use the same session", ^{
-                        [[error should] beNil];
-                        AMAEvent *resultEvent = [eventStorage() amatest_savedEventWithType:AMAEventTypeClient];
-                        [[resultEvent.sessionOid should] equal:session.oid];
-                        [[resultEvent.name should] equal:parameters.name];
-                    });
-                });
-                
-                context(@"when AppState is present and not equal to the session's AppState", ^{
-                    beforeEach(^{
-                        parameters.eventType = AMAEventTypeClient;
-                        parameters.name = @"test event";
-                        parameters.creationDate = [session.startDate.deviceDate dateByAddingTimeInterval:1];
-                        parameters.isPast = YES;
-                        parameters.appState = [AMAApplicationState objectWithDictionaryRepresentation:@{@"uuid" : @"98765"}];
-                        
-                        [reporter reportEventWithParameters:parameters onFailure:^(NSError *anError) {
-                            error = anError;
-                        }];
-                    });
-                    
-                    it(@"Should not use the same session", ^{
-                        [[error should] beNil];
-                        AMAEvent *resultEvent = [eventStorage() amatest_savedEventWithType:AMAEventTypeClient];
-                        [[resultEvent.sessionOid shouldNot] equal:session.oid];
-                        [[resultEvent.name should] equal:parameters.name];
-                    });
-                });
-                
-                context(@"when AppState is not present", ^{
-                    beforeEach(^{
-                        parameters.eventType = AMAEventTypeClient;
-                        parameters.name = @"test event";
-                        parameters.creationDate = [session.startDate.deviceDate dateByAddingTimeInterval:1];
-                        parameters.isPast = YES;
-                        parameters.appState = nil;
-                        
-                        [reporter reportEventWithParameters:parameters onFailure:^(NSError *anError) {
-                            error = anError;
-                        }];
-                    });
-                    
-                    it(@"Should use the same session", ^{
-                        [[error should] beNil];
-                        AMAEvent *resultEvent = [eventStorage() amatest_savedEventWithType:AMAEventTypeClient];
-                        [[resultEvent.sessionOid should] equal:session.oid];
-                        [[resultEvent.name should] equal:parameters.name];
-                    });
-                });
+                [[event shouldNot] beNil];
             });
         });
     });

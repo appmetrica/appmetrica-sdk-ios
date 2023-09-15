@@ -1,4 +1,3 @@
-
 #import <AppMetricaPlatform/AppMetricaPlatform.h>
 #import "AMAReporter.h"
 #import "AMAReporterNotifications.h"
@@ -178,7 +177,7 @@
     }];
 }
 
-#pragma mark - AMAAppMetricaReporting  protocol
+#pragma mark - AMAAppMetricaReporting protocol
 
 - (void)resumeSession
 {
@@ -358,13 +357,55 @@
                   onFailure:(void (^)(NSError *))onFailure
 {
     [self reportCommonEventWithBlock:^AMAEvent *(NSError **error) {
-                return [self.eventBuilder eventWithType:eventType
-                                                   name:name
-                                                  value:value
-                                       eventEnvironment:environment
-                                                 extras:extras
-                                                  error:error];
-            }
+        return [self.eventBuilder eventWithType:eventType
+                                           name:name
+                                          value:value
+                               eventEnvironment:environment
+                                         extras:extras
+                                          error:error];
+    }
+                           onFailure:onFailure];
+}
+
+- (void)reportBinaryEventWithType:(NSUInteger)eventType
+                             data:(NSData *)data
+                          gZipped:(BOOL)gZipped
+                      environment:(NSDictionary *)environment
+                           extras:(NSDictionary<NSString *,NSData *> *)extras
+                        onFailure:(void (^)(NSError *))onFailure
+{
+    [self reportCommonEventWithBlock:^AMAEvent *(NSError **error) {
+        return [self.eventBuilder binaryEventWithType:eventType
+                                                 data:data
+                                              gZipped:gZipped
+                                          environment:environment
+                                               extras:extras
+                                                error:error];
+    }
+                           onFailure:onFailure];
+}
+
+- (void)reportFileEventWithType:(NSUInteger)eventType
+                           data:(NSData *)data
+                       fileName:(NSString *)fileName
+                        gZipped:(BOOL)gZipped
+                      encrypted:(BOOL)encrypted
+                      truncated:(BOOL)truncated
+                    environment:(NSDictionary *)environment
+                         extras:(NSDictionary<NSString *,NSData *> *)extras
+                      onFailure:(void (^)(NSError *))onFailure
+{
+    [self reportCommonEventWithBlock:^AMAEvent *(NSError **error) {
+        return [self.eventBuilder fileEventWithType:eventType
+                                               data:data
+                                           fileName:fileName
+                                            gZipped:gZipped
+                                          encrypted:encrypted
+                                          truncated:truncated
+                                        environment:environment
+                                             extras:extras
+                                              error:error];
+    }
                            onFailure:onFailure];
 }
 
@@ -1090,14 +1131,6 @@
     [self execute:^{
         [self.delegate sendEventsBufferWithApiKey:self.apiKey];
     }];
-}
-
-- (void)reportAutoAppOpen:(NSDictionary *)parameters onFailure:(void (^)(NSError *))onFailure
-{
-    [self reportCommonEventWithBlock:^AMAEvent *(NSError **error) {
-        return [self.eventBuilder autoAppOpenEvent:parameters
-                                             error:error];
-    }                      onFailure:onFailure];
 }
 
 - (void)reportJSEvent:(NSString *)name value:(NSString *)value

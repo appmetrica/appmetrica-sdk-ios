@@ -19,7 +19,7 @@ describe(@"AMASharedReporterProvider", ^{
     });
 
     it(@"Should return reporter", ^{
-        id<AMAAppMetricaReporting > expectedReporter = [KWMock nullMockForProtocol:@protocol(AMAAppMetricaReporting )];
+        id<AMAAppMetricaReporting> expectedReporter = [KWMock nullMockForProtocol:@protocol(AMAAppMetricaReporting )];
         [AMAAppMetrica stub:@selector(reporterForApiKey:) andReturn:expectedReporter];
         id reporter = [provider reporter];
         [[reporter should] equal:expectedReporter];

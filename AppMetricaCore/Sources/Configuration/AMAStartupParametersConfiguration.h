@@ -20,8 +20,6 @@
 @property (nonatomic, copy) NSString *redirectHost;
 @property (nonatomic, copy) NSDictionary<NSString *, NSArray<NSString *> *> *SDKsCustomHosts;
 
-@property (nonatomic, assign) BOOL easyAttributionEnabled;
-
 @property (nonatomic, assign) BOOL permissionsCollectingEnabled;
 @property (nonatomic, copy) NSArray *permissionsCollectingList;
 @property (nonatomic, strong) NSNumber *permissionsCollectingForceSendInterval;

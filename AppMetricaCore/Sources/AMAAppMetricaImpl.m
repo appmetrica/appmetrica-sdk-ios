@@ -210,8 +210,52 @@
     }];
 }
 
+- (void)reportBinaryEventWithType:(NSUInteger)eventType
+                             data:(NSData *)data
+                          gZipped:(BOOL)gZipped
+                      environment:(NSDictionary *)environment
+                           extras:(NSDictionary<NSString *,NSData *> *)extras
+                        onFailure:(void (^)(NSError *))onFailure
+{
+    [self execute:^{
+        [self reportEventWithBlock:^{
+            [self.reporter reportBinaryEventWithType:eventType
+                                                data:data
+                                             gZipped:gZipped
+                                         environment:environment
+                                              extras:extras
+                                           onFailure:onFailure];
+        } onFailure:onFailure];
+    }];
+}
+
+- (void)reportFileEventWithType:(NSUInteger)eventType
+                           data:(NSData *)data
+                       fileName:(NSString *)fileName
+                        gZipped:(BOOL)gZipped
+                      encrypted:(BOOL)encrypted
+                      truncated:(BOOL)truncated
+                    environment:(NSDictionary *)environment
+                         extras:(NSDictionary<NSString *,NSData *> *)extras
+                      onFailure:(void (^)(NSError *))onFailure
+{
+    [self execute:^{
+        [self reportEventWithBlock:^{
+            [self.reporter reportFileEventWithType:eventType
+                                              data:data
+                                          fileName:fileName
+                                           gZipped:gZipped
+                                         encrypted:encrypted
+                                         truncated:truncated
+                                       environment:environment
+                                            extras:extras
+                                         onFailure:onFailure];
+        } onFailure:onFailure];
+    }];
+}
+
 - (void)reportEventWithParameters:(AMACustomEventParameters *)parameters
-                        onFailure:(nullable void (^)(NSError *error))onFailure;
+                        onFailure:(nullable void (^)(NSError *error))onFailure
 {
     
     [self execute:^{
@@ -219,7 +263,6 @@
             [self.reporter reportEventWithParameters:parameters onFailure:onFailure];
         } onFailure:onFailure];
     }];
-    
 }
 
 - (void)reportEventWithBlock:(dispatch_block_t)reportEvent
@@ -418,7 +461,7 @@
     return [[AMAEventBuilder alloc] initWithStateStorage:reporterStateStorage preloadInfo:info];
 }
 
-- (id<AMAAppMetricaReporting >)manualReporterForConfiguration:(AMAReporterConfiguration *)configuration
+- (id<AMAAppMetricaExtendedReporting>)manualReporterForConfiguration:(AMAReporterConfiguration *)configuration
 {
     return [self reporterForConfiguration:configuration];
 }

@@ -60,7 +60,7 @@ static NSString *const kAMAInternalEventsReporterExceptionDescriptionUserInfoKey
 - (void)reportEvent:(NSString *)event parameters:(NSDictionary *)parameters
 {
     [self.executor execute:^{
-        id<AMAAppMetricaReporting > reporter = [self.reporterProvider reporter];
+        id<AMAAppMetricaReporting> reporter = [self.reporterProvider reporter];
         [reporter reportEvent:event parameters:parameters onFailure:nil];
     }];
 }

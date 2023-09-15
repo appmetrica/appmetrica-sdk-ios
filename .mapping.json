@@ -1087,6 +1087,7 @@
   "AppMetricaCoreExtension/Sources/AMACoreExtension.m":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCoreExtension/Sources/AMACoreExtension.m",
   "AppMetricaCoreExtension/Sources/include/AppMetricaCoreExtension/AMAAdProviding.h":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCoreExtension/Sources/include/AppMetricaCoreExtension/AMAAdProviding.h",
   "AppMetricaCoreExtension/Sources/include/AppMetricaCoreExtension/AMAAppMetricaExtended.h":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCoreExtension/Sources/include/AppMetricaCoreExtension/AMAAppMetricaExtended.h",
+  "AppMetricaCoreExtension/Sources/include/AppMetricaCoreExtension/AMAAppMetricaExtendedReporting.h":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCoreExtension/Sources/include/AppMetricaCoreExtension/AMAAppMetricaExtendedReporting.h",
   "AppMetricaCoreExtension/Sources/include/AppMetricaCoreExtension/AMAApplicationStateManager.h":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCoreExtension/Sources/include/AppMetricaCoreExtension/AMAApplicationStateManager.h",
   "AppMetricaCoreExtension/Sources/include/AppMetricaCoreExtension/AMACustomEventParameters.h":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCoreExtension/Sources/include/AppMetricaCoreExtension/AMACustomEventParameters.h",
   "AppMetricaCoreExtension/Sources/include/AppMetricaCoreExtension/AMAEventFlushableDelegate.h":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCoreExtension/Sources/include/AppMetricaCoreExtension/AMAEventFlushableDelegate.h",

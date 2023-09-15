@@ -6,7 +6,6 @@ NSString *const AMAStorageStringKeyASATokenFirstDelay = @"asa.token.reporting.fi
 NSString *const AMAStorageStringKeyASATokenReportingInterval = @"asa.token.reporting.interval";
 NSString *const AMAStorageStringKeyAttributionDeeplinkConditions = @"attribution.deeplink.conditions";
 NSString *const AMAStorageStringKeyDidApplyFinalizationFor19Migration = @"finalization.19.migration.applied";
-NSString *const AMAStorageStringKeyEasyAttributionEnabled = @"easy.attribution.enabled";
 NSString *const AMAStorageStringKeyExtensionsLastReportDate = @"extensions.reporting.last.date";
 NSString *const AMAStorageStringKeyExtensionsReportingEnabled = @"extensions.reporting.enabled";
 NSString *const AMAStorageStringKeyExtensionsReportingInterval = @"extensions.reporting.interval";

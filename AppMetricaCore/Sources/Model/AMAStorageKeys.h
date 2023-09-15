@@ -6,7 +6,6 @@ extern NSString *const AMAStorageStringKeyASATokenFirstDelay;
 extern NSString *const AMAStorageStringKeyASATokenReportingInterval;
 extern NSString *const AMAStorageStringKeyAttributionDeeplinkConditions;
 extern NSString *const AMAStorageStringKeyDidApplyFinalizationFor19Migration;
-extern NSString *const AMAStorageStringKeyEasyAttributionEnabled;
 extern NSString *const AMAStorageStringKeyFirstStartupUpdateDate;
 extern NSString *const AMAStorageStringKeyHadFirstStartup;
 extern NSString *const AMAStorageStringKeyInitialCountry;

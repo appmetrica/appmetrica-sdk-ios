@@ -28,6 +28,7 @@ NSString *const kAMAMetricaLibraryApiKey = @"20799a27-fa80-4b36-b2db-0f8141f2418
 
 @property (atomic, assign, readwrite) BOOL appMetricaStarted;
 @property (atomic, assign, readwrite) BOOL appMetricaImplCreated;
+@property (atomic, assign, readwrite) BOOL externalServicesConfigured;
 
 @end
 
@@ -49,6 +50,7 @@ NSString *const kAMAMetricaLibraryApiKey = @"20799a27-fa80-4b36-b2db-0f8141f2418
         _appBuildNumber = (uint32_t)[[AMAPlatformDescription appBuildNumber] intValue];
         _updateSessionStampInterval = kAMADefaultUpdateSessionStampTimerInterval;
         _sessionsAutoTracking = YES;
+        _externalServicesConfigured = NO;
     }
     return self;
 }
@@ -73,6 +75,11 @@ NSString *const kAMAMetricaLibraryApiKey = @"20799a27-fa80-4b36-b2db-0f8141f2418
 - (void)markAppMetricaImplCreated
 {
     self.appMetricaImplCreated = YES;
+}
+
+- (void)markExternalServicesConfigured
+{
+    self.externalServicesConfigured = YES;
 }
 
 @end

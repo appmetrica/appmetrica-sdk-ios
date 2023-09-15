@@ -19,7 +19,6 @@ typedef NS_ENUM(NSUInteger, AMAEventType) {
     AMAEventTypeProtobufError = 27,
     AMAEventTypeCleanup = 29, // Excluded from AMAEventCountDispatchStrategy
     AMAEventTypeECommerce = 35,
-    AMAEventTypeStatboxExp = 36,
     AMAEventTypeASAToken = 37,
     AMAEventTypeWebViewSync = 38,
     AMAEventTypeAttribution = 39,

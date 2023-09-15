@@ -14,7 +14,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-/** AMAAppMetricaReporting  protocol groups methods that are used by custom reporting objects.
+/** AMAAppMetricaReporting protocol groups methods that are used by custom reporting objects.
  */
 @protocol AMAAppMetricaReporting  <NSObject>
 

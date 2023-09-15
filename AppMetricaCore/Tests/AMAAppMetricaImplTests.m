@@ -356,7 +356,7 @@ describe(@"AMAAppMetricaImpl", ^{
         });
     });
 
-    context(@"Sends events with custom EventType", ^{
+    context(@"Sends string events with custom EventType", ^{
         NSUInteger const eventType = 1234;
         it(@"Should save event with custom EventType", ^{
             [appMetricaImpl activateWithConfiguration:configuration];
@@ -372,15 +372,36 @@ describe(@"AMAAppMetricaImpl", ^{
         });
     });
     
-    context(@"Sends events with Custom parameters", ^{
-        NSUInteger const eventType = 1234;
-        it(@"Should save event with custom parameters", ^{
+    context(@"Sends binary events with custom EventType", ^{
+        NSUInteger const eventType = 4321;
+        it(@"Should save event with custom EventType", ^{
             [appMetricaImpl activateWithConfiguration:configuration];
-            AMACustomEventParameters *params = [[AMACustomEventParameters alloc] initWithEventType:1234];
-            
-            [appMetricaImpl reportEventWithParameters:params
+            [appMetricaImpl reportBinaryEventWithType:eventType
+                                                 data:[NSData data]
+                                              gZipped:YES
+                                          environment:@{}
+                                               extras:nil
                                             onFailure:nil];
-
+            
+            AMAEvent *event = [eventStorage amatest_savedEventWithType:eventType];
+            [[event shouldNot] beNil];
+        });
+    });
+    
+    context(@"Sends file events with custom EventType", ^{
+        NSUInteger const eventType = 2341;
+        it(@"Should save event with custom EventType", ^{
+            [appMetricaImpl activateWithConfiguration:configuration];
+            [appMetricaImpl reportFileEventWithType:eventType
+                                               data:[NSData data]
+                                           fileName:@""
+                                            gZipped:YES
+                                          encrypted:YES
+                                          truncated:YES
+                                        environment:@{}
+                                             extras:nil
+                                          onFailure:nil];
+            
             AMAEvent *event = [eventStorage amatest_savedEventWithType:eventType];
             [[event shouldNot] beNil];
         });

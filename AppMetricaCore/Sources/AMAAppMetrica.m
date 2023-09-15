@@ -121,16 +121,6 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
     }
 }
 
-+ (void)setupExternalService
-{
-    if (startupObservers != nil) {
-        [[self sharedImpl] setExtendedStartupObservers:startupObservers];
-    }
-    if (reporterStorageControllers != nil) {
-        [[self sharedImpl] setExtendedReporterStorageControllers:reporterStorageControllers];
-    }
-}
-
 + (void)registerAdProvider:(id<AMAAdProviding>)provider
 {
     @synchronized(self) {
@@ -138,12 +128,22 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
     }
 }
 
-+ (void)setupAdProvider
++ (void)setupExternalServices
 {
     @synchronized (self) {
+        if ([AMAMetricaConfiguration sharedInstance].inMemory.externalServicesConfigured) {
+            return;
+        }
+        if (startupObservers != nil) {
+            [[self sharedImpl] setExtendedStartupObservers:startupObservers];
+        }
+        if (reporterStorageControllers != nil) {
+            [[self sharedImpl] setExtendedReporterStorageControllers:reporterStorageControllers];
+        }
         if (adProvider != nil) {
             [[AMAAdProvider sharedInstance] setupAdProvider:adProvider];
         }
+        [[AMAMetricaConfiguration sharedInstance].inMemory markExternalServicesConfigured];
     }
 }
 
@@ -214,6 +214,48 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
                                      onFailure:onFailure];
     }
 }
+
++ (void)reportBinaryEventWithType:(NSUInteger)eventType
+                             data:(NSData *)data
+                          gZipped:(BOOL)gZipped
+                      environment:(nullable NSDictionary *)environment
+                           extras:(nullable NSDictionary<NSString *, NSData *> *)extras
+                        onFailure:(nullable void (^)(NSError *error))onFailure
+{
+    
+    if ([self isAppMetricaStartedWithLogging:onFailure]) {
+        [[self sharedImpl] reportBinaryEventWithType:eventType
+                                                data:data
+                                             gZipped:gZipped
+                                         environment:environment
+                                              extras:extras
+                                           onFailure:onFailure];
+    }
+}
+
++ (void)reportFileEventWithType:(NSUInteger)eventType
+                           data:(NSData *)data
+                       fileName:(NSString *)fileName
+                       gZipped:(BOOL)gZipped
+                      encrypted:(BOOL)encrypted
+                      truncated:(BOOL)truncated
+                    environment:(nullable NSDictionary *)environment
+                         extras:(nullable NSDictionary<NSString *, NSData *> *)extras
+                      onFailure:(nullable void (^)(NSError *error))onFailure
+{
+    if ([self isAppMetricaStartedWithLogging:onFailure]) {
+        [[self sharedImpl] reportFileEventWithType:eventType
+                                              data:data
+                                          fileName:fileName
+                                           gZipped:gZipped
+                                         encrypted:encrypted
+                                         truncated:truncated
+                                       environment:environment
+                                            extras:extras
+                                         onFailure:onFailure];
+    }
+}
+
 
 #pragma mark - Handle Configuration -
 
@@ -342,8 +384,7 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
             [AMAErrorLogger logMetricaActivationWithAlreadyPresentedKeyError];
             return;
         }
-        [[self class] setupExternalService];
-        [[self class] setupAdProvider];
+        [[self class] setupExternalServices];
         [self importConfiguration:configuration];
         [[self sharedImpl] activateWithConfiguration:configuration];
         [[AMAMetricaConfiguration sharedInstance].inMemory markAppMetricaStarted];
@@ -539,6 +580,7 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
             [AMAErrorLogger logMetricaActivationWithAlreadyPresentedKeyError];
         }
         else {
+            [[self class] setupExternalServices];
             AMADataSendingRestriction restriction = AMADataSendingRestrictionUndefined;
             if (configuration.dataSendingEnabledState != nil) {
                 restriction = [configuration.dataSendingEnabledState boolValue]
@@ -546,7 +588,7 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
                     : AMADataSendingRestrictionForbidden;
             }
             [[AMADataSendingRestrictionController sharedInstance] setReporterRestriction:restriction
-                                                                              forApiKey:configuration.apiKey];
+                                                                               forApiKey:configuration.apiKey];
 
             [[AMAMetricaConfiguration sharedInstance] setConfiguration:configuration];
             [self handleConfigurationUpdate];
@@ -555,7 +597,12 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
     }
 }
 
-+ (id<AMAAppMetricaReporting >)reporterForApiKey:(NSString *)apiKey
++ (id<AMAAppMetricaReporting>)reporterForApiKey:(NSString *)apiKey
+{
+    return [self extendedReporterForApiKey:apiKey];
+}
+
++ (id<AMAAppMetricaExtendedReporting>)extendedReporterForApiKey:(NSString *)apiKey
 {
     if ([self isAPIKeyValid:apiKey] == NO) {
         [AMAErrorLogger logInvalidApiKeyError:apiKey];
@@ -568,7 +615,7 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
                                                                               forApiKey:apiKey];
         }
         AMAReporterConfiguration *configuration = [[AMAReporterConfiguration alloc] initWithApiKey:apiKey];
-        id<AMAAppMetricaReporting > reporter = [[self sharedImpl] manualReporterForConfiguration:configuration];
+        id<AMAAppMetricaExtendedReporting> reporter = [[self sharedImpl] manualReporterForConfiguration:configuration];
         return reporter;
     }
 }
@@ -589,7 +636,6 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
                                            completionBlock:identifiersCompletionBlock];
     }
 }
-
 
 + (void)requestStartupIdentifiersWithCompletionQueue:(nullable dispatch_queue_t)queue
                                      completionBlock:(AMAIdentifiersCompletionBlock)block

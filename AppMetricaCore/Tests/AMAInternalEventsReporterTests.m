@@ -12,7 +12,7 @@ describe(@"AMAInternalEventsReporter", ^{
 
     id<AMAExecuting> __block executor = nil;
     AMAStubHostAppStateProvider *__block hostProvider = nil;
-    KWMock<AMAAppMetricaReporting > __block *reporterMock = nil;
+    KWMock<AMAAppMetricaReporting> __block *reporterMock = nil;
     AMAInternalEventsReporter *__block reporter = nil;
 
     beforeEach(^{

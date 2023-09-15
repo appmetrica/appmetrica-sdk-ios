@@ -258,6 +258,90 @@
     return event;
 }
 
+- (AMAEvent *)binaryEventWithType:(NSUInteger)eventType
+                             data:(NSData *)data
+                          gZipped:(BOOL)gZipped
+                      environment:(NSDictionary *)environment
+                           extras:(NSDictionary<NSString *,NSData *> *)extras
+                            error:(NSError **)outError
+{
+    if ([AMAEventTypeResolver isEventTypeReserved:eventType]) {
+        [AMAErrorUtilities fillError:outError
+                           withError:[AMAErrorsFactory eventTypeReservedError:eventType]];
+        return nil;
+    }
+    
+    NSError *internalError = nil;
+    BOOL gZippedValid = NO;
+    NSData *validData = data;
+    if (gZipped) {
+        NSData *gZippedData = [self gzipData:data error:&internalError];
+        if (internalError == nil) {
+            validData = gZippedData;
+            gZippedValid = YES;
+        }
+        else {
+            [AMAErrorUtilities fillError:outError withError:internalError];
+        }
+    }
+    
+    AMAEvent *event = [self eventOfType:eventType];
+    
+    [self fillEvent:event withBinaryValue:validData gZipped:gZippedValid];
+    
+    [self fillEvent:event withExtras:extras];
+    event.errorEnvironment = environment;
+    
+    return event;
+}
+
+- (AMAEvent *)fileEventWithType:(NSUInteger)eventType
+                           data:(NSData *)data
+                       fileName:(NSString *)fileName
+                        gZipped:(BOOL)gZipped
+                      encrypted:(BOOL)encrypted
+                      truncated:(BOOL)truncated
+                    environment:(NSDictionary *)environment
+                         extras:(NSDictionary<NSString *,NSData *> *)extras
+                          error:(NSError **)outError
+{
+    if ([AMAEventTypeResolver isEventTypeReserved:eventType]) {
+        [AMAErrorUtilities fillError:outError
+                          withError:[AMAErrorsFactory eventTypeReservedError:eventType]];
+        return nil;
+    }
+    
+    NSError *internalError = nil;
+    NSData *validData = data;
+    if (gZipped) {
+        NSData *gZippedData = [self gzipData:data error:&internalError];
+        if (internalError == nil) {
+            validData = gZippedData;
+        }
+        else {
+            [AMAErrorUtilities fillError:outError withError:internalError];
+        }
+    }
+    
+    AMAEvent *event = [self eventOfType:eventType];
+    
+    NSString *validFileName = fileName.length == 0
+        ? [NSString stringWithFormat:@"%@.event", NSUUID.UUID.UUIDString]
+        : fileName;
+    
+    [self fillEvent:event
+      withFileValue:validData
+           fileName:validFileName
+          encrypted:encrypted
+          truncated:truncated
+              error:outError];
+    
+    [self fillEvent:event withExtras:extras];
+    event.errorEnvironment = environment;
+
+    return event;
+}
+
 - (void)addPreloadInfo:(AMAAppMetricaPreloadInfo *)info
             parameters:(NSDictionary *)parameters
                toEvent:(AMAEvent *)event
@@ -338,22 +422,6 @@
     return event;
 }
 
-- (AMAEvent *)autoAppOpenEvent:(NSDictionary *)parameters
-                         error:(NSError **)outError
-{
-    NSError *internalError = nil;
-    NSString *jsonValue = [self jsonStringFromDictionary:parameters error:&internalError];
-    if (internalError != nil) {
-        AMALogError(@"Failed to serialize auto app open event value: %@", internalError);
-        [AMAErrorUtilities fillError:outError withError:internalError];
-        return nil;
-    }
-    AMAEvent *event = [self eventOfType:AMAEventTypeStatboxExp];
-    [self fillEvent:event withStringValue:jsonValue];
-    event.name = @"auto_app_open";
-    return event;
-}
-
 - (AMAEvent *)jsEvent:(NSString *)name value:(NSString *)value
 {
     if (name.length == 0) {
@@ -393,7 +461,7 @@
     return event;
 }
 
-#pragma mark - Private
+#pragma mark - Private -
 
 - (void)fillEvent:(AMAEvent *)event withName:(NSString *)name
 {
@@ -421,6 +489,38 @@
     event.value = [self.eventValueFactory binaryEventValue:value gZipped:gZipped bytesTruncated:&bytesTruncated];
     event.bytesTruncated += bytesTruncated;
     [self logTruncation:@"value" event:event bytesTruncated:bytesTruncated];
+}
+
+- (void)fillEvent:(AMAEvent *)event
+    withFileValue:(NSData *)value
+         fileName:(NSString *)fileName
+        encrypted:(BOOL)encrypted
+        truncated:(BOOL)truncated
+            error:(NSError **)outError
+{
+    NSError *internalError = nil;
+    NSUInteger bytesTruncated = 0;
+    
+    AMAEventEncryptionType encryption = encrypted ? AMAEventEncryptionTypeAESv1 : AMAEventEncryptionTypeNoEncryption;
+    AMAEventValueFactoryTruncationType truncation = truncated
+        ? AMAEventValueFactoryTruncationTypePartial
+        : AMAEventValueFactoryTruncationTypeFull;
+    
+    event.value = [self.eventValueFactory fileEventValue:value
+                                                fileName:fileName
+                                          encryptionType:encryption
+                                          truncationType:truncation
+                                          bytesTruncated:&bytesTruncated
+                                                   error:&internalError];
+    if (internalError != nil) {
+        event = nil;
+        AMALogError(@"Failed to create file event value: %@", internalError);
+        [AMAErrorUtilities fillError:outError withError:internalError];
+    }
+    else {
+        event.bytesTruncated += bytesTruncated;
+        [self logTruncation:@"value" event:event bytesTruncated:bytesTruncated];
+    }
 }
 
 - (void)fillEvent:(AMAEvent *)event
@@ -459,6 +559,17 @@
     return dictionary.count != 0
         ? [AMAJSONSerialization stringWithJSONObject:dictionary error:error]
         : nil;
+}
+
+- (NSData *)gzipData:(NSData *)data error:(NSError **)error
+{
+    NSError *internalError = nil;
+    NSData *gZippedData = [self.gZipEncoder encodeData:data error:&internalError];
+    if (internalError != nil) {
+        AMALogWarn(@"Failed to gzip data: %@", internalError);
+        [AMAErrorUtilities fillError:error withError:internalError];
+    }
+    return gZippedData;
 }
 
 @end

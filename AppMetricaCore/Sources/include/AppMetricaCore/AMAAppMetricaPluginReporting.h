@@ -6,7 +6,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 /**
- * `AMAAppMetricaPluginReporting` is an extension of `AMAAppMetricaReporting `.
+ * `AMAAppMetricaPluginReporting` is an extension of `AMAAppMetricaReporting`.
  * Instance of object that implements `AMAAppMetricaPluginReporting` can be obtained via
  * `AMAAppMetricaReporting #pluginExtension` property.
  * For every reporter only one `AMAAppMetricaPluginReporting` instance is created.

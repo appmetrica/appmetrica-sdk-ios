@@ -27,7 +27,7 @@
 
 @end
 
-@interface AMAReporter : NSObject <AMAAppMetricaReporting 
+@interface AMAReporter : NSObject <AMAAppMetricaReporting, AMAAppMetricaExtendedReporting
 #if !TARGET_OS_TV
 , AMAJSReporting
 #endif
@@ -76,14 +76,6 @@
 - (void)reportPermissionsEventWithPermissions:(NSString *)permissions onFailure:(void (^)(NSError *error))onFailure;
 - (void)reportCleanupEvent:(NSDictionary *)parameters onFailure:(void (^)(NSError *error))onFailure;
 - (void)reportASATokenEventWithParameters:(NSDictionary *)parameters onFailure:(void (^)(NSError *error))onFailure;
-- (void)reportEventWithType:(NSUInteger)eventType
-                       name:(NSString *)name
-                      value:(NSString *)value
-                environment:(NSDictionary *)environment
-                     extras:(NSDictionary<NSString *, NSData *> *)extras
-                  onFailure:(void (^)(NSError *))onFailure;
-- (void)reportAutoAppOpen:(NSDictionary *)parameters
-                onFailure:(void (^)(NSError *error))onFailure;
 - (void)reportAutoRevenue:(AMARevenueInfoModel *)revenueInfoModel onFailure:(void (^)(NSError *))onFailure;
 - (void)reportAttributionEventWithName:(NSString *)name value:(NSDictionary *)value;
 

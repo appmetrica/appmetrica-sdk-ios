@@ -49,6 +49,21 @@
            eventEnvironment:(NSDictionary *)eventEnvironment
                      extras:(NSDictionary<NSString *, NSData *> *)extras
                       error:(NSError **)outError;
+- (AMAEvent *)binaryEventWithType:(NSUInteger)eventType
+                             data:(NSData *)data
+                          gZipped:(BOOL)gZipped
+                      environment:(NSDictionary *)environment
+                           extras:(NSDictionary<NSString *, NSData *> *)extras
+                            error:(NSError **)outError;
+- (AMAEvent *)fileEventWithType:(NSUInteger)eventType
+                           data:(NSData *)data
+                       fileName:(NSString *)fileName
+                        gZipped:(BOOL)gZipped
+                      encrypted:(BOOL)encrypted
+                      truncated:(BOOL)truncated
+                    environment:(NSDictionary *)environment
+                         extras:(NSDictionary<NSString *, NSData *> *)extras
+                          error:(NSError **)outError;
 
 - (AMAEvent *)permissionsEventWithJSON:(NSString *)permissions error:(NSError **)outError;
 
@@ -75,9 +90,6 @@
 
 - (AMAEvent *)eventAdRevenue:(NSData *)adRevenueData
               bytesTruncated:(NSUInteger)bytesTruncated;
-
-- (AMAEvent *)autoAppOpenEvent:(NSDictionary *)parameters
-                         error:(NSError **)outError;
 
 - (AMAEvent *)jsEvent:(NSString *)name
                 value:(NSString *)value;

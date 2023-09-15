@@ -16,7 +16,6 @@ INSERT INTO "kv" VALUES ('server.time.offset',-0.160047054290772);
 INSERT INTO "kv" VALUES ('location.collecting.hosts','["https:\/\/rosenberg.appmetrica.test.net"]');
 INSERT INTO "kv" VALUES ('redirect.host','https://redirect.appmetrica.com');
 INSERT INTO "kv" VALUES ('startup.hosts','["https:\/\/unavailable.startup.tst.mobile.appmetrica.net","https:\/\/startup.tst.mobile.appmetrica.net"]');
-INSERT INTO "kv" VALUES ('easy.attribution.enabled',0);
 INSERT INTO "kv" VALUES ('extensions.reporting.launch.delay',3);
 INSERT INTO "kv" VALUES ('startup.first_update.date',1568284190.07959);
 INSERT INTO "kv" VALUES ('extensions.reporting.enabled',1);

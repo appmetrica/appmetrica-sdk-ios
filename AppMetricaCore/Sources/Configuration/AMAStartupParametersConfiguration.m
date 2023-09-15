@@ -24,7 +24,6 @@
         AMAStorageStringKeyASATokenFirstDelay,
         AMAStorageStringKeyASATokenReportingInterval,
         AMAStorageStringKeyAttributionDeeplinkConditions,
-        AMAStorageStringKeyEasyAttributionEnabled,
         AMAStorageStringKeyExtensionsReportingEnabled,
         AMAStorageStringKeyExtensionsReportingInterval,
         AMAStorageStringKeyExtensionsReportingLaunchDelay,
@@ -127,7 +126,6 @@ ARRAY_PROPERTY(reportHosts, setReportHosts, AMAStorageStringKeyReportHosts, [NSS
 ARRAY_PROPERTY(permissionsCollectingList, setPermissionsCollectingList, AMAStorageStringKeyPermissionsList, [NSString class]);
 ARRAY_PROPERTY(locationHosts, setLocationHosts, AMAStorageStringKeyLocationHosts, [NSString class]);
 
-BOOL_PROPERTY(easyAttributionEnabled, setEasyAttributionEnabled, AMAStorageStringKeyEasyAttributionEnabled);
 BOOL_PROPERTY(permissionsCollectingEnabled, setPermissionsCollectingEnabled, AMAStorageStringKeyPermissionsEnabled);
 BOOL_PROPERTY(extensionsCollectingEnabled, setExtensionsCollectingEnabled, AMAStorageStringKeyExtensionsReportingEnabled);
 BOOL_PROPERTY(locationCollectingEnabled, setLocationCollectingEnabled, AMAStorageStringKeyLocationCollectingEnabled);
@@ -232,7 +230,6 @@ BOOL_PROPERTY(locationVisitsCollectingEnabled, setLocationVisitsCollectingEnable
     NSMutableString *description = [NSMutableString stringWithFormat:@"<%@: ", super.description];
     [description appendFormat:@", self.redirectHost=%@", self.redirectHost];
     [description appendFormat:@", self.serverTimeOffset=%@", self.serverTimeOffset];
-    [description appendFormat:@", self.easyAttributionEnabled=%@", self.easyAttributionEnabled ? @"YES" : @"NO"];
     [description appendFormat:@", self.startupHosts=%@", self.startupHosts];
     [description appendFormat:@", self.reportHosts=%@", self.reportHosts];
     [description appendFormat:@", self.initialCountry=%@", self.initialCountry];

@@ -392,53 +392,196 @@ describe(@"AMAAppMetrica", ^{
         });
         
         context(@"Custom event type", ^{
-            context(@"Not activated Metrica", ^{
-                NSError *(^errorFromReporting)(void) = ^NSError * {
-                    NSError *__block resultError = nil;
-                    [AMAAppMetrica reportEventWithType:0
-                                                  name:@""
-                                                 value:@""
-                                           environment:@{}
-                                             onFailure:^(NSError *error) {
-                        resultError = error;
-                    }];
-                    return resultError;
-                };
-                
-                it(@"Should call onFailure with error of actual domain", ^{
-                    [[errorFromReporting().domain should] equal:kAMAAppMetricaErrorDomain];
+            context(@"String event", ^{
+                context(@"Not activated Metrica", ^{
+                    NSError *(^errorFromReporting)(void) = ^NSError * {
+                        NSError *__block resultError = nil;
+                        [AMAAppMetrica reportEventWithType:0
+                                                      name:@""
+                                                     value:@""
+                                               environment:@{}
+                                                 onFailure:^(NSError *error) {
+                            resultError = error;
+                        }];
+                        return resultError;
+                    };
+                    
+                    it(@"Should call onFailure with error of actual domain", ^{
+                        [[errorFromReporting().domain should] equal:kAMAAppMetricaErrorDomain];
+                    });
+                    it(@"Should call onFailure with error of actual code", ^{
+                        [[theValue(errorFromReporting().code) should] equal:theValue(AMAAppMetricaEventErrorCodeInitializationError)];
+                    });
                 });
-                it(@"Should call onFailure with error of actual code", ^{
-                    [[theValue(errorFromReporting().code) should] equal:theValue(AMAAppMetricaEventErrorCodeInitializationError)];
+                context(@"Event with type", ^{
+                    NSUInteger const eventType = 1234;
+                    NSString *const eventName = @"name";
+                    NSString *const eventValue = @"value";
+                    NSDictionary *const environment = @{ @"a": @"b" };
+                    
+                    it(@"Should report event with custom type", ^{
+                        activate();
+                        AMAReporter *reporter = reporterTestHelper.appReporter;
+                        [[reporter should] receive:@selector(reportEventWithType:name:value:environment:extras:onFailure:)
+                                     withArguments:theValue(eventType), eventName, eventValue, environment, nil, nil];
+                        [AMAAppMetrica reportEventWithType:eventType
+                                                      name:eventName
+                                                     value:eventValue
+                                               environment:environment
+                                                 onFailure:nil];
+                    });
+                    
+                    
+                    it(@"Should not report event with custom type if metrica is not activated", ^{
+                        AMAReporter *reporter = reporterTestHelper.appReporter;
+                        [[reporter shouldNot] receive:@selector(reportEventWithType:name:value:environment:extras:onFailure:)];
+                        [AMAAppMetrica reportEventWithType:eventType
+                                                      name:eventName
+                                                     value:eventValue
+                                               environment:environment
+                                                 onFailure:nil];
+                    });
                 });
             });
-            context(@"Event with type", ^{
-                NSUInteger const eventType = 1234;
-                NSString *const eventName = @"name";
-                NSString *const eventValue = @"value";
-                NSDictionary *const environment = @{ @"a": @"b" };
-                
-                it(@"Should report event with custom type", ^{
-                    activate();
-                    AMAReporter *reporter = reporterTestHelper.appReporter;
-                    [[reporter should] receive:@selector(reportEventWithType:name:value:environment:extras:onFailure:)
-                                 withArguments:theValue(eventType), eventName, eventValue, environment, nil, nil];
-                    [AMAAppMetrica reportEventWithType:eventType
-                                                  name:eventName
-                                                 value:eventValue
-                                           environment:environment
-                                             onFailure:nil];
+            context(@"Binary event", ^{
+                context(@"Not activated Metrica", ^{
+                    NSError *(^errorFromReporting)(void) = ^NSError * {
+                        NSError *__block resultError = nil;
+                        [AMAAppMetrica reportBinaryEventWithType:0
+                                                            data:[NSData data]
+                                                         gZipped:NO
+                                                     environment:nil
+                                                          extras:nil
+                                                       onFailure:^(NSError *error) {
+                            resultError = error;
+                        }];
+                        return resultError;
+                    };
+                    
+                    it(@"Should call onFailure with error of actual domain", ^{
+                        [[errorFromReporting().domain should] equal:kAMAAppMetricaErrorDomain];
+                    });
+                    it(@"Should call onFailure with error of actual code", ^{
+                        [[theValue(errorFromReporting().code) should] equal:theValue(AMAAppMetricaEventErrorCodeInitializationError)];
+                    });
                 });
-                
-                
-                it(@"Should not report event with custom type if metrica is not activated", ^{
-                    AMAReporter *reporter = reporterTestHelper.appReporter;
-                    [[reporter shouldNot] receive:@selector(reportEventWithType:name:value:environment:extras:onFailure:)];
-                    [AMAAppMetrica reportEventWithType:eventType
-                                                  name:eventName
-                                                 value:eventValue
-                                           environment:environment
-                                             onFailure:nil];
+                context(@"Event with binary type", ^{
+                    NSUInteger const eventType = 1234;
+                    NSDictionary *const environment = @{ @"a": @"b" };
+                    NSData *data = [NSData data];
+                    
+                    it(@"Should report event with custom type", ^{
+                        activate();
+                        AMAReporter *reporter = reporterTestHelper.appReporter;
+                        [[reporter should] receive:@selector(reportBinaryEventWithType:
+                                                             data:
+                                                             gZipped:
+                                                             environment:
+                                                             extras:
+                                                             onFailure:)
+                                     withArguments:theValue(eventType), data, theValue(YES), environment, nil, nil];
+                        [AMAAppMetrica reportBinaryEventWithType:eventType
+                                                            data:data
+                                                         gZipped:YES
+                                                     environment:environment
+                                                          extras:nil
+                                                       onFailure:nil];
+                    });
+                    
+                    
+                    it(@"Should not report event with custom type if metrica is not activated", ^{
+                        AMAReporter *reporter = reporterTestHelper.appReporter;
+                        [[reporter shouldNot] receive:@selector(reportBinaryEventWithType:
+                                                                data:
+                                                                gZipped:
+                                                                environment:
+                                                                extras:
+                                                                onFailure:)];
+                        [AMAAppMetrica reportBinaryEventWithType:eventType
+                                                            data:data
+                                                         gZipped:YES
+                                                     environment:environment
+                                                          extras:nil
+                                                       onFailure:nil];
+                    });
+                });
+            });
+            context(@"File event", ^{
+                context(@"Not activated Metrica", ^{
+                    NSError *(^errorFromReporting)(void) = ^NSError * {
+                        NSError *__block resultError = nil;
+                        [AMAAppMetrica reportFileEventWithType:0
+                                                          data:[NSData data]
+                                                      fileName:@""
+                                                       gZipped:YES
+                                                     encrypted:NO
+                                                     truncated:NO
+                                                   environment:nil
+                                                        extras:nil
+                                                     onFailure:^(NSError *error) {
+                            resultError = error;
+                        }];
+                        return resultError;
+                    };
+                    
+                    it(@"Should call onFailure with error of actual domain", ^{
+                        [[errorFromReporting().domain should] equal:kAMAAppMetricaErrorDomain];
+                    });
+                    it(@"Should call onFailure with error of actual code", ^{
+                        [[theValue(errorFromReporting().code) should] equal:theValue(AMAAppMetricaEventErrorCodeInitializationError)];
+                    });
+                });
+                context(@"Event with binary type", ^{
+                    NSUInteger const eventType = 1234;
+                    NSDictionary *const environment = @{ @"a": @"b" };
+                    NSData *data = [NSData data];
+                    NSString *fileName = @"file:///";
+                    
+                    it(@"Should report event with custom type", ^{
+                        activate();
+                        AMAReporter *reporter = reporterTestHelper.appReporter;
+                        [[reporter should] receive:@selector(reportFileEventWithType:
+                                                             data:
+                                                             fileName:
+                                                             gZipped:
+                                                             encrypted:
+                                                             truncated:
+                                                             environment:
+                                                             extras:
+                                                             onFailure:)
+                                     withArguments:theValue(eventType), data, fileName, theValue(YES), theValue(YES), theValue(YES), environment, nil, nil];
+                        [AMAAppMetrica reportFileEventWithType:eventType
+                                                          data:data
+                                                      fileName:fileName
+                                                       gZipped:YES
+                                                     encrypted:YES
+                                                     truncated:YES
+                                                   environment:environment
+                                                        extras:nil
+                                                     onFailure:nil];
+                    });
+                    
+                    it(@"Should not report event with custom type if metrica is not activated", ^{
+                        AMAReporter *reporter = reporterTestHelper.appReporter;
+                        [[reporter shouldNot] receive:@selector(reportFileEventWithType:
+                                                                data:
+                                                                fileName:
+                                                                gZipped:
+                                                                encrypted:
+                                                                truncated:
+                                                                environment:
+                                                                extras:
+                                                                onFailure:)];
+                        [AMAAppMetrica reportFileEventWithType:eventType
+                                                          data:data
+                                                      fileName:fileName
+                                                       gZipped:YES
+                                                     encrypted:YES
+                                                     truncated:YES
+                                                   environment:environment
+                                                        extras:nil
+                                                     onFailure:nil];
+                    });
                 });
             });
         });
@@ -879,38 +1022,71 @@ describe(@"AMAAppMetrica", ^{
     
                 [AMAAppMetrica sendEventsBuffer];
             });
-            
             context(@"Service Configuration", ^{
-                it(@"Should register Startup observer", ^{
-                    id startupObserver = [KWMock nullMockForProtocol:@protocol(AMAExtendedStartupObserving)];
-                    NSMutableSet *observers = [NSMutableSet stubbedNullMockForDefaultInit];
-                    
-                    __auto_type *config = [[AMAServiceConfiguration alloc] initStartupObserver:startupObserver
-                                                                     reporterStorageController:nil];
-                    
-                    [AMAAppMetrica registerExternalService:config];
-                    
-                    [[impl should] receive:@selector(setExtendedStartupObservers:) withArguments:observers];
-                    
-                    activate();
+                context(@"Startup observer", ^{
+                    id<AMAExtendedStartupObserving> __block startupObserver = nil;
+                    AMAServiceConfiguration *__block config = nil;
+                    beforeAll(^{
+                        startupObserver = [KWMock nullMockForProtocol:@protocol(AMAExtendedStartupObserving)];
+                        config = [[AMAServiceConfiguration alloc] initStartupObserver:startupObserver
+                                                            reporterStorageController:nil];
+                    });
+                    it(@"Should register Startup observer on activation main reporter", ^{
+                        [AMAAppMetrica registerExternalService:config];
+                        
+                        KWCaptureSpy *spy = [impl captureArgument:@selector(setExtendedStartupObservers:) atIndex:0];
+                        
+                        [[impl should] receive:@selector(setExtendedStartupObservers:)];
+                        
+                        activate();
+                        
+                        [[spy.argument should] equal:[NSMutableSet setWithObject:startupObserver]];
+                    });
+                    it(@"Should register Startup observer on activation secondary reporter", ^{
+                        [AMAAppMetrica registerExternalService:config];
+                        
+                        KWCaptureSpy *spy = [impl captureArgument:@selector(setExtendedStartupObservers:) atIndex:0];
+                        
+                        [[impl should] receive:@selector(setExtendedStartupObservers:)];
+                        
+                        [AMAAppMetrica activateReporterWithConfiguration:[[AMAReporterConfiguration alloc] initWithApiKey:apiKey]];
+                        
+                        [[spy.argument should] equal:[NSMutableSet setWithObject:startupObserver]];
+                    });
                 });
-                
-                it(@"Should register reporter storage controller", ^{
-                    id reporterStorageController = [KWMock nullMockForProtocol:@protocol(AMAReporterStorageControlling)];
-                    NSMutableSet *controllers = [NSMutableSet stubbedNullMockForDefaultInit];
-                    
-                    __auto_type *config = [[AMAServiceConfiguration alloc] initStartupObserver:nil
-                                                                     reporterStorageController:reporterStorageController];
-                    
-                    [AMAAppMetrica registerExternalService:config];
-                    
-                    [[impl should] receive:@selector(setExtendedReporterStorageControllers:) withArguments:controllers];
-                    
-                    activate();
+                context(@"Reporter storage controller", ^{
+                    id<AMAReporterStorageControlling> __block reporterStorageController = nil;
+                    AMAServiceConfiguration *__block config = nil;
+                    beforeAll(^{
+                        reporterStorageController = [KWMock nullMockForProtocol:@protocol(AMAReporterStorageControlling)];
+                        config = [[AMAServiceConfiguration alloc] initStartupObserver:nil
+                                                            reporterStorageController:reporterStorageController];
+                    });
+                    it(@"Should register reporter storage controller on activation main reporter", ^{
+                        [AMAAppMetrica registerExternalService:config];
+                        
+                        KWCaptureSpy *spy = [impl captureArgument:@selector(setExtendedReporterStorageControllers:) atIndex:0];
+                        
+                        [[impl should] receive:@selector(setExtendedReporterStorageControllers:)];
+                        
+                        activate();
+                        
+                        [[spy.argument should] equal:[NSMutableSet setWithObject:reporterStorageController]];
+                    });
+                    it(@"Should register reporter storage controller on activation secondary reporter", ^{
+                        [AMAAppMetrica registerExternalService:config];
+                        
+                        KWCaptureSpy *spy = [impl captureArgument:@selector(setExtendedReporterStorageControllers:) atIndex:0];
+                        
+                        [[impl should] receive:@selector(setExtendedReporterStorageControllers:)];
+                        
+                        [AMAAppMetrica activateReporterWithConfiguration:[[AMAReporterConfiguration alloc] initWithApiKey:apiKey]];
+                        
+                        [[spy.argument should] equal:[NSMutableSet setWithObject:reporterStorageController]];
+                    });
                 });
             });
-            
-            it(@"Should register external AdController to core AdProvider", ^{
+            it(@"Should register external AdController on activate main reporter", ^{
                 id adController = [KWMock nullMockForProtocol:@protocol(AMAAdProviding)];
 
                 [AMAAppMetrica registerAdProvider:adController];
@@ -919,44 +1095,31 @@ describe(@"AMAAppMetrica", ^{
 
                 activate();
             });
-            
+            it(@"Should register external AdController on activate reporter", ^{
+                id adController = [KWMock nullMockForProtocol:@protocol(AMAAdProviding)];
+
+                [AMAAppMetrica registerAdProvider:adController];
+
+                [[adProvider should] receive:@selector(setupAdProvider:) withArguments:adController];
+
+                [AMAAppMetrica activateReporterWithConfiguration:[[AMAReporterConfiguration alloc] initWithApiKey:apiKey]];
+            });
             it(@"Should return yes if api key is valid", ^{
                 [AMAIdentifierValidator stub:@selector(isValidUUIDKey:) andReturn:theValue(YES)];
                 
                 [[theValue([AMAAppMetrica isAPIKeyValid:@"api-key"]) should] beYes];
             });
-            
             it(@"Should return yes if AppMetrica started", ^{
                 stubMetricaStarted(YES);
                 
                 [[theValue([AMAAppMetrica isAppMetricaStarted]) should] beYes];
             });
-            
             it(@"Should return yes if reporter is created for api key", ^{
                 [[AMAMetricaConfiguration sharedInstance].inMemory stub:@selector(appMetricaImplCreated)
                                                               andReturn:theValue(YES)];
                 [impl stub:@selector(isReporterCreatedForAPIKey:) andReturn:theValue(YES)];
                 
                 [[theValue([AMAAppMetrica isReporterCreatedForAPIKey:@"api-key"]) should] beYes];
-            });
-            
-            it(@"Should report event with parameters", ^{
-                stubMetricaStarted(YES);
-                AMACustomEventParameters *parameters = [AMACustomEventParameters stubbedNullMockForInit:@selector(initWithEventType:)];
-                
-                [[impl should] receive:@selector(reportEventWithParameters:onFailure:)
-                         withArguments:parameters, kw_any()];
-                
-                [AMAAppMetrica reportEventWithParameters:parameters onFailure:nil];
-            });
-            
-            it(@"Should not report event with parameters if metrica is not activated", ^{
-                stubMetricaStarted(NO);
-                AMACustomEventParameters *parameters = [AMACustomEventParameters stubbedNullMockForInit:@selector(initWithEventType:)];
-                
-                [[impl shouldNot] receive:@selector(reportEventWithParameters:onFailure:)];
-                
-                [AMAAppMetrica reportEventWithParameters:parameters onFailure:nil];
             });
         });
     });

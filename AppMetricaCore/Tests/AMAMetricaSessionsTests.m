@@ -157,7 +157,7 @@ describe(@"AMAMetricaSessions", ^{
             it(@"Should not start manual reporters on applicationDidBecomeActive", ^{
                 stubSharedImpl();
                 NSString *manualApiKey = @"550e8400-e29b-41d4-a716-446655440001";
-                id<AMAAppMetricaReporting > __unused reporter = [AMAAppMetrica reporterForApiKey:manualApiKey];
+                id<AMAAppMetricaReporting> __unused reporter = [AMAAppMetrica reporterForApiKey:manualApiKey];
                 start();
                 [[NSNotificationCenter defaultCenter] postNotificationName:UIApplicationDidBecomeActiveNotification
                                                                     object:nil];

@@ -19,7 +19,7 @@
     return self;
 }
 
-- (id<AMAAppMetricaReporting >)reporter
+- (id<AMAAppMetricaReporting>)reporter
 {
     return [AMAAppMetrica reporterForApiKey:self.apiKey];
 }

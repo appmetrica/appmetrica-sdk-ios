@@ -41,9 +41,11 @@ extern BOOL const kAMADefaultAppOpenTrackingEnabled;
 
 @property (atomic, assign, readonly) BOOL appMetricaStarted;
 @property (atomic, assign, readonly) BOOL appMetricaImplCreated;
+@property (atomic, assign, readonly) BOOL externalServicesConfigured;
 
 - (void)markAppMetricaStarted;
 - (void)markAppMetricaImplCreated;
+- (void)markExternalServicesConfigured;
 
 @end
 

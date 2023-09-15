@@ -28,20 +28,11 @@ describe(@"AMAStartupResponseParser", ^{
         NSString *response = @"{"
             "\"features\" : {"
                 "\"list\" : {"
-                    "\"easy_attribution\" : {"
-                        "\"enabled\" : true"
-                    "},"
-                    "\"easy_collecting\" : {"
-                        "\"enabled\" : true"
-                    "},"
                     "\"permissions_collecting\" : {"
                         "\"enabled\" : true"
                     "},"
                     "\"extensions_collecting\" : {"
                         "\"enabled\" : true"
-                    "},"
-                    "\"auto_app_open_enabled\" : {"
-                         "\"enabled\" : false"
                     "},"
                 "}"
             "},"
@@ -256,10 +247,6 @@ describe(@"AMAStartupResponseParser", ^{
             
             it(@"Should parse get ads host", ^{
                 [[parsedConfiguration.extendedParameters[@"report_ad"] should] equal:@"https://https://mobile-ads-beta.appmetrica.io:4443"];
-            });
-            
-            it(@"Should parse easy attribution enabled flag", ^{
-                [[theValue(parsedConfiguration.easyAttributionEnabled) should] beYes];
             });
 
             it(@"Should parse initial country", ^{

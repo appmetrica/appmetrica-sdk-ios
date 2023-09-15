@@ -16,7 +16,7 @@ typedef NS_ENUM(NSUInteger, AMAAdType) {
 /** The class to store Ad Revenue data.
 
  The Ad Revenue object should be passed to the AppMetrica by using the
- `reportRevenue` method of the `AMAAppMetrica` or `AMAAppMetricaReporting ` classes.
+ `reportRevenue` method of the `AMAAppMetrica` or `AMAAppMetricaReporting` classes.
 
  @note This interface has the mutable version `AMAMutableAdRevenueInfo`.
  */

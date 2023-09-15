@@ -24,7 +24,6 @@ describe(@"AMAStartupParametersConfiguration", ^{
             @"asa.token.reporting.first",
             @"asa.token.reporting.interval",
             @"attribution.deeplink.conditions",
-            @"easy.attribution.enabled",
             @"extensions.reporting.enabled",
             @"extensions.reporting.interval",
             @"extensions.reporting.launch.delay",
@@ -376,25 +375,6 @@ describe(@"AMAStartupParametersConfiguration", ^{
         NSNumber *const value = @YES;
         beforeEach(^{
             [storage stub:@selector(boolNumberForKey:error:) andReturn:value];
-        });
-        
-        context(@"easyAttributionEnabled", ^{
-            NSString *const key = @"easy.attribution.enabled";
-            it(@"Should use valid key", ^{
-                [[storage should] receive:@selector(boolNumberForKey:error:) withArguments:key, kw_any()];
-                [configuration easyAttributionEnabled];
-            });
-            it(@"Should return valid value", ^{
-                [[theValue(configuration.easyAttributionEnabled) should] beYes];
-            });
-            it(@"Should return NO by default", ^{
-                [storage stub:@selector(boolNumberForKey:error:) andReturn:nil];
-                [[theValue(configuration.easyAttributionEnabled) should] beNo];
-            });
-            it(@"Should save valid value", ^{
-                [[storage should] receive:@selector(saveBoolNumber:forKey:error:) withArguments:value, key, kw_any()];
-                configuration.easyAttributionEnabled = value.boolValue;
-            });
         });
         context(@"extensionsCollectingEnabled", ^{
             NSString *const key = @"extensions.reporting.enabled";

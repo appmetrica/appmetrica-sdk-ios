@@ -129,8 +129,6 @@ static NSString *const kAMAStartupResponseURLsKey = @"urls";
 
         NSDictionary *features = parsedData[@"features"][kAMAStartupResponseArrayKey];
 
-        configuration.easyAttributionEnabled =
-            [self enabledPropertyValueFromDictionary:features[@"easy_attribution"]];
         configuration.extensionsCollectingEnabled =
             [self enabledPropertyValueFromDictionary:features[@"extensions_collecting"]];
         configuration.locationVisitsCollectingEnabled =

@@ -1,6 +1,7 @@
 
 #import <Kiwi/Kiwi.h>
 #import "AMACore.h"
+#import <AppMetricaEncodingUtils/AppMetricaEncodingUtils.h>
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
 #import <AppMetricaPlatform/AppMetricaPlatform.h>
 #import "AMAEventBuilder.h"
@@ -15,6 +16,7 @@
 #import "AMAEventComposerProvider.h"
 #import "AMAEventComposer.h"
 #import "AMABinaryEventValue.h"
+#import "AMAFileEventValue.h"
 
 SPEC_BEGIN(AMAEventBuilderTests)
 
@@ -33,8 +35,6 @@ describe(@"AMAEventBuilder", ^{
     AMAEventBuilder *__block builder = nil;
 
     AMAEvent *__block event = nil;
-
-    // TODO(bamx23): Add more tests. Especially to cover truncation
 
     beforeEach(^{
         stateStorage = [AMAReporterStateStorage nullMock];
@@ -239,26 +239,6 @@ describe(@"AMAEventBuilder", ^{
                 [builder eventOpen:@{ @"link": @"l" } attributionIDChanged:YES error:nil];
             });
         });
-        context(@"EVENT_AUTO_APP_OPEN", ^{
-            context(@"Value", ^{
-                beforeEach(^{
-                    valueSpy = [valueFactory captureArgument:@selector(stringEventValue:bytesTruncated:) atIndex:0];
-                    event = [builder autoAppOpenEvent:@{@"link":@"l"} error:nil];
-                });
-                it(@"Should contain valid value", ^{
-                    [[valueSpy.argument should] equal:@"{\"link\":\"l\"}"];
-                });
-                it(@"Should have valid value", ^{
-                    [[((NSObject *)event.value) should] equal:stringValue];
-                    [[event.name should] equal:@"auto_app_open"];
-                });
-            });
-            it(@"Should be passed to composer", ^{
-                [[eventComposerProvider should] receive:@selector(composerForType:) withArguments:theValue(AMAEventTypeStatboxExp)];
-                [[eventComposer should] receive:@selector(compose:)];
-                [builder autoAppOpenEvent:@{@"link":@"l"} error:nil];
-            });
-        });
         context(@"EVENT_PERMISSIONS", ^{
             context(@"Event fields", ^{
                 AMAEvent *__block event = nil;
@@ -396,7 +376,7 @@ describe(@"AMAEventBuilder", ^{
                 [builder eventAdRevenue:data bytesTruncated:bytesTruncated];
             });
         });
-        context(@"Сustom event", ^{
+        context(@"Сustom event resolving", ^{
             NSUInteger const allowedEventType = 1234;
             NSUInteger const internalEventType = 1;
             beforeEach(^{
@@ -413,57 +393,49 @@ describe(@"AMAEventBuilder", ^{
                     }
                 }];
             });
-            it(@"Should not create event with internal type", ^{
-                event = [builder eventWithType:internalEventType
-                                          name:nil
-                                         value:nil
-                              eventEnvironment:nil
-                                        extras:nil
-                                         error:nil];
-                [[event should] beNil];
-            });
-            context(@"Allowed type", ^{
-                NSString *name = @"NAME";
-                NSString *value = @"VALUE";
-                NSDictionary *eventEnvironment = @{ @"foo": @"bar" };
-                context(@"Event fields", ^{
-                    beforeEach(^{
-                        valueSpy = [valueFactory captureArgument:@selector(stringEventValue:bytesTruncated:) atIndex:0];
-                        event = [builder eventWithType:allowedEventType
-                                                  name:name
-                                                 value:value
-                                      eventEnvironment:eventEnvironment
+            context(@"Should not create event with internal type", ^{
+                it(@"String event type", ^{
+                    event = [builder eventWithType:internalEventType
+                                              name:nil
+                                             value:nil
+                                  eventEnvironment:nil
+                                            extras:nil
+                                             error:nil];
+                    [[event should] beNil];
+                });
+                it(@"Binary event type", ^{
+                    event = [builder binaryEventWithType:internalEventType
+                                                    data:nil
+                                                 gZipped:YES
+                                             environment:nil
+                                                  extras:nil
+                                                   error:nil];
+                    [[event should] beNil];
+                });
+                it(@"File event type", ^{
+                    event = [builder fileEventWithType:internalEventType
+                                                  data:nil
+                                              fileName:nil
+                                               gZipped:YES
+                                             encrypted:YES
+                                             truncated:YES
+                                           environment:nil
                                                 extras:nil
                                                  error:nil];
-                    });
-                    it(@"Should construct event", ^{
-                        [[event should] beNonNil];
-                    });
-                    it(@"Should construct event with type", ^{
-                        [[theValue(event.type) should] equal:theValue(allowedEventType)];
-                    });
-                    it(@"Should construct event with name", ^{
-                        [[event.name should] equal:name];
-                    });
-                    it(@"Should construct event with value", ^{
-                        [[valueSpy.argument should] equal:value];
-                    });
-                    it(@"Should construct event with event environment", ^{
-                        [[event.errorEnvironment should] equal:eventEnvironment];
-                    });
-                });
-                it(@"Should be passed to composer", ^{
-                    [[eventComposerProvider should] receive:@selector(composerForType:) withArguments:theValue(allowedEventType)];
-                    [[eventComposer should] receive:@selector(compose:)];
-                    [builder eventWithType:allowedEventType
-                                      name:name
-                                     value:value
-                          eventEnvironment:eventEnvironment
-                                    extras:nil
-                                     error:nil];
+                    [[event should] beNil];
                 });
             });
         });
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
         context(@"EVENT_ALIVE", ^{
             context(@"Event fields", ^{
                 beforeEach(^{
@@ -580,117 +552,254 @@ describe(@"AMAEventBuilder", ^{
                 [[dictionary should] equal:value];
             });
         });
-        context(@"When building an event with internal parameters", ^{
-            __block AMACustomEventParameters *parameters = nil;
-
+    });
+    context(@"Reporting custom events", ^{
+        let(enviromnent, ^NSDictionary *{ return @{@"key" : @"value"}; });
+        let(extras, ^NSDictionary *{ return @{@"extraKey": [@"extraValue" dataUsingEncoding:NSUTF8StringEncoding]}; });
+        AMAGZipDataEncoder *const encoder = [[AMAGZipDataEncoder alloc] init];
+        AMAEventValueFactory *const eventValueFactory = [[AMAEventValueFactory alloc] init];
+        
+        beforeEach(^{
+            builder = [[AMAEventBuilder alloc] initWithStateStorage:stateStorage
+                                                        preloadInfo:nil
+                                                  eventValueFactory:eventValueFactory
+                                                        gZipEncoder:encoder
+                                              eventComposerProvider:eventComposerProvider];
+        });
+        
+        context(@"String events", ^{
+            NSUInteger const eventType = 199;
+            NSString *const name = @"event name";
+            NSString *const value = @"event value";
+            __block AMAEvent *event;
+            __block NSError *error;
             beforeEach(^{
-                parameters = [[AMACustomEventParameters alloc] initWithEventType:1];
-                parameters.name = @"TestEvent";
-                parameters.data = [@"TestData" dataUsingEncoding:NSUTF8StringEncoding];
-                parameters.valueType = AMAEventValueTypeFile;
-                parameters.GZipped = YES;
-                parameters.appEnvironment = @{@"Key": @"Value"};
-                parameters.errorEnvironment = @{@"ErrorKey": @"ErrorValue"};
-                parameters.bytesTruncated = 5;
-                parameters.extras = @{@"extraKey": [@"extraValue" dataUsingEncoding:NSUTF8StringEncoding]};
-                parameters.appState = [[AMAApplicationState alloc] init];
-                parameters.isPast = YES;
+                event = [builder eventWithType:eventType
+                                          name:name
+                                         value:value
+                              eventEnvironment:enviromnent
+                                        extras:extras
+                                         error:&error];
             });
-
-            it(@"should call gZipEncoder when useGZip is YES", ^{
-                [[gZipEncoder should] receive:@selector(encodeData:error:) andReturn:[@"GZippedTestData" dataUsingEncoding:NSUTF8StringEncoding]];
-                [builder eventWithInternalParameters:parameters error:nil];
+            it(@"Should set event type", ^{
+                [[error should] beNil];
+                [[theValue(event.type) should] equal:theValue(eventType)];
             });
-
-            it(@"should call fileEventWithValue when valueType is AMAEventValueTypeFile", ^{
-                [[valueFactory should] receive:@selector(fileEventValue:fileName:encryptionType:truncationType:bytesTruncated:error:)];
-                [builder eventWithInternalParameters:parameters error:nil];
+            it(@"Should set event name", ^{
+                [[error should] beNil];
+                [[event.name should] equal:name];
             });
-
-            it(@"should call binaryEventValue when valueType is AMAEventValueTypeBinary", ^{
-                parameters.valueType = AMAEventValueTypeBinary;
-                [[valueFactory should] receive:@selector(binaryEventValue:gZipped:bytesTruncated:)];
-                [builder eventWithInternalParameters:parameters error:nil];
+            it(@"Should set event value", ^{
+                [[error should] beNil];
+                [[[event.value dataWithError:nil] should] equal:[value dataUsingEncoding:NSUTF8StringEncoding]];
             });
-
-            it(@"Should raise when valueType is invalid", ^{
-                parameters.valueType = 999; // Invalid value type
-                [[theBlock(^{
-                    AMAEvent *event = [builder eventWithInternalParameters:parameters error:nil];
-                }) should] raise];
+            it(@"Should set event enviromnent", ^{
+                [[error should] beNil];
+                [[event.errorEnvironment should] equal:enviromnent];
+            });
+            it(@"Should set event extras", ^{
+                [[error should] beNil];
+                [[event.extras should] equal:extras];
+            });
+            it(@"Should be passed to composer", ^{
+                [[eventComposerProvider should] receive:@selector(composerForType:) withArguments:theValue(eventType)];
+                [[eventComposer should] receive:@selector(compose:)];
+                [builder eventWithType:eventType
+                                  name:name
+                                 value:value
+                      eventEnvironment:enviromnent
+                                extras:extras
+                                 error:&error];
+            });
+        });
+        context(@"Binary events", ^{
+            NSUInteger const eventType = 120;
+            NSData *__block data = [@"data" dataUsingEncoding:NSUTF8StringEncoding];
+            __block AMAEvent *event;
+            __block NSError *error;
+            void(^buildEvent)(BOOL) = ^(BOOL gZipped) {
+                event = [builder binaryEventWithType:eventType
+                                                data:data
+                                             gZipped:gZipped
+                                         environment:enviromnent
+                                              extras:extras
+                                               error:&error];
+            };
+            beforeEach(^{
+                buildEvent(YES);
             });
             
-            it(@"should log a warning and fill the error when gZipEncoder fails", ^{
+            it(@"Should set event type", ^{
+                [[error should] beNil];
+                [[theValue(event.type) should] equal:theValue(eventType)];
+            });
+            it(@"Should gzip event value", ^{
+                [[error should] beNil];
+                NSData *expected = [encoder encodeData:data error:nil];
+                [[[event.value dataWithError:nil] should] equal:expected];
+            });
+            it(@"Should return gZipped value if gZipped is true", ^{
+                [[error should] beNil];
+                NSData *expected = [encoder encodeData:data error:nil];
+                [[[event.value gzippedDataWithError:nil] should] equal:expected];
+            });
+            it(@"Should return nil if gZipped is false", ^{
+                buildEvent(NO);
+                [[error should] beNil];
+                [[[event.value gzippedDataWithError:nil] should] beNil];
+            });
+            it(@"Should truncate data if gZipped is false", ^{
+                int maxSize = 230 * 1024;
+                int overLimit = maxSize + 100;
+                void *bytes = malloc(overLimit);
+                NSData *bigData = [NSData dataWithBytes:bytes length:overLimit];
+                free(bytes);
+                
+                data = bigData;
+                buildEvent(NO);
+                
+                [[error should] beNil];
+                [[theValue([event.value dataWithError:nil].length) should] equal:theValue(maxSize)];
+            });
+            it(@"Should set event enviromnent", ^{
+                [[error should] beNil];
+                [[event.errorEnvironment should] equal:enviromnent];
+            });
+            it(@"Should set event extras", ^{
+                [[error should] beNil];
+                [[event.extras should] equal:extras];
+            });
+            it(@"Should be passed to composer", ^{
+                [[eventComposerProvider should] receive:@selector(composerForType:) withArguments:theValue(eventType)];
+                [[eventComposer should] receive:@selector(compose:)];
+                buildEvent(YES);
+            });
+            it(@"Should and fill the error when gZipEncoder fails", ^{
                 NSError *expectedError = [NSError errorWithDomain:@"TestDomain" code:1234 userInfo:nil];
                 
-                [gZipEncoder stub:@selector(encodeData:error:) withBlock:^id(NSArray *params) {
+                [encoder stub:@selector(encodeData:error:) withBlock:^id(NSArray *params) {
                     [AMATestUtilities fillObjectPointerParameter:params[1] withValue:expectedError];
                     return nil;
                 }];
                 
                 NSError *actualError = nil;
-                [builder eventWithInternalParameters:parameters error:&actualError];
+                event = [builder binaryEventWithType:eventType
+                                                data:data
+                                             gZipped:YES
+                                         environment:enviromnent
+                                              extras:extras
+                                               error:&actualError];
                 
                 [[theValue(actualError.code) should] equal:theValue(expectedError.code)];
                 [[actualError.domain should] equal:expectedError.domain];
             });
+        });
+        context(@"File events", ^{
+            NSUInteger const eventType = 121;
+            NSData *__block data = [@"data" dataUsingEncoding:NSUTF8StringEncoding];
+            NSString *const fileName = @"file";
+            __block AMAEvent *event;
+            __block NSError *error;
+            void(^buildEvent)(BOOL, BOOL, BOOL) = ^(BOOL encrypted,
+                                                    BOOL truncated,
+                                                    BOOL gZipped) {
+                event = [builder fileEventWithType:eventType
+                                              data:data
+                                          fileName:fileName
+                                           gZipped:gZipped
+                                         encrypted:encrypted
+                                         truncated:truncated
+                                       environment:enviromnent
+                                            extras:extras
+                                             error:&error];
+            };
+            beforeEach(^{
+                buildEvent(YES, YES, YES);
+            });
             
-            context(@"When building an event with internal parameters", ^{
-                let(eventValueMock, ^id{ return [KWMock mockForProtocol:@protocol(AMAEventValueProtocol)]; });
-                let(parameters, ^{
-                    AMACustomEventParameters *parameters = [[AMACustomEventParameters alloc] initWithEventType:1];
-                    parameters.name = @"TestEvent";
-                    parameters.data = [@"TestData" dataUsingEncoding:NSUTF8StringEncoding];
-                    parameters.valueType = AMAEventValueTypeFile;
-                    parameters.GZipped = YES;
-                    parameters.appEnvironment = @{@"Key": @"Value"};
-                    parameters.errorEnvironment = @{@"ErrorKey": @"ErrorValue"};
-                    parameters.extras = @{@"ExtraKey": [@"ExtraValue" dataUsingEncoding:NSUTF8StringEncoding]};
-                    parameters.bytesTruncated = 5;
-                    parameters.appState = [AMAApplicationState objectWithDictionaryRepresentation:
-                                           @{@"appVersionName": @"1.0", @"appDebuggable": @NO}];
-                    parameters.isPast = NO;
-                    return parameters;
-                });
+            it(@"Should set event type", ^{
+                [[error should] beNil];
+                [[theValue(event.type) should] equal:theValue(eventType)];
+            });
+            it(@"Should set event enviromnent", ^{
+                [[error should] beNil];
+                [[event.errorEnvironment should] equal:enviromnent];
+            });
+            it(@"Should set event extras", ^{
+                [[error should] beNil];
+                [[event.extras should] equal:extras];
+            });
+            it(@"Should set event file name", ^{
+                [[error should] beNil];
+                NSString *path = ((AMAFileEventValue *)event.value).relativeFilePath;
+                [[path should] equal:fileName];
+            });
+            it(@"Should set event file encryption type if encrypted is true", ^{
+                [[error should] beNil];
+                AMAEventEncryptionType encryption = ((AMAFileEventValue *)event.value).encryptionType;
+                [[theValue(encryption) should] equal:theValue(AMAEventEncryptionTypeAESv1)];
+            });
+            it(@"Should set event file encryption type if encrypted is false", ^{
+                buildEvent(NO, YES, NO);
+                [[error should] beNil];
+                AMAEventEncryptionType encryption = ((AMAFileEventValue *)event.value).encryptionType;
+                [[theValue(encryption) should] equal:theValue(AMAEventEncryptionTypeNoEncryption)];
+            });
+            it(@"Should gZip value", ^{
+                buildEvent(YES, YES, YES);
                 
-                beforeEach(^{
-                    [valueFactory stub:@selector(fileEventValue:fileName:encryptionType:truncationType:bytesTruncated:error:) andReturn:eventValueMock];
-                    [valueFactory stub:@selector(binaryEventValue:gZipped:bytesTruncated:) andReturn:eventValueMock];
-                    [valueFactory stub:@selector(stringEventValue:bytesTruncated:) andReturn:eventValueMock];
-                });
-
-                it(@"should correctly fill the created event with the given parameters", ^{
-                    AMAEvent *event = [builder eventWithInternalParameters:parameters error:nil];
-                    
-                    [[theValue(event.type) should] equal:theValue(parameters.eventType)];
-                    [[event.name should] equal:parameters.name];
-                    [[(NSObject *)event.value should] equal:eventValueMock];
-                    [[event.appEnvironment should] equal:parameters.appEnvironment];
-                    [[event.errorEnvironment should] equal:parameters.errorEnvironment];
-                    [[event.extras should] equal:parameters.extras];
-                    [[theValue(event.bytesTruncated) should] equal:theValue(parameters.bytesTruncated)];
-                });
+                [[error should] beNil];
+                NSData *expected = [encoder encodeData:data error:nil];
+                [[[event.value dataWithError:nil] should] equal:expected];
+            });
+            it(@"Should be passed to composer", ^{
+                [[eventComposerProvider should] receive:@selector(composerForType:) withArguments:theValue(eventType)];
+                [[eventComposer should] receive:@selector(compose:)];
+                buildEvent(YES, YES, YES);
+            });
+            it(@"Should set file name if passed empty", ^{
+                KWCaptureSpy *fileNameSpy = [eventValueFactory captureArgument:@selector(fileEventValue:
+                                                                                         fileName:
+                                                                                         encryptionType:
+                                                                                         truncationType:
+                                                                                         bytesTruncated:
+                                                                                         error:)
+                                                                       atIndex:1];
                 
-                it(@"should set event date from parameters only when event is in the past", ^{
-                    NSDate *pastDate = [[NSDate date] dateByAddingTimeInterval: -3600]; // 1 hour ago
-                    parameters.creationDate = pastDate;
-                    parameters.isPast = YES;
+                event = [builder fileEventWithType:eventType
+                                              data:data
+                                          fileName:@""
+                                           gZipped:YES
+                                         encrypted:YES
+                                         truncated:YES
+                                       environment:enviromnent
+                                            extras:extras
+                                             error:&error];
+                [[fileNameSpy.argument should] containString:@".event"];
+            });
+            context(@"Truncation", ^{
+                const int maxSize = 230 * 1024;
+                NSData *(^createBigData)(int) = ^(int size) {
+                    void *bytes = malloc(size);
+                    NSData *bigData = [NSData dataWithBytes:bytes length:size];
+                    free(bytes);
+                    return bigData;
+                };
+                it(@"Should truncate value", ^{
+                    data = createBigData(maxSize + 100);
+                    buildEvent(YES, YES, NO);
                     
-                    AMAEvent *event = [builder eventWithInternalParameters:parameters error:nil];
-                    [[event.createdAt should] equal:pastDate];
+                    [[error should] beNil];
+                    [[theValue([event.value dataWithError:nil].length) should] equal:theValue(maxSize)];
                 });
-                
-                it(@"should use current time when event is not in the past", ^{
-                    // Set a future date in parameters, but since isInThePast is NO, current date will be used
-                    NSDate *futureDate = [[NSDate date] dateByAddingTimeInterval: 3600]; // 1 hour from now
-                    parameters.creationDate = futureDate;
-                    parameters.isPast = NO;
+                it(@"Should truncate value after gzip", ^{
+                    data = createBigData(maxSize + 100);
+                    [encoder stub:@selector(encodeData:error:) andReturn:data];
+                    buildEvent(YES, YES, YES);
                     
-                    AMAEvent *event = [builder eventWithInternalParameters:parameters error:nil];
-                    
-                    // Check if event.createdAt is close to the current date within a 1-second tolerance
-                    [[theValue(event.createdAt.timeIntervalSince1970) should] equal:NSDate.date.timeIntervalSince1970
-                                                                          withDelta:1.0];
+                    [[error should] beNil];
+                    NSData *truncated = [data subdataWithRange:NSMakeRange(0, maxSize)];
+                    [[[event.value dataWithError:nil] should] equal:truncated];
                 });
             });
         });

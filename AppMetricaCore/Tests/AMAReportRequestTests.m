@@ -341,20 +341,19 @@ describe(@"AMAReportRequestTests", ^{
                     return randomData;
                 });
                 
-                let(bigEventParams, ^{
-                    AMACustomEventParameters *eventParams =
-                        [[AMACustomEventParameters alloc] initWithEventType:AMAEventTypeClient];
-                    eventParams.data = bigData;
-                    eventParams.valueType = AMAEventValueTypeBinary;
-                    eventParams.GZipped = NO;
-                    return eventParams;
-                });
+                void(^reportEvent)(BOOL) = ^(BOOL gZipped) {
+                    [reporterTestHelper.appReporter reportBinaryEventWithType:AMAEventTypeClient
+                                                                         data:bigData
+                                                                      gZipped:gZipped
+                                                                  environment:nil
+                                                                       extras:nil
+                                                                    onFailure:nil];
+                };
                 
                 context(@"Big event deflated value truncation", ^{
                     beforeEach(^{
-                        bigEventParams.GZipped = YES;
                         generatePayloadWithBlock(^{
-                            [reporterTestHelper.appReporter reportEventWithParameters:bigEventParams onFailure:nil];
+                            reportEvent(YES);
                         });
                     });
 
@@ -382,7 +381,7 @@ describe(@"AMAReportRequestTests", ^{
                 context(@"Big event truncation", ^{
                     beforeEach(^{
                         generatePayloadWithBlock(^{
-                            [reporterTestHelper.appReporter reportEventWithParameters:bigEventParams onFailure:nil];
+                            reportEvent(NO);
                         });
                     });
 
@@ -545,12 +544,16 @@ describe(@"AMAReportRequestTests", ^{
                                            andReturn:storage];
                 [storage stub:@selector(writeData:error:) andReturn:theValue(YES)];
                 
-                AMACustomEventParameters *params =
-                    [[AMACustomEventParameters alloc] initWithEventType:AMAEventTypeClient];
-                params.valueType = AMAEventValueTypeFile;
-                params.data = [@"RANDOM_DATA" dataUsingEncoding:kCFStringEncodingUTF8];
-
-                [reporterTestHelper.appReporter reportEventWithParameters:params onFailure:nil];
+                
+                [reporterTestHelper.appReporter reportFileEventWithType:AMAEventTypeClient
+                                                                   data:[@"RANDOM_DATA" dataUsingEncoding:kCFStringEncodingUTF8]
+                                                               fileName:@""
+                                                                gZipped:YES
+                                                              encrypted:YES
+                                                              truncated:YES
+                                                            environment:@{}
+                                                                 extras:nil
+                                                              onFailure:nil];
                 
                 AMAReportRequestProvider *requestProvider =
                 reporterTestHelper.appReporter.reporterStorage.reportRequestProvider;

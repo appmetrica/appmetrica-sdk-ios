@@ -5,6 +5,6 @@
 
 @protocol AMAReporterProviding <NSObject>
 
-- (id<AMAAppMetricaReporting >)reporter;
+- (id<AMAAppMetricaReporting>)reporter;
 
 @end
