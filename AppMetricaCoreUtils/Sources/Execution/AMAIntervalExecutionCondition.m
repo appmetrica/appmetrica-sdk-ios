@@ -42,8 +42,8 @@
 {
     BOOL shouldExecute = YES;
     if (self.lastExecuted != nil && [self.lastExecuted isEqual:NSDate.distantPast] == NO) {
-        NSTimeInterval timeSinseLastExecution = [self.dateProvider.currentDate timeIntervalSinceDate:self.lastExecuted];
-        NSTimeInterval timeRemaining = self.interval - timeSinseLastExecution;
+        NSTimeInterval timeSinceLastExecution = [self.dateProvider.currentDate timeIntervalSinceDate:self.lastExecuted];
+        NSTimeInterval timeRemaining = self.interval - timeSinceLastExecution;
         if (timeRemaining > DBL_EPSILON) {
             shouldExecute = NO;
             AMALogInfo(@"Interval hasn't passed: %.0f seconds left", timeRemaining);

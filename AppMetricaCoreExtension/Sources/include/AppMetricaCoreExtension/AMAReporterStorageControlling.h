@@ -8,9 +8,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @protocol AMAReporterStorageControlling <NSObject>
 
-- (void)setupWithReporter:(id<AMAKeyValueStorageProviding>)stateStorageProvider forAPIKey:(NSString *)apiKey;
-- (void)setupWithMainReporter:(id<AMAKeyValueStorageProviding>)stateStorageProvider forAPIKey:(NSString *)apiKey;
-- (void)restoreState;
+- (void)setupWithReporter:(id<AMAKeyValueStorageProviding>)stateStorageProvider main:(BOOL)main forAPIKey:(NSString *)apiKey;
 
 @end
 

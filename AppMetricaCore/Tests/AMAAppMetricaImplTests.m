@@ -712,9 +712,7 @@ describe(@"AMAAppMetricaImpl", ^{
             });
             it(@"Should setup reporter storage controller", ^{
                 for (id<AMAReporterStorageControlling> controller in controllers) {
-                    [[(NSObject *)controller should] receive:@selector(restoreState) withCount:1];
-                    [[(NSObject *)controller should] receive:@selector(setupWithMainReporter:forAPIKey:) withCount:1];
-                    [[(NSObject *)controller should] receive:@selector(setupWithReporter:forAPIKey:) withCount:1];
+                    [[(NSObject *)controller should] receive:@selector(setupWithReporter:main:forAPIKey:) withCount:2];
                 }
                 
                 [appMetricaImpl setExtendedReporterStorageControllers:[NSSet setWithArray:controllers]];
