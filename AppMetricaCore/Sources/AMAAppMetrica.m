@@ -35,7 +35,7 @@
 static NSMutableSet<Class<AMAModuleActivationDelegate>> *activationDelegates = nil;
 static NSMutableSet<Class<AMAEventFlushableDelegate>> *eventFlushableDelegates = nil;
 
-__weak static id<AMAAdProviding> adProvider = nil;
+static id<AMAAdProviding> adProvider = nil;
 static NSMutableSet<id<AMAExtendedStartupObserving>> *startupObservers = nil;
 static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControllers = nil;
 
