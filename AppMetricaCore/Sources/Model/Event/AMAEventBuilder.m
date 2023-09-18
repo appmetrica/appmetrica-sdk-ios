@@ -529,7 +529,7 @@
     // event.extras contains session extras
     NSMutableDictionary *result = [NSMutableDictionary dictionaryWithDictionary:event.extras];
 
-    // merge it with event extras, session extras has priority under event extras
+    // merge it with event extras, session extras has priority over event extras
     for (NSString *key in eventExtras) {
         result[key] = result[key] ?: eventExtras[key];
     }
