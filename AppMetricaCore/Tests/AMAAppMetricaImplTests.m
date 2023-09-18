@@ -710,13 +710,23 @@ describe(@"AMAAppMetricaImpl", ^{
                 controllers = @[[KWMock nullMockForProtocol:@protocol(AMAReporterStorageControlling)],
                                 [KWMock nullMockForProtocol:@protocol(AMAReporterStorageControlling)]];
             });
-            it(@"Should setup reporter storage controller", ^{
+            it(@"Should setup reporter storage controller with main reporter", ^{
                 for (id<AMAReporterStorageControlling> controller in controllers) {
-                    [[(NSObject *)controller should] receive:@selector(setupWithReporter:main:forAPIKey:) withCount:2];
+                    [[(NSObject *)controller should] receive:@selector(setupWithReporter:main:forAPIKey:)
+                                               withArguments:kw_any(), theValue(YES), configuration.apiKey];
                 }
                 
                 [appMetricaImpl setExtendedReporterStorageControllers:[NSSet setWithArray:controllers]];
                 [appMetricaImpl activateWithConfiguration:configuration];
+            });
+            it(@"Should setup reporter storage controller with secondary reporter", ^{
+                for (id<AMAReporterStorageControlling> controller in controllers) {
+                    [[(NSObject *)controller should] receive:@selector(setupWithReporter:main:forAPIKey:)
+                                               withArguments:kw_any(), theValue(NO), configuration.apiKey];
+                }
+                
+                [appMetricaImpl setExtendedReporterStorageControllers:[NSSet setWithArray:controllers]];
+                [AMAAppMetrica activateReporterWithConfiguration:[[AMAReporterConfiguration alloc] initWithApiKey:apiKey]];
             });
         });
     });

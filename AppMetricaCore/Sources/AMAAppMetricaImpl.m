@@ -427,7 +427,7 @@
     [self updateStrategiesContainer:strategies];
     
     id<AMAKeyValueStorageProviding> reporterStorageProvider = (id<AMAKeyValueStorageProviding>)reporterStorage.keyValueStorageProvider;
-    [self setupReporterForExtendedReporterStorage:reporterStorageProvider main:NO apiKey:apiKey];
+    [self setupReporterForExtendedReporterStorage:reporterStorageProvider main:main apiKey:apiKey];
 }
 
 - (AMAReporter *)createReporterWithApiKey:(NSString *)apiKey
@@ -698,9 +698,6 @@
 
 - (void)postSetupMainReporterWithStorage:(AMAReporterStorage *)reporterStorage
 {
-    id<AMAKeyValueStorageProviding> reporterStorageProvider = (id<AMAKeyValueStorageProviding>)reporterStorage.keyValueStorageProvider;
-    [self setupReporterForExtendedReporterStorage:reporterStorageProvider main:YES apiKey:self.apiKey];
-    
     self.searchAdsController = [[AMASearchAdsController alloc] initWithApiKey:self.apiKey
                                                                      executor:self.executor
                                                          reporterStateStorage:reporterStorage.stateStorage];
