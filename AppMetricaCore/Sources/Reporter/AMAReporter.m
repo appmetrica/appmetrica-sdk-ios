@@ -44,6 +44,7 @@
 #import "AMAAppMetrica+Internal.h"
 #import "AMASessionExpirationHandler.h"
 #import "AMACustomEventParameters.h"
+#import "AMAExtrasContainer.h"
 
 @interface AMAReporter ()
 
@@ -407,6 +408,25 @@
                                               error:error];
     }
                            onFailure:onFailure];
+}
+
+- (void)setSessionExtras:(nullable NSData *)data forKey:(nonnull NSString *)key
+{
+    [self execute:^{
+        if ([data length] > 0) {
+            [self.reporterStorage.stateStorage.extrasContainer addValue:data forKey:key];
+        }
+        else {
+            [self.reporterStorage.stateStorage.extrasContainer removeValueForKey:key];
+        }
+    }];
+}
+
+- (void)clearSessionExtra
+{
+    [self execute:^{
+        [self.reporterStorage.stateStorage.extrasContainer clearExtras];
+    }];
 }
 
 - (void)reportFirstEventIfNeeded

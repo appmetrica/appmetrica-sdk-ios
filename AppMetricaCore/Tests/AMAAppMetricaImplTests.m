@@ -739,28 +739,16 @@ describe(@"AMAAppMetricaImpl", ^{
                 [appMetricaImpl setSessionExtras:data forKey:key];
             }) should] raise];
         });
-        it(@"Should remove session extras if data is empty", ^{
+        it(@"Should dispatch set session extras", ^{
             NSData *data = [NSData data];
             
-            AMAExtrasContainer *extrasContainer = [AMAExtrasContainer stubbedNullMockForInit:@selector(initWithDictionaryExtras:)];
-            [[extrasContainer should] receive:@selector(removeValueForKey:) withArguments:key];
+            [[reporterTestHelper.appReporter should] receive:@selector(setSessionExtras:forKey:) withArguments:data, key];
             
             [appMetricaImpl activateWithConfiguration:configuration];
             [appMetricaImpl setSessionExtras:data forKey:key];
         });
-        it(@"Should set session extras if reporter is data is not nil", ^{
-            NSData *data = [key dataUsingEncoding:NSUTF8StringEncoding];
-            
-            AMAExtrasContainer *extrasContainer = [AMAExtrasContainer stubbedNullMockForInit:@selector(initWithDictionaryExtras:)];
-            [[extrasContainer should] receive:@selector(addValue:forKey:) withArguments:data, key];
-            
-            [appMetricaImpl activateWithConfiguration:configuration];
-            [appMetricaImpl setSessionExtras:data forKey:key];
-        });
-        
-        it(@"Should clear session extras if reporter is not nil", ^{
-            AMAExtrasContainer *extrasContainer = [AMAExtrasContainer stubbedNullMockForInit:@selector(initWithDictionaryExtras:)];
-            [[extrasContainer should] receive:@selector(clearExtras)];
+        it(@"Should dispatch clear session extras", ^{
+            [[reporterTestHelper.appReporter should] receive:@selector(clearSessionExtra)];
             
             [appMetricaImpl activateWithConfiguration:configuration];
             [appMetricaImpl clearSessionExtra];

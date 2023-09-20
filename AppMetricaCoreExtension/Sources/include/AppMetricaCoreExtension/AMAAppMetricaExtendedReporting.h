@@ -4,7 +4,12 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@protocol AMAAppMetricaExtendedReporting  <AMAAppMetricaReporting>
+@protocol AMAAppMetricaExtendedReporting <AMAAppMetricaReporting>
+
+- (void)setSessionExtras:(nullable NSData *)data
+                  forKey:(NSString *)key NS_SWIFT_NAME(setSessionExtra(value:for:));
+
+- (void)clearSessionExtra;
 
 /** Reports an event of a specified type to the server. This method is intended for reporting string data.
  

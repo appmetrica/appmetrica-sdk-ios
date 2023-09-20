@@ -974,13 +974,8 @@
         if (self.reporter == nil) {
             AMALogAssert(@"reporter should be not null");
         }
-
-        if ([data length] > 0) {
-            [self.reporter.reporterStorage.stateStorage.extrasContainer addValue:data forKey:key];
-        }
-        else {
-            [self.reporter.reporterStorage.stateStorage.extrasContainer removeValueForKey:key];
-        }
+        
+        [self.reporter setSessionExtras:data forKey:key];
     }];
 }
 
@@ -991,7 +986,7 @@
             AMALogAssert(@"reporter should be not null");
         }
 
-        [self.reporter.reporterStorage.stateStorage.extrasContainer clearExtras];
+        [self.reporter clearSessionExtra];
     }];
 }
 

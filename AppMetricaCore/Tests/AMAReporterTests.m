@@ -54,6 +54,7 @@
 #import "AMAAppMetrica+Internal.h"
 #import "AMAEventFirstOccurrenceController.h"
 #import "AMAEventValueFactory.h"
+#import "AMAExtrasContainer.h"
 
 @interface AMAReporterStorage (Test)
 
@@ -1730,6 +1731,38 @@ describe(@"AMAReporter", ^{
                 [[error should] beNil];
                 [[event shouldNot] beNil];
             });
+        });
+    });
+    
+    context(@"Session extras", ^{
+        AMAReporter *__block reporter = nil;
+        AMAExtrasContainer *__block extrasContainer = nil;
+        beforeEach(^{
+            reporter = [reporterTestHelper appReporterForApiKey:apiKey];
+            extrasContainer = [AMAExtrasContainer nullMock];
+            [reporter.reporterStorage.stateStorage stub:@selector(extrasContainer)
+                                              andReturn:extrasContainer];
+        });
+        NSString *const key = @"key";
+        it(@"Should remove session extras if data is empty", ^{
+            NSData *data = [NSData data];
+            
+            [[extrasContainer should] receive:@selector(removeValueForKey:) withArguments:key];
+            
+            [reporter setSessionExtras:data forKey:key];
+        });
+        it(@"Should set session extras if reporter is data is not nil", ^{
+            NSData *data = [key dataUsingEncoding:NSUTF8StringEncoding];
+            
+            [[extrasContainer should] receive:@selector(addValue:forKey:) withArguments:data, key];
+            
+            [reporter setSessionExtras:data forKey:key];
+        });
+        
+        it(@"Should clear session extras if reporter is not nil", ^{
+            [[extrasContainer should] receive:@selector(clearExtras)];
+            
+            [reporter clearSessionExtra];
         });
     });
     
