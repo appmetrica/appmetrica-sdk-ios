@@ -1,6 +1,7 @@
 {
   ".github/ISSUE_TEMPLATE/BUG_REPORT.yml":"mobile/metrika/ios/appmetrica-sdk/public/.github/ISSUE_TEMPLATE/BUG_REPORT.yml",
   ".github/ISSUE_TEMPLATE/config.yml":"mobile/metrika/ios/appmetrica-sdk/public/.github/ISSUE_TEMPLATE/config.yml",
+  ".github/workflows/objective-c-xcode.yml":"mobile/metrika/ios/appmetrica-sdk/public/.github/workflows/objective-c-xcode.yml",
   ".gitignore":"mobile/metrika/ios/appmetrica-sdk/public/.gitignore",
   ".swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata":"mobile/metrika/ios/appmetrica-sdk/public/.swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata",
   ".swiftpm/xcode/xcshareddata/xcschemes/AppMetrica-Package.xcscheme":"mobile/metrika/ios/appmetrica-sdk/public/.swiftpm/xcode/xcshareddata/xcschemes/AppMetrica-Package.xcscheme",

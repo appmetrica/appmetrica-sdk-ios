@@ -1,0 +1,37 @@
+name: Xcode - Build and Test SPM Package
+
+on:
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build_and_test:
+    name: Build and Test using xcodebuild command
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Prepare Environment Variables
+        run: |
+          echo "SCHEME=AppMetrica-Package" >> $GITHUB_ENV
+          echo "DERIVED_DATA_PATH=$RUNNER_TEMP/DerivedData" >> $GITHUB_ENV
+
+      - name: Select Simulator and OS
+        run: |
+          LATEST_IOS_VERSION=$(xcrun simctl list runtimes -j | ruby -e "require 'json'; puts JSON.parse(STDIN.read)['runtimes'].select { |r| r['platform'] == 'iOS' && r['isAvailable'] }.map { |r| r['version'] }.sort.last")
+          DEVICE=$(xcrun simctl list devices available 'iOS' -j | ruby -e "require 'json'; puts JSON.parse(STDIN.read)['devices'].values.flatten.select { |d| d['isAvailable'] && d['name'].include?('iPhone') }.last['name']")
+          echo Selected simulator: $DEVICE
+          echo Selected OS: $LATEST_IOS_VERSION
+          echo "DEVICE=$DEVICE" >> $GITHUB_ENV
+          echo "LATEST_IOS_VERSION=$LATEST_IOS_VERSION" >> $GITHUB_ENV
+
+      - name: Build
+        run: |
+          xcodebuild build -scheme "$SCHEME" -sdk iphonesimulator -destination "platform=iOS Simulator,name=$DEVICE,OS=$LATEST_IOS_VERSION" -derivedDataPath $DERIVED_DATA_PATH | xcpretty && exit ${PIPESTATUS[0]}
+
+      - name: Test
+        run: |
+          xcodebuild test -scheme "$SCHEME" -sdk iphonesimulator -destination "platform=iOS Simulator,name=$DEVICE,OS=$LATEST_IOS_VERSION" -derivedDataPath $DERIVED_DATA_PATH | xcpretty && exit ${PIPESTATUS[0]}
+
