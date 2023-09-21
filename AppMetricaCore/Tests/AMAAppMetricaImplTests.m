@@ -712,7 +712,7 @@ describe(@"AMAAppMetricaImpl", ^{
             });
             it(@"Should setup reporter storage controller with main reporter", ^{
                 for (id<AMAReporterStorageControlling> controller in controllers) {
-                    [[(NSObject *)controller should] receive:@selector(setupWithReporter:main:forAPIKey:)
+                    [[(NSObject *)controller should] receive:@selector(setupWithReporterStorage:main:forAPIKey:)
                                                withArguments:kw_any(), theValue(YES), configuration.apiKey];
                 }
                 
@@ -721,7 +721,7 @@ describe(@"AMAAppMetricaImpl", ^{
             });
             it(@"Should setup reporter storage controller with secondary reporter", ^{
                 for (id<AMAReporterStorageControlling> controller in controllers) {
-                    [[(NSObject *)controller should] receive:@selector(setupWithReporter:main:forAPIKey:)
+                    [[(NSObject *)controller should] receive:@selector(setupWithReporterStorage:main:forAPIKey:)
                                                withArguments:kw_any(), theValue(NO), configuration.apiKey];
                 }
                 

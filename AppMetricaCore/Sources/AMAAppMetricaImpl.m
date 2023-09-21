@@ -427,7 +427,7 @@
     [self updateStrategiesContainer:strategies];
     
     id<AMAKeyValueStorageProviding> reporterStorageProvider = (id<AMAKeyValueStorageProviding>)reporterStorage.keyValueStorageProvider;
-    [self setupReporterForExtendedReporterStorage:reporterStorageProvider main:main apiKey:apiKey];
+    [self setupReporterWithExtendedReporterStorage:reporterStorageProvider main:main apiKey:apiKey];
 }
 
 - (AMAReporter *)createReporterWithApiKey:(NSString *)apiKey
@@ -941,15 +941,15 @@
     }];
 }
 
-- (void)setupReporterForExtendedReporterStorage:(id<AMAKeyValueStorageProviding>)storageProvider
-                                           main:(BOOL)main
-                                         apiKey:(NSString *)apiKey
+- (void)setupReporterWithExtendedReporterStorage:(id<AMAKeyValueStorageProviding>)storageProvider
+                                            main:(BOOL)main
+                                          apiKey:(NSString *)apiKey
 {
     [self execute:^{
         AMALogInfo(@"Setup main reporter for extended reporter storage %lu controllers",
                    (unsigned long)self.extendedReporterStorageControllersTable.count);
         for (id<AMAReporterStorageControlling> controller in self.extendedReporterStorageControllersTable) {
-            [controller setupWithReporter:storageProvider main:main forAPIKey:apiKey];
+            [controller setupWithReporterStorage:storageProvider main:main forAPIKey:apiKey];
         }
     }];
 }
