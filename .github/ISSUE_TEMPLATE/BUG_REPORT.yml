@@ -1,0 +1,118 @@
+name: 🐞 Bug Report
+description: File a bug report.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        If your issue pertains to the Web Interface, API, or Account, please contact us via [AppMetrica Support](https://appmetrica.io/docs/troubleshooting/feedback-new.html). Additionally, if you notice that users are not appearing in the web interface, refer to the [SDK Integration Documentation](https://appmetrica.io/docs/mobile-sdk-dg/ios/ios-quickstart.html) for guidance.
+  - type: input
+    attributes:
+      label: 📚 AppMetrica SDK Version
+      description: |
+        What version of AppMetrica SDK has this issue?
+      placeholder: 5.0.0
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: 🛠️ Xcode Version
+      description: |
+        What version of Xcode are you using?
+      placeholder: Version 15.0 (15A240d)
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: 📱 Device Information
+      description: |
+        What device and *OS version are you using?
+      placeholder: iPhone 15 Pro, iOS 17
+    validations:
+      required: true
+  - type: dropdown
+    attributes:
+      label: ⚙️ Installation Method
+      description: |
+        How did you add AppMetrica SDK to your project?
+      options:
+        - Swift Package Manager
+        - CocoaPods
+        - Carthage
+        - Zip
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: 📝 Description
+      description: |
+        Provide a detailed description of the issue. Include both your expected outcome and what actually happened. You may also attach files for additional context.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: 🔍 Reproducing the issue
+      description: |
+        Share **steps to reproduce** or a [**minimal reproducible example**](https://stackoverflow.com/help/minimal-reproducible-example) to expedite resolution.
+      placeholder: |
+        1. Open the app while standing on one leg
+        2. Whisper "AppMetrica" three times to your device
+        3. Rotate the phone counterclockwise
+        4. Notice the app still doesn't levitate
+    validations:
+      required: false
+  - type: textarea
+    attributes:
+      label: 📋 Relevant AppMetrica Log Output or Crash Logs
+      description: |
+        Please copy and paste any relevant AppMetrica log output or crash logs.
+      value: |
+        <!--- Replace the contents between the <details> tags with your own logs. --->
+        <details>
+        <summary>Expand to view logs</summary>
+        <br>
+        
+        ```
+        // Your logs go here
+        ```
+        
+        </details>
+    validations:
+      required: false
+  - type: textarea
+    attributes:
+      label: 📦 Attach Package.resolved (Swift Package Manager Users)
+      description: |
+        If you're using Swift Package Manager, attaching your `Package.resolved` will assist in debugging version-related issues.
+      value: |
+        <!--- Replace text between the <details> tags with your Package.resolved contents. --->
+        <details>
+        <summary>Click to expand <code>Package.resolved</code></summary>
+        <br>
+        
+        ```json
+        // Replace with your Package.resolved contents
+        ```
+        
+        </details>
+    validations:
+      required: false
+  - type: textarea
+    attributes:
+      label: 🍫 Attach Podfile.lock (CocoaPods Users)
+      description: |
+        If you're using CocoaPods, attaching your `Podfile.lock` will assist in debugging version-related issues.
+      value: |
+        <!--- Replace text between the <details> tags with your Podfile.lock contents. --->
+        <details>
+        <summary>Click to expand <code>Podfile.lock</code></summary>
+        <br>
+        
+        ```ruby
+        // Replace with your Podfile.lock contents
+        ```
+        
+        </details>
+    validations:
+      required: false

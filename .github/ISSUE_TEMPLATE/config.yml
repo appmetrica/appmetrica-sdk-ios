@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: ✨ Feature Request
+    url: https://appmetrica.io/docs/troubleshooting/improvement-idea.html
+    about: Submit your feature requests at the official AppMetrica Support channel.
+  - name: 🆘 AppMetrica Support
+    url: https://appmetrica.io/docs/troubleshooting/feedback-new.html
+    about: Please file non-SDK issues like web interface, APIs and account-specific issues at the official AppMetrica Support channel.
