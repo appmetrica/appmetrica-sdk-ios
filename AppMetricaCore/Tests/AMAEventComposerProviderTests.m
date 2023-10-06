@@ -49,15 +49,6 @@ describe(@"AMAEventComposerProvider", ^{
             [[eventComposer.profileIdComposer should] beMemberOfClass:AMAFilledProfileIdComposer.class];
             [[eventComposer.openIDComposer should] beMemberOfClass:AMAFilledOpenIDComposer.class];
         });
-        it(@"Should change AppEnvironment for Crash", ^{
-            eventComposer = [eventComposerProvider composerForType:AMAEventTypeCrash];
-            [[eventComposer.appEnvironmentComposer should] beMemberOfClass:AMADummyAppEnvironmentComposer.class];
-            [[eventComposer.errorEnvironmentComposer should] beMemberOfClass:AMADummyErrorEnvironmentComposer.class];
-            [[eventComposer.locationComposer should] beMemberOfClass:AMAFilledLocationComposer.class];
-            [[eventComposer.locationEnabledComposer should] beMemberOfClass:AMAFilledLocationEnabledComposer.class];
-            [[eventComposer.profileIdComposer should] beMemberOfClass:AMAFilledProfileIdComposer.class];
-            [[eventComposer.openIDComposer should] beMemberOfClass:AMAFilledOpenIDComposer.class];
-        });
         it(@"Should change AppEnvironment for ProtobufCrash", ^{
             eventComposer = [eventComposerProvider composerForType:AMAEventTypeProtobufCrash];
             [[eventComposer.appEnvironmentComposer should] beMemberOfClass:AMADummyAppEnvironmentComposer.class];
@@ -90,7 +81,6 @@ describe(@"AMAEventComposerProvider", ^{
     context(@"Other types", ^{
         __auto_type excludedTypes = @[
                 @(AMAEventTypeAlive),
-                @(AMAEventTypeCrash),
                 @(AMAEventTypeProtobufCrash),
                 @(AMAEventTypeProtobufANR),
                 @(AMAEventTypeProtobufError),

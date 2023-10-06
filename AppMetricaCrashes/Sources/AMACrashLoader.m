@@ -1,12 +1,14 @@
 
 #import "AMACrashLogging.h"
 #import <AppMetricaStorageUtils/AppMetricaStorageUtils.h>
+#import <AppMetricaPlatform/AppMetricaPlatform.h>
+#import <AppMetricaCoreExtension/AppMetricaCoreExtension.h>
+
 #import "AMAKSCrash.h"
 #import "AMACrashLoader.h"
 #import "AMACrashReportDecoder.h"
 #import "AMADecodedCrash.h"
 #import "KSCrash.h"
-#import <AppMetricaPlatform/AppMetricaPlatform.h>
 
 static NSString *const kAMALoadingCrashReportsTransactionKey = @"KSCrashLoadingReports";
 NSString *const kAMAApplicationNotRespondingCrashType = @"AMAApplicationNotRespondingCrashType";
@@ -19,6 +21,8 @@ NSString *const kAMAApplicationNotRespondingCrashType = @"AMAApplicationNotRespo
 @property (nonatomic, strong, readonly) KSCrash *ksCrashInstance;
 
 @property (nonatomic, assign) BOOL enabled;
+
+@property (nonatomic, strong) NSMutableArray *syncLoadedCrashes;
 
 @end
 
@@ -109,9 +113,9 @@ NSString *const kAMAApplicationNotRespondingCrashType = @"AMAApplicationNotRespo
 {
     //TODO: Crashes fixing
     @synchronized (self) {
-//        [AMACrashSafeTransactor processTransactionWithID:@"KSCrashSwapOfCxaThrow" name:@"SwapOfCxaThrow" transaction:^{
-//            [self.ksCrashInstance enableSwapOfCxaThrow];
-//        }];
+        [AMACrashSafeTransactor processTransactionWithID:@"KSCrashSwapOfCxaThrow" name:@"SwapOfCxaThrow" transaction:^{
+            [self.ksCrashInstance enableSwapOfCxaThrow];
+        }];
     }
 }
 
@@ -137,22 +141,29 @@ NSString *const kAMAApplicationNotRespondingCrashType = @"AMAApplicationNotRespo
     NSArray *__block reportIDs = nil;
     NSString *transactionID = kAMALoadingCrashReportsTransactionKey;
     __weak __typeof(self) weakSelf = self;
-//    [AMACrashSafeTransactor processTransactionWithID:transactionID name:@"ReportIDs" transaction:^{
-//        reportIDs = [weakSelf.ksCrashInstance reportIDs];
-//    } rollback:^NSString *(id context){
-//        [[self class] purgeAllRawCrashReports];
-//        return nil;
-//    }];
+    [AMACrashSafeTransactor processTransactionWithID:transactionID name:@"ReportIDs" transaction:^{
+        reportIDs = [weakSelf.ksCrashInstance reportIDs];
+    } rollback:^NSString *(id context){
+        [[self class] purgeAllRawCrashReports];
+        return nil;
+    }];
 
     if (reportIDs.count > 0) {
         AMALogInfo(@"Found pending crash reports:\n\t%@", reportIDs);
         [self handleCrashReports:reportIDs];
     }
 }
-
-- (void)decodeCrashReport:(id)crashReport withDecoder:(AMACrashReportDecoder *)decoder
+/// Temp implementation: Synchronously loads crash reports. Assumes single-threaded operation.
+- (NSArray<AMADecodedCrash *> *)syncLoadCrashReports
 {
-    [decoder decode:crashReport];
+    self.syncLoadedCrashes = [NSMutableArray array];
+
+    [self loadCrashReports];
+
+    NSArray *result = [self.syncLoadedCrashes copy];
+    self.syncLoadedCrashes = nil;
+
+    return result;
 }
 
 - (AMACrashReportDecoder *)crashReportDecoderForReportWithID:(NSNumber *)reportID
@@ -173,28 +184,28 @@ NSString *const kAMAApplicationNotRespondingCrashType = @"AMAApplicationNotRespo
     AMACrashReportDecoder *decoder = [self crashReportDecoderForReportWithID:reportID];
 
     if (decoder != nil) {
-//        __block NSDictionary *crashReport = nil;
+        __block NSDictionary *crashReport = nil;
 
-//        AMACrashSafeTransactorRollbackBlock rollback = ^NSString *(id context){
-//            [[self class] purgeAllRawCrashReports];
-//            success = NO;
-//            return nil;
-//        };
+        AMACrashSafeTransactorRollbackBlock rollback = ^NSString *(id context){
+            [[self class] purgeAllRawCrashReports];
+            success = NO;
+            return nil;
+        };
 
         NSString *transactionID = kAMALoadingCrashReportsTransactionKey;
-//        __weak __typeof(self) weakSelf = self;
-//        [AMACrashSafeTransactor processTransactionWithID:transactionID name:@"ReportWithID" transaction:^{
-//            crashReport = [weakSelf.ksCrashInstance reportWithID:reportID];
-//        } rollback:rollback];
-//
-//        if (success) {
-//            [AMACrashSafeTransactor processTransactionWithID:transactionID
-//                                                        name:@"DecodeReport"
-//                                             rollbackContext:[reportID stringValue]
-//                                                 transaction:^{
-//                [self decodeCrashReport:crashReport withDecoder:decoder];
-//            } rollback:rollback];
-//        }
+        __weak __typeof(self) weakSelf = self;
+        [AMACrashSafeTransactor processTransactionWithID:transactionID name:@"ReportWithID" transaction:^{
+            crashReport = [weakSelf.ksCrashInstance reportWithID:reportID];
+        } rollback:rollback];
+
+        if (success) {
+            [AMACrashSafeTransactor processTransactionWithID:transactionID
+                                                        name:@"DecodeReport"
+                                             rollbackContext:[reportID stringValue]
+                                                 transaction:^{
+                [decoder decode:crashReport];
+            } rollback:rollback];
+        }
     }
 
     return success;
@@ -261,7 +272,16 @@ NSString *const kAMAApplicationNotRespondingCrashType = @"AMAApplicationNotRespo
     if (decoder.crashID != nil) {
         [self.decoders removeObjectForKey:decoder.crashID];
     }
-    [self.delegate crashLoader:self didLoadCrash:decodedCrash withError:error];
+
+    if (self.syncLoadedCrashes != nil) {
+        if (decodedCrash != nil && error == nil) {
+            [self.syncLoadedCrashes addObject:decodedCrash];
+        }
+    }
+    else {
+        [self.delegate crashLoader:self didLoadCrash:decodedCrash withError:error];
+    }
+
     [[self class] purgeRawCrashReport:decoder.crashID];
 }
 
@@ -276,7 +296,16 @@ NSString *const kAMAApplicationNotRespondingCrashType = @"AMAApplicationNotRespo
     if (decoder.crashID != nil) {
         [self.decoders removeObjectForKey:decoder.crashID];
     }
-    [self.delegate crashLoader:self didLoadANR:decodedCrash withError:error];
+
+    if (self.syncLoadedCrashes != nil) {
+        if (decodedCrash != nil && error == nil) {
+            [self.syncLoadedCrashes addObject:decodedCrash];
+        }
+    } 
+    else {
+        [self.delegate crashLoader:self didLoadANR:decodedCrash withError:error];
+    }
+
     [[self class] purgeRawCrashReport:decoder.crashID];
 }
 

@@ -16,7 +16,6 @@
 @property (nonatomic, copy, readonly) AMAAppMetricaPreloadInfo *preloadInfo;
 
 - (instancetype)init NS_UNAVAILABLE;
-+ (instancetype)new NS_UNAVAILABLE;
 
 - (instancetype)initWithStateStorage:(AMAReporterStateStorage *)stateStorage
                          preloadInfo:(AMAAppMetricaPreloadInfo *)preloadInfo;

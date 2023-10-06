@@ -1,6 +1,7 @@
 
 #import <Foundation/Foundation.h>
 #import "AMAUnhandledCrashDetector.h"
+#import "AMACrashReportDecoder.h"
 
 @protocol AMACrashLoaderDelegate;
 @class AMADecodedCrash;
@@ -8,7 +9,7 @@
 
 extern NSString *const kAMAApplicationNotRespondingCrashType;
 
-@interface AMACrashLoader : NSObject
+@interface AMACrashLoader : NSObject <AMACrashReportDecoderDelegate>
 
 @property (nonatomic, weak) id<AMACrashLoaderDelegate> delegate;
 @property (nonatomic, assign) BOOL isUnhandledCrashDetectingEnabled;
@@ -20,6 +21,7 @@ extern NSString *const kAMAApplicationNotRespondingCrashType;
 - (void)enableRequiredMonitoring;
 - (void)enableSwapOfCxaThrow;
 - (void)loadCrashReports;
+- (NSArray<AMADecodedCrash *> *)syncLoadCrashReports;
 
 + (void)purgeRawCrashReport:(NSNumber *)reportID;
 + (void)purgeAllRawCrashReports;

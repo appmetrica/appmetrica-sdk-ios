@@ -5,35 +5,36 @@
 #if !TARGET_OS_TV
 #import <WebKit/WebKit.h>
 #endif
-#import "AMAAppMetricaImpl.h"
+
 #import "AMAAppMetrica.h"
-#import "AMAAppMetricaConfiguration.h"
+
+#import "AMAAdProvider.h"
+#import "AMAAdRevenueInfo.h"
 #import "AMAAppMetricaConfiguration+Internal.h"
+#import "AMAAppMetricaConfiguration.h"
+#import "AMAAppMetricaImpl.h"
+#import "AMADataSendingRestrictionController.h"
+#import "AMADatabaseQueueProvider.h"
+#import "AMADeepLinkController.h"
+#import "AMAEnvironmentContainer.h"
+#import "AMAErrorLogger.h"
+#import "AMAInternalEventsReporter+Private.h"
+#import "AMALocationManager.h"
 #import "AMAMetricaConfiguration.h"
 #import "AMAMetricaInMemoryConfiguration.h"
+#import "AMAMetricaParametersScanner.h"
 #import "AMAMetricaPersistentConfiguration.h"
 #import "AMAReporterConfiguration+Internal.h"
-#import "AMAMetricaParametersScanner.h"
-#import "AMASharedReporterProvider.h"
-#import "AMAErrorLogger.h"
-#import "AMADeepLinkController.h"
-#import "AMAInternalEventsReporter.h"
-#import "AMADataSendingRestrictionController.h"
-#import "AMAUserProfile.h"
-#import "AMARevenueInfo.h"
-#import "AMADatabaseQueueProvider.h"
-#import "AMALocationManager.h"
 #import "AMAReporterStoragesContainer.h"
-#import "AMAEnvironmentContainer.h"
-#import "AMAUUIDProvider.h"
-#import "AMAAppMetricaPlugins.h"
-#import "AMAAppMetricaPluginsImpl.h"
-#import "AMAAdRevenueInfo.h"
+#import "AMARevenueInfo.h"
+#import "AMASharedReporterProvider.h"
 #import "AMAStartupParametersConfiguration.h"
-#import "AMAAdProvider.h"
+#import "AMAUUIDProvider.h"
+#import "AMAUserProfile.h"
 
 static NSMutableSet<Class<AMAModuleActivationDelegate>> *activationDelegates = nil;
 static NSMutableSet<Class<AMAEventFlushableDelegate>> *eventFlushableDelegates = nil;
+static NSMutableSet<Class<AMAEventPollingDelegate>> *eventPollingDelegates = nil;
 
 static id<AMAAdProviding> adProvider = nil;
 static NSMutableSet<id<AMAExtendedStartupObserving>> *startupObservers = nil;
@@ -73,15 +74,14 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
     }
 }
 
-+ (void)activateDelegates:(AMAAppMetricaConfiguration *)configuration
++ (void)addEventPollingDelegate:(Class<AMAEventPollingDelegate>)delegate
 {
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        eventPollingDelegates = [[NSMutableSet alloc] init];
+    });
     @synchronized(self) {
-        __auto_type *moduleConfig = [[AMAModuleActivationConfiguration alloc] initWithApiKey:configuration.apiKey
-                                                                                  appVersion:configuration.appVersion
-                                                                              appBuildNumber:configuration.appBuildNumber];
-        for (Class<AMAModuleActivationDelegate> delegate in activationDelegates) {
-            [delegate didActivateWithConfiguration:moduleConfig];
-        }
+        [eventPollingDelegates addObject:delegate];
     }
 }
 
@@ -329,14 +329,6 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
     }
 }
 
-+ (void)importCrashReportingConfiguration:(AMAAppMetricaConfiguration *)configuration
-{
-    AMAMetricaConfiguration *internalConfiguration = [AMAMetricaConfiguration sharedInstance];
-    internalConfiguration.inMemory.reportCrashesEnabled = configuration.crashReporting;
-    internalConfiguration.inMemory.probablyUnhandledCrashDetectingEnabled = configuration.probablyUnhandledCrashReporting;
-    internalConfiguration.inMemory.ignoredCrashSignals = configuration.ignoredCrashSignals;
-}
-
 + (void)importConfiguration:(AMAAppMetricaConfiguration *)configuration
 {
     if (configuration == nil) {
@@ -355,7 +347,6 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
 
     [self importReporterConfiguration:configuration];
     [self importCustomVersionConfiguration:configuration];
-    [self importCrashReportingConfiguration:configuration];
 
     [self handleConfigurationUpdate];
 }
@@ -386,9 +377,14 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
         }
         [[self class] setupExternalServices];
         [self importConfiguration:configuration];
-        [[self sharedImpl] activateWithConfiguration:configuration];
+        
+        NSArray *delegates = nil;
+        @synchronized(self) {
+            delegates = activationDelegates.allObjects;
+        }
+        [[self sharedImpl] activateWithConfiguration:configuration delegates:delegates];
+        
         [[AMAMetricaConfiguration sharedInstance].inMemory markAppMetricaStarted];
-        [[self class] activateDelegates:configuration];
     }
 }
 
@@ -686,11 +682,6 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
     return deviceIDHash;
 }
 
-+ (id<AMAAppMetricaPlugins>)pluginExtension
-{
-    return [self sharedPluginsImpl];
-}
-
 #pragma mark - Shared -
 
 + (AMAAppMetricaImpl *)sharedImpl
@@ -699,9 +690,14 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         @autoreleasepool {
-            appMetricaImpl = [[AMAAppMetricaImpl alloc] initWithHostStateProvider:[self sharedHostStateProvider]
-                                                                         executor:[self sharedExecutor]];
-            
+            NSArray *localEventPollingDelegates = nil;
+            @synchronized (self) {
+                localEventPollingDelegates = eventPollingDelegates.allObjects;
+            }
+            appMetricaImpl = [[AMAAppMetricaImpl alloc] initWithHostStateProvider:self.sharedHostStateProvider
+                                                                         executor:self.sharedExecutor
+                                                            eventPollingDelegates:localEventPollingDelegates];
+
             [[AMAMetricaConfiguration sharedInstance].inMemory markAppMetricaImplCreated];
 
             [appMetricaImpl startDispatcher];
@@ -762,19 +758,13 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
     return logConfigurator;
 }
 
-+ (AMAAppMetricaPluginsImpl *)sharedPluginsImpl
+#pragma mark - Private & Testing Availability
+
++ (NSArray<Class<AMAEventPollingDelegate>> *)eventPollingDelegates
 {
-    static AMAAppMetricaPluginsImpl *appMetricaPluginsImpl = nil;
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        @autoreleasepool {
-            appMetricaPluginsImpl = [[AMAAppMetricaPluginsImpl alloc] init];
-        }
-    });
-    return appMetricaPluginsImpl;
+    return eventPollingDelegates.allObjects;
 }
 
-#pragma mark - Private & Testing Availability
 
 + (BOOL)isAppMetricaStartedWithLogging:(void (^)(NSError *))onFailure {
     if ([self isAppMetricaStarted] == NO) {
@@ -816,11 +806,6 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
 + (NSUInteger)backgroundSessionTimeout
 {
     return [AMAMetricaConfiguration sharedInstance].inMemory.backgroundSessionTimeout;
-}
-
-+ (BOOL)isReportCrashesEnabled
-{
-    return [AMAMetricaConfiguration sharedInstance].inMemory.reportCrashesEnabled;
 }
 
 @end

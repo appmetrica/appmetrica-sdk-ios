@@ -1,5 +1,8 @@
 
 #import <Kiwi/Kiwi.h>
+#import <AppMetricaTestUtils/AppMetricaTestUtils.h>
+#import <AppMetricaPlatform/AppMetricaPlatform.h>
+
 #import "AMACrashReportDecoder.h"
 #import "KSCrashReportFields.h"
 #import "AMADecodedCrash.h"
@@ -21,9 +24,7 @@
 #import "AMARegister.h"
 #import "AMAStack.h"
 #import "AMACrashContext.h"
-#import "AMADateProviderMock.h"
 #import "AMAVirtualMachineInfo.h"
-#import "AMAModuleBundleProvider.h"
 
 SPEC_BEGIN(AMACrashReportDecoderTests)
 

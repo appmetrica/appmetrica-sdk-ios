@@ -1,9 +1,11 @@
 
 #import "AMAErrorModelFactory.h"
+
 #import "AMAErrorModel.h"
 #import "AMAErrorNSErrorData.h"
 #import "AMAErrorCustomData.h"
 #import "AMAError.h"
+#import "AMAPluginErrorDetails.h"
 #import "AMAVirtualMachineError.h"
 #import "AMAEnvironmentTruncator.h"
 

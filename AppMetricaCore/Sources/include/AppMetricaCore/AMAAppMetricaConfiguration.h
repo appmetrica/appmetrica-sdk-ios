@@ -117,13 +117,6 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, assign) NSUInteger sessionTimeout;
 
-/** Enable/disable tracking app crashes.
-
- Enabled by default.
- To disable crash tracking, set the parameter value to false.
- */
-@property (nonatomic, assign) BOOL crashReporting;
-
 /** Set/get the arbitrary application version for AppMetrica to report.
 
  By default, the application version is set in the app configuration file Info.plist (CFBundleShortVersionString).

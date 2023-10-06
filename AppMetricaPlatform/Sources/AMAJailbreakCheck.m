@@ -254,7 +254,7 @@
         process = newprocess;
         
         // Set the st to the next process
-        st = sysctl(mib, (int)miblen, process, &size, NULL, 0);
+        st = sysctl(mib, (u_int)miblen, process, &size, NULL, 0);
         
     } while (st == -1 && errno == ENOMEM);
     

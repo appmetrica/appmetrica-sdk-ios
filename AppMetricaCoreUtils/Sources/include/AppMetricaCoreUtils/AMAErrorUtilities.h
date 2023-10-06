@@ -21,6 +21,7 @@ typedef NS_ERROR_ENUM(kAMAAppMetricaInternalErrorDomain, AMAAppMetricaInternalEv
     AMAAppMetricaInternalEventErrorCodeUnsupportedReportVersion = 2002,
     AMAAppMetricaInternalEventErrorCodeInternalInconsistency = 2003,
     AMAAppMetricaInternalEventJsonSerializationError = 2004,
+    AMAAppMetricaInternalEventErrorCodeProbableUnhandledCrash = 2005,
     AMAAppMetricaInternalEventErrorCodeNamedError = 3000,
 };
 

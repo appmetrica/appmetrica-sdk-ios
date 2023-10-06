@@ -2,7 +2,7 @@
 #import "AMACrashSafeTransactor.h"
 #import "AMACrashSafeTransactionLock.h"
 #import "AMACrashSafeTransactionRollbackResult.h"
-#import "AMAAppMetrica+Internal.h"
+#import "AMAAppMetricaExtended.h"
 #import "AMAInternalEventsReporter.h"
 
 @implementation AMACrashSafeTransactor

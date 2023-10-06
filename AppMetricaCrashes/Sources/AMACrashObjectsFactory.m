@@ -1,11 +1,14 @@
 
 #import "AMACrashLogging.h"
 #import "AMACrashObjectsFactory.h"
-#import "AMAVirtualMachineCrash.h"
+
 #import "AMABacktrace.h"
-#import "AMAVirtualMachineInfo.h"
 #import "AMABacktraceFrame.h"
 #import "AMAEnvironmentTruncator.h"
+#import "AMAPluginErrorDetails.h"
+#import "AMAStackTraceElement.h"
+#import "AMAVirtualMachineCrash.h"
+#import "AMAVirtualMachineInfo.h"
 
 @interface AMACrashObjectsFactory ()
 

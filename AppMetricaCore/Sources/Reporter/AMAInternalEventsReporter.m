@@ -1,8 +1,10 @@
 
 #import "AMAInternalEventsReporter.h"
+#import "AMAInternalEventsReporter+Private.h"
 #import "AMAReporter.h"
 #import "AMAReporterProviding.h"
 #import "AMAEventTypes.h"
+#import <AppMetricaHostState/AppMetricaHostState.h>
 
 static NSString *const kAMASchemaInconsistencyEventName = @"SchemaInconsistencyDetected";
 static NSString *const kAMASchemaInconsistencyEventParametersDescriptionKey = @"schema: ";
@@ -151,7 +153,6 @@ static NSString *const kAMAInternalEventsReporterExceptionDescriptionUserInfoKey
     switch (eventType) {
         case AMAEventTypeProtobufCrash:
         case AMAEventTypeProtobufANR:
-        case AMAEventTypeCrash:
             // TODO(bamx23): Drop this event?
             [self reportEvent:@"empty_crash" parameters:parameters];
             break;

@@ -1,35 +1,39 @@
-
 #import <Kiwi/Kiwi.h>
-#import "AMAInfo.h"
-#import "AMABinaryImage.h"
-#import "AMAMemory.h"
-#import "AMASystem.h"
-#import "AMADecodedCrash.h"
+
+#import <AppMetricaProtobufUtils/AppMetricaProtobufUtils.h>
+#import <AppMetricaCoreExtension/AppMetricaCoreExtension.h>
+#import <AppMetricaPlatform/AppMetricaPlatform.h>
+
+#import "AMADecodedCrashSerializer.h"
+#import "AMADecodedCrashSerializer+CustomEventParameters.h"
+
 #import "AMAApplicationStatistics.h"
-#import "AMACrashReportCrash.h"
-#import "AMACrashReportError.h"
-#import "AMAMach.h"
-#import "AMASignal.h"
-#import "AMANSException.h"
-#import "AMACppException.h"
-#import "AMANonFatal.h"
-#import "AMAErrorModel.h"
-#import "AMAErrorNSErrorData.h"
-#import "AMAErrorCustomData.h"
-#import "AMAThread.h"
 #import "AMABacktrace.h"
 #import "AMABacktraceFrame.h"
-#import "AMARegistersContainer.h"
-#import "AMARegister.h"
-#import "AMAStack.h"
-#import "AMADecodedCrashSerializer.h"
-#import "Crash.pb-c.h"
-#import "AMAProtobufUtilities.h"
-#import "AMAInternalEventsReporter.h"
+#import "AMABinaryImage.h"
+#import "AMACppException.h"
+#import "AMACrashReportCrash.h"
+#import "AMACrashReportError.h"
+#import "AMADecodedCrash.h"
 #import "AMADecodedCrashValidator.h"
-#import "AMAVirtualMachineInfo.h"
+#import "AMAErrorCustomData.h"
+#import "AMAErrorModel.h"
+#import "AMAErrorNSErrorData.h"
+#import "AMAInfo.h"
+#import "AMAMach.h"
+#import "AMAMemory.h"
+#import "AMANSException.h"
+#import "AMANonFatal.h"
+#import "AMARegister.h"
+#import "AMARegistersContainer.h"
+#import "AMASignal.h"
+#import "AMAStack.h"
+#import "AMASystem.h"
+#import "AMAThread.h"
 #import "AMAVirtualMachineCrash.h"
 #import "AMAVirtualMachineError.h"
+#import "AMAVirtualMachineInfo.h"
+#import "Crash.pb-c.h"
 
 SPEC_BEGIN(AMADecodedCrashSerializerTests)
 
@@ -172,10 +176,39 @@ describe(@"AMADecodedCrashSerializer", ^{
     AMACrashReportCrash *const crash = [[AMACrashReportCrash alloc] initWithError:crashError
                                                                     threads:@[ thread ]];
 
-    AMADecodedCrash *const decodedCrash = [[AMADecodedCrash alloc] initWithAppState:nil
-                                                                        appBuildUID:nil
-                                                                   errorEnvironment:nil
-                                                                     appEnvironment:nil
+    AMAApplicationState *const appState = [[AMAApplicationState alloc] initWithAppVersionName:@"1.0.0"
+                                                                        appDebuggable:NO
+                                                                           kitVersion:@"2.0.0"
+                                                                       kitVersionName:@"SampleKit"
+                                                                       kitBuildNumber:100
+                                                                         kitBuildType:@"Debug"
+                                                                            OSVersion:@"15.0"
+                                                                           OSAPILevel:30
+                                                                               locale:@"en_US"
+                                                                             isRooted:NO
+                                                                                 UUID:[[NSUUID UUID] UUIDString]
+                                                                             deviceID:@"SampleDeviceID"
+                                                                                  IFV:@"SampleIFV"
+                                                                                  IFA:@"SampleIFA"
+                                                                                  LAT:NO
+                                                                       appBuildNumber:@"100"];
+
+    AMABuildUID *const appBuildUID = [[AMABuildUID alloc] initWithString:@"SampleBuildUIDString"];
+
+    NSDictionary *const errorEnvironment = @{
+        @"errorKey1": @"errorValue1",
+        @"errorKey2": @"errorValue2"
+    };
+
+    NSDictionary *const appEnvironment = @{
+        @"appKey1": @"appValue1",
+        @"appKey2": @"appValue2"
+    };
+
+    AMADecodedCrash *const decodedCrash = [[AMADecodedCrash alloc] initWithAppState:appState
+                                                                        appBuildUID:appBuildUID
+                                                                   errorEnvironment:errorEnvironment
+                                                                     appEnvironment:appEnvironment
                                                                                info:info
                                                                        binaryImages:@[ binaryImage ]
                                                                              system:system
@@ -185,10 +218,10 @@ describe(@"AMADecodedCrashSerializer", ^{
 
     AMAInternalEventsReporter *__block reporter = nil;
 
-    void (^reportMessage)(AMADecodedCrash *) = ^void(AMADecodedCrash *crash) {
+    __auto_type reportMessage = ^void(AMADecodedCrash *crash) {
         AMADecodedCrashSerializer *serializer = [[AMADecodedCrashSerializer alloc] initWithReporter:reporter];
         NSData *data = [serializer dataForCrash:crash];
-        report = Ama__ioscrash_report__unpack(NULL, data.length, data.bytes);
+        report = ama__ioscrash_report__unpack(NULL, data.length, data.bytes);
     };
 
     beforeEach(^{
@@ -197,7 +230,7 @@ describe(@"AMADecodedCrashSerializer", ^{
 
     afterEach(^{
         if (report != NULL) {
-            Ama__ioscrash_report__free_unpacked(report, NULL);
+            ama__ioscrash_report__free_unpacked(report, NULL);
         }
     });
 
@@ -1465,13 +1498,13 @@ describe(@"AMADecodedCrashSerializer", ^{
                         report->crash->threads[0]->backtrace->frames[0];
                     [[theValue(protoFrame->line_of_code) should] equal:backtraceFrame.lineOfCode];
                 });
-                
+
                 it(@"Should serialize thread name", ^{
                     reportMessage(decodedCrash);
                     NSString *threadName = [AMAProtobufUtilities stringForBinaryData:&report->crash->threads[0]->name];
                     [[threadName should] equal:thread.threadName];
                 });
-                
+
                 it(@"Should serialize queue name", ^{
                     reportMessage(decodedCrash);
                     NSString *queueName =
@@ -1562,6 +1595,120 @@ describe(@"AMADecodedCrashSerializer", ^{
             [validator stub:@selector(result) andReturn:error];
             [[reporter shouldNot] receive:@selector(reportCorruptedCrashReportWithError:)];
             reportMessage(decodedCrash);
+        });
+    });
+
+    context(@"Custom event parameters", ^{
+
+        let(serializer, ^{ return [[AMADecodedCrashSerializer alloc] initWithReporter:reporter]; });
+        __block AMACustomEventParameters *result = nil;
+        
+        afterEach(^{
+            report = NULL;
+        });
+        
+        context(@"eventParametersFromDecodedData:forEventType:", ^{
+            it(@"Should generate correct event parameters for given type", ^{
+                AMACrashEventType eventType = AMACrashEventTypeANR;
+                result = [serializer eventParametersFromDecodedData:decodedCrash forEventType:eventType];
+                
+                [[theValue(result.eventType) should] equal:theValue(eventType)];
+                [[result.data should] equal:[serializer dataForCrash:decodedCrash]];
+                [[result.creationDate should] equal:decodedCrash.info.timestamp];
+                [[result.appState should] equal:decodedCrash.appState];
+                [[result.errorEnvironment should] equal:decodedCrash.errorEnvironment];
+                [[result.appEnvironment should] equal:decodedCrash.appEnvironment];
+                [[theValue(result.valueType) should] equal:theValue(AMAEventValueTypeFile)];
+            });
+        });
+        
+        context(@"eventParametersFromDecodedData:", ^{
+            it(@"Should use correct event type for MainThreadDeadlock", ^{
+                [decodedCrash.crash.error stub:@selector(type) andReturn:theValue(AMACrashTypeMainThreadDeadlock)];
+                result = [serializer eventParametersFromDecodedData:decodedCrash];
+                
+                [[theValue(result.eventType) should] equal:theValue(AMACrashEventTypeANR)];
+            });
+            
+            it(@"Should use correct event type for other crash types", ^{
+                [decodedCrash.crash.error stub:@selector(type) andReturn:theValue(AMACrashTypeUserReported)];
+                result = [serializer eventParametersFromDecodedData:decodedCrash];
+                
+                [[theValue(result.eventType) should] equal:theValue(AMACrashEventTypeCrash)];
+            });
+            
+            it(@"Should use AMAEventValueTypeFile as valueType", ^{
+                result = [serializer eventParametersFromDecodedData:decodedCrash];
+                [[theValue(result.valueType) should] equal:theValue(AMAEventValueTypeFile)];
+            });
+            
+            it(@"Should set correct data from decoded crash", ^{
+                result = [serializer eventParametersFromDecodedData:decodedCrash];
+                [[result.data should] equal:[serializer dataForCrash:decodedCrash]];
+            });
+            
+            it(@"Should set correct creationDate from decoded crash", ^{
+                result = [serializer eventParametersFromDecodedData:decodedCrash];
+                [[result.creationDate should] equal:decodedCrash.info.timestamp];
+            });
+            
+            it(@"Should set correct appState from decoded crash", ^{
+                result = [serializer eventParametersFromDecodedData:decodedCrash];
+                [[result.appState should] equal:decodedCrash.appState];
+            });
+            
+            it(@"Should set correct errorEnvironment from decoded crash", ^{
+                result = [serializer eventParametersFromDecodedData:decodedCrash];
+                [[result.errorEnvironment should] equal:decodedCrash.errorEnvironment];
+            });
+            
+            it(@"Should set correct appEnvironment from decoded crash", ^{
+                result = [serializer eventParametersFromDecodedData:decodedCrash];
+                [[result.appEnvironment should] equal:decodedCrash.appEnvironment];
+            });
+        });
+        
+        context(@"Edge Cases and Corner Cases", ^{
+
+            context(@"eventParametersFromDecodedData:forEventType:", ^{
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wnonnull"
+                it(@"Should handle nil decodedCrash gracefully", ^{
+                    [[theBlock(^{
+                        [serializer eventParametersFromDecodedData:nil forEventType:AMACrashEventTypeANR];
+                    }) shouldNot] raise];
+                });
+                
+            });
+
+            context(@"eventParametersFromDecodedData:", ^{
+                
+                it(@"Should handle nil decodedCrash gracefully", ^{
+                    [[theBlock(^{
+                        [serializer eventParametersFromDecodedData:nil];
+                    }) shouldNot] raise];
+                });
+#pragma clang diagnostic pop
+                it(@"Should default to AMACrashEventTypeCrash for unknown crash types", ^{
+                    [decodedCrash.crash.error stub:@selector(type) andReturn:theValue(9999)];
+                    AMACustomEventParameters *result = [serializer eventParametersFromDecodedData:decodedCrash];
+                    [[theValue(result.eventType) should] equal:theValue(AMACrashEventTypeCrash)];
+                });
+                
+                it(@"Should handle nil data from dataForCrash: gracefully", ^{
+                    [serializer stub:@selector(dataForCrash:) andReturn:nil];
+                    AMACustomEventParameters *result = [serializer eventParametersFromDecodedData:decodedCrash];
+                    [[result.data should] beNil];
+                });
+                
+                it(@"Should handle missing properties in decodedCrash gracefully", ^{
+                    [decodedCrash stub:@selector(info) andReturn:nil];
+                    [[theBlock(^{
+                        [serializer eventParametersFromDecodedData:decodedCrash];
+                    }) shouldNot] raise];
+                });
+                
+            });
         });
     });
 });

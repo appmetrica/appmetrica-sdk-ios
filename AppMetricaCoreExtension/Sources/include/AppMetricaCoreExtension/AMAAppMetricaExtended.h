@@ -7,36 +7,42 @@ NS_ASSUME_NONNULL_BEGIN
 @class AMALogConfigurator;
 @class AMACustomEventParameters;
 @class AMAServiceConfiguration;
+@class AMAInternalEventsReporter;
 
 @protocol AMAModuleActivationDelegate;
 @protocol AMAEventFlushableDelegate;
+@protocol AMAEventPollingDelegate;
 @protocol AMAAdProviding;
 @protocol AMAAppMetricaExtendedReporting;
 
 @interface AMAAppMetrica ()
 
+// Activation and Event Delegates
 + (void)addActivationDelegate:(Class<AMAModuleActivationDelegate>)delegate;
 + (void)addEventFlushableDelegate:(Class<AMAEventFlushableDelegate>)delegate;
++ (void)addEventPollingDelegate:(Class<AMAEventPollingDelegate>)delegate;
 
+// Registration Methods
 + (void)registerAdProvider:(id<AMAAdProviding>)provider;
-
 + (void)registerExternalService:(AMAServiceConfiguration *)configuration;
 
+// State Checks
 + (BOOL)isAppMetricaStarted;
-
 + (BOOL)isAPIKeyValid:(NSString *)apiKey;
-
 + (BOOL)isReporterCreatedForAPIKey:(NSString *)apiKey;
 
-+ (AMALogConfigurator *)sharedLogConfigurator;
-
+// Session Management
 + (void)setSessionExtras:(nullable NSData *)data
                   forKey:(NSString *)key NS_SWIFT_NAME(setSessionExtra(value:for:));
-
 + (void)clearSessionExtra;
 
+// Reporting
++ (AMAInternalEventsReporter *)sharedInternalEventsReporter;
 + (nullable id<AMAAppMetricaExtendedReporting>)extendedReporterForApiKey:(NSString *)apiKey
 NS_SWIFT_NAME(extendedReporter(for:));
+
+// Logging Configuration
++ (AMALogConfigurator *)sharedLogConfigurator;
 
 /** Reports an event of a specified type to the server. This method is intended for reporting string data.
  

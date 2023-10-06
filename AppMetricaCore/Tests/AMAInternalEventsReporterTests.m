@@ -1,10 +1,14 @@
-
 #import <Kiwi/Kiwi.h>
+
+#import "AMAInternalEventsReporter+Private.h"
+
 #import <AppMetricaCore/AppMetricaCore.h>
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
-#import "AMAInternalEventsReporter.h"
-#import "AMAStubReporterProvider.h"
+#import <AppMetricaHostState/AppMetricaHostState.h>
+
+#import "AMAEventTypes.h"
 #import "AMAStubHostAppStateProvider.h"
+#import "AMAStubReporterProvider.h"
 
 SPEC_BEGIN(AMAInternalEventsReporterTests)
 
@@ -324,6 +328,29 @@ describe(@"AMAInternalEventsReporter", ^{
     it(@"Should conform to AMAHostStateProviderDelegate", ^{
         [[reporter should] conformToProtocol:@protocol(AMAHostStateProviderDelegate)];
     });
+    
+    context(@"Event File Not Found", ^{
+        it(@"Should report 'empty_crash' for AMAEventTypeProtobufCrash", ^{
+            [[reporterMock should] receive:@selector(reportEvent:parameters:onFailure:)
+                             withArguments:@"empty_crash", @{ @"event_type": @(AMAEventTypeProtobufCrash) }, kw_any()];
+            [reporter reportEventFileNotFoundForEventWithType:AMAEventTypeProtobufCrash];
+        });
+        
+        it(@"Should report 'empty_crash' for AMAEventTypeProtobufANR", ^{
+            [[reporterMock should] receive:@selector(reportEvent:parameters:onFailure:)
+                             withArguments:@"empty_crash", @{ @"event_type": @(AMAEventTypeProtobufANR) }, kw_any()];
+            [reporter reportEventFileNotFoundForEventWithType:AMAEventTypeProtobufANR];
+        });
+        
+        it(@"Should report 'event_value_file_not_found' for other event types", ^{
+            NSUInteger otherEventType = 9999;
+            [[reporterMock should] receive:@selector(reportEvent:parameters:onFailure:)
+                             withArguments:@"event_value_file_not_found", @{ @"event_type": @(otherEventType) }, kw_any()];
+            [reporter reportEventFileNotFoundForEventWithType:otherEventType];
+        });
+        
+    });
+
 });
 
 SPEC_END

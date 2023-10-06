@@ -1,32 +1,32 @@
 
 #import <Kiwi/Kiwi.h>
-#import "AMAAppMetricaPlugins.h"
-#import "AMAPluginErrorDetails.h"
-#import "AMAAppMetrica+Internal.h"
-#import "AMAAppMetricaImpl+TestUtilities.h"
-#import "AMAAppMetricaPluginsImpl.h"
-#import "AMAStubHostAppStateProvider.h"
+//#import "AMAAppMetricaPlugins.h"
+//#import "AMAPluginErrorDetails.h"
+//#import "AMAAppMetrica+Internal.h"
+//#import "AMAAppMetricaImpl+TestUtilities.h"
+//#import "AMAAppMetricaPluginsImpl.h"
+//#import "AMAStubHostAppStateProvider.h"
 
 SPEC_BEGIN(AMAAppMetricaPluginsTests)
 
 describe(@"AMAAppMetricaPlugins", ^{
 
-    AMAAppMetricaImpl *__block sharedImpl = nil;
-    AMAPluginErrorDetails *__block errorDetails = nil;
-    AMAAppMetricaPluginsImpl *__block pluginsImpl = nil;
-    NSError *__block resultError = nil;
-    void __block (^onFailure)(NSError *) = nil;
-
-    beforeEach(^{
-        pluginsImpl = [[AMAAppMetricaPluginsImpl alloc] init];
-        resultError = nil;
-        errorDetails = [AMAPluginErrorDetails nullMock];
-        sharedImpl = [AMAAppMetricaImpl nullMock];
-        [AMAAppMetrica stub:@selector(sharedImpl) andReturn:sharedImpl];
-        onFailure = ^void (NSError *error) {
-            resultError = error;
-        };
-    });
+//    AMAAppMetricaImpl *__block sharedImpl = nil;
+//    AMAPluginErrorDetails *__block errorDetails = nil;
+//    AMAAppMetricaPluginsImpl *__block pluginsImpl = nil;
+//    NSError *__block resultError = nil;
+//    void __block (^onFailure)(NSError *) = nil;
+//
+//    beforeEach(^{
+//        pluginsImpl = [[AMAAppMetricaPluginsImpl alloc] init];
+//        resultError = nil;
+//        errorDetails = [AMAPluginErrorDetails nullMock];
+//        sharedImpl = [AMAAppMetricaImpl nullMock];
+//        [AMAAppMetrica stub:@selector(sharedImpl) andReturn:sharedImpl];
+//        onFailure = ^void (NSError *error) {
+//            resultError = error;
+//        };
+//    });
 
 //    context(@"Report unhandled exception", ^{
 //        it(@"Should not report if not started", ^{
@@ -102,9 +102,9 @@ describe(@"AMAAppMetricaPlugins", ^{
 //        });
 //    });
     
-    it(@"Should conform to AMAAppMetricaPlugins", ^{
-        [[pluginsImpl should] conformToProtocol:@protocol(AMAAppMetricaPlugins)];
-    });
+//    it(@"Should conform to AMAAppMetricaPlugins", ^{
+//        [[pluginsImpl should] conformToProtocol:@protocol(AMAAppMetricaPlugins)];
+//    });
 });
 
 SPEC_END

@@ -23,10 +23,7 @@ extern BOOL const kAMADefaultAppOpenTrackingEnabled;
 @property (atomic, assign) BOOL handleFirstActivationAsUpdate;
 @property (atomic, assign) BOOL handleActivationAsSessionStart;
 @property (atomic, assign) BOOL sessionsAutoTracking;
-@property (atomic, assign) BOOL reportCrashesEnabled;
-@property (atomic, assign) BOOL probablyUnhandledCrashDetectingEnabled;
 
-@property (atomic, copy, nullable) NSArray<NSNumber *> *ignoredCrashSignals;
 @property (atomic, copy) NSString *appVersion;
 @property (atomic, assign) uint32_t appBuildNumber;
 @property (atomic, copy) NSString *appBuildNumberString;

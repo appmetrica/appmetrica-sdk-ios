@@ -9,8 +9,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface AMAAppMetrica ()
 
-+ (AMAInternalEventsReporter *)sharedInternalEventsReporter;
-+ (BOOL)isAppMetricaStarted;
 + (AMAAppMetricaImpl *)sharedImpl;
 + (id<AMAHostStateProviding>)sharedHostStateProvider;
 

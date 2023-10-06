@@ -1,63 +1,69 @@
-
 #import "AMACore.h"
+#import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
+#import <AppMetricaPlatform/AppMetricaPlatform.h>
+#import <AppMetricaHostState/AppMetricaHostState.h>
+
 #import "AMAAppMetricaImpl.h"
+
+#import "AMAAdServicesDataProvider.h"
+#import "AMAAdServicesReportingController.h"
+#import "AMAAppMetrica+Internal.h"
+#import "AMAAppOpenWatcher.h"
+#import "AMAAttributionController.h"
+#import "AMAAutoPurchasesWatcher.h"
+#import "AMACachingStorageProvider.h"
+#import "AMADatabaseKeyValueStorageProviding.h"
+#import "AMADeepLinkController.h"
+#import "AMADefaultReportExecutionConditionChecker.h"
+#import "AMADispatchStrategiesContainer.h"
+#import "AMADispatchStrategiesFactory.h"
 #import "AMADispatcher.h"
 #import "AMADispatcherDelegate.h"
 #import "AMADispatchingController.h"
-#import "AMADispatchStrategiesContainer.h"
-#import "AMADispatchStrategiesFactory.h"
 #import "AMAEnvironmentContainer.h"
 #import "AMAEnvironmentContainerActionHistory.h"
 #import "AMAEnvironmentContainerActionRedoManager.h"
 #import "AMAErrorsFactory.h"
+#import "AMAEvent.h"
 #import "AMAEventBuilder.h"
 #import "AMAEventCountDispatchStrategy.h"
+#import "AMAEventPollingDelegate.h"
+#import "AMAEventStorage.h"
 #import "AMAExtensionsReportController.h"
-#import "AMAStartupItemsChangedNotifier.h"
+#import "AMAExtrasContainer.h"
 #import "AMAInstantFeaturesConfiguration.h"
 #import "AMAInternalEventsReporter.h"
 #import "AMALocationManager.h"
+#import "AMAMainReportExecutionConditionChecker.h"
 #import "AMAMetricaConfiguration.h"
 #import "AMAMetricaInMemoryConfiguration.h"
 #import "AMAMetricaPersistentConfiguration.h"
 #import "AMAPermissionsController.h"
 #import "AMAPersistentTimeoutConfiguration.h"
+#import "AMAPreactivationActionHistory.h"
 #import "AMAReachability.h"
 #import "AMAReporter.h"
 #import "AMAReporterConfiguration+Internal.h"
-#import "AMAReportersContainer.h"
+#import "AMAReporterConfiguration.h"
 #import "AMAReporterStateStorage.h"
 #import "AMAReporterStorage.h"
 #import "AMAReporterStoragesContainer.h"
-#import "AMASearchAdsController.h"
-#import "AMAStartupCompletionObserving.h"
-#import "AMATimeoutRequestsController.h"
-#import "AMAAppMetrica+Internal.h"
-#import "AMAAdServicesReportingController.h"
-#import "AMAAdServicesDataProvider.h"
+#import "AMAReportersContainer.h"
 #import "AMASKAdNetworkRequestor.h"
-#import "AMAAppOpenWatcher.h"
-#import "AMAAutoPurchasesWatcher.h"
-#import "AMAAttributionController.h"
-#import "AMAMainReportExecutionConditionChecker.h"
+#import "AMASearchAdsController.h"
 #import "AMASelfReportExecutionConditionChecker.h"
-#import "AMADefaultReportExecutionConditionChecker.h"
-#import "AMADeepLinkController.h"
-#import "AMAAppMetricaConfiguration+Extended.h"
-#import "AMAPreactivationActionHistory.h"
-#import "AMAUserProfileLogger.h"
-#import "AMAReporterConfiguration.h"
-#import "AMAPluginErrorDetails.h"
-#import "AMAExtrasContainer.h"
-#import "AMACachingStorageProvider.h"
+#import "AMASessionStorage.h"
+#import "AMAStartupCompletionObserving.h"
+#import "AMAStartupItemsChangedNotifier.h"
 #import "AMAStartupStorageProvider.h"
-#import <AppMetricaPlatform/AppMetricaPlatform.h>
+#import "AMATimeoutRequestsController.h"
+#import "AMAUserProfileLogger.h"
 
 @interface AMAAppMetricaImpl () <AMADispatcherDelegate,
-                                    AMADispatchStrategyDelegate,
-                                    AMAHostStateProviderDelegate,
-                                    AMAReporterDelegate,
-                                    AMAExtendedStartupObservingDelegate>
+                                 AMADispatchStrategyDelegate,
+                                 AMAHostStateProviderDelegate,
+                                 AMAReporterDelegate,
+                                 AMAExtendedStartupObservingDelegate>
 
 @property (nonatomic, copy, readwrite) NSString *apiKey;
 
@@ -84,6 +90,7 @@
 
 @property (nonatomic, strong) NSHashTable *extendedStartupCompletionObservers;
 @property (nonatomic, strong) NSHashTable *extendedReporterStorageControllersTable;
+@property (nonatomic, strong) NSArray<Class<AMAEventPollingDelegate>> *eventPollingDelegates;
 
 @end
 
@@ -92,11 +99,12 @@
 - (instancetype)init
 {
     id<AMAExecuting> executor = [[AMAAsyncExecutor alloc] initWithIdentifier:self];
-    return [self initWithHostStateProvider:nil executor:executor];
+    return [self initWithHostStateProvider:nil executor:executor eventPollingDelegates:nil];
 }
 
 - (instancetype)initWithHostStateProvider:(id<AMAHostStateProviding>)hostStateProvider
                                  executor:(id<AMAExecuting>)executor
+                    eventPollingDelegates:(NSArray<Class<AMAEventPollingDelegate>> *)eventPollingDelegates
 {
     self = [super init];
     if (self != nil) {
@@ -118,6 +126,7 @@
             [AMAMetricaConfiguration sharedInstance].persistent.timeoutConfiguration;
         _dispatchingController = [[AMADispatchingController alloc] initWithTimeoutConfiguration:configuration];
         _dispatchingController.proxyDelegate = self;
+        _eventPollingDelegates = eventPollingDelegates;
 
         [[AMASKAdNetworkRequestor sharedInstance] registerForAdNetworkAttribution];
 
@@ -149,6 +158,20 @@
 
 - (void)activateWithConfiguration:(AMAAppMetricaConfiguration *)configuration
 {
+    [self activateWithConfiguration:configuration delegates:@[]];
+}
+
+- (void)activateWithConfiguration:(AMAAppMetricaConfiguration *)configuration
+                        delegates:(NSArray<Class<AMAModuleActivationDelegate>> *)activationDelegates
+{
+    // FIXME: (glinnik) Activate delegates first for sync polling; needs future optimization.
+    __auto_type *moduleConfig = [[AMAModuleActivationConfiguration alloc] initWithApiKey:configuration.apiKey
+                                                                              appVersion:configuration.appVersion
+                                                                          appBuildNumber:configuration.appBuildNumber];
+    for (Class<AMAModuleActivationDelegate> delegate in activationDelegates) {
+        [delegate didActivateWithConfiguration:moduleConfig];
+    }
+    
     self.apiKey = configuration.apiKey;
 
     [self migrate];
@@ -367,7 +390,7 @@
                 [[AMAReporterStoragesContainer sharedInstance] storageForApiKey:configuration.apiKey];
             reporter = [self createReporterWithStorage:reporterStorage
                                                   main:NO
-                                     onStorageRestored:^{
+                                     onStorageRestored:^(AMAEventBuilder *eventBuilder) {
                                          [self applyUserProfileIDWithStorage:reporterStorage
                                                                userProfileID:configuration.userProfileID];
                                      }
@@ -379,7 +402,7 @@
 
 - (AMAReporter *)createReporterWithStorage:(AMAReporterStorage *)reporterStorage
                                       main:(BOOL)main
-                         onStorageRestored:(dispatch_block_t)onStorageRestored
+                         onStorageRestored:(void (^)(AMAEventBuilder *eventBuilder))onStorageRestored
                            onSetupComplete:(dispatch_block_t)onSetupComplete
 {
     NSString *apiKey = reporterStorage.apiKey;
@@ -394,7 +417,11 @@
     reporter.delegate = self;
 
     __weak __typeof(self) weakSelf = self;
-    [reporter setupWithOnStorageRestored:onStorageRestored onSetupComplete:^{
+    [reporter setupWithOnStorageRestored:^ {
+        if (onStorageRestored != nil) {
+            onStorageRestored(eventBuilder);
+        }
+    } onSetupComplete:^{
         [weakSelf postSetupReporterWithStorage:reporterStorage
                                           main:main
                      executionConditionChecker:[self getExecutionConditionCheckerForApiKey:apiKey main:main]
@@ -403,11 +430,25 @@
             onSetupComplete();
         }
     }];
-
+    
     [reporter reportFirstEventIfNeeded];
 
     [self.reportersContainer setReporter:reporter forApiKey:apiKey];
     return reporter;
+}
+// NOTE: Before you think of 'improving' this, it's overridden by AMAAppMetricaImplStub for tests. Best of luck.
+- (AMAReporter *)createReporterWithApiKey:(NSString *)apiKey
+                                     main:(BOOL)main
+                             eventBuilder:(AMAEventBuilder *)eventBuilder
+                          reporterStorage:(AMAReporterStorage *)reporterStorage
+                         internalReporter:(AMAInternalEventsReporter *)internalReporter
+{
+    return [[AMAReporter alloc] initWithApiKey:apiKey
+                                          main:main
+                               reporterStorage:reporterStorage
+                                  eventBuilder:eventBuilder
+                              internalReporter:internalReporter
+                      attributionCheckExecutor:self.executor];
 }
 
 - (void)postSetupReporterWithStorage:(AMAReporterStorage *)reporterStorage
@@ -428,20 +469,6 @@
     
     id<AMAKeyValueStorageProviding> reporterStorageProvider = (id<AMAKeyValueStorageProviding>)reporterStorage.keyValueStorageProvider;
     [self setupReporterWithExtendedReporterStorage:reporterStorageProvider main:main apiKey:apiKey];
-}
-
-- (AMAReporter *)createReporterWithApiKey:(NSString *)apiKey
-                                     main:(BOOL)main
-                             eventBuilder:(AMAEventBuilder *)eventBuilder
-                          reporterStorage:(AMAReporterStorage *)reporterStorage
-                         internalReporter:(AMAInternalEventsReporter *)internalReporter
-{
-    return [[AMAReporter alloc] initWithApiKey:apiKey
-                                          main:main
-                               reporterStorage:reporterStorage
-                                  eventBuilder:eventBuilder
-                              internalReporter:internalReporter
-                      attributionCheckExecutor:self.executor];
 }
 
 - (void)updateStrategiesContainer:(NSArray *)strategies
@@ -642,9 +669,12 @@
         AMAReporterStorage *reporterStorage =
             [[AMAReporterStoragesContainer sharedInstance] storageForApiKey:self.apiKey];
         __weak __typeof(self) weakSelf = self;
-        reporter = [self createReporterWithStorage:reporterStorage main:YES onStorageRestored:^{
-            [weakSelf applyDeferedAppEnvironmentUpdatesWithStorage:reporterStorage];
+        reporter = [self createReporterWithStorage:reporterStorage
+                                              main:YES
+                                 onStorageRestored:^(AMAEventBuilder *eventBuilder){
             // called on reporter.executor queue
+            [weakSelf applyDeferedAppEnvironmentUpdatesWithStorage:reporterStorage];
+            [weakSelf applyEventsFromPollingDelegatesWithStorage:reporterStorage eventBuilder:eventBuilder];
             [weakSelf applyUserProfileIDWithStorage:reporterStorage
                                       userProfileID:[self mergeUserProfileIDs:configuration.userProfileID]];
         } onSetupComplete:^{
@@ -657,6 +687,29 @@
             [self triggerSessionStartIfNeeded];
         }];
         return reporter;
+    }
+}
+// FIXME: (glinnik) manupulating storage in impl. Logic similar to Reporter. Move there later
+- (void)applyEventsFromPollingDelegatesWithStorage:(AMAReporterStorage *)reporterStorage
+                                      eventBuilder:(AMAEventBuilder *)eventBuilder;
+
+{
+    NSArray<AMAEvent *> *events = [AMACollectionUtilities flatMapArray:self.eventPollingDelegates
+                                                             withBlock:^NSArray *(Class<AMAEventPollingDelegate> delegate) {
+        return [AMACollectionUtilities mapArray:[delegate eventsForPreviousSession]
+                                      withBlock:^id(AMACustomEventParameters *params) {
+            return [eventBuilder eventWithInternalParameters:params error:NULL];
+        }];
+    }];
+    
+    if (events.count > 0) {
+        AMASession *session = [reporterStorage.sessionStorage lastSessionWithError:NULL];
+        if (session != nil) {
+            for (AMAEvent *event in events) {
+                event.sessionOid = session.oid;
+                [reporterStorage.eventStorage addEvent:event toSession:session error:NULL];
+            }
+        }
     }
 }
 

@@ -105,8 +105,8 @@
         case AMAEventValueTypeFile: {
             AMAEventEncryptionType encryption = parameters.encrypted ? AMAEventEncryptionTypeAESv1 : AMAEventEncryptionTypeNoEncryption;
             AMAEventValueFactoryTruncationType truncation = parameters.truncated
-            ? AMAEventValueFactoryTruncationTypeFull
-            : AMAEventValueFactoryTruncationTypePartial;
+                ? AMAEventValueFactoryTruncationTypeFull
+                : AMAEventValueFactoryTruncationTypePartial;
             
             NSString *fileName = parameters.fileName ?: [NSString stringWithFormat:@"%@.event", NSUUID.UUID.UUIDString];
             event.value = [self.eventValueFactory fileEventValue:data

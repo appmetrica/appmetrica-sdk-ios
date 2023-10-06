@@ -1,8 +1,9 @@
-
 #import <Kiwi/Kiwi.h>
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
+#import <AppMetricaHostState/AppMetricaHostState.h>
+#import <AppMetricaPlatform/AppMetricaPlatform.h>
+
 #import "AMAUnhandledCrashDetector.h"
-#import "AMAHostStateProviderFactory.h"
 
 @interface AMAUnhandledCrashDetector ()
 
@@ -11,7 +12,7 @@
 @property (nonatomic, assign) BOOL appWasTerminated;
 @property (nonatomic, assign) BOOL appWasInBackground;
 
-- (void)hostStateDidChange:(AMAHostState)hostState;
+- (void)hostStateDidChange:(AMAHostAppState)hostState;
 
 + (NSString *)currentBundleVersion;
 + (NSString *)currentOSVersion;
@@ -21,19 +22,13 @@
 SPEC_BEGIN(AMAUnhandledCrashDetectorTests)
 
 describe(@"AMAUnhandledCrashDetector", ^{
-
-    AMAUserDefaultsStorage *__block storage;
-    AMAUnhandledCrashDetector *__block crashDetector;
-    AMAHostStateProvider *__block hostAppStateProvider;
-    AMAManualCurrentQueueExecutor *__block executor;
-
-    beforeEach(^{
-        storage = [AMAUserDefaultsStorage nullMock];
-        hostAppStateProvider = [[[AMAHostStateProviderFactory alloc] init] makeStateProviderHub];
-        executor = [[AMAManualCurrentQueueExecutor alloc] init];
-        crashDetector = [[AMAUnhandledCrashDetector alloc] initWithStorage:storage
-                                                         hostStateProvider:hostAppStateProvider
-                                                                  executor:executor];
+    let(storage, ^{ return [AMAUserDefaultsStorage nullMock]; });
+    let(hostAppStateProvider, ^{ return [KWMock nullMockForProtocol:@protocol(AMAHostStateProviding)]; });
+    let(executor, ^{ return [[AMAManualCurrentQueueExecutor alloc] init]; });
+    let(crashDetector, ^{
+        return [[AMAUnhandledCrashDetector alloc] initWithStorage:storage
+                                                 hostStateProvider:hostAppStateProvider
+                                                          executor:executor];
     });
 
     context(@"Should initialize correctly", ^{
@@ -56,8 +51,9 @@ describe(@"AMAUnhandledCrashDetector", ^{
                 });
 
                 it(@"Should not add observer to the hostAppStateProvider", ^{
-                    [[hostAppStateProvider shouldNot] receive:@selector(addAMAObserver:)];
                     [crashDetector startDetecting];
+                    [[hostAppStateProvider should] receive:@selector(setDelegate:) withArguments:crashDetector];
+                    [executor execute];
                 });
             });
 
@@ -79,7 +75,9 @@ describe(@"AMAUnhandledCrashDetector", ^{
                 });
 
                 it(@"Should add observer to the hostAppStateProvider", ^{
-                    [[hostAppStateProvider should] receive:@selector(addAMAObserver:) withCountAtLeast:1];
+                    [[hostAppStateProvider should] receive:@selector(setDelegate:)
+                                          withCountAtLeast:1
+                                                 arguments:crashDetector];
                     [crashDetector startDetecting];
                     [executor execute];
                 });
@@ -171,6 +169,7 @@ describe(@"AMAUnhandledCrashDetector", ^{
             });
 
             it(@"Should store app background status from app state", ^{
+                [[hostAppStateProvider stub] hostState];
                 [hostAppStateProvider stub:@selector(hostState) andReturn:theValue(AMAHostAppStateBackground)];
                 [[storage should] receive:@selector(setBool:forKey:)
                             withArguments:theValue(YES), kAMAUserDefaultsStringKeyAppWasInBackground];
@@ -180,7 +179,7 @@ describe(@"AMAUnhandledCrashDetector", ^{
         });
 
         it(@"Should register to observe app state", ^{
-            [[hostAppStateProvider should] receive:@selector(addAMAObserver:) withArguments:crashDetector];
+            [[hostAppStateProvider should] receive:@selector(setDelegate:) withArguments:crashDetector];
             [crashDetector startDetecting];
             [executor execute];
         });
@@ -188,10 +187,9 @@ describe(@"AMAUnhandledCrashDetector", ^{
     context(@"Should store values to storage on outer notifications", ^{
 
         it(@"Should save YES to AMAStorageStringKeyAppWasTerminated on receiving AMAHostAppStateTerminated", ^{
-            [hostAppStateProvider stub:@selector(hostState) andReturn:theValue(AMAHostAppStateTerminated)];
             [[storage should] receive:@selector(setBool:forKey:)
                         withArguments:theValue(YES), kAMAUserDefaultsStringKeyAppWasTerminated];
-            [crashDetector hostStateDidChange:hostAppStateProvider];
+            [crashDetector hostStateDidChange:AMAHostAppStateTerminated];
         });
 
         it(@"Should save NO to AMAStorageStringKeyAppWasTerminated on receiving AMAHostAppStateForeground", ^{
@@ -216,33 +214,24 @@ describe(@"AMAUnhandledCrashDetector", ^{
         });
 
         it(@"Should save YES to AMAStorageStringKeyAppWasInBackground on receiving AMAHostAppStateBackground", ^{
-            [hostAppStateProvider stub:@selector(hostState) andReturn:theValue(AMAHostAppStateBackground)];
             [[storage should] receive:@selector(setBool:forKey:)
                         withArguments:theValue(YES), kAMAUserDefaultsStringKeyAppWasInBackground];
-            [crashDetector hostStateDidChange:hostAppStateProvider];
+            [crashDetector hostStateDidChange:AMAHostAppStateBackground];
         });
 
         it(@"Should save NO to AMAStorageStringKeyAppWasInBackground on receiving AMAHostAppStateForeground", ^{
-            [hostAppStateProvider stub:@selector(hostState) andReturn:theValue(AMAHostAppStateForeground)];
             [[storage should] receive:@selector(setBool:forKey:)
                         withArguments:theValue(NO), kAMAUserDefaultsStringKeyAppWasInBackground];
-            [crashDetector hostStateDidChange:hostAppStateProvider];
+            [crashDetector hostStateDidChange:AMAHostAppStateForeground];
         });
     });
     context(@"CheckUnhandedCrash", ^{
-        NSString *previousBundleVersion = @"0.0";
-        NSString *previousOSVersion = @"1.1";
+        static NSString *const previousBundleVersion = @"0.0";
+        static NSString *const previousOSVersion = @"1.1";
         AMAUnhandledCrashType __block unhandledCrashType;
         AMAUnhandledCrashCallback crashCallback = ^(AMAUnhandledCrashType crashType) {
             unhandledCrashType = crashType;
         };
-
-        beforeEach(^{
-            crashDetector.previousBundleVersion = previousBundleVersion;
-            crashDetector.previousOSVersion = previousOSVersion;
-            crashDetector.appWasTerminated = NO;
-            crashDetector.appWasInBackground = NO;
-        });
 
         AMAUnhandledCrashType (^checkUnhandledCrashType)(void) = ^{
             [crashDetector checkUnhandledCrash:crashCallback];
@@ -250,7 +239,13 @@ describe(@"AMAUnhandledCrashDetector", ^{
         };
 
         context(@"Should send AMAUnhandledCrashUnknown to callback", ^{
-
+            beforeEach(^{
+                crashDetector.previousBundleVersion = previousBundleVersion;
+                crashDetector.previousOSVersion = previousOSVersion;
+                crashDetector.appWasTerminated = NO;
+                crashDetector.appWasInBackground = NO;
+            });
+            
             it(@"If previous bundle version is null", ^{
                 crashDetector.previousBundleVersion = nil;
                 AMAUnhandledCrashType actualValue = checkUnhandledCrashType();
@@ -281,6 +276,11 @@ describe(@"AMAUnhandledCrashDetector", ^{
             beforeEach(^{
                 [AMAUnhandledCrashDetector stub:@selector(currentBundleVersion) andReturn:previousBundleVersion];
                 [AMAUnhandledCrashDetector stub:@selector(currentOSVersion) andReturn:previousOSVersion];
+                
+                crashDetector.previousBundleVersion = previousBundleVersion;
+                crashDetector.previousOSVersion = previousOSVersion;
+                crashDetector.appWasTerminated = NO;
+                crashDetector.appWasInBackground = NO;
             });
 
             it(@"Should be background crash if app was in background state", ^{

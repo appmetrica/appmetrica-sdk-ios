@@ -1,5 +1,5 @@
 
-#import "AMAAppMetricaConfiguration+Extended.h"
+#import "AMAAppMetricaConfiguration.h"
 
 @interface AMAAppMetricaConfiguration (Internal)
 

@@ -1,58 +1,59 @@
-
 #import <Kiwi/Kiwi.h>
+
 #import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
 #import <AppMetricaWebKit/AppMetricaWebKit.h>
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
 #import <AppMetricaPlatform/AppMetricaPlatform.h>
+
 #import "AMAAppMetricaImpl+TestUtilities.h"
-#import "AMAAppMetricaImplTestFactory.h"
-#import "AMADispatcher.h"
-#import "AMADispatchingController.h"
-#import "AMADispatchStrategiesContainer.h"
-#import "AMADispatchStrategy+Private.h"
-#import "AMAEventCountDispatchStrategy.h"
-#import "AMATimerDispatchStrategy.h"
-#import "AMAAppMetrica.h"
-#import "AMAReporter.h"
-#import "AMAReporterStorage.h"
-#import "AMAReporterStateStorage.h"
-#import "AMAEvent.h"
-#import "AMAStringEventValue.h"
-#import "AMAEventBuilder.h"
-#import "AMAReporterTestHelper.h"
-#import "AMAReporterConfiguration.h"
-#import "AMASessionStorage.h"
+
+#import "AMAAdRevenueInfo.h"
+#import "AMAAdServicesReportingController.h"
 #import "AMAAppMetrica+Internal.h"
 #import "AMAAppMetrica+TestUtilities.h"
-#import "AMADispatchStrategyMask.h"
-#import "AMAMetricaConfigurationTestUtilities.h"
-#import "AMAEventStorage+TestUtilities.h"
-#import "AMAEnvironmentContainer.h"
-#import "AMAAppMetricaPreloadInfo.h"
+#import "AMAAppMetrica.h"
+#import "AMAAppMetricaImplTestFactory.h"
 #import "AMAAppMetricaPreloadInfo+AMAInternal.h"
-#import "AMAStubHostAppStateProvider.h"
-#import "AMAInternalEventsReporter.h"
-#import "AMAUserProfile.h"
-#import "AMAProfileAttribute.h"
-#import "AMARevenueInfo.h"
-#import "AMAAppMetricaConfiguration+Extended.h"
-#import "AMAStartupController.h"
-#import "AMAPermissionsController.h"
-#import "AMAExtensionsReportController.h"
+#import "AMAAppMetricaPreloadInfo.h"
 #import "AMAAppOpenWatcher.h"
-#import "AMAAutoPurchasesWatcher.h"
-#import "AMAAdServicesReportingController.h"
-#import "AMALocationManager.h"
 #import "AMAAttributionController.h"
-#import "AMADeepLinkController.h"
-#import "AMAPluginErrorDetails.h"
-#import "AMAAdRevenueInfo.h"
-#import "AMAECommerce.h"
-#import "AMAStartupStorageProvider.h"
+#import "AMAAutoPurchasesWatcher.h"
 #import "AMACachingStorageProvider.h"
+#import "AMADeepLinkController.h"
+#import "AMADispatchStrategiesContainer.h"
+#import "AMADispatchStrategy+Private.h"
+#import "AMADispatchStrategyMask.h"
+#import "AMADispatcher.h"
+#import "AMADispatchingController.h"
+#import "AMAECommerce.h"
+#import "AMAEnvironmentContainer.h"
+#import "AMAEvent.h"
+#import "AMAEventBuilder.h"
+#import "AMAEventCountDispatchStrategy.h"
+#import "AMAEventStorage+TestUtilities.h"
+#import "AMAExtensionsReportController.h"
 #import "AMAExtrasContainer.h"
+#import "AMAInternalEventsReporter+Private.h"
+#import "AMALocationManager.h"
+#import "AMAMetricaConfigurationTestUtilities.h"
+#import "AMAPermissionsController.h"
+#import "AMAProfileAttribute.h"
+#import "AMAReporter.h"
+#import "AMAReporterConfiguration.h"
+#import "AMAReporterStateStorage.h"
+#import "AMAReporterStorage.h"
 #import "AMAReporterStoragesContainer.h"
+#import "AMAReporterTestHelper.h"
+#import "AMARevenueInfo.h"
+#import "AMASessionStorage.h"
+#import "AMAStartupController.h"
 #import "AMAStartupItemsChangedNotifier.h"
+#import "AMAStartupStorageProvider.h"
+#import "AMAStringEventValue.h"
+#import "AMAStubHostAppStateProvider.h"
+#import "AMATimerDispatchStrategy.h"
+#import "AMAUserProfile.h"
+#import "AMAEventPollingDelegateMock.h"
 
 static NSString *const kAMAEnvironmentTestKey = @"TestEnvironmentKey";
 static NSString *const kAMAEnvironmentTestValue = @"TestEnvironmentValue";
@@ -115,8 +116,8 @@ describe(@"AMAAppMetricaImpl", ^{
         eventStorage = [reporterTestHelper appReporterForApiKey:apiKey].reporterStorage.eventStorage;
         startupNotifier = [AMAStartupItemsChangedNotifier stubbedNullMockForDefaultInit];
         appMetricaImpl =
-        [AMAAppMetricaImplTestFactory createCurrentQueueImplWithReporterHelper:reporterTestHelper
-                                                             hostStateProvider:hostStateProvider];
+            [AMAAppMetricaImplTestFactory createCurrentQueueImplWithReporterHelper:reporterTestHelper
+                                                                 hostStateProvider:hostStateProvider];
         [AMAAppMetrica stub:@selector(sharedImpl) andReturn:appMetricaImpl];
         
         id<AMAExecuting>executor = [AMACurrentQueueExecutor new];
@@ -182,6 +183,42 @@ describe(@"AMAAppMetricaImpl", ^{
             [impl clearAppEnvironment];
             [impl activateWithConfiguration:configuration];
             [[appEnvironment().dictionaryEnvironment should] haveCountOf:0];
+        });
+    });
+    context(@"Event polling", ^{
+        let(impl, ^{
+            return [AMAAppMetricaImplTestFactory createCurrentQueueImplWithReporterHelper:reporterTestHelper
+                                                                        hostStateProvider:hostStateProvider
+                                                                    eventPollingDelegates:@[
+                                                                                    AMAEventPollingDelegateMock.class
+                                                                                          ]];
+        });
+
+        beforeEach(^{
+            AMAEventPollingDelegateMock.mockedEvents = @[];
+            [AMAAppMetrica stub:@selector(sharedImpl) andReturn:appMetricaImpl];
+        });
+        
+        it(@"Should poll polling delegates", ^{
+            [[AMAEventPollingDelegateMock should] receive:@selector(eventsForPreviousSession)];
+            [impl activateWithConfiguration:configuration];
+        });
+        
+        it(@"Should add events from delegage to previous session", ^{
+            AMASessionStorage *sessionStorage = reporterTestHelper.appReporter.reporterStorage.sessionStorage;
+            AMAEventStorage *eventsStorage = reporterTestHelper.appReporter.reporterStorage.eventStorage;
+            NSDate *creationDate = [NSDate dateWithTimeIntervalSinceNow:-10];
+            AMASession *session = [sessionStorage newFinishedBackgroundSessionCreatedAt:creationDate 
+                                                                               appState:nil error:NULL];
+            
+            AMAEventPollingDelegateMock.mockedEvents = @[
+                [[AMACustomEventParameters alloc] initWithEventType:AMAEventTypeProtobufCrash],
+                [[AMACustomEventParameters alloc] initWithEventType:AMAEventTypeProtobufError],
+            ];
+            [impl activateWithConfiguration:configuration];
+            
+            [[theValue([eventStorage totalCountOfEventsWithTypes:@[ @(AMAEventTypeProtobufCrash) ]]) should] equal:theValue(1)];
+            [[theValue([eventStorage totalCountOfEventsWithTypes:@[ @(AMAEventTypeProtobufError) ]]) should] equal:theValue(1)];
         });
     });
     context(@"Setting user profile ID", ^{
@@ -310,7 +347,18 @@ describe(@"AMAAppMetricaImpl", ^{
             [[event shouldNot] beNil];
         });
     });
-    
+
+    context(@"Sends Custom events", ^{
+        it(@"Should save PROFILE event", ^{
+            [appMetricaImpl activateWithConfiguration:configuration];
+            AMACustomEventParameters *params = [[AMACustomEventParameters alloc] initWithEventType:AMAEventTypeClient];
+            [appMetricaImpl reportEventWithParameters:params onFailure:nil];
+
+            AMAEvent *event = [eventStorage amatest_savedEventWithType:AMAEventTypeClient];
+            [[event shouldNot] beNil];
+        });
+    });
+
     context(@"Sends ECOMMERCE events", ^{
         it(@"Should save ECOMMERCE event", ^{
             [appMetricaImpl activateWithConfiguration:configuration];

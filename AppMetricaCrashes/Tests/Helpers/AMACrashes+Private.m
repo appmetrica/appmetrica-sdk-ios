@@ -1,7 +1,7 @@
 
-#import "AMACrashReporter+Private.h"
+#import "AMACrashes+Private.h"
 
-@implementation AMACrashReporter (Test)
+@implementation AMACrashes (Test)
 
 - (NSDictionary *)crashContext
 {

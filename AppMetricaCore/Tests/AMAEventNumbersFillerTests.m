@@ -65,32 +65,6 @@ describe(@"AMAEventNumbersFiller", ^{
             [[numberOfTypeStorages[@4].currentMockValue should] equal:@9];
         });
     });
-
-    context(@"Crash event", ^{
-        beforeEach(^{
-            event.type = AMAEventTypeCrash;
-            AMAIncrementableValueStorageMock *crashEventNumber = [[AMAIncrementableValueStorageMock alloc] init];
-            crashEventNumber.currentMockValue = @11;
-            numberOfTypeStorages[@(AMAEventTypeCrash)] = crashEventNumber;
-            [filler fillNumbersOfEvent:event session:session storage:storage rollback:rollbackHolder error:nil];
-        });
-        it(@"Should fill seq", ^{
-            [[theValue(event.sequenceNumber) should] equal:theValue(23)];
-        });
-        it(@"Should fill global event number", ^{
-            [[theValue(event.globalNumber) should] equal:theValue(0)];
-        });
-        it(@"Should increment global event number", ^{
-            [[globalNumberStorage.currentMockValue should] equal:@15];
-        });
-        it(@"Should fill event number of type", ^{
-            [[theValue(event.numberOfType) should] equal:theValue(12)];
-        });
-        it(@"Should increment global event number", ^{
-            [[numberOfTypeStorages[@(AMAEventTypeCrash)].currentMockValue should] equal:@12];
-        });
-    });
-
 });
 
 SPEC_END

@@ -11,6 +11,9 @@
 + (AMAAppMetricaImpl *)createCurrentQueueImplWithReporterHelper:(AMAReporterTestHelper *)reporterTestHelper;
 + (AMAAppMetricaImpl *)createCurrentQueueImplWithReporterHelper:(AMAReporterTestHelper *)reporterTestHelper
                                                  hostStateProvider:(id<AMAHostStateProviding>)hostStateProvider;
++ (AMAAppMetricaImpl *)createCurrentQueueImplWithReporterHelper:(AMAReporterTestHelper *)reporterTestHelper
+                                              hostStateProvider:(id<AMAHostStateProviding>)hostStateProvider
+                                          eventPollingDelegates:(NSArray<Class<AMAEventPollingDelegate>> *)eventPollingDelegates;
 
 @end
 

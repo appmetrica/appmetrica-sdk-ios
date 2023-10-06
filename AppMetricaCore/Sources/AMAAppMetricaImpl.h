@@ -1,31 +1,24 @@
-
 #import <Foundation/Foundation.h>
 #import "AMACompletionBlocks.h"
 #import "AMAStartupController.h"
 
-@class CLLocation;
-@class AMAAppMetricaPreloadInfo;
-@class AMACrash;
-@class AMAUserProfile;
-@class AMARevenueInfo;
 @class AMAAdRevenueInfo;
-@class AMAErrorModel;
-@class AMAECommerce;
 @class AMAAppMetricaConfiguration;
 @class AMACustomEventParameters;
+@class AMAECommerce;
+@class AMARevenueInfo;
+@class AMAUserProfile;
+@protocol AMAAppMetricaExtendedReporting;
+@protocol AMAEventPollingDelegate;
 @protocol AMAExecuting;
-@protocol AMAStartupCompletionObserving;
-@protocol AMAAppMetricaReporting;
-@protocol AMACrashReporting;
+@protocol AMAExtendedStartupObserving;
 @protocol AMAHostStateProviding;
-@class AMAReporterConfiguration;
-@class AMAPluginErrorDetails;
+@protocol AMAModuleActivationDelegate;
+@protocol AMAReporterStorageControlling;
+@protocol AMAStartupCompletionObserving;
 #if !TARGET_OS_TV
 @protocol AMAJSControlling;
 #endif
-@protocol AMAExtendedStartupObserving;
-@protocol AMAReporterStorageControlling;
-@protocol AMAAppMetricaExtendedReporting;
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -35,12 +28,15 @@ NS_ASSUME_NONNULL_BEGIN
 + (instancetype)new NS_UNAVAILABLE;
 
 - (instancetype)initWithHostStateProvider:(nullable id<AMAHostStateProviding>)hostStateProvider
-                                 executor:(id<AMAExecuting>)executor;
+                                 executor:(id<AMAExecuting>)executor
+                    eventPollingDelegates:(nullable NSArray<Class<AMAEventPollingDelegate>> *)eventPollingDelegates;
 
 @property (nonatomic, copy, readonly) NSString *apiKey;
 @property (nonatomic, strong, readonly) id<AMAExecuting> executor;
 
 - (void)activateWithConfiguration:(AMAAppMetricaConfiguration *)configuration;
+- (void)activateWithConfiguration:(AMAAppMetricaConfiguration *)configuration
+                        delegates:(NSArray<Class<AMAModuleActivationDelegate>> *)activationDelegates;
 
 - (void)addStartupCompletionObserver:(id<AMAStartupCompletionObserving>)observer;
 - (void)removeStartupCompletionObserver:(id<AMAStartupCompletionObserving>)observer;

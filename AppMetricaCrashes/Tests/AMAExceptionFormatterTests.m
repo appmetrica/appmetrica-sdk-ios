@@ -1,3 +1,10 @@
+#import <Kiwi/Kiwi.h>
+
+#import <mach/exception.h>
+
+#import <AppMetricaPlatform/AppMetricaPlatform.h>
+#import <AppMetricaTestUtils/AppMetricaTestUtils.h>
+#import <KSCrash.h>
 
 #import "AMADecodedCrashSerializer.h"
 #import "AMAExceptionFormatter.h"
@@ -13,14 +20,10 @@
 #import "AMAMach.h"
 #import "AMASignal.h"
 #import "AMANonFatal.h"
-#import "AMAInternalEventsReporter.h"
 #import "AMAErrorModel.h"
 #import "AMAErrorCustomData.h"
 #import "AMAErrorNSErrorData.h"
 #import "AMABacktraceSymbolicator.h"
-#import <AppMetricaTestUtils/AppMetricaTestUtils.h>
-#import <Kiwi/Kiwi.h>
-#import <mach/exception.h>
 #import "AMAVirtualMachineError.h"
 #import "AMAPluginErrorDetails.h"
 #import "AMAStackTraceElement.h"
@@ -29,7 +32,6 @@
 #import "AMACrashReportDecoder.h"
 #import "AMASystem.h"
 #import "AMAKSCrash.h"
-#import <KSCrash.h>
 #import "AMACppException.h"
 #import "AMAVirtualMachineCrash.h"
 #import "AMARegistersContainer.h"

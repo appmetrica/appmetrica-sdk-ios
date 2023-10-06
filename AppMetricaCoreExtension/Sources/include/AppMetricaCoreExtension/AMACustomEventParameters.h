@@ -33,7 +33,7 @@ typedef NS_ENUM(NSUInteger, AMAEventValueType) {
 /// Takes effect in session fetching if the event is in the past
 @property (nonatomic, nullable) AMAApplicationState *appState;
 /// Flag to indicate if the event is in the past. Default is NO.
-@property (nonatomic) BOOL isPast;
+@property (nonatomic) BOOL isPast; // TODO: (glinnik) remove this feature
 /// In case you use some kind of own truncator. The value will be added to truncated bytes number inside. Defaut is 0.
 @property (nonatomic, assign) NSUInteger bytesTruncated;
 

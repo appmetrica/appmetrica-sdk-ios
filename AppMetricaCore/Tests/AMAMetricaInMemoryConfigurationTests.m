@@ -34,9 +34,6 @@ describe(@"AMAMetricaInMemoryConfiguration", ^{
     it(@"Should have valid background session timeout", ^{
         [[theValue(configuration.backgroundSessionTimeout) should] equal:theValue(60 * 60)];
     });
-    it(@"Should have enabled crash reporting", ^{
-        [[theValue(configuration.reportCrashesEnabled) should] beYes];
-    });
     it(@"Should have valid app version", ^{
         [[configuration.appVersion should] equal:appVersion];
     });
@@ -54,9 +51,6 @@ describe(@"AMAMetricaInMemoryConfiguration", ^{
     });
     it(@"Should have enabled sessions auto tracking", ^{
         [[theValue(configuration.sessionsAutoTracking) should] beYes];
-    });
-    it(@"Should have not enabled probably unhandled crash detecting flag", ^{
-        [[theValue(configuration.probablyUnhandledCrashDetectingEnabled) should] beNo];
     });
     it(@"Should have lazy loaded app build UID", ^{
         AMABuildUID *buildUID = [AMABuildUID nullMock];

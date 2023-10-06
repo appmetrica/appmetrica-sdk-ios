@@ -45,7 +45,6 @@ NSString *const kAMAMetricaLibraryApiKey = @"20799a27-fa80-4b36-b2db-0f8141f2418
         _maxProtobufMsgSize = kAMAMaxProtobufMessageSize;
         _sessionMaxDuration = kAMAMaxSessionDurationSeconds;
         _backgroundSessionTimeout = kAMABackgroundSessionTimeoutSeconds;
-        _reportCrashesEnabled = YES;
         _appVersion = [AMAPlatformDescription appVersion];
         _appBuildNumber = (uint32_t)[[AMAPlatformDescription appBuildNumber] intValue];
         _updateSessionStampInterval = kAMADefaultUpdateSessionStampTimerInterval;

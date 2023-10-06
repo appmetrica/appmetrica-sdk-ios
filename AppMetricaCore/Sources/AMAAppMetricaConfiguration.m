@@ -41,17 +41,12 @@
     _dataSendingEnabledState = nil;
     _accurateLocationTracking = NO;
     _location = nil;
-    _crashReporting = YES;
     _logs = NO;
     _sessionTimeout = kAMASessionValidIntervalInSecondsDefault;
     _dispatchPeriod = kAMADefaultDispatchPeriodSeconds;
     _maxReportsCount = kAMAAutomaticReporterDefaultMaxReportsCount;
     _maxReportsInDatabaseCount = kAMAMaxReportsInDatabaseCount;
-    _probablyUnhandledCrashReporting = NO;
     _allowsBackgroundLocationUpdates = NO;
-    _applicationNotRespondingDetection = NO;
-    _applicationNotRespondingPingInterval = 0.1;
-    _applicationNotRespondingWatchdogInterval = 4.0;
     _revenueAutoTrackingEnabled = kAMADefaultRevenueAutoTrackingEnabled;
     _appOpenTrackingEnabled = kAMADefaultAppOpenTrackingEnabled;
 }

@@ -1,18 +1,7 @@
 
 #import <Foundation/Foundation.h>
-#import <AppMetricaHostState/AppMetricaHostState.h>
 
-@protocol AMAExecuting;
-@protocol AMAReporterProviding;
-@protocol AMAHostStateProviding;
-
-@interface AMAInternalEventsReporter : NSObject <AMAHostStateProviderDelegate>
-
-- (instancetype)initWithExecutor:(id<AMAExecuting>)executor
-                reporterProvider:(id<AMAReporterProviding>)reporterProvider;
-- (instancetype)initWithExecutor:(id<AMAExecuting>)executor
-                reporterProvider:(id<AMAReporterProviding>)reporterProvider
-               hostStateProvider:(id<AMAHostStateProviding>)hostStateProvider;
+@interface AMAInternalEventsReporter : NSObject
 
 - (instancetype)init NS_UNAVAILABLE;
 + (instancetype)new NS_UNAVAILABLE;

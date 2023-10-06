@@ -40,8 +40,6 @@ static NSUInteger const kAMAEventLogAPIKeyRequiredLength = 36;
             return @"Init";
         case AMAEventTypeStart:
             return @"Start";
-        case AMAEventTypeCrash:
-            return @"Crash";
         case AMAEventTypeProtobufCrash:
             return @"Crash (protobuf)";
         case AMAEventTypeProtobufANR:
@@ -50,7 +48,6 @@ static NSUInteger const kAMAEventLogAPIKeyRequiredLength = 36;
             return @"Client";
         case AMAEventTypeReferrer:
             return @"Referrer";
-        case AMAEventTypeError:
         case AMAEventTypeProtobufError:
             return @"Error";
         case AMAEventTypeAlive:
@@ -73,6 +70,13 @@ static NSUInteger const kAMAEventLogAPIKeyRequiredLength = 36;
             return @"E-Commerce";
         case AMAEventTypeAdRevenue:
             return @"AdRevenue";
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+        case AMAEventTypeError:
+            return @"Deprecated Error";
+        case AMAEventTypeCrash:
+            return @"Deprecated Crash";
+#pragma clang diagnostic pop
         default:
             return nil;
     }
@@ -140,11 +144,6 @@ static NSUInteger const kAMAEventLogAPIKeyRequiredLength = 36;
 - (void)logClientEventReceivedWithName:(NSString *)name
 {
     [self logEventReceivedWithName:name type:AMAEventTypeClient];
-}
-
-- (void)logErrorEventReceivedWithName:(NSString *)name
-{
-    [self logEventReceivedWithName:name type:AMAEventTypeError];
 }
 
 - (void)logProfileEventReceived

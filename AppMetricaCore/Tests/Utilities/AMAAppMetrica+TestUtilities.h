@@ -4,9 +4,11 @@
 
 @class AMAAppMetricaImpl;
 @class AMADeepLinkController;
-@protocol AMACrashReporting;
+@protocol AMAEventPollingDelegate;
 
 @interface AMAAppMetrica ()
+
+@property (class, readonly) NSArray<Class<AMAEventPollingDelegate>> *eventPollingDelegates;
 
 + (NSUInteger)dispatchPeriod;
 + (NSUInteger)maxReportsCount;
@@ -14,8 +16,6 @@
 
 + (AMAAppMetricaImpl *)sharedImpl;
 + (id<AMAExecuting>)sharedExecutor;
-+ (id<AMACrashReporting>)sharedCrashReporter;
-
 
 + (void)asyncUpdatePersistentConfigurationWithUUID:(NSString *)UUID;
 

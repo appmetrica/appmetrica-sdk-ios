@@ -38,7 +38,6 @@
         _stateStorage = storage;
         _composers = @{
                 @(AMAEventTypeAlive) : noLocationAndNetworkInfoComposer,
-                @(AMAEventTypeCrash) : crashComposer,
                 @(AMAEventTypeProtobufCrash) : crashComposer,
                 @(AMAEventTypeProtobufANR) : crashComposer,
                 @(AMAEventTypeProtobufError) : [errorComposerBuilder build],

@@ -25,12 +25,14 @@
 
 @implementation AMAAppMetricaImplStub
 
-- (instancetype)initWithHostStateProvider:(id<AMAHostStateProviding>)hostStateProvider
+- (instancetype)initWithHostStateProvider:(nullable id<AMAHostStateProviding>)hostStateProvider
                                  executor:(id<AMAExecuting>)executor
+                    eventPollingDelegates:(nullable NSArray<Class<AMAEventPollingDelegate>> *)eventPollingDelegates
                        reporterTestHelper:(AMAReporterTestHelper *)reporterTestHelper
 {
-    self = [super initWithHostStateProvider:hostStateProvider
-                                   executor:executor];
+    self = [super initWithHostStateProvider:hostStateProvider 
+                                   executor:executor
+                      eventPollingDelegates:eventPollingDelegates];
     if (self != nil) {
         _reporterTestHelper = reporterTestHelper;
     }
@@ -123,21 +125,24 @@
 @implementation AMAAppMetricaImplTestFactory
 
 + (AMAAppMetricaImpl *)createCurrentQueueImplWithReporterHelper:(AMAReporterTestHelper *)reporterTestHelper
-{
-    AMAStubHostAppStateProvider *hostStateProvider = [AMAStubHostAppStateProvider new];
-    hostStateProvider.hostState = AMAHostAppStateBackground;
-    return [self createCurrentQueueImplWithReporterHelper:reporterTestHelper
-                                        hostStateProvider:hostStateProvider];
-}
-
-+ (AMAAppMetricaImpl *)createCurrentQueueImplWithReporterHelper:(AMAReporterTestHelper *)reporterTestHelper
-                                                 hostStateProvider:(id<AMAHostStateProviding>)hostStateProvider
+                                              hostStateProvider:(id<AMAHostStateProviding>)hostStateProvider
+                                          eventPollingDelegates:(NSArray<Class<AMAEventPollingDelegate>> *)eventPollingDelegates
 {
     id<AMAExecuting> executor = [AMACurrentQueueExecutor new];
     AMAAppMetricaImpl *impl = [[AMAAppMetricaImplStub alloc] initWithHostStateProvider:hostStateProvider
                                                                               executor:executor
+                                                                 eventPollingDelegates:eventPollingDelegates
                                                                     reporterTestHelper:reporterTestHelper];
     return impl;
+}
+
++ (AMAAppMetricaImpl *)createCurrentQueueImplWithReporterHelper:(AMAReporterTestHelper *)reporterTestHelper
+{
+    AMAStubHostAppStateProvider *hostStateProvider = [AMAStubHostAppStateProvider new];
+    hostStateProvider.hostState = AMAHostAppStateBackground;
+    return [self createCurrentQueueImplWithReporterHelper:reporterTestHelper
+                                        hostStateProvider:hostStateProvider
+                                    eventPollingDelegates:nil];
 }
 
 + (AMAAppMetricaImpl *)createNoQueueImplWithReporterHelper:(AMAReporterTestHelper *)reporterTestHelper
@@ -145,11 +150,21 @@
     id<AMAExecuting> executor = [AMAManualCurrentQueueExecutor new];
     AMAStubHostAppStateProvider *hostStateProvider = [AMAStubHostAppStateProvider new];
     hostStateProvider.hostState = AMAHostAppStateBackground;
-
+    
     AMAAppMetricaImpl *impl = [[AMAAppMetricaImplStub alloc] initWithHostStateProvider:hostStateProvider
                                                                               executor:executor
+                                                                 eventPollingDelegates:nil
                                                                     reporterTestHelper:reporterTestHelper];
     return impl;
 }
 
++ (AMAAppMetricaImpl *)createCurrentQueueImplWithReporterHelper:(AMAReporterTestHelper *)reporterTestHelper
+                                              hostStateProvider:(id<AMAHostStateProviding>)hostStateProvider
+{
+    return [self createCurrentQueueImplWithReporterHelper:reporterTestHelper
+                                        hostStateProvider:hostStateProvider
+                                    eventPollingDelegates:nil];
+}
+
 @end
+

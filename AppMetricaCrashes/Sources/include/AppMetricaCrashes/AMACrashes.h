@@ -1,93 +1,146 @@
 
 #import <AppMetricaCoreExtension/AppMetricaCoreExtension.h>
-#import "AMAErrorRepresentable.h"
+
+#if __has_include("AMAErrorRepresentable.h")
+    #import "AMAErrorRepresentable.h"
+#else
+    #import <AppMetricaCrashes/AMAErrorRepresentable.h>
+#endif
 
 NS_ASSUME_NONNULL_BEGIN
 
-
-//TODO: (glinnik) Need for facade(requestCrashReportingStateWithCompletionQueue). Public?
-/** Crash reporting state callback block
-
- @param state Contains any combination of following identifiers on success:
- kAMACrashReportingStateEnabledKey - (NSNumber with bool) Is crash reporting enabled?
- kAMACrashReportingStateCrashedLastLaunchKey - (NSNumber with bool) Has application crashed last launch?
- */
+/// Type definition for the crash reporting state callback block.
+///
+/// The 'state' parameter is a dictionary that can contain any combination of the following keys:
+/// - kAMACrashReportingStateEnabledKey: An NSNumber containing a boolean value indicating if crash reporting is enabled.
+/// - kAMACrashReportingStateCrashedLastLaunchKey: An NSNumber containing a boolean value indicating if the app crashed during the last launch.
+///
+/// Use this block type with methods that require crash reporting state completion callbacks.
 typedef void(^AMACrashReportingStateCompletionBlock)(NSDictionary * _Nullable state);
 
 @protocol AMAErrorRepresentable;
+@class AMACrashesConfiguration;
 
+///`AMACrashes` provides error and crash reporting functionalities for integration with AppMetrica.
+///
+///The class offers a singleton instance and should not be subclassed. Initialize using `[AMACrashes crashes]`.
+///
 @interface AMACrashes : NSObject
 
-/** Reports custom error messages.
+/// Accesses the singleton `AMACrashes` instance.
+///
+/// - Returns: The singleton `AMACrashes` instance.
++ (instancetype)crashes NS_SWIFT_NAME(crashes());
 
- @param message Short name or description of the error
- @param exception Exception contains an NSException object that must be passed to the server. It can take the nil value.
- @param onFailure Block to be executed if an error occurs while reporting, the error is passed as block argument.
- */
-+ (void)reportError:(NSString *)message
-          exception:(nullable NSException *)exception
-          onFailure:(nullable void (^)(NSError *error))onFailure
-DEPRECATED_MSG_ATTRIBUTE("Use reportError:options:onFailure: or reportNSError:options:onFailure:");
+/// Sets the crash reporting configuration for the application.
+///
+/// - Parameter configuration: An `AMACrashesConfiguration` object that specifies how the application should handle and report crashes.
+///
+/// This method allows you to customize the behavior of the crash reporting mechanism.
+/// Use the properties of the `AMACrashesConfiguration` class to enable or disable specific types of crash reporting, as well as customize other related settings.
+/// Once set, the configuration will control how the app deals with various types of crashes and issues.
+///
+/// ## Example
+/// ```objc
+/// AMACrashesConfiguration *config = [AMACrashesConfiguration new];
+/// config.autoCrashTracking = YES;
+/// config.probablyUnhandledCrashReporting = NO;
+/// config.applicationNotRespondingDetection = YES;
+/// config.applicationNotRespondingWatchdogInterval = 5.0;
+/// [[AMACrashes crashes] setConfiguration:config];
+/// ```
+///
+/// - SeeAlso: `AMACrashesConfiguration`
+- (void)setConfiguration:(AMACrashesConfiguration *)configuration;
 
-/** Reports an error of the `NSError` type.
- AppMetrica uses domain and code for grouping errors.
- 
- Limits for `NSError`:
- - 200 characters for `domain`;
- - 50 key-value pairs for `userInfo`. 100 characters for a key length, 2000 for a value length;
- - 10 underlying errors using `NSUnderlyingErrorKey` as a key in `userInfo`;
- - 200 stack frames in a backtrace using `AMABacktraceErrorKey` as a key in `userInfo`.
- If the value exceeds the limit, AppMetrica truncates it.
- 
- @note You can also report custom backtrace in `NSError`, see the `AMABacktraceErrorKey` constant.
-
- @param error The error to report.
- @param onFailure Block to be executed if an error occurres while reporting, the error is passed as block argument.
- */
-+ (void)reportNSError:(NSError *)error
+/// Reports an error of the `NSError` type to AppMetrica.
+///
+/// The method allows reporting of errors that follow specific limits on `domain`, `userInfo`, and other properties.
+///
+/// - Parameter error: The `NSError` object to report. AppMetrica uses the `domain` and `code` properties for grouping errors.
+/// - Parameter onFailure: A closure that is executed if an error occurs while reporting. The error is passed as an argument to the block.
+///
+/// - Note: You can also include a custom backtrace in the `NSError` by using the `AMABacktraceErrorKey` constant in `userInfo`.
+///
+/// ## Limits
+/// - `domain`: Max 200 characters.
+/// - `userInfo`: Max 50 key-value pairs; max 100 characters for key length, max 2000 characters for value length.
+/// - `NSUnderlyingErrorKey`: Max 10 underlying errors can be included using this key in `userInfo`.
+/// - `AMABacktraceErrorKey`: Max 200 stack frames in a backtrace can be included using this key in `userInfo`.
+///
+/// If the value exceeds any of these limits, AppMetrica will truncate it.
+- (void)reportNSError:(NSError *)error
             onFailure:(nullable void (^)(NSError *error))onFailure NS_SWIFT_NAME(report(nserror:onFailure:));
 
-/** Reports an error of the `NSError` type.
- AppMetrica uses domain and code for grouping errors.
- Use this method to set the reporting options.
- 
- Limits for `NSError`:
- - 200 characters for `domain`;
- - 50 key-value pairs for `userInfo`. 100 characters for a key length, 2000 for a value length;
- - 10 underlying errors using `NSUnderlyingErrorKey` as a key in `userInfo`;
- - 200 stack frames in a backtrace using `AMABacktraceErrorKey` as a key in `userInfo`.
- If the value exceeds the limit, AppMetrica truncates it.
- 
- @note You can also report custom backtrace in `NSError`, see the `AMABacktraceErrorKey` constant.
- 
- @param error The error to report.
- @param options The options of error reporting.
- @param onFailure Block to be executed if an error occurres while reporting, the error is passed as block argument.
- */
-+ (void)reportNSError:(NSError *)error
+/// Reports an error of the `NSError` type with additional reporting options.
+///
+/// The method allows for customized error reporting, following specific limits on properties like `domain`, `userInfo`, and others.
+///
+/// - Parameter error: The `NSError` object to report. AppMetrica uses the `domain` and `code` properties for grouping errors.
+/// - Parameter options: An `AMAErrorReportingOptions` value that specifies how the error should be reported.
+/// - Parameter onFailure: A closure that is executed if an error occurs while reporting. The error is passed as an argument to the block.
+///
+/// - Note: You can include a custom backtrace in the `NSError` using the `AMABacktraceErrorKey` constant in `userInfo`.
+///
+/// ## Limits
+/// - `domain`: Max 200 characters.
+/// - `userInfo`: Max 50 key-value pairs; max 100 characters for key length, max 2000 characters for value length.
+/// - `NSUnderlyingErrorKey`: Max 10 underlying errors can be included using this key in `userInfo`.
+/// - `AMABacktraceErrorKey`: Max 200 stack frames in a backtrace can be included using this key in `userInfo`.
+///
+/// If any value exceeds these limits, AppMetrica will truncate it.
+- (void)reportNSError:(NSError *)error
               options:(AMAErrorReportingOptions)options
             onFailure:(nullable void (^)(NSError *error))onFailure NS_SWIFT_NAME(report(nserror:options:onFailure:));
 
-/** Reports a custom error.
- @note See `AMAErrorRepresentable` for more information.
-
- @param error The error to report.
- @param onFailure Block to be executed if an error occurres while reporting, the error is passed as block argument.
- */
-+ (void)reportError:(id<AMAErrorRepresentable>)error
+/// Reports a custom error that conforms to the `AMAErrorRepresentable` protocol.
+///
+/// - Parameter error: The custom error to report, which must conform to the `AMAErrorRepresentable` protocol.
+/// - Parameter onFailure: A closure that is executed if an error occurs while reporting. The reporting error is passed as a closure argument.
+///
+/// - SeeAlso: For details on creating custom errors, refer to the `AMAErrorRepresentable` protocol documentation.
+- (void)reportError:(id<AMAErrorRepresentable>)error
           onFailure:(nullable void (^)(NSError *error))onFailure NS_SWIFT_NAME(report(error:onFailure:));
 
-/** Reports a custom error.
- Use this method to set the reporting options.
- @note See `AMAErrorRepresentable` for more information.
-
- @param error The error to report.
- @param options The options of error reporting.
- @param onFailure Block to be executed if an error occurres while reporting, the error is passed as block argument.
- */
-+ (void)reportError:(id<AMAErrorRepresentable>)error
+/// Reports a custom error that conforms to the `AMAErrorRepresentable` protocol with additional reporting options.
+///
+/// - Parameter error: The custom error to report, which must conform to the `AMAErrorRepresentable` protocol.
+/// - Parameter options: Additional options for reporting the error, defined in `AMAErrorReportingOptions`.
+/// - Parameter onFailure: A closure that is executed if an error occurs while reporting. The reporting error is passed as a closure argument.
+///
+/// - SeeAlso: For details on creating custom errors, refer to the `AMAErrorRepresentable` protocol documentation.
+- (void)reportError:(id<AMAErrorRepresentable>)error
             options:(AMAErrorReportingOptions)options
           onFailure:(nullable void (^)(NSError *error))onFailure NS_SWIFT_NAME(report(error:options:onFailure:));
+
+/// Sets a key-value pair that will be associated with errors and crashes.
+///
+/// - Parameter value: The value you want to associate with a specific key. Setting this to `nil` will remove the previously set key-value pair.
+/// - Parameter key: The key with which to associate the value.
+///
+/// - Note: AppMetrica uses these key-value pairs as additional information for unhandled exceptions.
+- (void)setErrorEnvironmentValue:(nullable NSString *)value
+                          forKey:(NSString *)key NS_SWIFT_NAME(set(errorEnvironmentValue:forKey:));
+
+/// Clears all key-value pairs associated with errors and crashes.
+///
+/// - Note: This method removes all previously set key-value pairs associated with errors and crashes.
+///  Using this ensures that no additional information will be attached to future unhandled exceptions unless new key-value pairs are set.
+///
+/// - SeeAlso: `-setErrorEnvironmentValue:forKey:` for setting individual key-value pairs.
+- (void)clearErrorEnvironment;
+
+/// Requests the current crash reporting state.
+///
+/// This method asynchronously fetches the current crash reporting state and returns it via a completion block.
+///
+/// - Parameter completionQueue: The dispatch queue on which to execute the completion block.
+/// - Parameter completionBlock: A block to be executed upon completion of the request.
+///
+/// - SeeAlso: `AMACrashReportingStateCompletionBlock` for more information on the dictionary keys and their associated values.
+- (void)requestCrashReportingStateWithCompletionQueue:(dispatch_queue_t)completionQueue
+                                      completionBlock:(AMACrashReportingStateCompletionBlock)completionBlock;
+
 
 @end
 

@@ -175,37 +175,118 @@ describe(@"AMACollectionUtilities", ^{
             [[[array copy] should] beEmpty];
         });
     });
-    
+
     context(@"mapValuesOfDictionary:withBlock:", ^{
         it(@"Should return empty for empty dictionary", ^{
-            NSDictionary *result = [AMACollectionUtilities compactMapValuesOfDictionary:@{} withBlock:^id(id key, id value) {
+            NSDictionary *result = [AMACollectionUtilities compactMapValuesOfDictionary:@{}
+                                                                              withBlock:^id(id key, id value) {
                 return value;
             }];
             [[result should] equal:@{}];
         });
         it(@"Should return correct mapped dictionary", ^{
             NSDictionary *source = @{ @"a" : @"1", @"b" : @"3", @"c" : @"5" };
-            NSDictionary *result = [AMACollectionUtilities compactMapValuesOfDictionary:source withBlock:^id(id key, id value) {
+            NSDictionary *result = [AMACollectionUtilities compactMapValuesOfDictionary:source
+                                                                              withBlock:^id(id key, id value) {
                 return @([value integerValue]);
             }];
             [[result should] equal:@{ @"a" : @1, @"b" : @3, @"c" : @5 }];
         });
         it(@"Should remove nil-mapped items", ^{
             NSDictionary *source = @{ @"a" : @"1", @"b" : @"3", @"c" : @"5" };
-            NSDictionary *result = [AMACollectionUtilities compactMapValuesOfDictionary:source withBlock:^id(id key, id value) {
+            NSDictionary *result = [AMACollectionUtilities compactMapValuesOfDictionary:source
+                                                                              withBlock:^id(id key, id value) {
                 return [key isEqual:@"a"] ? nil : @([value integerValue]);
             }];
             [[result should] equal:@{ @"b" : @3, @"c" : @5 }];
         });
         it(@"Should return empty dictionary for all values mapsed to nil", ^{
             NSDictionary *source = @{ @"a" : @"1", @"b" : @"3", @"c" : @"5" };
-            NSDictionary *result = [AMACollectionUtilities compactMapValuesOfDictionary:source withBlock:^id(id key, id value) {
+            NSDictionary *result = [AMACollectionUtilities compactMapValuesOfDictionary:source
+                                                                              withBlock:^id(id key, id value) {
                 return nil;
             }];
             [[result should] equal:@{}];
         });
     });
+
+    context(@"filteredDictionary:withKeys:", ^{
+        it(@"Should return empty dictionary for empty source dictionary", ^{
+            NSDictionary *result = [AMACollectionUtilities filteredDictionary:@{} withKeys:[NSSet set]];
+            [[result should] equal:@{}];
+        });
+        it(@"Should return empty dictionary for non-matching keys", ^{
+            NSDictionary *source = @{ @"key1": @"value1", @"key2": @"value2" };
+            NSDictionary *result = [AMACollectionUtilities filteredDictionary:source
+                                                                     withKeys:[NSSet setWithArray:@[@"key3"]]];
+            [[result should] equal:@{}];
+        });
+        it(@"Should filter dictionary with one matching key", ^{
+            NSDictionary *source = @{ @"key1": @"value1", @"key2": @"value2", @"key3": @"value3" };
+            NSDictionary *result = [AMACollectionUtilities filteredDictionary:source
+                                                                     withKeys:[NSSet setWithArray:@[@"key1"]]];
+            [[result should] equal:@{ @"key1": @"value1" }];
+        });
+        it(@"Should filter dictionary with multiple matching keys", ^{
+            NSDictionary *source = @{ @"key1": @"value1", @"key2": @"value2", @"key3": @"value3" };
+            NSDictionary *result = [AMACollectionUtilities filteredDictionary:source
+                                                                     withKeys:[NSSet setWithArray:@[@"key1", @"key3"]]];
+            [[result should] equal:@{ @"key1": @"value1", @"key3": @"value3" }];
+        });
+    });
+
+    context(@"flatMapArray:withBlock:", ^{
+        it(@"Should return empty array for empty source", ^{
+            NSArray *result = [AMACollectionUtilities flatMapArray:@[] withBlock:^NSArray *(id item) {
+                return @[item, item];
+            }];
+            [[result should] equal:@[]];
+        });
+        it(@"Should flatten and map items correctly", ^{
+            NSArray *source = @[ @"a", @"b" ];
+            NSArray *result = [AMACollectionUtilities flatMapArray:source withBlock:^NSArray *(NSString *item) {
+                return @[item, [item stringByAppendingString:item]];
+            }];
+            [[result should] equal:@[ @"a", @"aa", @"b", @"bb" ]];
+        });
+        it(@"Should exclude items resulting in empty arrays", ^{
+            NSArray *source = @[ @"a", @"b", @"c" ];
+            NSArray *result = [AMACollectionUtilities flatMapArray:source withBlock:^NSArray *(NSString *item) {
+                return [item isEqualToString:@"b"] ? @[] : @[item];
+            }];
+            [[result should] equal:@[ @"a", @"c" ]];
+        });
+    });
+
+    context(@"filteredArray:withPredicate:", ^{
+        it(@"Should return empty array for empty source", ^{
+            NSArray *result = [AMACollectionUtilities filteredArray:@[] withPredicate:^BOOL(id item) {
+                return YES;
+            }];
+            [[result should] equal:@[]];
+        });
+        it(@"Should return source array for constant-YES predicate", ^{
+            NSArray *source = @[ @1, @2, @3 ];
+            NSArray *result = [AMACollectionUtilities filteredArray:source withPredicate:^BOOL(NSNumber *item) {
+                return YES;
+            }];
+            [[result should] equal:source];
+        });
+        it(@"Should return empty array for constant-NO predicate", ^{
+            NSArray *source = @[ @1, @2, @3 ];
+            NSArray *result = [AMACollectionUtilities filteredArray:source withPredicate:^BOOL(NSNumber *item) {
+                return NO;
+            }];
+            [[result should] equal:@[]];
+        });
+        it(@"Should filter out non-matching items", ^{
+            NSArray *source = @[ @1, @2, @3, @4 ];
+            NSArray *result = [AMACollectionUtilities filteredArray:source withPredicate:^BOOL(NSNumber *item) {
+                return item.intValue % 2 == 0;
+            }];
+            [[result should] equal:@[ @2, @4 ]];
+        });
+    });
 });
 
 SPEC_END
-

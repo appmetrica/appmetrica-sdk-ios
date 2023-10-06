@@ -15,6 +15,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 + (NSArray *)filteredArray:(NSArray *)array withPredicate:(BOOL(^)(id item))block;
 + (NSArray *)mapArray:(NSArray *)array withBlock:(id(^)(id item))block;
++ (NSArray *)flatMapArray:(NSArray *)array withBlock:(NSArray *(^)(id item))block;
 + (BOOL)areAllItemsOfArray:(NSArray *)array matchBlock:(BOOL(^)(id item))block;
 + (void)removeItemsFromArray:(NSMutableArray *)array withBlock:(void(^)(id item, BOOL *remove))block;
 

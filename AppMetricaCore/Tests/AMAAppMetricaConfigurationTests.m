@@ -1,7 +1,7 @@
 
 #import <Kiwi/Kiwi.h>
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
-#import "AMAAppMetricaConfiguration+Internal.h"
+#import "AMAAppMetricaConfiguration.h"
 
 static NSString *const kAMAValidAppVersion = @"v1.32";
 static NSString *const kAMAValidAppBuildNumber = @"3417";
@@ -22,10 +22,6 @@ describe(@"AMAAppMetricaConfiguration", ^{
                 AMAAppMetricaConfiguration *config = [[AMAAppMetricaConfiguration alloc] initWithApiKey:apiKey];
                 [[theValue(config.appOpenTrackingEnabled) should] beYes];
             });
-            it(@"Should have enabled crash reporting", ^{
-                AMAAppMetricaConfiguration *config = [[AMAAppMetricaConfiguration alloc] initWithApiKey:apiKey];
-                [[theValue(config.crashReporting) should] beYes];
-            });
             it(@"Should have disabled handleFirstActivationAsUpdate", ^{
                 AMAAppMetricaConfiguration *config = [[AMAAppMetricaConfiguration alloc] initWithApiKey:apiKey];
                 [[theValue(config.handleFirstActivationAsUpdate) should] beNo];
@@ -42,17 +38,9 @@ describe(@"AMAAppMetricaConfiguration", ^{
                 AMAAppMetricaConfiguration *config = [[AMAAppMetricaConfiguration alloc] initWithApiKey:apiKey];
                 [[theValue(config.logs) should] beNo];
             });
-            it(@"Should have disabled probablyUnhandledCrashReporting", ^{
-                AMAAppMetricaConfiguration *config = [[AMAAppMetricaConfiguration alloc] initWithApiKey:apiKey];
-                [[theValue(config.probablyUnhandledCrashReporting) should] beNo];
-            });
             it(@"Should have disabled allowsBackgroundLocationUpdates", ^{
                 AMAAppMetricaConfiguration *config = [[AMAAppMetricaConfiguration alloc] initWithApiKey:apiKey];
                 [[theValue(config.allowsBackgroundLocationUpdates) should] beNo];
-            });
-            it(@"Should have disabled applicationNotRespondingDetection", ^{
-                AMAAppMetricaConfiguration *config = [[AMAAppMetricaConfiguration alloc] initWithApiKey:apiKey];
-                [[theValue(config.applicationNotRespondingDetection) should] beNo];
             });
             it(@"Should have disabled allowsBackgroundLocationUpdates", ^{
                 AMAAppMetricaConfiguration *config = [[AMAAppMetricaConfiguration alloc] initWithApiKey:apiKey];
@@ -79,14 +67,6 @@ describe(@"AMAAppMetricaConfiguration", ^{
             it(@"Should have default maxReportsInDatabaseCount", ^{
                 AMAAppMetricaConfiguration *config = [[AMAAppMetricaConfiguration alloc] initWithApiKey:apiKey];
                 [[theValue(config.maxReportsInDatabaseCount) should] equal:theValue(1000)];
-            });
-            it(@"Should have default applicationNotRespondingPingInterval", ^{
-                AMAAppMetricaConfiguration *config = [[AMAAppMetricaConfiguration alloc] initWithApiKey:apiKey];
-                [[theValue(config.applicationNotRespondingPingInterval) should] equal:theValue(0.1)];
-            });
-            it(@"Should have default applicationNotRespondingWatchdogInterval", ^{
-                AMAAppMetricaConfiguration *config = [[AMAAppMetricaConfiguration alloc] initWithApiKey:apiKey];
-                [[theValue(config.applicationNotRespondingWatchdogInterval) should] equal:theValue(4.0)];
             });
         });
     });

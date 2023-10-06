@@ -22,7 +22,8 @@
     }
 
     NSURL *url = nil;
-    NSURL *baseURL = [NSURL URLWithString:baseURLString];
+    NSURL *baseURL = [self createBaseURL:baseURLString];
+
     if (baseURL != nil) {
         NSURLComponents *urlComponents = [NSURLComponents componentsWithURL:baseURL resolvingAgainstBaseURL:NO];
         if (httpGetParameters.count > 0) {
@@ -54,6 +55,16 @@
 }
 
 #pragma mark - Private
+
++ (NSURL *)createBaseURL:(NSString *)baseURLString
+{
+#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 170000 || __TV_OS_VERSION_MAX_ALLOWED >= 170000
+    if (@available(iOS 17.0, tvOS 17.0, *)) {
+        return [NSURL URLWithString:baseURLString encodingInvalidCharacters:NO];
+    }
+#endif
+    return [NSURL URLWithString:baseURLString];
+}
 
 + (void)appendQueryItemsForURLComponents:(NSURLComponents *)urlComponents fromDictionary:(NSDictionary *)dictionary
 {

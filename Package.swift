@@ -80,8 +80,7 @@ let package = Package(
             ],
             outerDependencies: [kiwi],
             searchPaths: [
-                "../../AppMetricaCoreExtension/Sources/include/AppMetricaCoreExtension", "./**",
-                "../Sources/**", "../../AppMetricaCrashes/Sources/**"
+                "../../AppMetricaCoreExtension/Sources/include/AppMetricaCoreExtension", "./**", "../Sources/**"
             ],
             resources: [.process("Resources")]
         ),
@@ -89,17 +88,19 @@ let package = Package(
         //MARK: - AppMetrica Crashes
         .target(
             target: .crashes,
-            dependencies: [.core, .log, .coreExtension, .hostState, .protobufUtils, .platform, .storageUtils, .encodingUtils],
+            dependencies: [
+                .core, .log, .coreExtension, .hostState, .protobufUtils, .platform, .storageUtils, .encodingUtils
+            ],
             outerDependencies: [ksKrash, protobuf],
             searchPaths: ["./**"]
         ),
-        
-        //TODO: https://nda.ya.ru/t/1-uPWaow6fHZr5
-//        .testTarget(
-//            target: .crashes,
-//            dependencies: [.crashes],
-//            searchPaths: ["../Sources/**", "./Helpers"]
-//        ),
+        .testTarget(
+            target: .crashes,
+            dependencies: [.crashes, .testUtils],
+            outerDependencies: [kiwi],
+            searchPaths: ["../Sources/**", "./Helpers"],
+            resources: [.process("Resources")]
+        ),
         
         //MARK: - AppMetrica CoreExtension
         .target(

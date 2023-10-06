@@ -36,7 +36,6 @@
 #import "AMAAttributionChecker.h"
 #import "AMAReportRequestProvider.h"
 #import "AMAMetricaPersistentConfiguration.h"
-#import "AMAPluginErrorDetails.h"
 #import "AMAAdRevenueInfo.h"
 #import "AMAAdRevenueInfoModel.h"
 #import "AMAAdRevenueInfoConverter.h"
@@ -197,11 +196,8 @@
 - (void)resumeSessionWithDate:(NSDate *)date
 {
     AMALogInfo(@"Resuming session of reporter: %@", self);
-    NSError *error = nil;
-    AMASession *currentSession = [self.reporterStorage.sessionStorage lastSessionWithError:&error];
-    if (error != nil) {
-        AMALogWarn(@"Failed to fetch current session");
-    }
+    AMASession *currentSession = [self lastSession];
+    
     BOOL isSessionBackground = currentSession.type == AMASessionTypeBackground;
     AMASessionExpirationType expirationType = [self.sessionExpirationHandler expirationTypeForSession:currentSession
                                                                                              withDate:date];

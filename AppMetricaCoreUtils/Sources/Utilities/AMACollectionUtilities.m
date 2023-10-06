@@ -62,6 +62,20 @@
     return [result copy];
 }
 
++ (NSArray *)flatMapArray:(NSArray *)array withBlock:(NSArray *(^)(id item))block
+{
+    NSParameterAssert(block != nil);
+    
+    NSMutableArray *result = [NSMutableArray new];
+    for (id item in array) {
+        NSArray *newItems = block(item);
+        if (newItems != nil) {
+            [result addObjectsFromArray:newItems];
+        }
+    }
+    return [result copy];
+}
+
 + (BOOL)areAllItemsOfArray:(NSArray *)array matchBlock:(BOOL(^)(id item))block
 {
     NSParameterAssert(block != nil);

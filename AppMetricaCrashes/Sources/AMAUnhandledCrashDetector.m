@@ -22,10 +22,20 @@
 - (instancetype)initWithStorage:(AMAUserDefaultsStorage *)storage
                        executor:(id<AMAExecuting>)executor
 {
+    return [self initWithStorage:storage
+               hostStateProvider:[[AMAHostStateProvider alloc] init]
+                        executor:executor];
+}
+
+
+- (instancetype)initWithStorage:(AMAUserDefaultsStorage *)storage
+              hostStateProvider:(id<AMAHostStateProviding>)hostStateProvider
+                       executor:(id<AMAExecuting>)executor
+{
     self = [super init];
-    if (self) {
+    if (self != nil) {
         _storage = storage;
-        _hostStateProvider = [[AMAHostStateProvider alloc] init];
+        _hostStateProvider = hostStateProvider;
         _executor = executor;
     }
 
@@ -46,9 +56,9 @@
 {
     AMAUnhandledCrashType crashType = AMAUnhandledCrashUnknown;
     BOOL didDetectUnhandledCrash =
-        [self.previousOSVersion isEqualToString:[AMAUnhandledCrashDetector currentOSVersion]] &&
-            [self.previousBundleVersion isEqualToString:[AMAUnhandledCrashDetector currentBundleVersion]] &&
-            self.appWasTerminated == NO;
+        [self.previousOSVersion isEqualToString:[[self class] currentOSVersion]] &&
+        [self.previousBundleVersion isEqualToString:[[self class] currentBundleVersion]] &&
+        self.appWasTerminated == NO;
 
     if (didDetectUnhandledCrash) {
         AMALogInfo(@"Did detect possible unhandled crash");

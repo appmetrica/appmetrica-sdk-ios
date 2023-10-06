@@ -54,7 +54,7 @@
 
 - (instancetype)init
 {
-    return [self initWithReporter:nil];//[AMAAppMetrica sharedInternalEventsReporter]];
+    return [self initWithReporter:[AMAAppMetrica sharedInternalEventsReporter]];
 }
 
 - (NSData *)dataForCrash:(AMADecodedCrash *)decodedCrash
@@ -106,7 +106,7 @@
                                 "Error details: %@.\n"
                                 "Trying to report the error to AppMetrica",
                                 decodedCrash, validationResult);
-//            [self.reporter reportCorruptedCrashReportWithError:validationResult];
+            [self.reporter reportCorruptedCrashReportWithError:validationResult];
         }
     }];
 

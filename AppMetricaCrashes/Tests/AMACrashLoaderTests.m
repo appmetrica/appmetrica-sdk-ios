@@ -1,14 +1,14 @@
 
 #import <Kiwi/Kiwi.h>
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
+#import <AppMetricaCoreExtension/AppMetricaCoreExtension.h>
 @import KSCrash_Recording;
 #import "AMAKSCrash.h"
 #import "AMACrashLoader.h"
 #import "AMAUnhandledCrashDetector.h"
-#import "AMACrashReporter.h"
+#import "AMACrashes.h"
 #import "AMACrashReportDecoder.h"
 #import "AMADecodedCrash.h"
-#import "AMACrashSafeTransactor.h"
 
 @interface AMACrashLoader ()
 
@@ -86,6 +86,89 @@ describe(@"AMACrashLoader", ^{
             [[[[AMAKSCrash sharedInstance] userInfo] should] equal:resultDictionary];
         });
     });
+    context(@"Synchronous Load Crash Reports", ^{
+        let(ksCrash, ^{
+            KSCrash *mock = [KSCrash nullMock];
+            [AMAKSCrash stub:@selector(sharedInstance) andReturn:mock];
+            return mock;
+        });
+        let(unhandledCrashDetector, ^{ return [AMAUnhandledCrashDetector nullMock]; });
+        let(crashLoaderDelegate, ^{ return [KWMock nullMockForProtocol:@protocol(AMACrashLoaderDelegate)]; });
+        let(crashLoader, ^{
+            AMACrashLoader *loader = [[AMACrashLoader alloc] initWithUnhandledCrashDetector:unhandledCrashDetector];
+            loader.delegate = crashLoaderDelegate;
+            return loader;
+        });
+        let(crashReports, ^{ return @[ [AMADecodedCrash nullMock], [AMADecodedCrash nullMock] ]; });
+        
+        NSNumber *const crashID = @23;
+        NSArray *const crashIDs = @[crashID];
+
+        beforeEach(^{
+            [AMACrashSafeTransactor stub:@selector(processTransactionWithID:name:transaction:rollback:) 
+                               withBlock:^id(NSArray *params) {
+                dispatch_block_t block = params[2];
+                block();
+                return nil;
+            }];
+            
+            [AMACrashSafeTransactor stub:@selector(processTransactionWithID:name:rollbackContext:transaction:rollback:) 
+                               withBlock:^id(NSArray *params) {
+                dispatch_block_t block = params[3];
+                block();
+                return nil;
+            }];
+        });
+      
+        it(@"Should return decoded crash reports", ^{
+            [ksCrash stub:@selector(reportIDs) andReturn:crashIDs];
+            AMACrashReportDecoder *decoder = [AMACrashReportDecoder nullMock];
+            [AMACrashReportDecoder stub:@selector(alloc) andReturn:decoder];
+            [decoder stub:@selector(initWithCrashID:) andReturn:decoder];
+            [decoder stub:@selector(decode:) withBlock:^id(NSArray *params) {
+                for (AMADecodedCrash *crash in crashReports) {
+                    [crashLoader crashReportDecoder:decoder didDecodeCrash:crash withError:nil];
+                }
+                return nil;
+            }];
+            
+            NSArray *result = [crashLoader syncLoadCrashReports];
+            
+            [[result should] equal:crashReports];
+        });
+
+        it(@"Should handle decoding errors gracefully", ^{
+            [ksCrash stub:@selector(reportIDs) andReturn:crashIDs];
+            AMACrashReportDecoder *decoder = [AMACrashReportDecoder nullMock];
+            [AMACrashReportDecoder stub:@selector(alloc) andReturn:decoder];
+            [decoder stub:@selector(initWithCrashID:) andReturn:decoder];
+            
+            NSError *error = [NSError errorWithDomain:@"TestDomain" code:400 userInfo:nil];
+            [decoder stub:@selector(decode:) withBlock:^id(NSArray *params) {
+                [crashLoader crashReportDecoder:decoder didDecodeCrash:nil withError:error];
+                return nil;
+            }];
+            
+            NSArray *result = [crashLoader syncLoadCrashReports];
+            
+            [[result should] beEmpty];
+        });
+        
+        it(@"Should return an empty array if no reports are available", ^{
+            [ksCrash stub:@selector(reportIDs) andReturn:@[]];
+            
+            NSArray *result = [crashLoader syncLoadCrashReports];
+            
+            [[result should] beEmpty];
+        });
+        
+        it(@"Should purge successfully processed reports", ^{
+            [ksCrash stub:@selector(reportIDs)andReturn:crashIDs times:@1 afterThatReturn:@[]]; // Simulating deletion
+            [[ksCrash should] receive:@selector(deleteReportWithID:) withArguments:crashID];
+            
+            [crashLoader syncLoadCrashReports];
+        });
+    });
     context(@"Load crash reports", ^{
         KSCrash __block *ksCrash;
         AMAUnhandledCrashDetector __block *unhandledCrashDetector;
@@ -107,7 +190,13 @@ describe(@"AMACrashLoader", ^{
             [[KSCrash shouldNot] receive:@selector(sharedInstance)];
             [crashLoader loadCrashReports];
         });
-    
+
+        it(@"Should set correct required monitoring in KSCrash", ^{
+            [[ksCrash should] receive:@selector(install)];
+            [[ksCrash should] receive:@selector(setMonitoring:) withArguments:theValue(KSCrashMonitorTypeRequired)];
+            [crashLoader enableRequiredMonitoring];
+        });
+
         it(@"Should enable cxa_throw swap", ^{
             [[ksCrash should] receive:@selector(enableSwapOfCxaThrow)];
             [crashLoader enableSwapOfCxaThrow];
@@ -391,12 +480,6 @@ describe(@"AMACrashLoader", ^{
                 beforeEach(^{
                     [ksCrash stub:@selector(reportWithID:)];
                     [ksCrash stub:@selector(deleteReportWithID:)];
-                });
-
-                it(@"Should load crash within transaction", ^{
-                    [crashLoader handleCrashReports:reportIDs];
-                    [[crashLoader should] receive:@selector(decodeCrashReport:withDecoder:)];
-                    transaction();
                 });
 
                 it(@"Should remove crashes within rollback", ^{

@@ -1,7 +1,9 @@
 
 #import <Kiwi/Kiwi.h>
+
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
-#import "AMACore.h"
+#import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
+
 #import "AMAANRWatchdog.h"
 
 SPEC_BEGIN(AMAANRWatchdogTests)

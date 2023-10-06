@@ -61,7 +61,7 @@
     
     NSNumber *value = [dpiValues valueForKey:model];
     if (value != nil) {
-        dpi = value.integerValue;
+        dpi = value.unsignedIntegerValue;
     }
     
     NSString *result = [NSString stringWithFormat:@"%d", (int)dpi];

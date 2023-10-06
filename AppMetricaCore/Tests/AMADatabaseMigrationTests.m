@@ -523,6 +523,8 @@ describe(@"AMADatabaseMigrationTests", ^{
                 database = [AMADatabaseMigrationTestsUtils databaseForName:@"storage-version-10"
                                                           migrationManager:migrationManager];
             });
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
             context(@"Crash reports moved in events table", ^{
                 NSString *crashName = @"migration_test_crash"; // hardcoded in storage-version-10 errors table
                 NSDictionary *__block eventDictionary = nil;
@@ -545,6 +547,7 @@ describe(@"AMADatabaseMigrationTests", ^{
                     [[theValue([eventDictionary[@"type"] integerValue]) should] equal:theValue(AMAEventTypeCrash)];
                 });
             });
+#pragma clang diagnostic pop
             it(@"Should drop errors table", ^{
                 [database inDatabase:^(FMDatabase *db) {
                     [[theValue([db tableExists:@"errors"]) should] beNo];

@@ -1,13 +1,11 @@
 
 #import <Foundation/Foundation.h>
 #import "AMAJSControlling.h"
-#import "AMAAppMetricaPluginReporting.h"
 #import "AMACore.h"
 
 @protocol AMACancelableExecuting;
 @class AMAReporterStorage;
 @class AMAEventBuilder;
-@class AMAEnvironmentContainer;
 @class AMAInternalEventsReporter;
 @class AMAErrorModel;
 @class AMAStartEventValueProvider;

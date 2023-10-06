@@ -31,17 +31,6 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (class, nonatomic, readonly) NSString *uuid;
 
-/**
- * Creates a `AMAAppMetricaPlugins` that can send plugin events to main API key.
- * Only one `AMAAppMetricaPlugins` instance is created.
- * You can either query it each time you need it, or save the reference by yourself.
- * NOTE: to use this extension you must activate AppMetrica first
- * via `[AMAAppMetrica activateWithConfiguration:]`.
- *
- * @return plugin extension instance
- */
-@property (class, nonatomic, readonly) id<AMAAppMetricaPlugins> pluginExtension;
-
 /** Starts the statistics collection process.
 
  @param configuration Configuration combines all AppMetrica settings in one place.
@@ -246,17 +235,6 @@ NS_SWIFT_NAME(requestStartupIdentifiers(keys:completionQueue:completionBlock:));
  See the sessionsAutoTracking property of AMAAppMetricaConfiguration.
  */
 + (void)pauseSession;
-
-/** Sets a key-value pair associated with errors and crashes.
- @note
- AppMetrica uses it as additional information for further unhandled exceptions.
- If the value is nil, AppMetrica removes the previously set key-value pair.
-
- @param value Error environment value.
- @param key Error environment key.
- */
-+ (void)setErrorEnvironmentValue:(nullable NSString *)value
-                          forKey:(NSString *)key NS_SWIFT_NAME(setErrorEnvironmentValue(value:for:));
 
 /** Sends information about the E-commerce event.
 

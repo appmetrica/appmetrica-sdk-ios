@@ -26,7 +26,6 @@
 - (BOOL)shouldUseGlobalNumberCounterForType:(NSUInteger)eventType
 {
     switch (eventType) {
-        case AMAEventTypeCrash:
         case AMAEventTypeProtobufCrash:
             return NO;
 

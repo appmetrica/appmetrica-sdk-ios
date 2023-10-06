@@ -70,13 +70,6 @@ describe(@"AMAEventLogger", ^{
                 [[logSpy.messages should] equal:@[ message(expectedText) ]];
             });
         });
-        context(@"Error event received", ^{
-            it(@"Should log", ^{
-                [logger logErrorEventReceivedWithName:eventName];
-                NSString *expectedText = suffixWithNullMetainfo(@"Error event is received:", @"EVENT_NAME");
-                [[logSpy.messages should] equal:@[ message(expectedText) ]];
-            });
-        });
         context(@"Profile event received", ^{
             it(@"Should log", ^{
                 [logger logProfileEventReceived];
@@ -141,10 +134,6 @@ describe(@"AMAEventLogger", ^{
                 logEventSentWithType(AMAEventTypeClient);
                 [[logSpy.messages should] equal:@[ message(textForEventWithTypeName(@"Client")) ]];
             });
-            it(@"Should log error event", ^{
-                logEventSentWithType(AMAEventTypeError);
-                [[logSpy.messages should] equal:@[ message(textForEventWithTypeName(@"Error")) ]];
-            });
             it(@"Should log profile event", ^{
                 logEventSentWithType(AMAEventTypeProfile);
                 [[logSpy.messages should] equal:@[ message(textForEventWithTypeName(@"Profile")) ]];
@@ -164,10 +153,6 @@ describe(@"AMAEventLogger", ^{
             it(@"Should log start event", ^{
                 logEventSentWithType(AMAEventTypeStart);
                 [[logSpy.messages should] equal:@[ message(textForEventWithTypeName(@"Start")) ]];
-            });
-            it(@"Should log crash event", ^{
-                logEventSentWithType(AMAEventTypeCrash);
-                [[logSpy.messages should] equal:@[ message(textForEventWithTypeName(@"Crash")) ]];
             });
             it(@"Should log referrer event", ^{
                 logEventSentWithType(AMAEventTypeReferrer);
@@ -203,6 +188,17 @@ describe(@"AMAEventLogger", ^{
                 [[logSpy.messages should]
                  equal:@[ message(textForEventWithTypeName(@"Application not responding (protobuf)")) ]];
             });
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+            it(@"Should log error event", ^{
+                logEventSentWithType(AMAEventTypeError);
+                [[logSpy.messages should] equal:@[ message(textForEventWithTypeName(@"Deprecated Error")) ]];
+            });
+            it(@"Should log crash event", ^{
+                logEventSentWithType(AMAEventTypeCrash);
+                [[logSpy.messages should] equal:@[ message(textForEventWithTypeName(@"Deprecated Crash")) ]];
+            });
+#pragma clang diagnostic pop
             it(@"Should log custom event", ^{
                 logEventSentWithType(1000);
                 NSString *text = @"Event [1000] is sent: eventOid 16, sessionOid 23, "
@@ -231,10 +227,6 @@ describe(@"AMAEventLogger", ^{
             it(@"Should log client event", ^{
                 [logger logClientEventReceivedWithName:eventName];
                 [[logSpy.messages should] equal:@[ message(textForEventWithTypeName(@"Client", eventName)) ]];
-            });
-            it(@"Should log error event", ^{
-                [logger logErrorEventReceivedWithName:eventName];
-                [[logSpy.messages should] equal:@[ message(textForEventWithTypeName(@"Error", eventName)) ]];
             });
             it(@"Should log profile event", ^{
                 [logger logProfileEventReceived];
@@ -285,10 +277,6 @@ describe(@"AMAEventLogger", ^{
                 logEventSentWithType(AMAEventTypeClient);
                 [[logSpy.messages should] equal:@[ message(textForEventWithTypeName(@"Client")) ]];
             });
-            it(@"Should log error event", ^{
-                logEventSentWithType(AMAEventTypeError);
-                [[logSpy.messages should] equal:@[ message(textForEventWithTypeName(@"Error")) ]];
-            });
             it(@"Should log profile event", ^{
                 logEventSentWithType(AMAEventTypeProfile);
                 [[logSpy.messages should] equal:@[ message(textForEventWithTypeName(@"Profile")) ]];
@@ -308,10 +296,6 @@ describe(@"AMAEventLogger", ^{
             it(@"Should log start event", ^{
                 logEventSentWithType(AMAEventTypeStart);
                 [[logSpy.messages should] equal:@[ message(textForEventWithTypeName(@"Start")) ]];
-            });
-            it(@"Should log crash event", ^{
-                logEventSentWithType(AMAEventTypeCrash);
-                [[logSpy.messages should] equal:@[ message(textForEventWithTypeName(@"Crash")) ]];
             });
             it(@"Should log referrer event", ^{
                 logEventSentWithType(AMAEventTypeReferrer);
@@ -346,6 +330,17 @@ describe(@"AMAEventLogger", ^{
                 [[logSpy.messages should]
                     equal:@[ message(textForEventWithTypeName(@"Application not responding (protobuf)")) ]];
             });
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+            it(@"Should log error event", ^{
+                logEventSentWithType(AMAEventTypeError);
+                [[logSpy.messages should] equal:@[ message(textForEventWithTypeName(@"Deprecated Error")) ]];
+            });
+            it(@"Should log crash event", ^{
+                logEventSentWithType(AMAEventTypeCrash);
+                [[logSpy.messages should] equal:@[ message(textForEventWithTypeName(@"Deprecated Crash")) ]];
+            });
+#pragma clang diagnostic pop
             it(@"Should log custom event", ^{
                 logEventSentWithType(1000);
                 NSString *text = @"Event [1000] is sent: eventOid 16, sessionOid 23, "

@@ -1,26 +1,28 @@
-
 #import <Kiwi/Kiwi.h>
+
 #import <AppMetricaWebKit/AppMetricaWebKit.h>
 #import <AppMetricaPlatform/AppMetricaPlatform.h>
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
-#import "AMAReporter.h"
-#import "AMAAppMetricaImplTestFactory.h"
+
 #import "AMAAppMetrica+TestUtilities.h"
-#import "AMALocationManager.h"
-#import "AMATestNetwork.h"
+
+#import "AMAAdProvider.h"
+#import "AMAAppMetricaImplTestFactory.h"
 #import "AMAAppStateManagerTestHelper.h"
-#import "AMAMetricaConfigurationTestUtilities.h"
+#import "AMADataSendingRestrictionController.h"
+#import "AMAEventPollingDelegate.h"
 #import "AMAFailureDispatcherTestHelper.h"
-#import "AMAStartupItemsChangedNotifier+Tests.h"
 #import "AMAInternalEventsReporter.h"
-#import "AMAStartupHostProvider.h"
+#import "AMALocationManager.h"
+#import "AMAMetricaConfigurationTestUtilities.h"
+#import "AMAReporter.h"
 #import "AMAReporterTestHelper.h"
+#import "AMAStartupHostProvider.h"
+#import "AMAStartupItemsChangedNotifier+Tests.h"
+#import "AMAStartupResponseParser.h"
+#import "AMATestNetwork.h"
 #import "AMATimeoutRequestsController.h"
 #import "AMAUUIDProvider.h"
-#import "AMAStartupResponseParser.h"
-#import "AMAAppMetricaPluginsImpl.h"
-#import "AMAAdProvider.h"
-#import "AMADataSendingRestrictionController.h"
 
 @interface AMAAppMetricaImpl () <AMAStartupControllerDelegate>
 
@@ -104,18 +106,21 @@ describe(@"AMAAppMetrica", ^{
         
         it(@"Should not activate if APIKey is not valid", ^{
             [[impl shouldNot] receive:@selector(activateWithConfiguration:)];
+            [[impl shouldNot] receive:@selector(activateWithConfiguration:delegates:)];
             
             [AMAAppMetrica activateWithConfiguration:[[AMAAppMetricaConfiguration alloc] initWithApiKey:@"---"]];
         });
         it(@"Should not activate if APIKey is not valid", ^{
             stubMetricaStarted(YES);
             [[impl shouldNot] receive:@selector(activateWithConfiguration:)];
+            [[impl shouldNot] receive:@selector(activateWithConfiguration:delegates:)];
             
             activate();
         });
         it(@"Should not activate if reporter is created for api key", ^{
             [AMAAppMetrica stub:@selector(isReporterCreatedForAPIKey:) andReturn:theValue(YES)];
             [[impl shouldNot] receive:@selector(activateWithConfiguration:)];
+            [[impl shouldNot] receive:@selector(activateWithConfiguration:delegates:)];
             
             activate();
         });
@@ -201,10 +206,6 @@ describe(@"AMAAppMetrica", ^{
             [AMAAppMetrica activateWithConfiguration:configuration];
             NSUInteger currentDispatchPeriod = [AMAAppMetrica dispatchPeriod];
             [[theValue(currentDispatchPeriod) should] equal:theValue(dispatchPeriod)];
-        });
-        it(@"Should set probably unhandled crash enabled to NO by default", ^{
-            stubMetrica();
-            [[theValue([AMAMetricaConfiguration sharedInstance].inMemory.probablyUnhandledCrashDetectingEnabled) should] beNo];
         });
         context(@"Manual reporter", ^{
             NSString *reporterApiKey = @"73831ec2-0ab2-49ed-a573-e3116740c8be";
@@ -959,21 +960,6 @@ describe(@"AMAAppMetrica", ^{
                         [[AMAMetricaConfiguration sharedInstance].inMemory stub:@selector(appMetricaImplCreated)
                                                                       andReturn:theValue(YES)];
                     });
-                    it(@"Should set error environment if metrica impl is started", ^{
-                        [[impl should] receive:@selector(setErrorEnvironmentValue:forKey:)
-                                 withArguments:value, key];
-                        
-                        [AMAAppMetrica setErrorEnvironmentValue:value forKey:key];
-                    });
-                    it(@"Should sync error environment if metrica is not started", ^{
-                        [[AMAMetricaConfiguration sharedInstance].inMemory stub:@selector(appMetricaImplCreated)
-                                                                      andReturn:theValue(NO)];
-                        [[impl shouldNot] receive:@selector(setErrorEnvironmentValue:forKey:)];
-                        [[AMAAppMetricaImpl should] receive:@selector(syncSetErrorEnvironmentValue:forKey:)
-                                 withArguments:value, key];
-
-                        [AMAAppMetrica setErrorEnvironmentValue:value forKey:key];
-                    });
                     
                     it(@"Should set app environment", ^{
                         [[impl should] receive:@selector(setAppEnvironmentValue:forKey:)
@@ -1009,6 +995,18 @@ describe(@"AMAAppMetrica", ^{
                 
                 activate();
             });
+            it(@"Should activate with delegates", ^{
+                id activationDelegate = [KWMock nullMock];
+    
+                [AMAAppMetrica addActivationDelegate:activationDelegate];
+                
+                [impl stub:@selector(activateWithConfiguration:delegates:) withBlock:^id(NSArray *params) {
+                    [[params[1] should] contain:activationDelegate];
+                    return nil;
+                }];
+
+                activate();
+            });
             it(@"Should register event flushable delegate", ^{
                 stubMetricaStarted(YES);
     
@@ -1020,6 +1018,12 @@ describe(@"AMAAppMetrica", ^{
                 [[eventFlushableDelegate should] receive:@selector(sendEventsBuffer)];
     
                 [AMAAppMetrica sendEventsBuffer];
+            });
+            it(@"Should register event polling delegate", ^{
+                id delegate = [KWMock nullMock];
+                
+                [AMAAppMetrica addEventPollingDelegate:delegate];
+                [[AMAAppMetrica.eventPollingDelegates should] contain:delegate];
             });
             it(@"Should return extended reporter", ^{
                 stubMetricaStarted(NO);
@@ -1193,19 +1197,6 @@ describe(@"AMAAppMetrica", ^{
             [[mockedImpl should] receive:@selector(clearSessionExtra)];
             
             [AMAAppMetrica clearSessionExtra];
-        });
-    });
-    
-    context(@"Plugin extension", ^{
-        AMAAppMetricaPluginsImpl *__block pluginImpl = nil;
-        beforeEach(^{
-            pluginImpl = [AMAAppMetricaPluginsImpl stubbedNullMockForDefaultInit];
-        });
-        it(@"Should return valid invariable plugin extension", ^{
-            id pluginExtension = AMAAppMetrica.pluginExtension;
-            [[pluginExtension should] equal:pluginImpl];
-            pluginExtension = AMAAppMetrica.pluginExtension;
-            [[pluginExtension should] equal:pluginImpl];
         });
     });
 });

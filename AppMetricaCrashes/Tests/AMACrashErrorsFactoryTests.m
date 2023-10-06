@@ -9,12 +9,14 @@ describe(@"AMACrashErrorsFactory", ^{
     
     context(@"Constructed errors", ^{
         
+        NSError *__block error = nil;
+        
         context(@"crashReportDecodingError", ^{
             beforeEach(^{
-                error = [AMAErrorsFactory crashReportDecodingError];
+                error = [AMACrashErrorsFactory crashReportDecodingError];
             });
             it(@"Should use correct domain", ^{
-                [[error.domain should] equal:domain];
+                [[error.domain should] equal:@"io.appmetrica"];
             });
             it(@"Should use correct code", ^{
                 [[theValue(error.code) should] equal:theValue(1001)];
@@ -27,7 +29,7 @@ describe(@"AMACrashErrorsFactory", ^{
         
         context(@"crashReportRecrashError", ^{
             beforeEach(^{
-                error = [AMAErrorsFactory crashReportRecrashError];
+                error = [AMACrashErrorsFactory crashReportRecrashError];
             });
             it(@"Should use correct domain", ^{
                 [[error.domain should] equal:kAMAAppMetricaInternalErrorDomain];
@@ -46,7 +48,7 @@ describe(@"AMACrashErrorsFactory", ^{
             static NSString *const kAMAExpectedVersion = @"11.22.333";
             
             beforeEach(^{
-                error = [AMAErrorsFactory crashUnsupportedReportVersionError:kAMAExpectedVersion];
+                error = [AMACrashErrorsFactory crashUnsupportedReportVersionError:kAMAExpectedVersion];
             });
             it(@"Should use correct domain", ^{
                 [[error.domain should] equal:kAMAAppMetricaInternalErrorDomain];
