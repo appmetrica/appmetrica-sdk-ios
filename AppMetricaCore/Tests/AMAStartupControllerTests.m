@@ -9,7 +9,6 @@
 #import "AMAStartupResponse.h"
 #import "AMAAppStateManagerTestHelper.h"
 #import "AMACore.h"
-#import "AMATestNetwork.h"
 #import "AMAHostProviderMock.h"
 #import "AMAStartupResponseParser.h"
 #import "AMATimeoutRequestsController.h"

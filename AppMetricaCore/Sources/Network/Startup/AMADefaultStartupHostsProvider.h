@@ -6,6 +6,6 @@
 - (instancetype)init NS_UNAVAILABLE;
 + (instancetype)new NS_UNAVAILABLE;
 
-+ (NSArray *)defaultStartupHosts;
++ (NSArray *)startupHostsWithAdditionalHosts:(NSArray *)additionalStartupHosts;
 
 @end

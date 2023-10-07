@@ -1,5 +1,5 @@
 
-#import "AMACustomEventParameters.h"
+#import "AMACore.h"
 
 @implementation AMACustomEventParameters
 

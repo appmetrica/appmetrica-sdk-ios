@@ -9,7 +9,6 @@
 + (BOOL)appPlatformIsIPad;
 
 + (BOOL)deviceTypeIsIPad;
-//TODO: Are `appPlatformIsIPad` and `deviceTypeIsIPad` the same?
 
 + (NSString *)screenDPI;
 + (NSString *)screenWidth;

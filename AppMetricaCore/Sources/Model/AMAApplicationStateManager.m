@@ -1,7 +1,7 @@
 
 #import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
 #import <AppMetricaPlatform/AppMetricaPlatform.h>
-#import "AMAApplicationStateManager.h"
+#import "AMACore.h"
 #import "AMAMetricaConfiguration.h"
 #import "AMAMetricaInMemoryConfiguration.h"
 #import "AMAStartupClientIdentifierFactory.h"

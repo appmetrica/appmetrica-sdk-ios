@@ -5,9 +5,9 @@
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
 
 #import "AMAAppMetrica+TestUtilities.h"
-
 #import "AMAAdProvider.h"
 #import "AMAAppMetricaImplTestFactory.h"
+#import "AMALocationManager.h"
 #import "AMAAppStateManagerTestHelper.h"
 #import "AMADataSendingRestrictionController.h"
 #import "AMAEventPollingDelegate.h"
@@ -20,7 +20,6 @@
 #import "AMAStartupHostProvider.h"
 #import "AMAStartupItemsChangedNotifier+Tests.h"
 #import "AMAStartupResponseParser.h"
-#import "AMATestNetwork.h"
 #import "AMATimeoutRequestsController.h"
 #import "AMAUUIDProvider.h"
 
@@ -989,9 +988,9 @@ describe(@"AMAAppMetrica", ^{
     
                 id startupObserver = [KWMock nullMockForProtocol:@protocol(AMAExtendedStartupObserving)];
                 id reporterStorageController = [KWMock nullMockForProtocol:@protocol(AMAReporterStorageControlling)];
-    
-                __auto_type *config = [[AMAServiceConfiguration alloc] initStartupObserver:startupObserver
-                                                                 reporterStorageController:reporterStorageController];
+                
+                __auto_type *config = [[AMAServiceConfiguration alloc] initWithStartupObserver:startupObserver
+                                                                     reporterStorageController:reporterStorageController];
                 
                 activate();
             });
@@ -1080,8 +1079,8 @@ describe(@"AMAAppMetrica", ^{
                     AMAServiceConfiguration *__block config = nil;
                     beforeAll(^{
                         startupObserver = [KWMock nullMockForProtocol:@protocol(AMAExtendedStartupObserving)];
-                        config = [[AMAServiceConfiguration alloc] initStartupObserver:startupObserver
-                                                            reporterStorageController:nil];
+                        config = [[AMAServiceConfiguration alloc] initWithStartupObserver:startupObserver
+                                                                reporterStorageController:nil];
                     });
                     it(@"Should register Startup observer on activation main reporter", ^{
                         [AMAAppMetrica registerExternalService:config];
@@ -1111,8 +1110,8 @@ describe(@"AMAAppMetrica", ^{
                     AMAServiceConfiguration *__block config = nil;
                     beforeAll(^{
                         reporterStorageController = [KWMock nullMockForProtocol:@protocol(AMAReporterStorageControlling)];
-                        config = [[AMAServiceConfiguration alloc] initStartupObserver:nil
-                                                            reporterStorageController:reporterStorageController];
+                        config = [[AMAServiceConfiguration alloc] initWithStartupObserver:nil
+                                                                reporterStorageController:reporterStorageController];
                     });
                     it(@"Should register reporter storage controller on activation main reporter", ^{
                         [AMAAppMetrica registerExternalService:config];

@@ -956,10 +956,27 @@
                 [observer setupStartupProvider:startupStorageProvider
                         cachingStorageProvider:cachingStorageProvider];
                 
-                [self.startupController addAdditionalStartupParameters:observer.startupRequestParameters];
+                [self addAdditionalStartupParameters:observer.startupParameters];
             }
         }
     }];
+}
+
+- (void)addAdditionalStartupParameters:(NSDictionary *)parameters
+{
+    NSArray *hosts = parameters[@"hosts"];
+    if (hosts != nil && [hosts isKindOfClass:NSArray.class]) {
+        hosts = [AMACollectionUtilities filteredArray:hosts
+                                        withPredicate:^BOOL(id  _Nonnull item) {
+            return [item isKindOfClass:NSString.class] && [item length] > 0;
+        }];
+        [[AMAMetricaConfiguration sharedInstance].inMemory addAdditionalStartupHosts:hosts];
+    }
+    
+    NSDictionary *request = parameters[@"request"];
+    if (request != nil && [request isKindOfClass:NSDictionary.class]) {
+        [self.startupController addAdditionalStartupParameters:request];
+    }
 }
 
 - (void)addStartupCompletionObserver:(id<AMAStartupCompletionObserving>)observer

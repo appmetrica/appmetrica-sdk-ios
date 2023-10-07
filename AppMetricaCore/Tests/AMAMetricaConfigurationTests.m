@@ -47,7 +47,7 @@ describe(@"AMAMetricaConfiguration", ^{
         });
     });
 
-    context(@"with invalid identifier", ^{
+    context(@"With invalid identifier", ^{
         NSString *invalidIFV = @"invalidIdentifier";
 
         beforeEach(^{

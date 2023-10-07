@@ -29,4 +29,4 @@
 #import "AMATime.h"
 #import <AppMetricaLog/AppMetricaLog.h>
 #import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
-#import "AppMetricaCoreExtension.h"
+#import <AppMetricaCoreExtension.h>

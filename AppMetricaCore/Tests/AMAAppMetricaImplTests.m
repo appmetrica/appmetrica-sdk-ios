@@ -50,7 +50,6 @@
 #import "AMAStartupItemsChangedNotifier.h"
 #import "AMAStartupStorageProvider.h"
 #import "AMAStringEventValue.h"
-#import "AMAStubHostAppStateProvider.h"
 #import "AMATimerDispatchStrategy.h"
 #import "AMAUserProfile.h"
 #import "AMAEventPollingDelegateMock.h"
@@ -709,7 +708,9 @@ describe(@"AMAAppMetricaImpl", ^{
     
     context(@"Extended", ^{
         context(@"Startup observer", ^{
-            NSDictionary *const startupParameters = @{@"key": @"value"};
+            NSDictionary *const startupParameters = @{@"request": @{@"ab" : @"1"},
+                                                      @"hosts": @[@"host_1", @1, @"host_2", @""],
+            };
             NSArray *__block observers = nil;
             beforeEach(^{
                 observers = @[[KWMock nullMockForProtocol:@protocol(AMAExtendedStartupObserving)],
@@ -719,33 +720,64 @@ describe(@"AMAAppMetricaImpl", ^{
                 id startupStorageProvider = [AMAStartupStorageProvider stubbedNullMockForDefaultInit];
                 id cachingStorageProvider = [AMACachingStorageProvider stubbedNullMockForDefaultInit];
                 
-                for (id<AMAExtendedStartupObserving> observer in observers) {
-                    [(NSObject *)observer stub:@selector(startupRequestParameters) andReturn:startupParameters];
+                for (NSObject<AMAExtendedStartupObserving> *observer in observers) {
+                    [observer stub:@selector(startupParameters) andReturn:startupParameters];
                     
-                    [[(NSObject *)observer should] receive:@selector(setupStartupProvider:cachingStorageProvider:)
-                                             withArguments:startupStorageProvider,cachingStorageProvider];
+                    [[observer should] receive:@selector(setupStartupProvider:cachingStorageProvider:)
+                                 withArguments:startupStorageProvider,cachingStorageProvider];
                 }
                 
                 [appMetricaImpl setExtendedStartupObservers:[NSSet setWithArray:observers]];
                 [appMetricaImpl activateWithConfiguration:configuration];
             });
-            it(@"Should add startup parameters", ^{
-                for (id<AMAExtendedStartupObserving> observer in observers) {
-                    [(NSObject *)observer stub:@selector(startupRequestParameters) andReturn:startupParameters];
+            it(@"Should add startup request parameters", ^{
+                for (NSObject<AMAExtendedStartupObserving> *observer in observers) {
+                    [observer stub:@selector(startupParameters) andReturn:startupParameters];
                 }
                 
                 [[startupController should] receive:@selector(addAdditionalStartupParameters:)
                                           withCount:2
-                                          arguments:startupParameters];
+                                          arguments:startupParameters[@"request"]];
                 
                 [appMetricaImpl setExtendedStartupObservers:[NSSet setWithArray:observers]];
                 [appMetricaImpl activateWithConfiguration:configuration];
             });
+            it(@"Should add startup hosts", ^{
+                [observers[1] stub:@selector(startupParameters) andReturn:@{@"hosts" : @[@"host_5", @"host_2", @"host_3"]}];
+                
+                [appMetricaImpl setExtendedStartupObservers:[NSSet setWithArray:observers]];
+                [appMetricaImpl activateWithConfiguration:configuration];
+                
+                NSArray *additionalHosts = [[AMAMetricaConfiguration sharedInstance].inMemory additionalStartupHosts];
+                [[additionalHosts should] equal:@[@"host_5", @"host_2", @"host_3"]];
+            });
+            it(@"Should add startup hosts from several observers", ^{
+                [observers[0] stub:@selector(startupParameters) andReturn:startupParameters];
+                [observers[1] stub:@selector(startupParameters) andReturn:@{@"hosts" : @[@"host_2", @"host_3"]}];
+                
+                [appMetricaImpl setExtendedStartupObservers:[NSSet setWithArray:observers]];
+                [appMetricaImpl activateWithConfiguration:configuration];
+                
+                NSArray *additionalHosts = [[AMAMetricaConfiguration sharedInstance].inMemory additionalStartupHosts];
+                [[additionalHosts should] containObjectsInArray:@[@"host_1", @"host_2", @"host_3"]];
+            });
+            it(@"Should not add startup parameters with invalid dictionary", ^{
+                [observers[0] stub:@selector(startupParameters) andReturn:@{@"foo" : @"bar"}];
+                [observers[1] stub:@selector(startupParameters) andReturn:@{@2 : @[@"host"], @"hosts" : @{}}];
+                
+                [[startupController shouldNot] receive:@selector(addAdditionalStartupParameters:)];
+                
+                [appMetricaImpl setExtendedStartupObservers:[NSSet setWithArray:observers]];
+                [appMetricaImpl activateWithConfiguration:configuration];
+                
+                NSArray *additionalHosts = [[AMAMetricaConfiguration sharedInstance].inMemory additionalStartupHosts];
+                [[additionalHosts should] equal:@[]];
+            });
             it(@"Should dispatch startup response", ^{
                 [startupController stub:@selector(upToDate) andReturn:theValue(YES)];
-                for (id<AMAExtendedStartupObserving> observer in observers) {
-                    [[(NSObject *)observer should] receive:@selector(startupUpdatedWithParameters:)
-                                             withArguments:startupParameters];
+                for (NSObject<AMAExtendedStartupObserving> *observer in observers) {
+                    [[observer should] receive:@selector(startupUpdatedWithParameters:)
+                                 withArguments:startupParameters];
                 }
                 
                 [appMetricaImpl setExtendedStartupObservers:[NSSet setWithArray:observers]];
@@ -759,18 +791,18 @@ describe(@"AMAAppMetricaImpl", ^{
                                 [KWMock nullMockForProtocol:@protocol(AMAReporterStorageControlling)]];
             });
             it(@"Should setup reporter storage controller with main reporter", ^{
-                for (id<AMAReporterStorageControlling> controller in controllers) {
-                    [[(NSObject *)controller should] receive:@selector(setupWithReporterStorage:main:forAPIKey:)
-                                               withArguments:kw_any(), theValue(YES), configuration.apiKey];
+                for (NSObject<AMAReporterStorageControlling> *controller in controllers) {
+                    [[controller should] receive:@selector(setupWithReporterStorage:main:forAPIKey:)
+                                   withArguments:kw_any(), theValue(YES), configuration.apiKey];
                 }
                 
                 [appMetricaImpl setExtendedReporterStorageControllers:[NSSet setWithArray:controllers]];
                 [appMetricaImpl activateWithConfiguration:configuration];
             });
             it(@"Should setup reporter storage controller with secondary reporter", ^{
-                for (id<AMAReporterStorageControlling> controller in controllers) {
-                    [[(NSObject *)controller should] receive:@selector(setupWithReporterStorage:main:forAPIKey:)
-                                               withArguments:kw_any(), theValue(NO), configuration.apiKey];
+                for (NSObject<AMAReporterStorageControlling> *controller in controllers) {
+                    [[controller should] receive:@selector(setupWithReporterStorage:main:forAPIKey:)
+                                   withArguments:kw_any(), theValue(NO), configuration.apiKey];
                 }
                 
                 [appMetricaImpl setExtendedReporterStorageControllers:[NSSet setWithArray:controllers]];

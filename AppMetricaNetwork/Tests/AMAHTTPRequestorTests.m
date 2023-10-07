@@ -2,7 +2,6 @@
 #import <Kiwi/Kiwi.h>
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
 #import <AppMetricaNetwork/AppMetricaNetwork.h>
-#import "AMAHTTPSessionProviderMock.h"
 
 SPEC_BEGIN(AMAHTTPRequestorTests)
 

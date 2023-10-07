@@ -1,6 +1,6 @@
 
-#import "AMAIncrementableValueStorageMock.h"
 #import <Kiwi/Kiwi.h>
+#import <AppMetricaTestUtils/AppMetricaTestUtils.h>
 
 @implementation AMAIncrementableValueStorageMock
 

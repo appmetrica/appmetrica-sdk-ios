@@ -19,7 +19,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @protocol AMAExtendedStartupObserving <NSObject>
 
-- (NSDictionary *)startupRequestParameters;
+- (NSDictionary *)startupParameters;
 
 - (void)startupUpdatedWithParameters:(NSDictionary *)parameters;
 

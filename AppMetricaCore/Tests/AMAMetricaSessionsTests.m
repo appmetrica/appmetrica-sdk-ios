@@ -9,8 +9,6 @@
 #import "AMAEventStorage+TestUtilities.h"
 #import "AMAMetricaConfigurationTestUtilities.h"
 #import "AMADate.h"
-#import "AMAStubHostAppStateProvider.h"
-#import "AMAIncrementableValueStorageMock.h"
 #import "AMAReporterTestHelper.h"
 #import "AMAReporter.h"
 #import "AMAReporterStorage.h"

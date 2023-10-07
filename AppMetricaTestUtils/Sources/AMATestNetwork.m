@@ -1,7 +1,7 @@
 
 #import <Kiwi/Kiwi.h>
 #import <AppMetricaNetwork/AppMetricaNetwork.h>
-#import "AMATestNetwork.h"
+#import <AppMetricaTestUtils/AppMetricaTestUtils.h>
 
 static NSUInteger AMATestNetworkRequestIndex = 0;
 

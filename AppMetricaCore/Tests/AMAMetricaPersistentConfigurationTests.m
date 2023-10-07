@@ -19,7 +19,7 @@ describe(@"AMAMetricaPersistentConfiguration", ^{
     id<AMADatabaseProtocol> __block database = nil;
     AMAKeychain *__block keychain = nil;
     AMAMetricaInMemoryConfiguration *__block inMemory = nil;
-    id<AMAKeyValueStoring> __block storage = nil;
+    NSObject<AMAKeyValueStoring> *__block storage = nil;
 
     AMAMetricaPersistentConfiguration *(^createConfig)(void) = ^{
         return [[AMAMetricaPersistentConfiguration alloc] initWithStorage:database.storageProvider.syncStorage
@@ -33,7 +33,7 @@ describe(@"AMAMetricaPersistentConfiguration", ^{
                                             accessGroup:@"b"
                                                  bridge:[[AMAKeychainBridgeMock alloc] init]];
         inMemory = [AMAMetricaInMemoryConfiguration nullMock];
-        storage = database.storageProvider.syncStorage;
+        storage = (NSObject<AMAKeyValueStoring> *)database.storageProvider.syncStorage;
     });
 
     context(@"Saves startup update date", ^{
@@ -55,7 +55,7 @@ describe(@"AMAMetricaPersistentConfiguration", ^{
         NSString *const key = @"startup.first_update.date";
         it(@"Should use valid key", ^{
             AMAMetricaPersistentConfiguration *config = createConfig();
-            [[(NSObject *)storage should] receive:@selector(dateForKey:error:) withArguments:key, kw_any()];
+            [[storage should] receive:@selector(dateForKey:error:) withArguments:key, kw_any()];
             [config firstStartupUpdateDate];
         });
         it(@"Should return nil initially", ^{
@@ -128,7 +128,7 @@ describe(@"AMAMetricaPersistentConfiguration", ^{
         NSString *const key = @"permissions.collecting.last_update_date";
         it(@"Should use valid key", ^{
             AMAMetricaPersistentConfiguration *config = createConfig();
-            [[(NSObject *)storage should] receive:@selector(dateForKey:error:) withArguments:key, kw_any()];
+            [[storage should] receive:@selector(dateForKey:error:) withArguments:key, kw_any()];
             [config lastPermissionsUpdateDate];
         });
         it(@"Should save in memory", ^{
@@ -156,7 +156,7 @@ describe(@"AMAMetricaPersistentConfiguration", ^{
         NSString *const key = @"extensions.reporting.last.date";
         it(@"Should use valid key", ^{
             AMAMetricaPersistentConfiguration *config = createConfig();
-            [[(NSObject *)storage should] receive:@selector(dateForKey:error:) withArguments:key, kw_any()];
+            [[storage should] receive:@selector(dateForKey:error:) withArguments:key, kw_any()];
             [config extensionsLastReportDate];
         });
         it(@"Should save in memory", ^{
@@ -184,7 +184,7 @@ describe(@"AMAMetricaPersistentConfiguration", ^{
         NSString *const key = @"register.for.attribution.time";
         it(@"Should use valid key", ^{
             AMAMetricaPersistentConfiguration *config = createConfig();
-            [[(NSObject *)storage should] receive:@selector(dateForKey:error:) withArguments:key, kw_any()];
+            [[storage should] receive:@selector(dateForKey:error:) withArguments:key, kw_any()];
             [config registerForAttributionTime];
         });
         it(@"Should be nil by default", ^{
@@ -218,7 +218,7 @@ describe(@"AMAMetricaPersistentConfiguration", ^{
         NSString *const key = @"event.counts.by.key";
         it(@"Should use valid key", ^{
             AMAMetricaPersistentConfiguration *config = createConfig();
-            [[(NSObject *)storage should] receive:@selector(jsonDictionaryForKey:error:) withArguments:key, kw_any()];
+            [[storage should] receive:@selector(jsonDictionaryForKey:error:) withArguments:key, kw_any()];
             [config eventCountsByKey];
         });
         it(@"Should be nil by default", ^{
@@ -250,7 +250,7 @@ describe(@"AMAMetricaPersistentConfiguration", ^{
         NSString *const key = @"events.sum";
         it(@"Should use valid key", ^{
             AMAMetricaPersistentConfiguration *config = createConfig();
-            [[(NSObject *)storage should] receive:@selector(stringForKey:error:) withArguments:key, kw_any()];
+            [[storage should] receive:@selector(stringForKey:error:) withArguments:key, kw_any()];
             [config eventSum];
         });
         it(@"Should be 0 by default", ^{
@@ -282,7 +282,7 @@ describe(@"AMAMetricaPersistentConfiguration", ^{
         NSString *const key = @"conversion.value";
         it(@"Should use valid key", ^{
             AMAMetricaPersistentConfiguration *config = createConfig();
-            [[(NSObject *)storage should] receive:@selector(longLongNumberForKey:error:) withArguments:key, kw_any()];
+            [[storage should] receive:@selector(longLongNumberForKey:error:) withArguments:key, kw_any()];
             [config conversionValue];
         });
         it(@"Should be nil by default", ^{
@@ -313,7 +313,7 @@ describe(@"AMAMetricaPersistentConfiguration", ^{
         NSString *const key = @"checked.initial.attribution";
         it(@"Should use valid key", ^{
             AMAMetricaPersistentConfiguration *config = createConfig();
-            [[(NSObject *)storage should] receive:@selector(boolNumberForKey:error:) withArguments:key, kw_any()];
+            [[storage should] receive:@selector(boolNumberForKey:error:) withArguments:key, kw_any()];
             [config checkedInitialAttribution];
         });
         it(@"Should be NO by default", ^{
@@ -344,7 +344,7 @@ describe(@"AMAMetricaPersistentConfiguration", ^{
         NSString *const key = @"revenue.transaction.ids";
         it(@"Should use valid key", ^{
             AMAMetricaPersistentConfiguration *config = createConfig();
-            [[(NSObject *)storage should] receive:@selector(jsonArrayForKey:error:) withArguments:key, kw_any()];
+            [[storage should] receive:@selector(jsonArrayForKey:error:) withArguments:key, kw_any()];
             [config revenueTransactionIds];
         });
         it(@"Should return valid value", ^{
@@ -379,7 +379,7 @@ describe(@"AMAMetricaPersistentConfiguration", ^{
             });
             it(@"Should use valid key", ^{
                 AMAMetricaPersistentConfiguration *config = createConfig();
-                [[(NSObject *)storage should] receive:@selector(jsonDictionaryForKey:error:) withArguments:key, kw_any()];
+                [[storage should] receive:@selector(jsonDictionaryForKey:error:) withArguments:key, kw_any()];
                 [config attributionModelConfiguration];
             });
             it(@"Should return nil", ^{
@@ -411,23 +411,23 @@ describe(@"AMAMetricaPersistentConfiguration", ^{
         NSString *const key = @"startup.had.first";
         AMAMetricaPersistentConfiguration *__block configuration = nil;
         beforeEach(^{
-            [(NSObject *)storage stub:@selector(boolNumberForKey:error:) andReturn:value];
+            [storage stub:@selector(boolNumberForKey:error:) andReturn:value];
             configuration = createConfig();
         });
         
         it(@"Should use valid key", ^{
-            [[(NSObject *)storage should] receive:@selector(boolNumberForKey:error:) withArguments:key, kw_any()];
+            [[storage should] receive:@selector(boolNumberForKey:error:) withArguments:key, kw_any()];
             [configuration hadFirstStartup];
         });
         it(@"Should return valid value", ^{
             [[theValue(configuration.hadFirstStartup) should] beYes];
         });
         it(@"Should return NO by default", ^{
-            [(NSObject *)storage stub:@selector(boolNumberForKey:error:) andReturn:nil];
+            [storage stub:@selector(boolNumberForKey:error:) andReturn:nil];
             [[theValue(configuration.hadFirstStartup) should] beNo];
         });
         it(@"Should save valid value", ^{
-            [[(NSObject *)storage should] receive:@selector(saveBoolNumber:forKey:error:) withArguments:value, key, kw_any()];
+            [[storage should] receive:@selector(saveBoolNumber:forKey:error:) withArguments:value, key, kw_any()];
             configuration.hadFirstStartup = value.boolValue;
         });
     });

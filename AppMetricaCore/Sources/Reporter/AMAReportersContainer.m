@@ -43,28 +43,4 @@
     }
 }
 
-- (void)start
-{
-    [self makeReportersPerformSelector:@selector(start)];
-}
-
-- (void)shutdown
-{
-    [self makeReportersPerformSelector:@selector(shutdown)];
-}
-
-- (void)startNewSession
-{
-    [self makeReportersPerformSelector:@selector(startNewSession)];
-}
-
-#pragma mark - Private
-
-- (void)makeReportersPerformSelector:(SEL)selector
-{
-    @synchronized(self) {
-        [self.reporters.allValues makeObjectsPerformSelector:selector];
-    }
-}
-
 @end

@@ -14,6 +14,7 @@
                        rollbackFailed:(BOOL)rollbackFailed;
 
 - (void)reportSearchAdsAttempt;
+- (void)reportSearchAdsTokenSuccess;
 - (void)reportSearchAdsCompletionWithType:(NSString *)callbackType parameters:(NSDictionary *)parameters;
 
 - (void)reportEventFileNotFoundForEventWithType:(NSUInteger)eventType;

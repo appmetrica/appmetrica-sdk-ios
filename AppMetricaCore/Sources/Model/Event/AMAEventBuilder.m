@@ -10,7 +10,6 @@
 #import "AMAEventValueFactory.h"
 #import "AMAEventComposer.h"
 #import "AMAEventComposerProvider.h"
-#import "AMACustomEventParameters.h"
 
 @interface AMAEventBuilder ()
 

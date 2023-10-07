@@ -4,7 +4,6 @@
 #import "AMASessionEventsCollection.h"
 #import "AMAEvent.h"
 #import "AMASession.h"
-#import "AMAApplicationStateManager.h"
 #import "AMAReportEventsBatch.h"
 #import "AMAReportRequestModel.h"
 #import "AMAMetricaConfiguration.h"

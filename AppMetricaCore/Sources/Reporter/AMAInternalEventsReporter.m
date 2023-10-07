@@ -16,6 +16,7 @@ static NSString *const kAMATransactionFailureEventParametersRollbackContentKey =
 static NSString *const kAMATransactionFailureEventParametersExceptionParametersKey = @"exception";
 
 static NSString *const kAMASearchAdsAttemptEventName = @"AppleSearchAdsAttempt";
+static NSString *const kAMASearchAdsTokenSuccessEventName = @"AppleSearchAdsTokenSuccess";
 
 static NSString *const kAMASearchAdsCompletionEventName = @"AppleSearchAdsCompletion";
 static NSString *const kAMASearchAdsCompletionEventParametersTypeKey = @"type";
@@ -99,6 +100,11 @@ static NSString *const kAMAInternalEventsReporterExceptionDescriptionUserInfoKey
     [self reportEvent:kAMASearchAdsAttemptEventName parameters:nil];
 }
 
+- (void)reportSearchAdsTokenSuccess
+{
+    [self reportEvent:kAMASearchAdsTokenSuccessEventName parameters:nil];
+}
+
 - (void)reportSearchAdsCompletionWithType:(NSString *)completionType parameters:(NSDictionary *)parameters
 {
     NSParameterAssert(completionType);
@@ -161,7 +167,6 @@ static NSString *const kAMAInternalEventsReporterExceptionDescriptionUserInfoKey
             [self reportEvent:@"event_value_file_not_found" parameters:parameters];
             break;
     }
-
 }
 
 #pragma mark - Utils -

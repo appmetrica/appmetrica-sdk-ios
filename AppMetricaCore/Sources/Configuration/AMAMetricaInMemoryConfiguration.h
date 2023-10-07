@@ -44,6 +44,10 @@ extern BOOL const kAMADefaultAppOpenTrackingEnabled;
 - (void)markAppMetricaImplCreated;
 - (void)markExternalServicesConfigured;
 
+@property (atomic, copy, readonly) NSArray<NSString *> *additionalStartupHosts;
+
+- (void)addAdditionalStartupHosts:(NSArray *)hosts;
+
 @end
 
 NS_ASSUME_NONNULL_END

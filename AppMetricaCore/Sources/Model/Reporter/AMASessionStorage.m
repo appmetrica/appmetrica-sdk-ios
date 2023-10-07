@@ -5,7 +5,6 @@
 #import "AMADatabaseConstants.h"
 #import "AMASessionSerializer.h"
 #import "AMAReporterStateStorage.h"
-#import "AMAApplicationStateManager.h"
 #import "AMAMetricaConfiguration.h"
 #import "AMAStartupParametersConfiguration.h"
 #import "AMADate.h"

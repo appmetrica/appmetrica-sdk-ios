@@ -1,5 +1,5 @@
 
-#import "AMAStubHostAppStateProvider.h"
+#import <AppMetricaTestUtils/AppMetricaTestUtils.h>
 
 @interface AMAStubHostAppStateProvider ()
 

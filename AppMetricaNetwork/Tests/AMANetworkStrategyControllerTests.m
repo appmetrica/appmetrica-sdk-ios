@@ -1,7 +1,7 @@
 
 #import <XCTest/XCTest.h>
 #import <AppMetricaNetwork/AppMetricaNetwork.h>
-#import "AMAHTTPSessionProviderMock.h"
+#import <AppMetricaTestUtils/AppMetricaTestUtils.h>
 
 @interface AMANetworkStrategyControllerTests : XCTestCase
 

@@ -1,13 +1,13 @@
 
 #import <Kiwi/Kiwi.h>
-#import <AppMetricaAdSupport/AppMetricaAdSupport.h>
+#import <AppMetricaCoreExtension/AppMetricaCoreExtension.h>
 #import "AMAAdProvider.h"
 
 SPEC_BEGIN(AMAAdProviderTests)
 
 describe(@"AMAAdProvider", ^{
     
-    let(externalProvider, ^{ return [AMAAdController nullMock]; });
+    let(externalProvider, ^{ return [KWMock nullMockForProtocol:@protocol(AMAAdProviding)]; });
     
     context(@"Default values", ^{
         

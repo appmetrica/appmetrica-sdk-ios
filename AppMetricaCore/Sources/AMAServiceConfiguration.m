@@ -3,8 +3,8 @@
 
 @implementation AMAServiceConfiguration
 
-- (instancetype)initStartupObserver:(id<AMAExtendedStartupObserving>)startupObserver
-          reporterStorageController:(id<AMAReporterStorageControlling>)reporterStorageController
+- (instancetype)initWithStartupObserver:(id<AMAExtendedStartupObserving>)startupObserver
+              reporterStorageController:(id<AMAReporterStorageControlling>)reporterStorageController
 {
     self = [super init];
     if (self) {

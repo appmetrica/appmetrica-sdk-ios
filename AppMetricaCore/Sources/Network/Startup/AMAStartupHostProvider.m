@@ -4,6 +4,7 @@
 #import "AMAMetricaConfiguration.h"
 #import "AMAStartupParametersConfiguration.h"
 #import "AMAMetricaPersistentConfiguration.h"
+#import "AMAMetricaInMemoryConfiguration.h"
 #import "AMADefaultStartupHostsProvider.h"
 
 @interface AMAStartupHostProvider ()
@@ -24,6 +25,11 @@
     return [AMAMetricaConfiguration sharedInstance].persistent.userStartupHosts;
 }
 
++ (NSArray *)additionalStartupHosts
+{
+    return [[AMAMetricaConfiguration sharedInstance].inMemory additionalStartupHosts];
+}
+
 - (id)current
 {
     return [self.iterator current];
@@ -42,13 +48,15 @@
     if (array != nil) {
         [hosts addObjectsFromArray:array];
     }
-
+    
     array = [[self class] userStartupHosts];
     if (array != nil) {
         [hosts addObjectsFromArray:array];
     }
-    [hosts addObjectsFromArray:[AMADefaultStartupHostsProvider defaultStartupHosts]];
-
+    
+    NSArray *additionalHosts = [[self class] additionalStartupHosts];
+    [hosts addObjectsFromArray:[AMADefaultStartupHostsProvider startupHostsWithAdditionalHosts:additionalHosts]];
+    
     self.iterator = [[AMAArrayIterator alloc] initWithArray:[hosts array]];
 }
 

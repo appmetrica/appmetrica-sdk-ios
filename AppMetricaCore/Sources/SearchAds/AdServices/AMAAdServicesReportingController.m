@@ -7,6 +7,8 @@
 #import "AMAStartupParametersConfiguration.h"
 #import "AMAMetricaPersistentConfiguration.h"
 #import "AMAMetricaInMemoryConfiguration.h"
+#import "AMAInternalEventsReporter.h"
+#import "AMAAppMetrica+Internal.h"
 
 static NSTimeInterval const kAMAASADefaultDelay = 43200.0;
 static NSTimeInterval const kAMAASADefaultInterval = 43200.0;
@@ -55,12 +57,10 @@ static NSTimeInterval const kAMAASADefaultEndInterval = 604800.0;
         NSError *error = nil;
         NSString *token = [self.dataProvider tokenWithError:&error];
         
-        AMAReporter *sdkReporter = (AMAReporter *)[AMAAppMetrica reporterForApiKey:kAMAMetricaLibraryApiKey];
-        
         if (token != nil) {
             AMAReporter *reporter = (AMAReporter *)[AMAAppMetrica reporterForApiKey:self.apiKey];
             [reporter reportASATokenEventWithParameters:@{ @"asaToken" : token } onFailure:nil];
-            [sdkReporter reportEvent:@"AppleSearchAdsTokenSuccess" onFailure:nil]; //TODO: Move to proper place
+            [[AMAAppMetrica sharedInternalEventsReporter] reportSearchAdsTokenSuccess];
             [self.reporterStorage markASATokenSentNow];
         }
 //        else if (error != nil) { //TODO: (Crashes) handle error

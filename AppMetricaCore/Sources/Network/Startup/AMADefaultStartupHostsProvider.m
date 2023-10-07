@@ -10,14 +10,14 @@ static NSString *const kAMADefaultStartupHostsKey = @"AMASDKStartupHosts";
 
 #pragma mark - Public -
 
-+ (NSArray *)defaultStartupHosts
++ (NSArray *)startupHostsWithAdditionalHosts:(NSArray *)additionalStartupHosts
 {
     NSArray *customStartupHosts = [[self class] filteredCustomStartupHosts:[[self class] customStartupHosts]];
     if (customStartupHosts.count > 0) {
         return customStartupHosts;
     }
     else {
-        return [[self class] predefinedStartupHosts];
+        return [[[self class] predefinedStartupHosts] arrayByAddingObjectsFromArray:additionalStartupHosts];
     }
 }
 

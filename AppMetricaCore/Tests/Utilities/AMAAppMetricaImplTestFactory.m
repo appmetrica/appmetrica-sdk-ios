@@ -3,7 +3,6 @@
 #import "AMAAppMetricaImplTestFactory.h"
 #import "AMADispatchStrategiesContainer.h"
 #import "AMAEventCountDispatchStrategy+Private.h"
-#import "AMAStubHostAppStateProvider.h"
 #import "AMAInternalEventsReporter.h"
 #import "AMAReporter.h"
 #import "AMAReporterTestHelper.h"

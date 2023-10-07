@@ -1,7 +1,7 @@
 
 #import <Kiwi/Kiwi.h>
+#import <AppMetricaTestUtils/AppMetricaTestUtils.h>
 #import "AMAEventNumbersFiller.h"
-#import "AMAIncrementableValueStorageMock.h"
 #import "AMAEvent.h"
 #import "AMASession.h"
 

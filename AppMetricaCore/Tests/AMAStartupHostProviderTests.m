@@ -2,6 +2,8 @@
 #import <Kiwi/Kiwi.h>
 #import "AMAStartupHostProvider.h"
 #import "AMADefaultStartupHostsProvider.h"
+#import "AMAMetricaConfiguration.h"
+#import "AMAMetricaInMemoryConfiguration.h"
 
 @interface AMAStartupHostProvider ()
 
@@ -35,7 +37,6 @@ describe(@"AMAStartupHostProvider", ^{
     beforeEach(^{
         [AMAStartupHostProvider stub:@selector(startupHosts) andReturn:@[]];
         [AMAStartupHostProvider stub:@selector(userStartupHosts) andReturn:@[]];
-        [AMADefaultStartupHostsProvider stub:@selector(defaultStartupHosts) andReturn:predefinedHosts];
     });
     
     it(@"Should contain default startup host if no hosts provided by user or startup responce", ^{
@@ -88,17 +89,24 @@ describe(@"AMAStartupHostProvider", ^{
         [[actualValue should] equal:expected];
     });
     
-    it(@"Should call DefaultStartupHostsProvider on reset", ^{
-        NSArray *hosts = @[@"host_1", @"host_2"];
-        [AMADefaultStartupHostsProvider stub:@selector(defaultStartupHosts) andReturn:hosts];
+    it(@"Should use additional hosts with predefined on reset", ^{
+        NSArray *additionalHosts = @[@"host_1", @"host_2"];
         
-        [[AMADefaultStartupHostsProvider should] receive:@selector(defaultStartupHosts)];
+        [AMADefaultStartupHostsProvider stub:@selector(startupHostsWithAdditionalHosts:)
+                                   andReturn:[predefinedHosts arrayByAddingObjectsFromArray:additionalHosts]
+                               withArguments:additionalHosts];
+        [[AMAMetricaConfiguration sharedInstance].inMemory stub:@selector(additionalStartupHosts)
+                                                      andReturn:additionalHosts];
+        
+        [[AMADefaultStartupHostsProvider should] receive:@selector(startupHostsWithAdditionalHosts:)
+                                           withArguments:additionalHosts];
         
         hostProvider = [AMAStartupHostProvider new];
         [hostProvider reset];
         
-        [[theValue(hostProvider.current) should] equal:theValue(hosts[0])];
-        [[theValue(hostProvider.next) should] equal:theValue(hosts[1])];
+        [[hostProvider.current should] equal:predefinedHosts[0]];
+        [[hostProvider.next should] equal:additionalHosts[0]];
+        [[hostProvider.next should] equal:additionalHosts[1]];
     });
 });
 

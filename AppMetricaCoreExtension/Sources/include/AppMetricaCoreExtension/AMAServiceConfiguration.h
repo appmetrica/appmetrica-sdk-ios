@@ -14,8 +14,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)init NS_UNAVAILABLE;
 + (instancetype)new NS_UNAVAILABLE;
 
-- (instancetype)initStartupObserver:(nullable id<AMAExtendedStartupObserving>)startupObserver
-          reporterStorageController:(nullable id<AMAReporterStorageControlling>)reporterStorageController;
+- (instancetype)initWithStartupObserver:(nullable id<AMAExtendedStartupObserving>)startupObserver
+              reporterStorageController:(nullable id<AMAReporterStorageControlling>)reporterStorageController;
 
 @end
 

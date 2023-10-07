@@ -4,7 +4,7 @@
 import PackageDescription
 import Foundation
 
-enum Targets: String {
+enum AppMetricaTarget: String {
     case core = "AppMetricaCore"
     case crashes = "AppMetricaCrashes"
     case coreExtension = "AppMetricaCoreExtension"
@@ -40,18 +40,18 @@ let package = Package(
         .tvOS(.v11),
     ],
     products: [
-        .library(name: "AppMetricaCore", targets: [Targets.core.name,
-                                                   Targets.coreExtension.name]),
-        .library(name: "AppMetricaAnalytics", targets: [Targets.core.name,
-                                                        Targets.coreExtension.name,
-                                                        Targets.adSupport.name,
-                                                        Targets.webKit.name]),
-        .library(name: "AppMetricaCrashes", targets: [Targets.crashes.name]),
-        .library(name: "AppMetricaAnalyticsNoAdSupport", targets: [Targets.core.name,
-                                                                   Targets.coreExtension.name,
-                                                                   Targets.webKit.name]),
-        .library(name: "AppMetricaAdSupport", targets: [Targets.adSupport.name]),
-        .library(name: "AppMetricaWebKit", targets: [Targets.webKit.name]),
+        .library(name: "AppMetricaCore", targets: [AppMetricaTarget.core.name,
+                                                   AppMetricaTarget.coreExtension.name]),
+        .library(name: "AppMetricaAnalytics", targets: [AppMetricaTarget.core.name,
+                                                        AppMetricaTarget.coreExtension.name,
+                                                        AppMetricaTarget.adSupport.name,
+                                                        AppMetricaTarget.webKit.name]),
+        .library(name: "AppMetricaCrashes", targets: [AppMetricaTarget.crashes.name]),
+        .library(name: "AppMetricaAnalyticsNoAdSupport", targets: [AppMetricaTarget.core.name,
+                                                                   AppMetricaTarget.coreExtension.name,
+                                                                   AppMetricaTarget.webKit.name]),
+        .library(name: "AppMetricaAdSupport", targets: [AppMetricaTarget.adSupport.name]),
+        .library(name: "AppMetricaWebKit", targets: [AppMetricaTarget.webKit.name]),
     ],
     dependencies: [
         .package(name: "protobuf-c", url: "https://github.com/appmetrica/protobuf-c", .upToNextMinor(from: "1.2.2-spm")),
@@ -76,7 +76,7 @@ let package = Package(
         .testTarget(
             target: .core,
             dependencies: [
-                .core, .coreExtension, .adSupport, .webKit, .testUtils, .hostState, .protobufUtils, .platform
+                .core, .coreExtension, .webKit, .testUtils, .hostState, .protobufUtils, .platform
             ],
             outerDependencies: [kiwi],
             searchPaths: [
@@ -139,7 +139,7 @@ let package = Package(
         ),
         
         //MARK: - AppMetrica TestUtils
-        .target(target: .testUtils, dependencies: [.coreUtils], outerDependencies: [kiwi]),
+        .target(target: .testUtils, dependencies: [.coreUtils, .network, .storageUtils, .hostState], outerDependencies: [kiwi]),
         
         //MARK: - AppMetrica Network
         .target(
@@ -150,7 +150,7 @@ let package = Package(
             target: .network,
             dependencies: [.network, .platform, .coreExtension, .testUtils],
             outerDependencies: [kiwi],
-            searchPaths: ["Mocks", "Utilities", "../Sources/include/AppMetricaNetwork"]
+            searchPaths: ["Utilities", "../Sources/include/AppMetricaNetwork"]
         ),
         
         //MARK: - AppMetrica AdSupport
@@ -189,7 +189,7 @@ let package = Package(
             searchPaths: ["../Sources/**"]
         ),
         
-        //MARK: - AppMetrica Storage
+        //MARK: - AppMetrica StorageUtils
         .target(target: .storageUtils, dependencies: [.log, .coreUtils]),
         .testTarget(
             target: .storageUtils,
@@ -210,8 +210,8 @@ let package = Package(
 )
 
 extension Target {
-    static func target(target: Targets,
-                       dependencies: [Targets] = [],
+    static func target(target: AppMetricaTarget,
+                       dependencies: [AppMetricaTarget] = [],
                        outerDependencies: [Target.Dependency] = [],
                        searchPaths: [String] = []) -> Target {
         return .target(
@@ -222,8 +222,9 @@ extension Target {
         )
     }
     
-    static func testTarget(target: Targets,
-                           dependencies: [Targets] = [],
+    static func testTarget(target: AppMetricaTarget,
+                           dependencies: [AppMetricaTarget] = [],
+                           testUtils: [AppMetricaTarget] = [],
                            outerDependencies: [Target.Dependency] = [],
                            searchPaths: [String] = [],
                            resources: [Resource]? = nil) -> Target {
@@ -249,7 +250,7 @@ extension Target {
         return cSettings
     }
     
-    private static func combinedDependencies(from dependencies: [Targets],
+    private static func combinedDependencies(from dependencies: [AppMetricaTarget],
                                              outerDependencies: [Target.Dependency]) -> [Target.Dependency] {
         return dependencies.map { $0.dependency } + outerDependencies
     }

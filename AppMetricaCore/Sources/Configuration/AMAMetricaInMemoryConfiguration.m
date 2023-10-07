@@ -30,11 +30,14 @@ NSString *const kAMAMetricaLibraryApiKey = @"20799a27-fa80-4b36-b2db-0f8141f2418
 @property (atomic, assign, readwrite) BOOL appMetricaImplCreated;
 @property (atomic, assign, readwrite) BOOL externalServicesConfigured;
 
+@property (atomic, copy, readwrite) NSMutableOrderedSet<NSString *> *orderedStartupHosts;
+
 @end
 
 @implementation AMAMetricaInMemoryConfiguration
 
 @synthesize appBuildUID = _appBuildUID;
+@synthesize additionalStartupHosts = _additionalStartupHosts;
 
 - (instancetype)init
 {
@@ -50,8 +53,21 @@ NSString *const kAMAMetricaLibraryApiKey = @"20799a27-fa80-4b36-b2db-0f8141f2418
         _updateSessionStampInterval = kAMADefaultUpdateSessionStampTimerInterval;
         _sessionsAutoTracking = YES;
         _externalServicesConfigured = NO;
+        _orderedStartupHosts = [NSMutableOrderedSet orderedSet];
     }
     return self;
+}
+
+- (NSArray<NSString *> *)additionalStartupHosts
+{
+    return [self.orderedStartupHosts array];
+}
+
+- (void)addAdditionalStartupHosts:(NSArray *)hosts
+{
+    @synchronized (self) {
+        [self.orderedStartupHosts addObjectsFromArray:hosts];
+    }
 }
 
 - (AMABuildUID *)appBuildUID

@@ -2,7 +2,6 @@
 #import "AMAReporter.h"
 #import "AMAReporterNotifications.h"
 #import "AMASession.h"
-#import "AMAApplicationStateManager.h"
 #import "AMAMetricaConfiguration.h"
 #import "AMAMetricaInMemoryConfiguration.h"
 #import "AMAErrorsFactory.h"
@@ -42,7 +41,6 @@
 #import "AMAAdRevenueInfoProcessor.h"
 #import "AMAAppMetrica+Internal.h"
 #import "AMASessionExpirationHandler.h"
-#import "AMACustomEventParameters.h"
 #import "AMAExtrasContainer.h"
 
 @interface AMAReporter ()

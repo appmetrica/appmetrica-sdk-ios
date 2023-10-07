@@ -13,7 +13,6 @@
 #import "AMASessionsCleaner.h"
 #import "AMAReportRequestModel.h"
 #import "AMADataSendingRestrictionController.h"
-#import "AMAIncrementableValueStorageMock.h"
 #import "AMAReachability.h"
 #import "AMAReporterStoragesContainer.h"
 

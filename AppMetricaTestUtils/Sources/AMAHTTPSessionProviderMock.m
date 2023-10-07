@@ -1,5 +1,5 @@
 
-#import "AMAHTTPSessionProviderMock.h"
+#import <AppMetricaTestUtils/AppMetricaTestUtils.h>
 
 @interface AMAURLSessionDataTaskMock ()
 

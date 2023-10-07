@@ -7,7 +7,6 @@
 #import <AppMetricaHostState/AppMetricaHostState.h>
 
 #import "AMAEventTypes.h"
-#import "AMAStubHostAppStateProvider.h"
 #import "AMAStubReporterProvider.h"
 
 SPEC_BEGIN(AMAInternalEventsReporterTests)
@@ -175,15 +174,22 @@ describe(@"AMAInternalEventsReporter", ^{
                                      rollbackFailed:YES];
         });
     });
-
-    context(@"Search Ads Attempt", ^{
-        it(@"Should report", ^{
+    
+    context(@"Search Ads", ^{
+        it(@"Should report search ads attempt", ^{
             [[reporterMock should] receive:@selector(reportEvent:parameters:onFailure:)
                              withArguments:@"AppleSearchAdsAttempt", nil, kw_any()];
+            
             [reporter reportSearchAdsAttempt];
         });
+        it(@"Should report search ads token success", ^{
+            [[reporterMock should] receive:@selector(reportEvent:parameters:onFailure:)
+                             withArguments:@"AppleSearchAdsTokenSuccess", nil, kw_any()];
+            
+            [reporter reportSearchAdsTokenSuccess];
+        });
     });
-
+    
     context(@"Search Ads Completion", ^{
         NSString *const completionType = @"COMPLETION_TYPE";
 

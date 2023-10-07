@@ -6,6 +6,8 @@
 #import "AMAMetricaConfigurationTestUtilities.h"
 #import "AMAMetricaPersistentConfiguration.h"
 #import "AMAReporter.h"
+#import "AMAAppMetrica+Internal.h"
+#import "AMAInternalEventsReporter.h"
 
 SPEC_BEGIN(AMAAdServicesReportingControllerTests)
 
@@ -22,6 +24,7 @@ describe(@"AMAAdServicesReportingController", ^{
     AMAReporterStateStorage *__block stateStorageMock = nil;
     AMAMetricaConfiguration *__block configurationMock = nil;
     AMAReporter *__block reporterMock = nil;
+    AMAInternalEventsReporter *__block internalEventsReporter = nil;
     
     beforeEach(^{
         stateStorageMock = [AMAReporterStateStorage nullMock];
@@ -38,7 +41,10 @@ describe(@"AMAAdServicesReportingController", ^{
         
         reporterMock = [AMAReporter nullMock];
         [AMAAppMetrica stub:@selector(reporterForApiKey:) andReturn:reporterMock];
-        [AMAAppMetrica stub:@selector(reporterForApiKey:) andReturn:reporterMock];
+        
+        internalEventsReporter = [AMAInternalEventsReporter nullMock];
+        [AMAAppMetrica stub:@selector(sharedInternalEventsReporter) andReturn:internalEventsReporter];
+        
         
         controller = [[AMAAdServicesReportingController alloc] initWithApiKey:@"API_KEY"
                                                               reporterStorage:stateStorageMock
@@ -92,6 +98,12 @@ describe(@"AMAAdServicesReportingController", ^{
             it(@"Should report with correct content", ^{
                 [[reporterMock should] receive:@selector(reportASATokenEventWithParameters:onFailure:)
                                  withArguments:@{ @"asaToken" : kAMATokenMock }, kw_any()];
+                [controller reportTokenIfNeeded];
+            });
+            
+            it(@"Should report ads token success internal event", ^{
+                [[internalEventsReporter should] receive:@selector(reportSearchAdsTokenSuccess)];
+                
                 [controller reportTokenIfNeeded];
             });
             

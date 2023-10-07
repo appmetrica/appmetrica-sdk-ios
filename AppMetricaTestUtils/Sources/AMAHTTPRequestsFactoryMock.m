@@ -1,7 +1,7 @@
 
 #import <AppMetricaNetwork/AppMetricaNetwork.h>
 #import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
-#import "AMAHTTPRequestsFactoryMock.h"
+#import <AppMetricaTestUtils/AppMetricaTestUtils.h>
 
 @implementation AMAHTTPRequestResponseStub
 

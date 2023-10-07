@@ -3,7 +3,6 @@
 #import "AMAReportHostProvider.h"
 #import "AMAReportRequest.h"
 #import "AMAReportPayloadProvider.h"
-#import "AMAApplicationStateManager.h"
 #import "AMAReportRequestModel.h"
 #import "AMAReportPayload.h"
 #import "AMARequestModelSplitter.h"

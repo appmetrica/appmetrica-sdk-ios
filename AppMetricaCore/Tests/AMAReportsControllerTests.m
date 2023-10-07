@@ -5,7 +5,6 @@
 #import "AMAReportsController.h"
 #import "AMAReportRequestMock.h"
 #import "AMAHostProviderMock.h"
-#import "AMAHTTPRequestsFactoryMock.h"
 #import "AMAInternalEventsReporter.h"
 #import "AMAAppMetrica+Internal.h"
 #import "AMAReportPayloadProvider.h"
