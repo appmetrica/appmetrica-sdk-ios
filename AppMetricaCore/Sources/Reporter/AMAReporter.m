@@ -21,7 +21,6 @@
 #import "AMAEventFirstOccurrenceController.h"
 #import "AMAEventNameHashesStorageFactory.h"
 #import "AMADataSendingRestrictionController.h"
-#import "AMAInternalEventsReporter.h"
 #import "AMAErrorLogger.h"
 #import "AMAAppMetrica.h"
 #import "AMAReporterStorage.h"

@@ -7,7 +7,6 @@
 #import "AMAReportPayload.h"
 #import "AMARequestModelSplitter.h"
 #import "AMAAppMetrica+Internal.h"
-#import "AMAInternalEventsReporter.h"
 #import "AMAEvent.h"
 #import "AMATimeoutRequestsController.h"
 

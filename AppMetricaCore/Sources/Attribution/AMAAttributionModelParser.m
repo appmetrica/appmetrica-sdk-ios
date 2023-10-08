@@ -5,7 +5,6 @@
 #import "AMAAttributionConvertingUtils.h"
 #import "AMAAttributionMapping.h"
 #import "AMAClientEventCondition.h"
-#import "AMAInternalEventsReporter.h"
 #import "AMAECommerceEventCondition.h"
 #import "AMAEventFilter.h"
 #import "AMARevenueEventCondition.h"

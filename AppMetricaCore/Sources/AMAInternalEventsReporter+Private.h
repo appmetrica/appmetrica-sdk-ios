@@ -1,4 +1,5 @@
-#import "AMAInternalEventsReporter.h"
+
+#import "AMACore.h"
 
 #import <AppMetricaHostState/AppMetricaHostState.h>
 

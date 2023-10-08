@@ -7,7 +7,6 @@
 #import "AMAStartupParametersConfiguration.h"
 #import "AMAMetricaPersistentConfiguration.h"
 #import "AMAMetricaInMemoryConfiguration.h"
-#import "AMAInternalEventsReporter.h"
 #import "AMAAppMetrica+Internal.h"
 
 static NSTimeInterval const kAMAASADefaultDelay = 43200.0;

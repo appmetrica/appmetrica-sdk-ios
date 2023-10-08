@@ -2,7 +2,6 @@
 #import "AMASearchAdsReporter.h"
 #import "AMAAppMetrica+Internal.h"
 #import "AMAReporter.h"
-#import "AMAInternalEventsReporter.h"
 
 static NSString *const kAMASearchAdsReporterCallbackTypeSuccess = @"success";
 static NSString *const kAMASearchAdsReporterCallbackTypeUnknown = @"unknown";
