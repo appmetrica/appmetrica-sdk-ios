@@ -353,7 +353,7 @@ describe(@"AMACrashes", ^{
         
         it(@"Should activate crashes on delegate callback", ^{
             [AMACrashes stub:@selector(crashes) andReturn:crashes];
-            [AMACrashes didActivateWithConfiguration:[AMAAppMetricaConfiguration mock]];
+            [AMACrashes willActivateWithConfiguration:[AMAAppMetricaConfiguration mock]];
             [[theValue(crashes.isActivated) should] beYes];
         });
     });

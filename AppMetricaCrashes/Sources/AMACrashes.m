@@ -378,9 +378,13 @@ them while retaining external immutability. Needed for testability. */
 
 #pragma mark - AMAModuleActivationDelegate
 
-+ (void)didActivateWithConfiguration:(__unused AMAModuleActivationConfiguration *)configuration
++ (void)willActivateWithConfiguration:(__unused AMAModuleActivationConfiguration *)configuration
 {
     [[[self class] crashes] activate];
+}
+
++ (void)didActivateWithConfiguration:(__unused AMAModuleActivationConfiguration *)configuration
+{
 }
 
 #pragma mark - AMAEventPollingDelegate

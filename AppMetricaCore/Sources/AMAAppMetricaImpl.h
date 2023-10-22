@@ -35,8 +35,6 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong, readonly) id<AMAExecuting> executor;
 
 - (void)activateWithConfiguration:(AMAAppMetricaConfiguration *)configuration;
-- (void)activateWithConfiguration:(AMAAppMetricaConfiguration *)configuration
-                        delegates:(NSArray<Class<AMAModuleActivationDelegate>> *)activationDelegates;
 
 - (void)addStartupCompletionObserver:(id<AMAStartupCompletionObserving>)observer;
 - (void)removeStartupCompletionObserver:(id<AMAStartupCompletionObserving>)observer;

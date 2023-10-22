@@ -5,9 +5,7 @@
 #if !TARGET_OS_TV
 #import <WebKit/WebKit.h>
 #endif
-
 #import "AMAAppMetrica.h"
-
 #import "AMAAdProvider.h"
 #import "AMAAdRevenueInfo.h"
 #import "AMAAppMetricaConfiguration+Internal.h"
@@ -59,7 +57,9 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
         activationDelegates = [[NSMutableSet alloc] init];
     });
     @synchronized(self) {
-        [activationDelegates addObject:delegate];
+        if ([self isAppMetricaStarted] == NO) {
+            [activationDelegates addObject:delegate];
+        }
     }
 }
 
@@ -70,7 +70,9 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
         eventFlushableDelegates = [[NSMutableSet alloc] init];
     });
     @synchronized(self) {
-        [eventFlushableDelegates addObject:delegate];
+        if ([self isAppMetricaStarted] == NO) {
+            [eventFlushableDelegates addObject:delegate];
+        }
     }
 }
 
@@ -81,7 +83,33 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
         eventPollingDelegates = [[NSMutableSet alloc] init];
     });
     @synchronized(self) {
-        [eventPollingDelegates addObject:delegate];
+        if ([self isAppMetricaStarted] == NO) {
+            [eventPollingDelegates addObject:delegate];
+        }
+    }
+}
+
++ (void)willActivateDelegates:(AMAAppMetricaConfiguration *)configuration
+{
+    @synchronized(self) {
+        __auto_type moduleConfig = [[AMAModuleActivationConfiguration alloc] initWithApiKey:configuration.apiKey
+                                                                                 appVersion:configuration.appVersion
+                                                                             appBuildNumber:configuration.appBuildNumber];
+        for (Class<AMAModuleActivationDelegate> delegate in activationDelegates) {
+            [delegate willActivateWithConfiguration:moduleConfig];
+        }
+    }
+}
+
++ (void)didActivateDelegates:(AMAAppMetricaConfiguration *)configuration
+{
+    @synchronized(self) {
+        __auto_type moduleConfig = [[AMAModuleActivationConfiguration alloc] initWithApiKey:configuration.apiKey
+                                                                                 appVersion:configuration.appVersion
+                                                                             appBuildNumber:configuration.appBuildNumber];
+        for (Class<AMAModuleActivationDelegate> delegate in activationDelegates) {
+            [delegate didActivateWithConfiguration:moduleConfig];
+        }
     }
 }
 
@@ -124,7 +152,9 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
 + (void)registerAdProvider:(id<AMAAdProviding>)provider
 {
     @synchronized(self) {
-        adProvider = provider;
+        if ([self isAppMetricaStarted] == NO) {
+            adProvider = provider;
+        }
     }
 }
 
@@ -378,13 +408,12 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
         [[self class] setupExternalServices];
         [self importConfiguration:configuration];
         
-        NSArray *delegates = nil;
-        @synchronized(self) {
-            delegates = activationDelegates.allObjects;
-        }
-        [[self sharedImpl] activateWithConfiguration:configuration delegates:delegates];
+        [[self class] willActivateDelegates:configuration];
         
+        [[self sharedImpl] activateWithConfiguration:configuration];
         [[AMAMetricaConfiguration sharedInstance].inMemory markAppMetricaStarted];
+        
+        [[self class] didActivateDelegates:configuration];
     }
 }
 

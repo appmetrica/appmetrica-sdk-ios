@@ -105,21 +105,18 @@ describe(@"AMAAppMetrica", ^{
         
         it(@"Should not activate if APIKey is not valid", ^{
             [[impl shouldNot] receive:@selector(activateWithConfiguration:)];
-            [[impl shouldNot] receive:@selector(activateWithConfiguration:delegates:)];
             
             [AMAAppMetrica activateWithConfiguration:[[AMAAppMetricaConfiguration alloc] initWithApiKey:@"---"]];
         });
         it(@"Should not activate if APIKey is not valid", ^{
             stubMetricaStarted(YES);
             [[impl shouldNot] receive:@selector(activateWithConfiguration:)];
-            [[impl shouldNot] receive:@selector(activateWithConfiguration:delegates:)];
             
             activate();
         });
         it(@"Should not activate if reporter is created for api key", ^{
             [AMAAppMetrica stub:@selector(isReporterCreatedForAPIKey:) andReturn:theValue(YES)];
             [[impl shouldNot] receive:@selector(activateWithConfiguration:)];
-            [[impl shouldNot] receive:@selector(activateWithConfiguration:delegates:)];
             
             activate();
         });
@@ -977,52 +974,81 @@ describe(@"AMAAppMetrica", ^{
         });
         
         context(@"Extended Availability", ^{
+            AMAModuleActivationConfiguration *__block activationConfiguration = nil;
+            AMATestAssertionHandler *__block handler = nil;
+            
+            beforeEach(^{
+                activationConfiguration = [AMAModuleActivationConfiguration stubbedNullMockForInit:@selector(initWithApiKey:appVersion:appBuildNumber:)];
+                
+                handler = [AMATestAssertionHandler new];
+            });
+            
             it(@"Should register activation delegate", ^{
-                AMAModuleActivationConfiguration *configuration = [AMAModuleActivationConfiguration stubbedNullMockForInit:@selector(initWithApiKey:appVersion:appBuildNumber:)];
                 id activationDelegate = [KWMock nullMock];
     
                 [AMAAppMetrica addActivationDelegate:activationDelegate];
     
-                [[activationDelegate should] receive:@selector(didActivateWithConfiguration:) withArguments:configuration];
-    
-    
-                id startupObserver = [KWMock nullMockForProtocol:@protocol(AMAExtendedStartupObserving)];
-                id reporterStorageController = [KWMock nullMockForProtocol:@protocol(AMAReporterStorageControlling)];
-                
-                __auto_type *config = [[AMAServiceConfiguration alloc] initWithStartupObserver:startupObserver
-                                                                     reporterStorageController:reporterStorageController];
+                [[activationDelegate should] receive:@selector(didActivateWithConfiguration:) withArguments:activationConfiguration];
+                [[activationDelegate should] receive:@selector(willActivateWithConfiguration:) withArguments:activationConfiguration];
                 
                 activate();
             });
-            it(@"Should activate with delegates", ^{
-                id activationDelegate = [KWMock nullMock];
-    
-                [AMAAppMetrica addActivationDelegate:activationDelegate];
+            it(@"Should not add activation delegate if metrica is activated", ^{
+                [handler beginAssertIgnoring];
                 
-                [impl stub:@selector(activateWithConfiguration:delegates:) withBlock:^id(NSArray *params) {
-                    [[params[1] should] contain:activationDelegate];
-                    return nil;
-                }];
+                stubMetricaStarted(YES);
+
+                id activationDelegate = [KWMock nullMock];
+
+                [AMAAppMetrica addActivationDelegate:activationDelegate];
+
+                [[activationDelegate shouldNot] receive:@selector(didActivateWithConfiguration:)];
+                [[activationDelegate shouldNot] receive:@selector(willActivateWithConfiguration:)];
 
                 activate();
+                
+                [handler endAssertIgnoring];
             });
             it(@"Should register event flushable delegate", ^{
-                stubMetricaStarted(YES);
-    
                 AMAModuleActivationConfiguration *configuration = [AMAModuleActivationConfiguration stubbedNullMockForInit:@selector(initWithApiKey:appVersion:appBuildNumber:)];
                 id eventFlushableDelegate = [KWMock nullMock];
     
                 [AMAAppMetrica addEventFlushableDelegate:eventFlushableDelegate];
-    
+                
                 [[eventFlushableDelegate should] receive:@selector(sendEventsBuffer)];
+                
+                stubMetricaStarted(YES);
     
                 [AMAAppMetrica sendEventsBuffer];
+            });
+            it(@"Should not add event flushable delegate if metrica is activated", ^{
+                [handler beginAssertIgnoring];
+                
+                stubMetricaStarted(YES);
+
+                id eventFlushableDelegate = [KWMock nullMock];
+
+                [AMAAppMetrica addEventFlushableDelegate:eventFlushableDelegate];
+
+                [[eventFlushableDelegate shouldNot] receive:@selector(sendEventsBuffer)];
+
+                activate();
+                
+                [handler endAssertIgnoring];
             });
             it(@"Should register event polling delegate", ^{
                 id delegate = [KWMock nullMock];
                 
                 [AMAAppMetrica addEventPollingDelegate:delegate];
                 [[AMAAppMetrica.eventPollingDelegates should] contain:delegate];
+            });
+            it(@"Should not add event polling delegate if metrica is activated", ^{
+                stubMetricaStarted(YES);
+                
+                id delegate = [KWMock nullMock];
+                
+                [AMAAppMetrica addEventPollingDelegate:delegate];
+                [[AMAAppMetrica.eventPollingDelegates shouldNot] contain:delegate];
             });
             it(@"Should return extended reporter", ^{
                 stubMetricaStarted(NO);

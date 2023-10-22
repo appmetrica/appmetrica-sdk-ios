@@ -1,12 +1,9 @@
 #import <Kiwi/Kiwi.h>
-
 #import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
 #import <AppMetricaWebKit/AppMetricaWebKit.h>
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
 #import <AppMetricaPlatform/AppMetricaPlatform.h>
-
 #import "AMAAppMetricaImpl+TestUtilities.h"
-
 #import "AMAAdRevenueInfo.h"
 #import "AMAAdServicesReportingController.h"
 #import "AMAAppMetrica+Internal.h"

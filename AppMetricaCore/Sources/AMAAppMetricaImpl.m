@@ -156,20 +156,6 @@
 
 - (void)activateWithConfiguration:(AMAAppMetricaConfiguration *)configuration
 {
-    [self activateWithConfiguration:configuration delegates:@[]];
-}
-
-- (void)activateWithConfiguration:(AMAAppMetricaConfiguration *)configuration
-                        delegates:(NSArray<Class<AMAModuleActivationDelegate>> *)activationDelegates
-{
-    // FIXME: (glinnik) Activate delegates first for sync polling; needs future optimization.
-    __auto_type *moduleConfig = [[AMAModuleActivationConfiguration alloc] initWithApiKey:configuration.apiKey
-                                                                              appVersion:configuration.appVersion
-                                                                          appBuildNumber:configuration.appBuildNumber];
-    for (Class<AMAModuleActivationDelegate> delegate in activationDelegates) {
-        [delegate didActivateWithConfiguration:moduleConfig];
-    }
-    
     self.apiKey = configuration.apiKey;
 
     [self migrate];

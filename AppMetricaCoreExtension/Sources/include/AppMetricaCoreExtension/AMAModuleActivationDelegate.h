@@ -7,6 +7,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @protocol AMAModuleActivationDelegate <NSObject>
 
++ (void)willActivateWithConfiguration:(AMAModuleActivationConfiguration *)configuration;
 + (void)didActivateWithConfiguration:(AMAModuleActivationConfiguration *)configuration;
 
 @end
