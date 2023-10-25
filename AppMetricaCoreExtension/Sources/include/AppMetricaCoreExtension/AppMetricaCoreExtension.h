@@ -3,12 +3,10 @@
     #import "AMAAppMetricaExtended.h"
     #import "AMAAppMetricaExtendedReporting.h"
     #import "AMAApplicationStateManager.h"
-    #import "AMACrashSafeTransactor.h"
     #import "AMACustomEventParameters.h"
     #import "AMAEventFlushableDelegate.h"
     #import "AMAEventPollingDelegate.h"
     #import "AMAExtendedStartupObserving.h"
-    #import "AMAInternalEventsReporter.h"
     #import "AMAModuleActivationConfiguration.h"
     #import "AMAModuleActivationDelegate.h"
     #import "AMAReporterStorageControlling.h"
@@ -18,12 +16,10 @@
     #import <AppMetricaCoreExtension/AMAAppMetricaExtended.h>
     #import <AppMetricaCoreExtension/AMAAppMetricaExtendedReporting.h>
     #import <AppMetricaCoreExtension/AMAApplicationStateManager.h>
-    #import <AppMetricaCoreExtension/AMACrashSafeTransactor.h>
     #import <AppMetricaCoreExtension/AMACustomEventParameters.h>
     #import <AppMetricaCoreExtension/AMAEventFlushableDelegate.h>
     #import <AppMetricaCoreExtension/AMAEventPollingDelegate.h>
     #import <AppMetricaCoreExtension/AMAExtendedStartupObserving.h>
-    #import <AppMetricaCoreExtension/AMAInternalEventsReporter.h>
     #import <AppMetricaCoreExtension/AMAModuleActivationConfiguration.h>
     #import <AppMetricaCoreExtension/AMAModuleActivationDelegate.h>
     #import <AppMetricaCoreExtension/AMAReporterStorageControlling.h>

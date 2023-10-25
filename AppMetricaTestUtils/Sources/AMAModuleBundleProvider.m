@@ -19,7 +19,10 @@
     if (bundleURL == nil) {
         @throw [NSException exceptionWithName:@"NoModuleBundle"
                                        reason:@"Can't locate test target module"
-                                     userInfo:nil];
+                                     userInfo:@{@"FailedURL": bundleURL ?: [NSNull null],
+                                                @"ExecutableName": xctestName ?: [NSNull null],
+                                                @"AllSearchedURLs": allURLs ?: [NSNull null],
+                                                @"FilterPredicate": predicate ?: [NSNull null]}];
     }
     
     return [NSBundle bundleWithURL:bundleURL];

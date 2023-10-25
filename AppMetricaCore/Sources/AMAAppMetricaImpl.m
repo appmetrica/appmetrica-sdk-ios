@@ -31,6 +31,7 @@
 #import "AMAExtensionsReportController.h"
 #import "AMAExtrasContainer.h"
 #import "AMAInstantFeaturesConfiguration.h"
+#import "AMAInternalEventsReporter.h"
 #import "AMALocationManager.h"
 #import "AMAMainReportExecutionConditionChecker.h"
 #import "AMAMetricaConfiguration.h"

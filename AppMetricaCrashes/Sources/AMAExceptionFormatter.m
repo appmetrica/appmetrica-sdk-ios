@@ -67,8 +67,10 @@ static NSString *const kAMAKSCrashReporterVersion = @"3.2.0";
     }
     return self;
 }
-
-- (NSData *)formattedException:(NSException *)exception
+/**
+ * This function is currently unused but may be useful. Used for legacy NSString errors.
+ */
+- (NSData *)formattedException:(NSException *)exception error:(NSError **)error
 {
     NSSet *binaryImages = nil;
     AMABacktrace *backtrace = [self.symbolicator backtraceForInstructionAddresses:exception.callStackReturnAddresses
@@ -77,37 +79,37 @@ static NSString *const kAMAKSCrashReporterVersion = @"3.2.0";
                                                               userInfo:exception.userInfo.description];
 
     uint64_t faultAddress = [backtrace.frames.firstObject.instructionAddress unsignedLongLongValue];
-    AMACrashReportError *error = [[AMACrashReportError alloc] initWithAddress:faultAddress
-                                                                       reason:exception.reason
-                                                                         type:AMACrashTypeNsException
-                                                                         mach:[self deafultMachError]
-                                                                       signal:[self defaultSignalError]
-                                                                  nsexception:nsException
-                                                                 cppException:nil
-                                                               nonFatalsChain:nil
-                                                          virtualMachineCrash:nil];
+    AMACrashReportError *reportRrror = [[AMACrashReportError alloc] initWithAddress:faultAddress
+                                                                             reason:exception.reason
+                                                                               type:AMACrashTypeNsException
+                                                                               mach:[self deafultMachError]
+                                                                             signal:[self defaultSignalError]
+                                                                        nsexception:nsException
+                                                                       cppException:nil
+                                                                     nonFatalsChain:nil
+                                                                virtualMachineCrash:nil];
 
     AMADecodedCrash *decodedCrash = [self decodedCrashWithBacktrace:backtrace
-                                                              error:error
+                                                              error:reportRrror
                                                        binaryImages:binaryImages
                                                  virtualMachineInfo:nil];
 
-    return [self.serializer dataForCrash:decodedCrash];
+    return [self.serializer dataForCrash:decodedCrash error:error];
 }
 
-- (NSData *)formattedError:(AMAErrorModel *)error
+- (NSData *)formattedError:(AMAErrorModel *)errorModel error:(NSError **)error
 {
-    if (error == nil) {
+    if (errorModel == nil) {
         return nil;
     }
     NSMutableSet *binaryImages = [NSMutableSet set];
-    NSArray<AMANonFatal *> *nonFatalsChain = [self nonFatalsChainForErrorModel:error binaryImages:binaryImages];
-
+    NSArray<AMANonFatal *> *nonFatalsChain = [self nonFatalsChainForErrorModel:errorModel binaryImages:binaryImages];
+    
     NSSet *reportCallBinaryImages = nil;
-    AMABacktrace *reportCallBacktrace = [self.symbolicator backtraceForInstructionAddresses:error.reportCallBacktrace
-                                                                               binaryImages:&reportCallBinaryImages];
+    AMABacktrace *callBacktrace = [self.symbolicator backtraceForInstructionAddresses:errorModel.reportCallBacktrace
+                                                                         binaryImages:&reportCallBinaryImages];
     [binaryImages unionSet:reportCallBinaryImages];
-
+    
     uint64_t faultAddress =
         [nonFatalsChain.firstObject.backtrace.frames.firstObject.instructionAddress unsignedLongLongValue];
     AMACrashReportError *crashReportError =
@@ -120,15 +122,17 @@ static NSString *const kAMAKSCrashReporterVersion = @"3.2.0";
                                         cppException:nil
                                       nonFatalsChain:nonFatalsChain
                                  virtualMachineCrash:nil];
-
-    AMADecodedCrash *decodedCrash = [self decodedCrashWithBacktrace:reportCallBacktrace
+    
+    AMADecodedCrash *decodedCrash = [self decodedCrashWithBacktrace:callBacktrace
                                                               error:crashReportError
                                                        binaryImages:binaryImages
                                                  virtualMachineInfo:nil];
-    return [self.serializer dataForCrash:decodedCrash];
+    return [self.serializer dataForCrash:decodedCrash error:error];
 }
 
-- (NSData *)formattedCrashErrorDetails:(AMAPluginErrorDetails *)errorDetails bytesTruncated:(NSUInteger *)bytesTruncated
+- (NSData *)formattedCrashErrorDetails:(AMAPluginErrorDetails *)errorDetails
+                        bytesTruncated:(NSUInteger *)bytesTruncated
+                                 error:(NSError **)error
 {
     AMACrashObjectsFactory *crashObjectsFactory = [AMACrashObjectsFactory sharedInstance];
     AMAVirtualMachineInfo *virtualMachineInfo = [crashObjectsFactory virtualMachineInfoForErrorDetails:errorDetails
@@ -136,7 +140,7 @@ static NSString *const kAMAKSCrashReporterVersion = @"3.2.0";
     AMABacktrace *backtrace = [crashObjectsFactory backtraceFrom:errorDetails.backtrace bytesTruncated:bytesTruncated];
     AMAVirtualMachineCrash *virtualMachineCrash = [crashObjectsFactory virtualMachineCrashForErrorDetails:errorDetails
                                                                                            bytesTruncated:bytesTruncated];
-    AMACrashReportError *error =
+    AMACrashReportError *reportError =
         [[AMACrashReportError alloc] initWithAddress:0x0
                                               reason:nil
                                                 type:AMACrashTypeVirtualMachineCrash
@@ -147,13 +151,15 @@ static NSString *const kAMAKSCrashReporterVersion = @"3.2.0";
                                       nonFatalsChain:nil
                                  virtualMachineCrash:virtualMachineCrash];
     AMADecodedCrash *decodedCrash = [self decodedCrashWithBacktrace:backtrace
-                                                              error:error
+                                                              error:reportError
                                                        binaryImages:[NSSet new]
                                                  virtualMachineInfo:virtualMachineInfo];
-    return [self.serializer dataForCrash:decodedCrash];
+    return [self.serializer dataForCrash:decodedCrash error:error];
 }
 
-- (NSData *)formattedErrorErrorDetails:(AMAPluginErrorDetails *)errorDetails bytesTruncated:(NSUInteger *)bytesTruncated
+- (NSData *)formattedErrorErrorDetails:(AMAPluginErrorDetails *)errorDetails 
+                        bytesTruncated:(NSUInteger *)bytesTruncated
+                                 error:(NSError **)error
 {
     AMACrashObjectsFactory *crashObjectsFactory = [AMACrashObjectsFactory sharedInstance];
     AMABacktrace *backtrace = [crashObjectsFactory backtraceFrom:errorDetails.backtrace bytesTruncated:bytesTruncated];
@@ -163,7 +169,7 @@ static NSString *const kAMAKSCrashReporterVersion = @"3.2.0";
                                                                                     bytesTruncated:bytesTruncated];
     AMANonFatal *nonFatal = [[AMANonFatal alloc] initWithModel:errorModel
                                                      backtrace:backtrace];
-    AMACrashReportError *error =
+    AMACrashReportError *reportError =
         [[AMACrashReportError alloc] initWithAddress:0x0
                                               reason:nil
                                                 type:AMACrashTypeVirtualMachineError
@@ -174,15 +180,16 @@ static NSString *const kAMAKSCrashReporterVersion = @"3.2.0";
                                       nonFatalsChain:@[ nonFatal ]
                                  virtualMachineCrash:nil];
     AMADecodedCrash *decodedCrash = [self decodedCrashWithBacktrace:nil
-                                                              error:error
+                                                              error:reportError
                                                        binaryImages:[NSSet set]
                                                  virtualMachineInfo:virtualMachineInfo];
-    return [self.serializer dataForCrash:decodedCrash];
+    return [self.serializer dataForCrash:decodedCrash error:error];
 }
 
 - (NSData *)formattedCustomErrorErrorDetails:(AMAPluginErrorDetails *)errorDetails
                                   identifier:(NSString *)identifier
                               bytesTruncated:(NSUInteger *)bytesTruncated
+                                       error:(NSError **)error
 {
     AMACrashObjectsFactory *crashObjectsFactory = [AMACrashObjectsFactory sharedInstance];
     AMABacktrace *backtrace = [crashObjectsFactory backtraceFrom:errorDetails.backtrace bytesTruncated:bytesTruncated];
@@ -193,7 +200,7 @@ static NSString *const kAMAKSCrashReporterVersion = @"3.2.0";
                                                                                    bytesTruncated:bytesTruncated];
     AMANonFatal *nonFatal = [[AMANonFatal alloc] initWithModel:errorModel
                                                      backtrace:backtrace];
-    AMACrashReportError *error =
+    AMACrashReportError *reportError =
         [[AMACrashReportError alloc] initWithAddress:0x0
                                               reason:nil
                                                 type:AMACrashTypeVirtualMachineCustomError
@@ -204,10 +211,10 @@ static NSString *const kAMAKSCrashReporterVersion = @"3.2.0";
                                       nonFatalsChain:@[ nonFatal ]
                                  virtualMachineCrash:nil];
     AMADecodedCrash *decodedCrash = [self decodedCrashWithBacktrace:nil
-                                                              error:error
+                                                              error:reportError
                                                        binaryImages:[NSSet new]
                                                  virtualMachineInfo:virtualMachineInfo];
-    return [self.serializer dataForCrash:decodedCrash];
+    return [self.serializer dataForCrash:decodedCrash error:error];
 }
 
 - (NSArray *)nonFatalsChainForErrorModel:(AMAErrorModel *)error binaryImages:(NSMutableSet *)binaryImages

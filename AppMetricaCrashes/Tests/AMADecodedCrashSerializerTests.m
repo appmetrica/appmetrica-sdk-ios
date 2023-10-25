@@ -138,7 +138,7 @@ describe(@"AMADecodedCrashSerializer", ^{
 
     AMANonFatal *const nonFatal = [[AMANonFatal alloc] initWithModel:errorModel
                                                            backtrace:backtrace];
-
+     
     AMACrashReportError *const crashError = [[AMACrashReportError alloc] initWithAddress:1234
                                                                                   reason:@"Something went wrong"
                                                                                     type:AMACrashTypeNsException
@@ -214,19 +214,16 @@ describe(@"AMADecodedCrashSerializer", ^{
                                                                              system:system
                                                                               crash:crash];
 
-    Ama__IOSCrashReport *__block report = NULL;
+    __block Ama__IOSCrashReport * report = NULL;
+    __block NSError *error = NULL;
 
-    AMAInternalEventsReporter *__block reporter = nil;
-
-    __auto_type reportMessage = ^void(AMADecodedCrash *crash) {
-        AMADecodedCrashSerializer *serializer = [[AMADecodedCrashSerializer alloc] initWithReporter:reporter];
-        NSData *data = [serializer dataForCrash:crash];
+    __auto_type reportMessage = ^NSData *(AMADecodedCrash *crash) {
+        AMADecodedCrashSerializer *serializer = [[AMADecodedCrashSerializer alloc] init];
+        error = nil;
+        NSData *data = [serializer dataForCrash:crash error:&error];
         report = ama__ioscrash_report__unpack(NULL, data.length, data.bytes);
+        return data;
     };
-
-    beforeEach(^{
-        reporter = [AMAInternalEventsReporter nullMock];
-    });
 
     afterEach(^{
         if (report != NULL) {
@@ -1562,45 +1559,131 @@ describe(@"AMADecodedCrashSerializer", ^{
     });
 
     context(@"Error reporting", ^{
-
-        AMADecodedCrashValidator *__block validator = nil;
-
-        beforeEach(^{
-            validator = [AMADecodedCrashValidator nullMock];
+        
+        let(validator, ^{
+            AMADecodedCrashValidator *validator = [AMADecodedCrashValidator nullMock];
             [AMADecodedCrashValidator stub:@selector(alloc) andReturn:validator];
+            return validator;
         });
 
-        it(@"Should report of corrupted crash report if there is a critical error", ^{
-            NSError *error = [NSError errorWithDomain:@"test.error.domain"
-                                                 code:AMACrashValidatorErrorCodeCritical
-                                             userInfo:@{}];
-            [validator stub:@selector(result) andReturn:error];
-            [[reporter should] receive:@selector(reportCorruptedCrashReportWithError:)];
-            reportMessage(decodedCrash);
+        it(@"Should return nil and set critical NSError", ^{
+            NSError *criticalError = [NSError errorWithDomain:@"test.error.domain"
+                                                          code:AMACrashValidatorErrorCodeCritical
+                                                      userInfo:@{}];
+            [validator stub:@selector(result) andReturn:criticalError];
+            NSData *data = reportMessage(decodedCrash);
+            
+            [[data should] beNil];
+            [[error should] equal:criticalError];
         });
 
-        it(@"Should not report of corrupted crash report if there is only suspicious error", ^{
-            NSError *error = [NSError errorWithDomain:@"test.error.domain"
-                                                 code:AMACrashValidatorErrorCodeSuspicious
-                                             userInfo:@{}];
-            [validator stub:@selector(result) andReturn:error];
-            [[reporter shouldNot] receive:@selector(reportCorruptedCrashReportWithError:)];
-            reportMessage(decodedCrash);
+        it(@"Should return data and set suspicious NSError", ^{
+            NSError *suspiciousError = [NSError errorWithDomain:@"test.error.domain"
+                                                           code:AMACrashValidatorErrorCodeSuspicious
+                                                       userInfo:@{}];
+            [validator stub:@selector(result) andReturn:suspiciousError];
+            NSData *data = reportMessage(decodedCrash);
+            
+            [[data shouldNot] beNil];
+            [[error should] equal:suspiciousError];
         });
 
-        it(@"Should not report of corrupted crash report if there is only non-critical error", ^{
-            NSError *error = [NSError errorWithDomain:@"test.error.domain"
-                                                 code:AMACrashValidatorErrorCodeNonCritical
-                                             userInfo:@{}];
-            [validator stub:@selector(result) andReturn:error];
-            [[reporter shouldNot] receive:@selector(reportCorruptedCrashReportWithError:)];
-            reportMessage(decodedCrash);
+        it(@"Should return data and set non-critical NSError", ^{
+            NSError *nonCriticalError = [NSError errorWithDomain:@"test.error.domain"
+                                                             code:AMACrashValidatorErrorCodeNonCritical
+                                                         userInfo:@{}];
+            [validator stub:@selector(result) andReturn:nonCriticalError];
+            NSData *data = reportMessage(decodedCrash);
+            
+            [[data shouldNot] beNil];
+            [[error should] equal:nonCriticalError];
+        });
+
+        it(@"Should return data and not set NSError if validation is successful", ^{
+            [validator stub:@selector(result) andReturn:nil];
+            NSData *data = reportMessage(decodedCrash);
+            
+            [[data shouldNot] beNil];
+            [[error should] beNil];
         });
     });
 
+    context(@"AMADecodedCrashSerializer (CustomEventParameters)", ^{
+        
+        let(serializer, ^{ return [[AMADecodedCrashSerializer alloc] init]; });
+        let(validator, ^{
+            AMADecodedCrashValidator *validator = [AMADecodedCrashValidator nullMock];
+            [AMADecodedCrashValidator stub:@selector(alloc) andReturn:validator];
+            return validator;
+        });
+        
+        __block NSError *error = nil;
+        
+        afterEach(^{
+            report = NULL;
+        });
+
+        context(@"-eventParametersFromDecodedData:error:", ^{
+            
+            it(@"Should return nil and set critical NSError", ^{
+                NSError *criticalError = [NSError errorWithDomain:@"test.error.domain"
+                                                             code:AMACrashValidatorErrorCodeCritical
+                                                         userInfo:@{}];
+                [validator stub:@selector(result) andReturn:criticalError];
+                AMACustomEventParameters *result = [serializer eventParametersFromDecodedData:decodedCrash error:&error];
+
+                [[result should] beNil];
+                [[error should] equal:criticalError];
+            });
+
+            it(@"Should return AMACustomEventParameters and set suspicious NSError", ^{
+                NSError *suspiciousError = [NSError errorWithDomain:@"test.error.domain"
+                                                              code:AMACrashValidatorErrorCodeSuspicious
+                                                          userInfo:@{}];
+                [validator stub:@selector(result) andReturn:suspiciousError];
+                AMACustomEventParameters *result = [serializer eventParametersFromDecodedData:decodedCrash error:&error];
+
+                [[result shouldNot] beNil];
+                [[error should] equal:suspiciousError];
+            });
+
+            it(@"Should return AMACustomEventParameters and set non-critical NSError", ^{
+                NSError *nonCriticalError = [NSError errorWithDomain:@"test.error.domain"
+                                                               code:AMACrashValidatorErrorCodeNonCritical
+                                                           userInfo:@{}];
+                [validator stub:@selector(result) andReturn:nonCriticalError];
+                AMACustomEventParameters *result = [serializer eventParametersFromDecodedData:decodedCrash error:&error];
+
+                [[result shouldNot] beNil];
+                [[error should] equal:nonCriticalError];
+            });
+            
+            it(@"Should return AMACustomEventParameters and not set NSError if validation is successful", ^{
+                [validator stub:@selector(result) andReturn:nil];
+                AMACustomEventParameters *result = [serializer eventParametersFromDecodedData:decodedCrash error:&error];
+
+                [[result shouldNot] beNil];
+                [[error should] beNil];
+            });
+        });
+        
+        context(@"Event types", ^{
+            it(@"Should use Crash event type", ^{
+                AMACustomEventParameters *result = [serializer eventParametersFromDecodedData:decodedCrash error:NULL];
+                [[theValue(result.eventType) should] equal:theValue(AMACrashEventTypeCrash)];
+            });
+            
+            it(@"Should use ANR event type in case of Deadlock", ^{
+                [crashError stub:@selector(type) andReturn:theValue(AMACrashTypeMainThreadDeadlock)];
+                AMACustomEventParameters *result = [serializer eventParametersFromDecodedData:decodedCrash error:NULL];
+                [[theValue(result.eventType) should] equal:theValue(AMACrashEventTypeANR)];
+            });
+        });
+    });
+    
     context(@"Custom event parameters", ^{
 
-        let(serializer, ^{ return [[AMADecodedCrashSerializer alloc] initWithReporter:reporter]; });
+        let(serializer, ^{ return [[AMADecodedCrashSerializer alloc] init]; });
         __block AMACustomEventParameters *result = nil;
         
         afterEach(^{
@@ -1610,10 +1693,10 @@ describe(@"AMADecodedCrashSerializer", ^{
         context(@"eventParametersFromDecodedData:forEventType:", ^{
             it(@"Should generate correct event parameters for given type", ^{
                 AMACrashEventType eventType = AMACrashEventTypeANR;
-                result = [serializer eventParametersFromDecodedData:decodedCrash forEventType:eventType];
+                result = [serializer eventParametersFromDecodedData:decodedCrash forEventType:eventType error:NULL];
                 
                 [[theValue(result.eventType) should] equal:theValue(eventType)];
-                [[result.data should] equal:[serializer dataForCrash:decodedCrash]];
+                [[result.data should] equal:[serializer dataForCrash:decodedCrash error:NULL]];
                 [[result.creationDate should] equal:decodedCrash.info.timestamp];
                 [[result.appState should] equal:decodedCrash.appState];
                 [[result.errorEnvironment should] equal:decodedCrash.errorEnvironment];
@@ -1625,45 +1708,45 @@ describe(@"AMADecodedCrashSerializer", ^{
         context(@"eventParametersFromDecodedData:", ^{
             it(@"Should use correct event type for MainThreadDeadlock", ^{
                 [decodedCrash.crash.error stub:@selector(type) andReturn:theValue(AMACrashTypeMainThreadDeadlock)];
-                result = [serializer eventParametersFromDecodedData:decodedCrash];
+                result = [serializer eventParametersFromDecodedData:decodedCrash error:NULL];
                 
                 [[theValue(result.eventType) should] equal:theValue(AMACrashEventTypeANR)];
             });
             
             it(@"Should use correct event type for other crash types", ^{
                 [decodedCrash.crash.error stub:@selector(type) andReturn:theValue(AMACrashTypeUserReported)];
-                result = [serializer eventParametersFromDecodedData:decodedCrash];
+                result = [serializer eventParametersFromDecodedData:decodedCrash error:NULL];
                 
                 [[theValue(result.eventType) should] equal:theValue(AMACrashEventTypeCrash)];
             });
             
             it(@"Should use AMAEventValueTypeFile as valueType", ^{
-                result = [serializer eventParametersFromDecodedData:decodedCrash];
+                result = [serializer eventParametersFromDecodedData:decodedCrash error:NULL];
                 [[theValue(result.valueType) should] equal:theValue(AMAEventValueTypeFile)];
             });
             
             it(@"Should set correct data from decoded crash", ^{
-                result = [serializer eventParametersFromDecodedData:decodedCrash];
-                [[result.data should] equal:[serializer dataForCrash:decodedCrash]];
+                result = [serializer eventParametersFromDecodedData:decodedCrash error:NULL];
+                [[result.data should] equal:[serializer dataForCrash:decodedCrash error:NULL]];
             });
             
             it(@"Should set correct creationDate from decoded crash", ^{
-                result = [serializer eventParametersFromDecodedData:decodedCrash];
+                result = [serializer eventParametersFromDecodedData:decodedCrash error:NULL];
                 [[result.creationDate should] equal:decodedCrash.info.timestamp];
             });
             
             it(@"Should set correct appState from decoded crash", ^{
-                result = [serializer eventParametersFromDecodedData:decodedCrash];
+                result = [serializer eventParametersFromDecodedData:decodedCrash error:NULL];
                 [[result.appState should] equal:decodedCrash.appState];
             });
             
             it(@"Should set correct errorEnvironment from decoded crash", ^{
-                result = [serializer eventParametersFromDecodedData:decodedCrash];
+                result = [serializer eventParametersFromDecodedData:decodedCrash error:NULL];
                 [[result.errorEnvironment should] equal:decodedCrash.errorEnvironment];
             });
             
             it(@"Should set correct appEnvironment from decoded crash", ^{
-                result = [serializer eventParametersFromDecodedData:decodedCrash];
+                result = [serializer eventParametersFromDecodedData:decodedCrash error:NULL];
                 [[result.appEnvironment should] equal:decodedCrash.appEnvironment];
             });
         });
@@ -1675,7 +1758,7 @@ describe(@"AMADecodedCrashSerializer", ^{
 #pragma clang diagnostic ignored "-Wnonnull"
                 it(@"Should handle nil decodedCrash gracefully", ^{
                     [[theBlock(^{
-                        [serializer eventParametersFromDecodedData:nil forEventType:AMACrashEventTypeANR];
+                        [serializer eventParametersFromDecodedData:nil forEventType:AMACrashEventTypeANR error:NULL];
                     }) shouldNot] raise];
                 });
                 
@@ -1685,26 +1768,28 @@ describe(@"AMADecodedCrashSerializer", ^{
                 
                 it(@"Should handle nil decodedCrash gracefully", ^{
                     [[theBlock(^{
-                        [serializer eventParametersFromDecodedData:nil];
+                        [serializer eventParametersFromDecodedData:nil error:NULL];
                     }) shouldNot] raise];
                 });
 #pragma clang diagnostic pop
                 it(@"Should default to AMACrashEventTypeCrash for unknown crash types", ^{
                     [decodedCrash.crash.error stub:@selector(type) andReturn:theValue(9999)];
-                    AMACustomEventParameters *result = [serializer eventParametersFromDecodedData:decodedCrash];
+                    AMACustomEventParameters *result = [serializer eventParametersFromDecodedData:decodedCrash 
+                                                                                            error:NULL];
                     [[theValue(result.eventType) should] equal:theValue(AMACrashEventTypeCrash)];
                 });
                 
                 it(@"Should handle nil data from dataForCrash: gracefully", ^{
-                    [serializer stub:@selector(dataForCrash:) andReturn:nil];
-                    AMACustomEventParameters *result = [serializer eventParametersFromDecodedData:decodedCrash];
+                    [serializer stub:@selector(dataForCrash:error:) andReturn:nil];
+                    AMACustomEventParameters *result = [serializer eventParametersFromDecodedData:decodedCrash
+                                                                                            error:NULL];
                     [[result.data should] beNil];
                 });
                 
                 it(@"Should handle missing properties in decodedCrash gracefully", ^{
                     [decodedCrash stub:@selector(info) andReturn:nil];
                     [[theBlock(^{
-                        [serializer eventParametersFromDecodedData:decodedCrash];
+                        [serializer eventParametersFromDecodedData:decodedCrash error:NULL];
                     }) shouldNot] raise];
                 });
                 

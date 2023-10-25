@@ -11,8 +11,12 @@
 
 - (AMACustomEventParameters *)eventParametersFromDecodedData:(AMADecodedCrash *)decodedCrash
                                                 forEventType:(AMACrashEventType)eventType
+                                                       error:(NSError **)error
 {
-    NSData *rawData = [self dataForCrash:decodedCrash];
+    NSData *rawData = [self dataForCrash:decodedCrash error:error];
+    if (rawData == nil) {
+        return nil;
+    }
     
     AMACustomEventParameters *encodedEvent = [[AMACustomEventParameters alloc] initWithEventType:eventType];
     encodedEvent.valueType = AMAEventValueTypeFile;
@@ -25,13 +29,13 @@
     return encodedEvent;
 }
 
-- (AMACustomEventParameters *)eventParametersFromDecodedData:(AMADecodedCrash *)decodedCrash
+- (AMACustomEventParameters *)eventParametersFromDecodedData:(AMADecodedCrash *)decodedCrash error:(NSError **)error
 {
     AMACrashEventType type = decodedCrash.crash.error.type == AMACrashTypeMainThreadDeadlock
         ? AMACrashEventTypeANR
         : AMACrashEventTypeCrash;
     
-    return [self eventParametersFromDecodedData:decodedCrash forEventType:type];
+    return [self eventParametersFromDecodedData:decodedCrash forEventType:type error:error];
 }
 
 @end

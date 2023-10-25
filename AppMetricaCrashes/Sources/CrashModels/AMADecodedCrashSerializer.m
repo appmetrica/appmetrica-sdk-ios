@@ -1,63 +1,42 @@
+#import "AMADecodedCrashSerializer.h"
+
+#import <AppMetricaProtobufUtils/AppMetricaProtobufUtils.h>
+#import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
 
 #import "AMACrashLogging.h"
-#import "AMADecodedCrashSerializer.h"
-#import "AMADecodedCrash.h"
-#import "Crash.pb-c.h"
-#import "AMAInfo.h"
-#import "AMABinaryImage.h"
-#import "AMADecodedCrashValidator.h"
-#import "AMASystem.h"
-#import "AMAMemory.h"
 #import "AMAApplicationStatistics.h"
-#import "AMACrashReportCrash.h"
-#import "AMACrashReportError.h"
-#import "AMAMach.h"
-#import "AMASignal.h"
-#import "AMANSException.h"
-#import "AMACppException.h"
-#import "AMANonFatal.h"
-#import "AMAErrorModel.h"
-#import "AMAErrorCustomData.h"
-#import "AMAErrorNSErrorData.h"
-#import "AMAThread.h"
 #import "AMABacktrace.h"
 #import "AMABacktraceFrame.h"
-#import "AMARegistersContainer.h"
+#import "AMABinaryImage.h"
+#import "AMACppException.h"
+#import "AMACrashReportCrash.h"
+#import "AMACrashReportError.h"
+#import "AMADecodedCrash.h"
+#import "AMADecodedCrashValidator.h"
+#import "AMAErrorCustomData.h"
+#import "AMAErrorModel.h"
+#import "AMAErrorNSErrorData.h"
+#import "AMAInfo.h"
+#import "AMAMach.h"
+#import "AMAMemory.h"
+#import "AMANSException.h"
+#import "AMANonFatal.h"
 #import "AMARegister.h"
+#import "AMARegistersContainer.h"
+#import "AMASignal.h"
 #import "AMAStack.h"
-#import "AMAVirtualMachineError.h"
+#import "AMASystem.h"
+#import "AMAThread.h"
 #import "AMAVirtualMachineCrash.h"
+#import "AMAVirtualMachineError.h"
 #import "AMAVirtualMachineInfo.h"
-#import <AppMetricaProtobufUtils/AppMetricaProtobufUtils.h>
-
-//TODO: Crashes fixing
-@interface AMADecodedCrashSerializer ()
-
-@property (nonatomic, strong, readonly) AMAInternalEventsReporter *reporter;
-
-@end
+#import "Crash.pb-c.h"
 
 @implementation AMADecodedCrashSerializer
 
 #pragma mark - Public
 
-- (instancetype)initWithReporter:(AMAInternalEventsReporter *)reporter
-{
-    self = [super init];
-
-    if (self != nil) {
-        _reporter = reporter;
-    }
-
-    return self;
-}
-
-- (instancetype)init
-{
-    return [self initWithReporter:[AMAAppMetrica sharedInternalEventsReporter]];
-}
-
-- (NSData *)dataForCrash:(AMADecodedCrash *)decodedCrash
+- (NSData *)dataForCrash:(AMADecodedCrash *)decodedCrash error:(NSError **)error
 {
     NSData *__block data = nil;
     AMADecodedCrashValidator *validator = [[AMADecodedCrashValidator alloc] init];
@@ -81,7 +60,8 @@
         }
 
         NSError *validationResult = [validator result];
-
+        [AMAErrorUtilities fillError:error withError:validationResult];
+        
         if (validationResult.code != AMACrashValidatorErrorCodeCritical) {
             Ama__IOSCrashReport report = AMA__IOSCRASH_REPORT__INIT;
             report.info = info;
@@ -94,7 +74,7 @@
             void *buffer = malloc(size);
             ama__ioscrash_report__pack(&report, buffer);
             data = [NSData dataWithBytesNoCopy:buffer length:size];
-
+            
             if (validationResult.code == AMACrashValidatorErrorCodeSuspicious) {
                 AMALogError(@"There were suspicious errors while AMADecodedCrash: %@ serialization.\n"
                                     "Error details: %@",
@@ -106,7 +86,6 @@
                                 "Error details: %@.\n"
                                 "Trying to report the error to AppMetrica",
                                 decodedCrash, validationResult);
-            [self.reporter reportCorruptedCrashReportWithError:validationResult];
         }
     }];
 
@@ -811,8 +790,6 @@ createNonFatalVirtualMachineErrorWithData:(AMAVirtualMachineError *)data
 - (Ama__IOSCrashReport__System__BuildType)buildTypeToProtobuf:(AMABuildType)buildType
 {
     switch (buildType) {
-        case AMABuildTypeUnknown:
-            return AMA__IOSCRASH_REPORT__SYSTEM__BUILD_TYPE__UNKNOWN;
         case AMABuildTypeSimulator:
             return AMA__IOSCRASH_REPORT__SYSTEM__BUILD_TYPE__SIMULATOR;
         case AMABuildTypeDebug:
@@ -821,6 +798,7 @@ createNonFatalVirtualMachineErrorWithData:(AMAVirtualMachineError *)data
             return AMA__IOSCRASH_REPORT__SYSTEM__BUILD_TYPE__TEST;
         case AMABuildTypeAppStore:
             return AMA__IOSCRASH_REPORT__SYSTEM__BUILD_TYPE__APP_STORE;
+        case AMABuildTypeUnknown:
         default:
             return AMA__IOSCRASH_REPORT__SYSTEM__BUILD_TYPE__UNKNOWN;
     }
@@ -841,14 +819,13 @@ createNonFatalVirtualMachineErrorWithData:(AMAVirtualMachineError *)data
             return AMA__IOSCRASH_REPORT__CRASH__ERROR__CRASH_TYPE__MAIN_THREAD_DEADLOCK;
         case AMACrashTypeUserReported:
             return AMA__IOSCRASH_REPORT__CRASH__ERROR__CRASH_TYPE__USER_REPORTED;
-        case AMACrashTypeNonFatal:
-            return AMA__IOSCRASH_REPORT__CRASH__ERROR__CRASH_TYPE__NON_FATAL;
         case AMACrashTypeVirtualMachineCrash:
             return AMA__IOSCRASH_REPORT__CRASH__ERROR__CRASH_TYPE__VIRTUAL_MACHINE_CRASH;
         case AMACrashTypeVirtualMachineError:
             return AMA__IOSCRASH_REPORT__CRASH__ERROR__CRASH_TYPE__VIRTUAL_MACHINE_ERROR;
         case AMACrashTypeVirtualMachineCustomError:
             return AMA__IOSCRASH_REPORT__CRASH__ERROR__CRASH_TYPE__VIRTUAL_MACHINE_CUSTOM_ERROR;
+        case AMACrashTypeNonFatal:
         default:
             return AMA__IOSCRASH_REPORT__CRASH__ERROR__CRASH_TYPE__NON_FATAL;
     }
@@ -857,10 +834,9 @@ createNonFatalVirtualMachineErrorWithData:(AMAVirtualMachineError *)data
 - (Ama__IOSCrashReport__Crash__Thread__Stack__GrowDirection)growDireсtionToProtobuf:(AMAGrowDirection)growDirection
 {
     switch (growDirection) {
-        case AMAGrowDirectionPlus:
-            return AMA__IOSCRASH_REPORT__CRASH__THREAD__STACK__GROW_DIRECTION__PLUS;
         case AMAGrowDirectionMinus:
             return AMA__IOSCRASH_REPORT__CRASH__THREAD__STACK__GROW_DIRECTION__MINUS;
+        case AMAGrowDirectionPlus:
         default:
             return AMA__IOSCRASH_REPORT__CRASH__THREAD__STACK__GROW_DIRECTION__PLUS;
     }

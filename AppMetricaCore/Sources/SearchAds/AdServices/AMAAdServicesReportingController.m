@@ -1,13 +1,15 @@
-
 #import "AMAAdServicesReportingController.h"
+
 #import "AMAAdServicesDataProvider.h"
+#import "AMAAppMetrica+Internal.h"
+#import "AMAAttributionModelParser.h"
+#import "AMAInternalEventsReporter.h"
 #import "AMAMetricaConfiguration.h"
+#import "AMAMetricaInMemoryConfiguration.h"
+#import "AMAMetricaPersistentConfiguration.h"
 #import "AMAReporter.h"
 #import "AMAReporterStateStorage.h"
 #import "AMAStartupParametersConfiguration.h"
-#import "AMAMetricaPersistentConfiguration.h"
-#import "AMAMetricaInMemoryConfiguration.h"
-#import "AMAAppMetrica+Internal.h"
 
 static NSTimeInterval const kAMAASADefaultDelay = 43200.0;
 static NSTimeInterval const kAMAASADefaultInterval = 43200.0;

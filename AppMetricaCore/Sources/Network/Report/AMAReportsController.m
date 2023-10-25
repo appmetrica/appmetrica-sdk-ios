@@ -1,13 +1,14 @@
-
 #import "AMAReportsController.h"
-#import "AMAReportHostProvider.h"
-#import "AMAReportRequest.h"
-#import "AMAReportPayloadProvider.h"
-#import "AMAReportRequestModel.h"
-#import "AMAReportPayload.h"
-#import "AMARequestModelSplitter.h"
+
 #import "AMAAppMetrica+Internal.h"
 #import "AMAEvent.h"
+#import "AMAInternalEventsReporter.h"
+#import "AMAReportHostProvider.h"
+#import "AMAReportPayload.h"
+#import "AMAReportPayloadProvider.h"
+#import "AMAReportRequest.h"
+#import "AMAReportRequestModel.h"
+#import "AMARequestModelSplitter.h"
 #import "AMATimeoutRequestsController.h"
 
 NSString *const kAMAReportsControllerErrorDomain = @"io.appmetrica.AMAReportController";

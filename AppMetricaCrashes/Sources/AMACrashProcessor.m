@@ -1,39 +1,42 @@
-
 #import "AMACrashLogging.h"
+
 #import "AMACrashProcessor.h"
-#import "AMADecodedCrash.h"
+
+#import "AMACrashEventType.h"
 #import "AMACrashReportCrash.h"
 #import "AMACrashReportError.h"
-#import "AMASignal.h"
-#import "AMADecodedCrashSerializer.h"
-#import "AMAInfo.h"
-#import "AMACrashProcessingReporting.h"
-#import "AMACrashEventType.h"
+#import "AMADecodedCrash.h"
 #import "AMADecodedCrashSerializer+CustomEventParameters.h"
-#import "AMAExceptionFormatter.h"
+#import "AMADecodedCrashSerializer.h"
 #import "AMAErrorModel.h"
+#import "AMAExceptionFormatter.h"
+#import "AMAInfo.h"
+#import "AMASignal.h"
+#import "AMACrashReporter.h"
 
 @interface AMACrashProcessor ()
 
 @property (nonatomic, strong, readonly) AMADecodedCrashSerializer *serializer;
 @property (nonatomic, strong, readonly) AMAExceptionFormatter *formatter;
+@property (nonatomic, strong, readonly) AMACrashReporter *crashReporter;
 
 @end
 
 @implementation AMACrashProcessor
 
-@synthesize extendedCrashReporters = _extendedCrashReporters;
-
 - (instancetype)initWithIgnoredSignals:(NSArray *)ignoredSignals
                             serializer:(AMADecodedCrashSerializer *)serializer
+                         crashReporter:(AMACrashReporter *)crashReporter
 {
     return [self initWithIgnoredSignals:ignoredSignals
                              serializer:serializer
+                          crashReporter:[[AMACrashReporter alloc] init]
                               formatter:[[AMAExceptionFormatter alloc] init]];
 }
 
 - (instancetype)initWithIgnoredSignals:(NSArray *)ignoredSignals
                             serializer:(AMADecodedCrashSerializer *)serializer
+                         crashReporter:(AMACrashReporter *)crashReporter
                              formatter:(AMAExceptionFormatter *)formatter
 {
     self = [super init];
@@ -42,58 +45,61 @@
         _serializer = serializer;
         _formatter = formatter;
         _ignoredCrashSignals = [ignoredSignals copy];
-        _extendedCrashReporters = [NSMutableSet set];
+        _crashReporter = crashReporter;
     }
 
     return self;
 }
 
+#pragma mark - Public -
+
 - (void)processCrash:(AMADecodedCrash *)decodedCrash withError:(NSError *)error
 {
     if (error != nil) {
-        [self reportCrashReportErrorToMetrica:decodedCrash withError:error];
+        [self.crashReporter reportInternalError:error];
         return;
     }
 
     if ([self shouldIgnoreCrash:decodedCrash]) { return; }
     
-    AMACustomEventParameters *encodedCrash = [self.serializer eventParametersFromDecodedData:decodedCrash
-                                                                                forEventType:AMACrashEventTypeCrash];
+    NSError *localError = nil;
+    AMACustomEventParameters *parameters = [self.serializer eventParametersFromDecodedData:decodedCrash
+                                                                              forEventType:AMACrashEventTypeCrash
+                                                                                     error:&localError];
     
-    [AMAAppMetrica reportEventWithParameters:encodedCrash onFailure:^(NSError *error) {
-        if (error != nil) {
-            AMALogError(@"Failed to report app crash with error: %@", error);
-            [self reportCrashReportErrorToMetrica:decodedCrash withError:error];
-        }
-    }];
+    if (parameters == nil) {
+        [self.crashReporter reportInternalCorruptedCrash:localError];
+    }
     
-    [self reportSafely];
+    [self.crashReporter reportCrashWithParameters:parameters];
 }
 
 - (void)processANR:(AMADecodedCrash *)decodedCrash withError:(NSError *)error
 {
     if (error != nil) {
-        [self reportCrashReportErrorToMetrica:decodedCrash withError:error];
+        [self.crashReporter reportInternalError:error];
         return;
     }
-
-    AMACustomEventParameters *parameters = [self.serializer eventParametersFromDecodedData:decodedCrash
-                                                                              forEventType:AMACrashEventTypeANR];
     
-    [AMAAppMetrica reportEventWithParameters:parameters onFailure:^(NSError *error) {
-        if (error != nil) {
-            AMALogError(@"Failed to report app ANR with error: %@", error);
-            [self reportCrashReportErrorToMetrica:decodedCrash withError:error];
-        }
-    }];
+    NSError *localError = nil;
+    AMACustomEventParameters *parameters = [self.serializer eventParametersFromDecodedData:decodedCrash
+                                                                              forEventType:AMACrashEventTypeANR
+                                                                                     error:&localError];
+    
+    if (parameters == nil) {
+        [self.crashReporter reportInternalCorruptedCrash:localError];
+    }
+    
+    [self.crashReporter reportANRWithParameters:parameters];
 }
 
 - (void)processError:(AMAErrorModel *)errorModel onFailure:(void (^)(NSError *))onFailure
 {
     NSError *potentialError = nil;
-    NSData *formattedData = [self.formatter formattedError:errorModel];
+    NSData *formattedData = [self.formatter formattedError:errorModel error:&potentialError];
     
     if (formattedData == nil) {
+        [self.crashReporter reportInternalCorruptedError:potentialError];
         onFailure(potentialError);
         return;
     }
@@ -104,40 +110,14 @@
     params.GZipped = YES;
     params.bytesTruncated = errorModel.bytesTruncated;
     
-    [AMAAppMetrica reportEventWithParameters:params onFailure:onFailure];
+    [self.crashReporter reportErrorWithParameters:params onFailure:onFailure];
 }
 
-#pragma mark - Private
+#pragma mark - Private -
 
 - (BOOL)shouldIgnoreCrash:(AMADecodedCrash *)decodedCrash
 {
     return [self.ignoredCrashSignals containsObject:@(decodedCrash.crash.error.signal.signal)];
-}
-
-- (void)reportCrashReportErrorToMetrica:(AMADecodedCrash *)decodedCrash withError:(NSError *)error
-{
-    switch (error.code) {
-        case AMAAppMetricaEventErrorCodeInvalidName:
-            [[AMAAppMetrica sharedInternalEventsReporter] reportCorruptedCrashReportWithError:error];
-            break;
-        case AMAAppMetricaInternalEventErrorCodeRecrash:
-            [[AMAAppMetrica sharedInternalEventsReporter] reportRecrashWithError:error];
-            break;
-        case AMAAppMetricaInternalEventErrorCodeUnsupportedReportVersion:
-            [[AMAAppMetrica sharedInternalEventsReporter] reportUnsupportedCrashReportVersionWithError:error];
-            break;
-        default:
-            break;
-    }
-}
-
-- (void)reportSafely
-{
-    for (id<AMACrashProcessingReporting> crashReporter in self.extendedCrashReporters) {
-        if (crashReporter != nil) {
-            [crashReporter reportCrash:@"Unhandled crash"];
-        }
-    }
 }
 
 @end

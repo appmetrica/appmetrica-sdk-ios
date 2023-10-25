@@ -4,6 +4,7 @@
 #import "AMACrashReportDecoder.h"
 
 @protocol AMACrashLoaderDelegate;
+@class AMACrashSafeTransactor;
 @class AMADecodedCrash;
 @class AMAUnhandledCrashDetector;
 
@@ -15,7 +16,9 @@ extern NSString *const kAMAApplicationNotRespondingCrashType;
 @property (nonatomic, assign) BOOL isUnhandledCrashDetectingEnabled;
 @property (nonatomic, assign, readonly) NSNumber *crashedLastLaunch;
 
-- (instancetype)initWithUnhandledCrashDetector:(AMAUnhandledCrashDetector *)unhandledCrashDetector;
+- (instancetype)init NS_UNAVAILABLE;
+- (instancetype)initWithUnhandledCrashDetector:(AMAUnhandledCrashDetector *)unhandledCrashDetector
+                                    transactor:(AMACrashSafeTransactor *)transactor;
 
 - (void)enableCrashLoader;
 - (void)enableRequiredMonitoring;

@@ -1,5 +1,5 @@
 
-#import "AMAInternalEventsReporter+Private.h"
+#import "AMAInternalEventsReporter.h"
 #import "AMAReporter.h"
 #import "AMAReporterProviding.h"
 #import "AMAEventTypes.h"
@@ -8,23 +8,12 @@
 static NSString *const kAMASchemaInconsistencyEventName = @"SchemaInconsistencyDetected";
 static NSString *const kAMASchemaInconsistencyEventParametersDescriptionKey = @"schema: ";
 
-static NSString *const kAMATransactionFailureEventName = @"TransactionFailure";
-static NSString *const kAMATransactionFailureEventParametersTransactionNameKey = @"name";
-static NSString *const kAMATransactionFailureEventParametersRollbackResultKey = @"rollback";
-static NSString *const kAMATransactionFailureEventParametersRollbackContentKey = @"rollbackcontent";
-static NSString *const kAMATransactionFailureEventParametersExceptionParametersKey = @"exception";
-
 static NSString *const kAMASearchAdsAttemptEventName = @"AppleSearchAdsAttempt";
 static NSString *const kAMASearchAdsTokenSuccessEventName = @"AppleSearchAdsTokenSuccess";
 
 static NSString *const kAMASearchAdsCompletionEventName = @"AppleSearchAdsCompletion";
 static NSString *const kAMASearchAdsCompletionEventParametersTypeKey = @"type";
 static NSString *const kAMASearchAdsCompletionEventParametersTypeAbsentValue = @"null";
-
-static NSString *const kAMAInternalEventsReporterExceptionDescriptionNameKey = @"name";
-static NSString *const kAMAInternalEventsReporterExceptionDescriptionReasonKey = @"reason";
-static NSString *const kAMAInternalEventsReporterExceptionDescriptionBacktraceKey = @"backtrace";
-static NSString *const kAMAInternalEventsReporterExceptionDescriptionUserInfoKey = @"userInfo";
 
 @interface AMAInternalEventsReporter ()
 
@@ -76,24 +65,6 @@ static NSString *const kAMAInternalEventsReporterExceptionDescriptionUserInfoKey
     [self reportEvent:kAMASchemaInconsistencyEventName parameters:parameters];
 }
 
-- (void)reportFailedTransactionWithID:(NSString *)transactionID
-                            ownerName:(NSString *)ownerName
-                      rollbackContent:(NSString *)rollbackContent
-                    rollbackException:(NSException *)rollbackException
-                       rollbackFailed:(BOOL)rollbackFailed
-{
-    NSString *parametersKey = transactionID ?: @"Unknown";
-    NSDictionary *exceptionParameters = [[self class] descriptionParametersForException:rollbackException];
-
-    NSMutableDictionary *parameters = [NSMutableDictionary dictionary];
-    parameters[kAMATransactionFailureEventParametersTransactionNameKey] = ownerName;
-    parameters[kAMATransactionFailureEventParametersExceptionParametersKey] = exceptionParameters;
-    parameters[kAMATransactionFailureEventParametersRollbackContentKey] = rollbackContent;
-    parameters[kAMATransactionFailureEventParametersRollbackResultKey] = rollbackFailed ? @"failed" : @"succeeded";
-
-    [self reportEvent:kAMATransactionFailureEventName parameters:@{ parametersKey: [parameters copy] }];
-}
-
 - (void)reportSearchAdsAttempt
 {
     [self reportEvent:kAMASearchAdsAttemptEventName parameters:nil];
@@ -132,21 +103,6 @@ static NSString *const kAMAInternalEventsReporterExceptionDescriptionUserInfoKey
     [self reportEvent:@"extensions_list_collecting_exception" parameters:parameters];
 }
 
-- (void)reportCorruptedCrashReportWithError:(NSError *)error
-{
-    [self reportEvent:@"corrupted_crash_report" withError:error];
-}
-
-- (void)reportUnsupportedCrashReportVersionWithError:(NSError *)error
-{
-    [self reportEvent:@"crash_report_version_unsupported" withError:error];
-}
-
-- (void)reportRecrashWithError:(NSError *)error
-{
-    [self reportEvent:@"crash_report_recrash" withError:error];
-}
-
 - (void)reportSKADAttributionParsingError:(NSDictionary *)parameters
 {
     [self reportEvent:@"skad_attribution_parsing_error" parameters:parameters];
@@ -178,21 +134,6 @@ static NSString *const kAMAInternalEventsReporterExceptionDescriptionUserInfoKey
         @"error_details" : error.userInfo.description ?: @"No error details supplied",
     };
     [self reportEvent:event parameters:parameters];
-}
-
-+ (NSDictionary *)descriptionParametersForException:(NSException *)exception
-{
-    if (exception == nil) {
-        return nil;
-    }
-
-    NSMutableDictionary *parameters = [NSMutableDictionary dictionary];
-    parameters[kAMAInternalEventsReporterExceptionDescriptionNameKey] = exception.name;
-    parameters[kAMAInternalEventsReporterExceptionDescriptionReasonKey] = exception.reason;
-    parameters[kAMAInternalEventsReporterExceptionDescriptionBacktraceKey] = exception.callStackSymbols;
-    parameters[kAMAInternalEventsReporterExceptionDescriptionUserInfoKey] = exception.userInfo;
-
-    return [parameters copy];
 }
 
 #pragma mark - AMAHostStateProviderDelegate delegate -

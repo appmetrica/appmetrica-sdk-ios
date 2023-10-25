@@ -1,46 +1,46 @@
 #import <Kiwi/Kiwi.h>
-#import <AppMetricaCore/AppMetricaCore.h>
-#import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
 
-#import "AMADecodedCrash.h"
-#import "AMACrashProcessingReporting.h"
 #import "AMACrashProcessor.h"
+
+#import "AMACrashProcessingReporting.h"
 #import "AMACrashReportCrash.h"
 #import "AMACrashReportError.h"
+#import "AMACrashReporter.h"
+#import "AMADecodedCrash.h"
 #import "AMADecodedCrashSerializer.h"
 #import "AMAErrorModel.h"
-#import "AMASignal.h"
 #import "AMAExceptionFormatter.h"
+#import "AMASignal.h"
 
 SPEC_BEGIN(AMACrashProcessorTests)
 
 describe(@"AMACrashProcessor", ^{
-
+    
     let(serializer, ^{ return [AMADecodedCrashSerializer nullMock]; });
     let(formatterMock, ^{ return [AMAExceptionFormatter nullMock]; });
+    let(crashReporterMock, ^{ return [AMACrashReporter nullMock]; });
     let(crashProcessor, ^{
         return [[AMACrashProcessor alloc] initWithIgnoredSignals:nil
                                                       serializer:serializer
+                                                   crashReporter:crashReporterMock
                                                        formatter:formatterMock];
     });
-
+    
     context(@"Initialization", ^{
-
+        
         it(@"Should properly initialize with default serializer when only signals are given", ^{
             AMACrashProcessor *processor = [[AMACrashProcessor alloc] initWithIgnoredSignals:@[ @SIGABRT ]
-                                                                                  serializer:serializer];
+                                                                                  serializer:serializer
+                                                                               crashReporter:crashReporterMock];
             [[processor.ignoredCrashSignals should] contain:@SIGABRT];
         });
         
         it(@"Should properly initialize with given serializer and signals", ^{
             AMACrashProcessor *processor = [[AMACrashProcessor alloc] initWithIgnoredSignals:@[ @SIGABRT ]
                                                                                   serializer:serializer
+                                                                               crashReporter:crashReporterMock
                                                                                    formatter:formatterMock];
             [[processor.ignoredCrashSignals should] contain:@SIGABRT];
-        });
-        
-        it(@"Should have empty set of extendedCrashReporters by default", ^{
-            [[crashProcessor.extendedCrashReporters should] beEmpty];
         });
     });
     
@@ -61,14 +61,25 @@ describe(@"AMACrashProcessor", ^{
             [crashMock stub:@selector(error) andReturn:errorMock];
             [errorMock stub:@selector(signal) andReturn:signalMock];
             [decodedCrashMock stub:@selector(crash) andReturn:crashMock];
-            
-            [AMAAppMetrica stub:@selector(reportEventWithParameters:onFailure:)];
         });
         
         context(@"Report crash", ^{
-            it(@"Should report to AMAAppMetrica", ^{
-                [[AMAAppMetrica should] receive:@selector(reportEventWithParameters:onFailure:)];
+            it(@"Should report crash", ^{
+                [[crashReporterMock should] receive:@selector(reportCrashWithParameters:)];
                 [crashProcessor processCrash:decodedCrashMock withError:nil];
+            });
+            
+            context(@"Internal Error", ^{
+                it(@"Should report of internal error", ^{
+                    [[crashReporterMock should] receive:@selector(reportInternalError:)
+                                          withArguments:sampleError, nil];
+                    [crashProcessor processCrash:decodedCrashMock withError:sampleError];
+                });
+                
+                it(@"Should not report crash in case of internal error", ^{
+                    [[crashReporterMock shouldNot] receive:@selector(reportCrashWithParameters:)];
+                    [crashProcessor processCrash:decodedCrashMock withError:sampleError];
+                });
             });
         });
         
@@ -76,14 +87,15 @@ describe(@"AMACrashProcessor", ^{
             let(crashProcessor, ^{
                 return [[AMACrashProcessor alloc] initWithIgnoredSignals:@[ @SIGABRT ]
                                                               serializer:serializer
+                                                           crashReporter:crashReporterMock
                                                                formatter:formatterMock];
             });
             beforeEach(^{
                 [signalMock stub:@selector(signal) andReturn:theValue(SIGABRT)];
             });
             
-            it(@"Should not report to AMAAppMetrica", ^{
-                [[AMAAppMetrica shouldNot] receive:@selector(reportEventWithParameters:onFailure:)];
+            it(@"Should not report crash", ^{
+                [[crashReporterMock shouldNot] receive:@selector(reportCrashWithParameters:)];
                 [crashProcessor processCrash:decodedCrashMock withError:nil];
             });
         });
@@ -92,22 +104,36 @@ describe(@"AMACrashProcessor", ^{
             let(crashProcessor, ^{
                 return [[AMACrashProcessor alloc] initWithIgnoredSignals:@[ @SIGQUIT ]
                                                               serializer:serializer
+                                                           crashReporter:crashReporterMock
                                                                formatter:formatterMock];
             });
             beforeEach(^{
                 [signalMock stub:@selector(signal) andReturn:theValue(SIGABRT)];
             });
             
-            it(@"Should report to AMAAppMetrica", ^{
-                [[AMAAppMetrica should] receive:@selector(reportEventWithParameters:onFailure:)];
+            it(@"Should report crash", ^{
+                [[crashReporterMock should] receive:@selector(reportCrashWithParameters:)];
                 [crashProcessor processCrash:decodedCrashMock withError:nil];
             });
         });
         
         context(@"Report ANR", ^{
-            it(@"Should report to AMAAppMetrica", ^{
-                [[AMAAppMetrica should] receive:@selector(reportEventWithParameters:onFailure:)];
+            it(@"Should report ANR", ^{
+                [[crashReporterMock should] receive:@selector(reportANRWithParameters:)];
                 [crashProcessor processANR:decodedCrashMock withError:nil];
+            });
+            
+            context(@"Internal Error", ^{
+                it(@"Should report of internal error", ^{
+                    [[crashReporterMock should] receive:@selector(reportInternalError:)
+                                          withArguments:sampleError, nil];
+                    [crashProcessor processANR:decodedCrashMock withError:sampleError];
+                });
+                
+                it(@"Should not report ANR in case of internal error", ^{
+                    [[crashReporterMock shouldNot] receive:@selector(reportANRWithParameters:)];
+                    [crashProcessor processANR:decodedCrashMock withError:sampleError];
+                });
             });
         });
         
@@ -126,22 +152,22 @@ describe(@"AMACrashProcessor", ^{
                 [[theValue(onFailureCalled) should] beYes];
             });
             
-            it(@"Should call AMAAppMetrica reportEventWithParameters:onFailure: when formatted data is not nil", ^{
+            it(@"Should call reportErrorWithParameters:onFailure: when formatted data is not nil", ^{
                 NSData *mockData = [NSData new];
-                [formatterMock stub:@selector(formattedError:) andReturn:mockData];
+                [formatterMock stub:@selector(formattedError:error:) andReturn:mockData];
                 
-                [[AMAAppMetrica should] receive:@selector(reportEventWithParameters:onFailure:)];
+                [[crashReporterMock should] receive:@selector(reportErrorWithParameters:onFailure:)];
                 
                 [crashProcessor processError:errorModelMock onFailure:^(NSError *error) {}];
             });
             
-            it(@"Should call onFailure when AMAAppMetrica reports an error", ^{
+            it(@"Should call onFailure when reportErrorWithParameters:onFailure: reports an error", ^{
                 NSData *mockData = [NSData new];
                 [formatterMock stub:@selector(formattedError:) andReturn:mockData];
                 
                 NSError *sampleError = [NSError errorWithDomain:@"TestDomain" code:1 userInfo:nil];
                 
-                [AMAAppMetrica stub:@selector(reportEventWithParameters:onFailure:) withBlock:^id(NSArray *params) {
+                [crashReporterMock stub:@selector(reportErrorWithParameters:onFailure:) withBlock:^id(NSArray *params) {
                     void (^failureBlock)(NSError *) = params[1];
                     failureBlock(sampleError);
                     return nil;
@@ -153,100 +179,6 @@ describe(@"AMACrashProcessor", ^{
                 }];
                 
                 [[theValue(onFailureCalled) should] beYes];
-            });
-        });
-        
-        context(@"Report crash with non-nil error", ^{
-            
-            NSError *__block invalidNameError = [NSError errorWithDomain:@"AMAAppMetricaEventErrorCodeDomain"
-                                                                    code:AMAAppMetricaEventErrorCodeInvalidName
-                                                                userInfo:nil];
-            NSError *__block recrashError = [NSError errorWithDomain:@"AMAAppMetricaEventErrorCodeDomain"
-                                                                code:AMAAppMetricaInternalEventErrorCodeRecrash
-                                                            userInfo:nil];
-            NSError *__block unsupportedVersionError = [NSError errorWithDomain:@"AMAAppMetricaEventErrorCodeDomain"
-                                                                           code:AMAAppMetricaInternalEventErrorCodeUnsupportedReportVersion
-                                                                       userInfo:nil];
-            
-            it(@"Should report corrupted crash report for InvalidName error", ^{
-                [[[AMAAppMetrica sharedInternalEventsReporter] should]
-                 receive:@selector(reportCorruptedCrashReportWithError:)];
-                [crashProcessor processCrash:decodedCrashMock withError:invalidNameError];
-            });
-            
-            it(@"Should report recrash for Recrash error", ^{
-                [[[AMAAppMetrica sharedInternalEventsReporter] should]
-                 receive:@selector(reportRecrashWithError:)];
-                [crashProcessor processCrash:decodedCrashMock withError:recrashError];
-            });
-            
-            it(@"Should report unsupported crash report version for UnsupportedReportVersion error", ^{
-                [[[AMAAppMetrica sharedInternalEventsReporter] should]
-                 receive:@selector(reportUnsupportedCrashReportVersionWithError:)];
-                [crashProcessor processCrash:decodedCrashMock withError:unsupportedVersionError];
-            });
-            
-            it(@"Should report corrupted crash report for InvalidName error on ANR", ^{
-                [[[AMAAppMetrica sharedInternalEventsReporter] should]
-                    receive:@selector(reportCorruptedCrashReportWithError:)];
-                [crashProcessor processANR:decodedCrashMock withError:invalidNameError];
-            });
-            
-            it(@"Should report recrash for Recrash error on ANR", ^{
-                [[[AMAAppMetrica sharedInternalEventsReporter] should] 
-                    receive:@selector(reportRecrashWithError:)];
-                [crashProcessor processANR:decodedCrashMock withError:recrashError];
-            });
-            
-            it(@"Should report unsupported crash report version for UnsupportedReportVersion error on ANR", ^{
-                [[[AMAAppMetrica sharedInternalEventsReporter] should]
-                    receive:@selector(reportUnsupportedCrashReportVersionWithError:)];
-                [crashProcessor processANR:decodedCrashMock withError:unsupportedVersionError];
-            });
-        });
-        
-        context(@"Report crash with extended reporters", ^{
-            let(extendedReporterMock1, ^id{
-                return [KWMock mockForProtocol:@protocol(AMACrashProcessingReporting)];
-            });
-            let(extendedReporterMock2, ^id{
-                return [KWMock mockForProtocol:@protocol(AMACrashProcessingReporting)];
-            });
-            
-            beforeEach(^{
-                [crashProcessor.extendedCrashReporters addObject:extendedReporterMock1];
-                [crashProcessor.extendedCrashReporters addObject:extendedReporterMock2];
-            });
-            
-            it(@"Should call reportCrash: on extendedCrashReporters", ^{
-                [[extendedReporterMock1 should] receive:@selector(reportCrash:) withArguments:@"Unhandled crash"];
-                [[extendedReporterMock2 should] receive:@selector(reportCrash:) withArguments:@"Unhandled crash"];
-                
-                [crashProcessor processCrash:decodedCrashMock withError:nil];
-            });
-        });
-        
-        context(@"Failure handling", ^{
-            NSError *testError = [NSError errorWithDomain:@"TestDomain" code:1 userInfo:nil];
-            
-            beforeEach(^{
-                [AMAAppMetrica stub:@selector(reportEventWithParameters:onFailure:) withBlock:^id(NSArray *params) {
-                    void (^failureBlock)(NSError *) = params[1];
-                    failureBlock(testError);
-                    return nil;
-                }];
-            });
-            
-            it(@"Should not raise any exception when reporting crash fails", ^{
-                [[theBlock(^{
-                    [crashProcessor processCrash:decodedCrashMock withError:nil];
-                }) shouldNot] raise];
-            });
-            
-            it(@"Should not raise any exception when reporting ANR fails", ^{
-                [[theBlock(^{
-                    [crashProcessor processANR:decodedCrashMock withError:nil];
-                }) shouldNot] raise];
             });
         });
     });

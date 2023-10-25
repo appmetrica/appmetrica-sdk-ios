@@ -1,14 +1,17 @@
-
 #import <Kiwi/Kiwi.h>
+
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
 #import <AppMetricaCoreExtension/AppMetricaCoreExtension.h>
-@import KSCrash_Recording;
-#import "AMAKSCrash.h"
+#import <KSCrashReport.h>
+
 #import "AMACrashLoader.h"
-#import "AMAUnhandledCrashDetector.h"
-#import "AMACrashes.h"
+
 #import "AMACrashReportDecoder.h"
+#import "AMACrashSafeTransactor.h"
+#import "AMACrashes.h"
 #import "AMADecodedCrash.h"
+#import "AMAKSCrash.h"
+#import "AMAUnhandledCrashDetector.h"
 
 @interface AMACrashLoader ()
 
@@ -44,6 +47,34 @@
 SPEC_BEGIN(AMACrashLoaderTests)
 
 describe(@"AMACrashLoader", ^{
+    
+    __block AMACrashSafeTransactor *transactor = nil;
+    
+    beforeEach(^{
+        transactor = [AMACrashSafeTransactor mock];
+        
+        [transactor stub:@selector(processTransactionWithID:name:transaction:)
+               withBlock:^id(NSArray *params) {
+            dispatch_block_t block = params[2];
+            block();
+            return nil;
+        }];
+        
+        [transactor stub:@selector(processTransactionWithID:name:transaction:rollback:)
+               withBlock:^id(NSArray *params) {
+            dispatch_block_t block = params[2];
+            block();
+            return nil;
+        }];
+        
+        [transactor stub:@selector(processTransactionWithID:name:rollbackContext:transaction:rollback:)
+               withBlock:^id(NSArray *params) {
+            dispatch_block_t block = params[3];
+            block();
+            return nil;
+        }];
+    });
+    
     context(@"Crash context", ^{
         beforeEach(^{
             [AMACrashLoader resetCrashContext];
@@ -87,38 +118,23 @@ describe(@"AMACrashLoader", ^{
         });
     });
     context(@"Synchronous Load Crash Reports", ^{
+        let(unhandledCrashDetector, ^{ return [AMAUnhandledCrashDetector nullMock]; });
+        let(crashLoaderDelegate, ^{ return [KWMock nullMockForProtocol:@protocol(AMACrashLoaderDelegate)]; });
+        let(crashReports, ^{ return @[ [AMADecodedCrash nullMock], [AMADecodedCrash nullMock] ]; });
         let(ksCrash, ^{
             KSCrash *mock = [KSCrash nullMock];
             [AMAKSCrash stub:@selector(sharedInstance) andReturn:mock];
             return mock;
         });
-        let(unhandledCrashDetector, ^{ return [AMAUnhandledCrashDetector nullMock]; });
-        let(crashLoaderDelegate, ^{ return [KWMock nullMockForProtocol:@protocol(AMACrashLoaderDelegate)]; });
         let(crashLoader, ^{
-            AMACrashLoader *loader = [[AMACrashLoader alloc] initWithUnhandledCrashDetector:unhandledCrashDetector];
+            AMACrashLoader *loader = [[AMACrashLoader alloc] initWithUnhandledCrashDetector:unhandledCrashDetector
+                                                                                 transactor:transactor];
             loader.delegate = crashLoaderDelegate;
             return loader;
         });
-        let(crashReports, ^{ return @[ [AMADecodedCrash nullMock], [AMADecodedCrash nullMock] ]; });
         
         NSNumber *const crashID = @23;
         NSArray *const crashIDs = @[crashID];
-
-        beforeEach(^{
-            [AMACrashSafeTransactor stub:@selector(processTransactionWithID:name:transaction:rollback:) 
-                               withBlock:^id(NSArray *params) {
-                dispatch_block_t block = params[2];
-                block();
-                return nil;
-            }];
-            
-            [AMACrashSafeTransactor stub:@selector(processTransactionWithID:name:rollbackContext:transaction:rollback:) 
-                               withBlock:^id(NSArray *params) {
-                dispatch_block_t block = params[3];
-                block();
-                return nil;
-            }];
-        });
       
         it(@"Should return decoded crash reports", ^{
             [ksCrash stub:@selector(reportIDs) andReturn:crashIDs];
@@ -175,12 +191,13 @@ describe(@"AMACrashLoader", ^{
         AMACrashLoader __block *crashLoader;
         id __block crashLoaderDelegate;
         NSNumber *crashID = @23;
-
+        
         beforeEach(^{
             ksCrash = [KSCrash nullMock];
             [AMAKSCrash stub:@selector(sharedInstance) andReturn:ksCrash];
             unhandledCrashDetector = [AMAUnhandledCrashDetector nullMock];
-            crashLoader = [[AMACrashLoader alloc] initWithUnhandledCrashDetector:unhandledCrashDetector];
+            crashLoader = [[AMACrashLoader alloc] initWithUnhandledCrashDetector:unhandledCrashDetector
+                                                                      transactor:transactor];
             crashLoaderDelegate = [KWMock nullMockForProtocol:@protocol(AMACrashLoaderDelegate)];
             crashLoader.delegate = crashLoaderDelegate;
             crashLoader.isUnhandledCrashDetectingEnabled = YES;
@@ -432,18 +449,25 @@ describe(@"AMACrashLoader", ^{
 
         context(@"Crash safety", ^{
 
-            dispatch_block_t __block transaction;
-            AMACrashSafeTransactorRollbackBlock __block rollback;
+            __block dispatch_block_t transaction;
+            __block AMACrashSafeTransactorRollbackBlock rollback;
 
             beforeEach(^{
                 transaction = nil;
                 rollback = nil;
 
-                SEL selector = @selector(processTransactionWithID:name:rollbackContext:transaction:rollback:);
-                [AMACrashSafeTransactor stub:selector withBlock:^id(NSArray *params) {
+                [transactor stub:@selector(processTransactionWithID:name:rollbackContext:transaction:rollback:)
+                       withBlock:^id(NSArray *params) {
                     transaction = params[3];
                     rollback = params[4];
 
+                    return nil;
+                }];
+                [transactor stub:@selector(processTransactionWithID:name:transaction:rollback:)
+                       withBlock:^id(NSArray *params) {
+                    transaction = params[2];
+                    rollback = params[3];
+                    
                     return nil;
                 }];
             });

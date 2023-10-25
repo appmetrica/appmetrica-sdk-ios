@@ -1,6 +1,6 @@
 #import <Kiwi/Kiwi.h>
 
-#import "AMAInternalEventsReporter+Private.h"
+#import "AMAInternalEventsReporter.h"
 
 #import <AppMetricaCore/AppMetricaCore.h>
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
@@ -49,131 +49,6 @@ describe(@"AMAInternalEventsReporter", ^{
         });
     });
 
-    context(@"Transaction failure event", ^{
-        NSString *eventName = @"TransactionFailure";
-
-        NSString *transactionID = @"Transaction ID";
-        NSString *transactionOwnerName = @"Owner name";
-        NSString *rollbackContent = @"Rollback content";
-        NSString *exceptionName = @"Exception name";
-        NSString *exceptionReason = @"Exception reason";
-        NSArray *exceptionBacktrace = @[ @"line1", @"line2" ];
-        NSDictionary *exceptionUserInfo = @{ @"key": @"value" };
-        NSException *__block rollbackException = nil;
-
-        beforeEach(^{
-            rollbackException = [[NSException alloc] initWithName:exceptionName
-                                                           reason:exceptionReason
-                                                         userInfo:exceptionUserInfo];
-            [rollbackException stub:@selector(callStackSymbols) andReturn:exceptionBacktrace];
-        });
-
-        it(@"Should report event if rollback failed", ^{
-            NSDictionary *parameters = @{
-                transactionID : @{
-                    @"name" : transactionOwnerName,
-                    @"rollback" : @"failed",
-                    @"rollbackcontent" : rollbackContent,
-                    @"exception" : @{
-                        @"name" : exceptionName,
-                        @"reason" : exceptionReason,
-                        @"backtrace" : exceptionBacktrace,
-                        @"userInfo" : rollbackException.userInfo
-                    }
-                }
-            };
-            [[reporterMock should] receive:@selector(reportEvent:parameters:onFailure:)
-                             withArguments:eventName, parameters, kw_any()];
-            [reporter reportFailedTransactionWithID:transactionID
-                                          ownerName:transactionOwnerName
-                                    rollbackContent:rollbackContent
-                                  rollbackException:rollbackException
-                                     rollbackFailed:YES];
-        });
-
-        it(@"Should report event if rollback succeeded", ^{
-            NSDictionary *parameters = @{
-                transactionID : @{
-                    @"name" : transactionOwnerName,
-                    @"rollback" : @"succeeded",
-                    @"rollbackcontent" : rollbackContent
-                }
-            };
-            [[reporterMock should] receive:@selector(reportEvent:parameters:onFailure:)
-                             withArguments:eventName, parameters, kw_any()];
-            [reporter reportFailedTransactionWithID:transactionID
-                                          ownerName:transactionOwnerName
-                                    rollbackContent:rollbackContent
-                                  rollbackException:nil
-                                     rollbackFailed:NO];
-        });
-
-        it(@"Should report absent transaction ID as Unknown", ^{
-            NSDictionary *parameters = @{
-                @"Unknown" : @{
-                    @"name" : transactionOwnerName,
-                    @"rollback" : @"succeeded",
-                    @"rollbackcontent" : rollbackContent
-                }
-            };
-            [[reporterMock should] receive:@selector(reportEvent:parameters:onFailure:)
-                             withArguments:eventName, parameters, kw_any()];
-            [reporter reportFailedTransactionWithID:nil
-                                          ownerName:transactionOwnerName
-                                    rollbackContent:rollbackContent
-                                  rollbackException:nil
-                                     rollbackFailed:NO];
-        });
-
-        it(@"Should report event without transaction owner name", ^{
-            NSDictionary *parameters = @{
-                transactionID : @{
-                    @"rollback" : @"succeeded",
-                    @"rollbackcontent" : rollbackContent
-                }
-            };
-            [[reporterMock should] receive:@selector(reportEvent:parameters:onFailure:)
-                             withArguments:eventName, parameters, kw_any()];
-            [reporter reportFailedTransactionWithID:transactionID
-                                          ownerName:nil
-                                    rollbackContent:rollbackContent
-                                  rollbackException:nil
-                                     rollbackFailed:NO];
-        });
-
-        it(@"Should report event without rollback content", ^{
-            NSDictionary *parameters = @{
-                transactionID : @{
-                    @"name" : transactionOwnerName,
-                    @"rollback" : @"succeeded"
-                }
-            };
-            [[reporterMock should] receive:@selector(reportEvent:parameters:onFailure:)
-                             withArguments:eventName, parameters, kw_any()];
-            [reporter reportFailedTransactionWithID:transactionID
-                                          ownerName:transactionOwnerName
-                                    rollbackContent:nil
-                                  rollbackException:nil
-                                     rollbackFailed:NO];
-        });
-
-        it(@"Should report event if rollback failed without exception", ^{
-            NSDictionary *parameters = @{
-                transactionID : @{
-                    @"name" : transactionOwnerName,
-                    @"rollback" : @"failed",
-                    @"rollbackcontent" : rollbackContent
-                }
-            };
-            [[reporterMock should] receive:@selector(reportEvent:parameters:onFailure:)
-                             withArguments:eventName, parameters, kw_any()];
-            [reporter reportFailedTransactionWithID:transactionID
-                                          ownerName:transactionOwnerName
-                                    rollbackContent:rollbackContent
-                                  rollbackException:nil
-                                     rollbackFailed:YES];
-        });
-    });
     
     context(@"Search Ads", ^{
         it(@"Should report search ads attempt", ^{
@@ -217,65 +92,6 @@ describe(@"AMAInternalEventsReporter", ^{
         });
     });
     
-    context(@"Corrupted crash reports", ^{
-        
-        it(@"Should report of corrupted report", ^{
-            NSDictionary *expecrtedUserInfo = @{ @"foo": @"bar" };
-            NSString *expectedErrorDomain = @"test_domain";
-            NSInteger exprecredCode = 123;
-            NSError *error = [NSError errorWithDomain:expectedErrorDomain
-                                                 code:exprecredCode
-                                             userInfo:expecrtedUserInfo];
-            
-            NSDictionary *expectedParameters = @{
-                                                 @"domain" : expectedErrorDomain,
-                                                 @"error_code" : @(exprecredCode),
-                                                 @"error_details" : expecrtedUserInfo.description,
-                                                 };
-            
-            [[reporterMock should] receive:@selector(reportEvent:parameters:onFailure:)
-                             withArguments:@"corrupted_crash_report", expectedParameters, kw_any()];
-            [reporter reportCorruptedCrashReportWithError:error];
-        });
-        
-        it(@"Should report of recrash", ^{
-            NSDictionary *expecrtedUserInfo = @{ @"foo": @"bar" };
-            NSString *expectedErrorDomain = @"test_domain";
-            NSInteger exprecredCode = 123;
-            NSError *error = [NSError errorWithDomain:expectedErrorDomain
-                                                 code:exprecredCode
-                                             userInfo:expecrtedUserInfo];
-            
-            NSDictionary *expectedParameters = @{
-                                                 @"domain" : expectedErrorDomain,
-                                                 @"error_code" : @(exprecredCode),
-                                                 @"error_details" : expecrtedUserInfo.description,
-                                                 };
-            
-            [[reporterMock should] receive:@selector(reportEvent:parameters:onFailure:)
-                             withArguments:@"crash_report_recrash", expectedParameters, kw_any()];
-            [reporter reportRecrashWithError:error];
-        });
-        
-        it(@"Should report of unsupported crash report version", ^{
-            NSDictionary *expecrtedUserInfo = @{ @"foo": @"bar" };
-            NSString *expectedErrorDomain = @"test_domain";
-            NSInteger exprecredCode = 123;
-            NSError *error = [NSError errorWithDomain:expectedErrorDomain
-                                                 code:exprecredCode
-                                             userInfo:expecrtedUserInfo];
-            
-            NSDictionary *expectedParameters = @{
-                                                 @"domain" : expectedErrorDomain,
-                                                 @"error_code" : @(exprecredCode),
-                                                 @"error_details" : expecrtedUserInfo.description,
-                                                 };
-            
-            [[reporterMock should] receive:@selector(reportEvent:parameters:onFailure:)
-                             withArguments:@"crash_report_version_unsupported", expectedParameters, kw_any()];
-            [reporter reportUnsupportedCrashReportVersionWithError:error];
-        });
-    });
     
     context(@"Extensions List", ^{
         it(@"Should report", ^{

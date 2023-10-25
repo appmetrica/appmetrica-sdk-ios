@@ -1,9 +1,11 @@
-
 #import "AMACore.h"
+
 #import "AMAExtensionsReportController.h"
+
+#import "AMAAppMetrica+Internal.h"
 #import "AMAExtensionReportProvider.h"
 #import "AMAExtensionsReportExecutionConditionProvider.h"
-#import "AMAAppMetrica+Internal.h"
+#import "AMAInternalEventsReporter.h"
 
 @interface AMAExtensionsReportController ()
 

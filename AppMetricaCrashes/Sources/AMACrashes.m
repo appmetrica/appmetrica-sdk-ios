@@ -15,7 +15,9 @@
 #import "AMACrashLogging.h"
 #import "AMACrashProcessingReporting.h"
 #import "AMACrashProcessor.h"
+#import "AMACrashReporter.h"
 #import "AMACrashReportingStateNotifier.h"
+#import "AMACrashSafeTransactor.h"
 #import "AMACrashesConfiguration.h"
 #import "AMADecodedCrash.h"
 #import "AMADecodedCrashSerializer+CustomEventParameters.h"
@@ -36,6 +38,7 @@
 @property (nonatomic, strong, readonly) AMAHostStateProvider *hostStateProvider;
 @property (nonatomic, strong, readonly) AMADecodedCrashSerializer *serializer;
 @property (nonatomic, strong, readonly) AMAErrorModelFactory *errorModelFactory;
+@property (nonatomic, strong, readonly) AMACrashReporter *crashReporter;
 
 @property (nonatomic, strong) NSMutableSet<id<AMACrashProcessingReporting>> *extendedCrashReporters;
 
@@ -74,15 +77,17 @@
     id<AMAExecuting> executor = [[AMAAsyncExecutor alloc] initWithIdentifier:self];
     AMAUserDefaultsStorage *storage = [[AMAUserDefaultsStorage alloc] init];
     AMAUnhandledCrashDetector *detector = [[AMAUnhandledCrashDetector alloc] initWithStorage:storage executor:executor];
+    AMACrashSafeTransactor *transactor = [[AMACrashSafeTransactor alloc] initWithReporter:nil];
 
     return [self initWithExecutor:executor
-                      crashLoader:[[AMACrashLoader alloc] initWithUnhandledCrashDetector:detector]
+                      crashLoader:[[AMACrashLoader alloc] initWithUnhandledCrashDetector:detector transactor:transactor]
                     stateNotifier:[[AMACrashReportingStateNotifier alloc] init]
                 hostStateProvider:[[AMAHostStateProvider alloc] init]
                        serializer:[[AMADecodedCrashSerializer alloc] init]
                     configuration:[[AMACrashesConfiguration alloc] init]
                  errorEnvironment:[AMAErrorEnvironment new]
-                errorModelFactory:[AMAErrorModelFactory sharedInstance]];
+                errorModelFactory:[AMAErrorModelFactory sharedInstance]
+                    crashReporter:[[AMACrashReporter alloc] init]];
 }
 
 
@@ -94,6 +99,7 @@
                    configuration:(AMACrashesConfiguration *)configuration
                 errorEnvironment:(AMAErrorEnvironment *)errorEnvironment
                errorModelFactory:(AMAErrorModelFactory *)errorModelFactory
+                   crashReporter:(AMACrashReporter *)crashReporter
 {
     self = [super init];
     if (self != nil) {
@@ -108,6 +114,7 @@
         _internalConfiguration = configuration;
         _errorEnvironment = errorEnvironment;
         _errorModelFactory = errorModelFactory;
+        _crashReporter = crashReporter;
     }
     return self;
 }
@@ -225,7 +232,7 @@
 {
     if (crashReporter != nil) {
         [self execute:^{
-            [self.crashProcessor.extendedCrashReporters addObject:crashReporter];
+            [self.crashReporter.extendedCrashReporters addObject:crashReporter];
         }];
     }
 }
@@ -235,13 +242,15 @@
 In Objective-C, properties can't be redefined in class extensions. Thus, private setters are used to modify
 them while retaining external immutability. Needed for testability. */
 
-- (void)setActivated:(BOOL)activated {
+- (void)setActivated:(BOOL)activated 
+{
     @synchronized (self) {
         _activated = activated;
     }
 }
 
-- (BOOL)isActivated {
+- (BOOL)isActivated 
+{
     @synchronized (self) {
         return _activated;
     }
@@ -300,14 +309,15 @@ them while retaining external immutability. Needed for testability. */
 {
     [self execute:^{
         self.crashProcessor = [[AMACrashProcessor alloc] initWithIgnoredSignals:ignoredSignals
-                                                                     serializer:self.serializer];
+                                                                     serializer:self.serializer
+                                                                  crashReporter:self.crashReporter];
     }];
 }
 // FIXME: (belanovich-sy) deadcode, not tested
 - (void)addExtendedCrashReporters
 {
     [self execute:^{
-        [self.crashProcessor.extendedCrashReporters addObjectsFromArray:[self.extendedCrashReporters allObjects]];
+        [self.crashReporter.extendedCrashReporters addObjectsFromArray:[self.extendedCrashReporters allObjects]];
     }];
 }
 
@@ -371,7 +381,7 @@ them while retaining external immutability. Needed for testability. */
         __strong typeof(weakSelf) strongSelf = weakSelf;
         NSArray<AMADecodedCrash *> *crashes = [strongSelf.crashLoader syncLoadCrashReports];
         return [AMACollectionUtilities mapArray:crashes withBlock:^AMACustomEventParameters *(AMADecodedCrash *item) {
-            return [strongSelf.serializer eventParametersFromDecodedData:item];
+            return [strongSelf.serializer eventParametersFromDecodedData:item error:NULL];
         }];
     }];
 }

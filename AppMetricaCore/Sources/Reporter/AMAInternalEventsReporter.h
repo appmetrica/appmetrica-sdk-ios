@@ -1,17 +1,23 @@
-
 #import <Foundation/Foundation.h>
 
-@interface AMAInternalEventsReporter : NSObject
+#import <AppMetricaHostState/AppMetricaHostState.h>
+
+@protocol AMAExecuting;
+@protocol AMAReporterProviding;
+@protocol AMAHostStateProviding;
+
+@interface AMAInternalEventsReporter : NSObject <AMAHostStateProviderDelegate>
 
 - (instancetype)init NS_UNAVAILABLE;
 + (instancetype)new NS_UNAVAILABLE;
 
+- (instancetype)initWithExecutor:(id<AMAExecuting>)executor
+                reporterProvider:(id<AMAReporterProviding>)reporterProvider;
+- (instancetype)initWithExecutor:(id<AMAExecuting>)executor
+                reporterProvider:(id<AMAReporterProviding>)reporterProvider
+               hostStateProvider:(id<AMAHostStateProviding>)hostStateProvider;
+
 - (void)reportSchemaInconsistencyWithDescription:(NSString *)inconsistencyDescription;
-- (void)reportFailedTransactionWithID:(NSString *)transactionID
-                            ownerName:(NSString *)ownerName
-                      rollbackContent:(NSString *)rollbackContent
-                    rollbackException:(NSException *)rollbackException
-                       rollbackFailed:(BOOL)rollbackFailed;
 
 - (void)reportSearchAdsAttempt;
 - (void)reportSearchAdsTokenSuccess;
@@ -22,9 +28,6 @@
 - (void)reportExtensionsReportWithParameters:(NSDictionary *)parameters;
 - (void)reportExtensionsReportCollectingException:(NSException *)exception;
 
-- (void)reportCorruptedCrashReportWithError:(NSError *)error;
-- (void)reportUnsupportedCrashReportVersionWithError:(NSError *)error;
-- (void)reportRecrashWithError:(NSError *)error;
 - (void)reportSKADAttributionParsingError:(NSDictionary *)parameters;
 
 @end

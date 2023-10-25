@@ -1,8 +1,6 @@
-
-#import "AMACore.h"
 #import "AMACrashSafeTransactionLock.h"
-#import "AMAMetricaConfiguration.h"
-#import "AMAMetricaInMemoryConfiguration.h"
+
+#import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
 
 static NSString *const kAMATransactionBuildUIDKey = @"buildUID";
 static NSString *const kAMATransactionNameKey = @"name";
@@ -36,7 +34,7 @@ static NSString *const kAMATransactionRollbackLockedKey = @"rollbackLocked";
 
         _transactionName = [name copy] ?: @"Unknown";
         _transactionKey = [NSString stringWithFormat:@"AMATransaction:%@%@", transactionID, self.transactionName];
-        _currentBuildUID = [[AMAMetricaConfiguration sharedInstance].inMemory.appBuildUID.stringValue copy] ?: @"";
+        _currentBuildUID = AMABuildUID.buildUID.stringValue ?: @"";
 
         if (self.dictionary == nil) {
             NSMutableDictionary *dictionary = [@{
@@ -48,7 +46,9 @@ static NSString *const kAMATransactionRollbackLockedKey = @"rollbackLocked";
 
             if (rollbackContext != nil) {
                 NSData *rollbackContextData =
-                    [NSKeyedArchiver archivedDataWithRootObject:rollbackContext];
+                    [NSKeyedArchiver archivedDataWithRootObject:rollbackContext
+                                          requiringSecureCoding:NO
+                                                          error:NULL];
 
                 [dictionary setObject:rollbackContextData
                                forKey:kAMATransactionRollbackContextKey];
@@ -96,8 +96,10 @@ static NSString *const kAMATransactionRollbackLockedKey = @"rollbackLocked";
     NSData *rollbackContextData = self.dictionary[kAMATransactionRollbackContextKey];
     
     if (rollbackContextData != nil) {
-        rollbackContext =
-            [NSKeyedUnarchiver unarchiveObjectWithData:rollbackContextData];
+        NSKeyedUnarchiver *unarchiver = [[NSKeyedUnarchiver alloc] initForReadingFromData:rollbackContextData 
+                                                                                    error:NULL];
+        unarchiver.requiresSecureCoding = NO;
+        rollbackContext = [unarchiver decodeObjectForKey:NSKeyedArchiveRootObjectKey];
     }
 
     return rollbackContext;

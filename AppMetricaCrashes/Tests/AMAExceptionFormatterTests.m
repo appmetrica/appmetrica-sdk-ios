@@ -50,21 +50,22 @@ SPEC_BEGIN(AMAExceptionFormatterTests)
 
 describe(@"AMAExceptionFormatter", ^{
 
-    AMAInternalEventsReporter *__block reporter = nil;
-    AMADecodedCrash *__block decodedCrash = nil;
-    KWCaptureSpy *__block serializerSpy = nil;
-    AMAExceptionFormatter *__block formatter = nil;
-    AMADateProviderMock *__block dateProvider = nil;
-    AMABacktraceSymbolicator *__block symbolicator = nil;
-    AMACrashReportDecoder *__block decoder = nil;
-    AMASystem *__block systemInfo = nil;
+    __block AMADecodedCrash *decodedCrash = nil;
+    __block AMADecodedCrashSerializer *serializer = nil;
+    __block KWCaptureSpy *serializerSpy = nil;
+    __block KWCaptureSpy *serializerErrorSpy = nil;
+    __block AMAExceptionFormatter *formatter = nil;
+    __block AMADateProviderMock *dateProvider = nil;
+    __block AMABacktraceSymbolicator *symbolicator = nil;
+    __block AMACrashReportDecoder *decoder = nil;
+    __block AMASystem *systemInfo = nil;
 
     beforeEach(^{
-        reporter = [AMAInternalEventsReporter nullMock];
         decoder = [AMACrashReportDecoder nullMock];
         systemInfo = [AMASystem nullMock];
-        AMADecodedCrashSerializer *serializer = [[AMADecodedCrashSerializer alloc] initWithReporter:reporter];
-        serializerSpy = [serializer captureArgument:@selector(dataForCrash:) atIndex:0];
+        serializer = [[AMADecodedCrashSerializer alloc] init];
+        serializerSpy = [serializer captureArgument:@selector(dataForCrash:error:) atIndex:0];
+        serializerErrorSpy = [serializer captureArgument:@selector(dataForCrash:error:) atIndex:1];
         dateProvider = [[AMADateProviderMock alloc] init];
         [dateProvider freeze];
         symbolicator = [AMABacktraceSymbolicator nullMock];
@@ -84,7 +85,7 @@ describe(@"AMAExceptionFormatter", ^{
         NSArray *const binaryImages = @[ [AMABinaryImage nullMock], [AMABinaryImage nullMock] ];
         AMABacktrace *const backtrace = [AMABacktrace nullMock];
 
-        NSException *__block exception = nil;
+        __block NSException *exception = nil;
         
         NSString *const kExpectedExceptionName = @"ExceptionName";
         NSString *const kExpectedExceptionReason = @"ExceptionReason";
@@ -103,7 +104,7 @@ describe(@"AMAExceptionFormatter", ^{
                                         kExpectedExceptionReason,
                                         @{ @"TestKey" : @"TestValue" },
                                         @((uintptr_t)&nsExceptionMock + 3));
-            [formatter formattedException:exception];
+            [formatter formattedException:exception error:NULL];
             decodedCrash = serializerSpy.argument;
         });
 
@@ -134,6 +135,41 @@ describe(@"AMAExceptionFormatter", ^{
         it(@"Should set BSD signal to SIGABRT", ^{
             [[theValue(decodedCrash.crash.error.signal.signal) should] equal:theValue(SIGABRT)];
         });
+        
+        context(@"Failures", ^{
+            it(@"Should set NSError when serialization fails", ^{
+                NSError *serializationError = [NSError errorWithDomain:@"TestErrorDomain" code:123 userInfo:nil];
+                [serializer stub:@selector(dataForCrash:error:) withBlock:^id(NSArray *params) {
+                    NSError *__autoreleasing *error = NULL;
+                    [((NSValue *)params[1]) getValue:&error];
+                    *error = serializationError;
+                    return nil;
+                }];
+
+                NSError *error = nil;
+                NSData *result = [formatter formattedException:exception error:&error];
+
+                [[result should] beNil];
+                [[error should] equal:serializationError];
+            });
+            
+            it(@"Should set NSError and return result", ^{
+                NSError *serializationError = [NSError errorWithDomain:@"TestErrorDomain" code:123 userInfo:nil];
+                NSData *sampleData = NSData.data;
+                [serializer stub:@selector(dataForCrash:error:) withBlock:^id(NSArray *params) {
+                    NSError *__autoreleasing *error = NULL;
+                    [((NSValue *)params[1]) getValue:&error];
+                    *error = serializationError;
+                    return sampleData;
+                }];
+
+                NSError *error = nil;
+                NSData *result = [formatter formattedException:exception error:&error];
+
+                [[result should] equal:sampleData];
+                [[error should] equal:serializationError];
+            });
+        });
     });
 
     context(@"Error", ^{
@@ -142,9 +178,9 @@ describe(@"AMAExceptionFormatter", ^{
         AMABacktrace *const userBacktrace = [AMABacktrace nullMock];
         AMABacktrace *const reportCallBacktrace = [AMABacktrace nullMock];
 
-        AMAErrorModel *__block underlyingError = nil;
-        AMAErrorModel *__block error = nil;
-        AMAVirtualMachineError *__block virtualMachineError = nil;
+        __block AMAErrorModel *underlyingError = nil;
+        __block AMAErrorModel *errorModel = nil;
+        __block AMAVirtualMachineError *virtualMachineError = nil;
 
         beforeEach(^{
             virtualMachineError = [[AMAVirtualMachineError alloc] initWithClassName:@"error class name"
@@ -161,7 +197,7 @@ describe(@"AMAExceptionFormatter", ^{
                                 virtualMachineError:nil
                                     underlyingError:nil
                                      bytesTruncated:0];
-            error =
+            errorModel =
                 [[AMAErrorModel alloc] initWithType:AMAErrorModelTypeCustom
                                          customData:[[AMAErrorCustomData alloc] initWithIdentifier:@"IDENTIFIER"
                                                                                            message:@"MESSAGE"
@@ -192,7 +228,7 @@ describe(@"AMAExceptionFormatter", ^{
                 }
                 return backtrace;
             }];
-            [formatter formattedError:error];
+            [formatter formattedError:errorModel error:NULL];
             decodedCrash = serializerSpy.argument;
         });
 
@@ -215,7 +251,7 @@ describe(@"AMAExceptionFormatter", ^{
             });
 
             it(@"Should have valid model", ^{
-                [[nonFatal.model should] equal:error];
+                [[nonFatal.model should] equal:errorModel];
             });
 
             it(@"Should have valid backtrace", ^{
@@ -249,6 +285,41 @@ describe(@"AMAExceptionFormatter", ^{
 
             it(@"Should have valid binary images", ^{
                 [[decodedCrash.binaryImages should] containObjectsInArray:@[ firstBinaryImage, secondBinaryImage ]];
+            });
+        });
+        
+        context(@"Failures", ^{
+            it(@"Should set NSError when serialization fails", ^{
+                NSError *serializationError = [NSError errorWithDomain:@"TestErrorDomain" code:123 userInfo:nil];
+                [serializer stub:@selector(dataForCrash:error:) withBlock:^id(NSArray *params) {
+                    NSError *__autoreleasing *error = NULL;
+                    [((NSValue *)params[1]) getValue:&error];
+                    *error = serializationError;
+                    return nil;
+                }];
+
+                NSError *error = nil;
+                NSData *result = [formatter formattedError:errorModel error:&error];
+
+                [[result should] beNil];
+                [[error should] equal:serializationError];
+            });
+            
+            it(@"Should set NSError and return result", ^{
+                NSError *serializationError = [NSError errorWithDomain:@"TestErrorDomain" code:123 userInfo:nil];
+                NSData *sampleData = NSData.data;
+                [serializer stub:@selector(dataForCrash:error:) withBlock:^id(NSArray *params) {
+                    NSError *__autoreleasing *error = NULL;
+                    [((NSValue *)params[1]) getValue:&error];
+                    *error = serializationError;
+                    return sampleData;
+                }];
+
+                NSError *error = nil;
+                NSData *result = [formatter formattedError:errorModel error:&error];
+
+                [[result should] equal:sampleData];
+                [[error should] equal:serializationError];
             });
         });
     });
@@ -398,7 +469,7 @@ describe(@"AMAExceptionFormatter", ^{
             });
             context(@"Format crash", ^{
                 beforeEach(^{
-                    [formatter formattedCrashErrorDetails:errorDetails bytesTruncated:NULL];
+                    [formatter formattedCrashErrorDetails:errorDetails bytesTruncated:NULL error:NULL];
                     decodedCrash = serializerSpy.argument;
                 });
 
@@ -412,7 +483,7 @@ describe(@"AMAExceptionFormatter", ^{
                                             withArguments:errorDetails, theValue(&bytesTruncated)];
                     [[crashObjectsFactory should] receive:@selector(backtraceFrom:bytesTruncated:)
                                             withArguments:inputBacktrace, theValue(&bytesTruncated)];
-                    [formatter formattedCrashErrorDetails:errorDetails bytesTruncated:&bytesTruncated];
+                    [formatter formattedCrashErrorDetails:errorDetails bytesTruncated:&bytesTruncated error:NULL];
                 });
                 it(@"Should have correct backtrace", ^{
                     [[decodedCrash.crashedThreadBacktrace should] equal:backtrace];
@@ -524,10 +595,46 @@ describe(@"AMAExceptionFormatter", ^{
                             });
                         });
                     });
+                    context(@"Failures", ^{
+                        it(@"Should set NSError when serialization fails", ^{
+                            NSError *serializationError = [NSError errorWithDomain:@"TestErrorDomain" code:123 userInfo:nil];
+                            [serializer stub:@selector(dataForCrash:error:) withBlock:^id(NSArray *params) {
+                                NSError *__autoreleasing *error = NULL;
+                                [((NSValue *)params[1]) getValue:&error];
+                                *error = serializationError;
+                                return nil;
+                            }];
+                            
+                            NSError *error = nil;
+                            NSData *result = [formatter formattedCrashErrorDetails:errorDetails
+                                                                    bytesTruncated:NULL error:&error];
+                            
+                            [[result should] beNil];
+                            [[error should] equal:serializationError];
+                        });
+                        
+                        it(@"Should set NSError and return result", ^{
+                            NSError *serializationError = [NSError errorWithDomain:@"TestErrorDomain" code:123 userInfo:nil];
+                            NSData *sampleData = NSData.data;
+                            [serializer stub:@selector(dataForCrash:error:) withBlock:^id(NSArray *params) {
+                                NSError *__autoreleasing *error = NULL;
+                                [((NSValue *)params[1]) getValue:&error];
+                                *error = serializationError;
+                                return sampleData;
+                            }];
+                            
+                            NSError *error = nil;
+                            NSData *result = [formatter formattedCrashErrorDetails:errorDetails
+                                                                    bytesTruncated:NULL error:&error];
+                            
+                            [[result should] equal:sampleData];
+                            [[error should] equal:serializationError];
+                        });
+                    });
                 };
                 context(@"Format default error", ^{
                     beforeEach(^{
-                        [formatter formattedErrorErrorDetails:errorDetails bytesTruncated:NULL];
+                        [formatter formattedErrorErrorDetails:errorDetails bytesTruncated:NULL error:NULL];
                         decodedCrash = serializerSpy.argument;
                     });
                     context(@"Common checks", ^{
@@ -541,36 +648,74 @@ describe(@"AMAExceptionFormatter", ^{
                                                 withArguments:errorDetails, theValue(&bytesTruncated)];
                         [[crashObjectsFactory should] receive:@selector(backtraceFrom:bytesTruncated:)
                                                 withArguments:inputBacktrace, theValue(&bytesTruncated)];
-                        [formatter formattedErrorErrorDetails:errorDetails bytesTruncated:&bytesTruncated];
+                        [formatter formattedErrorErrorDetails:errorDetails bytesTruncated:&bytesTruncated error:NULL];
                     });
                     context(@"Crash", ^{
-                        AMACrashReportError *__block error = nil;
+                        AMACrashReportError *__block reportError = nil;
                         beforeEach(^{
-                            error = decodedCrash.crash.error;
+                            reportError = decodedCrash.crash.error;
                         });
                         context(@"Error", ^{
                             it(@"Should have valid type", ^{
-                                [[theValue(error.type) should] equal:theValue(AMACrashTypeVirtualMachineError)];
+                                [[theValue(reportError.type) should] equal:theValue(AMACrashTypeVirtualMachineError)];
                             });
                             context(@"Non fatals", ^{
                                 context(@"Non fatal", ^{
                                     it(@"Should have valid error model", ^{
-                                        [[error.nonFatalsChain[0].model should] equal:defaultErrorModel];
+                                        [[reportError.nonFatalsChain[0].model should] equal:defaultErrorModel];
                                     });
                                     it(@"Should use correct arguments", ^{
                                         [[errorModelFactory should] receive:@selector(defaultModelForErrorDetails:bytesTruncated:)
                                                               withArguments:errorDetails, theValue(&bytesTruncated)];
-                                        [formatter formattedErrorErrorDetails:errorDetails bytesTruncated:&bytesTruncated];
+                                        [formatter formattedErrorErrorDetails:errorDetails
+                                                               bytesTruncated:&bytesTruncated error:NULL];
                                     });
                                 });
                             });
                         });
                     });
+                    context(@"Failures", ^{
+                        it(@"Should set NSError when serialization fails", ^{
+                            NSError *serializationError = [NSError errorWithDomain:@"TestErrorDomain" code:123 userInfo:nil];
+                            [serializer stub:@selector(dataForCrash:error:) withBlock:^id(NSArray *params) {
+                                NSError *__autoreleasing *error = NULL;
+                                [((NSValue *)params[1]) getValue:&error];
+                                *error = serializationError;
+                                return nil;
+                            }];
+                            
+                            NSError *error = nil;
+                            NSData *result = [formatter formattedErrorErrorDetails:errorDetails
+                                                                    bytesTruncated:NULL error:&error];
+                            
+                            [[result should] beNil];
+                            [[error should] equal:serializationError];
+                        });
+                        
+                        it(@"Should set NSError and return result", ^{
+                            NSError *serializationError = [NSError errorWithDomain:@"TestErrorDomain" code:123 userInfo:nil];
+                            NSData *sampleData = NSData.data;
+                            [serializer stub:@selector(dataForCrash:error:) withBlock:^id(NSArray *params) {
+                                NSError *__autoreleasing *error = NULL;
+                                [((NSValue *)params[1]) getValue:&error];
+                                *error = serializationError;
+                                return sampleData;
+                            }];
+                            
+                            NSError *error = nil;
+                            NSData *result = [formatter formattedErrorErrorDetails:errorDetails
+                                                                    bytesTruncated:NULL error:&error];
+                            
+                            [[result should] equal:sampleData];
+                            [[error should] equal:serializationError];
+                        });
+                    });
                 });
                 context(@"Format custom error", ^{
-                    NSString *identifier = @"555-666";
+                    NSString *const identifier = @"555-666";
                     beforeEach(^{
-                        [formatter formattedCustomErrorErrorDetails:errorDetails identifier:identifier bytesTruncated:NULL];
+                        [formatter formattedCustomErrorErrorDetails:errorDetails identifier:identifier 
+                                                     bytesTruncated:NULL error:NULL];
                         decodedCrash = serializerSpy.argument;
                     });
                     context(@"Common checks", ^{
@@ -586,29 +731,71 @@ describe(@"AMAExceptionFormatter", ^{
                                                 withArguments:inputBacktrace, theValue(&bytesTruncated)];
                         [formatter formattedCustomErrorErrorDetails:errorDetails
                                                          identifier:identifier
-                                                     bytesTruncated:&bytesTruncated];
+                                                     bytesTruncated:&bytesTruncated
+                                                              error:NULL];
                     });
                     context(@"Crash", ^{
-                        AMACrashReportError *__block error = nil;
+                        AMACrashReportError *__block reportError = nil;
                         beforeEach(^{
-                            error = decodedCrash.crash.error;
+                            reportError = decodedCrash.crash.error;
                         });
                         context(@"Error", ^{
                             it(@"Should have valid type", ^{
-                                [[theValue(error.type) should] equal:theValue(AMACrashTypeVirtualMachineCustomError)];
+                                [[theValue(reportError.type) should] equal:theValue(AMACrashTypeVirtualMachineCustomError)];
                             });
                             context(@"Non fatals", ^{
                                 context(@"Non fatal", ^{
                                     it(@"Should have valid error model", ^{
-                                        [[error.nonFatalsChain[0].model should] equal:customErrorModel];
+                                        [[reportError.nonFatalsChain[0].model should] equal:customErrorModel];
                                     });
                                     it(@"Should use correct arguments", ^{
                                         [[errorModelFactory should] receive:@selector(customModelForErrorDetails:identifier:bytesTruncated:)
                                                               withArguments:errorDetails, identifier, theValue(&bytesTruncated)];
-                                        [formatter formattedCustomErrorErrorDetails:errorDetails identifier:identifier bytesTruncated:&bytesTruncated];
+                                        [formatter formattedCustomErrorErrorDetails:errorDetails identifier:identifier
+                                                                     bytesTruncated:&bytesTruncated error:NULL];
                                     });
                                 });
                             });
+                        });
+                    });
+                    context(@"Failures", ^{
+                        it(@"Should set NSError when serialization fails", ^{
+                            NSError *serializationError = [NSError errorWithDomain:@"TestErrorDomain" code:123 userInfo:nil];
+                            [serializer stub:@selector(dataForCrash:error:) withBlock:^id(NSArray *params) {
+                                NSError *__autoreleasing *error = NULL;
+                                [((NSValue *)params[1]) getValue:&error];
+                                *error = serializationError;
+                                return nil;
+                            }];
+                            
+                            NSError *error = nil;
+                            NSData *result = [formatter formattedCustomErrorErrorDetails:errorDetails
+                                                                              identifier:identifier
+                                                                          bytesTruncated:NULL
+                                                                                   error:&error];
+                            
+                            [[result should] beNil];
+                            [[error should] equal:serializationError];
+                        });
+                        
+                        it(@"Should set NSError and return result", ^{
+                            NSError *serializationError = [NSError errorWithDomain:@"TestErrorDomain" code:123 userInfo:nil];
+                            NSData *sampleData = NSData.data;
+                            [serializer stub:@selector(dataForCrash:error:) withBlock:^id(NSArray *params) {
+                                NSError *__autoreleasing *error = NULL;
+                                [((NSValue *)params[1]) getValue:&error];
+                                *error = serializationError;
+                                return sampleData;
+                            }];
+                            
+                            NSError *error = nil;
+                            NSData *result = [formatter formattedCustomErrorErrorDetails:errorDetails
+                                                                              identifier:identifier
+                                                                          bytesTruncated:NULL
+                                                                                   error:&error];;
+                            
+                            [[result should] equal:sampleData];
+                            [[error should] equal:serializationError];
                         });
                     });
                 });
@@ -700,8 +887,11 @@ describe(@"AMAExceptionFormatter", ^{
 
             };
             context(@"Format default error", ^{
+                
+                __block NSError *error = nil;
+                
                 beforeEach(^{
-                    [formatter formattedErrorErrorDetails:nil bytesTruncated:NULL];
+                    [formatter formattedErrorErrorDetails:nil bytesTruncated:NULL error:&error];
                     decodedCrash = serializerSpy.argument;
                 });
                 context(@"Common checks", ^{
@@ -712,26 +902,28 @@ describe(@"AMAExceptionFormatter", ^{
                                             withArguments:nil, theValue(&bytesTruncated)];
                     [[crashObjectsFactory should] receive:@selector(backtraceFrom:bytesTruncated:)
                                             withArguments:nil, theValue(&bytesTruncated)];
-                    [formatter formattedErrorErrorDetails:nil bytesTruncated:&bytesTruncated];
+                    [formatter formattedErrorErrorDetails:nil bytesTruncated:&bytesTruncated error:&error];
                 });
                 context(@"Crash", ^{
-                    AMACrashReportError *__block error = nil;
+                    AMACrashReportError *__block reportError = nil;
                     beforeEach(^{
-                        error = decodedCrash.crash.error;
+                        error = nil;
+                        reportError = decodedCrash.crash.error;
                     });
                     context(@"Error", ^{
                         it(@"Should have valid type", ^{
-                            [[theValue(error.type) should] equal:theValue(AMACrashTypeVirtualMachineError)];
+                            [[theValue(reportError.type) should] equal:theValue(AMACrashTypeVirtualMachineError)];
                         });
                         context(@"Non fatals", ^{
                             context(@"Non fatal", ^{
                                 it(@"Should have valid error model", ^{
-                                    [[error.nonFatalsChain[0].model should] equal:defaultErrorModel];
+                                    [[reportError.nonFatalsChain[0].model should] equal:defaultErrorModel];
                                 });
                                 it(@"Should use correct arguments", ^{
                                     [[errorModelFactory should] receive:@selector(defaultModelForErrorDetails:bytesTruncated:)
                                                           withArguments:nil, theValue(&bytesTruncated)];
-                                    [formatter formattedErrorErrorDetails:nil bytesTruncated:&bytesTruncated];
+                                    [formatter formattedErrorErrorDetails:nil
+                                                           bytesTruncated:&bytesTruncated error:&error];
                                 });
                             });
                         });
@@ -740,8 +932,12 @@ describe(@"AMAExceptionFormatter", ^{
             });
             context(@"Format custom error", ^{
                 NSString *identifier = @"333-444";
+                
+                __block NSError *error = nil;
+                
                 beforeEach(^{
-                    [formatter formattedCustomErrorErrorDetails:nil identifier:identifier bytesTruncated:NULL];
+                    [formatter formattedCustomErrorErrorDetails:nil identifier:identifier
+                                                 bytesTruncated:NULL error:&error];
                     decodedCrash = serializerSpy.argument;
                 });
                 context(@"Common checks", ^{
@@ -752,26 +948,30 @@ describe(@"AMAExceptionFormatter", ^{
                                             withArguments:nil, theValue(&bytesTruncated)];
                     [[crashObjectsFactory should] receive:@selector(backtraceFrom:bytesTruncated:)
                                             withArguments:nil, theValue(&bytesTruncated)];
-                    [formatter formattedCustomErrorErrorDetails:nil identifier:identifier bytesTruncated:&bytesTruncated];
+                    [formatter formattedCustomErrorErrorDetails:nil identifier:identifier
+                                                 bytesTruncated:&bytesTruncated error:&error];
                 });
                 context(@"Crash", ^{
-                    AMACrashReportError *__block error = nil;
+                    __block AMACrashReportError *reportError = nil;
+                    __block NSError *error = nil;
                     beforeEach(^{
-                        error = decodedCrash.crash.error;
+                        error = nil;
+                        reportError = decodedCrash.crash.error;
                     });
                     context(@"Error", ^{
                         it(@"Should have valid type", ^{
-                            [[theValue(error.type) should] equal:theValue(AMACrashTypeVirtualMachineCustomError)];
+                            [[theValue(reportError.type) should] equal:theValue(AMACrashTypeVirtualMachineCustomError)];
                         });
                         context(@"Non fatals", ^{
                             context(@"Non fatal", ^{
                                 it(@"Should have valid error model", ^{
-                                    [[error.nonFatalsChain[0].model should] equal:customErrorModel];
+                                    [[reportError.nonFatalsChain[0].model should] equal:customErrorModel];
                                 });
                                 it(@"Should use correct arguments", ^{
                                     [[errorModelFactory should] receive:@selector(customModelForErrorDetails:identifier:bytesTruncated:)
                                                           withArguments:nil, identifier, theValue(&bytesTruncated)];
-                                    [formatter formattedCustomErrorErrorDetails:nil identifier:identifier bytesTruncated:&bytesTruncated];
+                                    [formatter formattedCustomErrorErrorDetails:nil identifier:identifier 
+                                                                 bytesTruncated:&bytesTruncated error:&error];
                                 });
                             });
                         });

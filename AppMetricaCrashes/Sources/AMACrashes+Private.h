@@ -10,11 +10,12 @@
 @class AMAAppMetricaConfiguration;
 @class AMACrashLoader;
 @class AMACrashMatchingRule;
+@class AMACrashReporter;
 @class AMACrashReportingStateNotifier;
 @class AMADecodedCrashSerializer;
 @class AMAErrorEnvironment;
-@class AMAReporterStateStorage;
 @class AMAErrorModelFactory;
+@class AMAReporterStateStorage;
 
 @protocol AMACrashProcessingReporting;
 @protocol AMAExecuting;
@@ -36,7 +37,8 @@
                       serializer:(AMADecodedCrashSerializer *)serializer
                    configuration:(AMACrashesConfiguration *)configuration
                 errorEnvironment:(AMAErrorEnvironment *)errorEnvironment
-               errorModelFactory:(AMAErrorModelFactory *)errorModelFactory NS_DESIGNATED_INITIALIZER;
+               errorModelFactory:(AMAErrorModelFactory *)errorModelFactory
+                   crashReporter:(AMACrashReporter *)crashReporter NS_DESIGNATED_INITIALIZER;
 
 - (void)activate;
 

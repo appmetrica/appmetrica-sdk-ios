@@ -27,6 +27,7 @@ extern BOOL const kAMADefaultAppOpenTrackingEnabled;
 @property (atomic, copy) NSString *appVersion;
 @property (atomic, assign) uint32_t appBuildNumber;
 @property (atomic, copy) NSString *appBuildNumberString;
+/// Unused
 @property (atomic, copy, readonly) AMABuildUID *appBuildUID;
 
 @property (atomic, assign) NSUInteger batchSize;

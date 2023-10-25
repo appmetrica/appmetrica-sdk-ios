@@ -1,18 +1,29 @@
+#import "AMACrashSafeTransactor.h"
 
-#import "AMACore.h"
 #import "AMACrashSafeTransactionLock.h"
 #import "AMACrashSafeTransactionRollbackResult.h"
 
 @implementation AMACrashSafeTransactor
 
-+ (void)processTransactionWithID:(NSString *)transactionID
+- (instancetype)initWithReporter:(id<AMATransactionReporter>)reporter
+{
+    self = [super init];
+    if (self != nil) {
+        _reporter = reporter;
+    }
+    return self;
+}
+
+#pragma mark - Public -
+
+- (void)processTransactionWithID:(NSString *)transactionID
                             name:(NSString *)name
                      transaction:(dispatch_block_t)transaction
 {
     [self processTransactionWithID:transactionID name:name transaction:transaction rollback:nil];
 }
 
-+ (void)processTransactionWithID:(NSString *)transactionID
+- (void)processTransactionWithID:(NSString *)transactionID
                             name:(NSString *)name
                      transaction:(dispatch_block_t)transaction
                         rollback:(AMACrashSafeTransactorRollbackBlock)rollback
@@ -24,7 +35,7 @@
                           rollback:rollback];
 }
 
-+ (void)processTransactionWithID:(NSString *)transactionID
+- (void)processTransactionWithID:(NSString *)transactionID
                             name:(NSString *)name
                  rollbackContext:(id<NSCoding>)rollbackContext
                      transaction:(dispatch_block_t)transaction
@@ -53,7 +64,9 @@
     }
 }
 
-+ (AMACrashSafeTransactionRollbackResult *)rollbackTransactionWithID:(NSString *)transactionID
+#pragma mark - Private -
+
+- (AMACrashSafeTransactionRollbackResult *)rollbackTransactionWithID:(NSString *)transactionID
                                                                 lock:(AMACrashSafeTransactionLock *)lock
                                                             rollback:(AMACrashSafeTransactorRollbackBlock)rollback
 {
@@ -78,16 +91,16 @@
                                                                   exception:rollbackException];
 }
 
-+ (void)reportFailedTransactionWithID:(NSString *)transactionID
+- (void)reportFailedTransactionWithID:(NSString *)transactionID
                                  lock:(AMACrashSafeTransactionLock *)lock
                        rollbackResult:(AMACrashSafeTransactionRollbackResult *)rollbackResult
 {
     if (lock.shouldBeReported) {
-        [[AMAAppMetrica sharedInternalEventsReporter] reportFailedTransactionWithID:transactionID
-                                                                             ownerName:lock.lockOwnerName
-                                                                       rollbackContent:rollbackResult.content
-                                                                     rollbackException:rollbackResult.exception
-                                                                        rollbackFailed:rollbackResult.exception != nil];
+        [self.reporter reportFailedTransactionWithID:transactionID
+                                           ownerName:lock.lockOwnerName
+                                     rollbackContent:rollbackResult.content
+                                   rollbackException:rollbackResult.exception
+                                      rollbackFailed:rollbackResult.exception != nil];
         lock.shouldBeReported = NO;
     }
 }

@@ -16,7 +16,7 @@
 #import "AMADeepLinkController.h"
 #import "AMAEnvironmentContainer.h"
 #import "AMAErrorLogger.h"
-#import "AMAInternalEventsReporter+Private.h"
+#import "AMAInternalEventsReporter.h"
 #import "AMALocationManager.h"
 #import "AMAMetricaConfiguration.h"
 #import "AMAMetricaInMemoryConfiguration.h"

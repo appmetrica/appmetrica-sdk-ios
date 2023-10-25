@@ -1,22 +1,23 @@
 
 #import <Foundation/Foundation.h>
 
+@class AMACrashReporter;
 @class AMADecodedCrash;
 @class AMADecodedCrashSerializer;
 @class AMAErrorModel;
 @class AMAExceptionFormatter;
-@protocol AMACrashProcessingReporting;
 
 @interface AMACrashProcessor : NSObject
 
 @property (nonatomic, copy, readonly) NSArray<NSNumber *> *ignoredCrashSignals;
-@property (nonatomic, strong) NSMutableSet<id<AMACrashProcessingReporting>> *extendedCrashReporters; // FIXME: (glinnik, belanovich-sy) needed any more?
 
 - (instancetype)init NS_UNAVAILABLE;
 - (instancetype)initWithIgnoredSignals:(NSArray *)ignoredSignals
-                            serializer:(AMADecodedCrashSerializer *)serializer;
+                            serializer:(AMADecodedCrashSerializer *)serializer
+                         crashReporter:(AMACrashReporter *)crashReporter;
 - (instancetype)initWithIgnoredSignals:(NSArray *)ignoredSignals
                             serializer:(AMADecodedCrashSerializer *)serializer
+                         crashReporter:(AMACrashReporter *)crashReporter
                              formatter:(AMAExceptionFormatter *)formatter NS_DESIGNATED_INITIALIZER;
 
 - (void)processCrash:(AMADecodedCrash *)decodedCrash withError:(NSError *)error;

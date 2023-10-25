@@ -1,13 +1,13 @@
-
 #import "AMACrashLogging.h"
+
 #import <AppMetricaStorageUtils/AppMetricaStorageUtils.h>
 #import <AppMetricaPlatform/AppMetricaPlatform.h>
-#import <AppMetricaCoreExtension/AppMetricaCoreExtension.h>
 
-#import "AMAKSCrash.h"
 #import "AMACrashLoader.h"
 #import "AMACrashReportDecoder.h"
+#import "AMACrashSafeTransactor.h"
 #import "AMADecodedCrash.h"
+#import "AMAKSCrash.h"
 #import "KSCrash.h"
 
 static NSString *const kAMALoadingCrashReportsTransactionKey = @"KSCrashLoadingReports";
@@ -17,6 +17,7 @@ NSString *const kAMAApplicationNotRespondingCrashType = @"AMAApplicationNotRespo
 
 @property (nonatomic, strong) NSMutableDictionary *decoders;
 @property (nonatomic, strong) AMAUnhandledCrashDetector *unhandledCrashDetector;
+@property (nonatomic, strong, readonly) AMACrashSafeTransactor *transactor;
 
 @property (nonatomic, strong, readonly) KSCrash *ksCrashInstance;
 
@@ -30,19 +31,16 @@ NSString *const kAMAApplicationNotRespondingCrashType = @"AMAApplicationNotRespo
 
 @synthesize ksCrashInstance = _ksCrashInstance;
 
-- (instancetype)init
-{
-    return [self initWithUnhandledCrashDetector:nil];
-}
-
 - (instancetype)initWithUnhandledCrashDetector:(AMAUnhandledCrashDetector *)unhandledCrashDetector
+                                    transactor:(AMACrashSafeTransactor *)transactor
 {
     self = [super init];
-    if (self) {
+    if (self != nil)
+    {
         _decoders = [NSMutableDictionary dictionary];
         _unhandledCrashDetector = unhandledCrashDetector;
+        _transactor = transactor;
     }
-
     return self;
 }
 
@@ -113,7 +111,7 @@ NSString *const kAMAApplicationNotRespondingCrashType = @"AMAApplicationNotRespo
 {
     //TODO: Crashes fixing
     @synchronized (self) {
-        [AMACrashSafeTransactor processTransactionWithID:@"KSCrashSwapOfCxaThrow" name:@"SwapOfCxaThrow" transaction:^{
+        [self.transactor processTransactionWithID:@"KSCrashSwapOfCxaThrow" name:@"SwapOfCxaThrow" transaction:^{
             [self.ksCrashInstance enableSwapOfCxaThrow];
         }];
     }
@@ -141,7 +139,7 @@ NSString *const kAMAApplicationNotRespondingCrashType = @"AMAApplicationNotRespo
     NSArray *__block reportIDs = nil;
     NSString *transactionID = kAMALoadingCrashReportsTransactionKey;
     __weak __typeof(self) weakSelf = self;
-    [AMACrashSafeTransactor processTransactionWithID:transactionID name:@"ReportIDs" transaction:^{
+    [self.transactor processTransactionWithID:transactionID name:@"ReportIDs" transaction:^{
         reportIDs = [weakSelf.ksCrashInstance reportIDs];
     } rollback:^NSString *(id context){
         [[self class] purgeAllRawCrashReports];
@@ -194,12 +192,12 @@ NSString *const kAMAApplicationNotRespondingCrashType = @"AMAApplicationNotRespo
 
         NSString *transactionID = kAMALoadingCrashReportsTransactionKey;
         __weak __typeof(self) weakSelf = self;
-        [AMACrashSafeTransactor processTransactionWithID:transactionID name:@"ReportWithID" transaction:^{
+        [self.transactor processTransactionWithID:transactionID name:@"ReportWithID" transaction:^{
             crashReport = [weakSelf.ksCrashInstance reportWithID:reportID];
         } rollback:rollback];
 
         if (success) {
-            [AMACrashSafeTransactor processTransactionWithID:transactionID
+            [self.transactor processTransactionWithID:transactionID
                                                         name:@"DecodeReport"
                                              rollbackContext:[reportID stringValue]
                                                  transaction:^{

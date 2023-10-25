@@ -9,6 +9,7 @@
 #import "AMACrashLoader.h"
 #import "AMACrashMatchingRule.h"
 #import "AMACrashProcessor.h"
+#import "AMACrashReporter.h"
 #import "AMACrashReportingStateNotifier.h"
 #import "AMACrashesConfiguration.h"
 #import "AMADecodedCrash.h"
@@ -30,12 +31,13 @@ describe(@"AMACrashes", ^{
     let(serializer, ^{ return [AMADecodedCrashSerializer nullMock]; });
     let(errorEnvironment, ^{ return [AMAErrorEnvironment nullMock]; });
     let(errorModelFactory, ^{ return [AMAErrorModelFactory nullMock]; });
+    let(crashReporter, ^{ return [AMACrashReporter nullMock]; });
     
     let(crashProcessor, ^{
         // TODO: replace with factory
         AMACrashProcessor *mock = [AMACrashProcessor nullMock];
         [AMACrashProcessor stub:@selector(alloc) andReturn:mock];
-        [mock stub:@selector(initWithIgnoredSignals:serializer:) andReturn:mock];
+        [mock stub:@selector(initWithIgnoredSignals:serializer:crashReporter:) andReturn:mock];
         return mock;
     });
     let(anrDetectorMock, ^{ 
@@ -54,7 +56,8 @@ describe(@"AMACrashes", ^{
                                          serializer:serializer
                                       configuration:[AMACrashesConfiguration new]
                                    errorEnvironment:errorEnvironment
-                                  errorModelFactory:errorModelFactory];
+                                  errorModelFactory:errorModelFactory
+                                      crashReporter:crashReporter];
     });
     
     context(@"Initialization and Singleton", ^{
@@ -83,8 +86,8 @@ describe(@"AMACrashes", ^{
     
     context(@"Configuration Setup", ^{
         
-        __block AMACrashesConfiguration *initialConfig;
-        __block AMACrashesConfiguration *newConfig;
+        __block AMACrashesConfiguration *initialConfig = nil;
+        __block AMACrashesConfiguration *newConfig = nil;
         
         beforeEach(^{
             initialConfig = [AMACrashesConfiguration new];
@@ -190,8 +193,8 @@ describe(@"AMACrashes", ^{
             
             it(@"Should initialize crash processor with provided ignored signals and serializer", ^{
                 initialConfig.ignoredCrashSignals = @[ @SIGABRT, @SIGILL, @SIGSEGV ];
-                [[crashProcessor should] receive:@selector(initWithIgnoredSignals:serializer:)
-                                   withArguments:initialConfig.ignoredCrashSignals, serializer];
+                [[crashProcessor should] receive:@selector(initWithIgnoredSignals:serializer:crashReporter:)
+                                   withArguments:initialConfig.ignoredCrashSignals, serializer, crashReporter];
                 
                 [crashes setConfiguration:initialConfig];
                 [crashes activate];
@@ -369,12 +372,12 @@ describe(@"AMACrashes", ^{
             NSArray *mockedEvents = @[[AMACustomEventParameters mock], [AMACustomEventParameters mock]];
             [crashLoader stub:@selector(syncLoadCrashReports) andReturn:mockedCrashes];
 
-            [[serializer should] receive:@selector(eventParametersFromDecodedData:)
+            [[serializer should] receive:@selector(eventParametersFromDecodedData:error:)
                                andReturn:mockedEvents[0]
-                           withArguments:mockedCrashes[0]];
-            [[serializer should] receive:@selector(eventParametersFromDecodedData:)
+                           withArguments:mockedCrashes[0], KWNull.null];
+            [[serializer should] receive:@selector(eventParametersFromDecodedData:error:)
                                andReturn:mockedEvents[1]
-                           withArguments:mockedCrashes[1]];
+                           withArguments:mockedCrashes[1], KWNull.null];
 
             [[[AMACrashes eventsForPreviousSession] should] equal:mockedEvents];
         });
@@ -383,7 +386,7 @@ describe(@"AMACrashes", ^{
             NSArray *mockedCrashes = @[[AMADecodedCrash mock], [AMADecodedCrash mock]];
             [crashLoader stub:@selector(syncLoadCrashReports) andReturn:mockedCrashes];
             
-            [[serializer should] receive:@selector(eventParametersFromDecodedData:)
+            [[serializer should] receive:@selector(eventParametersFromDecodedData:error:)
                                andReturn:nil
                                withCount:mockedCrashes.count];
             
@@ -395,8 +398,10 @@ describe(@"AMACrashes", ^{
             AMACustomEventParameters *event = [AMACustomEventParameters mock];
             [crashLoader stub:@selector(syncLoadCrashReports) andReturn:mockedCrashes];
             
-            [serializer stub:@selector(eventParametersFromDecodedData:) andReturn:event withArguments:mockedCrashes[0]];
-            [serializer stub:@selector(eventParametersFromDecodedData:) andReturn:nil withArguments:mockedCrashes[1]];
+            [serializer stub:@selector(eventParametersFromDecodedData:error:) 
+                   andReturn:event withArguments:mockedCrashes[0], nil];
+            [serializer stub:@selector(eventParametersFromDecodedData:error:)
+                   andReturn:nil withArguments:mockedCrashes[1], nil];
             
             NSArray *events = [AMACrashes eventsForPreviousSession];
             [[events should] haveCountOf:1];

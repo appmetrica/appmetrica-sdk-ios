@@ -27,10 +27,11 @@
 #import "AMAEvent.h"
 #import "AMAEventBuilder.h"
 #import "AMAEventCountDispatchStrategy.h"
+#import "AMAEventPollingDelegateMock.h"
 #import "AMAEventStorage+TestUtilities.h"
 #import "AMAExtensionsReportController.h"
 #import "AMAExtrasContainer.h"
-#import "AMAInternalEventsReporter+Private.h"
+#import "AMAInternalEventsReporter.h"
 #import "AMALocationManager.h"
 #import "AMAMetricaConfigurationTestUtilities.h"
 #import "AMAPermissionsController.h"
@@ -49,7 +50,6 @@
 #import "AMAStringEventValue.h"
 #import "AMATimerDispatchStrategy.h"
 #import "AMAUserProfile.h"
-#import "AMAEventPollingDelegateMock.h"
 
 static NSString *const kAMAEnvironmentTestKey = @"TestEnvironmentKey";
 static NSString *const kAMAEnvironmentTestValue = @"TestEnvironmentValue";
