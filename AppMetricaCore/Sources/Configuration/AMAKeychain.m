@@ -89,7 +89,13 @@ static NSString *const AMAKeychainAvailabilityCheckObject = @"AMAKeychainAvailab
         return;
     }
 
-    NSData *data = [NSKeyedArchiver archivedDataWithRootObject:value];
+    NSError *archiveError = nil;
+    NSData *data = [NSKeyedArchiver archivedDataWithRootObject:value requiringSecureCoding:YES error:&archiveError];
+    if (archiveError) {
+        AMALogError(@"Error archiving data: %@", archiveError);
+        [self fillError:error withErrorCode:kAMAKeychainErrorCodeDecode statusCode:0 underlyingError:archiveError];
+    }
+
     if ([self dataForKey:key error:nil] == nil) {
         [self addData:data forKey:key error:error];
     }
@@ -104,7 +110,13 @@ static NSString *const AMAKeychainAvailabilityCheckObject = @"AMAKeychainAvailab
         return;
     }
 
-    NSData *data = [NSKeyedArchiver archivedDataWithRootObject:value];
+    NSError *archiveError = nil;
+    NSData *data = [NSKeyedArchiver archivedDataWithRootObject:value requiringSecureCoding:YES error:&archiveError];
+    if (archiveError) {
+        AMALogError(@"Error archiving data: %@", archiveError);
+        [self fillError:error withErrorCode:kAMAKeychainErrorCodeDecode statusCode:0 underlyingError:archiveError];
+    }
+
     if ([self dataForKey:key error:nil] == nil) {
         [self addData:data forKey:key error:error];
     }
@@ -122,7 +134,7 @@ static NSString *const AMAKeychainAvailabilityCheckObject = @"AMAKeychainAvailab
     OSStatus result = [self.bridge updateEntryWithQuery:entryQuery attributesToUpdate:updateQuery];
     if (result != noErr) {
         AMALogError(@"Failed to update object for key %@ with osstatus %ld", key, (long)result);
-        [self fillError:error wtithErrorCode:kAMAKeychainErrorCodeUpdate statusCode:result];
+        [self fillError:error withErrorCode:kAMAKeychainErrorCodeUpdate statusCode:result];
     }
 }
 
@@ -136,7 +148,7 @@ static NSString *const AMAKeychainAvailabilityCheckObject = @"AMAKeychainAvailab
     OSStatus result = [self.bridge addEntryWithAttributes:dataQuery];
     if (result != noErr) {
         AMALogError(@"Failed to add object for key %@ with osstatus %ld", key, (long)result);
-        [self fillError:error wtithErrorCode:kAMAKeychainErrorCodeAdd statusCode:result];
+        [self fillError:error withErrorCode:kAMAKeychainErrorCodeAdd statusCode:result];
     }
 }
 
@@ -148,14 +160,11 @@ static NSString *const AMAKeychainAvailabilityCheckObject = @"AMAKeychainAvailab
     }
 
     NSString *value = nil;
-    @try {
-        value = [NSKeyedUnarchiver unarchiveObjectWithData:data];
-    } @catch (NSException *exception) {
-        [self fillError:error wtithErrorCode:kAMAKeychainErrorCodeDecode statusCode:0];
-    }
-    if ([value isKindOfClass:[NSString class]] == NO) {
-        value = nil;
-        [self fillError:error wtithErrorCode:kAMAKeychainErrorCodeInvalidType statusCode:0];
+    NSError *unarchiveError = nil;
+    value = [NSKeyedUnarchiver unarchivedObjectOfClass:NSString.class fromData:data error:&unarchiveError];
+    if (unarchiveError != nil) {
+        AMALogError(@"Error unarchiving data: %@", unarchiveError);
+        [self fillError:error withErrorCode:kAMAKeychainErrorCodeDecode statusCode:0 underlyingError:unarchiveError];
     }
     return value;
 }
@@ -171,7 +180,7 @@ static NSString *const AMAKeychainAvailabilityCheckObject = @"AMAKeychainAvailab
     OSStatus result = [self.bridge copyMatchingEntryWithQuery:dataQuery resultData:&data];
     if (result != noErr && result != errSecItemNotFound) {
         AMALogError(@"Failed to retrieve data for key %@, osstatus %ld", key, (long)result);
-        [self fillError:error wtithErrorCode:kAMAKeychainErrorCodeGet statusCode:result];
+        [self fillError:error withErrorCode:kAMAKeychainErrorCodeGet statusCode:result];
     }
 
     return data;
@@ -192,20 +201,34 @@ static NSString *const AMAKeychainAvailabilityCheckObject = @"AMAKeychainAvailab
     OSStatus result = [self.bridge deleteEntryWithQuery:entryQuery];
     if (result != noErr && result != errSecItemNotFound) {
         AMALogError(@"Failed to delete data for key %@, osstatus %ld", key, (long)result);
-        [self fillError:error wtithErrorCode:kAMAKeychainErrorCodeRemove statusCode:result];
+        [self fillError:error withErrorCode:kAMAKeychainErrorCodeRemove statusCode:result];
     }
 }
+
 - (void)fillError:(NSError **)error wtithErrorCode:(kAMAKeychainErrorCode)errorCode
 {
-    [self fillError:error wtithErrorCode:errorCode statusCode:0];
+    [self fillError:error withErrorCode:errorCode statusCode:0 underlyingError:nil];
 }
 
-- (void)fillError:(NSError **)error wtithErrorCode:(kAMAKeychainErrorCode)errorCode statusCode:(OSStatus)status
+- (void)fillError:(NSError **)error withErrorCode:(kAMAKeychainErrorCode)errorCode statusCode:(OSStatus)status
 {
-    NSError *internalError = [NSError errorWithDomain:kAMAKeychainErrorDomain code:errorCode userInfo:@{
-        kAMAKeychainErrorKeyCode: @(status),
-    }];
+    [self fillError:error withErrorCode:errorCode statusCode:status underlyingError:nil];
+}
+
+- (void)fillError:(NSError **)error 
+    withErrorCode:(kAMAKeychainErrorCode)errorCode
+       statusCode:(OSStatus)status
+  underlyingError:(NSError *)underlyingError
+{
+    NSMutableDictionary *userInfo = NSMutableDictionary.dictionary;
+    userInfo[kAMAKeychainErrorKeyCode] = @(status);
+    userInfo[NSUnderlyingErrorKey] = underlyingError;
+    
+    NSError *internalError = [NSError errorWithDomain:kAMAKeychainErrorDomain
+                                                 code:errorCode
+                                             userInfo:userInfo];
     [AMAErrorUtilities fillError:error withError:internalError];
 }
+
 
 @end

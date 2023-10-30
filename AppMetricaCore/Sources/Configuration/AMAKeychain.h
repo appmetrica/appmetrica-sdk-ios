@@ -16,7 +16,7 @@ typedef NS_ENUM(NSInteger, kAMAKeychainErrorCode) {
     kAMAKeychainErrorCodeRemove = 3,
     kAMAKeychainErrorCodeQueryCreation = 4,
     kAMAKeychainErrorCodeDecode = 5,
-    kAMAKeychainErrorCodeInvalidType = 6,
+    kAMAKeychainErrorCodeInvalidType = 6, // Unused
 };
 
 @interface AMAKeychain : NSObject <AMAKeychainStoring>

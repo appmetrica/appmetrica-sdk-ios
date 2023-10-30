@@ -35,11 +35,11 @@
     int milliseconds = (int)((epoch - floor(epoch)) * 1000);
 
     char ts[13] = "";
-    sprintf(ts, "%02ld:%02ld:%02ld:%03d",
-            (long)components.hour,
-            (long)components.minute,
-            (long)components.second,
-            milliseconds);
+    snprintf(ts, sizeof(ts), "%02ld:%02ld:%02ld:%03d",
+             (long)components.hour,
+             (long)components.minute,
+             (long)components.second,
+             milliseconds);
     NSString *dateString = [NSString stringWithUTF8String:ts];
     return dateString;
 }

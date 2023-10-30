@@ -116,9 +116,9 @@ describe(@"AMAKeychainTests", ^{
                 it(@"Should return nil in getter", ^{
                     [[[keychain stringValueForKey:@"foo" error:nil] should] beNil];
                 });
-                it(@"Should fill valid error", ^{
+                it(@"Should fill error with underlying error", ^{
                     [keychain stringValueForKey:@"foo" error:&error];
-                    [[error should] equal:errorWithCode(kAMAKeychainErrorCodeInvalidType, 0)];
+                    [error.userInfo[NSUnderlyingErrorKey] shouldNotBeNil];
                 });
             });
             context(@"Delete error", ^{

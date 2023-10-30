@@ -77,7 +77,7 @@
     // Add persistent version of the key to system keychain
     query[(__bridge id)kSecValueData] = self.key.data;
     query[(__bridge id)kSecAttrKeyClass] = (__bridge id)[self keyType];
-    query[(__bridge id)kSecAttrAccessible] = (__bridge id)kSecAttrAccessibleAlways;
+    query[(__bridge id)kSecAttrAccessible] = (__bridge id)kSecAttrAccessibleAfterFirstUnlock;
     query[(__bridge id)kSecReturnPersistentRef] = @YES;
 
     CFTypeRef persistKey = nil;
