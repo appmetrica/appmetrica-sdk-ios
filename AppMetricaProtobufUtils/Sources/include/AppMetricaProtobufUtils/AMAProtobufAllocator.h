@@ -1,6 +1,6 @@
 
 #import <Foundation/Foundation.h>
-#import <protobuf-c/protobuf-c.h>
+#import <AppMetrica_Protobuf/AppMetrica_Protobuf.h>
 
 @interface AMAProtobufAllocator : NSObject
 

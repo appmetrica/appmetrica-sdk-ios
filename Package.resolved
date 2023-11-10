@@ -27,15 +27,6 @@
           "revision": "9e72c018a0ba455a89cf5770dea6e1d5258744b6",
           "version": "1.15.27"
         }
-      },
-      {
-        "package": "protobuf-c",
-        "repositoryURL": "https://github.com/appmetrica/protobuf-c",
-        "state": {
-          "branch": null,
-          "revision": "2dd4ca0d49a317570347d9bc1e85ee1bc5660d01",
-          "version": "1.2.2-spm"
-        }
       }
     ]
   },

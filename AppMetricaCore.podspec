@@ -24,9 +24,9 @@ Pod::Spec.new do |s|
   s.dependency 'AppMetricaPlatform', '~> 5.0'
   s.dependency 'AppMetricaStorageUtils', '~> 5.0'
   s.dependency 'AppMetricaEncodingUtils', '~> 5.0'
+  s.dependency 'AppMetrica_Protobuf', '~> 5.0'
 
   s.dependency 'FMDB', '= 2.7.5'
-  s.dependency 'protobuf-c', '= 1.2.1'
   
   s.header_dir = s.name
   s.source_files = [

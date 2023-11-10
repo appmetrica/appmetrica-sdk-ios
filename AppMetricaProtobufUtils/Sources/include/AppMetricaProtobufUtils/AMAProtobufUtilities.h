@@ -1,6 +1,6 @@
 
 #import <UIKit/UIKit.h>
-#import <protobuf-c/protobuf-c.h>
+#import <AppMetrica_Protobuf/AppMetrica_Protobuf.h>
 
 NS_ASSUME_NONNULL_BEGIN
 

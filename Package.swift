@@ -20,6 +20,8 @@ enum AppMetricaTarget: String {
     case storageUtils = "AppMetricaStorageUtils"
     case encodingUtils = "AppMetricaEncodingUtils"
     
+    case protobuf = "AppMetrica_Protobuf"
+    
     var name: String { rawValue }
     var testsName: String { rawValue + "Tests" }
     var path: String { "\(rawValue)/Sources" }
@@ -28,7 +30,6 @@ enum AppMetricaTarget: String {
 }
 
 //MARK: - Target Dependencies -
-let protobuf = Target.Dependency.byName(name: "protobuf-c")
 let fmdb = Target.Dependency.byName(name: "FMDB")
 let kiwi = Target.Dependency.byName(name: "Kiwi")
 let ksKrash = Target.Dependency.byName(name: "KSCrash")
@@ -54,7 +55,6 @@ let package = Package(
         .library(name: "AppMetricaWebKit", targets: [AppMetricaTarget.webKit.name]),
     ],
     dependencies: [
-        .package(name: "protobuf-c", url: "https://github.com/appmetrica/protobuf-c", .upToNextMinor(from: "1.2.2-spm")),
         .package(name: "FMDB", url: "https://github.com/ccgus/fmdb", .upToNextMinor(from: "2.7.5")),
         // Crash dependencies
         .package(name: "KSCrash", url: "https://github.com/kstenerud/KSCrash", .upToNextMinor(from: "1.15.26")),
@@ -66,9 +66,9 @@ let package = Package(
         .target(
             target: .core,
             dependencies: [
-                .network, .log, .coreUtils, .hostState, .protobufUtils, .platform, .storageUtils, .encodingUtils
+                .network, .log, .coreUtils, .hostState, .protobufUtils, .platform, .storageUtils, .encodingUtils, .protobuf
             ],
-            outerDependencies: [protobuf, fmdb],
+            outerDependencies: [fmdb],
             searchPaths: [
                 "../../AppMetricaCoreExtension/Sources/include/AppMetricaCoreExtension", "./**"
             ]
@@ -89,9 +89,9 @@ let package = Package(
         .target(
             target: .crashes,
             dependencies: [
-                .core, .log, .coreExtension, .hostState, .protobufUtils, .platform, .storageUtils, .encodingUtils
+                .core, .log, .coreExtension, .hostState, .protobufUtils, .platform, .storageUtils, .encodingUtils, .protobuf
             ],
-            outerDependencies: [ksKrash, protobuf],
+            outerDependencies: [ksKrash],
             searchPaths: ["./**"]
         ),
         .testTarget(
@@ -117,12 +117,14 @@ let package = Package(
             searchPaths: ["../Sources"]
         ),
         
+        //MARK: - AppMetrica Protobuf
+        .target(target: .protobuf),
+        
         //MARK: - AppMetrica ProtobufUtils
-        .target(target: .protobufUtils, outerDependencies: [protobuf]),
+        .target(target: .protobufUtils, dependencies: [.protobuf]),
         .testTarget(
             target: .protobufUtils,
-            dependencies: [.protobufUtils],
-            outerDependencies: [protobuf]
+            dependencies: [.protobufUtils]
         ),
         
         //MARK: - AppMetrica CoreUtils
