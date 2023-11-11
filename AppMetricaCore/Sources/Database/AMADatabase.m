@@ -8,7 +8,7 @@
 #import "AMADatabaseQueueProvider.h"
 #import "AMADatabaseIntegrityManager.h"
 #import "AMADatabaseHelper.h"
-#import "FMDB.h"
+#import <AppMetrica_FMDB/AppMetrica_FMDB.h>
 
 @interface AMADatabase () <AMADatabaseIntegrityManagerDelegate>
 
@@ -19,7 +19,7 @@
 @property (nonatomic, copy, readonly) NSArray<NSString *> *criticalKeyValueKeys;
 @property (nonatomic, strong, readonly) NSMutableArray *delayedBlocks;
 
-@property (nonatomic, strong) FMDatabaseQueue *dbQueue;
+@property (nonatomic, strong) AMAFMDatabaseQueue *dbQueue;
 @property (nonatomic, assign) AMADatabaseType databaseType;
 
 @end
@@ -71,17 +71,17 @@
     [self.migrationManager applyApiKeyMigrationsWithKey:apiKey toDatabase:self];
 }
 
-- (void)inDatabase:(void (^)(FMDatabase *db))block
+- (void)inDatabase:(void (^)(AMAFMDatabase *db))block
 {
     [self inOpenedDatabase:^{
         [self.dbQueue inDatabase:block];
     }];
 }
 
-- (void)inTransaction:(void (^)(FMDatabase *db, AMARollbackHolder *rollbackHolder))block
+- (void)inTransaction:(void (^)(AMAFMDatabase *db, AMARollbackHolder *rollbackHolder))block
 {
     [self inOpenedDatabase:^{
-        [self.dbQueue inExclusiveTransaction:^(FMDatabase *db, BOOL *rollback) {
+        [self.dbQueue inExclusiveTransaction:^(AMAFMDatabase *db, BOOL *rollback) {
             if (block != nil) {
                 AMARollbackHolder *rollbackHolder = [[AMARollbackHolder alloc] init];
                 block(db, rollbackHolder);
@@ -146,14 +146,14 @@
 {
     // No error checking so far.
     // Bad progammer, no cookie.
-    [self.dbQueue inDatabase:^(FMDatabase *db) {
+    [self.dbQueue inDatabase:^(AMAFMDatabase *db) {
         [self.tableSchemeController createSchemaInDB:db];
     }];
 }
 
 - (void)enforceDatabaseConsistency
 {
-    [self inDatabase:^(FMDatabase *db) {
+    [self inDatabase:^(AMAFMDatabase *db) {
         [self.tableSchemeController enforceDatabaseConsistencyInDB:db onInconsistency:^(dispatch_block_t fix) {
             NSString *databaseSchemaDescription = [self extractDatabaseSchemaInfo:db];
             AMALogError(@"Dropping tables, database inconsistent %@", databaseSchemaDescription);
@@ -169,7 +169,7 @@
     }];
 }
 
-- (id<AMAKeyValueStoring>)criticalValuesStorageForDB:(FMDatabase *)db
+- (id<AMAKeyValueStoring>)criticalValuesStorageForDB:(AMAFMDatabase *)db
 {
     if (self.criticalKeyValueKeys.count == 0) {
         return nil;
@@ -179,7 +179,7 @@
                                                        error:nil];
 }
 
-- (void)restoreCriticalValuesFromStorage:(id<AMAKeyValueStoring>)storage inDB:(FMDatabase *)db
+- (void)restoreCriticalValuesFromStorage:(id<AMAKeyValueStoring>)storage inDB:(AMAFMDatabase *)db
 {
     if (storage == nil) {
         return;
@@ -187,7 +187,7 @@
     [self.storageProvider saveStorage:storage db:db error:nil];
 }
 
-- (NSString *)extractDatabaseSchemaInfo:(FMDatabase *)db
+- (NSString *)extractDatabaseSchemaInfo:(AMAFMDatabase *)db
 {
     NSArray *tablesDescription = [AMADatabaseHelper eachResultsDescription:[db getSchema]];
 
@@ -228,23 +228,23 @@
 #pragma mark - AMADatabaseIntegrityManagerDelegate -
 
 - (id)contextForIntegrityManager:(AMADatabaseIntegrityManager *)manager
-            thatWillDropDatabase:(FMDatabaseQueue *)databaase
+            thatWillDropDatabase:(AMAFMDatabaseQueue *)databaase
 {
     id<AMAKeyValueStoring> __block savedStorage = nil;
-    [databaase inDatabase:^(FMDatabase *db) {
+    [databaase inDatabase:^(AMAFMDatabase *db) {
         savedStorage = [self criticalValuesStorageForDB:db];
     }];
     return savedStorage;
 }
 
 - (void)integrityManager:(AMADatabaseIntegrityManager *)manager
-    didCreateNewDatabase:(FMDatabaseQueue *)databaase
+    didCreateNewDatabase:(AMAFMDatabaseQueue *)databaase
                  context:(id<AMAKeyValueStoring>)context
 {
     if (context == nil) {
         return;
     }
-    [databaase inDatabase:^(FMDatabase *db) {
+    [databaase inDatabase:^(AMAFMDatabase *db) {
         [self restoreCriticalValuesFromStorage:context inDB:db];
     }];
 }

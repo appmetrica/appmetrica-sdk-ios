@@ -4,14 +4,14 @@
 #import "AMAStorageKeys.h"
 #import "AMADatabaseProtocol.h"
 #import "AMAOptionalBool.h"
-#import "FMDB.h"
+#import <AppMetrica_FMDB/AppMetrica_FMDB.h>
 
 @implementation AMAMigrationUtils
 
 + (BOOL)addColumn:(NSString *)columnName
           toTable:(NSString *)tableName
              type:(NSString *)columnType
-         database:(FMDatabase *)db
+         database:(AMAFMDatabase *)db
 {
     return [self addColumn:columnName
                    toTable:tableName
@@ -23,7 +23,7 @@
 + (BOOL)addColumn:(NSString *)columnName 
           toTable:(NSString *)tableName 
              type:(NSString *)columnType 
-         database:(FMDatabase *)db 
+         database:(AMAFMDatabase *)db 
        parameters:(NSArray *)parameters
 {
     BOOL eventsTableMigrationResult = YES;
@@ -40,7 +40,7 @@
     return eventsTableMigrationResult;
 }
 
-+ (BOOL)addLocationToTable:(NSString *)tableName inDatabase:(FMDatabase *)db
++ (BOOL)addLocationToTable:(NSString *)tableName inDatabase:(AMAFMDatabase *)db
 {
     BOOL eventsTableMigrationResult = [self addColumn:@"latitude" toTable:tableName type:@"DOUBLE" database:db];
 
@@ -68,12 +68,12 @@
     return eventsTableMigrationResult;
 }
 
-+ (BOOL)addServerTimeOffsetToSessionsTableInDatabase:(FMDatabase *)db
++ (BOOL)addServerTimeOffsetToSessionsTableInDatabase:(AMAFMDatabase *)db
 {
     return [self addColumn:@"server_time_offset" toTable:@"sessions" type:@"DOUBLE" database:db];
 }
 
-+ (BOOL)addErrorEnvironmentToEventsAndErrorsTableInDatabase:(FMDatabase *)db
++ (BOOL)addErrorEnvironmentToEventsAndErrorsTableInDatabase:(AMAFMDatabase *)db
 {
     BOOL result = [self addColumn:@"environment" toTable:@"events" type:@"STRING" database:db];
     if (result) {
@@ -83,7 +83,7 @@
     return result;
 }
 
-+ (BOOL)addAppEnvironmentToEventsAndErrorsTableInDatabase:(FMDatabase *)db
++ (BOOL)addAppEnvironmentToEventsAndErrorsTableInDatabase:(AMAFMDatabase *)db
 {
     BOOL result = [self addColumn:@"app_environment" toTable:@"events" type:@"STRING" database:db];
     if (result) {
@@ -93,7 +93,7 @@
     return result;
 }
 
-+ (BOOL)addTruncatedToEventsAndErrorsTableInDatabase:(FMDatabase *)db
++ (BOOL)addTruncatedToEventsAndErrorsTableInDatabase:(AMAFMDatabase *)db
 {
     NSArray *params = @[@"NOT NULL", @"DEFAULT 0"];
     BOOL result = [self addColumn:@"is_truncated" toTable:@"events" type:@"BOOL" database:db parameters:params];
@@ -104,7 +104,7 @@
     return result;
 }
 
-+ (BOOL)addUserInfoInDatabase:(FMDatabase *)db
++ (BOOL)addUserInfoInDatabase:(AMAFMDatabase *)db
 {
     BOOL result = [self addColumn:@"user_info" toTable:@"events" type:@"STRING" database:db];
     if (result) {
@@ -113,7 +113,7 @@
     return result;
 }
 
-+ (BOOL)addOptionalBoolFieldWithName:(NSString *)fieldName toTable:(NSString *)tableName db:(FMDatabase *)db
++ (BOOL)addOptionalBoolFieldWithName:(NSString *)fieldName toTable:(NSString *)tableName db:(AMAFMDatabase *)db
 {
     return [self addColumn:fieldName
                    toTable:tableName
@@ -122,17 +122,17 @@
                 parameters:@[ [NSString stringWithFormat:@"DEFAULT %ld", (long)AMAOptionalBoolUndefined] ]];
 }
 
-+ (BOOL)addLocationEnabledInDatabase:(FMDatabase *)db
++ (BOOL)addLocationEnabledInDatabase:(AMAFMDatabase *)db
 {
     return [self addOptionalBoolFieldWithName:@"location_enabled" toTable:@"events" db:db];
 }
 
-+ (BOOL)addUserProfileIDInDatabase:(FMDatabase *)db
++ (BOOL)addUserProfileIDInDatabase:(AMAFMDatabase *)db
 {
     return [self addColumn:@"user_profile_id" toTable:@"events" type:@"STRING" database:db];
 }
 
-+ (BOOL)addEncryptionTypeInDatabase:(FMDatabase *)db
++ (BOOL)addEncryptionTypeInDatabase:(AMAFMDatabase *)db
 {
     return [self addColumn:@"encryption_type"
                    toTable:@"events"
@@ -141,17 +141,17 @@
                 parameters:@[@"NOT NULL", @"DEFAULT 0"]];
 }
 
-+ (BOOL)addFirstOccurrenceInDatabase:(FMDatabase *)db
++ (BOOL)addFirstOccurrenceInDatabase:(AMAFMDatabase *)db
 {
     return [self addOptionalBoolFieldWithName:@"first_occurrence" toTable:@"events" db:db];
 }
 
-+ (BOOL)addAttributionIDInDatabase:(FMDatabase *)db
++ (BOOL)addAttributionIDInDatabase:(AMAFMDatabase *)db
 {
     return [self addColumn:@"attribution_id" toTable:@"sessions" type:@"STRING" database:db];
 }
 
-+ (BOOL)addGlobalEventNumberInDatabase:(FMDatabase *)db
++ (BOOL)addGlobalEventNumberInDatabase:(AMAFMDatabase *)db
 {
     return [self addColumn:@"global_number"
                    toTable:@"events"
@@ -160,7 +160,7 @@
                 parameters:@[@"NOT NULL", @"DEFAULT 0"]];
 }
 
-+ (BOOL)addEventNumberOfTypeInDatabase:(FMDatabase *)db
++ (BOOL)addEventNumberOfTypeInDatabase:(AMAFMDatabase *)db
 {
     return [self addColumn:@"number_of_type"
                    toTable:@"events"
@@ -169,7 +169,7 @@
                 parameters:@[@"NOT NULL", @"DEFAULT 0"]];
 }
 
-+ (BOOL)updateColumnTypes:(NSString *)columnTypesDescription ofKeyValueTable:(NSString *)tableName db:(FMDatabase *)db
++ (BOOL)updateColumnTypes:(NSString *)columnTypesDescription ofKeyValueTable:(NSString *)tableName db:(AMAFMDatabase *)db
 {
     BOOL result = YES;
     NSArray *operations = @[
@@ -188,7 +188,7 @@
     return result;
 }
 
-+ (void)resetStartupUpdatedAtToDistantPastInDatabase:(id<AMADatabaseProtocol>)database db:(FMDatabase *)db
++ (void)resetStartupUpdatedAtToDistantPastInDatabase:(id<AMADatabaseProtocol>)database db:(AMAFMDatabase *)db
 {
     [[database.storageProvider storageForDB:db] saveDate:[NSDate distantPast]
                                                   forKey:AMAStorageStringKeyStartupUpdatedAt

@@ -14,7 +14,7 @@ Pod::Spec.new do |s|
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES' }
   
   s.frameworks = 'UIKit', 'Foundation', 'CoreLocation', 'CoreGraphics', 'SystemConfiguration'
-  s.libraries   = 'z', 'sqlite3', 'c++'
+  s.libraries = 'z', 'sqlite3', 'c++'
 
   s.dependency 'AppMetricaLog', '~> 5.0'
   s.dependency 'AppMetricaNetwork', '~> 5.0'
@@ -25,8 +25,7 @@ Pod::Spec.new do |s|
   s.dependency 'AppMetricaStorageUtils', '~> 5.0'
   s.dependency 'AppMetricaEncodingUtils', '~> 5.0'
   s.dependency 'AppMetrica_Protobuf', '~> 5.0'
-
-  s.dependency 'FMDB', '= 2.7.5'
+  s.dependency 'AppMetrica_FMDB', '~> 5.0'
   
   s.header_dir = s.name
   s.source_files = [

@@ -6,7 +6,7 @@
 #import "AMADatabaseIntegrityReport.h"
 #import "AMASQLiteIntegrityIssueParser.h"
 #import "AMASQLiteIntegrityIssue.h"
-#import "FMDB.h"
+#import <AppMetrica_FMDB/AppMetrica_FMDB.h>
 
 NSString *const kAMADatabaseIntegrityStepInitial = @"initial";
 NSString *const kAMADatabaseIntegrityStepReindex = @"reindex";
@@ -35,7 +35,7 @@ NSString *const kAMADatabaseIntegrityStepNewDatabase = @"new-database";
     return self;
 }
 
-- (BOOL)checkIntegrityIssuesForDatabase:(FMDatabaseQueue *)databaseQueue
+- (BOOL)checkIntegrityIssuesForDatabase:(AMAFMDatabaseQueue *)databaseQueue
                                  report:(AMADatabaseIntegrityReport *)report
 {
     if (databaseQueue == nil) {
@@ -82,7 +82,7 @@ NSString *const kAMADatabaseIntegrityStepNewDatabase = @"new-database";
     return NO;
 }
 
-- (BOOL)fixIndexForDatabase:(FMDatabaseQueue *)databaseQueue
+- (BOOL)fixIndexForDatabase:(AMAFMDatabaseQueue *)databaseQueue
                      report:(AMADatabaseIntegrityReport *)report
 {
     if (databaseQueue == nil) {
@@ -96,7 +96,7 @@ NSString *const kAMADatabaseIntegrityStepNewDatabase = @"new-database";
     return result;
 }
 
-- (BOOL)fixWithBackupAndRestore:(FMDatabaseQueue **)databaseQueue
+- (BOOL)fixWithBackupAndRestore:(AMAFMDatabaseQueue **)databaseQueue
                          report:(AMADatabaseIntegrityReport *)report
 {
     if (databaseQueue == NULL || *databaseQueue == nil) {
@@ -105,12 +105,12 @@ NSString *const kAMADatabaseIntegrityStepNewDatabase = @"new-database";
 
     report.lastAppliedFixStep = kAMADatabaseIntegrityStepBackupRestore;
 
-    FMDatabaseQueue *sourceQueue = *databaseQueue;
+    AMAFMDatabaseQueue *sourceQueue = *databaseQueue;
     NSString *databasePath = sourceQueue.path;
     NSString *backupDatabasePath = [databasePath stringByAppendingPathExtension:@"bak"];
 
     NSError *error = nil;
-    FMDatabaseQueue *backupQueue = [[AMADatabaseQueueProvider sharedInstance] queueForPath:backupDatabasePath];
+    AMAFMDatabaseQueue *backupQueue = [[AMADatabaseQueueProvider sharedInstance] queueForPath:backupDatabasePath];
     BOOL backupResult = [AMADatabaseIntegrityQueries backupDBQueue:sourceQueue backupDB:backupQueue error:&error];
     
     if (backupResult == NO) {
@@ -134,7 +134,7 @@ NSString *const kAMADatabaseIntegrityStepNewDatabase = @"new-database";
     return YES;
 }
 
-- (BOOL)fixWithCreatingNewDatabase:(FMDatabaseQueue **)databaseQueue
+- (BOOL)fixWithCreatingNewDatabase:(AMAFMDatabaseQueue **)databaseQueue
                             report:(AMADatabaseIntegrityReport *)report
 {
     if (databaseQueue == NULL || *databaseQueue == nil) {
@@ -143,14 +143,14 @@ NSString *const kAMADatabaseIntegrityStepNewDatabase = @"new-database";
 
     report.lastAppliedFixStep = kAMADatabaseIntegrityStepNewDatabase;
 
-    FMDatabaseQueue *sourceQueue = *databaseQueue;
+    AMAFMDatabaseQueue *sourceQueue = *databaseQueue;
     NSString *databasePath = sourceQueue.path;
 
     [sourceQueue close];
 
     [AMAFileUtility removeFileProtectionForPath:databasePath];
     [AMAFileUtility deleteFileAtPath:databasePath];
-    FMDatabaseQueue *newQueue = [[AMADatabaseQueueProvider sharedInstance] queueForPath:databasePath];
+    AMAFMDatabaseQueue *newQueue = [[AMADatabaseQueueProvider sharedInstance] queueForPath:databasePath];
 
     *databaseQueue = newQueue;
     return YES;

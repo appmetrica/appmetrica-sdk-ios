@@ -9,8 +9,8 @@
 #import "AMASession.h"
 #import "AMADatabaseHelper.h"
 #import "AMADatabaseConstants.h"
-@import FMDB;
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
+#import <AppMetrica_FMDB/AppMetrica_FMDB.h>
 
 SPEC_BEGIN(AMAEventStorageTests)
 
@@ -37,7 +37,7 @@ describe(@"AMAEventStorage", ^{
 
         session = [[AMASession alloc] init];
         session.eventSeq = 23;
-        [database inDatabase:^(FMDatabase *db) {
+        [database inDatabase:^(AMAFMDatabase *db) {
             NSDictionary *sessionDictionary = @{
                 kAMASessionTableFieldStartTime: @0,
                 kAMACommonTableFieldType: @0,
@@ -62,9 +62,9 @@ describe(@"AMAEventStorage", ^{
 
     id (^fetchSessionField)(NSString *field) = ^(NSString *field) {
         id __block result = nil;
-        [database inDatabase:^(FMDatabase *db) {
+        [database inDatabase:^(AMAFMDatabase *db) {
             NSString *query = [NSString stringWithFormat:@"SELECT %@ FROM sessions WHERE oid = 1 LIMIT 1", field];
-            FMResultSet *rs = [db executeQuery:query];
+            AMAFMResultSet *rs = [db executeQuery:query];
             if ([rs next] == NO) {
                 fail(@"Session not found");
             }
@@ -91,8 +91,8 @@ describe(@"AMAEventStorage", ^{
                 NSDictionary *__block eventDictionary = nil;
                 beforeEach(^{
                     [storage addEvent:event toSession:session error:nil];
-                    [database inDatabase:^(FMDatabase *db) {
-                        FMResultSet *rs = [db executeQuery:@"SELECT * FROM events LIMIT 1"];
+                    [database inDatabase:^(AMAFMDatabase *db) {
+                        AMAFMResultSet *rs = [db executeQuery:@"SELECT * FROM events LIMIT 1"];
                         if ([rs next] == NO) {
                             fail(@"No items in events table");
                         }
@@ -135,8 +135,8 @@ describe(@"AMAEventStorage", ^{
                 });
                 it(@"Should not add event", ^{
                     [storage addEvent:event toSession:session error:nil];
-                    [database inDatabase:^(FMDatabase *db) {
-                        FMResultSet *rs = [db executeQuery:@"SELECT * FROM events LIMIT 1"];
+                    [database inDatabase:^(AMAFMDatabase *db) {
+                        AMAFMResultSet *rs = [db executeQuery:@"SELECT * FROM events LIMIT 1"];
                         [[theValue([rs next]) should] beNo];
                         [rs close];
                     }];
@@ -163,8 +163,8 @@ describe(@"AMAEventStorage", ^{
                 });
                 it(@"Should not add event", ^{
                     [storage addEvent:event toSession:session error:nil];
-                    [database inDatabase:^(FMDatabase *db) {
-                        FMResultSet *rs = [db executeQuery:@"SELECT * FROM events LIMIT 1"];
+                    [database inDatabase:^(AMAFMDatabase *db) {
+                        AMAFMResultSet *rs = [db executeQuery:@"SELECT * FROM events LIMIT 1"];
                         [[theValue([rs next]) should] beNo];
                         [rs close];
                     }];
@@ -191,8 +191,8 @@ describe(@"AMAEventStorage", ^{
                 });
                 it(@"Should not add event", ^{
                     [storage addEvent:event toSession:session error:nil];
-                    [database inDatabase:^(FMDatabase *db) {
-                        FMResultSet *rs = [db executeQuery:@"SELECT * FROM events LIMIT 1"];
+                    [database inDatabase:^(AMAFMDatabase *db) {
+                        AMAFMResultSet *rs = [db executeQuery:@"SELECT * FROM events LIMIT 1"];
                         [[theValue([rs next]) should] beNo];
                         [rs close];
                     }];
@@ -220,8 +220,8 @@ describe(@"AMAEventStorage", ^{
                 });
                 it(@"Should not add event", ^{
                     [storage addEvent:event toSession:session error:nil];
-                    [database inDatabase:^(FMDatabase *db) {
-                        FMResultSet *rs = [db executeQuery:@"SELECT * FROM events LIMIT 1"];
+                    [database inDatabase:^(AMAFMDatabase *db) {
+                        AMAFMResultSet *rs = [db executeQuery:@"SELECT * FROM events LIMIT 1"];
                         [[theValue([rs next]) should] beNo];
                         [rs close];
                     }];
@@ -293,17 +293,17 @@ describe(@"AMAEventStorage", ^{
         NSDictionary *firstDictionary = @{ @"aaa" : @"bbb "};
         NSDictionary *secondDictionary = @{ @"ccc" : @"ddd "};
         id __block mockedDatabase = nil;
-        FMDatabase *__block fmDatabase = nil;
+        AMAFMDatabase *__block fmDatabase = nil;
         SEL dbHelperSelector = @selector(enumerateRowsWithFilter:order:valuesArray:tableName:limit:db:error:block:);
         beforeEach(^{
-            fmDatabase = [FMDatabase nullMock];
+            fmDatabase = [AMAFMDatabase nullMock];
             firstEvent = [AMAEvent nullMock];
             secondEvent = [AMAEvent nullMock];
             mockedEventSerializer = [AMAEventSerializer nullMock];
             mockedNumberFiller = [AMAEventNumbersFiller nullMock];
             mockedDatabase = [KWMock nullMockForProtocol:@protocol(AMADatabaseProtocol)];
             [mockedDatabase stub:@selector(inDatabase:) withBlock:^id (NSArray *params) {
-                void (^block)(FMDatabase *) = params[0];
+                void (^block)(AMAFMDatabase *) = params[0];
                 block(fmDatabase);
                 return nil;
             }];

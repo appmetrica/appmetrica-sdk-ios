@@ -21,6 +21,7 @@ enum AppMetricaTarget: String {
     case encodingUtils = "AppMetricaEncodingUtils"
     
     case protobuf = "AppMetrica_Protobuf"
+    case fmdb = "AppMetrica_FMDB"
     
     var name: String { rawValue }
     var testsName: String { rawValue + "Tests" }
@@ -30,7 +31,6 @@ enum AppMetricaTarget: String {
 }
 
 //MARK: - Target Dependencies -
-let fmdb = Target.Dependency.byName(name: "FMDB")
 let kiwi = Target.Dependency.byName(name: "Kiwi")
 let ksKrash = Target.Dependency.byName(name: "KSCrash")
 
@@ -55,7 +55,6 @@ let package = Package(
         .library(name: "AppMetricaWebKit", targets: [AppMetricaTarget.webKit.name]),
     ],
     dependencies: [
-        .package(name: "FMDB", url: "https://github.com/ccgus/fmdb", .upToNextMinor(from: "2.7.5")),
         // Crash dependencies
         .package(name: "KSCrash", url: "https://github.com/kstenerud/KSCrash", .upToNextMinor(from: "1.15.26")),
         // Test dependencies
@@ -66,9 +65,9 @@ let package = Package(
         .target(
             target: .core,
             dependencies: [
-                .network, .log, .coreUtils, .hostState, .protobufUtils, .platform, .storageUtils, .encodingUtils, .protobuf
+                .network, .log, .coreUtils, .hostState, .protobufUtils, .platform, .storageUtils, .encodingUtils, .protobuf, .fmdb
             ],
-            outerDependencies: [fmdb],
+            outerDependencies: [],
             searchPaths: [
                 "../../AppMetricaCoreExtension/Sources/include/AppMetricaCoreExtension", "./**"
             ]
@@ -208,6 +207,9 @@ let package = Package(
             outerDependencies: [kiwi],
             searchPaths: ["../Sources/**"]
         ),
+        
+        //MARK: - AppMetrica FMDB
+        .target(target: .fmdb),
     ]
 )
 

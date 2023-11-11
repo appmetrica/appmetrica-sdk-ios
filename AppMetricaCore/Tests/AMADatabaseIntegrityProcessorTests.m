@@ -7,7 +7,7 @@
 #import "AMADatabaseIntegrityReport.h"
 #import "AMASQLiteIntegrityIssueParser.h"
 #import "AMASQLiteIntegrityIssue.h"
-@import FMDB;
+#import <AppMetrica_FMDB/AppMetrica_FMDB.h>
 
 SPEC_BEGIN(AMADatabaseIntegrityProcessorTests)
 
@@ -23,7 +23,7 @@ describe(@"AMADatabaseIntegrityProcessor", ^{
     AMADatabaseIntegrityReport *__block report = nil;
     AMASQLiteIntegrityIssue *__block issue = nil;
 
-    FMDatabaseQueue *__block database = nil;
+    AMAFMDatabaseQueue *__block database = nil;
     AMADatabaseQueueProvider *__block databaseProvider = nil;
     AMASQLiteIntegrityIssueParser *__block parser = nil;
     AMADatabaseIntegrityProcessor *__block processor = nil;
@@ -43,7 +43,7 @@ describe(@"AMADatabaseIntegrityProcessor", ^{
             if (path == nil) {
                 return nil;
             }
-            FMDatabaseQueue *queue = [FMDatabaseQueue nullMock];
+            AMAFMDatabaseQueue *queue = [AMAFMDatabaseQueue nullMock];
             [queue stub:@selector(path) andReturn:path];
             [additionalDatabasePaths addObject:path];
             if ([NSData dataWithContentsOfFile:path] == nil) {
@@ -53,7 +53,7 @@ describe(@"AMADatabaseIntegrityProcessor", ^{
         }];
         [AMADatabaseQueueProvider stub:@selector(sharedInstance) andReturn:databaseProvider];
 
-        database = [FMDatabaseQueue nullMock];
+        database = [AMAFMDatabaseQueue nullMock];
         [database stub:@selector(path) andReturn:databasePath];
         
         parser = [AMASQLiteIntegrityIssueParser nullMock];

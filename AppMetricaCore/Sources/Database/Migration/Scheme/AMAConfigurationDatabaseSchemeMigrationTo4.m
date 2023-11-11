@@ -1,7 +1,7 @@
 
 #import "AMAConfigurationDatabaseSchemeMigrationTo4.h"
 #import "AMAMigrationUtils.h"
-#import "FMDB.h"
+#import <AppMetrica_FMDB/AppMetrica_FMDB.h>
 
 @implementation AMAConfigurationDatabaseSchemeMigrationTo4
 
@@ -10,7 +10,7 @@
     return 4;
 }
 
-- (BOOL)applyTransactionalMigrationToDatabase:(FMDatabase *)db
+- (BOOL)applyTransactionalMigrationToDatabase:(AMAFMDatabase *)db
 {
     BOOL result = YES;
 
@@ -35,7 +35,7 @@
     return result;
 }
 
-- (BOOL)transferLocationFromSessionsToEvents:(FMDatabase *)db
+- (BOOL)transferLocationFromSessionsToEvents:(AMAFMDatabase *)db
 {
     BOOL locationTransferResult = [db executeUpdate:@"UPDATE events "
                                    "SET latitude= (SELECT sessions.lat FROM sessions WHERE events.session_id=sessions.id), "
@@ -50,7 +50,7 @@
     return locationTransferResult;
 }
 
-- (BOOL)createBackupTableInDatabase:(FMDatabase *)db
+- (BOOL)createBackupTableInDatabase:(AMAFMDatabase *)db
 {
     return [db executeUpdate:@"CREATE TABLE sessions_backup ("
             "id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, "
@@ -64,7 +64,7 @@
             "finished BOOL NOT NULL DEFAULT 0)"];
 }
 
-- (BOOL)copyCurrentTableToBackupTableInDatabase:(FMDatabase *)db
+- (BOOL)copyCurrentTableToBackupTableInDatabase:(AMAFMDatabase *)db
 {
     return [db executeUpdate:@"INSERT INTO sessions_backup "
             "SELECT id, "
@@ -79,12 +79,12 @@
             "FROM sessions"];
 }
 
-- (BOOL)dropCurrentTableInDatabase:(FMDatabase *)db
+- (BOOL)dropCurrentTableInDatabase:(AMAFMDatabase *)db
 {
     return [db executeUpdate:@"DROP TABLE sessions"];
 }
 
-- (BOOL)renameBackupTableInDataBase:(FMDatabase *)db
+- (BOOL)renameBackupTableInDataBase:(AMAFMDatabase *)db
 {
     return [db executeUpdate:@"ALTER TABLE sessions_backup RENAME TO sessions"];
 }

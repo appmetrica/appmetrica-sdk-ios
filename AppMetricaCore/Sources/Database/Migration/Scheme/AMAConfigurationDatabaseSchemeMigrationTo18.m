@@ -1,7 +1,7 @@
 
 #import "AMAConfigurationDatabaseSchemeMigrationTo18.h"
 #import "AMAMigrationUtils.h"
-#import "FMDB.h"
+#import <AppMetrica_FMDB/AppMetrica_FMDB.h>
 
 @implementation AMAConfigurationDatabaseSchemeMigrationTo18
 
@@ -10,7 +10,7 @@
     return 18;
 }
 
-- (BOOL)applyTransactionalMigrationToDatabase:(FMDatabase *)db
+- (BOOL)applyTransactionalMigrationToDatabase:(AMAFMDatabase *)db
 {
     BOOL success = YES;
     success = success && [AMAMigrationUtils addGlobalEventNumberInDatabase:db];

@@ -220,7 +220,7 @@ describe(@"AMAStorageEventsTrimTransaction", ^{
             [reporter reportEvent:@"EVENT" onFailure:NULL];
             event = [eventStorage amatest_allSavedEvents].lastObject;
 
-            [database inDatabase:^(FMDatabase *db) {
+            [database inDatabase:^(AMAFMDatabase *db) {
                 [AMADatabaseHelper updateFieldsWithDictionary:@{ kAMACommonTableFieldDataEncryptionType: @999 }
                                                      keyField:kAMACommonTableFieldOID
                                                           key:event.oid

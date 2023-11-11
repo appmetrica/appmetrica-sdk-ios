@@ -130,7 +130,7 @@ describe(@"AMAReporterStorage", ^{
             id db = [KWMock nullMock];
             id kvStorage = [KWMock nullMock];
             [database stub:@selector(inDatabase:) withBlock:^id(NSArray *params) {
-                void (^block)(FMDatabase *db) = params[0];
+                void (^block)(AMAFMDatabase *db) = params[0];
                 block(db);
                 return nil;
             }];

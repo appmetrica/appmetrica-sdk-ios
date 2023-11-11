@@ -4,11 +4,11 @@
 #import "AMALocationCollectingConfiguration.h"
 #import "AMALocationSerializer.h"
 #import "AMADatabaseProtocol.h"
-@import FMDB;
 #import <CoreLocation/CoreLocation.h>
 #import "AMALocation.h"
 #import "AMAMockDatabase.h"
 #import "AMAVisit.h"
+#import <AppMetrica_FMDB/AppMetrica_FMDB.h>
 
 SPEC_BEGIN(AMALocationStorageTests)
 
@@ -357,7 +357,7 @@ describe(@"AMALocationStorage", ^{
         });
         context(@"Existing state", ^{
             beforeEach(^{
-                [database inDatabase:^(FMDatabase *db) {
+                [database inDatabase:^(AMAFMDatabase *db) {
                     [db executeUpdate:@"INSERT OR REPLACE INTO kv (k, v) VALUES (?, ?)"
                                values:@[ @"next.request.id", @"2" ]
                                 error:NULL];

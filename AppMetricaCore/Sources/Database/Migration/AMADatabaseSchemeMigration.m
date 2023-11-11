@@ -9,7 +9,7 @@
     return 0;
 }
 
-- (BOOL)applyTransactionalMigrationToDatabase:(FMDatabase *)db
+- (BOOL)applyTransactionalMigrationToDatabase:(AMAFMDatabase *)db
 {
     return NO;
 }

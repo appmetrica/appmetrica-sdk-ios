@@ -2,12 +2,11 @@
 #import <Kiwi/Kiwi.h>
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
 #import "AMADatabaseQueueProvider.h"
-@import FMDB;
 #import <sqlite3.h>
-#import "AMAFMDatabaseQueue.h"
 #import "AMAAppMetrica+Internal.h"
 #import "AMAInternalEventsReporter.h"
 #import <AppMetricaPlatform/AppMetricaPlatform.h>
+#import <AppMetrica_FMDB/AppMetrica_FMDB.h>
 
 SPEC_BEGIN(AMADatabaseQueueProviderTests)
 
@@ -18,7 +17,7 @@ describe(@"AMADatabaseQueueProvider", ^{
 
     NSFileManager *__block fileManager = nil;
     AMAFMDatabaseQueue *__block databaseQueue = nil;
-    FMDatabase *__block database = nil;
+    AMAFMDatabase *__block database = nil;
     AMAInternalEventsReporter *__block reporter = nil;
     AMADatabaseQueueProvider *__block provider = nil;
 
@@ -30,10 +29,10 @@ describe(@"AMADatabaseQueueProvider", ^{
         [fileManager stub:@selector(setAttributes:ofItemAtPath:error:) andReturn:theValue(YES)];
         [NSFileManager stub:@selector(defaultManager) andReturn:fileManager];
 
-        database = [FMDatabase nullMock];
+        database = [AMAFMDatabase nullMock];
         databaseQueue = [AMAFMDatabaseQueue stubbedNullMockForInit:@selector(initWithPath:flags:)];
         [databaseQueue stub:@selector(inDatabase:) withBlock:^id(NSArray *params) {
-            void (^block)(FMDatabase *db) = params[0];
+            void (^block)(AMAFMDatabase *db) = params[0];
             if (block != nil) {
                 block(database);
             }

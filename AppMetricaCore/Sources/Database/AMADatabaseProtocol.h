@@ -2,7 +2,7 @@
 #import <Foundation/Foundation.h>
 #import "AMADatabaseKeyValueStorageProviding.h"
 
-@class FMDatabase;
+@class AMAFMDatabase;
 @class AMARollbackHolder;
 
 typedef NS_ENUM(NSInteger, AMADatabaseType) {
@@ -17,8 +17,8 @@ typedef NS_ENUM(NSInteger, AMADatabaseType) {
 @property (nonatomic, copy, readonly) NSString *databasePath;
 @property (nonatomic, strong, readonly) id<AMADatabaseKeyValueStorageProviding> storageProvider;
 
-- (void)inDatabase:(void (^)(FMDatabase *db))block;
-- (void)inTransaction:(void (^)(FMDatabase *db, AMARollbackHolder *rollbackHolder))block;
+- (void)inDatabase:(void (^)(AMAFMDatabase *db))block;
+- (void)inTransaction:(void (^)(AMAFMDatabase *db, AMARollbackHolder *rollbackHolder))block;
 
 - (void)ensureMigrated;
 - (void)migrateToMainApiKey:(NSString *)apiKey;

@@ -1,6 +1,6 @@
 
 #import "AMAConfigurationDatabaseSchemeMigrationTo7.h"
-#import "FMDB.h"
+#import <AppMetrica_FMDB/AppMetrica_FMDB.h>
 
 @implementation AMAConfigurationDatabaseSchemeMigrationTo7
 
@@ -9,7 +9,7 @@
     return 7;
 }
 
-- (BOOL)applyTransactionalMigrationToDatabase:(FMDatabase *)db
+- (BOOL)applyTransactionalMigrationToDatabase:(AMAFMDatabase *)db
 {
     BOOL result = YES;
 
@@ -28,7 +28,7 @@
     return result;
 }
 
-- (BOOL)createBackupTableInDatabase:(FMDatabase *)db
+- (BOOL)createBackupTableInDatabase:(AMAFMDatabase *)db
 {
     return [db executeUpdate:@"CREATE TABLE sessions_backup ("
             "id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, "
@@ -44,7 +44,7 @@
     ];
 }
 
-- (BOOL)copyCurrentTableToBackupTableInDatabase:(FMDatabase *)db
+- (BOOL)copyCurrentTableToBackupTableInDatabase:(AMAFMDatabase *)db
 {
     return [db executeUpdate:@"INSERT INTO sessions_backup "
             "SELECT id, "
@@ -60,12 +60,12 @@
             "FROM sessions"];
 }
 
-- (BOOL)dropCurrentTableInDatabase:(FMDatabase *)db
+- (BOOL)dropCurrentTableInDatabase:(AMAFMDatabase *)db
 {
     return [db executeUpdate:@"DROP TABLE sessions"];
 }
 
-- (BOOL)renameBackupTableInDataBase:(FMDatabase *)db
+- (BOOL)renameBackupTableInDataBase:(AMAFMDatabase *)db
 {
     return [db executeUpdate:@"ALTER TABLE sessions_backup RENAME TO sessions"];
 }

@@ -9,15 +9,14 @@
 #import "AMADatabaseKeyValueStorageProvider.h"
 #import "AMADatabaseObjectProvider.h"
 #import "AMADatabaseConstants.h"
-#import "AMAFMDatabaseQueue.h"
-@import FMDB;
+#import <AppMetrica_FMDB/AppMetrica_FMDB.h>
 
 @interface AMAMockDatabase ()
 
 @property (nonatomic, strong, readonly) AMATableSchemeController *tableSchemeController;
 @property (nonatomic, strong, readonly) NSMutableArray *delayedBlocks;
 
-@property (nonatomic, strong) FMDatabaseQueue *dbQueue;
+@property (nonatomic, strong) AMAFMDatabaseQueue *dbQueue;
 
 @end
 
@@ -115,17 +114,17 @@
     [_dbQueue close];
 }
 
-- (void)inDatabase:(void (^)(FMDatabase *db))block
+- (void)inDatabase:(void (^)(AMAFMDatabase *db))block
 {
     [self inOpenedDatabase:^{
         [self.dbQueue inDatabase:block];
     }];
 }
 
-- (void)inTransaction:(void (^)(FMDatabase *db, AMARollbackHolder *rollback))block
+- (void)inTransaction:(void (^)(AMAFMDatabase *db, AMARollbackHolder *rollback))block
 {
     [self inOpenedDatabase:^{
-        [self.dbQueue inExclusiveTransaction:^(FMDatabase *db, BOOL *rollback) {
+        [self.dbQueue inExclusiveTransaction:^(AMAFMDatabase *db, BOOL *rollback) {
             if (block != nil) {
                 AMARollbackHolder *holder = [[AMARollbackHolder alloc] init];
                 block(db, holder);
@@ -179,7 +178,7 @@
         @synchronized(self) {
             if (self.dbQueue == nil) {
                 self.dbQueue = [[AMAFMDatabaseQueue alloc] initWithPath:nil];
-                [self.dbQueue inDatabase:^(FMDatabase *db) {
+                [self.dbQueue inDatabase:^(AMAFMDatabase *db) {
                     [self.tableSchemeController createSchemaInDB:db];
                 }];
                 for (dispatch_block_t block in self.delayedBlocks) {

@@ -2,11 +2,11 @@
 #import "AMACore.h"
 #import "AMADatabaseKVSDataProvider.h"
 #import "AMADatabaseConstants.h"
-#import "FMDB.h"
+#import <AppMetrica_FMDB/AppMetrica_FMDB.h>
 
 @interface AMADatabaseKVSDataProvider ()
 
-@property (nonatomic, strong, readonly) FMDatabase *database;
+@property (nonatomic, strong, readonly) AMAFMDatabase *database;
 @property (nonatomic, copy, readonly) NSString *tableName;
 @property (nonatomic, copy, readonly) AMADatabaseObjectProviderBlock objectProvider;
 
@@ -14,7 +14,7 @@
 
 @implementation AMADatabaseKVSDataProvider
 
-- (instancetype)initWithDatabase:(FMDatabase *)database
+- (instancetype)initWithDatabase:(AMAFMDatabase *)database
                        tableName:(NSString *)tableName
                   objectProvider:(AMADatabaseObjectProviderBlock)objectProvider
 {
@@ -32,7 +32,7 @@
     NSMutableArray<NSString *> *result = [NSMutableArray array];
     NSString *query = [NSString stringWithFormat:@"SELECT %@ FROM %@", kAMAKeyValueTableFieldKey, self.tableName];
     NSError *internalError = nil;
-    FMResultSet *rs = [self.database executeQuery:query values:@[] error:&internalError];
+    AMAFMResultSet *rs = [self.database executeQuery:query values:@[] error:&internalError];
     while (internalError == nil && [rs nextWithError:&internalError]) {
         NSString *key = [rs stringForColumnIndex:0];
         if (key != nil && (id)key != [NSNull null]) {
@@ -67,7 +67,7 @@
     NSError *internalError = nil;
     NSString *query = [NSString stringWithFormat:@"SELECT %@ FROM %@ WHERE %@ = ? LIMIT 1",
                        kAMAKeyValueTableFieldValue, self.tableName, kAMAKeyValueTableFieldKey];
-    FMResultSet *rs = [self.database executeQuery:query values:@[ key ] error:&internalError];
+    AMAFMResultSet *rs = [self.database executeQuery:query values:@[ key ] error:&internalError];
     if (internalError == nil && [rs nextWithError:&internalError]) {
         result = self.objectProvider(rs, 0);
         if (result == [NSNull null]) {
@@ -116,7 +116,7 @@
                        queryKeysSubstring];
 
     NSError *internalError = nil;
-    FMResultSet *rs = [self.database executeQuery:query values:keys error:&internalError];
+    AMAFMResultSet *rs = [self.database executeQuery:query values:keys error:&internalError];
     while (internalError == nil && [rs nextWithError:&internalError]) {
         NSString *key = [rs stringForColumnIndex:0];
         id value = self.objectProvider(rs, 1);

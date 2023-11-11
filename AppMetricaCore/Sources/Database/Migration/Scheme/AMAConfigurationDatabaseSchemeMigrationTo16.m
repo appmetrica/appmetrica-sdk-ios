@@ -2,7 +2,7 @@
 #import "AMACore.h"
 #import "AMAConfigurationDatabaseSchemeMigrationTo16.h"
 #import "AMAMigrationUtils.h"
-#import "FMDB.h"
+#import <AppMetrica_FMDB/AppMetrica_FMDB.h>
 
 @implementation AMAConfigurationDatabaseSchemeMigrationTo16
 
@@ -11,7 +11,7 @@
     return 16;
 }
 
-- (BOOL)applyTransactionalMigrationToDatabase:(FMDatabase *)db
+- (BOOL)applyTransactionalMigrationToDatabase:(AMAFMDatabase *)db
 {
     BOOL result = YES;
 

@@ -76,7 +76,7 @@
 - (NSUInteger)countOfEventsInDatabase:(id<AMADatabaseProtocol>)database
 {
     NSUInteger __block count = 0;
-    [database inDatabase:^(FMDatabase *db) {
+    [database inDatabase:^(AMAFMDatabase *db) {
         count = [AMADatabaseHelper countWhereField:nil
                                            inArray:nil
                                          tableName:kAMAEventTableName

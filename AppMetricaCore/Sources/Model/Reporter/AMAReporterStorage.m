@@ -72,7 +72,7 @@
 
 - (void)storageInDatabase:(void (^)(id<AMAKeyValueStoring> storage))block
 {
-    [self.database inDatabase:^(FMDatabase *db) {
+    [self.database inDatabase:^(AMAFMDatabase *db) {
         if (block != nil) {
             block([self.database.storageProvider storageForDB:db]);
         }

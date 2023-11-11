@@ -12,7 +12,7 @@
 #import "AMAFileEventValue.h"
 #import "AMABinaryEventValue.h"
 #import "AMAStringEventValue.h"
-#import "FMDB.h"
+#import <AppMetrica_FMDB/AppMetrica_FMDB.h>
 #import <CoreLocation/CoreLocation.h>
 
 static NSUInteger const kAMAAPIKeyStringLength = 36;
@@ -42,7 +42,7 @@ static NSNumber *AMAStorageUnsignedLongLongFromString(NSString *string)
     return 19;
 }
 
-- (BOOL)applyTransactionalMigrationToDatabase:(FMDatabase *)db
+- (BOOL)applyTransactionalMigrationToDatabase:(AMAFMDatabase *)db
 {
     BOOL success = YES;
     NSArray *allKeys = [self allKeyValueStorageKeysForDatabase:db];
@@ -63,10 +63,10 @@ static NSNumber *AMAStorageUnsignedLongLongFromString(NSString *string)
     return success;
 }
 
-- (NSArray *)allKeyValueStorageKeysForDatabase:(FMDatabase *)db
+- (NSArray *)allKeyValueStorageKeysForDatabase:(AMAFMDatabase *)db
 {
     NSMutableArray *keys = [NSMutableArray array];
-    FMResultSet *rs = [db executeQuery:@"SELECT k FROM kv"];
+    AMAFMResultSet *rs = [db executeQuery:@"SELECT k FROM kv"];
     while ([rs next]) {
         NSString *key = [[rs stringForColumnIndex:0] copy];
         if (key != nil && [key isKindOfClass:[NSString class]]) {
@@ -77,7 +77,7 @@ static NSNumber *AMAStorageUnsignedLongLongFromString(NSString *string)
     return [keys copy];
 }
 
-- (NSArray *)apiKeysForDatabase:(FMDatabase *)db allKeys:(NSArray *)allKeys
+- (NSArray *)apiKeysForDatabase:(AMAFMDatabase *)db allKeys:(NSArray *)allKeys
 {
     NSMutableSet *apiKeys = [NSMutableSet set];
     [apiKeys unionSet:[self sessionsApiKeysForDatabase:db]];
@@ -85,11 +85,11 @@ static NSNumber *AMAStorageUnsignedLongLongFromString(NSString *string)
     return [apiKeys allObjects];
 }
 
-- (NSSet *)sessionsApiKeysForDatabase:(FMDatabase *)db
+- (NSSet *)sessionsApiKeysForDatabase:(AMAFMDatabase *)db
 {
     NSMutableSet *apiKeys = [NSMutableSet set];
     NSDictionary *sharedReporterKeys = [[self class] defaultSharedReportersKeyPairs];
-    FMResultSet *rs = [db executeQuery:@"SELECT DISTINCT api_key FROM sessions"];
+    AMAFMResultSet *rs = [db executeQuery:@"SELECT DISTINCT api_key FROM sessions"];
     while ([rs next]) {
         NSString *key = [[rs stringForColumnIndex:0] copy];
         if (key != nil && [key isKindOfClass:[NSString class]]) {
@@ -157,7 +157,7 @@ static NSNumber *AMAStorageUnsignedLongLongFromString(NSString *string)
 
 #pragma mark - KV migration
 
-- (BOOL)migrateKeyValueStorageFromDatabase:(FMDatabase *)sourceDB
+- (BOOL)migrateKeyValueStorageFromDatabase:(AMAFMDatabase *)sourceDB
                            reporterStorage:(AMAReporterStorage *)storage
                                 legacyKeys:(NSMutableArray *)legacyKeys
 {
@@ -172,11 +172,11 @@ static NSNumber *AMAStorageUnsignedLongLongFromString(NSString *string)
     return YES;
 }
 
-- (NSDictionary *)dictionaryForKeysWithApiKey:(NSString *)apiKey db:(FMDatabase *)db
+- (NSDictionary *)dictionaryForKeysWithApiKey:(NSString *)apiKey db:(AMAFMDatabase *)db
 {
     NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
     NSString *likeValue = [NSString stringWithFormat:@"%@%@%@", @"%", apiKey, @"%"];
-    FMResultSet *rs = [db executeQuery:@"SELECT k, v FROM kv WHERE k LIKE ?" values:@[ likeValue ] error:nil];
+    AMAFMResultSet *rs = [db executeQuery:@"SELECT k, v FROM kv WHERE k LIKE ?" values:@[ likeValue ] error:nil];
     while ([rs next]) {
         NSString *key = [[rs stringForColumnIndex:0] copy];
         NSString *value = [[rs stringForColumnIndex:1] copy];
@@ -292,7 +292,7 @@ static NSNumber *AMAStorageUnsignedLongLongFromString(NSString *string)
 
 #pragma mark - Events and sessions migration
 
-- (void)migrateSessionsFromDatabase:(FMDatabase *)sourceDB
+- (void)migrateSessionsFromDatabase:(AMAFMDatabase *)sourceDB
                     reporterStorage:(AMAReporterStorage *)storage
 {
     NSArray *sessions = [self sessionsForApiKey:storage.apiKey db:sourceDB];
@@ -314,10 +314,10 @@ static NSNumber *AMAStorageUnsignedLongLongFromString(NSString *string)
 
 - (void)migrateEventsForSourceSessionOID:(NSNumber *)sourceSessionOID
                         targetSessionOID:(NSNumber *)targetSessionOID
-                                      db:(FMDatabase *)sourceDB
+                                      db:(AMAFMDatabase *)sourceDB
                          reporterStorage:(AMAReporterStorage *)storage
 {
-    FMResultSet *rs = [sourceDB executeQuery:@"SELECT * FROM events WHERE session_id = ? ORDER BY id ASC"
+    AMAFMResultSet *rs = [sourceDB executeQuery:@"SELECT * FROM events WHERE session_id = ? ORDER BY id ASC"
                                       values:@[ sourceSessionOID ]
                                        error:nil];
     while ([rs next]) {
@@ -335,11 +335,11 @@ static NSNumber *AMAStorageUnsignedLongLongFromString(NSString *string)
     [rs close];
 }
 
-- (NSArray<AMASession *> *)sessionsForApiKey:(NSString *)apiKey db:(FMDatabase *)db
+- (NSArray<AMASession *> *)sessionsForApiKey:(NSString *)apiKey db:(AMAFMDatabase *)db
 {
     NSMutableArray *sessions = [NSMutableArray array];
     NSString *additionalApiKey = [[self class] reverseDefaultSharedReportersKeyPairs][apiKey] ?: apiKey;
-    FMResultSet *rs = [db executeQuery:@"SELECT * FROM sessions WHERE api_key IN (?, ?) ORDER BY id ASC"
+    AMAFMResultSet *rs = [db executeQuery:@"SELECT * FROM sessions WHERE api_key IN (?, ?) ORDER BY id ASC"
                                 values:@[ apiKey, additionalApiKey ]
                                  error:nil];
     while ([rs next]) {
@@ -355,7 +355,7 @@ static NSNumber *AMAStorageUnsignedLongLongFromString(NSString *string)
     return [sessions copy];
 }
 
-- (AMASession *)sessionForResultSet:(FMResultSet *)rs
+- (AMASession *)sessionForResultSet:(AMAFMResultSet *)rs
 {
     AMASession *session = [[AMASession alloc] init];
     session.startDate = [[AMADate alloc] init];
@@ -383,7 +383,7 @@ static NSNumber *AMAStorageUnsignedLongLongFromString(NSString *string)
     return session;
 }
 
-- (CLLocation *)locationForResultSet:(FMResultSet *)rs
+- (CLLocation *)locationForResultSet:(AMAFMResultSet *)rs
 {
     if ([rs columnIsNull:@"latitude"] || [rs columnIsNull:@"longitude"]) {
         return nil;
@@ -407,7 +407,7 @@ static NSNumber *AMAStorageUnsignedLongLongFromString(NSString *string)
                                         timestamp:locationTimestamp];
 }
 
-- (AMAEvent *)eventForResultSet:(FMResultSet *)rs
+- (AMAEvent *)eventForResultSet:(AMAFMResultSet *)rs
 {
     AMAEvent *event = [[AMAEvent alloc] init];
     event.oid = @([rs intForColumn:@"id"]);
@@ -448,7 +448,7 @@ static NSNumber *AMAStorageUnsignedLongLongFromString(NSString *string)
     return event;
 }
 
-- (id<AMAEventValueProtocol>)eventValueForResultSet:(FMResultSet *)rs eventType:(NSUInteger)eventType
+- (id<AMAEventValueProtocol>)eventValueForResultSet:(AMAFMResultSet *)rs eventType:(NSUInteger)eventType
 {
     NSString *value = [rs stringForColumn:@"value"];
     switch (eventType) {
@@ -477,14 +477,14 @@ static NSNumber *AMAStorageUnsignedLongLongFromString(NSString *string)
 
 #pragma mark - Cleanup
 
-- (void)cleanupWithDatabase:(FMDatabase *)db legacyKVKeys:(NSMutableArray *)legacyKVKeys
+- (void)cleanupWithDatabase:(AMAFMDatabase *)db legacyKVKeys:(NSMutableArray *)legacyKVKeys
 {
     [db executeUpdate:@"DROP TABLE events"];
     [db executeUpdate:@"DROP TABLE sessions"];
     [self cleanupKVStorageKeys:legacyKVKeys database:db];
 }
 
-- (void)cleanupKVStorageKeys:(NSArray *)keys database:(FMDatabase *)db
+- (void)cleanupKVStorageKeys:(NSArray *)keys database:(AMAFMDatabase *)db
 {
     NSMutableString *placeholders = [NSMutableString stringWithCapacity:keys.count * 2];
     for (NSUInteger idx = 0; idx < keys.count; ++idx) {

@@ -1,14 +1,14 @@
 
 #import <Foundation/Foundation.h>
 
-@class FMDatabase;
+@class AMAFMDatabase;
 
 NS_ASSUME_NONNULL_BEGIN
 
 @interface AMADatabaseSchemeMigration : NSObject
 
 - (NSUInteger)schemeVersion;
-- (BOOL)applyTransactionalMigrationToDatabase:(FMDatabase *)db;
+- (BOOL)applyTransactionalMigrationToDatabase:(AMAFMDatabase *)db;
 
 @end
 

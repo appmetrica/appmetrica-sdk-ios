@@ -6,7 +6,7 @@
 #import "AMADatabaseIntegrityProcessor.h"
 #import "AMADatabaseIntegrityReport.h"
 #import "AMADatabaseQueueProvider.h"
-#import "FMDB.h"
+#import <AppMetrica_FMDB/AppMetrica_FMDB.h>
 
 @interface AMADatabaseIntegrityManager ()
 
@@ -46,11 +46,11 @@
 
 #pragma mark - Public -
 
-- (FMDatabaseQueue *)databaseWithEnsuredIntegrityWithIsNew:(BOOL *)isNew
+- (AMAFMDatabaseQueue *)databaseWithEnsuredIntegrityWithIsNew:(BOOL *)isNew
 {
     BOOL dbFileExists = [AMAFileUtility fileExistsAtPath:self.databasePath];
     AMADatabaseIntegrityReport *report = [[AMADatabaseIntegrityReport alloc] init];
-    FMDatabaseQueue *databaseQueue = [self ensureIntegrityWithReport:report];
+    AMAFMDatabaseQueue *databaseQueue = [self ensureIntegrityWithReport:report];
     if (isNew != NULL) {
         *isNew = dbFileExists == NO || [report.lastAppliedFixStep isEqual:kAMADatabaseIntegrityStepNewDatabase];
     }
@@ -59,9 +59,9 @@
 
 #pragma mark - Private -
 
-- (FMDatabaseQueue *)ensureIntegrityWithReport:(AMADatabaseIntegrityReport *)report
+- (AMAFMDatabaseQueue *)ensureIntegrityWithReport:(AMADatabaseIntegrityReport *)report
 {
-    FMDatabaseQueue *databaseQueue = [[AMADatabaseQueueProvider sharedInstance] queueForPath:self.databasePath];
+    AMAFMDatabaseQueue *databaseQueue = [[AMADatabaseQueueProvider sharedInstance] queueForPath:self.databasePath];
     if ([self.processor checkIntegrityIssuesForDatabase:databaseQueue report:report]) {
         AMALogInfo(@"Checked integrity issues");
         return databaseQueue;

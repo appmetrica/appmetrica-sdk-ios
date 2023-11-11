@@ -5,16 +5,16 @@
 @protocol AMAKeyValueStoring;
 @protocol AMADatabaseProtocol;
 @protocol AMAKeyValueStorageProviding;
-@class FMDatabase;
+@class AMAFMDatabase;
 
 @protocol AMADatabaseKeyValueStorageProviding <AMAKeyValueStorageProviding>
 
 - (void)setDatabase:(id<AMADatabaseProtocol>)database;
 
-- (id<AMAKeyValueStoring>)storageForDB:(FMDatabase *)db;
+- (id<AMAKeyValueStoring>)storageForDB:(AMAFMDatabase *)db;
 
-- (id<AMAKeyValueStoring>)nonPersistentStorageForKeys:(NSArray *)keys db:(FMDatabase *)db error:(NSError **)error;
-- (BOOL)saveStorage:(id<AMAKeyValueStoring>)storage db:(FMDatabase *)db error:(NSError **)error;
+- (id<AMAKeyValueStoring>)nonPersistentStorageForKeys:(NSArray *)keys db:(AMAFMDatabase *)db error:(NSError **)error;
+- (BOOL)saveStorage:(id<AMAKeyValueStoring>)storage db:(AMAFMDatabase *)db error:(NSError **)error;
 
 - (void)addBackingKeys:(NSArray<NSString *> *)backingKeys;
 

@@ -41,7 +41,7 @@
 
         __weak typeof(self) weakSelf = self;
         AMAKVSProviderSource providerSource = ^(AMAKVSWithProviderBlock block) {
-            [weakSelf.database inDatabase:^(FMDatabase *db) {
+            [weakSelf.database inDatabase:^(AMAFMDatabase *db) {
                 block([weakSelf dataProviderForDB:db]);
             }];
         };
@@ -73,20 +73,20 @@
 
 - (void)inStorage:(void (^)(id<AMAKeyValueStoring> storage))block
 {
-    [self.database inDatabase:^(FMDatabase *db) {
+    [self.database inDatabase:^(AMAFMDatabase *db) {
         if (block != nil) {
             block([self storageForDB:db]);
         }
     }];
 }
 
-- (id<AMAKeyValueStoring>)storageForDB:(FMDatabase *)db
+- (id<AMAKeyValueStoring>)storageForDB:(AMAFMDatabase *)db
 {
     return [[AMAKeyValueStorage alloc] initWithDataProvider:[self dataProviderForDB:db]
                                                   converter:self.converter];
 }
 
-- (id<AMAKeyValueStorageDataProviding>)dataProviderForDB:(FMDatabase *)db
+- (id<AMAKeyValueStorageDataProviding>)dataProviderForDB:(AMAFMDatabase *)db
 {
     AMADatabaseKVSDataProvider *dbDataProvider =
         [[AMADatabaseKVSDataProvider alloc] initWithDatabase:db
@@ -128,7 +128,7 @@
 {
     id<AMAKeyValueStoring> __block result = nil;
     NSError *__block internalError = nil;
-    [self.database inDatabase:^(FMDatabase *db) {
+    [self.database inDatabase:^(AMAFMDatabase *db) {
         result = [self nonPersistentStorageForKeys:keys db:db error:&internalError];
     }];
     if (result == nil) {
@@ -142,7 +142,7 @@
 {
     BOOL __block result = NO;
     NSError *__block internalError = nil;
-    [self.database inDatabase:^(FMDatabase *db) {
+    [self.database inDatabase:^(AMAFMDatabase *db) {
         result = [self saveStorage:storage db:db error:&internalError];
     }];
     if (result == NO) {
@@ -171,7 +171,7 @@
     return result;
 }
 
-- (id<AMAKeyValueStoring>)nonPersistentStorageForKeys:(NSArray *)keys db:(FMDatabase *)db error:(NSError **)error
+- (id<AMAKeyValueStoring>)nonPersistentStorageForKeys:(NSArray *)keys db:(AMAFMDatabase *)db error:(NSError **)error
 {
     id<AMAKeyValueStoring> result = nil;
     id<AMAKeyValueStorageDataProviding> dataProvider = [self dataProviderForDB:db];
@@ -184,7 +184,7 @@
     return result;
 }
 
-- (BOOL)saveStorage:(AMAKeyValueStorage *)storage db:(FMDatabase *)db error:(NSError **)error
+- (BOOL)saveStorage:(AMAKeyValueStorage *)storage db:(AMAFMDatabase *)db error:(NSError **)error
 {
     if ([self validateStorage:storage error:error] == NO) {
         return NO;

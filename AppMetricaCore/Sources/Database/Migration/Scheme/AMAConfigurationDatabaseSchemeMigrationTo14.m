@@ -1,7 +1,7 @@
 
 #import "AMAConfigurationDatabaseSchemeMigrationTo14.h"
 #import "AMAMigrationUtils.h"
-#import "FMDB.h"
+#import <AppMetrica_FMDB/AppMetrica_FMDB.h>
 
 @implementation AMAConfigurationDatabaseSchemeMigrationTo14
 
@@ -10,7 +10,7 @@
     return 14;
 }
 
-- (BOOL)applyTransactionalMigrationToDatabase:(FMDatabase *)db
+- (BOOL)applyTransactionalMigrationToDatabase:(AMAFMDatabase *)db
 {
     return [AMAMigrationUtils addUserProfileIDInDatabase:db];
 }

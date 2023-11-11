@@ -4,7 +4,7 @@
 #import "AMADatabaseConstants.h"
 #import "AMASession.h"
 #import "AMASessionSerializer.h"
-@import FMDB;
+#import <AppMetrica_FMDB/AppMetrica_FMDB.h>
 
 @interface AMASessionStorage ()
 
@@ -37,10 +37,10 @@
 - (AMASession *)amatest_sessionWithOid:(NSNumber *)sessionOid
 {
     __block AMASession *session = nil;
-    [self.database inDatabase:^(FMDatabase *db) {
+    [self.database inDatabase:^(AMAFMDatabase *db) {
         NSString *query = [NSString stringWithFormat:@"SELECT * FROM %@ WHERE %@ = ? LIMIT 1",
                            kAMASessionTableName, kAMACommonTableFieldOID];
-        FMResultSet *rs = [db executeQuery:query, sessionOid];
+        AMAFMResultSet *rs = [db executeQuery:query, sessionOid];
         if ([rs next]) {
             session = [self.serializer sessionForDictionary:rs.resultDictionary error:nil];
         }
@@ -52,10 +52,10 @@
 - (NSArray *)amatest_allSessionsWithType:(AMASessionType)type
 {
     __block NSMutableArray *sessions = [NSMutableArray array];
-    [self.database inDatabase:^(FMDatabase *db) {
+    [self.database inDatabase:^(AMAFMDatabase *db) {
         NSString *query = [NSString stringWithFormat:@"SELECT * FROM %@ WHERE %@ = ? ORDER BY %@ DESC",
                            kAMASessionTableName, kAMACommonTableFieldType, kAMASessionTableFieldStartTime];
-        FMResultSet *rs = [db executeQuery:query, @(type)];
+        AMAFMResultSet *rs = [db executeQuery:query, @(type)];
         while ([rs next]) {
             AMASession *session = [self.serializer sessionForDictionary:rs.resultDictionary error:nil];
             if (session != nil) {

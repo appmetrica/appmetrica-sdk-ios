@@ -8,7 +8,7 @@
 #import "AMADatabaseIntegrityProcessor.h"
 #import "AMADatabaseIntegrityReport.h"
 #import "AMADatabaseQueueProvider.h"
-@import FMDB;
+#import <AppMetrica_FMDB/AppMetrica_FMDB.h>
 
 SPEC_BEGIN(AMADatabaseIntegrityManagerTests)
 
@@ -16,7 +16,7 @@ describe(@"AMADatabaseIntegrityManager", ^{
 
     NSString *const databasePath = @"/path/to/database";
 
-    FMDatabaseQueue *__block database = nil;
+    AMAFMDatabaseQueue *__block database = nil;
     AMADatabaseQueueProvider *__block databaseProvider = nil;
     AMADatabaseIntegrityReport *__block report = nil;
 
@@ -27,7 +27,7 @@ describe(@"AMADatabaseIntegrityManager", ^{
     AMADatabaseIntegrityManager *__block manager = nil;
 
     beforeEach(^{
-        database = [FMDatabaseQueue nullMock];
+        database = [AMAFMDatabaseQueue nullMock];
         databaseProvider = [AMADatabaseQueueProvider nullMock];
         [databaseProvider stub:@selector(queueForPath:) andReturn:database];
         [AMADatabaseQueueProvider stub:@selector(sharedInstance) andReturn:databaseProvider];
@@ -157,10 +157,10 @@ describe(@"AMADatabaseIntegrityManager", ^{
     });
 
     context(@"New database", ^{
-        FMDatabaseQueue *__block newDatabase = nil;
+        AMAFMDatabaseQueue *__block newDatabase = nil;
 
         beforeEach(^{
-            newDatabase = [FMDatabaseQueue nullMock];
+            newDatabase = [AMAFMDatabaseQueue nullMock];
         });
 
         __auto_type stubProcessorWithNewDatabase = ^(SEL selector, BOOL(^block)(AMADatabaseIntegrityReport *)) {

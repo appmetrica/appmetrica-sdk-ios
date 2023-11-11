@@ -1,7 +1,7 @@
 
 #import "AMACore.h"
 #import "AMAConfigurationDatabaseSchemeMigrationTo12.h"
-#import "FMDB.h"
+#import <AppMetrica_FMDB/AppMetrica_FMDB.h>
 #import "AMAStorageKeys.h"
 
 @implementation AMAConfigurationDatabaseSchemeMigrationTo12
@@ -11,7 +11,7 @@
     return 12;
 }
 
-- (BOOL)applyTransactionalMigrationToDatabase:(FMDatabase *)db
+- (BOOL)applyTransactionalMigrationToDatabase:(AMAFMDatabase *)db
 {
     NSString *legacyReportHost = [self stringForKey:AMAStorageStringKeyReportsURL db:db];
     if (legacyReportHost.length != 0) {
@@ -26,10 +26,10 @@
     return YES;
 }
 
-- (NSString *)stringForKey:(NSString *)key db:(FMDatabase *)db
+- (NSString *)stringForKey:(NSString *)key db:(AMAFMDatabase *)db
 {
     NSString *result = nil;
-    FMResultSet *resultSet = [db executeQuery:@"SELECT v FROM kv WHERE k = ?", key];
+    AMAFMResultSet *resultSet = [db executeQuery:@"SELECT v FROM kv WHERE k = ?", key];
     if ([resultSet next]) {
         result = [resultSet stringForColumn:@"v"];
     }
@@ -37,12 +37,12 @@
     return result;
 }
 
-- (void)setString:(NSString *)value forKey:(NSString *)key db:(FMDatabase *)db
+- (void)setString:(NSString *)value forKey:(NSString *)key db:(AMAFMDatabase *)db
 {
     [db executeUpdate:@"INSERT OR REPLACE INTO kv (k, v) VALUES (?, ?)", key, value];
 }
 
-- (void)deleteValueForKey:(NSString *)key db:(FMDatabase *)db
+- (void)deleteValueForKey:(NSString *)key db:(AMAFMDatabase *)db
 {
     [db executeUpdate:@"DELETE FROM kv WHERE k = ?", key];
 }

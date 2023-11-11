@@ -41,7 +41,7 @@
 - (BOOL)addEvent:(AMAEvent *)event toSession:(AMASession *)session error:(NSError **)error
 {
     NSError *__block internalError = nil;
-    [self.database inTransaction:^(FMDatabase *db, AMARollbackHolder *rollbackHolder) {
+    [self.database inTransaction:^(AMAFMDatabase *db, AMARollbackHolder *rollbackHolder) {
         id<AMAKeyValueStoring> storage = [self.database.storageProvider storageForDB:db];
         [self.eventNumberFiller fillNumbersOfEvent:event
                                            session:session
@@ -68,7 +68,7 @@
     return internalError == nil;
 }
 
-- (BOOL)addEvent:(AMAEvent *)event db:(FMDatabase *)db error:(NSError **)error
+- (BOOL)addEvent:(AMAEvent *)event db:(AMAFMDatabase *)db error:(NSError **)error
 {
     NSDictionary *eventDictionary = [self.eventSerializer dictionaryForEvent:event error:error];
     if (eventDictionary == nil) {
@@ -87,7 +87,7 @@
 
 - (BOOL)updateSessionFields:(AMASession *)session
                forLastEvent:(AMAEvent *)event
-                         db:(FMDatabase *)db
+                         db:(AMAFMDatabase *)db
                       error:(NSError **)error
 {
     NSDate *lastEventTime = session.lastEventTime;
@@ -126,7 +126,7 @@
 {
     NSUInteger __block result = 0;
     NSError *__block error = nil;
-    [self.database inDatabase:^(FMDatabase *db) {
+    [self.database inDatabase:^(AMAFMDatabase *db) {
         result = [AMADatabaseHelper countWhereField:kAMACommonTableFieldType
                                             inArray:includedTypes
                                       andNotInArray:excludedTypes
@@ -144,7 +144,7 @@
 - (NSArray<AMAEvent*> *)allEvents
 {
     NSMutableArray *result = [[NSMutableArray alloc] init];
-    [self.database inDatabase:^(FMDatabase *db) {
+    [self.database inDatabase:^(AMAFMDatabase *db) {
         NSError *error = nil;
         [AMADatabaseHelper enumerateRowsWithFilter:nil
                                              order:nil
@@ -176,7 +176,7 @@
 {
     BOOL __block result = NO;
     NSError *__block internalError = nil;
-    [self.database inDatabase:^(FMDatabase *db) {
+    [self.database inDatabase:^(AMAFMDatabase *db) {
         result = [self addEvent:event db:db error:&internalError];
     }];
     if (internalError != nil) {

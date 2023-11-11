@@ -1,14 +1,14 @@
 
 #import <Foundation/Foundation.h>
 
-@class FMDatabaseQueue;
+@class AMAFMDatabaseQueue;
 
 @interface AMADatabaseQueueProvider : NSObject
 
 @property (nonatomic, assign) BOOL logsEnabled;
 
-- (FMDatabaseQueue *)inMemoryQueue;
-- (FMDatabaseQueue *)queueForPath:(NSString *)path;
+- (AMAFMDatabaseQueue *)inMemoryQueue;
+- (AMAFMDatabaseQueue *)queueForPath:(NSString *)path;
 
 + (instancetype)sharedInstance;
 

@@ -50,7 +50,7 @@ describe(@"AMADatabaseFactory", ^{
     NSString *const persistentPathForApiKey = @"/persistent/path/for/apikey";
     NSString *const applicationSupportDirectoryPath = @"/persistent/path";
 
-    AMADatabaseObjectProviderBlock const objectProvider = ^id (FMResultSet *rs, NSUInteger columdIdx) {
+    AMADatabaseObjectProviderBlock const objectProvider = ^id (AMAFMResultSet *rs, NSUInteger columdIdx) {
         return nil;
     };
 

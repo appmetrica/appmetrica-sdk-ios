@@ -9,7 +9,7 @@
     return 5;
 }
 
-- (BOOL)applyTransactionalMigrationToDatabase:(FMDatabase *)db
+- (BOOL)applyTransactionalMigrationToDatabase:(AMAFMDatabase *)db
 {
     return [AMAMigrationUtils addLocationToTable:@"errors" inDatabase:db];
 }

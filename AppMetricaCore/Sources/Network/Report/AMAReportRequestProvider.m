@@ -76,7 +76,7 @@
 
 #pragma mark - Private -
 
-- (NSArray<AMASession *> *)sessionsFromDB:(FMDatabase *)db limit:(NSUInteger)limit error:(NSError **)error
+- (NSArray<AMASession *> *)sessionsFromDB:(AMAFMDatabase *)db limit:(NSUInteger)limit error:(NSError **)error
 {
     NSMutableArray *result = [NSMutableArray array];
     NSMutableArray *brokenOIDs = [NSMutableArray array];
@@ -119,7 +119,7 @@
 }
 
 - (NSArray<AMAEvent *> *)eventsForSessionID:(NSNumber *)sessionID
-                                         db:(FMDatabase *)db
+                                         db:(AMAFMDatabase *)db
                                       limit:(NSUInteger)limit
                                       error:(NSError **)error
 {
@@ -167,7 +167,7 @@
     __block NSMutableArray *result = [NSMutableArray array];
     NSUInteger limit = [AMAMetricaConfiguration sharedInstance].inMemory.batchSize;
     NSError *__block error = nil;
-    [self.database inDatabase:^(FMDatabase *db) {
+    [self.database inDatabase:^(AMAFMDatabase *db) {
         NSArray *sessions = [self sessionsFromDB:db limit:limit error:&error];
         NSUInteger limitLeft = limit;
         for (AMASession *session in sessions) {

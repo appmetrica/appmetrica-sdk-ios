@@ -1,11 +1,11 @@
 
 #import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
 #import "AMADatabaseHelper.h"
-#import "FMDB.h"
+#import <AppMetrica_FMDB/AppMetrica_FMDB.h>
 
 @implementation AMADatabaseHelper
 
-+ (NSArray *)eachResultsDescription:(FMResultSet *)resultSet
++ (NSArray *)eachResultsDescription:(AMAFMResultSet *)resultSet
 {
     NSMutableArray *result = [NSMutableArray array];
     if (resultSet != nil) {
@@ -59,7 +59,7 @@
 
 + (NSNumber *)insertRowWithDictionary:(NSDictionary *)dictionary
                             tableName:(NSString *)tableName
-                                   db:(FMDatabase *)db
+                                   db:(AMAFMDatabase *)db
                                 error:(NSError **)error
 {
     NSMutableArray *values = [NSMutableArray arrayWithCapacity:dictionary.count];
@@ -85,7 +85,7 @@
                           keyField:(NSString *)keyField
                                key:(id)key
                          tableName:(NSString *)tableName
-                                db:(FMDatabase *)db
+                                db:(AMAFMDatabase *)db
                              error:(NSError **)error
 {
     NSMutableArray *values = [NSMutableArray arrayWithCapacity:dictionary.count + 1];
@@ -108,7 +108,7 @@
 + (BOOL)deleteRowsWhereKey:(NSString *)keyField
                    inArray:(NSArray<NSNumber *> *)valuesArray
                  tableName:(NSString *)tableName
-                        db:(FMDatabase *)db
+                        db:(AMAFMDatabase *)db
                      error:(NSError **)error
 {
     NSMutableArray *values = [NSMutableArray array];
@@ -124,7 +124,7 @@
                     descendingOrderField:(NSString *)descendingOrderField
                                    limit:(NSInteger)limit
                                   offset:(NSInteger)offset
-                                      db:(FMDatabase *)db
+                                      db:(AMAFMDatabase *)db
                                    error:(NSError **)error
 {
     NSString *queryTemplate =
@@ -148,7 +148,7 @@
                            order:(NSString *)order
                      valuesArray:(NSArray *)valuesArray
                        tableName:(NSString *)tableName
-                              db:(FMDatabase *)db
+                              db:(AMAFMDatabase *)db
                            error:(NSError **)error
 {
     NSString *queryTemplate =
@@ -164,7 +164,7 @@
 + (NSUInteger)countWhereField:(NSString *)fieldName
                       inArray:(NSArray *)includedValuesArray
                     tableName:(NSString *)tableName
-                           db:(FMDatabase *)db
+                           db:(AMAFMDatabase *)db
                         error:(NSError **)error
 {
     return [self countWhereField:fieldName
@@ -179,7 +179,7 @@
                       inArray:(NSArray *)includedValuesArray
                 andNotInArray:(NSArray *)excludedValuesArray
                     tableName:(NSString *)tableName
-                           db:(FMDatabase *)db
+                           db:(AMAFMDatabase *)db
                         error:(NSError **)error
 {
     NSUInteger result = 0;
@@ -204,7 +204,7 @@
         whereQuery = [NSString stringWithFormat:@" WHERE %@", [whereQueries componentsJoinedByString:@" AND "]];
     }
     NSString *query = [NSString stringWithFormat:@"SELECT count(*) FROM %@%@", tableName, whereQuery];
-    FMResultSet *rs = [db executeQuery:query values:valuesArray error:error];
+    AMAFMResultSet *rs = [db executeQuery:query values:valuesArray error:error];
     if ([rs nextWithError:error]) {
         result = (NSUInteger)[rs longForColumnIndex:0];
     }
@@ -216,13 +216,13 @@
                                order:(NSString *)order
                          valuesArray:(NSArray *)valuesArray
                            tableName:(NSString *)tableName
-                                  db:(FMDatabase *)db
+                                  db:(AMAFMDatabase *)db
                                error:(NSError **)error
 {
     NSDictionary *result = nil;
     NSString *query = [NSString stringWithFormat:@"SELECT * FROM %@%@ LIMIT 1",
                        tableName, [self queryPartForFilter:filter order:order]];
-    FMResultSet *rs = [db executeQuery:query values:valuesArray error:error];
+    AMAFMResultSet *rs = [db executeQuery:query values:valuesArray error:error];
     if ([rs nextWithError:error]) {
         result = [rs resultDictionary];
     }
@@ -235,7 +235,7 @@
                     valuesArray:(NSArray *)valuesArray
                       tableName:(NSString *)tableName
                           limit:(NSUInteger)limit
-                             db:(FMDatabase *)db
+                             db:(AMAFMDatabase *)db
                           error:(NSError **)error
                           block:(void(^)(NSDictionary *dictionary))block
 {
@@ -243,7 +243,7 @@
     NSString *query = [NSString stringWithFormat:@"SELECT * FROM %@%@ LIMIT ?",
                        tableName, [self queryPartForFilter:filter order:order]];
     NSArray *fullValues = [(valuesArray ?: @[]) arrayByAddingObject:@(limit)];
-    FMResultSet *rs = [db executeQuery:query values:fullValues error:error];
+    AMAFMResultSet *rs = [db executeQuery:query values:fullValues error:error];
     while ([rs nextWithError:error]) {
         if (block != nil) {
             block([rs resultDictionary]);
@@ -253,7 +253,7 @@
     return result;
 }
 
-+ (NSInteger)changesForDB:(FMDatabase *)db
++ (NSInteger)changesForDB:(AMAFMDatabase *)db
 {
     return (NSInteger)db.changes;
 }

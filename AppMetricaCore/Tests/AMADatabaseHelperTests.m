@@ -1,7 +1,7 @@
 
 #import <Kiwi/Kiwi.h>
 #import "AMADatabaseHelper.h"
-@import FMDB;
+#import <AppMetrica_FMDB/AppMetrica_FMDB.h>
 
 SPEC_BEGIN(AMADatabaseHelperTests)
 
@@ -10,11 +10,11 @@ describe(@"AMADatabaseHelper", ^{
     context(@"Description", ^{
         NSArray *const resultDictionaries = @[ @{@"foo": @"bar"}, @{@"a": @"b"} ];
         NSArray *const desriptions = @[ [resultDictionaries[0] description], [resultDictionaries[1] description] ];
-        FMResultSet *__block resultSet = nil;
+        AMAFMResultSet *__block resultSet = nil;
         NSUInteger __block nextCallCount = 0;
 
         beforeEach(^{
-            resultSet = [FMResultSet nullMock];
+            resultSet = [AMAFMResultSet nullMock];
             nextCallCount = 0;
             [resultSet stub:@selector(next) withBlock:^id(NSArray *params) {
                 id result = theValue(nextCallCount < desriptions.count);

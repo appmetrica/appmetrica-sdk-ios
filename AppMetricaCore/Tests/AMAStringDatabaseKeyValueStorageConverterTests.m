@@ -1,7 +1,6 @@
 
 #import <Kiwi/Kiwi.h>
 #import "AMAStringDatabaseKeyValueStorageConverter.h"
-@import FMDB;
 
 SPEC_BEGIN(AMAStringDatabaseKeyValueStorageConverterTests)
 

@@ -1,7 +1,7 @@
 
 #import <Foundation/Foundation.h>
 
-@class FMDatabase;
+@class AMAFMDatabase;
 @protocol AMADatabaseProtocol;
 
 @interface AMAMigrationUtils : NSObject
@@ -9,22 +9,22 @@
 - (instancetype)init NS_UNAVAILABLE;
 + (instancetype)new NS_UNAVAILABLE;
 
-+ (BOOL)addLocationToTable:(NSString *)tableName inDatabase:(FMDatabase *)db;
-+ (BOOL)addServerTimeOffsetToSessionsTableInDatabase:(FMDatabase *)db;
-+ (BOOL)addErrorEnvironmentToEventsAndErrorsTableInDatabase:(FMDatabase *)db;
-+ (BOOL)addAppEnvironmentToEventsAndErrorsTableInDatabase:(FMDatabase *)db;
-+ (BOOL)addTruncatedToEventsAndErrorsTableInDatabase:(FMDatabase *)db;
-+ (BOOL)addUserInfoInDatabase:(FMDatabase *)db;
-+ (BOOL)addLocationEnabledInDatabase:(FMDatabase *)db;
-+ (BOOL)addUserProfileIDInDatabase:(FMDatabase *)db;
-+ (BOOL)addEncryptionTypeInDatabase:(FMDatabase *)db;
-+ (BOOL)addFirstOccurrenceInDatabase:(FMDatabase *)db;
-+ (BOOL)addAttributionIDInDatabase:(FMDatabase *)db;
-+ (BOOL)addGlobalEventNumberInDatabase:(FMDatabase *)db;
-+ (BOOL)addEventNumberOfTypeInDatabase:(FMDatabase *)db;
++ (BOOL)addLocationToTable:(NSString *)tableName inDatabase:(AMAFMDatabase *)db;
++ (BOOL)addServerTimeOffsetToSessionsTableInDatabase:(AMAFMDatabase *)db;
++ (BOOL)addErrorEnvironmentToEventsAndErrorsTableInDatabase:(AMAFMDatabase *)db;
++ (BOOL)addAppEnvironmentToEventsAndErrorsTableInDatabase:(AMAFMDatabase *)db;
++ (BOOL)addTruncatedToEventsAndErrorsTableInDatabase:(AMAFMDatabase *)db;
++ (BOOL)addUserInfoInDatabase:(AMAFMDatabase *)db;
++ (BOOL)addLocationEnabledInDatabase:(AMAFMDatabase *)db;
++ (BOOL)addUserProfileIDInDatabase:(AMAFMDatabase *)db;
++ (BOOL)addEncryptionTypeInDatabase:(AMAFMDatabase *)db;
++ (BOOL)addFirstOccurrenceInDatabase:(AMAFMDatabase *)db;
++ (BOOL)addAttributionIDInDatabase:(AMAFMDatabase *)db;
++ (BOOL)addGlobalEventNumberInDatabase:(AMAFMDatabase *)db;
++ (BOOL)addEventNumberOfTypeInDatabase:(AMAFMDatabase *)db;
 
-+ (BOOL)updateColumnTypes:(NSString *)columnTypesDescription ofKeyValueTable:(NSString *)tableName db:(FMDatabase *)db;
++ (BOOL)updateColumnTypes:(NSString *)columnTypesDescription ofKeyValueTable:(NSString *)tableName db:(AMAFMDatabase *)db;
 
-+ (void)resetStartupUpdatedAtToDistantPastInDatabase:(id<AMADatabaseProtocol>)database db:(FMDatabase *)db;
++ (void)resetStartupUpdatedAtToDistantPastInDatabase:(id<AMADatabaseProtocol>)database db:(AMAFMDatabase *)db;
 
 @end

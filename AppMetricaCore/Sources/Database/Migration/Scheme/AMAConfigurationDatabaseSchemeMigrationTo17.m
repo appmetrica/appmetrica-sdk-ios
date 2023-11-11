@@ -1,7 +1,7 @@
 
 #import "AMAConfigurationDatabaseSchemeMigrationTo17.h"
 #import "AMAStorageKeys.h"
-#import "FMDB.h"
+#import <AppMetrica_FMDB/AppMetrica_FMDB.h>
 
 @implementation AMAConfigurationDatabaseSchemeMigrationTo17
 
@@ -10,7 +10,7 @@
     return 17;
 }
 
-- (BOOL)applyTransactionalMigrationToDatabase:(FMDatabase *)db
+- (BOOL)applyTransactionalMigrationToDatabase:(AMAFMDatabase *)db
 {
     NSString *query = [self insertHadFirstStartupForKVTable];
     return [db executeUpdate:query withArgumentsInArray:@[ AMAStorageStringKeyHadFirstStartup,

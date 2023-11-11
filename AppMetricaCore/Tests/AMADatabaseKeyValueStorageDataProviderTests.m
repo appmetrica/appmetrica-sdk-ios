@@ -4,9 +4,9 @@
 #import "AMAMockDatabase.h"
 #import "AMADatabaseConstants.h"
 #import "AMADatabaseKVSDataProvider.h"
-@import FMDB;
+#import <AppMetrica_FMDB/AppMetrica_FMDB.h>
 
-typedef void(^AMAWithProviderBlock)(AMADatabaseKVSDataProvider *provider, FMDatabase *db);
+typedef void(^AMAWithProviderBlock)(AMADatabaseKVSDataProvider *provider, AMAFMDatabase *db);
 
 SPEC_BEGIN(AMADatabaseKeyValueStorageDataProviderTests)
 
@@ -22,11 +22,11 @@ describe(@"AMADatabaseKeyValueStorageDataProvider", ^{
     });
 
     void (^withProvider)(AMAWithProviderBlock block) = ^(AMAWithProviderBlock block) {
-        [database inDatabase:^(FMDatabase *db) {
+        [database inDatabase:^(AMAFMDatabase *db) {
             AMADatabaseKVSDataProvider *provider =
                 [[AMADatabaseKVSDataProvider alloc] initWithDatabase:db
                                                                        tableName:kAMAKeyValueTableName
-                                                                  objectProvider:^id(FMResultSet *rs, NSUInteger columdIdx) {
+                                                                  objectProvider:^id(AMAFMResultSet *rs, NSUInteger columdIdx) {
                                                                       return [rs stringForColumnIndex:(int)columdIdx];
                                                                   }];
             block(provider, db);
@@ -34,43 +34,43 @@ describe(@"AMADatabaseKeyValueStorageDataProvider", ^{
     };
 
     it(@"Should store value", ^{
-        withProvider(^(AMADatabaseKVSDataProvider *provider, FMDatabase *db) {
+        withProvider(^(AMADatabaseKVSDataProvider *provider, AMAFMDatabase *db) {
             [provider saveObject:value forKey:key error:nil];
             [[[provider objectForKey:key error:nil] should] equal:value];
         });
     });
     it(@"Should store nil", ^{
-        withProvider(^(AMADatabaseKVSDataProvider *provider, FMDatabase *db) {
+        withProvider(^(AMADatabaseKVSDataProvider *provider, AMAFMDatabase *db) {
             [provider saveObject:nil forKey:key error:nil];
             [[[provider objectForKey:key error:nil] should] beNil];
         });
     });
     it(@"Should overwrite with value", ^{
-        withProvider(^(AMADatabaseKVSDataProvider *provider, FMDatabase *db) {
+        withProvider(^(AMADatabaseKVSDataProvider *provider, AMAFMDatabase *db) {
             [provider saveObject:nil forKey:key error:nil];
             [provider saveObject:value forKey:key error:nil];
             [[[provider objectForKey:key error:nil] should] equal:value];
         });
     });
     it(@"Should overwrite with nil", ^{
-        withProvider(^(AMADatabaseKVSDataProvider *provider, FMDatabase *db) {
+        withProvider(^(AMADatabaseKVSDataProvider *provider, AMAFMDatabase *db) {
             [provider saveObject:@"SOME" forKey:key error:nil];
             [provider saveObject:nil forKey:key error:nil];
             [[[provider objectForKey:key error:nil] should] beNil];
         });
     });
     it(@"Should return nil if no value", ^{
-        withProvider(^(AMADatabaseKVSDataProvider *provider, FMDatabase *db) {
+        withProvider(^(AMADatabaseKVSDataProvider *provider, AMAFMDatabase *db) {
             [[[provider objectForKey:key error:nil] should] beNil];
         });
     });
     it(@"Should return empty array if no keys", ^{
-        withProvider(^(AMADatabaseKVSDataProvider *provider, FMDatabase *db) {
+        withProvider(^(AMADatabaseKVSDataProvider *provider, AMAFMDatabase *db) {
             [[[provider allKeysWithError:nil] should] beEmpty];
         });
     });
     it(@"Should return all keys", ^{
-        withProvider(^(AMADatabaseKVSDataProvider *provider, FMDatabase *db) {
+        withProvider(^(AMADatabaseKVSDataProvider *provider, AMAFMDatabase *db) {
             [provider saveObject:@"A" forKey:@"a" error:nil];
             [provider saveObject:@"B" forKey:@"b" error:nil];
             [provider saveObject:@"C" forKey:@"c" error:nil];
@@ -78,7 +78,7 @@ describe(@"AMADatabaseKeyValueStorageDataProvider", ^{
         });
     });
     it(@"Should return values for keys", ^{
-        withProvider(^(AMADatabaseKVSDataProvider *provider, FMDatabase *db) {
+        withProvider(^(AMADatabaseKVSDataProvider *provider, AMAFMDatabase *db) {
             [provider saveObject:@"A" forKey:@"a" error:nil];
             [provider saveObject:@"B" forKey:@"b" error:nil];
             [provider saveObject:@"C" forKey:@"c" error:nil];
@@ -86,13 +86,13 @@ describe(@"AMADatabaseKeyValueStorageDataProvider", ^{
         });
     });
     it(@"Should store values for keys", ^{
-        withProvider(^(AMADatabaseKVSDataProvider *provider, FMDatabase *db) {
+        withProvider(^(AMADatabaseKVSDataProvider *provider, AMAFMDatabase *db) {
             [provider saveObjectsDictionary:@{ @"a": @"A", @"b": @"B", @"c": @"C" } error:nil];
             [[[provider objectsForKeys:@[ @"a", @"c", @"d" ] error:nil] should] equal:@{ @"a": @"A", @"c": @"C" }];
         });
     });
     it(@"Should allow removing when storing values for keys", ^{
-        withProvider(^(AMADatabaseKVSDataProvider *provider, FMDatabase *db) {
+        withProvider(^(AMADatabaseKVSDataProvider *provider, AMAFMDatabase *db) {
             [provider saveObjectsDictionary:@{ @"a": @"A", @"b": @"B", @"c": @"C" } error:nil];
             [provider saveObjectsDictionary:@{ @"a": @"AA", @"c": [NSNull null], @"d": @"D" } error:nil];
             [[[provider objectsForKeys:@[ @"a", @"c", @"d" ] error:nil] should] equal:@{ @"a": @"AA", @"d": @"D" }];
@@ -101,13 +101,13 @@ describe(@"AMADatabaseKeyValueStorageDataProvider", ^{
 
     context(@"Existing data", ^{
         it(@"Should return existing value", ^{
-            withProvider(^(AMADatabaseKVSDataProvider *provider, FMDatabase *db) {
+            withProvider(^(AMADatabaseKVSDataProvider *provider, AMAFMDatabase *db) {
                 [db executeUpdate:@"INSERT INTO kv (k, v) VALUES (?, ?)" values:@[ key, value ] error:nil];
                 [[[provider objectForKey:key error:nil] should] equal:value];
             });
         });
         it(@"Should return existing nil", ^{
-            withProvider(^(AMADatabaseKVSDataProvider *provider, FMDatabase *db) {
+            withProvider(^(AMADatabaseKVSDataProvider *provider, AMAFMDatabase *db) {
                 [db executeUpdate:@"INSERT INTO kv (k, v) VALUES (?, ?)" values:@[ key, [NSNull null] ] error:nil];
                 [[[provider objectForKey:key error:nil] should] beNil];
             });
@@ -117,7 +117,7 @@ describe(@"AMADatabaseKeyValueStorageDataProvider", ^{
     context(@"Error handling", ^{
         NSError *const expectedError = [NSError errorWithDomain:@"DOMAIN" code:1 userInfo:nil];
         context(@"Query error", ^{
-            void (^stubError)(FMDatabase *db) = ^(FMDatabase *db) {
+            void (^stubError)(AMAFMDatabase *db) = ^(AMAFMDatabase *db) {
                 [db stub:@selector(executeQuery:values:error:) withBlock:^id(NSArray *params) {
                     [AMATestUtilities fillObjectPointerParameter:params[2] withValue:expectedError];
                     return nil;
@@ -130,13 +130,13 @@ describe(@"AMADatabaseKeyValueStorageDataProvider", ^{
 
             context(@"Get", ^{
                 it(@"Should return nil", ^{
-                    withProvider(^(AMADatabaseKVSDataProvider *provider, FMDatabase *db) {
+                    withProvider(^(AMADatabaseKVSDataProvider *provider, AMAFMDatabase *db) {
                         stubError(db);
                         [[[provider objectForKey:key error:nil] should] beNil];
                     });
                 });
                 it(@"Should fill error", ^{
-                    withProvider(^(AMADatabaseKVSDataProvider *provider, FMDatabase *db) {
+                    withProvider(^(AMADatabaseKVSDataProvider *provider, AMAFMDatabase *db) {
                         stubError(db);
                         NSError *error = nil;
                         [provider objectForKey:key error:&error];
@@ -146,13 +146,13 @@ describe(@"AMADatabaseKeyValueStorageDataProvider", ^{
             });
             context(@"Save", ^{
                 it(@"Should return NO", ^{
-                    withProvider(^(AMADatabaseKVSDataProvider *provider, FMDatabase *db) {
+                    withProvider(^(AMADatabaseKVSDataProvider *provider, AMAFMDatabase *db) {
                         stubError(db);
                         [[theValue([provider saveObject:@"SOME" forKey:key error:nil]) should] beNo];
                     });
                 });
                 it(@"Should fill error", ^{
-                    withProvider(^(AMADatabaseKVSDataProvider *provider, FMDatabase *db) {
+                    withProvider(^(AMADatabaseKVSDataProvider *provider, AMAFMDatabase *db) {
                         stubError(db);
                         NSError *error = nil;
                         [provider saveObject:@"SOME" forKey:key error:&error];
@@ -162,13 +162,13 @@ describe(@"AMADatabaseKeyValueStorageDataProvider", ^{
             });
             context(@"Remove", ^{
                 it(@"Should return NO", ^{
-                    withProvider(^(AMADatabaseKVSDataProvider *provider, FMDatabase *db) {
+                    withProvider(^(AMADatabaseKVSDataProvider *provider, AMAFMDatabase *db) {
                         stubError(db);
                         [[theValue([provider removeKey:key error:nil]) should] beNo];
                     });
                 });
                 it(@"Should fill error", ^{
-                    withProvider(^(AMADatabaseKVSDataProvider *provider, FMDatabase *db) {
+                    withProvider(^(AMADatabaseKVSDataProvider *provider, AMAFMDatabase *db) {
                         stubError(db);
                         NSError *error = nil;
                         [provider removeKey:key error:&error];
@@ -178,13 +178,13 @@ describe(@"AMADatabaseKeyValueStorageDataProvider", ^{
             });
             context(@"All keys", ^{
                 it(@"Should return nil", ^{
-                    withProvider(^(AMADatabaseKVSDataProvider *provider, FMDatabase *db) {
+                    withProvider(^(AMADatabaseKVSDataProvider *provider, AMAFMDatabase *db) {
                         stubError(db);
                         [[[provider allKeysWithError:nil] should] beNil];
                     });
                 });
                 it(@"Should fill error", ^{
-                    withProvider(^(AMADatabaseKVSDataProvider *provider, FMDatabase *db) {
+                    withProvider(^(AMADatabaseKVSDataProvider *provider, AMAFMDatabase *db) {
                         stubError(db);
                         NSError *error = nil;
                         [provider allKeysWithError:&error];
@@ -194,13 +194,13 @@ describe(@"AMADatabaseKeyValueStorageDataProvider", ^{
             });
             context(@"Get many", ^{
                 it(@"Should return nil", ^{
-                    withProvider(^(AMADatabaseKVSDataProvider *provider, FMDatabase *db) {
+                    withProvider(^(AMADatabaseKVSDataProvider *provider, AMAFMDatabase *db) {
                         stubError(db);
                         [[[provider objectsForKeys:@[@"a"] error:nil] should] beNil];
                     });
                 });
                 it(@"Should fill error", ^{
-                    withProvider(^(AMADatabaseKVSDataProvider *provider, FMDatabase *db) {
+                    withProvider(^(AMADatabaseKVSDataProvider *provider, AMAFMDatabase *db) {
                         stubError(db);
                         NSError *error = nil;
                         [provider objectsForKeys:@[@"a"] error:&error];
@@ -210,13 +210,13 @@ describe(@"AMADatabaseKeyValueStorageDataProvider", ^{
             });
             context(@"Save many", ^{
                 it(@"Should return nil", ^{
-                    withProvider(^(AMADatabaseKVSDataProvider *provider, FMDatabase *db) {
+                    withProvider(^(AMADatabaseKVSDataProvider *provider, AMAFMDatabase *db) {
                         stubError(db);
                         [[theValue([provider saveObjectsDictionary:@{ @"a": @"A" } error:nil]) should] beNo];
                     });
                 });
                 it(@"Should fill error", ^{
-                    withProvider(^(AMADatabaseKVSDataProvider *provider, FMDatabase *db) {
+                    withProvider(^(AMADatabaseKVSDataProvider *provider, AMAFMDatabase *db) {
                         stubError(db);
                         NSError *error = nil;
                         [provider saveObjectsDictionary:@{ @"a": @"A" } error:&error];
@@ -227,9 +227,9 @@ describe(@"AMADatabaseKeyValueStorageDataProvider", ^{
         });
 
         context(@"Next error", ^{
-            FMResultSet *__block resultSet = nil;
-            void (^stubError)(FMDatabase *db) = ^(FMDatabase *db) {
-                resultSet = [FMResultSet nullMock];
+            AMAFMResultSet *__block resultSet = nil;
+            void (^stubError)(AMAFMDatabase *db) = ^(AMAFMDatabase *db) {
+                resultSet = [AMAFMResultSet nullMock];
                 [resultSet stub:@selector(nextWithError:) withBlock:^id(NSArray *params) {
                     [AMATestUtilities fillObjectPointerParameter:params[0] withValue:expectedError];
                     return theValue(NO);
@@ -239,13 +239,13 @@ describe(@"AMADatabaseKeyValueStorageDataProvider", ^{
 
             context(@"Get", ^{
                 it(@"Should return nil", ^{
-                    withProvider(^(AMADatabaseKVSDataProvider *provider, FMDatabase *db) {
+                    withProvider(^(AMADatabaseKVSDataProvider *provider, AMAFMDatabase *db) {
                         stubError(db);
                         [[[provider objectForKey:key error:nil] should] beNil];
                     });
                 });
                 it(@"Should fill error", ^{
-                    withProvider(^(AMADatabaseKVSDataProvider *provider, FMDatabase *db) {
+                    withProvider(^(AMADatabaseKVSDataProvider *provider, AMAFMDatabase *db) {
                         stubError(db);
                         NSError *error = nil;
                         [provider objectForKey:key error:&error];
@@ -255,13 +255,13 @@ describe(@"AMADatabaseKeyValueStorageDataProvider", ^{
             });
             context(@"All keys", ^{
                 it(@"Should return nil", ^{
-                    withProvider(^(AMADatabaseKVSDataProvider *provider, FMDatabase *db) {
+                    withProvider(^(AMADatabaseKVSDataProvider *provider, AMAFMDatabase *db) {
                         stubError(db);
                         [[[provider allKeysWithError:nil] should] beNil];
                     });
                 });
                 it(@"Should fill error", ^{
-                    withProvider(^(AMADatabaseKVSDataProvider *provider, FMDatabase *db) {
+                    withProvider(^(AMADatabaseKVSDataProvider *provider, AMAFMDatabase *db) {
                         stubError(db);
                         NSError *error = nil;
                         [provider allKeysWithError:&error];
@@ -271,13 +271,13 @@ describe(@"AMADatabaseKeyValueStorageDataProvider", ^{
             });
             context(@"Get many", ^{
                 it(@"Should return nil", ^{
-                    withProvider(^(AMADatabaseKVSDataProvider *provider, FMDatabase *db) {
+                    withProvider(^(AMADatabaseKVSDataProvider *provider, AMAFMDatabase *db) {
                         stubError(db);
                         [[[provider objectsForKeys:@[@"a"] error:nil] should] beNil];
                     });
                 });
                 it(@"Should fill error", ^{
-                    withProvider(^(AMADatabaseKVSDataProvider *provider, FMDatabase *db) {
+                    withProvider(^(AMADatabaseKVSDataProvider *provider, AMAFMDatabase *db) {
                         stubError(db);
                         NSError *error = nil;
                         [provider objectsForKeys:@[@"a"] error:&error];

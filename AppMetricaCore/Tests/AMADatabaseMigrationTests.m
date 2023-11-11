@@ -1,7 +1,6 @@
 
 #import <Kiwi/Kiwi.h>
 #import <sqlite3.h>
-@import FMDB;
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
 #import "AMADatabase.h"
 #import "AMATableSchemeController.h"
@@ -54,6 +53,7 @@
 #import "AMAEnvironmentContainer.h"
 #import <CoreLocation/CoreLocation.h>
 #import <AppMetricaPlatform/AppMetricaPlatform.h>
+#import <AppMetrica_FMDB/AppMetrica_FMDB.h>
 
 @interface AMADatabaseMigrationTestsUtils : NSObject
 
@@ -77,11 +77,11 @@
     NSString *targetPath = [self tempDatabasePath];
     NSString *backupPath = [AMAModuleBundleProvider.moduleBundle pathForResource:backupName ofType:@"sql"];
 
-    FMDatabaseQueue *dbQueue = [[FMDatabaseQueue alloc] initWithPath:targetPath
+    AMAFMDatabaseQueue *dbQueue = [[AMAFMDatabaseQueue alloc] initWithPath:targetPath
                                                                flags:(SQLITE_OPEN_READWRITE |
                                                                       SQLITE_OPEN_CREATE |
                                                                       SQLITE_OPEN_FILEPROTECTION_NONE)];
-    [dbQueue inDatabase:^(FMDatabase * _Nonnull db) {
+    [dbQueue inDatabase:^(AMAFMDatabase * _Nonnull db) {
         [db executeStatements:[NSString stringWithContentsOfFile:backupPath encoding:NSUTF8StringEncoding error:nil]];
     }];
     [dbQueue close];
@@ -171,12 +171,12 @@ describe(@"AMADatabaseMigrationTests", ^{
                 [database migrateToMainApiKey:apiKey];
             });
             it(@"Should add column `type` in sessions table", ^{
-                [database inDatabase:^(FMDatabase *db) {
+                [database inDatabase:^(AMAFMDatabase *db) {
                     [[theValue([db columnExists:@"type" inTableWithName:@"sessions"]) should] beYes];
                 }];
             });
             it(@"Should add column `api_key` in sessions table", ^{
-                [database inDatabase:^(FMDatabase *db) {
+                [database inDatabase:^(AMAFMDatabase *db) {
                     [[theValue([db columnExists:@"api_key" inTableWithName:@"sessions"]) should] beYes];
                 }];
             });
@@ -199,12 +199,12 @@ describe(@"AMADatabaseMigrationTests", ^{
                                                           migrationManager:migrationManager];
             });
             it(@"Should add column `app_state` in sessions table", ^{
-                [database inDatabase:^(FMDatabase *db) {
+                [database inDatabase:^(AMAFMDatabase *db) {
                     [[theValue([db columnExists:@"app_state" inTableWithName:@"sessions"]) should] beYes];
                 }];
             });
             it(@"Should add column `finished` in sessions table", ^{
-                [database inDatabase:^(FMDatabase *db) {
+                [database inDatabase:^(AMAFMDatabase *db) {
                     [[theValue([db columnExists:@"finished" inTableWithName:@"sessions"]) should] beYes];
                 }];
             });
@@ -227,8 +227,8 @@ describe(@"AMADatabaseMigrationTests", ^{
                                                                     libraryMigrations:@[]];
                 database = [AMADatabaseMigrationTestsUtils databaseForName:@"storage-version-3"
                                                           migrationManager:migrationManager];
-                [database inDatabase:^(FMDatabase *db) {
-                    FMResultSet *rs = [db executeQuery:@"SELECT * FROM events ORDER BY id DESC LIMIT 1"];
+                [database inDatabase:^(AMAFMDatabase *db) {
+                    AMAFMResultSet *rs = [db executeQuery:@"SELECT * FROM events ORDER BY id DESC LIMIT 1"];
                     [[theValue([rs next]) should] beYes];
                     eventDictionary = rs.resultDictionary;
                 }];
@@ -290,42 +290,42 @@ describe(@"AMADatabaseMigrationTests", ^{
                                                           migrationManager:migrationManager];
             });
             it(@"Should add column `latitude` to `errors` table", ^{
-                [database inDatabase:^(FMDatabase *db) {
+                [database inDatabase:^(AMAFMDatabase *db) {
                     [[theValue([db columnExists:@"latitude" inTableWithName:@"errors"]) should] beYes];
                 }];
             });
             it(@"Should add column `longitude` to `errors` table", ^{
-                [database inDatabase:^(FMDatabase *db) {
+                [database inDatabase:^(AMAFMDatabase *db) {
                     [[theValue([db columnExists:@"longitude" inTableWithName:@"errors"]) should] beYes];
                 }];
             });
             it(@"Should add column `speed` to `errors` table", ^{
-                [database inDatabase:^(FMDatabase *db) {
+                [database inDatabase:^(AMAFMDatabase *db) {
                     [[theValue([db columnExists:@"location_speed" inTableWithName:@"errors"]) should] beYes];
                 }];
             });
             it(@"Should add column `location_direction` to `errors` table", ^{
-                [database inDatabase:^(FMDatabase *db) {
+                [database inDatabase:^(AMAFMDatabase *db) {
                     [[theValue([db columnExists:@"location_direction" inTableWithName:@"errors"]) should] beYes];
                 }];
             });
             it(@"Should add column `location_horizontal_accuracy` to `errors` table", ^{
-                [database inDatabase:^(FMDatabase *db) {
+                [database inDatabase:^(AMAFMDatabase *db) {
                     [[theValue([db columnExists:@"location_horizontal_accuracy" inTableWithName:@"errors"]) should] beYes];
                 }];
             });
             it(@"Should add column `location_vertical_accuracy` to `errors` table", ^{
-                [database inDatabase:^(FMDatabase *db) {
+                [database inDatabase:^(AMAFMDatabase *db) {
                     [[theValue([db columnExists:@"location_vertical_accuracy" inTableWithName:@"errors"]) should] beYes];
                 }];
             });
             it(@"Should add column `location_timestamp` to `errors` table", ^{
-                [database inDatabase:^(FMDatabase *db) {
+                [database inDatabase:^(AMAFMDatabase *db) {
                     [[theValue([db columnExists:@"location_timestamp" inTableWithName:@"errors"]) should] beYes];
                 }];
             });
             it(@"Should add column `location_altitude` to `errors` table", ^{
-                [database inDatabase:^(FMDatabase *db) {
+                [database inDatabase:^(AMAFMDatabase *db) {
                     [[theValue([db columnExists:@"location_altitude" inTableWithName:@"errors"]) should] beYes];
                 }];
             });
@@ -348,12 +348,12 @@ describe(@"AMADatabaseMigrationTests", ^{
                                                           migrationManager:migrationManager];
             });
             it(@"Should add column `server_time_offset` to `sessions` table", ^{
-                [database inDatabase:^(FMDatabase *db) {
+                [database inDatabase:^(AMAFMDatabase *db) {
                     [[theValue([db columnExists:@"server_time_offset" inTableWithName:@"sessions"]) should] beYes];
                 }];
             });
             it(@"Should add column `user_info` to `events` table", ^{
-                [database inDatabase:^(FMDatabase *db) {
+                [database inDatabase:^(AMAFMDatabase *db) {
                     [[theValue([db columnExists:@"user_info" inTableWithName:@"events"]) should] beYes];
                 }];
             });
@@ -376,8 +376,8 @@ describe(@"AMADatabaseMigrationTests", ^{
                                                           migrationManager:migrationManager];
             });
             it(@"Should change column `api_key` type in `sessions` table", ^{
-                [database inDatabase:^(FMDatabase *db) {
-                    FMResultSet *schema = [db getTableSchema:@"sessions"];
+                [database inDatabase:^(AMAFMDatabase *db) {
+                    AMAFMResultSet *schema = [db getTableSchema:@"sessions"];
 
                     NSString *type = nil;
                     while ([schema next]) {
@@ -409,7 +409,7 @@ describe(@"AMADatabaseMigrationTests", ^{
                                                           migrationManager:migrationManager];
             });
             it(@"Should move column `environment` to `error_environment` in `events` and `errors` tables", ^{
-                [database inDatabase:^(FMDatabase *db) {
+                [database inDatabase:^(AMAFMDatabase *db) {
                     [[theValue([db columnExists:@"error_environment" inTableWithName:@"events"]) should] beYes];
                     [[theValue([db columnExists:@"environment" inTableWithName:@"events"]) should] beNo];
                     [[theValue([db columnExists:@"error_environment" inTableWithName:@"errors"]) should] beYes];
@@ -417,13 +417,13 @@ describe(@"AMADatabaseMigrationTests", ^{
                 }];
             });
             it(@"Should add column `app_environment` to `events` and `errors` tables", ^{
-                [database inDatabase:^(FMDatabase *db) {
+                [database inDatabase:^(AMAFMDatabase *db) {
                     [[theValue([db columnExists:@"app_environment" inTableWithName:@"events"]) should] beYes];
                     [[theValue([db columnExists:@"app_environment" inTableWithName:@"errors"]) should] beYes];
                 }];
             });
             it(@"Should add column `is_truncated` to `events` and `errors` tables", ^{
-                [database inDatabase:^(FMDatabase *db) {
+                [database inDatabase:^(AMAFMDatabase *db) {
                     [[theValue([db columnExists:@"is_truncated" inTableWithName:@"events"]) should] beYes];
                     [[theValue([db columnExists:@"is_truncated" inTableWithName:@"errors"]) should] beYes];
                 }];
@@ -447,7 +447,7 @@ describe(@"AMADatabaseMigrationTests", ^{
                                                           migrationManager:migrationManager];
             });
             it(@"Should change column `is_truncated` to `bytes_truncated` in `events` and `errors` tables", ^{
-                [database inDatabase:^(FMDatabase *db) {
+                [database inDatabase:^(AMAFMDatabase *db) {
                     [[theValue([db columnExists:@"bytes_truncated" inTableWithName:@"events"]) should] beYes];
                     [[theValue([db columnExists:@"is_truncated" inTableWithName:@"events"]) should] beNo];
                     [[theValue([db columnExists:@"bytes_truncated" inTableWithName:@"errors"]) should] beYes];
@@ -489,16 +489,16 @@ describe(@"AMADatabaseMigrationTests", ^{
                                                           migrationManager:migrationManager];
             });
             it(@"Should change column `updated_at` to `last_event_time` and `pause_time` in `sessions` table", ^{
-                [database inDatabase:^(FMDatabase *db) {
+                [database inDatabase:^(AMAFMDatabase *db) {
                     [[theValue([db columnExists:@"last_event_time" inTableWithName:@"sessions"]) should] beYes];
                     [[theValue([db columnExists:@"pause_time" inTableWithName:@"sessions"]) should] beYes];
                     [[theValue([db columnExists:@"updated_at" inTableWithName:@"sessions"]) should] beNo];
                 }];
             });
             it(@"Should use value of `updated_at` as values of `last_event_time` and `pause_time`", ^{
-                [database inDatabase:^(FMDatabase *db) {
+                [database inDatabase:^(AMAFMDatabase *db) {
                     NSString *query = @"SELECT * FROM sessions WHERE api_key = ? ORDER BY id DESC LIMIT 1";
-                    FMResultSet *rs = [db executeQuery:query, @"1111"];
+                    AMAFMResultSet *rs = [db executeQuery:query, @"1111"];
                     [[theValue([rs next]) should] beYes];
                     [[[rs stringForColumn:@"pause_time"] should] equal:@"1418742210.99402"];
                     [[[rs stringForColumn:@"last_event_time"] should] equal:@"1418742210.99402"];
@@ -529,9 +529,9 @@ describe(@"AMADatabaseMigrationTests", ^{
                 NSString *crashName = @"migration_test_crash"; // hardcoded in storage-version-10 errors table
                 NSDictionary *__block eventDictionary = nil;
                 beforeAll(^{
-                    [database inDatabase:^(FMDatabase *db) {
+                    [database inDatabase:^(AMAFMDatabase *db) {
                         NSString *query = @"SELECT * FROM events WHERE name = ? and type = ? ORDER BY id DESC LIMIT 1";
-                        FMResultSet *rs = [db executeQuery:query, crashName, @(AMAEventTypeCrash)];
+                        AMAFMResultSet *rs = [db executeQuery:query, crashName, @(AMAEventTypeCrash)];
                         [[theValue([rs next]) should] beYes];
                         eventDictionary = rs.resultDictionary;
                         [rs close];
@@ -549,7 +549,7 @@ describe(@"AMADatabaseMigrationTests", ^{
             });
 #pragma clang diagnostic pop
             it(@"Should drop errors table", ^{
-                [database inDatabase:^(FMDatabase *db) {
+                [database inDatabase:^(AMAFMDatabase *db) {
                     [[theValue([db tableExists:@"errors"]) should] beNo];
                 }];
             });
@@ -598,8 +598,8 @@ describe(@"AMADatabaseMigrationTests", ^{
                                                           migrationManager:migrationManager];
             });
             it(@"Should migrate with locationEnabled set to -1 (undefined)", ^{
-                [database inDatabase:^(FMDatabase *db) {
-                    FMResultSet *rs = [db executeQuery:@"SELECT location_enabled FROM events LIMIT 1"];
+                [database inDatabase:^(AMAFMDatabase *db) {
+                    AMAFMResultSet *rs = [db executeQuery:@"SELECT location_enabled FROM events LIMIT 1"];
                     [[theValue([rs next]) should] beYes];
                     [[theValue([rs intForColumnIndex:0]) should] equal:theValue(AMAOptionalBoolUndefined)];
                     [rs close];
@@ -623,8 +623,8 @@ describe(@"AMADatabaseMigrationTests", ^{
                                                           migrationManager:migrationManager];
             });
             it(@"Should migrate new empty field user_profile_id", ^{
-                [database inDatabase:^(FMDatabase *db) {
-                    FMResultSet *rs = [db executeQuery:@"SELECT user_profile_id FROM events LIMIT 1"];
+                [database inDatabase:^(AMAFMDatabase *db) {
+                    AMAFMResultSet *rs = [db executeQuery:@"SELECT user_profile_id FROM events LIMIT 1"];
                     [[theValue([rs next]) should] beYes];
                     [[[rs stringForColumnIndex:0] should] beNil];
                     [rs close];
@@ -665,7 +665,7 @@ describe(@"AMADatabaseMigrationTests", ^{
                                                           migrationManager:migrationManager];
             });
             it(@"Should add column session_id in sessions table", ^{
-                [database inDatabase:^(FMDatabase *db) {
+                [database inDatabase:^(AMAFMDatabase *db) {
                     [[theValue([db columnExists:@"session_id" inTableWithName:@"sessions"]) should] beYes];
                 }];
             });
@@ -709,16 +709,16 @@ describe(@"AMADatabaseMigrationTests", ^{
                                                                 migrationManager:migrationManager];
             });
             it(@"Should migrate new zero field global_number", ^{
-                [database inDatabase:^(FMDatabase *db) {
-                    FMResultSet *rs = [db executeQuery:@"SELECT global_number FROM events LIMIT 1"];
+                [database inDatabase:^(AMAFMDatabase *db) {
+                    AMAFMResultSet *rs = [db executeQuery:@"SELECT global_number FROM events LIMIT 1"];
                     [[theValue([rs next]) should] beYes];
                     [[theValue([rs longLongIntForColumnIndex:0]) should] beZero];
                     [rs close];
                 }];
             });
             it(@"Should migrate new zero field number_of_type", ^{
-                [database inDatabase:^(FMDatabase *db) {
-                    FMResultSet *rs = [db executeQuery:@"SELECT number_of_type FROM events LIMIT 1"];
+                [database inDatabase:^(AMAFMDatabase *db) {
+                    AMAFMResultSet *rs = [db executeQuery:@"SELECT number_of_type FROM events LIMIT 1"];
                     [[theValue([rs next]) should] beYes];
                     [[theValue([rs longLongIntForColumnIndex:0]) should] beZero];
                     [rs close];
@@ -1123,8 +1123,8 @@ describe(@"AMADatabaseMigrationTests", ^{
                                                                 migrationManager:migrationManager];
             });
             it(@"Should change KV column types", ^{
-                [database inDatabase:^(FMDatabase *db) {
-                    FMResultSet *rs = [db getTableSchema:@"kv"];
+                [database inDatabase:^(AMAFMDatabase *db) {
+                    AMAFMResultSet *rs = [db getTableSchema:@"kv"];
                     NSMutableDictionary *types = [NSMutableDictionary dictionary];
                     while ([rs next]) {
                         types[[rs stringForColumn:@"name"]] = [rs stringForColumn:@"type"];
@@ -1135,28 +1135,28 @@ describe(@"AMADatabaseMigrationTests", ^{
             });
             context(@"KV items", ^{
                 it(@"Should migrate device ID", ^{
-                    [database inDatabase:^(FMDatabase *db) {
+                    [database inDatabase:^(AMAFMDatabase *db) {
                         NSString *key = @"fallback-keychain-AMAMetricaPersistentConfigurationDeviceIDStorageKey";
                         NSString *value = [[database.storageProvider storageForDB:db] stringForKey:key error:nil];
                         [[value should] equal:@"8B1C3660-9F81-4FC4-A720-85032F5F9849"];
                     }];
                 });
                 it(@"Should migrate UUID", ^{
-                    [database inDatabase:^(FMDatabase *db) {
+                    [database inDatabase:^(AMAFMDatabase *db) {
                         NSString *key = @"uuid";
                         NSString *value = [[database.storageProvider storageForDB:db] stringForKey:key error:nil];
                         [[value should] equal:@"59a050e331fe457ab300882db3e2f2c5"];
                     }];
                 });
                 it(@"Should migrate startup update date", ^{
-                    [database inDatabase:^(FMDatabase *db) {
+                    [database inDatabase:^(AMAFMDatabase *db) {
                         NSString *key = @"startup.updated_at";
                         NSString *value = [[database.storageProvider storageForDB:db] stringForKey:key error:nil];
                         [[value should] equal:@"1568284190.23964"];
                     }];
                 });
                 it(@"Should remove device ID hash", ^{
-                    [database inDatabase:^(FMDatabase *db) {
+                    [database inDatabase:^(AMAFMDatabase *db) {
                         NSString *key = @"fallback-keychain-AMAMetricaPersistentConfigurationDeviceIDHashStorageKey";
                         NSString *value = [[database.storageProvider storageForDB:db] stringForKey:key error:nil];
                         [[value should] beNil];

@@ -106,7 +106,7 @@
     BOOL __block result = YES;
     NSError *__block internalError = nil;
     // This method will create a copy of session with the last oid in DB.
-    [self.database inTransaction:^(FMDatabase *db, AMARollbackHolder *rollbackHolder) {
+    [self.database inTransaction:^(AMAFMDatabase *db, AMARollbackHolder *rollbackHolder) {
         BOOL isFinished = session.isFinished;
         result = [self updateSessionFields:@{ kAMASessionTableFieldFinished: @YES }
                                 forSession:session
@@ -167,7 +167,7 @@
 {
     BOOL __block result = NO;
     NSError *__block internalError = nil;
-    [self.database inDatabase:^(FMDatabase *db) {
+    [self.database inDatabase:^(AMAFMDatabase *db) {
         result = [self insertSession:session inDB:db error:&internalError];
     }];
     if (internalError != nil) {
@@ -204,7 +204,7 @@
 
     AMASession *__block resultSession = nil;
     NSError *__block internalError = nil;
-    [self.database inTransaction:^(FMDatabase *db, AMARollbackHolder *rollbackHolder) {
+    [self.database inTransaction:^(AMAFMDatabase *db, AMARollbackHolder *rollbackHolder) {
         id<AMAKeyValueStoring> storage = [self.database.storageProvider storageForDB:db];
 
         AMASession *session = [[AMASession alloc] init];
@@ -254,7 +254,7 @@
 {
     AMASession *__block session = nil;
     NSError *__block internalError = nil;
-    [self.database inDatabase:^(FMDatabase *db) {
+    [self.database inDatabase:^(AMAFMDatabase *db) {
         NSDictionary *sessionDictionary = [AMADatabaseHelper firstRowWithFilter:filter
                                                                           order:[NSString stringWithFormat:@"%@ DESC", kAMACommonTableFieldOID]
                                                                     valuesArray:values
@@ -275,7 +275,7 @@
 {
     NSError *__block internalError = nil;
     BOOL __block result = YES;
-    [self.database inDatabase:^(FMDatabase *db) {
+    [self.database inDatabase:^(AMAFMDatabase *db) {
         result = [self updateSessionFields:fieldsDictionary
                                 forSession:session
                                 inDatabase:db
@@ -290,7 +290,7 @@
 
 - (BOOL)updateSessionFields:(NSDictionary *)fieldsDictionary
                  forSession:(AMASession *)session
-                 inDatabase:(FMDatabase *)db
+                 inDatabase:(AMAFMDatabase *)db
                       error:(NSError **)error
                   onSuccess:(dispatch_block_t)onSuccess
 {
@@ -307,7 +307,7 @@
 }
 
 - (BOOL)insertSession:(AMASession *)session
-                 inDB:(FMDatabase *)db
+                 inDB:(AMAFMDatabase *)db
                 error:(NSError **)error
 {
     NSDictionary *sessionDictionary = [self.serializer dictionaryForSession:session error:error];

@@ -7,7 +7,7 @@
 #import "AMAEventSerializer.h"
 #import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
 #import "AMAEvent.h"
-@import FMDB;
+#import <AppMetrica_FMDB/AppMetrica_FMDB.h>
 
 @implementation AMAEventStorage (TestUtilities)
 
@@ -61,8 +61,8 @@
 - (NSArray *)amatest_allSavedEventsForQuery:(NSString *)query arguments:(NSArray *)arguments
 {
     NSMutableArray *result = [NSMutableArray array];
-    [self.database inDatabase:^(FMDatabase *db) {
-        FMResultSet *rs = [db executeQuery:query withArgumentsInArray:arguments];
+    [self.database inDatabase:^(AMAFMDatabase *db) {
+        AMAFMResultSet *rs = [db executeQuery:query withArgumentsInArray:arguments];
         while ([rs next]) {
             AMAEvent *event = [self.eventSerializer eventForDictionary:rs.resultDictionary error:nil];
             if (event != nil) {

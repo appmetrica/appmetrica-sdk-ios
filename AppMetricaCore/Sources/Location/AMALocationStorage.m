@@ -97,7 +97,7 @@ static double const kAMALocationsOverflowPurgingFactor = 0.1;
     }
 
     AMALogInfo(@"Purging %lu locations", (unsigned long)locationIdentifiers.count);
-    [self inTransaction:^(FMDatabase *db, AMARollbackHolder *rollbackHolder) {
+    [self inTransaction:^(AMAFMDatabase *db, AMARollbackHolder *rollbackHolder) {
         NSError *error = nil;
         [AMADatabaseHelper deleteRowsWhereKey:kAMACommonTableFieldOID
                                       inArray:locationIdentifiers
@@ -132,7 +132,7 @@ static double const kAMALocationsOverflowPurgingFactor = 0.1;
     if (self.state == nil) {
         @synchronized (self) {
             if (self.state == nil) {
-                [self.database inDatabase:^(FMDatabase *db) {
+                [self.database inDatabase:^(AMAFMDatabase *db) {
                     [self ensureStateLoaded:db];
                 }];
             }
@@ -172,7 +172,7 @@ static double const kAMALocationsOverflowPurgingFactor = 0.1;
     }
 
     AMALogInfo(@"Purging %lu visits", (unsigned long)visitIdentifiers.count);
-    [self inTransaction:^(FMDatabase *db, AMARollbackHolder *rollbackHolder) {
+    [self inTransaction:^(AMAFMDatabase *db, AMARollbackHolder *rollbackHolder) {
         NSError *error = nil;
         [AMADatabaseHelper deleteRowsWhereKey:kAMACommonTableFieldOID
                                       inArray:visitIdentifiers
@@ -199,7 +199,7 @@ static double const kAMALocationsOverflowPurgingFactor = 0.1;
 
 - (void)incrementRequestIdentifier
 {
-    [self.database inDatabase:^(FMDatabase *db) {
+    [self.database inDatabase:^(AMAFMDatabase *db) {
         [self ensureStateLoaded:db];
         unsigned long long nextIdentifier = self.state.requestIdentifier + 1;
 
@@ -226,7 +226,7 @@ static double const kAMALocationsOverflowPurgingFactor = 0.1;
              nextIdentifier:(unsigned long long)nextIdentifier
 {
     AMALogInfo(@"Add location with identifier: %@", identifier);
-    [self inTransaction:^(FMDatabase *db, AMARollbackHolder *rollbackHolder) {
+    [self inTransaction:^(AMAFMDatabase *db, AMARollbackHolder *rollbackHolder) {
         NSError *error = nil;
         NSUInteger count = self.state.locationsCount;
         NSDate *firstLocationDate = self.state.firstLocationDate ?: collectDate;
@@ -272,7 +272,7 @@ static double const kAMALocationsOverflowPurgingFactor = 0.1;
           nextIdentifier:(unsigned long long)nextIdentifier
 {
     AMALogInfo(@"Add visit with identifier: %@", identifier);
-    [self inTransaction:^(FMDatabase *db, AMARollbackHolder *rollbackHolder) {
+    [self inTransaction:^(AMAFMDatabase *db, AMARollbackHolder *rollbackHolder) {
         NSError *error = nil;
         NSDictionary *visitDictionary = @{
             kAMACommonTableFieldOID : identifier,
@@ -311,7 +311,7 @@ static double const kAMALocationsOverflowPurgingFactor = 0.1;
     }
     NSArray *__block objects = nil;
     AMALogInfo(@"Collecting pending objects from '%@' table", tableName);
-    [self.database inDatabase:^(FMDatabase *db) {
+    [self.database inDatabase:^(AMAFMDatabase *db) {
 
         NSMutableArray *mutableArray = [NSMutableArray array];
         NSError *error = nil;
@@ -354,7 +354,7 @@ static double const kAMALocationsOverflowPurgingFactor = 0.1;
     return objects;
 }
 
-- (NSUInteger)purgeFirstLocationsInDB:(FMDatabase *)db error:(NSError **)error
+- (NSUInteger)purgeFirstLocationsInDB:(AMAFMDatabase *)db error:(NSError **)error
 {
     NSUInteger limit = (NSUInteger)ceil(self.state.locationsCount * kAMALocationsOverflowPurgingFactor);
     AMALogInfo(@"Locations limit is reached. Purging first %lu rows.", (unsigned long)limit);
@@ -368,15 +368,15 @@ static double const kAMALocationsOverflowPurgingFactor = 0.1;
     return limit;
 }
 
-- (void)inTransaction:(void (^)(FMDatabase *db, AMARollbackHolder *rollbackHolder))block
+- (void)inTransaction:(void (^)(AMAFMDatabase *db, AMARollbackHolder *rollbackHolder))block
 {
-    [self.database inTransaction:^(FMDatabase *db, AMARollbackHolder *rollbackHolder) {
+    [self.database inTransaction:^(AMAFMDatabase *db, AMARollbackHolder *rollbackHolder) {
         [self ensureStateLoaded:db];
         block(db, rollbackHolder);
     }];
 }
 
-- (void)ensureStateLoaded:(FMDatabase *)db
+- (void)ensureStateLoaded:(AMAFMDatabase *)db
 {
     if (self.state != nil) {
         return;
@@ -415,7 +415,7 @@ static double const kAMALocationsOverflowPurgingFactor = 0.1;
     }
 }
 
-- (NSDate *)firstLocationDateWithDB:(FMDatabase *)db error:(NSError **)error
+- (NSDate *)firstLocationDateWithDB:(AMAFMDatabase *)db error:(NSError **)error
 {
     NSDate *firstLocationDate = nil;
     NSError *internalError = nil;
@@ -436,17 +436,17 @@ static double const kAMALocationsOverflowPurgingFactor = 0.1;
     return firstLocationDate;
 }
 
-- (NSUInteger)locationsCountWithDB:(FMDatabase *)database error:(NSError **)error
+- (NSUInteger)locationsCountWithDB:(AMAFMDatabase *)database error:(NSError **)error
 {
     return [self countForTable:kAMALocationsTableName db:database error:error];
 }
 
-- (NSUInteger)visitsCountWithDB:(FMDatabase *)database error:(NSError **)error
+- (NSUInteger)visitsCountWithDB:(AMAFMDatabase *)database error:(NSError **)error
 {
     return [self countForTable:kAMALocationsVisitsTableName db:database error:error];
 }
 
-- (NSUInteger)countForTable:(NSString *)tableName db:(FMDatabase *)db error:(NSError **)error
+- (NSUInteger)countForTable:(NSString *)tableName db:(AMAFMDatabase *)db error:(NSError **)error
 {
     NSError *internalError = nil;
     NSUInteger locationsCount = [AMADatabaseHelper countWhereField:nil

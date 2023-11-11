@@ -2,9 +2,8 @@
 #import <AppMetricaPlatform/AppMetricaPlatform.h>
 #import "AMACore.h"
 #import <sqlite3.h>
-#import "FMDB.h"
+#import <AppMetrica_FMDB/AppMetrica_FMDB.h>
 #import "AMADatabaseQueueProvider.h"
-#import "AMAFMDatabaseQueue.h"
 
 @interface AMADatabaseQueueProvider ()
 
@@ -31,12 +30,12 @@
     return [NSString stringWithFormat:@"file:%@?nolock=1", path];
 }
 
-- (FMDatabaseQueue *)inMemoryQueue
+- (AMAFMDatabaseQueue *)inMemoryQueue
 {
     return [[AMAFMDatabaseQueue alloc] initWithPath:nil];
 }
 
-- (FMDatabaseQueue *)queueForPath:(NSString *)path
+- (AMAFMDatabaseQueue *)queueForPath:(NSString *)path
 {
     [AMAFileUtility createPathIfNeeded:[path stringByDeletingLastPathComponent]];
     AMALogInfo(@"Database path: %@", path);
@@ -52,7 +51,7 @@
         AMALogWarn(@"Failed to set the skip-backup attribute");
     }
 
-    [dbQueue inDatabase:^(FMDatabase *db) {
+    [dbQueue inDatabase:^(AMAFMDatabase *db) {
         db.logsErrors = self.logsEnabled;
         [db executeUpdate:@"PRAGMA auto_vacuum=FULL"];
     }];
@@ -83,7 +82,7 @@
         queues = [self.createdQueues allObjects];
     }
     for (AMAFMDatabaseQueue *queue in queues) {
-        [queue inDatabase:^(FMDatabase *db) {
+        [queue inDatabase:^(AMAFMDatabase *db) {
             db.logsErrors = logsEnabled;
         }];
     }

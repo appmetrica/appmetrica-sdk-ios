@@ -2,12 +2,12 @@
 #import <Kiwi/Kiwi.h>
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
 #import <AppMetricaStorageUtils/AppMetricaStorageUtils.h>
-@import FMDB;
 #import "AMADatabaseKeyValueStorageProvider.h"
 #import "AMADatabaseObjectProvider.h"
 #import "AMAMockDatabase.h"
 #import "AMAStringDatabaseKeyValueStorageConverter.h"
 #import "AMAInMemoryKeyValueStorageDataProvider.h"
+#import <AppMetrica_FMDB/AppMetrica_FMDB.h>
 
 SPEC_BEGIN(AMADatabaseKeyValueStorageProviderTests)
 
@@ -31,15 +31,15 @@ describe(@"AMADatabaseKeyValueStorageProvider", ^{
     });
 
     void (^addValues)(void) = ^{
-        [database inDatabase:^(FMDatabase *db) {
+        [database inDatabase:^(AMAFMDatabase *db) {
             [db executeUpdate:@"INSERT INTO kv (k,v) VALUES (?, ?)" values:@[ key, value ] error:nil];
         }];
     };
 
     NSString *(^existingValue)(void) = ^{
         NSString *__block result = nil;
-        [database inDatabase:^(FMDatabase *db) {
-            FMResultSet *rs = [db executeQuery:@"SELECT v FROM kv WHERE k = ? LIMIT 1" values:@[ key ] error:nil];
+        [database inDatabase:^(AMAFMDatabase *db) {
+            AMAFMResultSet *rs = [db executeQuery:@"SELECT v FROM kv WHERE k = ? LIMIT 1" values:@[ key ] error:nil];
             if ([rs next]) {
                 result = [rs stringForColumnIndex:0];
             }
@@ -85,7 +85,7 @@ describe(@"AMADatabaseKeyValueStorageProvider", ^{
         it(@"Should flush on open database", ^{
             [storage saveString:value forKey:key error:nil];
             [[storage should] receive:@selector(flush)];
-            [database inDatabase:^(FMDatabase *db) {
+            [database inDatabase:^(AMAFMDatabase *db) {
                 // Do nothing
             }];
         });
@@ -105,7 +105,7 @@ describe(@"AMADatabaseKeyValueStorageProvider", ^{
     context(@"Storage for DB", ^{
         it(@"Should return value", ^{
             addValues();
-            [database inDatabase:^(FMDatabase *db) {
+            [database inDatabase:^(AMAFMDatabase *db) {
                 [[[[provider storageForDB:db] stringForKey:key error:nil] should] equal:value];
             }];
         });
@@ -171,7 +171,7 @@ describe(@"AMADatabaseKeyValueStorageProvider", ^{
         
         it(@"Should return value from original DB", ^{
             addValues();
-            [database inDatabase:^(FMDatabase *db) {
+            [database inDatabase:^(AMAFMDatabase *db) {
                 [[[[provider storageForDB:db] stringForKey:key error:nil] should] equal:value];
             }];
         });
@@ -179,7 +179,7 @@ describe(@"AMADatabaseKeyValueStorageProvider", ^{
         it(@"Should not return value from backed DB if the keys were not added", ^{
             backingStorage[backedKey] = backingStorage[backedValue];
             
-            [database inDatabase:^(FMDatabase *db) {
+            [database inDatabase:^(AMAFMDatabase *db) {
                 [[[[provider storageForDB:db] stringForKey:backedKey error:nil] should] beNil];
             }];
         });
@@ -188,7 +188,7 @@ describe(@"AMADatabaseKeyValueStorageProvider", ^{
             backingStorage[backedKey] = backedValue;
             [provider addBackingKeys:@[ backedKey ]];
             
-            [database inDatabase:^(FMDatabase *db) {
+            [database inDatabase:^(AMAFMDatabase *db) {
                 [[[[provider storageForDB:db] stringForKey:backedKey error:nil] should] equal:backedValue];
             }];
         });

@@ -41,7 +41,7 @@ static NSUInteger const kAMAInitialSchemeVersion = 1;
 
 - (void)applySchemeMigrationsToDatabase:(id<AMADatabaseProtocol>)database isNew:(BOOL)isNew
 {
-    [database inTransaction:^(FMDatabase *db, AMARollbackHolder *rollbackHolder) {
+    [database inTransaction:^(AMAFMDatabase *db, AMARollbackHolder *rollbackHolder) {
         id<AMAKeyValueStoring> storage = [database.storageProvider storageForDB:db];
         if (isNew) {
             [storage saveLongLongNumber:@(self.currentSchemeVersion) forKey:kAMADatabaseKeySchemaVersion error:nil];
@@ -59,7 +59,7 @@ static NSUInteger const kAMAInitialSchemeVersion = 1;
     }];
 }
 
-- (void)migrateSchemeInDB:(FMDatabase *)db
+- (void)migrateSchemeInDB:(AMAFMDatabase *)db
      initialStorageScheme:(NSUInteger)initialStorageScheme
                   storage:(id<AMAKeyValueStoring>)storage
                  rollback:(AMARollbackHolder *)rollbackHolder
@@ -130,7 +130,7 @@ static NSUInteger const kAMAInitialSchemeVersion = 1;
         return;
     }
 
-    [database inDatabase:^(FMDatabase *db) {
+    [database inDatabase:^(AMAFMDatabase *db) {
         id<AMAKeyValueStoring> storage = [database.storageProvider storageForDB:db];
         NSString *initialVersion = [storage stringForKey:kAMADatabaseKeyLibraryVersion error:nil];
         NSString *currentVersion = [AMAPlatformDescription SDKVersionName];

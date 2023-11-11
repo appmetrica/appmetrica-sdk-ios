@@ -3,7 +3,7 @@
 #import "AMAConfigurationDatabaseSchemeMigrationTo15.h"
 #import "AMAMigrationUtils.h"
 #import "AMAEventTypes.h"
-#import "FMDB.h"
+#import <AppMetrica_FMDB/AppMetrica_FMDB.h>
 
 static NSString *const kAMAFilePathPrefix = @"/Library/Caches/io.appmetrica/";
 
@@ -14,16 +14,16 @@ static NSString *const kAMAFilePathPrefix = @"/Library/Caches/io.appmetrica/";
     return 15;
 }
 
-- (BOOL)applyTransactionalMigrationToDatabase:(FMDatabase *)db
+- (BOOL)applyTransactionalMigrationToDatabase:(AMAFMDatabase *)db
 {
     BOOL result = [AMAMigrationUtils addEncryptionTypeInDatabase:db];
     result = result && [self fixFilePathInDatabase:db];
     return result;
 }
 
-- (BOOL)fixFilePathInDatabase:(FMDatabase *)db
+- (BOOL)fixFilePathInDatabase:(AMAFMDatabase *)db
 {
-    FMResultSet *eventsSet = [db executeQuery:@"SELECT id, value FROM events WHERE type = ?"
+    AMAFMResultSet *eventsSet = [db executeQuery:@"SELECT id, value FROM events WHERE type = ?"
                          withArgumentsInArray:@[ @(28) ]];
     while ([eventsSet next]) {
         NSString *eventValue = [eventsSet stringForColumn:@"value"];

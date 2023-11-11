@@ -1,7 +1,7 @@
 
 #import <Foundation/Foundation.h>
 
-@class FMDatabaseQueue;
+@class AMAFMDatabaseQueue;
 @class AMADatabaseIntegrityManager;
 @class AMADatabaseIntegrityStorage;
 @class AMADatabaseIntegrityProcessor;
@@ -9,10 +9,10 @@
 @protocol AMADatabaseIntegrityManagerDelegate <NSObject>
 
 - (id)contextForIntegrityManager:(AMADatabaseIntegrityManager *)manager
-            thatWillDropDatabase:(FMDatabaseQueue *)databaase;
+            thatWillDropDatabase:(AMAFMDatabaseQueue *)databaase;
 
 - (void)integrityManager:(AMADatabaseIntegrityManager *)manager
-    didCreateNewDatabase:(FMDatabaseQueue *)databaase
+    didCreateNewDatabase:(AMAFMDatabaseQueue *)databaase
                  context:(id)context;
 
 @end
@@ -29,6 +29,6 @@
                              storage:(AMADatabaseIntegrityStorage *)storage
                            processor:(AMADatabaseIntegrityProcessor *)processor;
 
-- (FMDatabaseQueue *)databaseWithEnsuredIntegrityWithIsNew:(BOOL *)isNew;
+- (AMAFMDatabaseQueue *)databaseWithEnsuredIntegrityWithIsNew:(BOOL *)isNew;
 
 @end

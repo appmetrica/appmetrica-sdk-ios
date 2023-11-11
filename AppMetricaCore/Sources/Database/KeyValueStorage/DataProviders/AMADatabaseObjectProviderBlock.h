@@ -1,6 +1,6 @@
 
 #import <Foundation/Foundation.h>
 
-@class FMResultSet;
+@class AMAFMResultSet;
 
-typedef id(^AMADatabaseObjectProviderBlock)(FMResultSet *rs, NSUInteger columdIdx);
+typedef id(^AMADatabaseObjectProviderBlock)(AMAFMResultSet *rs, NSUInteger columdIdx);

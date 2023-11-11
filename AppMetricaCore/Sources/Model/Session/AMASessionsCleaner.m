@@ -86,7 +86,7 @@
 - (void)purgeEmptySessionsWithType:(AMASessionType)type
 {
     NSError *__block error = nil;
-    [self.database inDatabase:^(FMDatabase *db) {
+    [self.database inDatabase:^(AMAFMDatabase *db) {
         [AMADatabaseHelper deleteRowsMissingRelationsForKey:kAMACommonTableFieldOID
                                                     inTable:kAMASessionTableName
                                            relationTableKey:kAMAEventTableFieldSessionOID

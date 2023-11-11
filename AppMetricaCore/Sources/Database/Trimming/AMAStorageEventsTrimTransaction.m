@@ -59,7 +59,7 @@
 - (void)performTransactionInDatabase:(id<AMADatabaseProtocol>)database
 {
     AMAEventsCleanupInfo *__block cleanupInfo = nil;
-    [database inDatabase:^(FMDatabase *db) {
+    [database inDatabase:^(AMAFMDatabase *db) {
         NSError *error = nil;
         cleanupInfo = [self cleanupInfoForDatabase:db error:&error];
 
@@ -83,7 +83,7 @@
 
 #pragma mark - Private -
 
-- (AMAEventsCleanupInfo *)cleanupInfoForDatabase:(FMDatabase *)db error:(NSError **)error
+- (AMAEventsCleanupInfo *)cleanupInfoForDatabase:(AMAFMDatabase *)db error:(NSError **)error
 {
     NSError *internalError = nil;
     NSUInteger count = [AMADatabaseHelper countWhereField:nil

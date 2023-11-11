@@ -4,7 +4,7 @@
 #import "AMATableDescriptionProvider.h"
 #import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
 #import "AMADatabaseColumnDescriptionBuilder.h"
-#import "FMDB.h"
+#import <AppMetrica_FMDB/AppMetrica_FMDB.h>
 
 @interface AMATableSchemeController ()
 
@@ -26,7 +26,7 @@
 
 #pragma mark - Public -
 
-- (void)createSchemaInDB:(FMDatabase *)db
+- (void)createSchemaInDB:(AMAFMDatabase *)db
 {
     NSError *__block error = nil;
     [self.schemes enumerateKeysAndObjectsUsingBlock:^(NSString *tableName, NSArray *metaInfo, BOOL *stop) {
@@ -40,7 +40,7 @@
     }
 }
 
-- (void)enforceDatabaseConsistencyInDB:(FMDatabase *)db onInconsistency:(void (^)(dispatch_block_t fix))onInconsistency
+- (void)enforceDatabaseConsistencyInDB:(AMAFMDatabase *)db onInconsistency:(void (^)(dispatch_block_t fix))onInconsistency
 {
     BOOL __block consistent = YES;
     [self.schemes enumerateKeysAndObjectsUsingBlock:^(NSString *tableName, NSArray *metaInfo, BOOL *stop) {
@@ -101,10 +101,10 @@
     return [NSString stringWithFormat:@"DROP TABLE %@", tableName];
 }
 
-- (BOOL)doesTableWithName:(NSString *)tableName matchSchemaInfo:(NSArray *)metaInfo db:(FMDatabase *)db
+- (BOOL)doesTableWithName:(NSString *)tableName matchSchemaInfo:(NSArray *)metaInfo db:(AMAFMDatabase *)db
 {
     NSError *error = nil;
-    FMResultSet *resultSet = [db executeQuery:[NSString stringWithFormat:@"PRAGMA table_info('%@')", tableName]
+    AMAFMResultSet *resultSet = [db executeQuery:[NSString stringWithFormat:@"PRAGMA table_info('%@')", tableName]
                                        values:@[]
                                         error:&error];
     NSUInteger idx = 0;

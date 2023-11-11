@@ -1,7 +1,7 @@
 
 #import <Foundation/Foundation.h>
 
-@class FMDatabase;
+@class AMAFMDatabase;
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -14,8 +14,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (instancetype)initWithTableSchemes:(NSDictionary *)schemes;
 
-- (void)createSchemaInDB:(FMDatabase *)db;
-- (void)enforceDatabaseConsistencyInDB:(FMDatabase *)db
+- (void)createSchemaInDB:(AMAFMDatabase *)db;
+- (void)enforceDatabaseConsistencyInDB:(AMAFMDatabase *)db
                        onInconsistency:(nullable void (^)(dispatch_block_t fix))onInconsistency;
 
 @end

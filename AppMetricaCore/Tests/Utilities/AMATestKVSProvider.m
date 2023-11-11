@@ -59,17 +59,17 @@
     return [self.underlyingProvider saveStorage:storage error:error];
 }
 
-- (id<AMAKeyValueStoring>)nonPersistentStorageForKeys:(NSArray *)keys db:(FMDatabase *)db error:(NSError **)error
+- (id<AMAKeyValueStoring>)nonPersistentStorageForKeys:(NSArray *)keys db:(AMAFMDatabase *)db error:(NSError **)error
 {
     return [self nonPersistentStorageForKeys:keys error:error];
 }
 
-- (BOOL)saveStorage:(id<AMAKeyValueStoring>)storage db:(FMDatabase *)db error:(NSError **)error
+- (BOOL)saveStorage:(id<AMAKeyValueStoring>)storage db:(AMAFMDatabase *)db error:(NSError **)error
 {
     return [self saveStorage:storage error:error];
 }
 
-- (id<AMAKeyValueStoring>)storageForDB:(FMDatabase *)db
+- (id<AMAKeyValueStoring>)storageForDB:(AMAFMDatabase *)db
 {
     return self.syncStorage;
 }

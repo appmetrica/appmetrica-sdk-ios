@@ -2,8 +2,8 @@
 #import <Kiwi/Kiwi.h>
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
 #import "AMADatabaseIntegrityQueries.h"
-@import FMDB;
 #import <sqlite3.h>
+#import <AppMetrica_FMDB/AppMetrica_FMDB.h>
 
 SPEC_BEGIN(AMADatabaseIntegrityQueriesTests)
 
@@ -11,7 +11,7 @@ describe(@"AMADatabaseIntegrityQueries", ^{
 
     NSError *__block error = nil;
     NSString *__block databasePath = nil;
-    FMDatabaseQueue *__block database = nil;
+    AMAFMDatabaseQueue *__block database = nil;
 
     beforeEach(^{
         error = nil;
@@ -24,7 +24,7 @@ describe(@"AMADatabaseIntegrityQueries", ^{
         databasePath = [NSTemporaryDirectory() stringByAppendingPathComponent:databaseName];
         [[NSFileManager defaultManager] copyItemAtPath:databaseResourcePath toPath:databasePath error:nil];
 
-        database = [[FMDatabaseQueue alloc] initWithPath:databasePath
+        database = [[AMAFMDatabaseQueue alloc] initWithPath:databasePath
                                                    flags:(SQLITE_OPEN_READWRITE |
                                                           SQLITE_OPEN_FILEPROTECTION_NONE)];
     });
@@ -35,7 +35,7 @@ describe(@"AMADatabaseIntegrityQueries", ^{
     });
 
     __auto_type dbError = ^NSError *(NSInteger code, NSString *description) {
-        return [NSError errorWithDomain:@"FMDatabase"
+        return [NSError errorWithDomain:@"AMAFMDatabase"
                                    code:code
                                userInfo:@{ NSLocalizedDescriptionKey: description }];
     };
@@ -45,7 +45,7 @@ describe(@"AMADatabaseIntegrityQueries", ^{
         [dbFile seekToFileOffset:offset];
         [dbFile writeData:[NSData dataWithBytes:data length:size]];
         [dbFile closeFile];
-        database = [[FMDatabaseQueue alloc] initWithPath:databasePath
+        database = [[AMAFMDatabaseQueue alloc] initWithPath:databasePath
                                                    flags:(SQLITE_OPEN_READWRITE |
                                                           SQLITE_OPEN_FILEPROTECTION_NONE)];
     };
@@ -243,11 +243,11 @@ describe(@"AMADatabaseIntegrityQueries", ^{
         BOOL __block result = NO;
         NSArray *__block issues = nil;
         NSString *__block backupPath = nil;
-        FMDatabaseQueue *__block backupDatabase = nil;
+        AMAFMDatabaseQueue *__block backupDatabase = nil;
 
         beforeEach(^{
             backupPath = [databasePath stringByAppendingPathExtension:@"bak"];
-            backupDatabase = [[FMDatabaseQueue alloc] initWithPath:backupPath
+            backupDatabase = [[AMAFMDatabaseQueue alloc] initWithPath:backupPath
                                                              flags:(SQLITE_OPEN_READWRITE |
                                                                     SQLITE_OPEN_CREATE |
                                                                     SQLITE_OPEN_FILEPROTECTION_NONE)];
@@ -259,8 +259,8 @@ describe(@"AMADatabaseIntegrityQueries", ^{
 
         __auto_type extractValues = ^NSArray<NSDictionary *> *{
             NSMutableArray *result = [NSMutableArray array];
-            [backupDatabase inDatabase:^(FMDatabase * _Nonnull db) {
-                FMResultSet *rs = [db executeQuery:@"SELECT * FROM test"];
+            [backupDatabase inDatabase:^(AMAFMDatabase * _Nonnull db) {
+                AMAFMResultSet *rs = [db executeQuery:@"SELECT * FROM test"];
                 while ([rs next]) {
                     [result addObject:rs.resultDictionary];
                 }

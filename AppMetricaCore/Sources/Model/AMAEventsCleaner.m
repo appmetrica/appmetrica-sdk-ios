@@ -30,7 +30,7 @@
 {
     NSError *__block internalError = nil;
     BOOL __block result = YES;
-    [database inDatabase:^(FMDatabase *db) {
+    [database inDatabase:^(AMAFMDatabase *db) {
         result = [AMADatabaseHelper deleteRowsWhereKey:kAMACommonTableFieldOID
                                                inArray:cleanupInfo.eventOids
                                              tableName:kAMAEventTableName

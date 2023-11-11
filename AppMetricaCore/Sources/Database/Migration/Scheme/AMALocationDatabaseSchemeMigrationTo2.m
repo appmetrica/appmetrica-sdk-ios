@@ -1,7 +1,7 @@
 
 #import "AMALocationDatabaseSchemeMigrationTo2.h"
 #import "AMAMigrationUtils.h"
-#import "FMDB.h"
+#import <AppMetrica_FMDB/AppMetrica_FMDB.h>
 
 @implementation AMALocationDatabaseSchemeMigrationTo2
 
@@ -10,7 +10,7 @@
     return 2;
 }
 
-- (BOOL)applyTransactionalMigrationToDatabase:(FMDatabase *)db
+- (BOOL)applyTransactionalMigrationToDatabase:(AMAFMDatabase *)db
 {
     BOOL result = YES;
 
