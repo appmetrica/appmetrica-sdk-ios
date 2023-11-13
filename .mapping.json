@@ -1638,6 +1638,7 @@
   "AppMetrica_FMDB/Sources/include/AppMetrica_FMDB/AppMetrica_FMDB.h":"mobile/metrika/ios/appmetrica-sdk/public/AppMetrica_FMDB/Sources/include/AppMetrica_FMDB/AppMetrica_FMDB.h",
   "AppMetrica_Protobuf.podspec":"mobile/metrika/ios/appmetrica-sdk/public/AppMetrica_Protobuf.podspec",
   "AppMetrica_Protobuf/LICENSE":"mobile/metrika/ios/appmetrica-sdk/public/AppMetrica_Protobuf/LICENSE",
+  "AppMetrica_Protobuf/README.md":"mobile/metrika/ios/appmetrica-sdk/public/AppMetrica_Protobuf/README.md",
   "AppMetrica_Protobuf/Sources/include/AppMetrica_Protobuf/AppMetrica_Protobuf.h":"mobile/metrika/ios/appmetrica-sdk/public/AppMetrica_Protobuf/Sources/include/AppMetrica_Protobuf/AppMetrica_Protobuf.h",
   "AppMetrica_Protobuf/Sources/include/AppMetrica_Protobuf/protobuf-c.h":"mobile/metrika/ios/appmetrica-sdk/public/AppMetrica_Protobuf/Sources/include/AppMetrica_Protobuf/protobuf-c.h",
   "AppMetrica_Protobuf/Sources/protobuf-c.c":"mobile/metrika/ios/appmetrica-sdk/public/AppMetrica_Protobuf/Sources/protobuf-c.c",
