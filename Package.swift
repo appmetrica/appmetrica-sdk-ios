@@ -56,7 +56,7 @@ let package = Package(
     ],
     dependencies: [
         // Crash dependencies
-        .package(name: "KSCrash", url: "https://github.com/kstenerud/KSCrash", .upToNextMinor(from: "1.15.26")),
+        .package(name: "KSCrash", url: "https://github.com/kstenerud/KSCrash", .upToNextMinor(from: "1.16.1")),
         // Test dependencies
         .package(name: "Kiwi", url: "https://github.com/appmetrica/Kiwi", .upToNextMinor(from: "3.0.1-spm")),
     ],
