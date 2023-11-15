@@ -1,7 +1,8 @@
 
 #import <Foundation/Foundation.h>
 
-@protocol AMAAllocationsTracking
+NS_SWIFT_NAME(AllocationsTracking)
+@protocol AMAAllocationsTracking <NSObject>
 
 - (void *)allocateSize:(size_t)size;
 

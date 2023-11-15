@@ -1,5 +1,4 @@
-
-#import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
+#import <Foundation/Foundation.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -8,10 +7,11 @@ typedef NS_ENUM(NSInteger, AMAHostAppState) {
     AMAHostAppStateBackground = 1,
     AMAHostAppStateTerminated = 2,
     AMAHostAppStateUnknown = -1,
-};
+} NS_SWIFT_NAME(HostAppState);
 
 @protocol AMAHostStateProviderDelegate;
 
+NS_SWIFT_NAME(HostStateProviding)
 @protocol AMAHostStateProviding <NSObject>
 
 @property (nonatomic, nullable, weak) id<AMAHostStateProviderDelegate> delegate;
@@ -22,10 +22,12 @@ typedef NS_ENUM(NSInteger, AMAHostAppState) {
 
 @end
 
+NS_SWIFT_NAME(HostStateProvider)
 @interface AMAHostStateProvider : NSObject<AMAHostStateProviding>
 
 @end
 
+NS_SWIFT_NAME(HostStateProviderDelegate)
 @protocol AMAHostStateProviderDelegate <NSObject>
 
 - (void)hostStateDidChange:(AMAHostAppState)hostState;

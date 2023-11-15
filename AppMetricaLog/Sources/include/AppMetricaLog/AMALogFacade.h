@@ -11,8 +11,9 @@ typedef NS_OPTIONS(NSInteger, AMALogLevel) {
     AMALogLevelWarning = 1 << 2,
     AMALogLevelError   = 1 << 3,
     AMALogLevelNotify  = 1 << 4,
-};
+} NS_SWIFT_NAME(LogLevel);
 
+NS_SWIFT_NAME(LogFacade)
 @interface AMALogFacade : NSObject
 
 + (instancetype)sharedLog;

@@ -3,6 +3,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+NS_SWIFT_NAME(NetworkSessionProviding)
 @protocol AMANetworkSessionProviding <NSURLSessionDelegate>
 
 @property (nonatomic, strong, readonly) NSURLSession *session;

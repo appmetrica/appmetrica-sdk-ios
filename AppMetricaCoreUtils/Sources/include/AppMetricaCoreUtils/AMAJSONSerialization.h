@@ -1,6 +1,7 @@
 
 #import <Foundation/Foundation.h>
 
+NS_SWIFT_NAME(JSONSerialization)
 @interface AMAJSONSerialization : NSObject
 
 + (NSString *)stringWithJSONObject:(id)object error:(NSError **)error;

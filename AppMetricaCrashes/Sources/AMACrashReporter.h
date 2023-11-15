@@ -5,6 +5,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @protocol AMACrashProcessingReporting;
+@protocol AMAAppMetricaReporting;
 @class AMACustomEventParameters;
 
 @interface AMACrashReporter : NSObject <AMATransactionReporter>

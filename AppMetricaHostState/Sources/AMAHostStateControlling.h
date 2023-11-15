@@ -1,4 +1,4 @@
-
+#import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
 #import <AppMetricaHostState/AppMetricaHostState.h>
 
 NS_ASSUME_NONNULL_BEGIN

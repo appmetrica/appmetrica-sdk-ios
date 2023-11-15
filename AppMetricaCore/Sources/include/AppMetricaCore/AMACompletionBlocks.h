@@ -18,7 +18,8 @@ extern NSString *const kAMADeviceIDHashKey;
  @param error Error of NSURLErrorDomain. In a case of error identifiers param is nil.
  */
 typedef void(^AMAIdentifiersCompletionBlock)(NSDictionary<NSString *, id> * _Nullable identifiers,
-                                             NSError * _Nullable error);
+                                             NSError * _Nullable error)
+NS_SWIFT_UNAVAILABLE("Use closures instead");
 
 /** Identifiers callback block
 
@@ -27,6 +28,7 @@ typedef void(^AMAIdentifiersCompletionBlock)(NSDictionary<NSString *, id> * _Nul
 
  @param error Error of NSURLErrorDomain. In a case of error appMetricaDeviceID param is nil.
  */
-typedef void(^AMAAppMetricaDeviceIDRetrievingBlock)(NSString * _Nullable appMetricaDeviceID, NSError * _Nullable error);
+typedef void(^AMAAppMetricaDeviceIDRetrievingBlock)(NSString * _Nullable appMetricaDeviceID, NSError * _Nullable error)
+NS_SWIFT_UNAVAILABLE("Use closures instead");
 
 NS_ASSUME_NONNULL_END

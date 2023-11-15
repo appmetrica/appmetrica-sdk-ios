@@ -3,6 +3,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+NS_SWIFT_NAME(BuildUID)
 @interface AMABuildUID : NSObject <NSCopying, NSSecureCoding>
 
 @property (nonatomic, copy, readonly) NSString *stringValue;

@@ -10,6 +10,7 @@ extern AMAUserDefaultsStringKey kAMAUserDefaultsStringKeyPreviousOSVersion;
 extern AMAUserDefaultsStringKey kAMAUserDefaultsStringKeyAppWasTerminated;
 extern AMAUserDefaultsStringKey kAMAUserDefaultsStringKeyAppWasInBackground;
 
+NS_SWIFT_NAME(UserDefaultsStorage)
 @interface AMAUserDefaultsStorage : NSObject
 
 - (void)setObject:(id)object forKey:(id)key;

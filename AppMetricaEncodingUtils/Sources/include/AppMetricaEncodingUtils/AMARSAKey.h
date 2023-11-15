@@ -9,8 +9,9 @@ extern NSString *const kAMARSAKeyTagUIS;
 typedef NS_ENUM(NSUInteger, AMARSAKeyType) {
     AMARSAKeyTypePublic,
     AMARSAKeyTypePrivate,
-};
+} NS_SWIFT_NAME(RSAKeyType);
 
+NS_SWIFT_NAME(RSAKey)
 @interface AMARSAKey : NSObject <NSCopying>
 
 @property (nonatomic, copy, readonly) NSData *data;

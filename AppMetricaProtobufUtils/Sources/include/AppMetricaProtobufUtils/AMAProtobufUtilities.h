@@ -1,11 +1,11 @@
-
-#import <UIKit/UIKit.h>
+#import <Foundation/Foundation.h>
 #import <AppMetrica_Protobuf/AppMetrica_Protobuf.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
 @protocol AMAAllocationsTracking;
 
+NS_SWIFT_NAME(ProtobufUtilities)
 @interface AMAProtobufUtilities : NSObject
 
 + (void *)addBuffer:(nullable const void *)buffer ofSize:(NSUInteger)size toTracker:(id<AMAAllocationsTracking>)tracker;

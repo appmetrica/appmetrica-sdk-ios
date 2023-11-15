@@ -20,6 +20,7 @@ NS_ASSUME_NONNULL_BEGIN
 
  Correct matching of system classes and their extensions is not guaranteed.
  */
+NS_SWIFT_NAME(CrashMatchingRule)
 @interface AMACrashMatchingRule : NSObject<NSCopying>
 
 /** Classes for crash matching.

@@ -12,6 +12,7 @@ NS_ASSUME_NONNULL_BEGIN
  Revenue events are displayed in the AppMetrica Revenue report.
  @note This interface has the mutable version `AMAMutableRevenueInfo`.
  */
+NS_SWIFT_NAME(RevenueInfo)
 @interface AMARevenueInfo : NSObject <NSCopying, NSMutableCopying>
 
 /** Price of the products purchased.
@@ -120,6 +121,7 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 /** Mutable version of the `AMARevenueInfo` class.*/
+NS_SWIFT_NAME(MutableRevenueInfo)
 @interface AMAMutableRevenueInfo : AMARevenueInfo
 
 /** Quantity of products purchased.

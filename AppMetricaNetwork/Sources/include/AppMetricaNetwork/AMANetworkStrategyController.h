@@ -5,6 +5,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @protocol AMANetworkSessionProviding;
 
+NS_SWIFT_NAME(NetworkStrategyController)
 @interface AMANetworkStrategyController : NSObject
 
 @property (nonatomic, strong, readonly) id<AMANetworkSessionProviding> sessionProvider;

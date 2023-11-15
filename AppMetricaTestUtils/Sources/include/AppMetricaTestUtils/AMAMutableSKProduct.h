@@ -24,6 +24,7 @@ API_AVAILABLE(ios(11.2))
 
 @end
 
+NS_SWIFT_NAME(MutableSKProduct)
 @interface AMAMutableSKProduct : SKProduct
 
 @property(nonatomic, strong) NSString *localizedDescription;

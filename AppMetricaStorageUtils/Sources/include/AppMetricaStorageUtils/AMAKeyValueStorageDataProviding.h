@@ -1,6 +1,7 @@
 
 #import <Foundation/Foundation.h>
 
+NS_SWIFT_NAME(KeyValueStorageDataProviding)
 @protocol AMAKeyValueStorageDataProviding <NSObject>
 
 - (NSArray<NSString *> *)allKeysWithError:(NSError **)error;

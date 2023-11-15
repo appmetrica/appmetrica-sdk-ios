@@ -1,6 +1,7 @@
 
 #import <Foundation/Foundation.h>
 
+NS_SWIFT_NAME(TimeUtilities)
 @interface AMATimeUtilities : NSObject
 
 + (NSTimeInterval)intervalWithNumber:(NSNumber *)value defaultInterval:(NSTimeInterval)defaultInterval;

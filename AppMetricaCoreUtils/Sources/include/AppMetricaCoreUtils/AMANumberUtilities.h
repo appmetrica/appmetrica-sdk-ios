@@ -1,6 +1,7 @@
 
 #import <Foundation/Foundation.h>
 
+NS_SWIFT_NAME(NumberUtilities)
 @interface AMANumberUtilities : NSObject
 
 + (NSUInteger)unsignedIntegerForNumber:(NSNumber *)number defaultValue:(NSUInteger)defaultValue;

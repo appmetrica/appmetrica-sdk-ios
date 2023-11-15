@@ -17,6 +17,7 @@ NS_ASSUME_NONNULL_BEGIN
 
  User profiles are stored on the AppMetrica server.
  */
+NS_SWIFT_NAME(UserProfile)
 @interface AMAUserProfile : NSObject <NSCopying, NSMutableCopying>
 
 /** An array with applied attributes.

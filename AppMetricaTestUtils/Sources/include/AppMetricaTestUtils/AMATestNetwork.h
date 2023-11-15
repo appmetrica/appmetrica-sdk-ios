@@ -1,6 +1,7 @@
 
 #import <Foundation/Foundation.h>
 
+NS_SWIFT_NAME(TestNetwork)
 @interface AMATestNetwork : NSObject
 
 + (void)stubHTTPRequestToFinishWithError:(NSError *)error;

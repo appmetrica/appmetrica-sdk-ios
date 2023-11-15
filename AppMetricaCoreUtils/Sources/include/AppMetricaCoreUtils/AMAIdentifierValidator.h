@@ -3,6 +3,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+NS_SWIFT_NAME(IdentifierValidator)
 @interface AMAIdentifierValidator : NSObject
 
 + (BOOL)isValidUUIDKey:(NSString *)key;

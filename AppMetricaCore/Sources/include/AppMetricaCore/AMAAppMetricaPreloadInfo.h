@@ -3,6 +3,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+NS_SWIFT_NAME(AppMetricaPreloadInfo)
 @interface AMAAppMetricaPreloadInfo : NSObject <NSCopying>
 
 - (instancetype)init NS_UNAVAILABLE;

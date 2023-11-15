@@ -1,8 +1,11 @@
-
-#import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
+#import <Foundation/Foundation.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
+@protocol AMAStringTruncating;
+@protocol AMADataTruncating;
+
+NS_SWIFT_NAME(TruncatorsFactory)
 @interface AMATruncatorsFactory : NSObject
 
 + (id<AMAStringTruncating>)eventNameTruncator;

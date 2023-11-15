@@ -3,6 +3,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+NS_SWIFT_NAME(UserDefaultsMock)
 @interface AMAUserDefaultsMock : NSObject
 
 @property (nonatomic, assign, readonly) BOOL synchronized;

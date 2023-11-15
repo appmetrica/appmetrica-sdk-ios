@@ -3,6 +3,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+NS_SWIFT_NAME(Request)
 @protocol AMARequest <NSObject>
 
 @property (nonatomic, nullable, strong, readwrite) NSString *host;

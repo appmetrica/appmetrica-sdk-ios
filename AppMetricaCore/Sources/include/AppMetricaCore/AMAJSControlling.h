@@ -8,6 +8,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @protocol AMAExecuting;
 
+NS_SWIFT_NAME(JSReporting)
 @protocol AMAJSReporting <NSObject>
 
 - (void)reportJSEvent:(NSString *)name value:(NSString *)value;
@@ -15,6 +16,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
+NS_SWIFT_NAME(JSControlling)
 @protocol AMAJSControlling <NSObject>
 
 @property (nonatomic, strong, readonly) WKUserContentController *userContentController;

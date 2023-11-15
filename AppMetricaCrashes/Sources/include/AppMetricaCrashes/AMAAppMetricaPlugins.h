@@ -16,6 +16,7 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @note See `AMAAppMetrica#pluginExtension`.
  */
+NS_SWIFT_NAME(AppMetricaPlugins)
 @protocol AMAAppMetricaPlugins <NSObject> // FIXME: Come up with where to move plugins
 
 /**

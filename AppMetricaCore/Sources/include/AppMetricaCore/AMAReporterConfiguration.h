@@ -3,6 +3,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+NS_SWIFT_NAME(ReporterConfiguration)
 @interface AMAReporterConfiguration : NSObject <NSCopying, NSMutableCopying>
 
 /** Application key used to initialize the configuration.
@@ -66,6 +67,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
+NS_SWIFT_NAME(MutableReporterConfiguration)
 @interface AMAMutableReporterConfiguration : AMAReporterConfiguration
 
 /** A boolean value indicating whether data sending to the AppMetrica server is enabled.

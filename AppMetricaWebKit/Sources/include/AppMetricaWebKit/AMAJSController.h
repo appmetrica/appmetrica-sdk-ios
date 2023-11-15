@@ -7,6 +7,8 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+API_UNAVAILABLE(tvos)
+NS_SWIFT_NAME(JSController)
 @interface AMAJSController : NSObject<AMAJSControlling, WKScriptMessageHandler>
 
 - (instancetype)initWithUserContentController:(WKUserContentController *)userContentController;
@@ -18,4 +20,4 @@ NS_ASSUME_NONNULL_BEGIN
 
 NS_ASSUME_NONNULL_END
 
-#endif
+#endif // !TARGET_OS_TV

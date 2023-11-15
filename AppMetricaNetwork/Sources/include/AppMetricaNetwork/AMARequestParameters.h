@@ -3,6 +3,7 @@
 
 @class AMAApplicationState;
 
+NS_SWIFT_NAME(RequestParameters)
 @interface AMARequestParameters : NSObject <AMADictionaryRepresentation>
 
 - (instancetype)initWithApiKey:(NSString *)apiKey

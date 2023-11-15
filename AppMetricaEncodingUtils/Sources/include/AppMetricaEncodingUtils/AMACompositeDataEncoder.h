@@ -18,6 +18,7 @@
 /// NSData *encodedData = [encoder encodeData:originalData error:&error]; // Encodes in order
 /// NSData *decodedData = [encoder decodeData:encodedData error:&error]; // Decodes in reverse order
 ///
+NS_SWIFT_NAME(CompositeDataEncoder)
 @interface AMACompositeDataEncoder : NSObject <AMADataEncoding>
 
 - (instancetype)init NS_UNAVAILABLE;

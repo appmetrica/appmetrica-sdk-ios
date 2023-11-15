@@ -3,6 +3,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+NS_SWIFT_NAME(Broadcasting)
 @protocol AMABroadcasting <NSObject>
 
 @property (nonatomic, copy, readonly) NSArray *observers;

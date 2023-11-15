@@ -3,6 +3,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+NS_SWIFT_NAME(TestTruncator)
 @interface AMATestTruncator : NSObject <AMAStringTruncating, AMADataTruncating, AMADictionaryTruncating>
 
 - (void)enableTruncationWithResult:(id)truncationResult bytesTruncated:(NSUInteger)bytesTruncated;

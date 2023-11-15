@@ -3,6 +3,7 @@
 
 @protocol AMAKeyValueStoring;
 
+NS_SWIFT_NAME(ReadonlyKeyValueStoring)
 @protocol AMAReadonlyKeyValueStoring <NSObject>
 
 - (NSString *)stringForKey:(NSString *)key error:(NSError **)error;
@@ -17,6 +18,7 @@
 
 @end;
 
+NS_SWIFT_NAME(KeyValueStoring)
 @protocol AMAKeyValueStoring <AMAReadonlyKeyValueStoring>
 
 - (BOOL)saveString:(NSString *)string forKey:(NSString *)key error:(NSError **)error;

@@ -1,6 +1,8 @@
+#import <Foundation/Foundation.h>
 
-#import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
+#import "AMAExecutionCondition.h"
 
+NS_SWIFT_NAME(GapExecutionCondition)
 @interface AMAGapExecutionCondition : NSObject <AMAExecutionCondition>
 
 - (instancetype)init NS_UNAVAILABLE;

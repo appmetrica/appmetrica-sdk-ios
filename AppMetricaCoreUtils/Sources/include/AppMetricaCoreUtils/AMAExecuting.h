@@ -5,18 +5,21 @@ NS_ASSUME_NONNULL_BEGIN
 
 #pragma mark - protocols
 
+NS_SWIFT_NAME(Executing)
 @protocol AMAExecuting <NSObject>
 
 - (void)execute:(nullable dispatch_block_t)block;
 
 @end
 
+NS_SWIFT_NAME(DelayedExecuting)
 @protocol AMADelayedExecuting <AMAExecuting>
 
 - (void)executeAfterDelay:(NSTimeInterval)delay block:(nullable dispatch_block_t)block;
 
 @end
 
+NS_SWIFT_NAME(CancelableExecuting)
 @protocol AMACancelableExecuting <AMADelayedExecuting>
 
 - (void)cancelDelayed;
@@ -25,6 +28,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 #pragma mark - AMAExecutor
 
+NS_SWIFT_NAME(AsyncExecutor)
 @interface AMAAsyncExecutor : NSObject <AMAExecuting>
 
 - (instancetype)initWithQueue:(dispatch_queue_t)queue NS_DESIGNATED_INITIALIZER;
@@ -34,10 +38,12 @@ NS_ASSUME_NONNULL_BEGIN
 
 #pragma mark - AMADelayedExecutor
 
+NS_SWIFT_NAME(DelayedExecutor)
 @interface AMADelayedExecutor : AMAAsyncExecutor <AMADelayedExecuting>
 
 @end
 
+NS_SWIFT_NAME(CancelableDelayedExecutor)
 @interface AMACancelableDelayedExecutor : AMAAsyncExecutor <AMACancelableExecuting>
 
 @end

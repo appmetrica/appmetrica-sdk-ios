@@ -8,7 +8,7 @@ NS_ASSUME_NONNULL_BEGIN
  
  AppMetrica automatically parses the passed value.
  */
-extern NSErrorUserInfoKey const AMABacktraceErrorKey;
+extern NSErrorUserInfoKey const AMABacktraceErrorKey NS_SWIFT_NAME(BacktraceErrorKey);
 
 /** Reporting options enumeration.
  */
@@ -17,7 +17,7 @@ typedef NS_OPTIONS(NSUInteger, AMAErrorReportingOptions) {
     /** Option that does not attach the backtrace of the current thread to an error. This option might speed up the reporting.
      */
     AMAErrorReportingOptionsNoBacktrace = 1 << 0,
-};
+} NS_SWIFT_NAME(ErrorReportingOptions);
 
 /** The protocol for errors that can be reported to AppMetrica.
  Each error instance should have the specified `identifier` property. AppMetrica uses the property value to group errors.
@@ -26,6 +26,7 @@ typedef NS_OPTIONS(NSUInteger, AMAErrorReportingOptions) {
  
  You can implement this protocol to send custom errors. Also, you can use the default protocol implementation `AMAError`.
  */
+NS_SWIFT_NAME(ErrorRepresentable)
 @protocol AMAErrorRepresentable <NSObject>
 
 #pragma mark - Required

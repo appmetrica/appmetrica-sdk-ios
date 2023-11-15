@@ -1,10 +1,10 @@
 
 #import <Foundation/Foundation.h>
 
-extern NSErrorDomain const kAMAAppMetricaErrorDomain;
+extern NSErrorDomain const kAMAAppMetricaErrorDomain NS_SWIFT_NAME(AppMetricaErrorDomain);
 
-extern NSErrorDomain const kAMAAppMetricaInternalErrorDomain;
-extern NSString *const kAMAAppMetricaInternalErrorResultObjectKey;
+extern NSErrorDomain const kAMAAppMetricaInternalErrorDomain NS_SWIFT_NAME(AppMetricaInternalErrorDomain);
+extern NSString *const kAMAAppMetricaInternalErrorResultObjectKey NS_SWIFT_NAME(AppMetricaInternalErrorResultObjectKey);
 
 typedef NS_ERROR_ENUM(kAMAAppMetricaErrorDomain, AMAAppMetricaEventErrorCode) {
     AMAAppMetricaEventErrorCodeInitializationError = 1000,
@@ -13,7 +13,7 @@ typedef NS_ERROR_ENUM(kAMAAppMetricaErrorDomain, AMAAppMetricaEventErrorCode) {
     AMAAppMetricaEventErrorCodeEmptyUserProfile = 1003,
     AMAAppMetricaEventErrorCodeInvalidBacktrace = 1004,
     AMAAppMetricaEventErrorCodeInvalidAdRevenueInfo = 1005,
-};
+} NS_SWIFT_NAME(AppMetricaEventErrorCode);
 
 typedef NS_ERROR_ENUM(kAMAAppMetricaInternalErrorDomain, AMAAppMetricaInternalEventErrorCode) {
     AMAAppMetricaInternalEventErrorCodeRecrash = 2000,
@@ -23,8 +23,9 @@ typedef NS_ERROR_ENUM(kAMAAppMetricaInternalErrorDomain, AMAAppMetricaInternalEv
     AMAAppMetricaInternalEventJsonSerializationError = 2004,
     AMAAppMetricaInternalEventErrorCodeProbableUnhandledCrash = 2005,
     AMAAppMetricaInternalEventErrorCodeNamedError = 3000,
-};
+} NS_SWIFT_NAME(AppMetricaInternalEventErrorCode);
 
+NS_SWIFT_NAME(ErrorUtilities)
 @interface AMAErrorUtilities : NSObject
 
 + (void)fillError:(NSError **)placeholderError withError:(NSError *)error;

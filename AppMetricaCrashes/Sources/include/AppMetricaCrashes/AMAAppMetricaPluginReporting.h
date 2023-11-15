@@ -14,6 +14,7 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @note See `AMAAppMetricaReporting #pluginExtension`.
  */
+NS_SWIFT_NAME(AppMetricaPluginReporting)
 @protocol AMAAppMetricaPluginReporting <NSObject>
 
 /**

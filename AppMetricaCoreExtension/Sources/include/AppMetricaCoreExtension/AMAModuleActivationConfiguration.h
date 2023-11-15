@@ -3,6 +3,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+NS_SWIFT_NAME(ModuleActivationConfiguration)
 @interface AMAModuleActivationConfiguration : NSObject
 
 @property (nonatomic, copy, readonly) NSString *apiKey;

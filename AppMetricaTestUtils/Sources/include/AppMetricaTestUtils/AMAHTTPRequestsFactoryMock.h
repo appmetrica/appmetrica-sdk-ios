@@ -1,3 +1,4 @@
+#import <Foundation/Foundation.h>
 
 #import <AppMetricaNetwork/AppMetricaNetwork.h>
 
@@ -5,8 +6,9 @@ typedef NS_ENUM(NSUInteger, AMAHTTPRequestsMockResponseType) {
     AMAHTTPRequestsMockResponseTypeNoResponse,
     AMAHTTPRequestsMockResponseTypeSuccess,
     AMAHTTPRequestsMockResponseTypeFailure,
-};
+} NS_SWIFT_NAME(HTTPRequestsMockResponseType);
 
+NS_SWIFT_NAME(HTTPRequestResponseStub)
 @interface AMAHTTPRequestResponseStub : NSObject
 
 @property (nonatomic, assign, readonly) AMAHTTPRequestsMockResponseType responseType;
@@ -29,8 +31,10 @@ typedef NS_ENUM(NSUInteger, AMAHTTPRequestsMockResponseType) {
 
 @end
 
-typedef AMAHTTPRequestResponseStub *(^AMAHTTPRequestResponseBlock)(NSURL *url, NSDictionary *headers);
+typedef AMAHTTPRequestResponseStub *(^AMAHTTPRequestResponseBlock)(NSURL *url, NSDictionary *headers)
+    NS_SWIFT_UNAVAILABLE("Use Swift closures.");
 
+NS_SWIFT_NAME(HTTPRequestsFactoryMock)
 @interface AMAHTTPRequestsFactoryMock : AMAHTTPRequestsFactory
 
 - (void)stub:(AMAHTTPRequestResponseStub *)stub forHost:(NSString *)host;

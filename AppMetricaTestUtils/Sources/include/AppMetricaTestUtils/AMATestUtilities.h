@@ -9,6 +9,7 @@
 
 @end
 
+NS_SWIFT_NAME(TestUtilities)
 @interface AMATestUtilities : NSObject
 
 + (void)fillObjectPointerParameter:(NSValue *)parameter withValue:(id)value;

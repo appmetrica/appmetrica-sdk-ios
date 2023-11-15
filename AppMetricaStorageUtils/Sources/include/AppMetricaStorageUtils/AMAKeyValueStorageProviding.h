@@ -4,6 +4,7 @@
 @protocol AMAKeyValueStoring;
 @protocol AMAReadonlyKeyValueStoring;
 
+NS_SWIFT_NAME(KeyValueStorageProviding)
 @protocol AMAKeyValueStorageProviding <NSObject>
 
 @property (nonatomic, strong, readonly) id<AMAKeyValueStoring> syncStorage;

@@ -7,6 +7,7 @@ extern NSString *const kAMAAESDataEncoderErrorDomain;
 extern NSUInteger const kAMAAESDataEncoderIVSize;
 extern NSUInteger const kAMAAESDataEncoder128BitKeySize;
 
+NS_SWIFT_NAME(AESCrypter)
 @interface AMAAESCrypter : NSObject <AMADataEncoding>
 
 @property (nonatomic, strong, readonly) NSData *key;

@@ -3,10 +3,12 @@
 
 @class AMATimer;
 
+NS_SWIFT_NAME(TimerDelegate)
 @protocol AMATimerDelegate <NSObject>
 - (void)timerDidFire:(AMATimer *)timer;
 @end
 
+NS_SWIFT_NAME(Timer)
 @interface AMATimer : NSObject
 
 @property (nonatomic, strong, readonly) NSDate *startDate;

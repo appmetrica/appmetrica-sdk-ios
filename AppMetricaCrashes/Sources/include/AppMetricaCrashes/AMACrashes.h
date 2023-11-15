@@ -1,5 +1,4 @@
-
-#import <AppMetricaCoreExtension/AppMetricaCoreExtension.h>
+#import <Foundation/Foundation.h>
 
 #if __has_include("AMAErrorRepresentable.h")
     #import "AMAErrorRepresentable.h"
@@ -16,7 +15,8 @@ NS_ASSUME_NONNULL_BEGIN
 /// - kAMACrashReportingStateCrashedLastLaunchKey: An NSNumber containing a boolean value indicating if the app crashed during the last launch.
 ///
 /// Use this block type with methods that require crash reporting state completion callbacks.
-typedef void(^AMACrashReportingStateCompletionBlock)(NSDictionary * _Nullable state);
+typedef void(^AMACrashReportingStateCompletionBlock)(NSDictionary * _Nullable state)
+    NS_SWIFT_UNAVAILABLE("Use Swift closures.");
 
 @protocol AMAErrorRepresentable;
 @class AMACrashesConfiguration;
@@ -25,6 +25,7 @@ typedef void(^AMACrashReportingStateCompletionBlock)(NSDictionary * _Nullable st
 ///
 ///The class offers a singleton instance and should not be subclassed. Initialize using `[AMACrashes crashes]`.
 ///
+NS_SWIFT_NAME(Crashes)
 @interface AMACrashes : NSObject
 
 /// Accesses the singleton `AMACrashes` instance.

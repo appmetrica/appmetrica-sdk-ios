@@ -8,8 +8,9 @@ typedef NS_ENUM(NSUInteger, AMATrackingManagerAuthorizationStatus) {
     AMATrackingManagerAuthorizationStatusRestricted,
     AMATrackingManagerAuthorizationStatusDenied,
     AMATrackingManagerAuthorizationStatusAuthorized
-} API_AVAILABLE(ios(14.0), tvos(14.0));
+} API_AVAILABLE(ios(14.0), tvos(14.0)) NS_SWIFT_NAME(TrackingManagerAuthorizationStatus);
 
+NS_SWIFT_NAME(AdProviding)
 @protocol AMAAdProviding <NSObject>
 
 - (BOOL)isAdvertisingTrackingEnabled;

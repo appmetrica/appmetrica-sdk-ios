@@ -1,6 +1,7 @@
 
 #import <Foundation/Foundation.h>
 
+NS_SWIFT_NAME(Iterable)
 @protocol AMAIterable <NSObject>
 
 - (id)current;
@@ -8,6 +9,7 @@
 
 @end
 
+NS_SWIFT_NAME(ResettableIterable)
 @protocol AMAResettableIterable <AMAIterable>
 
 - (void)reset;

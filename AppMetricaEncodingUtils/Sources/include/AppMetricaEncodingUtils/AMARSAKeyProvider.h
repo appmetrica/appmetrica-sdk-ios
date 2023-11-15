@@ -5,6 +5,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+NS_SWIFT_NAME(RSAKeyProvider)
 @interface AMARSAKeyProvider : NSObject
 
 - (instancetype)init NS_UNAVAILABLE;

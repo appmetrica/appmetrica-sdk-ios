@@ -3,10 +3,12 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-extern NSString *const kAMADeviceTypeTV;
-extern NSString *const kAMADeviceTypeTablet;
-extern NSString *const kAMADeviceTypePhone;
-extern NSString *const kAMADeviceTypeWatch;
+typedef NSString *const AMADeviceType NS_TYPED_EXTENSIBLE_ENUM NS_SWIFT_NAME(DeviceType);
+
+extern AMADeviceType kAMADeviceTypeTV;
+extern AMADeviceType kAMADeviceTypeTablet;
+extern AMADeviceType kAMADeviceTypePhone;
+extern AMADeviceType kAMADeviceTypeWatch;
 
 typedef NS_ENUM(NSUInteger, AMAAppBuildType) {
     AMAAppBuildTypeUnknown,
@@ -14,8 +16,9 @@ typedef NS_ENUM(NSUInteger, AMAAppBuildType) {
     AMAAppBuildTypeAdHoc,
     AMAAppBuildTypeTestFlight,
     AMAAppBuildTypeAppStore,
-};
+} NS_SWIFT_NAME(AppBuildType);
 
+NS_SWIFT_NAME(PlatformDescription)
 @interface AMAPlatformDescription : NSObject
 
 // SDK //

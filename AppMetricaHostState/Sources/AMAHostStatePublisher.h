@@ -1,5 +1,4 @@
-
-#import <AppMetricaHostState/AppMetricaHostState.h>
+#import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
 
 @interface AMAHostStatePublisher : NSObject <AMABroadcasting>
 

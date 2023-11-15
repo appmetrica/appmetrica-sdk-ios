@@ -1,6 +1,7 @@
 
 #import <Foundation/Foundation.h>
 
+NS_SWIFT_NAME(FileStorage)
 @protocol AMAFileStorage <NSObject>
 
 @property (nonatomic, assign, readonly) BOOL fileExists;

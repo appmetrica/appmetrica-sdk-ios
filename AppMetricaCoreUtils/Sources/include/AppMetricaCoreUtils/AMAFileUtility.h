@@ -3,6 +3,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+NS_SWIFT_NAME(FileUtility)
 @interface AMAFileUtility : NSObject
 
 + (NSString *)pathForFileName:(NSString *)fileName withExtension:(NSString *)extension;

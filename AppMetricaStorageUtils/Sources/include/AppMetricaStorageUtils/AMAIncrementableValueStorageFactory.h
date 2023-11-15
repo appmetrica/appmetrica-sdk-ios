@@ -3,12 +3,15 @@
 
 @class AMAIncrementableValueStorage;
 
-extern NSString *const kAMAAttributionIDStorageKey;
-extern NSString *const kAMALastSessionIDStorageKey;
-extern NSString *const kAMAGlobalEventNumberStorageKey;
-extern NSString *const kAMARequestIdentifierStorageKey;
-extern NSString *const kAMAOpenIDStorageKey;
+typedef NSString *const AMAStorageKey NS_TYPED_ENUM NS_SWIFT_NAME(StorageKey);
 
+extern AMAStorageKey kAMAAttributionIDStorageKey;
+extern AMAStorageKey kAMALastSessionIDStorageKey;
+extern AMAStorageKey kAMAGlobalEventNumberStorageKey;
+extern AMAStorageKey kAMARequestIdentifierStorageKey;
+extern AMAStorageKey kAMAOpenIDStorageKey;
+
+NS_SWIFT_NAME(IncrementableValueStorageFactory)
 @interface AMAIncrementableValueStorageFactory : NSObject
 
 + (AMAIncrementableValueStorage *)attributionIDStorage;

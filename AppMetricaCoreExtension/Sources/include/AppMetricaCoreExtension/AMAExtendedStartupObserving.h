@@ -4,6 +4,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+NS_SWIFT_NAME(StartupStorageProviding)
 @protocol AMAStartupStorageProviding <NSObject>
 
 - (id<AMAKeyValueStoring>)startupStorageForKeys:(NSArray<NSString *> *)keys;
@@ -11,12 +12,14 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
+NS_SWIFT_NAME(CachingStorageProviding)
 @protocol AMACachingStorageProviding <NSObject>
 
 - (id<AMAKeyValueStoring>)cachingStorage;
 
 @end
 
+NS_SWIFT_NAME(ExtendedStartupObserving)
 @protocol AMAExtendedStartupObserving <NSObject>
 
 - (NSDictionary *)startupParameters;

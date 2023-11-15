@@ -9,8 +9,9 @@ typedef NS_ENUM(NSUInteger, AMAEventValueType) {
     AMAEventValueTypeString,
     AMAEventValueTypeBinary,
     AMAEventValueTypeFile
-};
+} NS_SWIFT_NAME(EventValueType);
 
+NS_SWIFT_NAME(CustomEventParameters)
 @interface AMACustomEventParameters: NSObject
 
 @property (nonatomic) NSUInteger eventType;

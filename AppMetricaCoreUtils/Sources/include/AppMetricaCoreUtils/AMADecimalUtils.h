@@ -1,6 +1,7 @@
 
 #import <Foundation/Foundation.h>
 
+NS_SWIFT_NAME(DecimalUtils)
 @interface AMADecimalUtils : NSObject
 
 - (instancetype)init NS_UNAVAILABLE;

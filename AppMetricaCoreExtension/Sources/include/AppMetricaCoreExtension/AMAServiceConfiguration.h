@@ -6,6 +6,7 @@ NS_ASSUME_NONNULL_BEGIN
 @protocol AMAExtendedStartupObserving;
 @protocol AMAReporterStorageControlling;
 
+NS_SWIFT_NAME(ServiceConfiguration)
 @interface AMAServiceConfiguration : NSObject
 
 @property (nonatomic, nullable, strong, readonly) id<AMAExtendedStartupObserving> startupObserver;

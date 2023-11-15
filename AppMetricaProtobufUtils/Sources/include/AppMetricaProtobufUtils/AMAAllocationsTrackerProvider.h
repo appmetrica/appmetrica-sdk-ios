@@ -5,6 +5,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @protocol AMAAllocationsTracking;
 
+NS_SWIFT_NAME(AllocationsTrackerProvider)
 @interface AMAAllocationsTrackerProvider : NSObject
 
 + (void)track:(void (^)(id<AMAAllocationsTracking> tracker))block;

@@ -9,6 +9,7 @@ NS_ASSUME_NONNULL_BEGIN
 @protocol AMAExecuting;
 @protocol AMANetworkSessionProviding;
 
+NS_SWIFT_NAME(HTTPRequestDelegate)
 @protocol AMAHTTPRequestDelegate <NSObject>
 
 - (void)httpRequestor:(AMAHTTPRequestor *)requestor
@@ -21,6 +22,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
+NS_SWIFT_NAME(HTTPRequestor)
 @interface AMAHTTPRequestor : NSObject
 
 @property (nonatomic, copy, readonly) id<AMARequest> request;

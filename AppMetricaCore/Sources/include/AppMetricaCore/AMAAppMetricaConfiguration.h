@@ -6,6 +6,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+NS_SWIFT_NAME(AppMetricaConfiguration)
 @interface AMAAppMetricaConfiguration : NSObject
 
 /** Initialize configuration with specified Application key.

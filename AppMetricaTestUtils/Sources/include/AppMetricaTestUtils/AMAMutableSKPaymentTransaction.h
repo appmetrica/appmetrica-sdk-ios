@@ -3,6 +3,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+NS_SWIFT_NAME(MutableSKPaymentTransaction)
 @interface AMAMutableSKPaymentTransaction : SKPaymentTransaction
 
 @property(nonatomic, nullable, strong) NSError *error;

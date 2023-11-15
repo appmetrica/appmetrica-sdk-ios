@@ -23,6 +23,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+NS_SWIFT_NAME(AppMetrica)
 @interface AMAAppMetrica : NSObject
 
 /** Retrieves current UUID.

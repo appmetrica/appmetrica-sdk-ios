@@ -5,6 +5,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @class AMARSAKey;
 
+NS_SWIFT_NAME(RSACrypter)
 @interface AMARSACrypter : NSObject <AMADataEncoding>
 
 @property (nonatomic, strong, readonly) AMARSAKey *publicKey;

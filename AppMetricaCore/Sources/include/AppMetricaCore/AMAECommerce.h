@@ -6,6 +6,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * Describes an amount of something - number and unit.
  */
+NS_SWIFT_NAME(ECommerceAmount)
 @interface AMAECommerceAmount : NSObject
 
 /**
@@ -34,6 +35,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * Describes price of a product.
  */
+NS_SWIFT_NAME(ECommercePrice)
 @interface AMAECommercePrice : NSObject
 
 /**
@@ -71,6 +73,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * Describes a screen (page).
  */
+NS_SWIFT_NAME(ECommerceScreen)
 @interface AMAECommerceScreen : NSObject
 
 /**
@@ -144,6 +147,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * Describes a product.
  */
+NS_SWIFT_NAME(ECommerceProduct)
 @interface AMAECommerceProduct : NSObject
 
 /**
@@ -214,6 +218,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * Describes transition source - screen which shown screen, product card, etc.
  */
+NS_SWIFT_NAME(ECommerceReferrer)
 @interface AMAECommerceReferrer : NSObject
 
 /**
@@ -249,6 +254,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * Describes an item in a cart.
  */
+NS_SWIFT_NAME(ECommerceCartItem)
 @interface AMAECommerceCartItem : NSObject
 
 /**
@@ -290,6 +296,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * Describes an order - info about a cart purchase.
  */
+NS_SWIFT_NAME(ECommerceOrder)
 @interface AMAECommerceOrder : NSObject
 
 /**
@@ -338,6 +345,7 @@ NS_ASSUME_NONNULL_BEGIN
  * There are several different types of e-commerce events for different user actions.
  * Each method corresponds to one specific type. See method descriptions for more info.
  */
+NS_SWIFT_NAME(ECommerce)
 @interface AMAECommerce : NSObject
 
 /**

@@ -6,8 +6,9 @@ NS_ASSUME_NONNULL_BEGIN
 typedef NS_ENUM(NSInteger, AMAReportResponseStatus) {
     AMAReportResponseStatusUnknown,
     AMAReportResponseStatusAccepted,
-};
+} NS_SWIFT_NAME(ReportResponseStatus);
 
+NS_SWIFT_NAME(ReportResponse)
 @interface AMAReportResponse : NSObject
 
 @property (nonatomic, assign, readonly) AMAReportResponseStatus status;

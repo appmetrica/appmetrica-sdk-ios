@@ -3,6 +3,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+NS_SWIFT_NAME(GenericRequest)
 @interface AMAGenericRequest : NSObject<AMARequest>
 
 @property (nonatomic, strong, readonly) NSString *method;

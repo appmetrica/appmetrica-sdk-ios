@@ -7,6 +7,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 extern NSString *const kAMARSAAESCrypterErrorDomain;
 
+NS_SWIFT_NAME(RSAAESCrypter)
 @interface AMARSAAESCrypter : NSObject <AMADataEncoding>
 
 - (instancetype)init NS_UNAVAILABLE;

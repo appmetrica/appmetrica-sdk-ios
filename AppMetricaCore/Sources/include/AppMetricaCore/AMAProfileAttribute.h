@@ -9,6 +9,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /** This class indicates user profile update.
  */
+NS_SWIFT_NAME(UserProfileUpdate)
 @interface AMAUserProfileUpdate : NSObject
 
 @end
@@ -18,6 +19,7 @@ NS_ASSUME_NONNULL_BEGIN
 
  @warning The maximum length of the user profile name is 100 characters.
  */
+NS_SWIFT_NAME(NameAttribute)
 @protocol AMANameAttribute <NSObject>
 
 /** Updates the name attribute with the specified value.
@@ -51,11 +53,12 @@ typedef NS_ENUM(NSUInteger, AMAGenderType) {
  You can set the `AMAGenderTypeOther` value to the gender attribute and pass additional info using the custom attribute.
  */
     AMAGenderTypeOther,
-};
+} NS_SWIFT_NAME(GenderType);
 
 /** The gender attribute protocol.
  It enables linking user gender with the profile.
  */
+NS_SWIFT_NAME(GenderAttribute)
 @protocol AMAGenderAttribute <NSObject>
 
 /** Updates the gender attribute with the specified value.
@@ -76,6 +79,7 @@ typedef NS_ENUM(NSUInteger, AMAGenderType) {
 /** The birth date attribute protocol.
  It enables linking user birth date with the profile.
  */
+NS_SWIFT_NAME(BirthDateAttribute)
 @protocol AMABirthDateAttribute <NSObject>
 
 /** Updates the birth date attribute with the specified value.
@@ -137,6 +141,7 @@ typedef NS_ENUM(NSUInteger, AMAGenderType) {
  It indicates whether the user has enabled notifications for the application.
  It enables setting notification status for the profile.
  */
+NS_SWIFT_NAME(NotificationsEnabledAttribute)
 @protocol AMANotificationsEnabledAttribute <NSObject>
 
 /** Updates the NotificationsEnabled attribute with the specified value.
@@ -160,6 +165,7 @@ typedef NS_ENUM(NSUInteger, AMAGenderType) {
 
  @warning The maximum length of the custom string attribute value is 200 characters.
  */
+NS_SWIFT_NAME(CustomStringAttribute)
 @protocol AMACustomStringAttribute <NSObject>
 
 /** Updates the string attribute with the specified value.

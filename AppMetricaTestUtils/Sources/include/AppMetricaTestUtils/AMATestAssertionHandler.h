@@ -15,6 +15,7 @@ do {\
 } while (0)
 
 
+NS_SWIFT_NAME(TestAssertionHandler)
 @interface AMATestAssertionHandler : NSAssertionHandler
 
 - (void)beginAssertIgnoring;

@@ -7,15 +7,18 @@
 @protocol AMAIterable;
 @protocol AMAHostExchangeResponseValidating;
 
-extern NSString *const kAMAHostExchangeRequestProcessorErrorDomain;
+extern NSErrorDomain const kAMAHostExchangeRequestProcessorErrorDomain 
+    NS_SWIFT_NAME(HostExchangeRequestProcessorErrorDomain);
 
-typedef NS_ENUM(NSInteger, AMAHostExchangeRequestProcessorErrorCode) {
+typedef NS_ERROR_ENUM(kAMAHostExchangeRequestProcessorErrorDomain, AMAHostExchangeRequestProcessorErrorCode) {
     AMAHostExchangeRequestProcessorNetworkError,
     AMAHostExchangeRequestProcessorBadRequest,
-};
+} NS_SWIFT_NAME(HostExchangeRequestProcessorErrorCode);
 
-typedef void(^AMAHostExchangeRequestProcessorCallback)(NSError *error);
+typedef void(^AMAHostExchangeRequestProcessorCallback)(NSError *error)
+    NS_SWIFT_UNAVAILABLE("Use Swift closures.");
 
+NS_SWIFT_NAME(HostExchangeRequestProcessor)
 @interface AMAHostExchangeRequestProcessor : NSObject
 
 - (instancetype)init NS_UNAVAILABLE;

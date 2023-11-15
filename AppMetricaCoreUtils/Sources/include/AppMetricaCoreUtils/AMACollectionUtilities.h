@@ -3,6 +3,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+NS_SWIFT_NAME(CollectionUtilities)
 @interface AMACollectionUtilities : NSObject
 
 - (instancetype)init NS_UNAVAILABLE;

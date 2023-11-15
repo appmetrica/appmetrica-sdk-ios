@@ -8,6 +8,7 @@ NS_ASSUME_NONNULL_BEGIN
 ///
 /// This class allows you to enable or disable specific types of crash reporting and to customize the behavior
 /// of the reporting mechanism.
+NS_SWIFT_NAME(CrashesConfiguration)
 @interface AMACrashesConfiguration : NSObject <NSCopying>
 
 /// Controls the automated tracking of application crashes.

@@ -5,8 +5,10 @@ NS_ASSUME_NONNULL_BEGIN
 
 @class AMABlockTimer;
 
-typedef void(^AMABlockTimerBlock)(AMABlockTimer *sender);
+typedef void(^AMABlockTimerBlock)(AMABlockTimer *sender)
+    NS_SWIFT_UNAVAILABLE("Use Swift closures.");
 
+NS_SWIFT_NAME(BlockTimer)
 @interface AMABlockTimer : NSObject
 
 - (instancetype)init NS_UNAVAILABLE;

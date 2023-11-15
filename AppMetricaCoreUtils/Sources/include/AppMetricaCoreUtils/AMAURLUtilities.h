@@ -1,6 +1,7 @@
 
 #import <Foundation/Foundation.h>
 
+NS_SWIFT_NAME(URLUtilities)
 @interface AMAURLUtilities : NSObject
 
 + (NSURL *)URLWithBaseURLString:(NSString *)baseURLString

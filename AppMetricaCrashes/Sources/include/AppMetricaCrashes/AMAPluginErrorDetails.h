@@ -5,13 +5,16 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-extern NSString * const kAMAPlatformNative;
-extern NSString * const kAMAPlatformFlutter;
-extern NSString * const kAMAPlatformUnity;
-extern NSString * const kAMAPlatformReactNative;
-extern NSString * const kAMAPlatformXamarin;
-extern NSString * const kAMAPlatformCordova;
+typedef NSString *const AMAPlatform NS_TYPED_ENUM NS_SWIFT_NAME(Platform);
 
+extern AMAPlatform kAMAPlatformNative;
+extern AMAPlatform kAMAPlatformFlutter;
+extern AMAPlatform kAMAPlatformUnity;
+extern AMAPlatform kAMAPlatformReactNative;
+extern AMAPlatform kAMAPlatformXamarin;
+extern AMAPlatform kAMAPlatformCordova;
+
+NS_SWIFT_NAME(PluginErrorDetails)
 @interface AMAPluginErrorDetails : NSObject
 
 /**

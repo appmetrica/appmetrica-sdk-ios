@@ -4,6 +4,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+NS_SWIFT_NAME(AppMetricaExtendedReporting)
 @protocol AMAAppMetricaExtendedReporting <AMAAppMetricaReporting>
 
 - (void)setSessionExtras:(nullable NSData *)data

@@ -5,6 +5,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @class AMAApplicationState;
 
+NS_SWIFT_NAME(ApplicationStateManager)
 @interface AMAApplicationStateManager : NSObject
 
 @property (class, readonly) AMAApplicationState *applicationState;

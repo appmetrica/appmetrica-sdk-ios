@@ -1,6 +1,7 @@
 
 #import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
 
+NS_SWIFT_NAME(ApplicationState)
 @interface AMAApplicationState : NSObject <NSCopying, NSMutableCopying, AMADictionaryRepresentation>
 
 @property (nonatomic, copy, readonly) NSString *appVersionName;
@@ -41,6 +42,7 @@
 
 @end
 
+NS_SWIFT_NAME(MutableApplicationState)
 @interface AMAMutableApplicationState : AMAApplicationState
 
 @property (nonatomic, copy, readwrite) NSString *appVersionName;

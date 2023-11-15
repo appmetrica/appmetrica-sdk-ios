@@ -7,6 +7,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+NS_SWIFT_NAME(IncrementableValueStorage)
 @interface AMAIncrementableValueStorage : NSObject
 
 @property (nonatomic, copy, readonly) NSString *key;

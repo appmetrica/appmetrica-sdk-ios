@@ -1,6 +1,7 @@
 
 #import <Foundation/Foundation.h>
 
+NS_SWIFT_NAME(AESUtility)
 @interface AMAAESUtility : NSObject
 
 + (NSData *)randomIv;

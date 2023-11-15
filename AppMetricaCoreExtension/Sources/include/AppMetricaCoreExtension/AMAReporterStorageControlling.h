@@ -6,6 +6,7 @@ NS_ASSUME_NONNULL_BEGIN
 @protocol AMAKeyValueStorageProviding;
 @protocol AMAKeyValueStoring;
 
+NS_SWIFT_NAME(ReporterStorageControlling)
 @protocol AMAReporterStorageControlling <NSObject>
 
 - (void)setupWithReporterStorage:(id<AMAKeyValueStorageProviding>)stateStorageProvider

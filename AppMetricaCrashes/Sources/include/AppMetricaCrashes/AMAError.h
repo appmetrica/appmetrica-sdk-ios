@@ -11,6 +11,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /** The default implementation of the `AMAErrorRepresentable` protocol.
  */
+NS_SWIFT_NAME(AppMetricaError)
 @interface AMAError : NSObject <AMAErrorRepresentable>
 
 /** Creates the error instance with its ID.

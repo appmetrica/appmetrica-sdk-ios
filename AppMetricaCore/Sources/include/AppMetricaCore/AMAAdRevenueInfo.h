@@ -11,7 +11,7 @@ typedef NS_ENUM(NSUInteger, AMAAdType) {
     AMAAdTypeInterstitial = 4,
     AMAAdTypeMrec = 5,
     AMAAdTypeOther = 6,
-};
+} NS_SWIFT_NAME(AdType);
 
 /** The class to store Ad Revenue data.
 
@@ -20,6 +20,7 @@ typedef NS_ENUM(NSUInteger, AMAAdType) {
 
  @note This interface has the mutable version `AMAMutableAdRevenueInfo`.
  */
+NS_SWIFT_NAME(AdRevenueInfo)
 @interface AMAAdRevenueInfo : NSObject <NSCopying, NSMutableCopying>
 
 /**
@@ -89,6 +90,7 @@ typedef NS_ENUM(NSUInteger, AMAAdType) {
 /**
  * Mutable version of the `AMAAdRevenueInfo` class.
 */
+NS_SWIFT_NAME(MutableAdRevenueInfo)
 @interface AMAMutableAdRevenueInfo : AMAAdRevenueInfo
 
 /**

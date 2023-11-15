@@ -5,6 +5,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @class AMALogFacade;
 
+NS_SWIFT_NAME(LogConfigurator)
 @interface AMALogConfigurator : NSObject
 
 - (instancetype)initWithLog:(AMALogFacade *)log;

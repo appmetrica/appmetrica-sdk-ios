@@ -3,6 +3,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+NS_SWIFT_NAME(TestSafeTransactionRollbackContext)
 @interface AMATestSafeTransactionRollbackContext : NSObject <NSCoding>
 
 @property (nonatomic, strong, readonly) NSString *param1;

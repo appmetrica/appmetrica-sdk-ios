@@ -3,6 +3,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+NS_SWIFT_NAME(RollbackHolder)
 @interface AMARollbackHolder : NSObject
 
 @property (nonatomic, assign) BOOL rollback;

@@ -1,6 +1,7 @@
 
 #import <Foundation/Foundation.h>
 
+NS_SWIFT_NAME(DictionaryRepresentation)
 @protocol AMADictionaryRepresentation <NSObject>
 
 @required

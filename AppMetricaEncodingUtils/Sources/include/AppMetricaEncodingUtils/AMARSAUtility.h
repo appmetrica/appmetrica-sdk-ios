@@ -3,6 +3,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+NS_SWIFT_NAME(RSAUtility)
 @interface AMARSAUtility : NSObject
 
 + (nullable NSData *)publicKeyFromPem:(NSString *)pemString;
