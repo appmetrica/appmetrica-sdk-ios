@@ -444,16 +444,16 @@ required_field_get_packed_size(const ProtobufCFieldDescriptor *field,
     case PROTOBUF_C_TYPE_STRING: {
         const char *str = *(char * const *) member;
         size_t len = str ? strlen(str) : 0;
-        return rv + uint32_size(len) + len;
+        return rv + uint32_size((uint32_t)len) + len;
     }
     case PROTOBUF_C_TYPE_BYTES: {
         size_t len = ((const ProtobufCBinaryData *) member)->len;
-        return rv + uint32_size(len) + len;
+        return rv + uint32_size((uint32_t)len) + len;
     }
     case PROTOBUF_C_TYPE_MESSAGE: {
         const ProtobufCMessage *msg = *(ProtobufCMessage * const *) member;
         size_t subrv = msg ? protobuf_c_message_get_packed_size(msg) : 0;
-        return rv + uint32_size(subrv) + subrv;
+        return rv + uint32_size((uint32_t)subrv) + subrv;
     }
     }
     PROTOBUF_C__ASSERT_NOT_REACHED();
@@ -661,26 +661,26 @@ repeated_field_get_packed_size(const ProtobufCFieldDescriptor *field,
     case PROTOBUF_C_TYPE_STRING:
         for (i = 0; i < count; i++) {
             size_t len = strlen(((char **) array)[i]);
-            rv += uint32_size(len) + len;
+            rv += uint32_size((uint32_t)len) + len;
         }
         break;
     case PROTOBUF_C_TYPE_BYTES:
         for (i = 0; i < count; i++) {
             size_t len = ((ProtobufCBinaryData *) array)[i].len;
-            rv += uint32_size(len) + len;
+            rv += uint32_size((uint32_t)len) + len;
         }
         break;
     case PROTOBUF_C_TYPE_MESSAGE:
         for (i = 0; i < count; i++) {
             size_t len = protobuf_c_message_get_packed_size(
                 ((ProtobufCMessage **) array)[i]);
-            rv += uint32_size(len) + len;
+            rv += uint32_size((uint32_t)len) + len;
         }
         break;
     }
 
     if (0 != (field->flags & PROTOBUF_C_FIELD_FLAG_PACKED))
-        header_size += uint32_size(rv);
+        header_size += uint32_size((uint32_t)rv);
     return header_size + rv;
 }
 
@@ -999,7 +999,7 @@ string_pack(const char *str, uint8_t *out)
         return 1;
     } else {
         size_t len = strlen(str);
-        size_t rv = uint32_pack(len, out);
+        size_t rv = uint32_pack((uint32_t)len, out);
         memcpy(out + rv, str, len);
         return rv + len;
     }
@@ -1020,7 +1020,7 @@ static inline size_t
 binary_data_pack(const ProtobufCBinaryData *bd, uint8_t *out)
 {
     size_t len = bd->len;
-    size_t rv = uint32_pack(len, out);
+    size_t rv = uint32_pack((uint32_t)len, out);
     memcpy(out + rv, bd->data, len);
     return rv + len;
 }
@@ -1044,10 +1044,10 @@ prefixed_message_pack(const ProtobufCMessage *message, uint8_t *out)
         return 1;
     } else {
         size_t rv = protobuf_c_message_pack(message, out + 1);
-        uint32_t rv_packed_size = uint32_size(rv);
+        size_t rv_packed_size = uint32_size((uint32_t)rv);
         if (rv_packed_size != 1)
             memmove(out + rv_packed_size, out + 1, rv);
-        return uint32_pack(rv, out) + rv;
+        return uint32_pack((uint32_t)rv, out) + rv;
     }
 }
 
@@ -1365,16 +1365,16 @@ repeated_field_pack(const ProtobufCFieldDescriptor *field,
         unsigned min_length;
         unsigned payload_len;
         unsigned length_size_min;
-        unsigned actual_length_size;
+        size_t actual_length_size;
         uint8_t *payload_at;
 
         if (count == 0)
             return 0;
-        header_len = tag_pack(field->id, out);
+        header_len = (unsigned)tag_pack(field->id, out);
         out[0] |= PROTOBUF_C_WIRE_TYPE_LENGTH_PREFIXED;
         len_start = header_len;
-        min_length = get_type_min_size(field->type) * count;
-        length_size_min = uint32_size(min_length);
+        min_length = get_type_min_size(field->type) * (unsigned)count;
+        length_size_min = (unsigned)uint32_size(min_length);
         header_len += length_size_min;
         payload_at = out + header_len;
 
@@ -1382,13 +1382,13 @@ repeated_field_pack(const ProtobufCFieldDescriptor *field,
         case PROTOBUF_C_TYPE_SFIXED32:
         case PROTOBUF_C_TYPE_FIXED32:
         case PROTOBUF_C_TYPE_FLOAT:
-            copy_to_little_endian_32(payload_at, array, count);
+            copy_to_little_endian_32(payload_at, array, (unsigned)count);
             payload_at += count * 4;
             break;
         case PROTOBUF_C_TYPE_SFIXED64:
         case PROTOBUF_C_TYPE_FIXED64:
         case PROTOBUF_C_TYPE_DOUBLE:
-            copy_to_little_endian_64(payload_at, array, count);
+            copy_to_little_endian_64(payload_at, array, (unsigned)count);
             payload_at += count * 8;
             break;
         case PROTOBUF_C_TYPE_ENUM:
@@ -1433,7 +1433,7 @@ repeated_field_pack(const ProtobufCFieldDescriptor *field,
             PROTOBUF_C__ASSERT_NOT_REACHED();
         }
 
-        payload_len = payload_at - (out + header_len);
+        payload_len = (unsigned)(payload_at - (out + header_len));
         actual_length_size = uint32_size(payload_len);
         if (length_size_min != actual_length_size) {
             assert(actual_length_size == length_size_min + 1);
@@ -1447,7 +1447,7 @@ repeated_field_pack(const ProtobufCFieldDescriptor *field,
         /* not "packed" cased */
         /* CONSIDER: optimize this case a bit (by putting the loop inside the switch) */
         size_t rv = 0;
-        unsigned siz = sizeof_elt_in_repeated_array(field->type);
+        size_t siz = sizeof_elt_in_repeated_array(field->type);
 
         for (i = 0; i < count; i++) {
             rv += required_field_pack(field, array, out + rv);
@@ -1603,7 +1603,7 @@ required_field_pack_to_buffer(const ProtobufCFieldDescriptor *field,
         size_t sublen = str ? strlen(str) : 0;
 
         scratch[0] |= PROTOBUF_C_WIRE_TYPE_LENGTH_PREFIXED;
-        rv += uint32_pack(sublen, scratch + rv);
+        rv += uint32_pack((uint32_t)sublen, scratch + rv);
         buffer->append(buffer, rv, scratch);
         buffer->append(buffer, sublen, (const uint8_t *) str);
         rv += sublen;
@@ -1614,7 +1614,7 @@ required_field_pack_to_buffer(const ProtobufCFieldDescriptor *field,
         size_t sublen = bd->len;
 
         scratch[0] |= PROTOBUF_C_WIRE_TYPE_LENGTH_PREFIXED;
-        rv += uint32_pack(sublen, scratch + rv);
+        rv += uint32_pack((uint32_t)sublen, scratch + rv);
         buffer->append(buffer, rv, scratch);
         buffer->append(buffer, sublen, bd->data);
         rv += sublen;
@@ -1629,7 +1629,7 @@ required_field_pack_to_buffer(const ProtobufCFieldDescriptor *field,
             buffer->append(buffer, rv, scratch);
         } else {
             size_t sublen = protobuf_c_message_get_packed_size(msg);
-            rv += uint32_pack(sublen, scratch + rv);
+            rv += uint32_pack((uint32_t)sublen, scratch + rv);
             buffer->append(buffer, rv, scratch);
             protobuf_c_message_pack_to_buffer(msg, buffer);
             rv += sublen;
@@ -1850,28 +1850,28 @@ pack_buffer_packed_payload(const ProtobufCFieldDescriptor *field,
     case PROTOBUF_C_TYPE_ENUM:
     case PROTOBUF_C_TYPE_INT32:
         for (i = 0; i < count; i++) {
-            unsigned len = int32_pack(((int32_t *) array)[i], scratch);
+            size_t len = int32_pack(((int32_t *) array)[i], scratch);
             buffer->append(buffer, len, scratch);
             rv += len;
         }
         break;
     case PROTOBUF_C_TYPE_SINT32:
         for (i = 0; i < count; i++) {
-            unsigned len = sint32_pack(((int32_t *) array)[i], scratch);
+            size_t len = sint32_pack(((int32_t *) array)[i], scratch);
             buffer->append(buffer, len, scratch);
             rv += len;
         }
         break;
     case PROTOBUF_C_TYPE_UINT32:
         for (i = 0; i < count; i++) {
-            unsigned len = uint32_pack(((uint32_t *) array)[i], scratch);
+            size_t len = uint32_pack(((uint32_t *) array)[i], scratch);
             buffer->append(buffer, len, scratch);
             rv += len;
         }
         break;
     case PROTOBUF_C_TYPE_SINT64:
         for (i = 0; i < count; i++) {
-            unsigned len = sint64_pack(((int64_t *) array)[i], scratch);
+            size_t len = sint64_pack(((int64_t *) array)[i], scratch);
             buffer->append(buffer, len, scratch);
             rv += len;
         }
@@ -1879,14 +1879,14 @@ pack_buffer_packed_payload(const ProtobufCFieldDescriptor *field,
     case PROTOBUF_C_TYPE_INT64:
     case PROTOBUF_C_TYPE_UINT64:
         for (i = 0; i < count; i++) {
-            unsigned len = uint64_pack(((uint64_t *) array)[i], scratch);
+            size_t len = uint64_pack(((uint64_t *) array)[i], scratch);
             buffer->append(buffer, len, scratch);
             rv += len;
         }
         break;
     case PROTOBUF_C_TYPE_BOOL:
         for (i = 0; i < count; i++) {
-            unsigned len = boolean_pack(((protobuf_c_boolean *) array)[i], scratch);
+            size_t len = boolean_pack(((protobuf_c_boolean *) array)[i], scratch);
             buffer->append(buffer, len, scratch);
             rv += len;
         }
@@ -1919,7 +1919,7 @@ repeated_field_pack_to_buffer(const ProtobufCFieldDescriptor *field,
         size_t tmp;
 
         scratch[0] |= PROTOBUF_C_WIRE_TYPE_LENGTH_PREFIXED;
-        rv += uint32_pack(payload_len, scratch + rv);
+        rv += uint32_pack((uint32_t)payload_len, scratch + rv);
         buffer->append(buffer, rv, scratch);
         tmp = pack_buffer_packed_payload(field, count, array, buffer);
         assert(tmp == payload_len);
@@ -1997,7 +1997,7 @@ protobuf_c_message_pack_to_buffer(const ProtobufCMessage *message,
         } else {
             rv += repeated_field_pack_to_buffer(
                 field,
-                *(const size_t *) qmember,
+                (unsigned)*(const size_t *) qmember,
                 member,
                 buffer
             );
@@ -2065,7 +2065,7 @@ parse_tag_and_wiretype(size_t len,
                uint32_t *tag_out,
                uint8_t *wiretype_out)
 {
-    unsigned max_rv = len > 5 ? 5 : len;
+    size_t max_rv = len > 5 ? 5 : len;
     uint32_t tag = (data[0] & 0x7f) >> 3;
     unsigned shift = 4;
     unsigned rv;
@@ -2110,7 +2110,7 @@ static inline size_t
 scan_length_prefixed_data(size_t len, const uint8_t *data,
               size_t *prefix_len_out)
 {
-    unsigned hdr_max = len < 5 ? len : 5;
+    size_t hdr_max = len < 5 ? len : 5;
     unsigned hdr_len;
     size_t val = 0;
     unsigned i;
@@ -2498,7 +2498,7 @@ parse_required_member(ScannedMember *scanned_member,
               ProtobufCAllocator *allocator,
               protobuf_c_boolean maybe_clear)
 {
-    unsigned len = scanned_member->len;
+    unsigned len = (unsigned)scanned_member->len;
     const uint8_t *data = scanned_member->data;
     uint8_t wire_type = scanned_member->wire_type;
 
@@ -2786,7 +2786,7 @@ parse_packed_repeated_member(ScannedMember *scanned_member,
     case PROTOBUF_C_TYPE_ENUM:
     case PROTOBUF_C_TYPE_INT32:
         while (rem > 0) {
-            unsigned s = scan_varint(rem, at);
+            unsigned s = scan_varint((unsigned)rem, at);
             if (s == 0) {
                 PROTOBUF_C_UNPACK_ERROR("bad packed-repeated int32 value");
                 return FALSE;
@@ -2798,7 +2798,7 @@ parse_packed_repeated_member(ScannedMember *scanned_member,
         break;
     case PROTOBUF_C_TYPE_SINT32:
         while (rem > 0) {
-            unsigned s = scan_varint(rem, at);
+            unsigned s = scan_varint((unsigned)rem, at);
             if (s == 0) {
                 PROTOBUF_C_UNPACK_ERROR("bad packed-repeated sint32 value");
                 return FALSE;
@@ -2810,7 +2810,7 @@ parse_packed_repeated_member(ScannedMember *scanned_member,
         break;
     case PROTOBUF_C_TYPE_UINT32:
         while (rem > 0) {
-            unsigned s = scan_varint(rem, at);
+            unsigned s = scan_varint((unsigned)rem, at);
             if (s == 0) {
                 PROTOBUF_C_UNPACK_ERROR("bad packed-repeated enum or uint32 value");
                 return FALSE;
@@ -2823,7 +2823,7 @@ parse_packed_repeated_member(ScannedMember *scanned_member,
 
     case PROTOBUF_C_TYPE_SINT64:
         while (rem > 0) {
-            unsigned s = scan_varint(rem, at);
+            unsigned s = scan_varint((unsigned)rem, at);
             if (s == 0) {
                 PROTOBUF_C_UNPACK_ERROR("bad packed-repeated sint64 value");
                 return FALSE;
@@ -2836,7 +2836,7 @@ parse_packed_repeated_member(ScannedMember *scanned_member,
     case PROTOBUF_C_TYPE_INT64:
     case PROTOBUF_C_TYPE_UINT64:
         while (rem > 0) {
-            unsigned s = scan_varint(rem, at);
+            unsigned s = scan_varint((unsigned)rem, at);
             if (s == 0) {
                 PROTOBUF_C_UNPACK_ERROR("bad packed-repeated int64/uint64 value");
                 return FALSE;
@@ -2848,7 +2848,7 @@ parse_packed_repeated_member(ScannedMember *scanned_member,
         break;
     case PROTOBUF_C_TYPE_BOOL:
         while (rem > 0) {
-            unsigned s = scan_varint(rem, at);
+            unsigned s = scan_varint((unsigned)rem, at);
             if (s == 0) {
                 PROTOBUF_C_UNPACK_ERROR("bad packed-repeated boolean value");
                 return FALSE;
@@ -3134,7 +3134,7 @@ protobuf_c_message_unpack(const ProtobufCMessageDescriptor *desc,
 
         switch (wire_type) {
         case PROTOBUF_C_WIRE_TYPE_VARINT: {
-            unsigned max_len = rem < 10 ? rem : 10;
+            unsigned max_len = rem < 10 ? (unsigned)rem : 10;
             unsigned i;
 
             for (i = 0; i < max_len; i++)
@@ -3241,7 +3241,7 @@ protobuf_c_message_unpack(const ProtobufCMessageDescriptor *desc,
                 STRUCT_MEMBER_PTR(size_t, rv,
                           field->quantifier_offset);
             if (*n_ptr != 0) {
-                unsigned n = *n_ptr;
+                unsigned n = (unsigned)*n_ptr;
                 void *a;
                 *n_ptr = 0;
                 assert(rv->descriptor != NULL);
@@ -3283,7 +3283,7 @@ protobuf_c_message_unpack(const ProtobufCMessageDescriptor *desc,
     /* do real parsing */
     for (i_slab = 0; i_slab <= which_slab; i_slab++) {
         unsigned max = (i_slab == which_slab) ?
-            in_slab_index : (1UL << (i_slab + 4));
+            in_slab_index : (1U << (i_slab + 4));
         ScannedMember *slab = scanned_member_slabs[i_slab];
 
         for (j = 0; j < max; j++) {
