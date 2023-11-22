@@ -1,6 +1,6 @@
 # [AppMetrica SDK](https://appmetrica.io)
 
-AAppMetrica is a one-stop marketing platform for install attribution, app analytics, and push campaigns. AppMetrica covers the three key features for discovering your app's performance — ad tracking, usage analytics and crash analytics.
+AppMetrica is a one-stop marketing platform for install attribution, app analytics, and push campaigns. AppMetrica covers the three key features for discovering your app's performance — ad tracking, usage analytics and crash analytics.
 
 ## License
 AppMetrica is released under the MIT license.
