@@ -53,7 +53,7 @@ NSString *const kAMADeviceTypeWatch = @"watch";
 
 + (NSString *)SDKUserAgent
 {
-    NSString *SDKName = @"io.appmetrica.sdk";
+    NSString *SDKName = @"io.appmetrica.analytics";
     NSString *versionName = [self SDKVersionName];
     NSUInteger buildNumber = [self SDKBuildNumber];
     return [[self class] userAgentWithName:SDKName

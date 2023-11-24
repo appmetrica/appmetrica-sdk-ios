@@ -177,7 +177,7 @@ describe(@"AMAPlatformDescription", ^{
             [[[AMAPlatformDescription SDKBundleName] should] equal:@"io.appmetrica"];
         });
         it(@"Should return user agent", ^{
-            NSString *SDKName = @"io.appmetrica.sdk";
+            NSString *SDKName = @"io.appmetrica.analytics";
             NSString *versionName = [AMAPlatformDescription SDKVersionName];
             NSUInteger buildNumber = [AMAPlatformDescription SDKBuildNumber];
             
