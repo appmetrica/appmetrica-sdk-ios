@@ -5,7 +5,6 @@ static NSUInteger const kAMARevenueInfoDefaultQuantity = 1;
 
 @interface AMARevenueInfo ()
 
-@property (nonatomic, assign, readwrite) double price;
 @property (nonatomic, strong, readwrite) NSDecimalNumber *priceDecimal;
 @property (nonatomic, copy, readwrite) NSString *currency;
 
@@ -20,17 +19,6 @@ static NSUInteger const kAMARevenueInfoDefaultQuantity = 1;
 
 @implementation AMARevenueInfo
 
-- (instancetype)initWithPrice:(double)price currency:(NSString *)currency
-{
-    return [self initWithPrice:price
-                      currency:currency
-                      quantity:kAMARevenueInfoDefaultQuantity
-                     productID:nil
-                 transactionID:nil
-                   receiptData:nil
-                       payload:nil];
-}
-
 - (instancetype)initWithPriceDecimal:(NSDecimalNumber *)priceDecimal
                             currency:(NSString *)currency
 {
@@ -43,24 +31,6 @@ static NSUInteger const kAMARevenueInfoDefaultQuantity = 1;
                               payload:nil];
 }
 
-- (instancetype)initWithPrice:(double)price
-                     currency:(NSString *)currency
-                     quantity:(NSUInteger)quantity
-                    productID:(NSString *)productID
-                transactionID:(NSString *)transactionID
-                  receiptData:(NSData *)receiptData
-                      payload:(NSDictionary *)payload
-{
-    return [self initWithPrice:price
-                  priceDecimal:nil
-                      currency:currency
-                      quantity:quantity
-                     productID:productID
-                 transactionID:transactionID
-                   receiptData:receiptData
-                       payload:payload];
-}
-
 - (instancetype)initWithPriceDecimal:(NSDecimalNumber *)priceDecimal
                             currency:(NSString *)currency
                             quantity:(NSUInteger)quantity
@@ -69,28 +39,8 @@ static NSUInteger const kAMARevenueInfoDefaultQuantity = 1;
                          receiptData:(NSData *)receiptData
                              payload:(NSDictionary *)payload
 {
-    return [self initWithPrice:0.0
-                  priceDecimal:priceDecimal
-                      currency:currency
-                      quantity:quantity
-                     productID:productID
-                 transactionID:transactionID
-                   receiptData:receiptData
-                       payload:payload];
-}
-
-- (instancetype)initWithPrice:(double)price
-                 priceDecimal:(NSDecimalNumber *)priceDecimal
-                     currency:(NSString *)currency
-                     quantity:(NSUInteger)quantity
-                    productID:(NSString *)productID
-                transactionID:(NSString *)transactionID
-                  receiptData:(NSData *)receiptData
-                      payload:(NSDictionary *)payload
-{
     self = [super init];
     if (self != nil) {
-        _price = price;
         _priceDecimal = priceDecimal;
         _currency = [currency copy];
 
@@ -110,21 +60,19 @@ static NSUInteger const kAMARevenueInfoDefaultQuantity = 1;
 
 - (id)mutableCopyWithZone:(nullable NSZone *)zone
 {
-    return [[AMAMutableRevenueInfo alloc] initWithPrice:self.price
-                                           priceDecimal:self.priceDecimal
-                                               currency:self.currency
-                                               quantity:self.quantity
-                                              productID:self.productID
-                                          transactionID:self.transactionID
-                                            receiptData:self.receiptData
-                                                payload:self.payload];
+    return [[AMAMutableRevenueInfo alloc] initWithPriceDecimal:self.priceDecimal
+                                                      currency:self.currency
+                                                      quantity:self.quantity
+                                                     productID:self.productID
+                                                 transactionID:self.transactionID
+                                                   receiptData:self.receiptData
+                                                       payload:self.payload];
 }
 
 @end
 
 @implementation AMAMutableRevenueInfo
 
-@dynamic price;
 @dynamic priceDecimal;
 @dynamic currency;
 @dynamic quantity;
@@ -135,14 +83,13 @@ static NSUInteger const kAMARevenueInfoDefaultQuantity = 1;
 
 - (id)copyWithZone:(nullable NSZone *)zone
 {
-    return [[AMARevenueInfo alloc] initWithPrice:self.price
-                                    priceDecimal:self.priceDecimal
-                                        currency:self.currency
-                                        quantity:self.quantity
-                                       productID:self.productID
-                                   transactionID:self.transactionID
-                                     receiptData:self.receiptData
-                                         payload:self.payload];
+    return [[AMARevenueInfo alloc] initWithPriceDecimal:self.priceDecimal
+                                               currency:self.currency
+                                               quantity:self.quantity
+                                              productID:self.productID
+                                          transactionID:self.transactionID
+                                            receiptData:self.receiptData
+                                                payload:self.payload];
 }
 
 @end

@@ -542,7 +542,7 @@ const ProtobufCEnumDescriptor ama__revenue__in_app_type__descriptor =
 static const uint32_t ama__revenue__quantity__default_value = 1u;
 static const protobuf_c_boolean ama__revenue__auto_collected__default_value = 0;
 static const Ama__Revenue__InAppType ama__revenue__in_app_type__default_value = AMA__REVENUE__IN_APP_TYPE__PURCHASE;
-static const ProtobufCFieldDescriptor ama__revenue__field_descriptors[11] =
+static const ProtobufCFieldDescriptor ama__revenue__field_descriptors[10] =
 {
   {
     "quantity",
@@ -553,18 +553,6 @@ static const ProtobufCFieldDescriptor ama__revenue__field_descriptors[11] =
     offsetof(Ama__Revenue, quantity),
     NULL,
     &ama__revenue__quantity__default_value,
-    0,             /* flags */
-    0,NULL,NULL    /* reserved1,reserved2, etc */
-  },
-  {
-    "price",
-    2,
-    PROTOBUF_C_LABEL_OPTIONAL,
-    PROTOBUF_C_TYPE_DOUBLE,
-    offsetof(Ama__Revenue, has_price),
-    offsetof(Ama__Revenue, price),
-    NULL,
-    NULL,
     0,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
@@ -678,23 +666,23 @@ static const ProtobufCFieldDescriptor ama__revenue__field_descriptors[11] =
   },
 };
 static const unsigned ama__revenue__field_indices_by_name[] = {
-  7,   /* field[7] = auto_collected */
-  2,   /* field[2] = currency */
-  8,   /* field[8] = in_app_type */
-  4,   /* field[4] = payload */
-  1,   /* field[1] = price */
-  6,   /* field[6] = price_micros */
-  3,   /* field[3] = product_id */
+  6,   /* field[6] = auto_collected */
+  1,   /* field[1] = currency */
+  7,   /* field[7] = in_app_type */
+  3,   /* field[3] = payload */
+  5,   /* field[5] = price_micros */
+  2,   /* field[2] = product_id */
   0,   /* field[0] = quantity */
-  5,   /* field[5] = receipt */
-  10,   /* field[10] = subscription_info */
-  9,   /* field[9] = transaction_info */
+  4,   /* field[4] = receipt */
+  9,   /* field[9] = subscription_info */
+  8,   /* field[8] = transaction_info */
 };
-static const ProtobufCIntRange ama__revenue__number_ranges[2 + 1] =
+static const ProtobufCIntRange ama__revenue__number_ranges[3 + 1] =
 {
   { 1, 0 },
-  { 10, 8 },
-  { 0, 11 }
+  { 3, 1 },
+  { 10, 7 },
+  { 0, 10 }
 };
 const ProtobufCMessageDescriptor ama__revenue__descriptor =
 {
@@ -704,10 +692,10 @@ const ProtobufCMessageDescriptor ama__revenue__descriptor =
   "Ama__Revenue",
   "ama",
   sizeof(Ama__Revenue),
-  11,
+  10,
   ama__revenue__field_descriptors,
   ama__revenue__field_indices_by_name,
-  2,  ama__revenue__number_ranges,
+  3,  ama__revenue__number_ranges,
   (ProtobufCMessageInit) ama__revenue__init,
   NULL,NULL,NULL    /* reserved[123] */
 };

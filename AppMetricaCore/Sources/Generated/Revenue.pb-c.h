@@ -153,8 +153,6 @@ struct  Ama__Revenue
   ProtobufCMessage base;
   protobuf_c_boolean has_quantity;
   uint32_t quantity;
-  protobuf_c_boolean has_price;
-  double price;
   /*
    * ISO 4217
    */
@@ -174,7 +172,7 @@ struct  Ama__Revenue
    */
   Ama__Revenue__Receipt *receipt;
   /*
-   * Price value in micros(price * 10^6). If this field is filled, price field is ignored. Used in Android(3.7.0+) and iOS (3.7.0+).
+   * Price value in micros(price * 10^6).
    */
   protobuf_c_boolean has_price_micros;
   int64_t price_micros;
@@ -187,7 +185,7 @@ struct  Ama__Revenue
 };
 #define AMA__REVENUE__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__revenue__descriptor) \
-    , 0, 1u, 0, 0, {0,NULL}, 0, {0,NULL}, 0, {0,NULL}, NULL, 0, 0, 0, 0, 0, AMA__REVENUE__IN_APP_TYPE__PURCHASE, NULL, NULL }
+    , 0, 1u, {0,NULL}, 0, {0,NULL}, 0, {0,NULL}, NULL, 0, 0, 0, 0, 0, AMA__REVENUE__IN_APP_TYPE__PURCHASE, NULL, NULL }
 
 
 /* Ama__Revenue__Receipt methods */

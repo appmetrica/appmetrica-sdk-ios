@@ -56,12 +56,6 @@ describe(@"AMARevenueInfoModelSerializer", ^{
                                                       transactionInfo:nil];
             revenue = serializeAndDeserializeModel(model);
         });
-        it(@"Should fill price", ^{
-            [[theValue(revenue->price) should] equal:0 withDelta:DBL_EPSILON];
-        });
-        it(@"Should fill has_price", ^{
-            [[theValue(revenue->has_price) should] beYes];
-        });
         it(@"Should not fill has_price_micros", ^{
             [[theValue(revenue->has_price_micros) should] beNo];
         });
@@ -147,12 +141,6 @@ describe(@"AMARevenueInfoModelSerializer", ^{
                                                          subscriptionInfo:subscription
                                                           transactionInfo:transaction];
                 revenue = serializeAndDeserializeModel(model);
-            });
-            it(@"Should not fill price", ^{
-                [[theValue(revenue->price) should] equal:0.0 withDelta:DBL_EPSILON];
-            });
-            it(@"Should fill has_price", ^{
-                [[theValue(revenue->has_price) should] beNo];
             });
             it(@"Should fill price_micros", ^{
                 [[theValue(revenue->price_micros) should] equal:theValue(23550000)];

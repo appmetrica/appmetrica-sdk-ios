@@ -12,14 +12,14 @@ message Revenue
     }
 
     optional uint32 quantity = 1 [default = 1];
-    optional double price = 2;
+    reserved 2;
     required bytes currency = 3; // ISO 4217
     optional bytes product_id = 4; // arbitrary string
     optional bytes payload = 5; // arbitrary JSON, same rules as for EVENT_CLIENT
 
     optional Receipt receipt = 6; // data for revenue validation
 
-    optional int64 price_micros = 7; // Price value in micros(price * 10^6). If this field is filled, price field is ignored. Used in Android(3.7.0+) and iOS (3.7.0+).
+    optional int64 price_micros = 7; // Price value in micros(price * 10^6).
 
     optional bool auto_collected = 8 [default = false];
 

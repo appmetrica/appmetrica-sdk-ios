@@ -62,7 +62,7 @@
         priceMicros = [[NSDecimalNumber alloc] initWithLongLong:revenueData->price_micros];
     }
     else {
-        priceMicros = [[NSDecimalNumber alloc] initWithDouble:(revenueData->price * 1000000)];
+        priceMicros = [NSDecimalNumber zero];
     }
     NSString *currency = [AMAProtobufUtilities stringForBinaryData:&revenueData->currency];
     return [[AMALightRevenueEvent alloc] initWithPriceMicros:priceMicros

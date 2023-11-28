@@ -39,7 +39,6 @@
         revenue.receipt = [self receiptForRevenueInfoModel:model tracker:tracker];
         BOOL hasDecimalPrice = model.priceDecimal != nil;
 
-        revenue.has_price = hasDecimalPrice == NO;
         revenue.has_price_micros = hasDecimalPrice;
         if (hasDecimalPrice) {
             revenue.has_price_micros = [AMADecimalUtils fillMicrosValue:&revenue.price_micros
