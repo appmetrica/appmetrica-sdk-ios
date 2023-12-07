@@ -25,7 +25,7 @@
 {
     if (self == [AMANetworkStrategyController class]) {
         [[[self class] logConfigurator] setupLogWithChannel:AMA_LOG_CHANNEL];
-        [[[self class] logConfigurator] setChannel:AMA_LOG_CHANNEL enabled:YES];
+        [[[self class] logConfigurator] setChannel:AMA_LOG_CHANNEL enabled:NO];
     }
 }
 

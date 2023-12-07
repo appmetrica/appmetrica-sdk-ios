@@ -58,7 +58,7 @@
 {
     if (self == [AMACrashes class]) {
         [AMAAppMetrica.sharedLogConfigurator setupLogWithChannel:AMA_LOG_CHANNEL];
-        [AMAAppMetrica.sharedLogConfigurator setChannel:AMA_LOG_CHANNEL enabled:YES];
+        [AMAAppMetrica.sharedLogConfigurator setChannel:AMA_LOG_CHANNEL enabled:NO];
     }
 }
 
