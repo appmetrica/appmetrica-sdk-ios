@@ -6,8 +6,9 @@
 #import "AMAInstantFeaturesConfiguration.h"
 #import "AMADatabaseFactory.h"
 #import "AMACore.h"
+#import "AMAInstantFeaturesConfiguration+Migration.h"
 
-@interface AMAUUIDProvider()
+@interface AMAUUIDProvider ()
 
 @property (nonatomic, copy, readwrite) NSString *UUID;
 
@@ -37,28 +38,29 @@
                 AMAInstantFeaturesConfiguration *instantFeaturesConfiguration = [AMAInstantFeaturesConfiguration sharedInstance];
                 self.UUID = instantFeaturesConfiguration.UUID;
                 AMALogInfo(@"Uuid from instant features: %@", self.UUID);
+                
+                if (self.UUID.length > 0) {
+                    return self.UUID;
+                }
+                
                 if (self.UUID.length == 0) {
-                    NSString *oldUUIDDatabasePath = [AMADatabaseFactory configurationDatabasePath];
-                    if ([AMAFileUtility fileExistsAtPath:oldUUIDDatabasePath] == YES) {
-                        id<AMAKeyValueStoring> uuidOldStorage = [[AMAMetricaConfiguration sharedInstance] UUIDOldStorage];
-                        NSError *error = nil;
-                        self.UUID = [uuidOldStorage stringForKey:AMAStorageStringKeyUUID error:&error];
-                        if (error != nil) {
-                            AMALogInfo(@"Failed to read uuid from old storage. Error: %@", error);
-                        }
-                    } else {
-                        AMALogInfo(@"No old uuid database");
-                    }
+                    self.UUID = [self uuidFromOldStorage];
                     AMALogInfo(@"Uuid from old storage: %@", self.UUID);
-                    if (self.UUID.length == 0) {
-                        self.UUID = [self generateUUID];
-                        AMALogInfo(@"Generated uuid: %@", self.UUID);
-                    }
-                    if (self.UUID.length != 0) {
-                        instantFeaturesConfiguration.UUID = self.UUID;
-                    } else {
-                        AMALogWarn(@"Could not generate UUID");
-                    }
+                }
+                
+                if (self.UUID.length == 0) {
+                    self.UUID = [self uuidFromMigrationStorage];
+                    AMALogInfo(@"Uuid from old instant features: %@", self.UUID);
+                }
+                
+                if (self.UUID.length == 0) {
+                    self.UUID = [self generateUUID];
+                    AMALogInfo(@"Generated uuid: %@", self.UUID);
+                }
+                if (self.UUID.length != 0) {
+                    instantFeaturesConfiguration.UUID = self.UUID;
+                } else {
+                    AMALogWarn(@"Could not generate UUID");
                 }
             }
         }
@@ -78,6 +80,29 @@
         [result appendFormat:@"%02x", (unsigned int)uuidData[idx]];
     }
     return [result copy];
+}
+
+- (NSString *)uuidFromOldStorage
+{
+    NSString *oldUUID = nil;
+    NSString *oldUUIDDatabasePath = [AMADatabaseFactory configurationDatabasePath];
+    if ([AMAFileUtility fileExistsAtPath:oldUUIDDatabasePath] == YES) {
+        id<AMAKeyValueStoring> uuidOldStorage = [[AMAMetricaConfiguration sharedInstance] UUIDOldStorage];
+        NSError *error = nil;
+        oldUUID = [uuidOldStorage stringForKey:AMAStorageStringKeyUUID error:&error];
+        if (error != nil) {
+            AMALogInfo(@"Failed to read uuid from old storage. Error: %@", error);
+        }
+    } else {
+        AMALogInfo(@"No old uuid database");
+    }
+    return oldUUID;
+}
+
+- (NSString *)uuidFromMigrationStorage
+{
+    AMAInstantFeaturesConfiguration *migrationConfiguration = [AMAInstantFeaturesConfiguration migrationInstance];
+    return migrationConfiguration.UUID;
 }
 
 @end

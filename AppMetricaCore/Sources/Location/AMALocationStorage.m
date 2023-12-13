@@ -13,6 +13,7 @@
 #import "AMAErrorsFactory.h"
 #import "AMAVisit.h"
 #import "AMATypeSafeDictionaryHelper.h"
+#import "AMALocationEncoderFactory.h"
 
 static NSString *const kAMANextLocationIdentifierKey = @"next.item.id";
 static NSString *const kAMANextVisitIdentifierKey = @"next.visit.id";
@@ -37,7 +38,7 @@ static double const kAMALocationsOverflowPurgingFactor = 0.1;
     return [self initWithConfiguration:configuration
                             serializer:[[AMALocationSerializer alloc] init]
                               database:[AMADatabaseFactory locationDatabase]
-                               crypter:[[AMAAESCrypter alloc] initWithKey:[self message] iv:[AMAAESUtility defaultIv]]];
+                               crypter:[AMALocationEncoderFactory encoder]];
 }
 
 - (instancetype)initWithConfiguration:(AMALocationCollectingConfiguration *)configuration
@@ -464,15 +465,6 @@ static double const kAMALocationsOverflowPurgingFactor = 0.1;
 - (NSString *)order
 {
     return [NSString stringWithFormat:@"%@ ASC, %@ ASC", kAMALocationsTableFieldTimestamp, kAMACommonTableFieldOID];
-}
-
-- (NSData *)message
-{
-    // This is an encryption key for AES algorithm
-    const unsigned char data[] = {
-        0x04, 0xf3, 0x88, 0x78, 0x96, 0xe0, 0x48, 0x7f, 0x86, 0x7c, 0x0d, 0xe4, 0x45, 0xea, 0x0a, 0x11,
-    };
-    return [NSData dataWithBytes:data length:16];
 }
 
 @end

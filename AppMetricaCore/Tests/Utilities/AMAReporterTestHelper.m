@@ -390,20 +390,20 @@
 {
     NSDate *date = [[NSDate date] dateByAddingTimeInterval:fromNowSecs];
     [NSDate stub:@selector(date) andReturn:date];
-};
+}
 
 + (void)cycleReporterWithStubbedDateFromNow:(AMAReporter *)reporter interval:(NSTimeInterval)sinceNow
 {
     [self stubTimeFromNowSec:sinceNow];
     [reporter start];
     [reporter shutdown];
-};
+}
 
 + (void)reportDelayedEvent:(AMAReporter *)reporter delay:(NSTimeInterval)delaySec
 {
     [self stubTimeFromNowSec:delaySec];
     [reporter reportEvent:@"test" onFailure:nil];
-};
+}
 
 
 @end

@@ -12,7 +12,7 @@ NS_SWIFT_NAME(TruncatorsFactory)
 + (id<AMAStringTruncating>)eventStringValueTruncator;
 + (id<AMADataTruncating>)eventBinaryValueTruncator;
 + (id<AMADataTruncating>)fullValueTruncator;
-+ (id<AMAStringTruncating>)userInfoTruncator;
++ (id<AMAStringTruncating>)extrasMigrationTruncator;
 + (id<AMAStringTruncating>)profileIDTruncator;
 
 - (instancetype)init NS_UNAVAILABLE;

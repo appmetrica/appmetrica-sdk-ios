@@ -20,6 +20,8 @@
 @property (nonatomic, strong, readonly) AMAExceptionFormatter *formatter;
 @property (nonatomic, strong, readonly) AMACrashReporter *crashReporter;
 
+@property (nonatomic, copy, readwrite) NSDictionary *currentErrorEnvironment;
+
 @end
 
 @implementation AMACrashProcessor
@@ -46,6 +48,7 @@
         _formatter = formatter;
         _ignoredCrashSignals = [ignoredSignals copy];
         _crashReporter = crashReporter;
+        _currentErrorEnvironment = nil;
     }
 
     return self;
@@ -109,8 +112,16 @@
     params.data = formattedData;
     params.GZipped = YES;
     params.bytesTruncated = errorModel.bytesTruncated;
+    if (self.currentErrorEnvironment.count > 0) {
+        params.errorEnvironment = self.currentErrorEnvironment;
+    }
     
     [self.crashReporter reportErrorWithParameters:params onFailure:onFailure];
+}
+
+- (void)updateErrorEnvironment:(NSDictionary *)errorEnvironment
+{
+    self.currentErrorEnvironment = [errorEnvironment copy];
 }
 
 #pragma mark - Private -

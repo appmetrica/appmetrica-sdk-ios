@@ -1,8 +1,6 @@
 
 #import "AMACore.h"
 #import "AMADatabaseIntegrityManager.h"
-#import "AMADatabaseIntegrityStorageFactory.h"
-#import "AMADatabaseIntegrityStorage.h"
 #import "AMADatabaseIntegrityProcessor.h"
 #import "AMADatabaseIntegrityReport.h"
 #import "AMADatabaseQueueProvider.h"
@@ -11,7 +9,6 @@
 @interface AMADatabaseIntegrityManager ()
 
 @property (nonatomic, strong, readonly) NSString *databasePath;
-@property (nonatomic, strong, readonly) AMADatabaseIntegrityStorage *storage;
 @property (nonatomic, strong, readonly) AMADatabaseIntegrityProcessor *processor;
 
 @end
@@ -20,25 +17,19 @@
 
 - (instancetype)initWithDatabasePath:(NSString *)databasePath
 {
-    NSString *storagePath = [databasePath stringByAppendingPathExtension:@"stat"];
-
-    AMADatabaseIntegrityStorage *storage = [AMADatabaseIntegrityStorageFactory storageForPath:storagePath];
     AMADatabaseIntegrityProcessor *processor = [[AMADatabaseIntegrityProcessor alloc] init];
 
     return [self initWithDatabasePath:databasePath
-                              storage:storage
                             processor:processor];
 }
 
 - (instancetype)initWithDatabasePath:(NSString *)databasePath
-                             storage:(AMADatabaseIntegrityStorage *)storage
                            processor:(AMADatabaseIntegrityProcessor *)processor
 {
 
     self = [super init];
     if (self != nil) {
         _databasePath = [databasePath copy];
-        _storage = storage;
         _processor = processor;
     }
     return self;

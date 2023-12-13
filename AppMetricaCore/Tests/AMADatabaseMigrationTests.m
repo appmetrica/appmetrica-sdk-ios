@@ -54,75 +54,7 @@
 #import <CoreLocation/CoreLocation.h>
 #import <AppMetricaPlatform/AppMetricaPlatform.h>
 #import <AppMetrica_FMDB/AppMetrica_FMDB.h>
-
-@interface AMADatabaseMigrationTestsUtils : NSObject
-
-@end
-
-@implementation AMADatabaseMigrationTestsUtils
-
-+ (id<AMADatabaseProtocol>)databaseForName:(NSString *)databaseName
-                          migrationManager:(AMADatabaseMigrationManager *)migrationManager
-{
-    NSString *targetPath = [self tempDatabasePath];
-    NSString *sourcePath = [self pathForDatabase:databaseName];
-    [[NSFileManager defaultManager] copyItemAtPath:sourcePath toPath:targetPath error:nil];
-
-    return [self databaseWithPath:targetPath migrationManager:migrationManager];
-}
-
-+ (id<AMADatabaseProtocol>)databaseForBackupName:(NSString *)backupName
-                                migrationManager:(AMADatabaseMigrationManager *)migrationManager
-{
-    NSString *targetPath = [self tempDatabasePath];
-    NSString *backupPath = [AMAModuleBundleProvider.moduleBundle pathForResource:backupName ofType:@"sql"];
-
-    AMAFMDatabaseQueue *dbQueue = [[AMAFMDatabaseQueue alloc] initWithPath:targetPath
-                                                               flags:(SQLITE_OPEN_READWRITE |
-                                                                      SQLITE_OPEN_CREATE |
-                                                                      SQLITE_OPEN_FILEPROTECTION_NONE)];
-    [dbQueue inDatabase:^(AMAFMDatabase * _Nonnull db) {
-        [db executeStatements:[NSString stringWithContentsOfFile:backupPath encoding:NSUTF8StringEncoding error:nil]];
-    }];
-    [dbQueue close];
-
-    return [self databaseWithPath:targetPath migrationManager:migrationManager];
-}
-
-+ (NSString *)tempDatabasePath
-{
-    NSString *fileName = [NSString stringWithFormat:@"%@.sqlite", [NSUUID UUID].UUIDString];
-    NSURL *targetPath = [[NSFileManager defaultManager].temporaryDirectory URLByAppendingPathComponent:fileName];
-    return targetPath.path;
-}
-
-+ (id<AMADatabaseProtocol>)databaseWithPath:(NSString *)path
-                           migrationManager:(AMADatabaseMigrationManager *)migrationManager
-{
-    AMATableSchemeController *schemeController = [AMATableSchemeController nullMock];
-    id<AMAKeyValueStorageConverting> converter = [[AMAStringDatabaseKeyValueStorageConverter alloc] init];
-    AMADatabaseKeyValueStorageProvider *keyValueStorageProvider =
-        [[AMADatabaseKeyValueStorageProvider alloc] initWithTableName:@"kv"
-                                                            converter:converter
-                                                       objectProvider:[AMADatabaseObjectProvider blockForStrings]
-                                               backingKVSDataProvider:nil];
-
-    AMADatabase *database = [[AMADatabase alloc] initWithTableSchemeController:schemeController
-                                                                  databasePath:path
-                                                              migrationManager:migrationManager
-                                                                   trimManager:nil
-                                                       keyValueStorageProvider:keyValueStorageProvider
-                                                          criticalKeyValueKeys:@[ @"UUID" ]];
-    keyValueStorageProvider.database = database;
-    return database;
-}
-
-+ (NSString *)pathForDatabase:(NSString *)databaseName
-{
-    return [AMAModuleBundleProvider.moduleBundle pathForResource:databaseName ofType:@"sqlite"];
-}
-
-@end
+#import "AMADatabaseMigrationTestsUtils.h"
 
 SPEC_BEGIN(AMADatabaseMigrationTests)
 
@@ -1136,7 +1068,7 @@ describe(@"AMADatabaseMigrationTests", ^{
             context(@"KV items", ^{
                 it(@"Should migrate device ID", ^{
                     [database inDatabase:^(AMAFMDatabase *db) {
-                        NSString *key = @"fallback-keychain-AMAMetricaPersistentConfigurationDeviceIDStorageKey";
+                        NSString *key = @"fallback-keychain-YMMMetricaPersistentConfigurationDeviceIDStorageKey";
                         NSString *value = [[database.storageProvider storageForDB:db] stringForKey:key error:nil];
                         [[value should] equal:@"8B1C3660-9F81-4FC4-A720-85032F5F9849"];
                     }];
@@ -1157,7 +1089,7 @@ describe(@"AMADatabaseMigrationTests", ^{
                 });
                 it(@"Should remove device ID hash", ^{
                     [database inDatabase:^(AMAFMDatabase *db) {
-                        NSString *key = @"fallback-keychain-AMAMetricaPersistentConfigurationDeviceIDHashStorageKey";
+                        NSString *key = @"fallback-keychain-YMMMetricaPersistentConfigurationDeviceIDHashStorageKey";
                         NSString *value = [[database.storageProvider storageForDB:db] stringForKey:key error:nil];
                         [[value should] beNil];
                     }];
@@ -1174,11 +1106,11 @@ describe(@"AMADatabaseMigrationTests", ^{
         context(@"Migration to 3.2.0", ^{
             beforeEach(^{
                 AMADatabaseMigrationManager *migrationManager =
-                [[AMADatabaseMigrationManager alloc] initWithCurrentSchemeVersion:19
-                                                                 schemeMigrations:@[]
-                                                                 apiKeyMigrations:@[]
-                                                                   dataMigrations:@[]
-                                                                libraryMigrations:@[[[AMALibraryMigration320 alloc] init]]];
+                    [[AMADatabaseMigrationManager alloc] initWithCurrentSchemeVersion:19
+                                                                     schemeMigrations:@[]
+                                                                     apiKeyMigrations:@[]
+                                                                       dataMigrations:@[]
+                                                                    libraryMigrations:@[[[AMALibraryMigration320 alloc] init]]];
                 database = [AMADatabaseMigrationTestsUtils databaseForBackupName:@"storage-library-initial"
                                                                 migrationManager:migrationManager];
             });

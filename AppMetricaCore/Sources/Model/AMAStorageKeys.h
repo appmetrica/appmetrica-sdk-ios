@@ -60,3 +60,5 @@ extern NSString *const AMAStorageStringKeyRevenueTransactionIds;
 extern NSString *const AMAStorageStringKeySDKsCustomHosts;
 
 extern NSString *const AMAStorageStringKeyExtendedParameters;
+
+extern NSString *const AMAStorageStringKeyDidApplyDataMigrationFor500;

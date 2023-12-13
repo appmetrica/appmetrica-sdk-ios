@@ -54,3 +54,4 @@ NSString *const AMAStorageStringKeyRevenueTransactionIds = @"revenue.transaction
 NSString *const AMAStorageStringKeySDKsCustomHosts = @"other.report.hosts";
 NSString *const AMAStorageStringKeyStartupUpdateInterval = @"startup.update.interval";
 NSString *const AMAStorageStringKeyExtendedParameters = @"extended.parameters";
+NSString *const AMAStorageStringKeyDidApplyDataMigrationFor500 = @"5.0.0.migration.applied";

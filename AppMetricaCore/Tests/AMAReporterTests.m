@@ -311,7 +311,7 @@ describe(@"AMAReporter", ^{
                                 newBeforeTimeoutDate = [newPauseDate dateByAddingTimeInterval:sessionTimeout - timeDelta];
                                 [NSDate stub:@selector(date) andReturn:newBeforeTimeoutDate];
                             });
-                            it(@"Should not create new sessin on resume", ^{
+                            it(@"Should not create new session on resume", ^{
                                 [reporter resumeSession];
                                 AMASession *session = [sessionStorage() lastGeneralSessionWithError:nil];
                                 [[session.oid should] equal:foregroundSession.oid];
@@ -327,7 +327,7 @@ describe(@"AMAReporter", ^{
                                 beforeEach(^{
                                     [reporter resumeSession];
                                 });
-                                it(@"Should create new sessin on resume", ^{
+                                it(@"Should create new session on resume", ^{
                                     AMASession *session = [sessionStorage() lastGeneralSessionWithError:nil];
                                     [[session.oid shouldNot] equal:foregroundSession.oid];
                                 });

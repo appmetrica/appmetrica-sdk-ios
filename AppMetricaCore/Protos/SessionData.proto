@@ -20,6 +20,7 @@ message SessionData {
         optional bytes ifa = 14;
         required bool lat = 15;
         optional bytes app_build_number = 16;
+        reserved 17;
     }
     required int64 session_id = 1;
     optional bytes attribution_id = 2;

@@ -24,4 +24,6 @@
 - (void)processANR:(AMADecodedCrash *)decodedCrash withError:(NSError *)error;
 - (void)processError:(AMAErrorModel *)errorModel onFailure:(void (^)(NSError *))onFailure;
 
+- (void)updateErrorEnvironment:(NSDictionary *)errorEnvironment;
+
 @end

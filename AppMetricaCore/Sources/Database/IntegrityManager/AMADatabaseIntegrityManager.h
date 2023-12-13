@@ -3,7 +3,6 @@
 
 @class AMAFMDatabaseQueue;
 @class AMADatabaseIntegrityManager;
-@class AMADatabaseIntegrityStorage;
 @class AMADatabaseIntegrityProcessor;
 
 @protocol AMADatabaseIntegrityManagerDelegate <NSObject>
@@ -26,7 +25,6 @@
 
 - (instancetype)initWithDatabasePath:(NSString *)databasePath;
 - (instancetype)initWithDatabasePath:(NSString *)databasePath
-                             storage:(AMADatabaseIntegrityStorage *)storage
                            processor:(AMADatabaseIntegrityProcessor *)processor;
 
 - (AMAFMDatabaseQueue *)databaseWithEnsuredIntegrityWithIsNew:(BOOL *)isNew;

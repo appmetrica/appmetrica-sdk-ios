@@ -2,7 +2,7 @@
 #import <Foundation/Foundation.h>
 #import <Kiwi/Kiwi.h>
 #import "AMAUUIDProvider.h"
-#import "AMAInstantFeaturesConfiguration.h"
+#import "AMAInstantFeaturesConfiguration+Migration.h"
 #import "AMAMetricaConfiguration.h"
 #import "AMADatabaseFactory.h"
 #import "AMACore.h"
@@ -28,16 +28,18 @@ describe(@"AMAUUIDProvider", ^{
         });
     });
     context(@"Retrieve UUID", ^{
-
         AMAInstantFeaturesConfiguration *__block instantConfiguration = nil;
+        AMAInstantFeaturesConfiguration *__block migrationInstantConfiguration = nil;
         id __block uuidOldStorage = nil;
         AMAMetricaConfiguration *__block configuration;
         beforeEach(^{
             configuration = [AMAMetricaConfiguration nullMock];
             instantConfiguration = [AMAInstantFeaturesConfiguration nullMock];
+            migrationInstantConfiguration = [AMAInstantFeaturesConfiguration nullMock];
             uuidOldStorage = [KWMock nullMockForProtocol:@protocol(AMAKeyValueStoring)];
             [AMAMetricaConfiguration stub:@selector(sharedInstance) andReturn:configuration];
             [AMAInstantFeaturesConfiguration stub:@selector(sharedInstance) andReturn:instantConfiguration];
+            [AMAInstantFeaturesConfiguration stub:@selector(migrationInstance) andReturn:migrationInstantConfiguration];
             [configuration stub:@selector(UUIDOldStorage) andReturn:uuidOldStorage];
             [AMADatabaseFactory stub:@selector(configurationDatabasePath) andReturn:oldUUIDDatabasePath];
         });
@@ -150,6 +152,28 @@ describe(@"AMAUUIDProvider", ^{
                                                                                   atIndex:0];
                             NSString *uuid = provider.retrieveUUID;
                             [[uuidSpy.argument should] equal:uuid];
+                        });
+                        
+                        context(@"UUID in old instant configuration", ^{
+                            NSString *const migrationUuid = @"migration_uuid";
+                            beforeEach(^{
+                                [migrationInstantConfiguration stub:@selector(UUID) andReturn:migrationUuid];
+                            });
+                            it(@"Should return migration uuid", ^{
+                                [[provider.retrieveUUID should] equal:migrationUuid];
+                            });
+                            it(@"Should save UUID", ^{
+                                KWCaptureSpy *uuidSpy = [instantConfiguration captureArgument:@selector(setUUID:)
+                                                                                      atIndex:0];
+                                [provider retrieveUUID];
+                                [[uuidSpy.argument should] equal:migrationUuid];
+                            });
+                            it(@"Should save UUID", ^{
+                                KWCaptureSpy *uuidSpy = [instantConfiguration captureArgument:@selector(setUUID:)
+                                                                                      atIndex:0];
+                                NSString *uuid = provider.retrieveUUID;
+                                [[uuidSpy.argument should] equal:migrationUuid];
+                            });
                         });
                     });
                 });

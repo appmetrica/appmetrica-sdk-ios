@@ -1,0 +1,9 @@
+syntax = "proto2";
+option optimize_for = LITE_RUNTIME;
+package ama;
+
+message LegacyEventExtras {
+    required string id = 1;
+    optional string type = 2;
+    optional string options = 3;
+}

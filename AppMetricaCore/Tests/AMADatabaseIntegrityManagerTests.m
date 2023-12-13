@@ -3,8 +3,6 @@
 #import <AppMetricaStorageUtils/AppMetricaStorageUtils.h>
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
 #import "AMADatabaseIntegrityManager.h"
-#import "AMADatabaseIntegrityStorageFactory.h"
-#import "AMADatabaseIntegrityStorage.h"
 #import "AMADatabaseIntegrityProcessor.h"
 #import "AMADatabaseIntegrityReport.h"
 #import "AMADatabaseQueueProvider.h"
@@ -22,7 +20,6 @@ describe(@"AMADatabaseIntegrityManager", ^{
 
     NSObject<AMADatabaseIntegrityManagerDelegate> *__block delegate = nil;
 
-    AMADatabaseIntegrityStorage *__block storage = nil;
     AMADatabaseIntegrityProcessor *__block processor = nil;
     AMADatabaseIntegrityManager *__block manager = nil;
 
@@ -39,7 +36,6 @@ describe(@"AMADatabaseIntegrityManager", ^{
 
         delegate = [KWMock nullMockForProtocol:@protocol(AMADatabaseIntegrityManagerDelegate)];
 
-        storage = [AMADatabaseIntegrityStorage nullMock];
         processor = [AMADatabaseIntegrityProcessor nullMock];
         [processor stub:@selector(checkIntegrityIssuesForDatabase:report:) andReturn:theValue(NO)];
         [processor stub:@selector(fixIndexForDatabase:report:) andReturn:theValue(NO)];
@@ -47,7 +43,6 @@ describe(@"AMADatabaseIntegrityManager", ^{
         [processor stub:@selector(fixWithCreatingNewDatabase:report:) andReturn:theValue(NO)];
 
         manager = [[AMADatabaseIntegrityManager alloc] initWithDatabasePath:databasePath
-                                                                    storage:storage
                                                                   processor:processor];
         manager.delegate = delegate;
     });

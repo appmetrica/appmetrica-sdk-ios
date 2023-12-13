@@ -35,6 +35,9 @@
 #import "AMAConfigurationDatabaseSchemeMigrationTo20.h"
 #import "AMAMigrationTo19FinalizationOnApiKeySpecified.h"
 #import "AMALibraryMigration320.h"
+#import "AMADataMigrationTo500.h"
+#import "AMAReporterDataMigrationTo500.h"
+#import "AMALocationDataMigrationTo500.h"
 
 #import "AMALocationDatabaseSchemeMigrationTo2.h"
 
@@ -104,6 +107,7 @@ static NSUInteger const kAMALocationDatabaseSchemaVersion = 2;
         [AMAMigrationTo19FinalizationOnApiKeySpecified new],
     ];
     NSArray *dataMigrations = @[
+        [AMADataMigrationTo500 new],
     ];
     NSArray *libraryMigrations = @[
         [AMALibraryMigration320 new],
@@ -168,6 +172,7 @@ static NSUInteger const kAMALocationDatabaseSchemaVersion = 2;
     NSArray *apiKeyMigrations = @[
     ];
     NSArray *dataMigrations = @[
+        [[AMAReporterDataMigrationTo500 alloc] initWithApiKey:apiKey],
     ];
     NSArray *libraryMigrations = @[
     ];
@@ -221,6 +226,7 @@ static NSUInteger const kAMALocationDatabaseSchemaVersion = 2;
     NSArray *apiKeyMigrations = @[
     ];
     NSArray *dataMigrations = @[
+        [AMALocationDataMigrationTo500 new],
     ];
     NSArray *libraryMigrations = @[
     ];

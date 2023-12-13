@@ -24,6 +24,17 @@
     
 }
 
++ (NSString *)oldAppIdentifierPrefix
+{
+    static NSString *appIdentifierPrefix = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        appIdentifierPrefix = [AMAAppIdentifierProvider appIdentifierPrefix];
+    });
+    return appIdentifierPrefix;
+    
+}
+
 #pragma mark - Device type
 
 + (BOOL)isDeviceRooted

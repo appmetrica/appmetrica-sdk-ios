@@ -9,6 +9,16 @@
 + (NSString *)appIdentifierPrefix
 {
     NSDictionary *query = [self query];
+    NSString *appIdentifierPrefix = [self appIdentifierPrefixWithQuery:query];
+    if (appIdentifierPrefix.length == 0) {
+        NSDictionary *fallbackQuery = [self fallbackQuery];
+        appIdentifierPrefix = [self appIdentifierPrefixWithQuery:fallbackQuery];
+    }
+    return appIdentifierPrefix;
+}
+
++ (NSString *)appIdentifierPrefixWithQuery:(NSDictionary *)query
+{
     AMASecItemOperationResult *operationResult = [self resultForCopyQuery:[self query]];
     if (operationResult.status == errSecItemNotFound) {
         operationResult = [self resultForAddQuery:query];
@@ -23,9 +33,19 @@
 
 + (NSDictionary *)query
 {
+    return [self queryWithAccount:@"AMAAppIdentifierPrefix" service:@"AMADeviceDescription"];
+}
+
++ (NSDictionary *)fallbackQuery
+{
+    return [self queryWithAccount:@"YXAppIdentifierPrefix" service:@"YXPlatformDescription"];
+}
+
++ (NSDictionary *)queryWithAccount:(NSString *)account service:(NSString *)service
+{
     return @{(__bridge id)kSecClass: (__bridge id)kSecClassGenericPassword,
-             (__bridge id)kSecAttrAccount: @"AMAAppIdentifierPrefix",
-             (__bridge id)kSecAttrService: @"AMADeviceDescription",
+             (__bridge id)kSecAttrAccount: account,
+             (__bridge id)kSecAttrService: service,
              (__bridge id)kSecReturnAttributes: (__bridge id)kCFBooleanTrue,
              (__bridge id)kSecAttrAccessible: (__bridge id)kSecAttrAccessibleAfterFirstUnlock};
 }

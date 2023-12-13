@@ -17,6 +17,7 @@
 #import "AMAEventComposer.h"
 #import "AMABinaryEventValue.h"
 #import "AMAFileEventValue.h"
+#import "AMAExtrasComposer.h"
 
 SPEC_BEGIN(AMAEventBuilderTests)
 
@@ -801,6 +802,55 @@ describe(@"AMAEventBuilder", ^{
                     NSData *truncated = [data subdataWithRange:NSMakeRange(0, maxSize)];
                     [[[event.value dataWithError:nil] should] equal:truncated];
                 });
+            });
+        });
+        
+        context(@"Session extras", ^{
+            NSString *const extrasKey1 = @"extrasKey1";
+            NSString *const extrasKey2 = @"extrasKey2";
+            NSData *const sessionExtras = [@"sessionExtras" dataUsingEncoding:NSUTF8StringEncoding];
+            NSData *const eventExtras = [@"eventExtras" dataUsingEncoding:NSUTF8StringEncoding];
+            __block AMAEvent *event;
+            
+            beforeEach(^{
+                NSObject *extrasComposer = [KWMock nullMockForProtocol:@protocol(AMAExtrasComposer)];
+                [eventComposer stub:@selector(compose:) withBlock:^id(NSArray *params) {
+                    AMAEvent *eventToCompose = (AMAEvent *)params[0];
+                    eventToCompose.extras = @{ extrasKey1 : sessionExtras,
+                                               extrasKey2 : sessionExtras };
+                    return nil;
+                }];
+                
+                [eventComposer stub:@selector(extrasComposer) andReturn:extrasComposer];
+            });
+            
+            it(@"Should ignore session extras for reserved event types", ^{
+                event = [builder eventWithType:12
+                                          name:@"name"
+                                         value:@"value"
+                              eventEnvironment:nil
+                                        extras:@{ extrasKey1 : eventExtras }
+                                         error:nil];
+                
+                [[event.extras should] equal:@{ extrasKey1 : eventExtras,
+                                                extrasKey2 : sessionExtras }];
+            });
+            
+            it(@"Should merge session extras with event extras for non reserved event types", ^{
+                NSInteger randomEventType;
+                do {
+                    randomEventType = arc4random_uniform(41) + 1;
+                } while (randomEventType == 12);
+                
+                event = [builder eventWithType:randomEventType
+                                          name:@"name"
+                                         value:@"value"
+                              eventEnvironment:nil
+                                        extras:@{ extrasKey1 : eventExtras }
+                                         error:nil];
+                
+                [[event.extras should] equal:@{ extrasKey1 : sessionExtras,
+                                                extrasKey2 : sessionExtras }];
             });
         });
     });

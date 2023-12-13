@@ -3,7 +3,7 @@
 #import <CoreLocation/CoreLocation.h>
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
 #import <AppMetricaProtobufUtils/AppMetricaProtobufUtils.h>
-#import "AMAEventSerializer.h"
+#import "AMAEventSerializer+Migration.h"
 #import "AMADatabaseConstants.h"
 #import "AMAEvent.h"
 #import "AMAStringEventValue.h"
@@ -513,6 +513,17 @@ describe(@"AMAEventSerializer", ^{
             eventDictionary[kAMACommonTableFieldDataEncryptionType] = @(AMAReporterDatabaseEncryptionTypeAES);
             [serializer eventForDictionary:eventDictionary error:nil];
         });
+        
+        it(@"Should create migration encoder", ^{
+            AMAEventSerializer *__block migrationSerialzer = [[AMAEventSerializer alloc] migrationInit];
+            
+            [[AMAReporterDatabaseEncodersFactory should] receive:@selector(migrationEncoderForEncryptionType:)
+                                                   withArguments:theValue(AMAReporterDatabaseEncryptionTypeAES)];
+            prepareDictionary();
+            eventDictionary[kAMACommonTableFieldDataEncryptionType] = @(AMAReporterDatabaseEncryptionTypeAES);
+            [migrationSerialzer eventForDictionary:eventDictionary error:nil];
+        });
+        
         it(@"Should return nil if data is empty", ^{
             prepareDictionary();
             NSData *encodedData = [encoder encodeData:[NSData data] error:nil];

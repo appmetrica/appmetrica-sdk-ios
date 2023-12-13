@@ -193,7 +193,7 @@ static NSString *const kAMAFilePath = @"io.appmetrica";
     return result;
 }
 
-#pragma mark - Private
+#pragma mark - Private -
 
 + (NSArray<NSURLResourceKey> *)supportedResourceKeys
 {

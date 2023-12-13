@@ -1,6 +1,8 @@
 
 #import <AppMetricaEncodingUtils/AppMetricaEncodingUtils.h>
 #import "AMAReporterDatabaseEncodersFactory.h"
+#import "AMAAESUtility+Migration.h"
+#import "AMAMigrationTo500Utils.h"
 
 @implementation AMAReporterDatabaseEncodersFactory
 
@@ -30,7 +32,7 @@
     }
 }
 
-#pragma mark - Publc -
+#pragma mark - Private -
 
 + (id<AMADataEncoding>)aesEncoder
 {
@@ -59,6 +61,34 @@
         0xaf, 0x9d, 0xca, 0x1b, 0xe7, 0x9a, 0x41, 0x97, 0xa0, 0x4b, 0x42, 0x24, 0x28, 0x50, 0xc6, 0xc2,
     };
     return [NSData dataWithBytes:data length:16];
+}
+
+#pragma mark - Migration -
++ (id<AMADataEncoding>)migrationEncoderForEncryptionType:(AMAReporterDatabaseEncryptionType)encryptionType
+{
+    switch (encryptionType) {
+        case AMAReporterDatabaseEncryptionTypeAES:
+            return [self migrationAESEncoder];
+
+        case AMAReporterDatabaseEncryptionTypeGZipAES:
+            return [self migrationGZipAESEncoder];
+            
+        default:
+            return nil;
+    }
+}
+
++ (id<AMADataEncoding>)migrationAESEncoder
+{
+    return [[AMAAESCrypter alloc] initWithKey:[self firstMessage] iv:[AMAAESUtility migrationIv:kAMAMigrationBundle]];
+}
+
++ (id<AMADataEncoding>)migrationGZipAESEncoder
+{
+    return [[AMACompositeDataEncoder alloc] initWithEncoders:@[
+        [[AMAGZipDataEncoder alloc] init],
+        [[AMAAESCrypter alloc] initWithKey:[self secondMessage] iv:[AMAAESUtility migrationIv:kAMAMigrationBundle]],
+    ]];
 }
 
 @end

@@ -41,5 +41,5 @@ INSERT INTO "kv" VALUES ('user.startup.hosts','["https:\/\/startup.tst.mobile.ap
 INSERT INTO "kv" VALUES ('startup.updated_at',1568284190.23964);
 INSERT INTO "kv" VALUES ('location.collecting.enabled',1);
 INSERT INTO "kv" VALUES ('get_ad.host','https://mobile-ads-beta.appmetrica.io:4443');
-INSERT INTO "kv" VALUES ('fallback-keychain-AMAMetricaPersistentConfigurationDeviceIDStorageKey','8B1C3660-9F81-4FC4-A720-85032F5F9849');
+INSERT INTO "kv" VALUES ('fallback-keychain-YMMMetricaPersistentConfigurationDeviceIDStorageKey','8B1C3660-9F81-4FC4-A720-85032F5F9849');
 COMMIT;

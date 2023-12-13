@@ -28,7 +28,7 @@ static NSUInteger const kAMAUserProfileIDMaxLength = 200;
     return [[AMAFullDataTruncator alloc] initWithMaxLength:kAMAProtobufEventValueMaxSize];
 }
 
-+ (id<AMAStringTruncating>)userInfoTruncator
++ (id<AMAStringTruncating>)extrasMigrationTruncator
 {
     return [[AMALengthStringTruncator alloc] initWithMaxLength:kAMAProtobufUserInfoMaxLength];
 }

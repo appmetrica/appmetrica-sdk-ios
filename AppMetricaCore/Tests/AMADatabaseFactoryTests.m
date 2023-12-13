@@ -38,6 +38,9 @@
 #import "AMAConfigurationDatabaseSchemeMigrationTo20.h"
 #import "AMAMigrationTo19FinalizationOnApiKeySpecified.h"
 #import "AMALibraryMigration320.h"
+#import "AMADataMigrationTo500.h"
+#import "AMALocationDataMigrationTo500.h"
+#import "AMAReporterDataMigrationTo500.h"
 
 #import "AMALocationDatabaseSchemeMigrationTo2.h"
 
@@ -212,7 +215,7 @@ describe(@"AMADatabaseFactory", ^{
                 });
             });
             it(@"Should not have data migrations", ^{
-                [[dataMigrations should] beEmpty];
+                [[dataMigrations[0] should] beKindOfClass:[AMADataMigrationTo500 class]];
             });
             context(@"Library migrations", ^{
                 it(@"Should have 3.2.0 migration", ^{
@@ -315,7 +318,7 @@ describe(@"AMADatabaseFactory", ^{
                 [[apiKeyMigrations should] beEmpty];
             });
             it(@"Should not have data migrations", ^{
-                [[dataMigrations should] beEmpty];
+                [[dataMigrations[0] should] beKindOfClass:[AMAReporterDataMigrationTo500 class]];
             });
             it(@"Should not have library migrations", ^{
                 [[libraryMigrations should] beEmpty];
@@ -430,7 +433,7 @@ describe(@"AMADatabaseFactory", ^{
                 [[apiKeyMigrations should] beEmpty];
             });
             it(@"Should not have data migrations", ^{
-                [[dataMigrations should] beEmpty];
+                [[dataMigrations[0] should] beKindOfClass:[AMALocationDataMigrationTo500 class]];
             });
             it(@"Should not have library migrations", ^{
                 [[libraryMigrations should] beEmpty];

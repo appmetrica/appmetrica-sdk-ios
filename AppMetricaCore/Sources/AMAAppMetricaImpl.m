@@ -2,9 +2,7 @@
 #import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
 #import <AppMetricaPlatform/AppMetricaPlatform.h>
 #import <AppMetricaHostState/AppMetricaHostState.h>
-
 #import "AMAAppMetricaImpl.h"
-
 #import "AMAAdServicesDataProvider.h"
 #import "AMAAdServicesReportingController.h"
 #import "AMAAppMetrica+Internal.h"

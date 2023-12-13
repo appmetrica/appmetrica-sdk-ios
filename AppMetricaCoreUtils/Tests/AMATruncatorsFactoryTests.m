@@ -46,17 +46,17 @@ describe(@"AMATruncatorsFactory", ^{
             [[(NSObject *)[AMATruncatorsFactory eventBinaryValueTruncator] should] equal:truncator];
         });
     });
-    context(@"userInfoTruncator", ^{
+    context(@"extrasMigrationTruncator", ^{
         AMALengthStringTruncator *__block truncator = nil;
         beforeEach(^{
             truncator = [AMALengthStringTruncator stubbedNullMockForInit:@selector(initWithMaxLength:)];
         });
         it(@"Should create valid truncator", ^{
             [[truncator should] receive:@selector(initWithMaxLength:) withArguments:theValue(10000)];
-            [AMATruncatorsFactory userInfoTruncator];
+            [AMATruncatorsFactory extrasMigrationTruncator];
         });
         it(@"Should return created truncator", ^{
-            [[(NSObject *)[AMATruncatorsFactory userInfoTruncator] should] equal:truncator];
+            [[(NSObject *)[AMATruncatorsFactory extrasMigrationTruncator] should] equal:truncator];
         });
     });
     context(@"profileID", ^{

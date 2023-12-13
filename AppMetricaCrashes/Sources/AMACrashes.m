@@ -171,6 +171,7 @@
     [self execute:^{
         [self.errorEnvironment addValue:value forKey:key];
         [self updateCrashContextQuickly:YES];
+        [self updateCrashProcessorEnvironmentIfNeeded];
     }];
 }
 
@@ -179,10 +180,11 @@
     [self execute:^{
         [self.errorEnvironment clearEnvironment];
         [self updateCrashContextQuickly:YES];
+        [self updateCrashProcessorEnvironmentIfNeeded];
     }];
 }
 
-#pragma mark - Internal
+#pragma mark - Internal -
 
 - (void)activate
 {
@@ -311,6 +313,7 @@ them while retaining external immutability. Needed for testability. */
         self.crashProcessor = [[AMACrashProcessor alloc] initWithIgnoredSignals:ignoredSignals
                                                                      serializer:self.serializer
                                                                   crashReporter:self.crashReporter];
+        [self updateCrashProcessorEnvironmentIfNeeded];
     }];
 }
 // FIXME: (belanovich-sy) deadcode, not tested
@@ -384,6 +387,11 @@ them while retaining external immutability. Needed for testability. */
             return [strongSelf.serializer eventParametersFromDecodedData:item error:NULL];
         }];
     }];
+}
+
+- (void)updateCrashProcessorEnvironmentIfNeeded
+{
+    [self.crashProcessor updateErrorEnvironment:self.errorEnvironment.currentEnvironment ?: @{}];
 }
 
 #pragma mark - AMAModuleActivationDelegate

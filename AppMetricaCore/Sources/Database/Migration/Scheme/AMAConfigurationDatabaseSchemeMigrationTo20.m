@@ -18,7 +18,7 @@
                                             ofKeyValueTable:@"kv"
                                                          db:db];
     result = result && [db executeUpdate:@"DELETE FROM kv WHERE k = ?"
-                                  values:@[@"fallback-keychain-AMAMetricaPersistentConfigurationDeviceIDHashStorageKey"]
+                                  values:@[@"fallback-keychain-YMMMetricaPersistentConfigurationDeviceIDHashStorageKey"]
                                    error:nil];
 
     return result;

@@ -1,0 +1,60 @@
+
+#import <AppMetricaLog/AppMetricaLog.h>
+#import "AMADataMigrationTo500.h"
+#import "AMADatabaseConstants.h"
+#import "AMAStorageKeys.h"
+#import <AppMetrica_FMDB/AppMetrica_FMDB.h>
+#import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
+#import "AMAMigrationTo500Utils.h"
+#import "AMADatabaseProtocol.h"
+#import "AMATableDescriptionProvider.h"
+#import "AMAMigrationUtils.h"
+
+@implementation AMADataMigrationTo500
+
+- (NSString *)migrationKey
+{
+    return AMAStorageStringKeyDidApplyDataMigrationFor500;
+}
+
+- (void)applyMigrationToDatabase:(id<AMADatabaseProtocol>)database
+{
+    NSString *oldDBPath = [[AMAMigrationTo500Utils migrationPath] stringByAppendingPathComponent:@"storage.sqlite"];
+    
+    @synchronized (self) {
+        if ([AMAFileUtility fileExistsAtPath:oldDBPath]) {
+            [self migrateData:oldDBPath database:database];
+        }
+        
+        [AMAMigrationTo500Utils migrateUUID];
+        
+        // Reset startup update date
+        [database inDatabase:^(AMAFMDatabase *db) {
+            [AMAMigrationUtils resetStartupUpdatedAtToDistantPastInDatabase:database db:db];
+        }];
+    }
+}
+
+- (void)migrateData:(NSString *)sourceDBPath
+           database:(id<AMADatabaseProtocol>)database
+{
+    AMAFMDatabase *sourceDB = [AMAFMDatabase databaseWithPath:sourceDBPath];
+    
+    if ([sourceDB open] == NO) {
+        AMALogWarn(@"Failed to open database at path: %@", sourceDBPath);
+        return;
+    }
+    
+    [database inDatabase:^(AMAFMDatabase *db) {
+        [AMAMigrationTo500Utils migrateTable:kAMAKeyValueTableName
+                                 tableScheme:[AMATableDescriptionProvider binaryKVTableMetaInfo]
+                                    sourceDB:sourceDB
+                               destinationDB:db];
+        
+        [db close];
+    }];
+    [AMAMigrationTo500Utils migrateDeviceIDFromDB:sourceDB];
+    [sourceDB close];
+}
+
+@end

@@ -54,7 +54,8 @@
     return [AMAFileUtility deleteFileAtPath:self.path error:error];
 }
 
-- (void)checkNoBackupFlag {
+- (void)checkNoBackupFlag
+{
     if ((self.options & AMADiskFileStorageOptionNoBackup) != 0 && self.noBackupAttibuteEnsured == NO) {
         [AMAFileUtility setSkipBackupAttributesOnPath:self.path];
         self.noBackupAttibuteEnsured = YES;

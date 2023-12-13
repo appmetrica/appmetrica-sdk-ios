@@ -10,7 +10,7 @@
 
 @implementation AMASyncKeyValueStorageDataProvider
 
-- (instancetype)initWithUnderlyingProviderSource:(AMAKVSProviderSource)providerSource;
+- (instancetype)initWithUnderlyingProviderSource:(AMAKVSProviderSource)providerSource
 {
     self = [super init];
     if (self != nil) {

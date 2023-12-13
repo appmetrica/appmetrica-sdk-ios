@@ -9,11 +9,13 @@
 #import "AMAReporterDatabaseEncodersFactory.h"
 #import "AMATypeSafeDictionaryHelper.h"
 #import <AppMetricaProtobufUtils/AppMetricaProtobufUtils.h>
+#import "AMAReporterDatabaseEncodersFactory+Migration.h"
 
 @interface AMASessionSerializer ()
 
 @property (nonatomic, assign, readonly) AMAReporterDatabaseEncryptionType encryptionType;
 @property (nonatomic, strong, readonly) id<AMADataEncoding> encoder;
+@property (nonatomic, assign, readonly) BOOL useMigrationEncoder;
 
 @end
 
@@ -21,10 +23,21 @@
 
 - (instancetype)init
 {
+    AMAReporterDatabaseEncryptionType encryptionType = [AMAReporterDatabaseEncodersFactory sessionDataEncryptionType];
+    return [self initWithEncryptionType:encryptionType
+                                encoder:[AMAReporterDatabaseEncodersFactory encoderForEncryptionType:encryptionType]
+                    useMigrationEncoder:NO];
+}
+
+- (instancetype)initWithEncryptionType:(AMAReporterDatabaseEncryptionType)encryptionType
+                               encoder:(id<AMADataEncoding>)encoder
+                   useMigrationEncoder:(BOOL)useMigrationEncoder
+{
     self = [super init];
     if (self != nil) {
-        _encryptionType = [AMAReporterDatabaseEncodersFactory sessionDataEncryptionType];
-        _encoder = [AMAReporterDatabaseEncodersFactory encoderForEncryptionType:_encryptionType];
+        _encryptionType = encryptionType;
+        _encoder = encoder;
+        _useMigrationEncoder = useMigrationEncoder;
     }
     return self;
 }
@@ -195,7 +208,7 @@
         (AMAReporterDatabaseEncryptionType)[encryptionTypeNumber unsignedIntegerValue];
     id<AMADataEncoding> encoder = self.encoder;
     if (encryptionType != self.encryptionType) {
-        encoder = [AMAReporterDatabaseEncodersFactory encoderForEncryptionType:encryptionType];
+        encoder = [self encoderForEncryptionType:encryptionType];
     }
 
     NSError *internalError = nil;
@@ -276,6 +289,26 @@
     appState.appBuildNumber = [AMAProtobufUtilities stringForBinaryData:&appStateData->app_build_number
                                                                     has:appStateData->has_app_build_number];
     return [appState copy];
+}
+
+#pragma mark - Migration -
+
+- (instancetype)migrationInit
+{
+    AMAReporterDatabaseEncryptionType encryptionType = [AMAReporterDatabaseEncodersFactory sessionDataEncryptionType];
+    return [self initWithEncryptionType:encryptionType
+                                encoder:[AMAReporterDatabaseEncodersFactory migrationEncoderForEncryptionType:encryptionType]
+                    useMigrationEncoder:YES];
+}
+
+- (id<AMADataEncoding>)encoderForEncryptionType:(AMAReporterDatabaseEncryptionType)encryptionType
+{
+    if (self.useMigrationEncoder) {
+        return [AMAReporterDatabaseEncodersFactory migrationEncoderForEncryptionType:encryptionType];
+    }
+    else {
+        return [AMAReporterDatabaseEncodersFactory encoderForEncryptionType:encryptionType];
+    }
 }
 
 @end

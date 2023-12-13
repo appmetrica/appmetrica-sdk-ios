@@ -4,6 +4,9 @@
 #import "AMAStartupParametersConfiguration.h"
 #import "AMAJSONFileKVSDataProvider.h"
 #import "AMACore.h"
+#import "AMAMigrationTo500Utils.h"
+
+static NSString *const kAMAInstantFileName = @"instant.json";
 
 @interface AMAInstantFeaturesConfiguration ()
 
@@ -26,10 +29,8 @@
 
 - (instancetype)init
 {
-    NSString *filePath = [AMAFileUtility.persistentPath stringByAppendingPathComponent:@"instant.json"];
-    AMADiskFileStorageOptions options = AMADiskFileStorageOptionNoBackup | AMADiskFileStorageOptionCreateDirectory;
-    AMADiskFileStorage *fileStorage = [[AMADiskFileStorage alloc] initWithPath:filePath options:options];
-    return [self initWithJSONDataProvider:[[AMAJSONFileKVSDataProvider alloc] initWithFileStorage:fileStorage]];
+    NSString *filePath = [AMAFileUtility.persistentPath stringByAppendingPathComponent:kAMAInstantFileName];
+    return [self initWithFilePath:filePath];
 }
 
 - (instancetype)initWithJSONDataProvider:(AMAJSONFileKVSDataProvider *)provider
@@ -55,6 +56,21 @@
 - (NSString *)UUID
 {
     return [self.backingFileStorage objectForKey:AMAStorageStringKeyUUID error:NULL];
+}
+
+#pragma mark - Migration -
+
++ (instancetype)migrationInstance
+{
+    NSString *filePath = [[AMAMigrationTo500Utils migrationPath] stringByAppendingPathComponent:kAMAInstantFileName];
+    return [[self alloc] initWithFilePath:filePath];
+}
+
+- (instancetype)initWithFilePath:(NSString *)filePath
+{
+    AMADiskFileStorageOptions options = AMADiskFileStorageOptionNoBackup | AMADiskFileStorageOptionCreateDirectory;
+    AMADiskFileStorage *fileStorage = [[AMADiskFileStorage alloc] initWithPath:filePath options:options];
+    return [self initWithJSONDataProvider:[[AMAJSONFileKVSDataProvider alloc] initWithFileStorage:fileStorage]];
 }
 
 @end
