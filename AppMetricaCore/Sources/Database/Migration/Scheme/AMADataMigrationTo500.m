@@ -32,6 +32,8 @@
         [database inDatabase:^(AMAFMDatabase *db) {
             [AMAMigrationUtils resetStartupUpdatedAtToDistantPastInDatabase:database db:db];
         }];
+        
+        [self migrateExtendedStartupParametersIfNeeded:database];
     }
 }
 
@@ -55,6 +57,20 @@
     }];
     [AMAMigrationTo500Utils migrateDeviceIDFromDB:sourceDB];
     [sourceDB close];
+}
+
+- (void)migrateExtendedStartupParametersIfNeeded:(id<AMADatabaseProtocol>)database
+{
+    NSString *adHostKey = @"get_ad.host";
+    [database inDatabase:^(AMAFMDatabase *db) {
+        NSString *adHost = [[database.storageProvider storageForDB:db] stringForKey:adHostKey error:nil];
+        
+        if (adHost != nil) {
+            [[database.storageProvider storageForDB:db] saveJSONDictionary:@{@"get_ad" : adHost}
+                                                                    forKey:AMAStorageStringKeyExtendedParameters
+                                                                     error:nil];
+        }
+    }];
 }
 
 @end

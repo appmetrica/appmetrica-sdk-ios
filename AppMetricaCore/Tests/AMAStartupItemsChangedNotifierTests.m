@@ -59,9 +59,9 @@ describe(@"AMAStartupItemsChangedNotifier", ^{
         it(@"Should notify because startup has allready been loaded", ^{
             [notifier startupUpdateCompletedWithConfiguration:nil];
             [notifier requestStartupItemsWithKeys:allKeys
-                                                options:nil
-                                                  queue:nil
-                                             completion:defaultBlock];
+                                          options:nil
+                                            queue:nil
+                                       completion:defaultBlock];
             [[theValue(defaultBlockIsCalled) should] beYes];
             [[theValue(receivedIdentifiers.count) should] beZero];
             [[receivedError should] beNil];
@@ -69,17 +69,17 @@ describe(@"AMAStartupItemsChangedNotifier", ^{
 
         it(@"Should not notify because startup has not been loaded", ^{
             [notifier requestStartupItemsWithKeys:allKeys
-                                                options:nil
-                                                  queue:nil
-                                             completion:defaultBlock];
+                                          options:nil
+                                            queue:nil
+                                       completion:defaultBlock];
             [[theValue(defaultBlockIsCalled) should] beNo];
         });
 
         it(@"Should not notify with error", ^{
             [notifier requestStartupItemsWithKeys:allKeys
-                                                options:nil
-                                                  queue:nil
-                                             completion:defaultBlock];
+                                          options:nil
+                                            queue:nil
+                                       completion:defaultBlock];
             NSError *error = [NSError errorWithDomain:@"test_domain" code:1 userInfo:nil];
             [notifier startupUpdateFailedWithError:error];
 
@@ -90,13 +90,29 @@ describe(@"AMAStartupItemsChangedNotifier", ^{
             NSString *callbackMode = kAMARequestIdentifiersOptionCallbackInAnyCase;
             NSDictionary *options = @{kAMARequestIdentifiersOptionCallbackModeKey : callbackMode};
             [notifier requestStartupItemsWithKeys:allKeys
-                                                options:options
-                                                  queue:nil
-                                             completion:defaultBlock];
+                                          options:options
+                                            queue:nil
+                                       completion:defaultBlock];
             NSError *error = [NSError errorWithDomain:@"test_domain" code:1 userInfo:nil];
             [notifier startupUpdateFailedWithError:error];
 
             [[receivedError should] equal:error];
+        });
+        
+        it(@"Should not notify with error if startup loaded", ^{
+            [notifier stub:@selector(startupLoaded) andReturn:theValue(YES)];
+            
+            NSString *callbackMode = kAMARequestIdentifiersOptionCallbackInAnyCase;
+            NSDictionary *options = @{kAMARequestIdentifiersOptionCallbackModeKey : callbackMode};
+            [notifier requestStartupItemsWithKeys:allKeys
+                                          options:options
+                                            queue:nil
+                                       completion:defaultBlock];
+            NSError *error = [NSError errorWithDomain:@"test_domain" code:1 userInfo:nil];
+            
+            [notifier startupUpdateFailedWithError:error];
+
+            [[receivedError should] beNil];
         });
     });
     context(@"Notifies when deviceIDHash is available or not", ^{

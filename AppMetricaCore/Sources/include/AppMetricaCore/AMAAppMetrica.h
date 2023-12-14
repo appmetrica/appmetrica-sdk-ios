@@ -158,7 +158,6 @@ NS_SWIFT_NAME(requestAppMetricaDeviceID(completionQueue:completionBlock:));
  Predefined identifiers are:
     kAMAUUIDKey
     kAMADeviceIDKey
-    kAMAGetAdHostKey
     kAMADeviceIDHashKey
  If they are available at the moment of call - block is dispatched immediately. See definition
  of AMAIdentifiersCompletionBlock for more detailed information on returned types.

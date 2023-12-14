@@ -129,7 +129,9 @@ typedef NSDictionary<NSString *, id> AMAIdentifierObserver;
         [availableFields addEntriesFromDictionary:startup.SDKsCustomHosts];
     }
     
-    [availableFields addEntriesFromDictionary:startup.extendedParameters];
+    if (startup.extendedParameters != nil) {
+        [availableFields addEntriesFromDictionary:startup.extendedParameters];
+    }
     
     return [availableFields copy];
 }
@@ -182,6 +184,9 @@ typedef NSDictionary<NSString *, id> AMAIdentifierObserver;
 {
     NSMutableArray *observersToNotifyError = [NSMutableArray array];
     @synchronized (self) {
+        if (self.startupLoaded == YES) {
+            return;
+        }
         [AMACollectionUtilities removeItemsFromArray:self.observers
                                            withBlock:^(AMAIdentifierObserver *observer, BOOL *remove) {
             NSString *callbackMode = observer[kAMAObserversOptionsKey][kAMARequestIdentifiersOptionCallbackModeKey];

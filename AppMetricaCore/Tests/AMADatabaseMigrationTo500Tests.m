@@ -93,6 +93,7 @@ describe(@"AMADatabaseMigrationTo500Tests", ^{
         context(@"Data migration", ^{
             NSString *const key = @"foo";
             NSString *const value = @"bar";
+            NSString *const adUrl = @"ad_url";
             
             id<AMADatabaseProtocol> __block migrationDatabase = nil;
             
@@ -125,6 +126,7 @@ describe(@"AMADatabaseMigrationTo500Tests", ^{
                     
                     [storage saveString:value forKey:key error:nil];
                     [storage saveString:@"4.5.0" forKey:@"library.version" error:nil];
+                    [storage saveString:adUrl forKey:@"get_ad.host" error:nil];
                 }];
             });
             
@@ -139,6 +141,9 @@ describe(@"AMADatabaseMigrationTo500Tests", ^{
 
                     // Should reset startup update date
                     [[[storage dateForKey:AMAStorageStringKeyStartupUpdatedAt error:nil] should] equal:[NSDate distantPast]];
+                    
+                    // Should migrate ad url to extended params
+                    [[[storage jsonDictionaryForKey:AMAStorageStringKeyExtendedParameters error:nil] should] equal:@{@"get_ad" : adUrl}];
                 }];
             });
             

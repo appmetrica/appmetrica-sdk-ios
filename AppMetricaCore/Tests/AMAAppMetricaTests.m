@@ -1,9 +1,7 @@
 #import <Kiwi/Kiwi.h>
-
 #import <AppMetricaWebKit/AppMetricaWebKit.h>
 #import <AppMetricaPlatform/AppMetricaPlatform.h>
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
-
 #import "AMAAppMetrica+TestUtilities.h"
 #import "AMAAdProvider.h"
 #import "AMAAppMetricaImplTestFactory.h"

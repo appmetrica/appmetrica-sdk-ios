@@ -912,6 +912,18 @@ describe(@"AMAAppMetricaImpl", ^{
                                               completionBlock:identifiersBlock
                                                 notifyOnError:NO];
         });
+        
+        it(@"Should request predefined identifiers keys for empty keys list", ^{
+            NSDictionary *options = @{ kAMARequestIdentifiersOptionCallbackModeKey :
+                                           kAMARequestIdentifiersOptionCallbackOnSuccess };
+            [[startupNotifier should] receive:@selector(requestStartupItemsWithKeys:options:queue:completion:)
+                                withArguments:[AMAStartupItemsChangedNotifier allIdentifiersKeys], options, queue, identifiersBlock];
+            
+            [appMetricaImpl requestStartupIdentifiersWithKeys:@[]
+                                              completionQueue:queue
+                                              completionBlock:identifiersBlock
+                                                notifyOnError:NO];
+        });
     });
     
     context(@"Protocols", ^{

@@ -1075,9 +1075,10 @@
         if (notifyOnError) {
             callbackMode = kAMARequestIdentifiersOptionCallbackInAnyCase;
         }
+        NSArray<NSString *> *allKeys = keys.count > 0 ? keys : [AMAStartupItemsChangedNotifier allIdentifiersKeys];
 
         NSDictionary *options = @{ kAMARequestIdentifiersOptionCallbackModeKey : callbackMode };
-        [self.startupItemsNotifier requestStartupItemsWithKeys:keys options:options queue:queue completion:block];
+        [self.startupItemsNotifier requestStartupItemsWithKeys:allKeys options:options queue:queue completion:block];
         [self.startupController update];
     }];
 }

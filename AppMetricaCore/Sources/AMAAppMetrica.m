@@ -646,20 +646,15 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
 }
 
 + (void)requestAppMetricaDeviceIDWithCompletionQueue:(nullable dispatch_queue_t)queue
-                                     completionBlock:(AMAAppMetricaDeviceIDRetrievingBlock)block {
-    __auto_type handleErrorBlock = ^(NSError *error) {
-        if (block != nil) { dispatch_async(queue, ^{ block(nil, error); }); }
+                                     completionBlock:(AMAAppMetricaDeviceIDRetrievingBlock)block 
+{
+    AMAIdentifiersCompletionBlock identifiersCompletionBlock = ^(NSDictionary * _Nullable identifiers,
+                                                                 NSError * _Nullable error) {
+        NSString *deviceIDHash = identifiers[kAMADeviceIDHashKey];
+        block(deviceIDHash, error);
     };
-    
-    if ([self isAppMetricaStartedWithLogging:handleErrorBlock]) {
-        AMAIdentifiersCompletionBlock identifiersCompletionBlock = ^(NSDictionary * _Nullable identifiers,
-                                                                     NSError * _Nullable error) {
-            NSString *deviceIDHash = identifiers[kAMADeviceIDHashKey];
-            block(deviceIDHash, error);
-        };
-        [self requestStartupIdentifiersWithCompletionQueue:queue
-                                           completionBlock:identifiersCompletionBlock];
-    }
+    [self requestStartupIdentifiersWithCompletionQueue:queue
+                                       completionBlock:identifiersCompletionBlock];
 }
 
 + (void)requestStartupIdentifiersWithCompletionQueue:(nullable dispatch_queue_t)queue
