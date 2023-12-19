@@ -12,17 +12,10 @@ Pod::Spec.new do |s|
   s.tvos.deployment_target = '11.0'
 
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES' }
-
-  s.default_subspec = 'Analytics'
   
-  s.subspec "Analytics" do |analytics|
-    analytics.dependency 'AppMetricaCore', '~> 5.0'
-    analytics.dependency 'AppMetricaAdSupport', '~> 5.0'
-    analytics.dependency 'AppMetricaWebKit', '~> 5.0'
-  end
-  
-  s.subspec "NoAdSupport" do |noAdSupport|
-    noAdSupport.dependency 'AppMetricaCore', '~> 5.0'
-    noAdSupport.dependency 'AppMetricaWebKit', '~> 5.0'
-  end
+  s.dependency 'AppMetricaCore', '~> 5.0'
+  s.dependency 'AppMetricaCoreExtension', '~> 5.0'
+  s.dependency 'AppMetricaAdSupport', '~> 5.0'
+  s.dependency 'AppMetricaWebKit', '~> 5.0'
+  s.dependency 'AppMetricaCrashes', '~> 5.0'
 end
