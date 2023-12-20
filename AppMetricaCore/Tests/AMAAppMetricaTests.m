@@ -856,13 +856,6 @@ describe(@"AMAAppMetrica", ^{
                 it(@"Should return deviceID sync", ^{
                     [[[AMAAppMetrica deviceID] should] equal:deviceID];
                 });
-                it(@"Should return deviceIDHash async", ^{
-                    NSString * __block retrievedDeviceIDHash = nil;
-                    [AMAAppMetrica requestAppMetricaDeviceIDWithCompletionQueue:nil completionBlock:^(NSString * _Nullable appMetricaDeviceID, NSError * _Nullable error) {
-                        retrievedDeviceIDHash = appMetricaDeviceID;
-                    }];
-                    [[deviceIDHash should] equal:retrievedDeviceIDHash];
-                });
             });
             
             context(@"Sends events", ^{

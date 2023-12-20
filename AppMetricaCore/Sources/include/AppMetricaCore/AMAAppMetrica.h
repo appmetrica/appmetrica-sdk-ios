@@ -140,17 +140,6 @@ NS_SWIFT_NAME(reportEvent(name:parameters:onFailure:));
  */
 + (NSString *)libraryVersion;
 
-/** Retrieves unique AppMetrica device identifier. It is used to identify a device in the statistics.
-
- @note AppMetrica device ID is used in the Logs API and Post API as 'appmetrica_device_id'.
-
- @param queue Queue for the block to be dispatched to. If nil, main queue is used.
- @param block Block will be dispatched upon identifier becoming available or in a case of error.
- */
-+ (void)requestAppMetricaDeviceIDWithCompletionQueue:(nullable dispatch_queue_t)queue
-                                     completionBlock:(AMAAppMetricaDeviceIDRetrievingBlock)block
-NS_SWIFT_NAME(requestAppMetricaDeviceID(completionQueue:completionBlock:));
-
 /** Getting all predefined identifiers
 
  @param queue Queue for the block to be dispatched to. If nil, main queue is used.
