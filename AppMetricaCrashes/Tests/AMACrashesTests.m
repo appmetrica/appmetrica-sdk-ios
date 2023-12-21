@@ -1,13 +1,10 @@
 #import <Kiwi/Kiwi.h>
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
 #import <AppMetricaCoreExtension/AppMetricaCoreExtension.h>
-
 #import "AMACrashes.h"
 #import "AMACrashes+Private.h"
-
 #import "AMAANRWatchdog.h"
 #import "AMACrashLoader.h"
-#import "AMACrashMatchingRule.h"
 #import "AMACrashProcessor.h"
 #import "AMACrashReporter.h"
 #import "AMACrashReportingStateNotifier.h"

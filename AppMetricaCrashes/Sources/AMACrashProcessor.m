@@ -1,7 +1,6 @@
+
 #import "AMACrashLogging.h"
-
 #import "AMACrashProcessor.h"
-
 #import "AMACrashEventType.h"
 #import "AMACrashReportCrash.h"
 #import "AMACrashReportError.h"

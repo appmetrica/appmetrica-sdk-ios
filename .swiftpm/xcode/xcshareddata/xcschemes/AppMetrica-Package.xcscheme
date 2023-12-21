@@ -42,20 +42,6 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "AppMetricaAnalyticsNoAdSupport"
-               BuildableName = "AppMetricaAnalyticsNoAdSupport"
-               BlueprintName = "AppMetricaAnalyticsNoAdSupport"
-               ReferencedContainer = "container:">
-            </BuildableReference>
-         </BuildActionEntry>
-         <BuildActionEntry
-            buildForTesting = "YES"
-            buildForRunning = "YES"
-            buildForProfiling = "YES"
-            buildForArchiving = "YES"
-            buildForAnalyzing = "YES">
-            <BuildableReference
-               BuildableIdentifier = "primary"
                BlueprintIdentifier = "AppMetricaCore"
                BuildableName = "AppMetricaCore"
                BlueprintName = "AppMetricaCore"
@@ -274,10 +260,10 @@
          </BuildActionEntry>
          <BuildActionEntry
             buildForTesting = "YES"
-            buildForRunning = "NO"
+            buildForRunning = "YES"
             buildForProfiling = "NO"
             buildForArchiving = "NO"
-            buildForAnalyzing = "NO">
+            buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "AppMetricaCrashesTests"
@@ -409,20 +395,6 @@
                BlueprintIdentifier = "AppMetrica_AppMetricaCoreTests"
                BuildableName = "AppMetrica_AppMetricaCoreTests"
                BlueprintName = "AppMetrica_AppMetricaCoreTests"
-               ReferencedContainer = "container:">
-            </BuildableReference>
-         </BuildActionEntry>
-         <BuildActionEntry
-            buildForTesting = "YES"
-            buildForRunning = "YES"
-            buildForProfiling = "YES"
-            buildForArchiving = "YES"
-            buildForAnalyzing = "YES">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "AppMetricaProtobuf"
-               BuildableName = "AppMetricaProtobuf"
-               BlueprintName = "AppMetricaProtobuf"
                ReferencedContainer = "container:">
             </BuildableReference>
          </BuildActionEntry>

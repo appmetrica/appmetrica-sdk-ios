@@ -1,7 +1,6 @@
 
 #import "AMACrashLogging.h"
 #import "AMAExceptionFormatter.h"
-
 #import "AMABacktrace.h"
 #import "AMABacktraceFrame.h"
 #import "AMABacktraceSymbolicator.h"
@@ -22,7 +21,6 @@
 #import "AMANonFatal.h"
 #import "AMAPluginErrorDetails.h"
 #import "AMASignal.h"
-#import "AMASymbolsExtractor.h"
 #import "AMAThread.h"
 #import "AMAVirtualMachineCrash.h"
 #import "AMAVirtualMachineError.h"
@@ -157,7 +155,7 @@ static NSString *const kAMAKSCrashReporterVersion = @"3.2.0";
     return [self.serializer dataForCrash:decodedCrash error:error];
 }
 
-- (NSData *)formattedErrorErrorDetails:(AMAPluginErrorDetails *)errorDetails 
+- (NSData *)formattedErrorErrorDetails:(AMAPluginErrorDetails *)errorDetails
                         bytesTruncated:(NSUInteger *)bytesTruncated
                                  error:(NSError **)error
 {

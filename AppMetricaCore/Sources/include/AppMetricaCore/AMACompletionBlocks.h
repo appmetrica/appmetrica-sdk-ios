@@ -21,14 +21,4 @@ typedef void(^AMAIdentifiersCompletionBlock)(NSDictionary<NSString *, id> * _Nul
                                              NSError * _Nullable error)
 NS_SWIFT_UNAVAILABLE("Use closures instead");
 
-/** Identifiers callback block
-
- @param appMetricaDeviceID Contains retrieved appMetricaDeviceID
- Empty appMetricaDeviceID may be returned if server by any reason did not provide identifier.
-
- @param error Error of NSURLErrorDomain. In a case of error appMetricaDeviceID param is nil.
- */
-typedef void(^AMAAppMetricaDeviceIDRetrievingBlock)(NSString * _Nullable appMetricaDeviceID, NSError * _Nullable error)
-NS_SWIFT_UNAVAILABLE("Use closures instead");
-
 NS_ASSUME_NONNULL_END

@@ -3,8 +3,7 @@
 #import "AMABinaryImage.h"
 #import "AMABacktrace.h"
 #import "AMABacktraceFrame.h"
-#import "AMASymbolsExtractor.h"
-
+#import "AMABinaryImageExtractor.h"
 #import "KSSymbolicator.h"
 #import "KSDynamicLinker.h"
 
@@ -105,7 +104,7 @@
         NSNumber *key = [NSNumber numberWithUnsignedInteger:(NSUInteger)address];
         image = [self.imagesCache objectForKey:key];
         if (image == nil) {
-            image = [AMASymbolsExtractor imageForImageHeader:address name:name];
+            image = [AMABinaryImageExtractor imageForImageHeader:address name:name];
             [self.imagesCache setObject:image forKey:key];
         }
     }
@@ -114,7 +113,7 @@
 
 - (AMABinaryImage *)binaryImageWithInstructionAddress:(NSNumber *)address
 {
-    NSArray *images = [AMASymbolsExtractor sharedImages];
+    NSArray *images = [AMABinaryImageExtractor sharedImages];
     NSUInteger instructionAddress = [address unsignedIntegerValue];
 
     NSUInteger index = [images indexOfObjectPassingTest:^BOOL(AMABinaryImage *obj, NSUInteger idx, BOOL *stop) {

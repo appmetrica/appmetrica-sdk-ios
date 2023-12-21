@@ -674,8 +674,7 @@
 }
 // FIXME: (glinnik) manupulating storage in impl. Logic similar to Reporter. Move there later
 - (void)applyEventsFromPollingDelegatesWithStorage:(AMAReporterStorage *)reporterStorage
-                                      eventBuilder:(AMAEventBuilder *)eventBuilder;
-
+                                      eventBuilder:(AMAEventBuilder *)eventBuilder
 {
     NSArray<AMAEvent *> *events = [AMACollectionUtilities flatMapArray:self.eventPollingDelegates
                                                              withBlock:^NSArray *(Class<AMAEventPollingDelegate> delegate) {

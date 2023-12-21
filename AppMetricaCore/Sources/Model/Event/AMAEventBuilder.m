@@ -60,7 +60,7 @@
 {
     if (eventName.length == 0) {
         [AMAErrorUtilities fillError:outError
-                          withError:[AMAErrorsFactory badEventNameError:eventName]];
+                           withError:[AMAErrorsFactory badEventNameError:eventName]];
         return nil;
     }
 

@@ -18,7 +18,7 @@
     return [self initWithDictionaryEnvironment:nil];
 }
 
-- (instancetype)initWithDictionaryEnvironment:(nullable NSDictionary *)dictionaryEnvironment;
+- (instancetype)initWithDictionaryEnvironment:(nullable NSDictionary *)dictionaryEnvironment
 {
     return [self initWithDictionaryEnvironment:dictionaryEnvironment
                                        limiter:[AMAEnvironmentLimiter new]];

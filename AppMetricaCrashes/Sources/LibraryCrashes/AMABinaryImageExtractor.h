@@ -1,13 +1,9 @@
 
 #import <Foundation/Foundation.h>
 
-@class AMASymbolsCollection;
-@class AMACrashMatchingRule;
 @class AMABinaryImage;
 
-@interface AMASymbolsExtractor : NSObject
-
-+ (AMASymbolsCollection *)symbolsCollectionForRule:(AMACrashMatchingRule *)rule;
+@interface AMABinaryImageExtractor : NSObject
 
 + (NSArray<AMABinaryImage *> *)sharedImages;
 + (NSArray<AMABinaryImage *> *)userApplicationImages;

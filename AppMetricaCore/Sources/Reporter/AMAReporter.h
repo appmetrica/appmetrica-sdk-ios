@@ -15,7 +15,6 @@
 @class AMAAdServicesDataProvider;
 @class AMAAttributionChecker;
 @protocol AMAExecuting;
-@class AMAPluginErrorDetails;
 @class AMASessionExpirationHandler;
 @class AMACustomEventParameters;
 

@@ -1,7 +1,6 @@
 
 #import <Kiwi/Kiwi.h>
 #import "AMABacktraceSymbolicator.h"
-#import "AMASymbolsExtractor.h"
 #import "AMABacktrace.h"
 #import "AMABacktraceFrame.h"
 #import "AMABinaryImage.h"
