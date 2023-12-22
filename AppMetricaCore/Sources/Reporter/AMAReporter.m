@@ -346,7 +346,8 @@
 - (void)reportEventWithType:(NSUInteger)eventType
                        name:(NSString *)name
                       value:(NSString *)value
-                environment:(NSDictionary *)environment
+           eventEnvironment:(NSDictionary *)eventEnvironment
+             appEnvironment:(NSDictionary *)appEnvironment
                      extras:(NSDictionary<NSString *, NSData *> *)extras
                   onFailure:(void (^)(NSError *))onFailure
 {
@@ -354,7 +355,8 @@
         return [self.eventBuilder eventWithType:eventType
                                            name:name
                                           value:value
-                               eventEnvironment:environment
+                               eventEnvironment:eventEnvironment
+                                 appEnvironment:appEnvironment
                                          extras:extras
                                           error:error];
     }
@@ -362,17 +364,19 @@
 }
 
 - (void)reportBinaryEventWithType:(NSUInteger)eventType
-                             data:(NSData *)data
-                          gZipped:(BOOL)gZipped
-                      environment:(NSDictionary *)environment
-                           extras:(NSDictionary<NSString *,NSData *> *)extras
-                        onFailure:(void (^)(NSError *))onFailure
+                            data:(NSData *)data
+                         gZipped:(BOOL)gZipped
+                eventEnvironment:(nullable NSDictionary *)eventEnvironment
+                  appEnvironment:(nullable NSDictionary *)appEnvironment
+                          extras:(nullable NSDictionary<NSString *, NSData *> *)extras
+                       onFailure:(nullable void (^)(NSError *error))onFailure
 {
     [self reportCommonEventWithBlock:^AMAEvent *(NSError **error) {
         return [self.eventBuilder binaryEventWithType:eventType
                                                  data:data
                                               gZipped:gZipped
-                                          environment:environment
+                                     eventEnvironment:eventEnvironment
+                                       appEnvironment:appEnvironment
                                                extras:extras
                                                 error:error];
     }
@@ -385,7 +389,8 @@
                         gZipped:(BOOL)gZipped
                       encrypted:(BOOL)encrypted
                       truncated:(BOOL)truncated
-                    environment:(NSDictionary *)environment
+               eventEnvironment:(nullable NSDictionary *)eventEnvironment
+                 appEnvironment:(nullable NSDictionary *)appEnvironment
                          extras:(NSDictionary<NSString *,NSData *> *)extras
                       onFailure:(void (^)(NSError *))onFailure
 {
@@ -396,7 +401,8 @@
                                             gZipped:gZipped
                                           encrypted:encrypted
                                           truncated:truncated
-                                        environment:environment
+                                   eventEnvironment:eventEnvironment
+                                     appEnvironment:appEnvironment
                                              extras:extras
                                               error:error];
     }

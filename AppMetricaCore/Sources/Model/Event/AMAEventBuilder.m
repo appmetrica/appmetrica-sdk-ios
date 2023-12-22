@@ -110,6 +110,7 @@
             NSString *fileName = parameters.fileName ?: [NSString stringWithFormat:@"%@.event", NSUUID.UUID.UUIDString];
             event.value = [self.eventValueFactory fileEventValue:data
                                                         fileName:fileName
+                                                         gZipped:gZipped
                                                   encryptionType:encryption
                                                   truncationType:truncation
                                                   bytesTruncated:&bytesTruncated
@@ -147,7 +148,7 @@
     [self fillEvent:event withName:parameters.name];
     event.bytesTruncated += (parameters.bytesTruncated + bytesTruncated);
     event.appEnvironment = parameters.appEnvironment;
-    event.errorEnvironment = parameters.errorEnvironment;
+    event.eventEnvironment = parameters.errorEnvironment;
     [self fillEvent:event withExtras:parameters.extras];
     event.createdAt = parameters.isPast ? parameters.creationDate : event.createdAt;
 
@@ -240,6 +241,7 @@
                        name:(NSString *)name
                       value:(NSString *)value
            eventEnvironment:(NSDictionary *)eventEnvironment
+             appEnvironment:(NSDictionary *)appEnvironment
                      extras:(NSDictionary<NSString *, NSData *> *)extras
                       error:(NSError **)outError
 {
@@ -252,7 +254,7 @@
     [self fillEvent:event withName:name];
     [self fillEvent:event withStringValue:value];
     [self fillEvent:event withExtras:extras];
-    event.errorEnvironment = eventEnvironment;
+    [self fillEvent:event eventEnvironment:eventEnvironment appEnvironment:appEnvironment];
 
     return event;
 }
@@ -260,8 +262,9 @@
 - (AMAEvent *)binaryEventWithType:(NSUInteger)eventType
                              data:(NSData *)data
                           gZipped:(BOOL)gZipped
-                      environment:(NSDictionary *)environment
-                           extras:(NSDictionary<NSString *,NSData *> *)extras
+                 eventEnvironment:(NSDictionary *)eventEnvironment
+                   appEnvironment:(NSDictionary *)appEnvironment
+                           extras:(NSDictionary<NSString *, NSData *> *)extras
                             error:(NSError **)outError
 {
     if ([AMAEventTypeResolver isEventTypeReserved:eventType]) {
@@ -285,11 +288,9 @@
     }
     
     AMAEvent *event = [self eventOfType:eventType];
-    
     [self fillEvent:event withBinaryValue:validData gZipped:gZippedValid];
-    
     [self fillEvent:event withExtras:extras];
-    event.errorEnvironment = environment;
+    [self fillEvent:event eventEnvironment:eventEnvironment appEnvironment:appEnvironment];
     
     return event;
 }
@@ -300,7 +301,8 @@
                         gZipped:(BOOL)gZipped
                       encrypted:(BOOL)encrypted
                       truncated:(BOOL)truncated
-                    environment:(NSDictionary *)environment
+               eventEnvironment:(NSDictionary *)eventEnvironment
+                 appEnvironment:(NSDictionary *)appEnvironment
                          extras:(NSDictionary<NSString *,NSData *> *)extras
                           error:(NSError **)outError
 {
@@ -331,13 +333,14 @@
     [self fillEvent:event
       withFileValue:validData
            fileName:validFileName
+            gZipped:gZipped
           encrypted:encrypted
           truncated:truncated
               error:outError];
     
     [self fillEvent:event withExtras:extras];
-    event.errorEnvironment = environment;
-
+    [self fillEvent:event eventEnvironment:eventEnvironment appEnvironment:appEnvironment];
+    
     return event;
 }
 
@@ -493,6 +496,7 @@
 - (void)fillEvent:(AMAEvent *)event
     withFileValue:(NSData *)value
          fileName:(NSString *)fileName
+          gZipped:(BOOL)gZipped
         encrypted:(BOOL)encrypted
         truncated:(BOOL)truncated
             error:(NSError **)outError
@@ -507,6 +511,7 @@
     
     event.value = [self.eventValueFactory fileEventValue:value
                                                 fileName:fileName
+                                                 gZipped:gZipped
                                           encryptionType:encryption
                                           truncationType:truncation
                                           bytesTruncated:&bytesTruncated
@@ -540,6 +545,18 @@
     }
     
     event.extras = [result copy];
+}
+
+- (void)fillEvent:(AMAEvent *)event
+ eventEnvironment:(NSDictionary *)eventEnvironment
+   appEnvironment:(NSDictionary *)appEnvironment
+{
+    if (eventEnvironment != nil) {
+        event.eventEnvironment = eventEnvironment;
+    }
+    if (appEnvironment != nil) {
+        event.appEnvironment = appEnvironment;
+    }
 }
 
 - (void)logTruncation:(NSString *)fieldName

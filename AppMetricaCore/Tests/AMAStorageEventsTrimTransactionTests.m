@@ -150,7 +150,8 @@ describe(@"AMAStorageEventsTrimTransaction", ^{
                 [reporter reportEventWithType:type.unsignedIntegerValue
                                          name:@"EVENT"
                                         value:@"VALUE"
-                                  environment:@{}
+                             eventEnvironment:@{}
+                               appEnvironment:@{}
                                        extras:nil
                                     onFailure:NULL];
             }

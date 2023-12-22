@@ -43,15 +43,15 @@ static NSString *const kAMAKeyLastASATokenSendDate = @"last_asa_token_send_date"
 @synthesize appEnvironment = _appEnvironment;
 
 - (instancetype)initWithStorageProvider:(id<AMADatabaseKeyValueStorageProviding>)storageProvider
-                       errorEnvironment:(AMAEnvironmentContainer *)errorEnvironment
+                       eventEnvironment:(AMAEnvironmentContainer *)eventEnvironment
 {
     return [self initWithStorageProvider:storageProvider
-                        errorEnvironment:errorEnvironment
+                        eventEnvironment:eventEnvironment
                             dateProvider:[[AMADateProvider alloc] init]];
 }
 
 - (instancetype)initWithStorageProvider:(id<AMADatabaseKeyValueStorageProviding>)storageProvider
-                       errorEnvironment:(AMAEnvironmentContainer *)errorEnvironment
+                       eventEnvironment:(AMAEnvironmentContainer *)eventEnvironment
                            dateProvider:(id<AMADateProviding>)dateProvider
 {
     self = [super init];
@@ -59,7 +59,7 @@ static NSString *const kAMAKeyLastASATokenSendDate = @"last_asa_token_send_date"
         _storageProvider = storageProvider;
         [_storageProvider addBackingKeys:self.criticalKeys];
 
-        _errorEnvironment = errorEnvironment;
+        _eventEnvironment = eventEnvironment;
         _dateProvider = dateProvider;
         _sessionIDStorage = [AMAIncrementableValueStorageFactory lastSessionIDStorage];
         _attributionIDStorage = [AMAIncrementableValueStorageFactory attributionIDStorage];

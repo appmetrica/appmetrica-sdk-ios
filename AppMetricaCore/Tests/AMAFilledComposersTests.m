@@ -1,7 +1,7 @@
 
 #import <Kiwi/Kiwi.h>
 #import "AMAFilledAppEnvironmentComposer.h"
-#import "AMAFilledErrorEnvironmentComposer.h"
+#import "AMAFilledEventEnvironmentComposer.h"
 #import "AMAFilledLocationComposer.h"
 #import "AMAReporterStateStorage+Migration.h"
 #import "AMAEnvironmentContainer.h"
@@ -40,11 +40,11 @@ describe(@"AMAFilledComposers", ^{
                     [[[composer compose] should] equal:filledEnvironment];
                 });
             });
-            context(@"ErrorEnvironment", ^{
-                AMAFilledErrorEnvironmentComposer *__block composer = nil;
+            context(@"EventEnvironment", ^{
+                AMAFilledEventEnvironmentComposer *__block composer = nil;
                 beforeEach(^{
-                    [storage stub:@selector(errorEnvironment) andReturn:environmentContainer];
-                    composer = [[AMAFilledErrorEnvironmentComposer alloc] initWithStorage:storage];
+                    [storage stub:@selector(eventEnvironment) andReturn:environmentContainer];
+                    composer = [[AMAFilledEventEnvironmentComposer alloc] initWithStorage:storage];
                 });
                 it(@"Should return nil if empty", ^{
                     [environmentContainer stub:@selector(dictionaryEnvironment) andReturn:emptyEnvironment];

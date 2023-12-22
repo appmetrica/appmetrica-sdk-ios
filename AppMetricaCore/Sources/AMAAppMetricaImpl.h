@@ -42,27 +42,34 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)reportEvent:(NSString *)eventName
          parameters:(NSDictionary *)params
           onFailure:(nullable void (^)(NSError *error))onFailure;
+
 - (void)reportEventWithType:(NSUInteger)eventType
                        name:(NSString *)name
                       value:(NSString *)value
-                environment:(nullable NSDictionary *)environment
+           eventEnvironment:(nullable NSDictionary *)eventEnvironment
+             appEnvironment:(nullable NSDictionary *)appEnvironment
                      extras:(nullable NSDictionary<NSString *, NSData *> *)extras
                   onFailure:(nullable void (^)(NSError *))onFailure;
+
 - (void)reportBinaryEventWithType:(NSUInteger)eventType
                              data:(NSData *)data
                           gZipped:(BOOL)gZipped
-                      environment:(nullable NSDictionary *)environment
+                 eventEnvironment:(nullable NSDictionary *)eventEnvironment
+                   appEnvironment:(nullable NSDictionary *)appEnvironment
                            extras:(nullable NSDictionary<NSString *, NSData *> *)extras
                         onFailure:(nullable void (^)(NSError *error))onFailure;
+
 - (void)reportFileEventWithType:(NSUInteger)eventType
                            data:(NSData *)data
                        fileName:(NSString *)fileName
                         gZipped:(BOOL)gZipped
                       encrypted:(BOOL)encrypted
                       truncated:(BOOL)truncated
-                    environment:(nullable NSDictionary *)environment
+               eventEnvironment:(nullable NSDictionary *)eventEnvironment
+                 appEnvironment:(nullable NSDictionary *)appEnvironment
                          extras:(nullable NSDictionary<NSString *, NSData *> *)extras
                       onFailure:(nullable void (^)(NSError *error))onFailure;
+
 - (void)reportEventWithParameters:(AMACustomEventParameters * )parameters
                         onFailure:(nullable void (^)(NSError *error))onFailure;
 

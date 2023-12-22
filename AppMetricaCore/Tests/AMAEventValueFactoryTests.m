@@ -131,6 +131,7 @@ describe(@"AMAEventValueFactory", ^{
         AMAFileEventValue *(^eventValue)(void) = ^{
             return (AMAFileEventValue *)[factory fileEventValue:fileData
                                                        fileName:fileName
+                                                        gZipped:NO
                                                  encryptionType:encryptionType
                                                  truncationType:truncationType
                                                  bytesTruncated:&bytesTruncated
@@ -184,6 +185,7 @@ describe(@"AMAEventValueFactory", ^{
                 [[fileStorage should] receive:@selector(writeData:error:) withArguments:truncatedValue, kw_any()];
                 [factory fileEventValue:fileData
                                fileName:fileName
+                                gZipped:NO
                          encryptionType:encryptionType
                          truncationType:AMAEventValueFactoryTruncationTypeFull
                          bytesTruncated:&bytesTruncated
@@ -192,6 +194,7 @@ describe(@"AMAEventValueFactory", ^{
             it(@"Should fill bytes truncated", ^{
                 [factory fileEventValue:fileData
                                fileName:fileName
+                                gZipped:NO
                          encryptionType:encryptionType
                          truncationType:AMAEventValueFactoryTruncationTypeFull
                          bytesTruncated:&bytesTruncated
@@ -214,6 +217,7 @@ describe(@"AMAEventValueFactory", ^{
                 NSError *error = nil;
                 [factory fileEventValue:fileData
                                fileName:fileName
+                                gZipped:NO
                          encryptionType:encryptionType
                          truncationType:truncationType
                          bytesTruncated:&bytesTruncated
@@ -223,11 +227,13 @@ describe(@"AMAEventValueFactory", ^{
         });
         context(@"GZipped", ^{
             __auto_type gzippedEventValue = ^{
-                return (AMAFileEventValue *)[factory fileEventWithValue:fileData
-                                                              fileName:fileName
-                                                               gZipped:YES
-                                                       bytesTruncated:&bytesTruncated
-                                                                 error:nil];
+                return (AMAFileEventValue *)[factory fileEventValue:fileData
+                                                           fileName:fileName
+                                                            gZipped:YES
+                                                     encryptionType:encryptionType
+                                                     truncationType:AMAEventValueFactoryTruncationTypeFull
+                                                     bytesTruncated:&bytesTruncated
+                                                              error:nil];
             };
             it(@"Should create value of valid type", ^{
                 [[gzippedEventValue() should] beKindOfClass:[AMAFileEventValue class]];
@@ -270,11 +276,13 @@ describe(@"AMAEventValueFactory", ^{
         });
         context(@"Not GZipped", ^{
             __auto_type notGZippedEventValue = ^{
-                return (AMAFileEventValue *)[factory fileEventWithValue:fileData
-                                                              fileName:fileName
-                                                               gZipped:NO
-                                                       bytesTruncated:&bytesTruncated
-                                                                 error:nil];
+                return (AMAFileEventValue *)[factory fileEventValue:fileData
+                                                           fileName:fileName
+                                                            gZipped:NO
+                                                     encryptionType:encryptionType
+                                                     truncationType:AMAEventValueFactoryTruncationTypePartial
+                                                     bytesTruncated:&bytesTruncated
+                                                              error:nil];
             };
             it(@"Should create value of valid type", ^{
                 [[notGZippedEventValue() should] beKindOfClass:[AMAFileEventValue class]];
@@ -285,7 +293,7 @@ describe(@"AMAEventValueFactory", ^{
             });
             it(@"Should create valid file storage", ^{
                 [[AMAEncryptedFileStorageFactory should] receive:@selector(fileStorageForEncryptionType:filePath:)
-                                                   withArguments:theValue(AMAEventEncryptionTypeNoEncryption), filePath];
+                                                   withArguments:theValue(encryptionType), filePath];
                 notGZippedEventValue();
             });
             it(@"Should write valid content", ^{
@@ -297,7 +305,7 @@ describe(@"AMAEventValueFactory", ^{
                     [[notGZippedEventValue().relativeFilePath should] equal:fileName];
                 });
                 it(@"Should have valid encryption type", ^{
-                    [[theValue(notGZippedEventValue().encryptionType) should] equal:theValue(AMAEventEncryptionTypeNoEncryption)];
+                    [[theValue(notGZippedEventValue().encryptionType) should] equal:theValue(encryptionType)];
                 });
             });
             context(@"Partial truncation", ^{

@@ -200,7 +200,8 @@
 - (void)reportEventWithType:(NSUInteger)eventType
                        name:(NSString *)name
                       value:(NSString *)value
-                environment:(NSDictionary *)environment
+           eventEnvironment:(NSDictionary *)eventEnvironment
+             appEnvironment:(NSDictionary *)appEnvironment
                      extras:(NSDictionary<NSString *, NSData *> *)extras
                   onFailure:(void (^)(NSError *))onFailure
 {
@@ -209,7 +210,8 @@
             [self.reporter reportEventWithType:eventType
                                           name:name
                                          value:value
-                                   environment:environment
+                              eventEnvironment:eventEnvironment
+                                appEnvironment:appEnvironment
                                         extras:extras
                                      onFailure:onFailure];
         } onFailure:onFailure];
@@ -219,7 +221,8 @@
 - (void)reportBinaryEventWithType:(NSUInteger)eventType
                              data:(NSData *)data
                           gZipped:(BOOL)gZipped
-                      environment:(NSDictionary *)environment
+                 eventEnvironment:(NSDictionary *)eventEnvironment
+                   appEnvironment:(NSDictionary *)appEnvironment
                            extras:(NSDictionary<NSString *,NSData *> *)extras
                         onFailure:(void (^)(NSError *))onFailure
 {
@@ -228,7 +231,8 @@
             [self.reporter reportBinaryEventWithType:eventType
                                                 data:data
                                              gZipped:gZipped
-                                         environment:environment
+                                    eventEnvironment:eventEnvironment
+                                      appEnvironment:appEnvironment
                                               extras:extras
                                            onFailure:onFailure];
         } onFailure:onFailure];
@@ -241,7 +245,8 @@
                         gZipped:(BOOL)gZipped
                       encrypted:(BOOL)encrypted
                       truncated:(BOOL)truncated
-                    environment:(NSDictionary *)environment
+               eventEnvironment:(NSDictionary *)eventEnvironment
+                 appEnvironment:(NSDictionary *)appEnvironment
                          extras:(NSDictionary<NSString *,NSData *> *)extras
                       onFailure:(void (^)(NSError *))onFailure
 {
@@ -253,7 +258,8 @@
                                            gZipped:gZipped
                                          encrypted:encrypted
                                          truncated:truncated
-                                       environment:environment
+                                  eventEnvironment:eventEnvironment
+                                    appEnvironment:appEnvironment
                                             extras:extras
                                          onFailure:onFailure];
         } onFailure:onFailure];
@@ -1044,7 +1050,7 @@
 
 + (void)syncSetErrorEnvironmentValue:(NSString *)value forKey:(NSString *)key
 {
-    [[AMAReporterStoragesContainer sharedInstance].errorEnvironment addValue:value forKey:key];
+    [[AMAReporterStoragesContainer sharedInstance].eventEnvironment addValue:value forKey:key];
 }
 
 - (void)setErrorEnvironmentValue:(NSString *)value forKey:(NSString *)key

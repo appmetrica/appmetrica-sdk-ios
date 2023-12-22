@@ -6,9 +6,9 @@
 #import "AMAEventComposer.h"
 #import "AMADummyLocationComposer.h"
 #import "AMADummyAppEnvironmentComposer.h"
-#import "AMADummyErrorEnvironmentComposer.h"
+#import "AMADummyEventEnvironmentComposer.h"
 #import "AMAFilledAppEnvironmentComposer.h"
-#import "AMAFilledErrorEnvironmentComposer.h"
+#import "AMAFilledEventEnvironmentComposer.h"
 #import "AMAFilledLocationComposer.h"
 #import "AMAFilledLocationEnabledComposer.h"
 #import "AMAFilledProfileIdComposer.h"
@@ -22,7 +22,7 @@
 @property(nonatomic, strong, readonly) id locationEnabledComposer;
 @property(nonatomic, strong, readonly) id networkInfoComposer;
 @property(nonatomic, strong, readonly) id appEnvironmentComposer;
-@property(nonatomic, strong, readonly) id errorEnvironmentComposer;
+@property(nonatomic, strong, readonly) id eventEnvironmentComposer;
 @property(nonatomic, strong, readonly) id openIDComposer;
 
 @end
@@ -43,7 +43,7 @@ describe(@"AMAEventComposerProvider", ^{
         it(@"Should change Location and NetworkInfo for Alive", ^{
             eventComposer = [eventComposerProvider composerForType:AMAEventTypeAlive];
             [[eventComposer.appEnvironmentComposer should] beMemberOfClass:AMAFilledAppEnvironmentComposer.class];
-            [[eventComposer.errorEnvironmentComposer should] beMemberOfClass:AMADummyErrorEnvironmentComposer.class];
+            [[eventComposer.eventEnvironmentComposer should] beMemberOfClass:AMADummyEventEnvironmentComposer.class];
             [[eventComposer.locationComposer should] beMemberOfClass:AMADummyLocationComposer.class];
             [[eventComposer.locationEnabledComposer should] beMemberOfClass:AMAFilledLocationEnabledComposer.class];
             [[eventComposer.profileIdComposer should] beMemberOfClass:AMAFilledProfileIdComposer.class];
@@ -52,7 +52,7 @@ describe(@"AMAEventComposerProvider", ^{
         it(@"Should change AppEnvironment for ProtobufCrash", ^{
             eventComposer = [eventComposerProvider composerForType:AMAEventTypeProtobufCrash];
             [[eventComposer.appEnvironmentComposer should] beMemberOfClass:AMADummyAppEnvironmentComposer.class];
-            [[eventComposer.errorEnvironmentComposer should] beMemberOfClass:AMADummyErrorEnvironmentComposer.class];
+            [[eventComposer.eventEnvironmentComposer should] beMemberOfClass:AMADummyEventEnvironmentComposer.class];
             [[eventComposer.locationComposer should] beMemberOfClass:AMAFilledLocationComposer.class];
             [[eventComposer.locationEnabledComposer should] beMemberOfClass:AMAFilledLocationEnabledComposer.class];
             [[eventComposer.profileIdComposer should] beMemberOfClass:AMAFilledProfileIdComposer.class];
@@ -61,16 +61,16 @@ describe(@"AMAEventComposerProvider", ^{
         it(@"Should change AppEnvironment for ProtobufANR", ^{
             eventComposer = [eventComposerProvider composerForType:AMAEventTypeProtobufANR];
             [[eventComposer.appEnvironmentComposer should] beMemberOfClass:AMADummyAppEnvironmentComposer.class];
-            [[eventComposer.errorEnvironmentComposer should] beMemberOfClass:AMADummyErrorEnvironmentComposer.class];
+            [[eventComposer.eventEnvironmentComposer should] beMemberOfClass:AMADummyEventEnvironmentComposer.class];
             [[eventComposer.locationComposer should] beMemberOfClass:AMAFilledLocationComposer.class];
             [[eventComposer.locationEnabledComposer should] beMemberOfClass:AMAFilledLocationEnabledComposer.class];
             [[eventComposer.profileIdComposer should] beMemberOfClass:AMAFilledProfileIdComposer.class];
             [[eventComposer.openIDComposer should] beMemberOfClass:AMAFilledOpenIDComposer.class];
         });
-        it(@"Should change ErrorEnvironment for ProtobufError", ^{
+        it(@"Should change EventEnvironment for ProtobufError", ^{
             eventComposer = [eventComposerProvider composerForType:AMAEventTypeProtobufError];
             [[eventComposer.appEnvironmentComposer should] beMemberOfClass:AMAFilledAppEnvironmentComposer.class];
-            [[eventComposer.errorEnvironmentComposer should] beMemberOfClass:AMAFilledErrorEnvironmentComposer.class];
+            [[eventComposer.eventEnvironmentComposer should] beMemberOfClass:AMAFilledEventEnvironmentComposer.class];
             [[eventComposer.locationComposer should] beMemberOfClass:AMAFilledLocationComposer.class];
             [[eventComposer.locationEnabledComposer should] beMemberOfClass:AMAFilledLocationEnabledComposer.class];
             [[eventComposer.profileIdComposer should] beMemberOfClass:AMAFilledProfileIdComposer.class];
@@ -84,13 +84,14 @@ describe(@"AMAEventComposerProvider", ^{
                 @(AMAEventTypeProtobufCrash),
                 @(AMAEventTypeProtobufANR),
                 @(AMAEventTypeProtobufError),
+                @(28),
         ];
         for (AMAEventType eventType = AMAEventTypeInit; eventType <= AMAEventTypeECommerce; ++eventType) {
             if (![excludedTypes containsObject:@(eventType)]){
                 it([NSString stringWithFormat:@"Should use defaults for type %u", (unsigned int) eventType],^{
                     eventComposer = [eventComposerProvider composerForType:eventType];
                     [[eventComposer.appEnvironmentComposer should] beMemberOfClass:AMAFilledAppEnvironmentComposer.class];
-                    [[eventComposer.errorEnvironmentComposer should] beMemberOfClass:AMADummyErrorEnvironmentComposer.class];
+                    [[eventComposer.eventEnvironmentComposer should] beMemberOfClass:AMADummyEventEnvironmentComposer.class];
                     [[eventComposer.locationComposer should] beMemberOfClass:AMAFilledLocationComposer.class];
                     [[eventComposer.locationEnabledComposer should] beMemberOfClass:AMAFilledLocationEnabledComposer.class];
                     [[eventComposer.profileIdComposer should] beMemberOfClass:AMAFilledProfileIdComposer.class];

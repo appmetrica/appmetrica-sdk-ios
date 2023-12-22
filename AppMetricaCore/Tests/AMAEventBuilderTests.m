@@ -400,6 +400,7 @@ describe(@"AMAEventBuilder", ^{
                                               name:nil
                                              value:nil
                                   eventEnvironment:nil
+                                    appEnvironment:nil
                                             extras:nil
                                              error:nil];
                     [[event should] beNil];
@@ -408,7 +409,8 @@ describe(@"AMAEventBuilder", ^{
                     event = [builder binaryEventWithType:internalEventType
                                                     data:nil
                                                  gZipped:YES
-                                             environment:nil
+                                        eventEnvironment:nil
+                                          appEnvironment:nil
                                                   extras:nil
                                                    error:nil];
                     [[event should] beNil];
@@ -420,7 +422,8 @@ describe(@"AMAEventBuilder", ^{
                                                gZipped:YES
                                              encrypted:YES
                                              truncated:YES
-                                           environment:nil
+                                      eventEnvironment:nil
+                                        appEnvironment:nil
                                                 extras:nil
                                                  error:nil];
                     [[event should] beNil];
@@ -555,7 +558,8 @@ describe(@"AMAEventBuilder", ^{
         });
     });
     context(@"Reporting custom events", ^{
-        let(enviromnent, ^NSDictionary *{ return @{@"key" : @"value"}; });
+        let(eventEnvironment, ^NSDictionary *{ return @{@"key" : @"value"}; });
+        let(appEnvironment, ^NSDictionary *{ return @{@"key2" : @"value2"}; });
         let(extras, ^NSDictionary *{ return @{@"extraKey": [@"extraValue" dataUsingEncoding:NSUTF8StringEncoding]}; });
         AMAGZipDataEncoder *const encoder = [[AMAGZipDataEncoder alloc] init];
         AMAEventValueFactory *const eventValueFactory = [[AMAEventValueFactory alloc] init];
@@ -578,7 +582,8 @@ describe(@"AMAEventBuilder", ^{
                 event = [builder eventWithType:eventType
                                           name:name
                                          value:value
-                              eventEnvironment:enviromnent
+                              eventEnvironment:eventEnvironment
+                                appEnvironment:appEnvironment
                                         extras:extras
                                          error:&error];
             });
@@ -596,7 +601,11 @@ describe(@"AMAEventBuilder", ^{
             });
             it(@"Should set event enviromnent", ^{
                 [[error should] beNil];
-                [[event.errorEnvironment should] equal:enviromnent];
+                [[event.eventEnvironment should] equal:eventEnvironment];
+            });
+            it(@"Should set app enviromnent", ^{
+                [[error should] beNil];
+                [[event.appEnvironment should] equal:appEnvironment];
             });
             it(@"Should set event extras", ^{
                 [[error should] beNil];
@@ -608,7 +617,8 @@ describe(@"AMAEventBuilder", ^{
                 [builder eventWithType:eventType
                                   name:name
                                  value:value
-                      eventEnvironment:enviromnent
+                      eventEnvironment:eventEnvironment
+                        appEnvironment:appEnvironment
                                 extras:extras
                                  error:&error];
             });
@@ -622,7 +632,8 @@ describe(@"AMAEventBuilder", ^{
                 event = [builder binaryEventWithType:eventType
                                                 data:data
                                              gZipped:gZipped
-                                         environment:enviromnent
+                                    eventEnvironment:eventEnvironment
+                                      appEnvironment:appEnvironment
                                               extras:extras
                                                error:&error];
             };
@@ -664,7 +675,11 @@ describe(@"AMAEventBuilder", ^{
             });
             it(@"Should set event enviromnent", ^{
                 [[error should] beNil];
-                [[event.errorEnvironment should] equal:enviromnent];
+                [[event.eventEnvironment should] equal:eventEnvironment];
+            });
+            it(@"Should set app enviromnent", ^{
+                [[error should] beNil];
+                [[event.appEnvironment should] equal:appEnvironment];
             });
             it(@"Should set event extras", ^{
                 [[error should] beNil];
@@ -687,7 +702,8 @@ describe(@"AMAEventBuilder", ^{
                 event = [builder binaryEventWithType:eventType
                                                 data:data
                                              gZipped:YES
-                                         environment:enviromnent
+                                    eventEnvironment:eventEnvironment
+                                      appEnvironment:appEnvironment
                                               extras:extras
                                                error:&actualError];
                 
@@ -710,7 +726,8 @@ describe(@"AMAEventBuilder", ^{
                                            gZipped:gZipped
                                          encrypted:encrypted
                                          truncated:truncated
-                                       environment:enviromnent
+                                  eventEnvironment:eventEnvironment
+                                    appEnvironment:appEnvironment
                                             extras:extras
                                              error:&error];
             };
@@ -724,7 +741,11 @@ describe(@"AMAEventBuilder", ^{
             });
             it(@"Should set event enviromnent", ^{
                 [[error should] beNil];
-                [[event.errorEnvironment should] equal:enviromnent];
+                [[event.eventEnvironment should] equal:eventEnvironment];
+            });
+            it(@"Should set app enviromnent", ^{
+                [[error should] beNil];
+                [[event.appEnvironment should] equal:appEnvironment];
             });
             it(@"Should set event extras", ^{
                 [[error should] beNil];
@@ -735,10 +756,17 @@ describe(@"AMAEventBuilder", ^{
                 NSString *path = ((AMAFileEventValue *)event.value).relativeFilePath;
                 [[path should] equal:fileName];
             });
-            it(@"Should set event file encryption type if encrypted is true", ^{
+            it(@"Should set event file encryption type if encrypted is true without gzip", ^{
+                buildEvent(YES, YES, NO);
+                
                 [[error should] beNil];
                 AMAEventEncryptionType encryption = ((AMAFileEventValue *)event.value).encryptionType;
                 [[theValue(encryption) should] equal:theValue(AMAEventEncryptionTypeAESv1)];
+            });
+            it(@"Should set event file encryption type gzip if gzip is true", ^{
+                [[error should] beNil];
+                AMAEventEncryptionType encryption = ((AMAFileEventValue *)event.value).encryptionType;
+                [[theValue(encryption) should] equal:theValue(AMAEventEncryptionTypeGZip)];
             });
             it(@"Should set event file encryption type if encrypted is false", ^{
                 buildEvent(NO, YES, NO);
@@ -746,12 +774,14 @@ describe(@"AMAEventBuilder", ^{
                 AMAEventEncryptionType encryption = ((AMAFileEventValue *)event.value).encryptionType;
                 [[theValue(encryption) should] equal:theValue(AMAEventEncryptionTypeNoEncryption)];
             });
-            it(@"Should gZip value", ^{
+            it(@"Should use no encryption for file storage and gZip for file value", ^{
                 buildEvent(YES, YES, YES);
                 
                 [[error should] beNil];
                 NSData *expected = [encoder encodeData:data error:nil];
-                [[[event.value dataWithError:nil] should] equal:expected];
+                
+                [[[event.value gzippedDataWithError:nil] should] equal:expected];
+                [[[event.value dataWithError:nil] should] equal:data];
             });
             it(@"Should be passed to composer", ^{
                 [[eventComposerProvider should] receive:@selector(composerForType:) withArguments:theValue(eventType)];
@@ -761,6 +791,7 @@ describe(@"AMAEventBuilder", ^{
             it(@"Should set file name if passed empty", ^{
                 KWCaptureSpy *fileNameSpy = [eventValueFactory captureArgument:@selector(fileEventValue:
                                                                                          fileName:
+                                                                                         gZipped:
                                                                                          encryptionType:
                                                                                          truncationType:
                                                                                          bytesTruncated:
@@ -773,7 +804,8 @@ describe(@"AMAEventBuilder", ^{
                                            gZipped:YES
                                          encrypted:YES
                                          truncated:YES
-                                       environment:enviromnent
+                                  eventEnvironment:eventEnvironment
+                                    appEnvironment:appEnvironment
                                             extras:extras
                                              error:&error];
                 [[fileNameSpy.argument should] containString:@".event"];
@@ -800,7 +832,7 @@ describe(@"AMAEventBuilder", ^{
                     
                     [[error should] beNil];
                     NSData *truncated = [data subdataWithRange:NSMakeRange(0, maxSize)];
-                    [[[event.value dataWithError:nil] should] equal:truncated];
+                    [[[event.value gzippedDataWithError:nil] should] equal:truncated];
                 });
             });
         });
@@ -828,7 +860,8 @@ describe(@"AMAEventBuilder", ^{
                 event = [builder eventWithType:12
                                           name:@"name"
                                          value:@"value"
-                              eventEnvironment:nil
+                              eventEnvironment:eventEnvironment
+                                appEnvironment:appEnvironment
                                         extras:@{ extrasKey1 : eventExtras }
                                          error:nil];
                 
@@ -845,7 +878,8 @@ describe(@"AMAEventBuilder", ^{
                 event = [builder eventWithType:randomEventType
                                           name:@"name"
                                          value:@"value"
-                              eventEnvironment:nil
+                              eventEnvironment:eventEnvironment
+                                appEnvironment:appEnvironment
                                         extras:@{ extrasKey1 : eventExtras }
                                          error:nil];
                 

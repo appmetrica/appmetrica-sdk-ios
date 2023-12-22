@@ -65,38 +65,19 @@
 
 - (id<AMAEventValueProtocol>)fileEventValue:(NSData *)value
                                    fileName:(NSString *)fileName
+                                    gZipped:(BOOL)gZipped
                              encryptionType:(AMAEventEncryptionType)encryptionType
                              truncationType:(AMAEventValueFactoryTruncationType)truncationType
                              bytesTruncated:(NSUInteger *)bytesTruncated
                                       error:(NSError **)error
 {
-    return [self fileEventValue:value
-                       fileName:fileName
-      fileStorageEncryptionType:encryptionType
-        fileValueEncryptionType:encryptionType
-                 truncationType:truncationType
-                 bytesTruncated:bytesTruncated
-                          error:error];
-}
-
-- (id<AMAEventValueProtocol>)fileEventWithValue:(NSData *)value
-                                       fileName:(NSString *)fileName
-                                        gZipped:(BOOL)gZipped
-                                 bytesTruncated:(NSUInteger *)bytesTruncated
-                                          error:(NSError **)error
-{
-    AMAEventEncryptionType fileValueEncryptionType = 0;
-    AMAEventEncryptionType fileStorageEncryptionType = 0;
-    AMAEventValueFactoryTruncationType truncationType = 0;
+    
+    AMAEventEncryptionType fileValueEncryptionType = encryptionType;
+    AMAEventEncryptionType fileStorageEncryptionType = encryptionType;
     
     if (gZipped) {
         fileValueEncryptionType = AMAEventEncryptionTypeGZip;
         fileStorageEncryptionType = AMAEventEncryptionTypeNoEncryption;
-        truncationType = AMAEventValueFactoryTruncationTypeFull;
-    } else {
-        fileValueEncryptionType = AMAEventEncryptionTypeNoEncryption;
-        fileStorageEncryptionType = fileValueEncryptionType;
-        truncationType = AMAEventValueFactoryTruncationTypePartial;
     }
     
     return [self fileEventValue:value

@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
   s.name = "AppMetricaCoreExtension"
   s.version = '5.0.0'
-  s.summary = "AppMetricaCoreExtension provides facilitating interfaces for seamless integration of other modules"
+  s.summary = "Extended AppMetrica Core APIs. Not for public use."
 
   s.homepage = 'https://appmetrica.io'
   s.license = { :type => 'MIT', :file => 'LICENSE' }

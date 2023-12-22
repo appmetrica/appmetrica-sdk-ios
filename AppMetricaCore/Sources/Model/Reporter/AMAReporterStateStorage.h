@@ -22,7 +22,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong, readonly) AMAIncrementableValueStorage *requestIDStorage;
 
 @property (nonatomic, strong, readonly) AMAEnvironmentContainer *appEnvironment;
-@property (nonatomic, strong, readonly) AMAEnvironmentContainer *errorEnvironment;
+@property (nonatomic, strong, readonly) AMAEnvironmentContainer *eventEnvironment;
 @property (nullable, nonatomic, strong, readonly) AMAExtrasContainer *extrasContainer;
 
 @property (nonatomic, copy, nullable) NSString *profileID;
@@ -36,9 +36,9 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)init NS_UNAVAILABLE;
 
 - (instancetype)initWithStorageProvider:(id<AMADatabaseKeyValueStorageProviding>)storageProvider
-                       errorEnvironment:(AMAEnvironmentContainer *)errorEnvironment;
+                       eventEnvironment:(AMAEnvironmentContainer *)eventEnvironment;
 - (instancetype)initWithStorageProvider:(id<AMADatabaseKeyValueStorageProviding>)storageProvider
-                       errorEnvironment:(AMAEnvironmentContainer *)errorEnvironment
+                       eventEnvironment:(AMAEnvironmentContainer *)eventEnvironment
                            dateProvider:(id<AMADateProviding>)dateProvider;
 
 - (void)restoreState;

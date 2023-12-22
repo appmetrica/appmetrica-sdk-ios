@@ -345,7 +345,8 @@ describe(@"AMAReportRequestTests", ^{
                     [reporterTestHelper.appReporter reportBinaryEventWithType:AMAEventTypeClient
                                                                          data:bigData
                                                                       gZipped:gZipped
-                                                                  environment:nil
+                                                             eventEnvironment:nil
+                                                               appEnvironment:nil
                                                                        extras:nil
                                                                     onFailure:nil];
                 };
@@ -551,7 +552,8 @@ describe(@"AMAReportRequestTests", ^{
                                                                 gZipped:YES
                                                               encrypted:YES
                                                               truncated:YES
-                                                            environment:@{}
+                                                       eventEnvironment:@{}
+                                                         appEnvironment:@{}
                                                                  extras:nil
                                                               onFailure:nil];
                 

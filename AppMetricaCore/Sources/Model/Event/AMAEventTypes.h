@@ -2,12 +2,9 @@
 typedef NS_ENUM(NSUInteger, AMAEventType) {
     AMAEventTypeInit = 1,
     AMAEventTypeStart = 2,
-    AMAEventTypeCrash __deprecated = 3,
     AMAEventTypeClient = 4,
     AMAEventTypeReferrer = 5,
-    AMAEventTypeError __deprecated = 6,
     AMAEventTypeAlive = 7,
-    AMAEventTypeAccount = 12,
     AMAEventTypeFirst = 13,
     AMAEventTypeOpen = 16,
     AMAEventTypeUpdate = 17,

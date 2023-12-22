@@ -27,15 +27,11 @@ NS_ASSUME_NONNULL_BEGIN
                                bytesTruncated:(NSUInteger *)bytesTruncated;
 - (id<AMAEventValueProtocol>)fileEventValue:(NSData *)value
                                    fileName:(NSString *)fileName
+                                    gZipped:(BOOL)gZipped
                              encryptionType:(AMAEventEncryptionType)encryptionType
                              truncationType:(AMAEventValueFactoryTruncationType)truncationType
                              bytesTruncated:(NSUInteger *)bytesTruncated
                                       error:(NSError **)error;
-- (id<AMAEventValueProtocol>)fileEventWithValue:(NSData *)value
-                                       fileName:(NSString *)fileName
-                                        gZipped:(BOOL)gZipped
-                                 bytesTruncated:(NSUInteger *)bytesTruncated
-                                          error:(NSError **)error;
 
 @end
 

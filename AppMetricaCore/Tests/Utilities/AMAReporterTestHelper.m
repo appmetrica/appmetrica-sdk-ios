@@ -198,7 +198,7 @@
         return self.reporterStorages[apiKey];
     }
 
-    AMAEnvironmentContainer *errorEnvironment = [[AMAEnvironmentContainer alloc] init];
+    AMAEnvironmentContainer *eventEnvironment = [[AMAEnvironmentContainer alloc] init];
     id<AMAReporterProviding> reporterProvider = [KWMock nullMockForProtocol:@protocol(AMAReporterProviding)];
     AMAEventsCleaner *eventsCleaner = [[AMAEventsCleaner alloc] initWithReporterProvider:reporterProvider];
 
@@ -219,7 +219,7 @@
         [AMAFileUtility clearStubs];
     }
     AMAReporterStorage *reporterStorage = [[AMAReporterStorage alloc] initWithApiKey:apiKey
-                                                                    errorEnvironment:errorEnvironment
+                                                                    eventEnvironment:eventEnvironment
                                                                        eventsCleaner:eventsCleaner
                                                                             database:database];
 

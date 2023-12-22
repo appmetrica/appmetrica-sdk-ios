@@ -13,7 +13,7 @@ describe(@"AMAReporterStoragesContainer", ^{
     NSString *const apiKey = @"API_KEY";
 
     AMAMetricaConfiguration *__block metricaConfiguration = nil;
-    AMAEnvironmentContainer *__block errorEnvironment = nil;
+    AMAEnvironmentContainer *__block eventEnvironment = nil;
     AMAReporterStorage *__block reporterStorage = nil;
     AMAReporterStoragesContainer *__block container = nil;
 
@@ -21,19 +21,19 @@ describe(@"AMAReporterStoragesContainer", ^{
         metricaConfiguration = [AMAMetricaConfiguration nullMock];
         [AMAMetricaConfiguration stub:@selector(sharedInstance) andReturn:metricaConfiguration];
 
-        errorEnvironment = [AMAEnvironmentContainer stubbedNullMockForDefaultInit];
-        reporterStorage = [AMAReporterStorage stubbedNullMockForInit:@selector(initWithApiKey:errorEnvironment:)];
+        eventEnvironment = [AMAEnvironmentContainer stubbedNullMockForDefaultInit];
+        reporterStorage = [AMAReporterStorage stubbedNullMockForInit:@selector(initWithApiKey:eventEnvironment:)];
         container = [[AMAReporterStoragesContainer alloc] init];
     });
 
     it(@"Should return valid error environment", ^{
-        [[container.errorEnvironment should] equal:errorEnvironment];
+        [[container.eventEnvironment should] equal:eventEnvironment];
     });
 
     context(@"Reporter storage creation", ^{
         it(@"Should create valid storage", ^{
-            [[reporterStorage should] receive:@selector(initWithApiKey:errorEnvironment:)
-                                withArguments:apiKey, errorEnvironment];
+            [[reporterStorage should] receive:@selector(initWithApiKey:eventEnvironment:)
+                                withArguments:apiKey, eventEnvironment];
             [container storageForApiKey:apiKey];
         });
         it(@"Should return valid storage", ^{
@@ -41,7 +41,7 @@ describe(@"AMAReporterStoragesContainer", ^{
         });
         it(@"Should not create storage twice", ^{
             AMAReporterStorage *firstReporterStorage = [container storageForApiKey:apiKey];
-            reporterStorage = [AMAReporterStorage stubbedNullMockForInit:@selector(initWithApiKey:errorEnvironment:)];
+            reporterStorage = [AMAReporterStorage stubbedNullMockForInit:@selector(initWithApiKey:eventEnvironment:)];
             [[[container storageForApiKey:apiKey] should] equal:firstReporterStorage];
         });
     });

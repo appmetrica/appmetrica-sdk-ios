@@ -3,7 +3,7 @@
 #import "AMAEventComposer.h"
 #import "AMAFilledLocationComposer.h"
 #import "AMAFilledAppEnvironmentComposer.h"
-#import "AMADummyErrorEnvironmentComposer.h"
+#import "AMADummyEventEnvironmentComposer.h"
 #import "AMAReporterStateStorage.h"
 #import "AMAFilledProfileIdComposer.h"
 #import "AMALocationEnabledComposer.h"
@@ -19,7 +19,7 @@
 @property(nonatomic, strong, readwrite) id <AMALocationComposer> locationComposer;
 @property(nonatomic, strong, readwrite) id <AMALocationEnabledComposer> locationEnabledComposer;
 @property(nonatomic, strong, readwrite) id <AMAAppEnvironmentComposer> appEnvironmentComposer;
-@property(nonatomic, strong, readwrite) id <AMAErrorEnvironmentComposer> errorEnvironmentComposer;
+@property(nonatomic, strong, readwrite) id <AMAEventEnvironmentComposer> eventEnvironmentComposer;
 @property(nonatomic, strong, readwrite) id <AMAOpenIDComposer> openIDComposer;
 @property(nonatomic, strong, readwrite) id <AMAExtrasComposer> extrasComposer;
 
@@ -37,7 +37,7 @@
         _locationComposer = [[AMAFilledLocationComposer alloc] initWithLocationManager:locationManager];
         _locationEnabledComposer = [[AMAFilledLocationEnabledComposer alloc] initWithLocationManager:locationManager];
         _appEnvironmentComposer = [[AMAFilledAppEnvironmentComposer alloc] initWithStorage:storage];
-        _errorEnvironmentComposer = [AMADummyErrorEnvironmentComposer new];
+        _eventEnvironmentComposer = [AMADummyEventEnvironmentComposer new];
         _extrasComposer = [[AMAFilledExtrasComposer alloc] initWithStorage:storage];
     }
     return self;
@@ -63,9 +63,9 @@
     self.appEnvironmentComposer = appEnvironmentComposer;
 }
 
-- (void)addErrorEnvironmentComposer:(id<AMAErrorEnvironmentComposer>)errorEnvironmentComposer
+- (void)addEventEnvironmentComposer:(id<AMAEventEnvironmentComposer>)eventEnvironmentComposer
 {
-    self.errorEnvironmentComposer = errorEnvironmentComposer;
+    self.eventEnvironmentComposer = eventEnvironmentComposer;
 }
 
 - (void)addOpenIDComposer:(id<AMAOpenIDComposer>)openIDComposer

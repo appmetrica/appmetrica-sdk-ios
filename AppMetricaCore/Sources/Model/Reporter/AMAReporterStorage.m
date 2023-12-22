@@ -24,19 +24,19 @@
 @implementation AMAReporterStorage
 
 - (instancetype)initWithApiKey:(NSString *)apiKey
-              errorEnvironment:(AMAEnvironmentContainer *)errorEnvironment
+              eventEnvironment:(AMAEnvironmentContainer *)eventEnvironment
 {
     AMASharedReporterProvider *reporterProvider = [[AMASharedReporterProvider alloc] initWithApiKey:apiKey];
     AMAEventsCleaner *eventsCleaner = [[AMAEventsCleaner alloc] initWithReporterProvider:reporterProvider];
     return [self initWithApiKey:apiKey
-               errorEnvironment:errorEnvironment
+               eventEnvironment:eventEnvironment
                   eventsCleaner:eventsCleaner
                        database:[AMADatabaseFactory reporterDatabaseForApiKey:apiKey
                                                                 eventsCleaner:eventsCleaner]];
 }
 
 - (instancetype)initWithApiKey:(NSString *)apiKey
-              errorEnvironment:(AMAEnvironmentContainer *)errorEnvironment
+              eventEnvironment:(AMAEnvironmentContainer *)eventEnvironment
                  eventsCleaner:(AMAEventsCleaner *)eventsCleaner
                       database:(id<AMADatabaseProtocol>)database
 {
@@ -48,7 +48,7 @@
         _eventSerializer = [[AMAEventSerializer alloc] init];
         _sessionSerializer = [[AMASessionSerializer alloc] init];
         _stateStorage = [[AMAReporterStateStorage alloc] initWithStorageProvider:database.storageProvider
-                                                                errorEnvironment:errorEnvironment];
+                                                                eventEnvironment:eventEnvironment];
         _sessionStorage = [[AMASessionStorage alloc] initWithDatabase:database
                                                            serializer:_sessionSerializer
                                                          stateStorage:_stateStorage];

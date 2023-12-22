@@ -443,7 +443,7 @@ static NSNumber *AMAStorageUnsignedLongLongFromString(NSString *string)
 
     error = nil;
     NSString *errorEnvironmentString = [rs stringForColumn:@"error_environment"];
-    event.errorEnvironment = [AMAJSONSerialization dictionaryWithJSONString:errorEnvironmentString error:&error];
+    event.eventEnvironment = [AMAJSONSerialization dictionaryWithJSONString:errorEnvironmentString error:&error];
 
     return event;
 }
@@ -452,10 +452,7 @@ static NSNumber *AMAStorageUnsignedLongLongFromString(NSString *string)
 {
     NSString *value = [rs stringForColumn:@"value"];
     switch (eventType) {
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-        case AMAEventTypeCrash:
-#pragma clang diagnostic pop
+        case 3:
         case AMAEventTypeProtobufCrash:
         case AMAEventTypeProtobufANR: {
             NSString *filePath = [value stringByAppendingPathExtension:@"crash"];

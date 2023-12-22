@@ -100,7 +100,7 @@
                                             withDictionary:event.appEnvironment
                                                    tracker:tracker];
         eventData.has_event_environment = [self fillJSONData:&eventData.event_environment
-                                              withDictionary:event.errorEnvironment
+                                              withDictionary:event.eventEnvironment
                                                      tracker:tracker];
 
         eventData.has_user_profile_id = [AMAProtobufUtilities fillBinaryData:&eventData.user_profile_id
@@ -358,7 +358,7 @@
     
     event.appEnvironment = [self dictionaryForJSONData:&eventData->app_environment
                                                    has:eventData->has_app_environment];
-    event.errorEnvironment = [self dictionaryForJSONData:&eventData->event_environment
+    event.eventEnvironment = [self dictionaryForJSONData:&eventData->event_environment
                                                      has:eventData->has_event_environment];
     
     if (eventData->has_user_profile_id) {

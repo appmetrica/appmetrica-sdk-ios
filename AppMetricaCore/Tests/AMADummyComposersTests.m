@@ -2,7 +2,7 @@
 #import <Foundation/Foundation.h>
 #import <Kiwi/Kiwi.h>
 #import "AMADummyAppEnvironmentComposer.h"
-#import "AMADummyErrorEnvironmentComposer.h"
+#import "AMADummyEventEnvironmentComposer.h"
 #import "AMADummyLocationComposer.h"
 #import <CoreLocation/CoreLocation.h>
 
@@ -10,24 +10,32 @@ SPEC_BEGIN(AMADummyComposersTests)
 
 describe(@"AMADummyComposers", ^{
     context(@"Compose", ^{
-        let(appEvniromnentComposer, ^id{return [AMADummyAppEnvironmentComposer new];});
+        let(appEnviromnentComposer, ^id{return [AMADummyAppEnvironmentComposer new];});
+        let(eventEnviromnentComposer, ^id{return [AMADummyEventEnvironmentComposer new];});
+        let(locationComposer, ^id{return [AMADummyLocationComposer new];});
+        
         context(@"AppEnvironment", ^{
             it(@"Should return nil", ^{
-                [[[appEvniromnentComposer compose] should] beNil];
+                [[[appEnviromnentComposer compose] should] beNil];
             });
             it(@"Should conform to AMAAppEnvironmentComposer", ^{
-                [[appEvniromnentComposer should] conformToProtocol:@protocol(AMAAppEnvironmentComposer)];
+                [[appEnviromnentComposer should] conformToProtocol:@protocol(AMAAppEnvironmentComposer)];
             });
         });
         context(@"ErrorEnvironment", ^{
             it(@"Should return nil", ^{
-                [[[appEvniromnentComposer compose] should] beNil];
+                [[[eventEnviromnentComposer compose] should] beNil];
+            });
+            it(@"Should conform to AMAEventEnvironmentComposer", ^{
+                [[eventEnviromnentComposer should] conformToProtocol:@protocol(AMAEventEnvironmentComposer)];
             });
         });
         context(@"Location", ^{
-            AMADummyLocationComposer *composer = [AMADummyLocationComposer new];
             it(@"Should return nil", ^{
-                [[[composer compose] should] beNil];
+                [[[locationComposer compose] should] beNil];
+            });
+            it(@"Should conform to AMALocationComposer", ^{
+                [[locationComposer should] conformToProtocol:@protocol(AMALocationComposer)];
             });
         });
     });

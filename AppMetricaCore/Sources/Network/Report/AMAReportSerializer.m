@@ -248,10 +248,10 @@ NSString *const kAMAReportSerializerErrorKeyActualSize = @"kAMAReportSerializerE
                                                           withString:event.profileID
                                                              tracker:tracker];
 
-    if (event.errorEnvironment != nil) {
-        NSString *errorEnvironment = [AMAJSONSerialization stringWithJSONObject:event.errorEnvironment
+    if (event.eventEnvironment != nil) {
+        NSString *eventEnvironment = [AMAJSONSerialization stringWithJSONObject:event.eventEnvironment
                                                                           error:NULL];
-        eventData->environment = [AMAProtobufUtilities addNSString:errorEnvironment
+        eventData->environment = [AMAProtobufUtilities addNSString:eventEnvironment
                                                          toTracker:tracker];
         AMA_ENSURE_MEMORY_ALLOCATED(eventData->environment);
     }

@@ -262,13 +262,6 @@ describe(@"AMAEventStorage", ^{
                 NSArray *types = @[ @(AMAEventTypeAlive), @(AMAEventTypeInit) ];
                 [[theValue([storage totalCountOfEventsWithTypes:types]) should] equal:theValue(1)];
             });
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-            it(@"Should return 0 for not matching types", ^{
-                NSArray *types = @[ @(AMAEventTypeError), @(AMAEventTypeInit) ];
-                [[theValue([storage totalCountOfEventsWithTypes:types]) should] beZero];
-            });
-#pragma clang diagnostic pop
             context(@"Error", ^{
                 beforeEach(^{
                     [AMADatabaseHelper stub:@selector(countWhereField:inArray:andNotInArray:tableName:db:error:) withBlock:^id(NSArray *params) {

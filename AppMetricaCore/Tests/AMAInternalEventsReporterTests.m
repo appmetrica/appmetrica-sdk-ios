@@ -1,11 +1,8 @@
+
 #import <Kiwi/Kiwi.h>
-
 #import "AMAInternalEventsReporter.h"
-
 #import <AppMetricaCore/AppMetricaCore.h>
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
-#import <AppMetricaHostState/AppMetricaHostState.h>
-
 #import "AMAEventTypes.h"
 #import "AMAStubReporterProvider.h"
 

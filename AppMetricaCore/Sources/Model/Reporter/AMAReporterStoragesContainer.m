@@ -22,7 +22,7 @@
 {
     self = [super init];
     if (self != nil) {
-        _errorEnvironment = [[AMAEnvironmentContainer alloc] init];
+        _eventEnvironment = [[AMAEnvironmentContainer alloc] init];
         _condition = [[NSCondition alloc] init];
         _executor = [[AMAAsyncExecutor alloc] initWithIdentifier:self];
         _storages = [NSMutableDictionary dictionary];
@@ -38,7 +38,7 @@
     AMAReporterStorage *storage = self.storages[apiKey];
     if (storage == nil) {
         storage = [[AMAReporterStorage alloc] initWithApiKey:apiKey
-                                            errorEnvironment:self.errorEnvironment];
+                                            eventEnvironment:self.eventEnvironment];
         self.storages[apiKey] = storage;
     }
     [self.condition unlock];

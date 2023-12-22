@@ -463,7 +463,7 @@ describe(@"AMADatabaseMigrationTests", ^{
                 beforeAll(^{
                     [database inDatabase:^(AMAFMDatabase *db) {
                         NSString *query = @"SELECT * FROM events WHERE name = ? and type = ? ORDER BY id DESC LIMIT 1";
-                        AMAFMResultSet *rs = [db executeQuery:query, crashName, @(AMAEventTypeCrash)];
+                        AMAFMResultSet *rs = [db executeQuery:query, crashName, @(3)];
                         [[theValue([rs next]) should] beYes];
                         eventDictionary = rs.resultDictionary;
                         [rs close];
@@ -476,7 +476,7 @@ describe(@"AMADatabaseMigrationTests", ^{
                     [[eventDictionary[@"name"] should] equal:crashName];
                 });
                 it(@"Should have correct type", ^{
-                    [[theValue([eventDictionary[@"type"] integerValue]) should] equal:theValue(AMAEventTypeCrash)];
+                    [[theValue([eventDictionary[@"type"] integerValue]) should] equal:theValue(3)];
                 });
             });
 #pragma clang diagnostic pop

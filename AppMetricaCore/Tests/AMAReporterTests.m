@@ -1683,7 +1683,8 @@ describe(@"AMAReporter", ^{
                 [reporter reportEventWithType:AMAEventTypeClient
                                          name:nil
                                         value:nil
-                                  environment:nil
+                             eventEnvironment:nil
+                               appEnvironment:nil
                                        extras:nil
                                     onFailure:^(NSError *anError) { error = anError; }];
                 event = [eventStorage() amatest_savedEventWithType:AMAEventTypeClient];
@@ -1700,7 +1701,8 @@ describe(@"AMAReporter", ^{
                 [reporter reportBinaryEventWithType:AMAEventTypeClient
                                                data:data
                                             gZipped:YES
-                                        environment:nil
+                                   eventEnvironment:nil
+                                     appEnvironment:nil
                                              extras:nil
                                           onFailure:^(NSError *anError) { error = anError; }];
                 event = [eventStorage() amatest_savedEventWithType:AMAEventTypeClient];
@@ -1720,7 +1722,8 @@ describe(@"AMAReporter", ^{
                                           gZipped:YES
                                         encrypted:YES
                                         truncated:YES
-                                      environment:nil
+                                 eventEnvironment:nil
+                                   appEnvironment:nil
                                            extras:nil
                                         onFailure:^(NSError *anError) { error = anError; }];
                 event = [eventStorage() amatest_savedEventWithType:AMAEventTypeClient];

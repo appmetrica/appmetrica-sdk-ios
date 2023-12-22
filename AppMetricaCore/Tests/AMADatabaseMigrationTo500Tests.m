@@ -354,10 +354,10 @@ describe(@"AMADatabaseMigrationTo500Tests", ^{
 
 
             AMAReporterStorage *(^buildReporterStorage)(id<AMADatabaseProtocol>, NSString *) = ^(id<AMADatabaseProtocol> database, NSString *apiKey) {
-                AMAEnvironmentContainer *errorEnviromnent = [[AMAEnvironmentContainer alloc] init];
+                AMAEnvironmentContainer *eventEnvironment = [[AMAEnvironmentContainer alloc] init];
 
                 return [[AMAReporterStorage alloc] initWithApiKey:apiKey
-                                                 errorEnvironment:errorEnviromnent
+                                                 eventEnvironment:eventEnvironment
                                                     eventsCleaner:eventsCleaner
                                                          database:database];
             };
@@ -385,6 +385,7 @@ describe(@"AMADatabaseMigrationTo500Tests", ^{
                                                                       name:@"eventName"
                                                                      value:@"eventValue"
                                                           eventEnvironment:params
+                                                            appEnvironment:params
                                                                     extras:extras
                                                                      error:nil];
                     eventToMigrate.createdAt = creationDate;
@@ -429,7 +430,7 @@ describe(@"AMADatabaseMigrationTo500Tests", ^{
                     [[theValue(migratedEvent.globalNumber) should] equal:theValue(eventToMigrate.globalNumber)];
                     [[theValue(migratedEvent.numberOfType) should] equal:theValue(eventToMigrate.numberOfType)];
                     [[migratedEvent.name should] equal:eventToMigrate.name];
-                    [[migratedEvent.errorEnvironment should] equal:eventToMigrate.errorEnvironment];
+                    [[migratedEvent.eventEnvironment should] equal:eventToMigrate.eventEnvironment];
                     [[[migratedEvent.value dataWithError:nil] should] equal:[eventToMigrate.value dataWithError:nil]];
                     [[migratedEvent.sessionOid should] equal:eventToMigrate.sessionOid];
                     [[migratedEvent.createdAt should] equal:eventToMigrate.createdAt];

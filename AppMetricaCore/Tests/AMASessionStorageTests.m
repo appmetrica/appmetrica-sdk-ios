@@ -24,7 +24,7 @@ describe(@"AMASessionStorage", ^{
 
     AMAAppStateManagerTestHelper *__block stateHelper = nil;
     AMAMockDatabase *__block database = nil;
-    AMAEnvironmentContainer *__block errorEnvironment = nil;
+    AMAEnvironmentContainer *__block eventEnvironment = nil;
     AMASessionSerializer *__block serializer = nil;
     AMAReporterStateStorage *__block stateStorage = nil;
     AMASessionStorage *__block storage = nil;
@@ -36,9 +36,9 @@ describe(@"AMASessionStorage", ^{
 
         database = [AMAMockDatabase reporterDatabase];
         serializer = [[AMASessionSerializer alloc] init];
-        errorEnvironment = [[AMAEnvironmentContainer alloc] init];
+        eventEnvironment = [[AMAEnvironmentContainer alloc] init];
         stateStorage = [[AMAReporterStateStorage alloc] initWithStorageProvider:database.storageProvider
-                                                               errorEnvironment:errorEnvironment];
+                                                               eventEnvironment:eventEnvironment];
         storage = [[AMASessionStorage alloc] initWithDatabase:database
                                                    serializer:serializer
                                                  stateStorage:stateStorage];

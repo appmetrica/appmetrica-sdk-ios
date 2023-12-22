@@ -4,7 +4,7 @@
 #import "AMAEventComposerBuilder.h"
 #import "AMADummyLocationComposer.h"
 #import "AMADummyAppEnvironmentComposer.h"
-#import "AMAFilledErrorEnvironmentComposer.h"
+#import "AMAFilledEventEnvironmentComposer.h"
 #import "AMAEventTypes.h"
 #import "AMAReporterStateStorage.h"
 
@@ -26,21 +26,23 @@
         [crashComposerBuilder addAppEnvironmentComposer:[AMADummyAppEnvironmentComposer new]];
         AMAEventComposer *crashComposer = [crashComposerBuilder build];
 
-        AMAEventComposerBuilder *noLocationAndNetworkInfoComposerBuilder =
+        AMAEventComposerBuilder *noLocationComposerBuilder =
             [AMAEventComposerBuilder defaultBuilderWithStorage:storage];
-        [noLocationAndNetworkInfoComposerBuilder addLocationComposer:[AMADummyLocationComposer new]];
-        AMAEventComposer *noLocationAndNetworkInfoComposer = [noLocationAndNetworkInfoComposerBuilder build];
+        [noLocationComposerBuilder addLocationComposer:[AMADummyLocationComposer new]];
+        AMAEventComposer *noLocationComposer = [noLocationComposerBuilder build];
 
         AMAEventComposerBuilder *errorComposerBuilder = [AMAEventComposerBuilder defaultBuilderWithStorage:storage];
-        [errorComposerBuilder addErrorEnvironmentComposer:
-                                  [[AMAFilledErrorEnvironmentComposer alloc] initWithStorage:storage]];
+        [errorComposerBuilder addEventEnvironmentComposer:
+                                  [[AMAFilledEventEnvironmentComposer alloc] initWithStorage:storage]];
+        AMAEventComposer *errorComposer = [errorComposerBuilder build];
 
         _stateStorage = storage;
         _composers = @{
-                @(AMAEventTypeAlive) : noLocationAndNetworkInfoComposer,
+                @(AMAEventTypeAlive) : noLocationComposer,
                 @(AMAEventTypeProtobufCrash) : crashComposer,
                 @(AMAEventTypeProtobufANR) : crashComposer,
-                @(AMAEventTypeProtobufError) : [errorComposerBuilder build],
+                @(AMAEventTypeProtobufError) : errorComposer,
+                @(28) : noLocationComposer,
         };
     }
     return self;

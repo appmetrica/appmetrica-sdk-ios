@@ -589,7 +589,7 @@ describe(@"AMAReportSerializer", ^{
                     context(@"Event environment", ^{
                         NSDictionary *const environment = @{ @"foo": @"bar" };
                         beforeEach(^{
-                            event.errorEnvironment = environment;
+                            event.eventEnvironment = environment;
                             fillReport();
                         });
                         it(@"Should have valid value", ^{

@@ -8,7 +8,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface AMAReporterStoragesContainer : NSObject
 
-@property (nonatomic, strong, readonly) AMAEnvironmentContainer *errorEnvironment;
+@property (nonatomic, strong, readonly) AMAEnvironmentContainer *eventEnvironment;
 
 - (AMAReporterStorage *)storageForApiKey:(NSString *)apiKey;
 

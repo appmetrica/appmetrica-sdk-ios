@@ -6,7 +6,7 @@
 @protocol AMALocationComposer;
 @protocol AMANetworkInfoComposer;
 @protocol AMAAppEnvironmentComposer;
-@protocol AMAErrorEnvironmentComposer;
+@protocol AMAEventEnvironmentComposer;
 @protocol AMAProfileIdComposer;
 @protocol AMALocationEnabledComposer;
 @protocol AMAOpenIDComposer;
@@ -18,7 +18,7 @@
 @property(nonatomic, strong, readonly) id<AMALocationComposer> locationComposer;
 @property(nonatomic, strong, readonly) id<AMALocationEnabledComposer> locationEnabledComposer;
 @property(nonatomic, strong, readonly) id<AMAAppEnvironmentComposer> appEnvironmentComposer;
-@property(nonatomic, strong, readonly) id<AMAErrorEnvironmentComposer> errorEnvironmentComposer;
+@property(nonatomic, strong, readonly) id<AMAEventEnvironmentComposer> eventEnvironmentComposer;
 @property(nonatomic, strong, readonly) id<AMAOpenIDComposer> openIDComposer;
 @property(nonatomic, strong, readonly) id<AMAExtrasComposer> extrasComposer;
 
@@ -31,7 +31,7 @@
 - (void)addLocationComposer:(id<AMALocationComposer>)locationComposer;
 - (void)addLocationEnabledComposer:(id<AMALocationEnabledComposer>)locationEnabledComposer;
 - (void)addAppEnvironmentComposer:(id<AMAAppEnvironmentComposer>)appEnvironmentComposer;
-- (void)addErrorEnvironmentComposer:(id<AMAErrorEnvironmentComposer>)errorEnvironmentComposer;
+- (void)addEventEnvironmentComposer:(id<AMAEventEnvironmentComposer>)eventEnvironmentComposer;
 - (void)addExtrasComposer:(id<AMAExtrasComposer>)extrasComposer;
 - (AMAEventComposer *)build;
 

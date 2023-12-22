@@ -21,16 +21,16 @@ describe(@"AMAReporterStateStorage", ^{
 
     AMADateProviderMock *__block dateProvider = nil;
     AMAMockDatabase *__block database = nil;
-    AMAEnvironmentContainer *__block errorEnvironment = nil;
+    AMAEnvironmentContainer *__block eventEnvironment = nil;
     AMAReporterStateStorage *__block storage = nil;
 
     beforeEach(^{
         dateProvider = [[AMADateProviderMock alloc] init];
         now = [dateProvider freeze];
         database = [AMAMockDatabase reporterDatabase];
-        errorEnvironment = [[AMAEnvironmentContainer alloc] init];
+        eventEnvironment = [[AMAEnvironmentContainer alloc] init];
         storage = [[AMAReporterStateStorage alloc] initWithStorageProvider:database.storageProvider
-                                                          errorEnvironment:errorEnvironment
+                                                          eventEnvironment:eventEnvironment
                                                               dateProvider:dateProvider];
     });
 
@@ -41,7 +41,7 @@ describe(@"AMAReporterStateStorage", ^{
             return nil;
         }];
         (void)[[AMAReporterStateStorage alloc] initWithStorageProvider:database.storageProvider
-                                                      errorEnvironment:errorEnvironment
+                                                      eventEnvironment:eventEnvironment
                                                           dateProvider:dateProvider];
         [[actualKeys should] equal:[NSSet setWithArray:@[
             @"session_first_event_sent",
@@ -96,7 +96,7 @@ describe(@"AMAReporterStateStorage", ^{
                 [[storage.appEnvironment.dictionaryEnvironment should] beEmpty];
             });
             it(@"Should have empty error environment", ^{
-                [[storage.errorEnvironment.dictionaryEnvironment should] beEmpty];
+                [[storage.eventEnvironment.dictionaryEnvironment should] beEmpty];
             });
             it(@"Should have no profile id", ^{
                 [[storage.profileID should] beNil];
@@ -157,7 +157,7 @@ describe(@"AMAReporterStateStorage", ^{
                 [kvStorage saveLongLongNumber:@(openID) forKey:@"open.id" error:nil];
 
                 [kvStorage saveJSONDictionary:appEnvironment forKey:@"app_environment" error:nil];
-                [errorEnvironment addValue:@"bar" forKey:@"errEnv"];
+                [eventEnvironment addValue:@"bar" forKey:@"errEnv"];
 
                 [kvStorage saveString:profileID forKey:@"profile_id" error:nil];
 
@@ -200,7 +200,7 @@ describe(@"AMAReporterStateStorage", ^{
                 [[storage.appEnvironment.dictionaryEnvironment should] equal:appEnvironment];
             });
             it(@"Should have valid error environment", ^{
-                [[storage.errorEnvironment.dictionaryEnvironment should] equal:@{ @"errEnv": @"bar" }];
+                [[storage.eventEnvironment.dictionaryEnvironment should] equal:@{ @"errEnv": @"bar" }];
             });
             it(@"Should have valid profile id", ^{
                 [[storage.profileID should] equal:profileID];

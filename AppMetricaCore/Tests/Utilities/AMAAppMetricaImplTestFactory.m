@@ -10,7 +10,7 @@
 
 @interface AMAAppMetricaImpl ()
 
-@property (nonatomic, strong, readonly) AMAEnvironmentContainer *errorEnvironment;
+@property (nonatomic, strong, readonly) AMAEnvironmentContainer *eventEnvironment;
 
 - (void)shutdown;
 

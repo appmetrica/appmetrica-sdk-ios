@@ -65,11 +65,6 @@ describe(@"AMAEventSerializer", ^{
                 event.sequenceNumber = sequenceNumber;
                 [[field(kAMAEventTableFieldSequenceNumber) should] equal:@(sequenceNumber)];
             });
-            it(@"Should store event type", ^{
-                AMAEventType type = AMAEventTypeAccount;
-                event.type = type;
-                [[field(kAMACommonTableFieldType) should] equal:@(type)];
-            });
             it(@"Should have valid encryption type", ^{
                 [[field(kAMACommonTableFieldDataEncryptionType) should] equal:@(AMAReporterDatabaseEncryptionTypeGZipAES)];
             });
@@ -414,7 +409,7 @@ describe(@"AMAEventSerializer", ^{
                 [[jsonString should] equal:@"{\"foo\":\"bar\"}"];
             });
             it(@"Should have valid event environment", ^{
-                event.errorEnvironment = @{ @"foo": @"bar" };
+                event.eventEnvironment = @{ @"foo": @"bar" };
                 fillEventData();
                 NSString *jsonString = [AMAProtobufUtilities stringForBinaryData:&eventData->event_environment
                                                                              has:eventData->has_event_environment];
@@ -862,7 +857,7 @@ describe(@"AMAEventSerializer", ^{
                         fillEvent();
                     });
                     it(@"Should have nil value", ^{
-                        [[event.errorEnvironment should] beNil];
+                        [[event.eventEnvironment should] beNil];
                     });
                 });
                 context(@"Non-empty", ^{
@@ -875,7 +870,7 @@ describe(@"AMAEventSerializer", ^{
                         fillEvent();
                     });
                     it(@"Should have valid value", ^{
-                        [[event.errorEnvironment should] equal:@{ @"foo": @"bar", @"b": @"B" }];
+                        [[event.eventEnvironment should] equal:@{ @"foo": @"bar", @"b": @"B" }];
                     });
                 });
             });

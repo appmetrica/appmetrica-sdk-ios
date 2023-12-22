@@ -209,13 +209,15 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
 + (void)reportEventWithType:(NSUInteger)eventType
                        name:(nullable NSString *)name
                       value:(nullable NSString *)value
-                environment:(nullable NSDictionary *)environment
+           eventEnvironment:(NSDictionary *)eventEnvironment
+             appEnvironment:(NSDictionary *)appEnvironment
                   onFailure:(nullable void (^)(NSError *error))onFailure
 {
     [self reportEventWithType:eventType
                          name:name
                         value:value
-                  environment:environment
+             eventEnvironment:eventEnvironment
+               appEnvironment:appEnvironment
                        extras:nil
                     onFailure:onFailure];
 }
@@ -231,7 +233,8 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
 + (void)reportEventWithType:(NSUInteger)eventType
                        name:(nullable NSString *)name
                       value:(nullable NSString *)value
-                environment:(nullable NSDictionary *)environment
+           eventEnvironment:(NSDictionary *)eventEnvironment
+             appEnvironment:(NSDictionary *)appEnvironment
                      extras:(nullable NSDictionary<NSString *, NSData *> *)extras
                   onFailure:(nullable void (^)(NSError *error))onFailure
 {
@@ -239,25 +242,27 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
         [[self sharedImpl] reportEventWithType:eventType
                                           name:name
                                          value:value
-                                   environment:environment
+                              eventEnvironment:eventEnvironment
+                                appEnvironment:appEnvironment
                                         extras:extras
                                      onFailure:onFailure];
     }
 }
 
 + (void)reportBinaryEventWithType:(NSUInteger)eventType
-                             data:(NSData *)data
-                          gZipped:(BOOL)gZipped
-                      environment:(nullable NSDictionary *)environment
-                           extras:(nullable NSDictionary<NSString *, NSData *> *)extras
-                        onFailure:(nullable void (^)(NSError *error))onFailure
+                            data:(NSData *)data
+                         gZipped:(BOOL)gZipped
+                eventEnvironment:(nullable NSDictionary *)eventEnvironment
+                  appEnvironment:(nullable NSDictionary *)appEnvironment
+                          extras:(nullable NSDictionary<NSString *, NSData *> *)extras
+                       onFailure:(nullable void (^)(NSError *error))onFailure
 {
-    
     if ([self isAppMetricaStartedWithLogging:onFailure]) {
         [[self sharedImpl] reportBinaryEventWithType:eventType
                                                 data:data
                                              gZipped:gZipped
-                                         environment:environment
+                                    eventEnvironment:eventEnvironment
+                                      appEnvironment:appEnvironment
                                               extras:extras
                                            onFailure:onFailure];
     }
@@ -269,7 +274,8 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
                        gZipped:(BOOL)gZipped
                       encrypted:(BOOL)encrypted
                       truncated:(BOOL)truncated
-                    environment:(nullable NSDictionary *)environment
+               eventEnvironment:(NSDictionary *)eventEnvironment
+                 appEnvironment:(NSDictionary *)appEnvironment
                          extras:(nullable NSDictionary<NSString *, NSData *> *)extras
                       onFailure:(nullable void (^)(NSError *error))onFailure
 {
@@ -280,7 +286,8 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
                                            gZipped:gZipped
                                          encrypted:encrypted
                                          truncated:truncated
-                                       environment:environment
+                                  eventEnvironment:eventEnvironment
+                                    appEnvironment:appEnvironment
                                             extras:extras
                                          onFailure:onFailure];
     }

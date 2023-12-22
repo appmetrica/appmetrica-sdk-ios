@@ -402,12 +402,32 @@ describe(@"AMAAppMetricaImpl", ^{
 
     context(@"Sends string events with custom EventType", ^{
         NSUInteger const eventType = 1234;
+        it(@"Should dispatch reporter with correct event type", ^{
+            [appMetricaImpl activateWithConfiguration:configuration];
+            [[appMetricaImpl.reporter should] receive:@selector(reportEventWithType:
+                                                                name:
+                                                                value:
+                                                                eventEnvironment:
+                                                                appEnvironment:
+                                                                extras:
+                                                                onFailure:)
+                                        withArguments:theValue(eventType), @"", @"", @{}, @{}, nil, nil];
+            
+            [appMetricaImpl reportEventWithType:eventType
+                                           name:@""
+                                          value:@""
+                               eventEnvironment:@{}
+                                 appEnvironment:@{}
+                                         extras:nil
+                                      onFailure:nil];
+        });
         it(@"Should save event with custom EventType", ^{
             [appMetricaImpl activateWithConfiguration:configuration];
             [appMetricaImpl reportEventWithType:eventType
                                            name:@""
                                           value:@""
-                                    environment:@{}
+                               eventEnvironment:@{}
+                                 appEnvironment:@{}
                                          extras:nil
                                       onFailure:nil];
 
@@ -418,12 +438,33 @@ describe(@"AMAAppMetricaImpl", ^{
     
     context(@"Sends binary events with custom EventType", ^{
         NSUInteger const eventType = 4321;
+        it(@"Should dispatch reporter with correct event type", ^{
+            [appMetricaImpl activateWithConfiguration:configuration];
+            
+            [[appMetricaImpl.reporter should] receive:@selector(reportBinaryEventWithType:
+                                                                data:
+                                                                gZipped:
+                                                                eventEnvironment:
+                                                                appEnvironment:
+                                                                extras:
+                                                                onFailure:)
+                                        withArguments:theValue(eventType), kw_any(), theValue(YES), @{}, @{}, nil, nil];
+            
+            [appMetricaImpl reportBinaryEventWithType:eventType
+                                                 data:[NSData data]
+                                              gZipped:YES
+                                     eventEnvironment:@{}
+                                       appEnvironment:@{}
+                                               extras:nil
+                                            onFailure:nil];
+        });
         it(@"Should save event with custom EventType", ^{
             [appMetricaImpl activateWithConfiguration:configuration];
             [appMetricaImpl reportBinaryEventWithType:eventType
                                                  data:[NSData data]
                                               gZipped:YES
-                                          environment:@{}
+                                     eventEnvironment:@{}
+                                       appEnvironment:@{}
                                                extras:nil
                                             onFailure:nil];
             
@@ -434,6 +475,32 @@ describe(@"AMAAppMetricaImpl", ^{
     
     context(@"Sends file events with custom EventType", ^{
         NSUInteger const eventType = 2341;
+        it(@"Should dispatch reporter with correct event type", ^{
+            [appMetricaImpl activateWithConfiguration:configuration];
+            
+            [[appMetricaImpl.reporter should] receive:@selector(reportFileEventWithType:
+                                                                data:
+                                                                fileName:
+                                                                gZipped:
+                                                                encrypted:
+                                                                truncated:
+                                                                eventEnvironment:
+                                                                appEnvironment:
+                                                                extras:
+                                                                onFailure:)
+                                        withArguments:theValue(eventType), kw_any(), @"", theValue(YES), theValue(YES), theValue(YES), @{}, @{}, nil, nil];
+            
+            [appMetricaImpl reportFileEventWithType:eventType
+                                               data:[NSData data]
+                                           fileName:@""
+                                            gZipped:YES
+                                          encrypted:YES
+                                          truncated:YES
+                                   eventEnvironment:@{}
+                                     appEnvironment:@{}
+                                             extras:nil
+                                          onFailure:nil];
+        });
         it(@"Should save event with custom EventType", ^{
             [appMetricaImpl activateWithConfiguration:configuration];
             [appMetricaImpl reportFileEventWithType:eventType
@@ -442,7 +509,8 @@ describe(@"AMAAppMetricaImpl", ^{
                                             gZipped:YES
                                           encrypted:YES
                                           truncated:YES
-                                        environment:@{}
+                                   eventEnvironment:@{}
+                                     appEnvironment:@{}
                                              extras:nil
                                           onFailure:nil];
             
@@ -842,7 +910,7 @@ describe(@"AMAAppMetricaImpl", ^{
         NSString *const value = @"value";
         AMAEnvironmentContainer *__block container = nil;
         beforeEach(^{
-            container = [AMAReporterStoragesContainer sharedInstance].errorEnvironment;
+            container = [AMAReporterStoragesContainer sharedInstance].eventEnvironment;
         });
         it(@"Should sync set error environment value", ^{
             [[container should] receive:@selector(addValue:forKey:) withArguments:value, key];

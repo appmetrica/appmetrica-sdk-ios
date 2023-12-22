@@ -1,7 +1,7 @@
 
 #import <Foundation/Foundation.h>
 
-@protocol AMAErrorEnvironmentComposer <NSObject>
+@protocol AMAEventEnvironmentComposer <NSObject>
 
 - (NSDictionary *)compose;
 

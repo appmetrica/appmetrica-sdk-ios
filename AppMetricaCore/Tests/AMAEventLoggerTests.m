@@ -162,10 +162,6 @@ describe(@"AMAEventLogger", ^{
                 logEventSentWithType(AMAEventTypeAlive);
                 [[logSpy.messages should] equal:@[ message(textForEventWithTypeName(@"Alive")) ]];
             });
-            it(@"Should log account event", ^{
-                logEventSentWithType(AMAEventTypeAccount);
-                [[logSpy.messages should] equal:@[ message(textForEventWithTypeName(@"Account")) ]];
-            });
             it(@"Should log first event", ^{
                 logEventSentWithType(AMAEventTypeFirst);
                 [[logSpy.messages should] equal:@[ message(textForEventWithTypeName(@"First")) ]];
@@ -188,17 +184,6 @@ describe(@"AMAEventLogger", ^{
                 [[logSpy.messages should]
                  equal:@[ message(textForEventWithTypeName(@"Application not responding (protobuf)")) ]];
             });
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-            it(@"Should log error event", ^{
-                logEventSentWithType(AMAEventTypeError);
-                [[logSpy.messages should] equal:@[ message(textForEventWithTypeName(@"Deprecated Error")) ]];
-            });
-            it(@"Should log crash event", ^{
-                logEventSentWithType(AMAEventTypeCrash);
-                [[logSpy.messages should] equal:@[ message(textForEventWithTypeName(@"Deprecated Crash")) ]];
-            });
-#pragma clang diagnostic pop
             it(@"Should log custom event", ^{
                 logEventSentWithType(1000);
                 NSString *text = @"Event [1000] is sent: eventOid 16, sessionOid 23, "
@@ -305,10 +290,6 @@ describe(@"AMAEventLogger", ^{
                 logEventSentWithType(AMAEventTypeAlive);
                 [[logSpy.messages should] equal:@[ message(textForEventWithTypeName(@"Alive")) ]];
             });
-            it(@"Should log account event", ^{
-                logEventSentWithType(AMAEventTypeAccount);
-                [[logSpy.messages should] equal:@[ message(textForEventWithTypeName(@"Account")) ]];
-            });
             it(@"Should log first event", ^{
                 logEventSentWithType(AMAEventTypeFirst);
                 [[logSpy.messages should] equal:@[ message(textForEventWithTypeName(@"First")) ]];
@@ -330,17 +311,6 @@ describe(@"AMAEventLogger", ^{
                 [[logSpy.messages should]
                     equal:@[ message(textForEventWithTypeName(@"Application not responding (protobuf)")) ]];
             });
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-            it(@"Should log error event", ^{
-                logEventSentWithType(AMAEventTypeError);
-                [[logSpy.messages should] equal:@[ message(textForEventWithTypeName(@"Deprecated Error")) ]];
-            });
-            it(@"Should log crash event", ^{
-                logEventSentWithType(AMAEventTypeCrash);
-                [[logSpy.messages should] equal:@[ message(textForEventWithTypeName(@"Deprecated Crash")) ]];
-            });
-#pragma clang diagnostic pop
             it(@"Should log custom event", ^{
                 logEventSentWithType(1000);
                 NSString *text = @"Event [1000] is sent: eventOid 16, sessionOid 23, "

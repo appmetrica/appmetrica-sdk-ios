@@ -24,7 +24,7 @@
 @property (nonatomic, assign) NSUInteger type; // AMAEventType
 @property (nonatomic, copy) CLLocation *location;
 @property (nonatomic, assign) AMAOptionalBool locationEnabled;
-@property (nonatomic, copy) NSDictionary *errorEnvironment;
+@property (nonatomic, copy) NSDictionary *eventEnvironment;
 @property (nonatomic, copy) NSDictionary *appEnvironment;
 @property (nonatomic, copy) NSString *profileID;
 @property (nonatomic, assign) NSUInteger bytesTruncated;

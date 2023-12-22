@@ -46,12 +46,14 @@
                        name:(NSString *)name
                       value:(NSString *)value
            eventEnvironment:(NSDictionary *)eventEnvironment
+             appEnvironment:(NSDictionary *)appEnvironment
                      extras:(NSDictionary<NSString *, NSData *> *)extras
                       error:(NSError **)outError;
 - (AMAEvent *)binaryEventWithType:(NSUInteger)eventType
                              data:(NSData *)data
                           gZipped:(BOOL)gZipped
-                      environment:(NSDictionary *)environment
+                 eventEnvironment:(NSDictionary *)eventEnvironment
+                   appEnvironment:(NSDictionary *)appEnvironment
                            extras:(NSDictionary<NSString *, NSData *> *)extras
                             error:(NSError **)outError;
 - (AMAEvent *)fileEventWithType:(NSUInteger)eventType
@@ -60,7 +62,8 @@
                         gZipped:(BOOL)gZipped
                       encrypted:(BOOL)encrypted
                       truncated:(BOOL)truncated
-                    environment:(NSDictionary *)environment
+               eventEnvironment:(NSDictionary *)eventEnvironment
+                 appEnvironment:(NSDictionary *)appEnvironment
                          extras:(NSDictionary<NSString *, NSData *> *)extras
                           error:(NSError **)outError;
 

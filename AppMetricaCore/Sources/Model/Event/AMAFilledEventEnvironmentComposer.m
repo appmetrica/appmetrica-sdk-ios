@@ -1,15 +1,15 @@
 
-#import "AMAFilledErrorEnvironmentComposer.h"
+#import "AMAFilledEventEnvironmentComposer.h"
 #import "AMAReporterStateStorage.h"
 #import "AMAEnvironmentContainer.h"
 
-@interface AMAFilledErrorEnvironmentComposer()
+@interface AMAFilledEventEnvironmentComposer ()
 
 @property(nonatomic, strong, readonly)AMAReporterStateStorage *stateStorage;
 
 @end
 
-@implementation AMAFilledErrorEnvironmentComposer
+@implementation AMAFilledEventEnvironmentComposer
 
 - (instancetype)initWithStorage:(AMAReporterStateStorage *)storage
 {
@@ -22,8 +22,8 @@
 
 - (NSDictionary *)compose
 {
-    NSDictionary *errorEnvironment = self.stateStorage.errorEnvironment.dictionaryEnvironment;
-    return errorEnvironment.count != 0 ? errorEnvironment : nil;
+    NSDictionary *eventEnvironment = self.stateStorage.eventEnvironment.dictionaryEnvironment;
+    return eventEnvironment.count != 0 ? eventEnvironment : nil;
 }
 
 @end

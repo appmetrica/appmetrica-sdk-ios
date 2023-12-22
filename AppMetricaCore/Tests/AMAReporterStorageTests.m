@@ -24,7 +24,7 @@ describe(@"AMAReporterStorage", ^{
     NSString *const apiKey = @"API_KEY";
 
     AMAReporterStoragesContainer *__block storagesContainer = nil;
-    AMAEnvironmentContainer *__block errorEnvironment = nil;
+    AMAEnvironmentContainer *__block eventEnvironment = nil;
     NSObject<AMADatabaseProtocol> *__block database = nil;
     NSObject<AMADatabaseKeyValueStorageProviding> *__block storageProvider = nil;
     AMAEventSerializer *__block eventSerializer = nil;
@@ -41,7 +41,7 @@ describe(@"AMAReporterStorage", ^{
     beforeEach(^{
         storagesContainer = [AMAReporterStoragesContainer nullMock];
         [AMAReporterStoragesContainer stub:@selector(sharedInstance) andReturn:storagesContainer];
-        errorEnvironment = [AMAEnvironmentContainer nullMock];
+        eventEnvironment = [AMAEnvironmentContainer nullMock];
         database = [KWMock nullMockForProtocol:@protocol(AMADatabaseProtocol)];
         [AMADatabaseFactory stub:@selector(reporterDatabaseForApiKey:eventsCleaner:) andReturn:database];
         storageProvider = [KWMock nullMockForProtocol:@protocol(AMADatabaseKeyValueStorageProviding)];
@@ -50,7 +50,7 @@ describe(@"AMAReporterStorage", ^{
         reporterProvider = [AMASharedReporterProvider stubbedNullMockForInit:@selector(initWithApiKey:)];
         eventSerializer = [AMAEventSerializer stubbedNullMockForDefaultInit];
         sessionSerializer = [AMASessionSerializer stubbedNullMockForDefaultInit];
-        stateStorage = [AMAReporterStateStorage stubbedNullMockForInit:@selector(initWithStorageProvider:errorEnvironment:)];
+        stateStorage = [AMAReporterStateStorage stubbedNullMockForInit:@selector(initWithStorageProvider:eventEnvironment:)];
         sessionStorage = [AMASessionStorage stubbedNullMockForInit:@selector(initWithDatabase:serializer:stateStorage:)];
         eventStorage = [AMAEventStorage stubbedNullMockForInit:@selector(initWithDatabase:eventSerializer:)];
         reportRequestProvider =
@@ -60,7 +60,7 @@ describe(@"AMAReporterStorage", ^{
     });
 
     void (^createStorage)(void) = ^{
-        storage = [[AMAReporterStorage alloc] initWithApiKey:apiKey errorEnvironment:errorEnvironment];
+        storage = [[AMAReporterStorage alloc] initWithApiKey:apiKey eventEnvironment:eventEnvironment];
     };
 
     it(@"Should create valid reporter provider", ^{
@@ -79,8 +79,8 @@ describe(@"AMAReporterStorage", ^{
         createStorage();
     });
     it(@"Should create valid state storage", ^{
-        [[stateStorage should] receive:@selector(initWithStorageProvider:errorEnvironment:)
-                         withArguments:storageProvider, errorEnvironment];
+        [[stateStorage should] receive:@selector(initWithStorageProvider:eventEnvironment:)
+                         withArguments:storageProvider, eventEnvironment];
         createStorage();
     });
     it(@"Should create valid event storage", ^{

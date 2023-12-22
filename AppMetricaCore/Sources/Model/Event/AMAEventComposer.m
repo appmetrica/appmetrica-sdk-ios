@@ -5,7 +5,7 @@
 #import "AMALocationComposer.h"
 #import "AMALocationEnabledComposer.h"
 #import "AMAAppEnvironmentComposer.h"
-#import "AMAErrorEnvironmentComposer.h"
+#import "AMAEventEnvironmentComposer.h"
 #import "AMAProfileIdComposer.h"
 #import "AMAOpenIDComposer.h"
 #import "AMAExtrasComposer.h"
@@ -16,7 +16,7 @@
 @property(nonatomic, strong, readonly) id<AMALocationComposer> locationComposer;
 @property(nonatomic, strong, readonly) id<AMALocationEnabledComposer> locationEnabledComposer;
 @property(nonatomic, strong, readonly) id<AMAAppEnvironmentComposer> appEnvironmentComposer;
-@property(nonatomic, strong, readonly) id<AMAErrorEnvironmentComposer> errorEnvironmentComposer;
+@property(nonatomic, strong, readonly) id<AMAEventEnvironmentComposer> eventEnvironmentComposer;
 @property(nonatomic, strong, readonly) id<AMAOpenIDComposer> openIDComposer;
 @property(nonatomic, strong, readonly) id<AMAExtrasComposer> extrasComposer;
 
@@ -32,7 +32,7 @@
         _locationComposer = builder.locationComposer;
         _locationEnabledComposer = builder.locationEnabledComposer;
         _appEnvironmentComposer = builder.appEnvironmentComposer;
-        _errorEnvironmentComposer = builder.errorEnvironmentComposer;
+        _eventEnvironmentComposer = builder.eventEnvironmentComposer;
         _openIDComposer = builder.openIDComposer;
         _extrasComposer = builder.extrasComposer;
     }
@@ -46,7 +46,7 @@
     event.location = [self.locationComposer compose];
     event.locationEnabled = [self.locationEnabledComposer compose];
     event.appEnvironment = [self.appEnvironmentComposer compose];
-    event.errorEnvironment = [self.errorEnvironmentComposer compose];
+    event.eventEnvironment = [self.eventEnvironmentComposer compose];
     event.extras = [self.extrasComposer compose];
 }
 

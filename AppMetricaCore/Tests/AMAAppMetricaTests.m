@@ -394,7 +394,9 @@ describe(@"AMAAppMetrica", ^{
                         [AMAAppMetrica reportEventWithType:0
                                                       name:@""
                                                      value:@""
-                                               environment:@{}
+                                          eventEnvironment:@{}
+                                            appEnvironment:@{}
+                                                    extras:nil
                                                  onFailure:^(NSError *error) {
                             resultError = error;
                         }];
@@ -412,28 +414,48 @@ describe(@"AMAAppMetrica", ^{
                     NSUInteger const eventType = 1234;
                     NSString *const eventName = @"name";
                     NSString *const eventValue = @"value";
-                    NSDictionary *const environment = @{ @"a": @"b" };
+                    NSDictionary *const eventEnvironment = @{ @"c": @"d" };
+                    NSDictionary *const appEnvironment = @{ @"a": @"b" };
+                    NSDictionary *const extras = @{ @"foo" : [NSData data] };
                     
                     it(@"Should report event with custom type", ^{
                         activate();
                         AMAReporter *reporter = reporterTestHelper.appReporter;
-                        [[reporter should] receive:@selector(reportEventWithType:name:value:environment:extras:onFailure:)
-                                     withArguments:theValue(eventType), eventName, eventValue, environment, nil, nil];
+                        [[reporter should] receive:@selector(reportEventWithType:
+                                                             name:
+                                                             value:
+                                                             eventEnvironment:
+                                                             appEnvironment:
+                                                             extras:
+                                                             onFailure:)
+                                     withArguments:theValue(eventType), eventName, eventValue, eventEnvironment, appEnvironment, extras, nil];
+                        
                         [AMAAppMetrica reportEventWithType:eventType
                                                       name:eventName
                                                      value:eventValue
-                                               environment:environment
+                                          eventEnvironment:eventEnvironment
+                                            appEnvironment:appEnvironment
+                                                    extras:extras
                                                  onFailure:nil];
                     });
                     
                     
                     it(@"Should not report event with custom type if metrica is not activated", ^{
                         AMAReporter *reporter = reporterTestHelper.appReporter;
-                        [[reporter shouldNot] receive:@selector(reportEventWithType:name:value:environment:extras:onFailure:)];
+                        [[reporter shouldNot] receive:@selector(reportEventWithType:
+                                                                name:
+                                                                value:
+                                                                eventEnvironment:
+                                                                appEnvironment:
+                                                                extras:
+                                                                onFailure:)];
+
                         [AMAAppMetrica reportEventWithType:eventType
                                                       name:eventName
                                                      value:eventValue
-                                               environment:environment
+                                          eventEnvironment:eventEnvironment
+                                            appEnvironment:appEnvironment
+                                                    extras:extras
                                                  onFailure:nil];
                     });
                 });
@@ -445,7 +467,8 @@ describe(@"AMAAppMetrica", ^{
                         [AMAAppMetrica reportBinaryEventWithType:0
                                                             data:[NSData data]
                                                          gZipped:NO
-                                                     environment:nil
+                                                eventEnvironment:nil
+                                                  appEnvironment:nil
                                                           extras:nil
                                                        onFailure:^(NSError *error) {
                             resultError = error;
@@ -462,7 +485,8 @@ describe(@"AMAAppMetrica", ^{
                 });
                 context(@"Event with binary type", ^{
                     NSUInteger const eventType = 1234;
-                    NSDictionary *const environment = @{ @"a": @"b" };
+                    NSDictionary *const eventEnvironment = @{ @"a": @"b" };
+                    NSDictionary *const appEnvironment = @{ @"c": @"d" };
                     NSData *data = [NSData data];
                     
                     it(@"Should report event with custom type", ^{
@@ -471,14 +495,16 @@ describe(@"AMAAppMetrica", ^{
                         [[reporter should] receive:@selector(reportBinaryEventWithType:
                                                              data:
                                                              gZipped:
-                                                             environment:
+                                                             eventEnvironment:
+                                                             appEnvironment:
                                                              extras:
                                                              onFailure:)
-                                     withArguments:theValue(eventType), data, theValue(YES), environment, nil, nil];
+                                     withArguments:theValue(eventType), data, theValue(YES), eventEnvironment, appEnvironment, nil, nil];
                         [AMAAppMetrica reportBinaryEventWithType:eventType
                                                             data:data
                                                          gZipped:YES
-                                                     environment:environment
+                                                eventEnvironment:eventEnvironment
+                                                  appEnvironment:appEnvironment
                                                           extras:nil
                                                        onFailure:nil];
                     });
@@ -489,13 +515,15 @@ describe(@"AMAAppMetrica", ^{
                         [[reporter shouldNot] receive:@selector(reportBinaryEventWithType:
                                                                 data:
                                                                 gZipped:
-                                                                environment:
+                                                                eventEnvironment:
+                                                                appEnvironment:
                                                                 extras:
                                                                 onFailure:)];
                         [AMAAppMetrica reportBinaryEventWithType:eventType
                                                             data:data
                                                          gZipped:YES
-                                                     environment:environment
+                                                eventEnvironment:eventEnvironment
+                                                  appEnvironment:appEnvironment
                                                           extras:nil
                                                        onFailure:nil];
                     });
@@ -511,7 +539,8 @@ describe(@"AMAAppMetrica", ^{
                                                        gZipped:YES
                                                      encrypted:NO
                                                      truncated:NO
-                                                   environment:nil
+                                              eventEnvironment:nil
+                                                appEnvironment:nil
                                                         extras:nil
                                                      onFailure:^(NSError *error) {
                             resultError = error;
@@ -541,17 +570,19 @@ describe(@"AMAAppMetrica", ^{
                                                              gZipped:
                                                              encrypted:
                                                              truncated:
-                                                             environment:
+                                                             eventEnvironment:
+                                                             appEnvironment:
                                                              extras:
                                                              onFailure:)
-                                     withArguments:theValue(eventType), data, fileName, theValue(YES), theValue(YES), theValue(YES), environment, nil, nil];
+                                     withArguments:theValue(eventType), data, fileName, theValue(YES), theValue(YES), theValue(YES), environment, environment, nil, nil];
                         [AMAAppMetrica reportFileEventWithType:eventType
                                                           data:data
                                                       fileName:fileName
                                                        gZipped:YES
                                                      encrypted:YES
                                                      truncated:YES
-                                                   environment:environment
+                                              eventEnvironment:environment
+                                                appEnvironment:environment
                                                         extras:nil
                                                      onFailure:nil];
                     });
@@ -564,7 +595,8 @@ describe(@"AMAAppMetrica", ^{
                                                                 gZipped:
                                                                 encrypted:
                                                                 truncated:
-                                                                environment:
+                                                                eventEnvironment:
+                                                                appEnvironment:
                                                                 extras:
                                                                 onFailure:)];
                         [AMAAppMetrica reportFileEventWithType:eventType
@@ -573,7 +605,8 @@ describe(@"AMAAppMetrica", ^{
                                                        gZipped:YES
                                                      encrypted:YES
                                                      truncated:YES
-                                                   environment:environment
+                                              eventEnvironment:environment
+                                                appEnvironment:environment
                                                         extras:nil
                                                      onFailure:nil];
                     });

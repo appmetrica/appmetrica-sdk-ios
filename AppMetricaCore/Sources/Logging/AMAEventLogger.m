@@ -52,8 +52,6 @@ static NSUInteger const kAMAEventLogAPIKeyRequiredLength = 36;
             return @"Error";
         case AMAEventTypeAlive:
             return @"Alive";
-        case AMAEventTypeAccount:
-            return @"Account";
         case AMAEventTypeFirst:
             return @"First";
         case AMAEventTypeOpen:
@@ -70,13 +68,6 @@ static NSUInteger const kAMAEventLogAPIKeyRequiredLength = 36;
             return @"E-Commerce";
         case AMAEventTypeAdRevenue:
             return @"AdRevenue";
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-        case AMAEventTypeError:
-            return @"Deprecated Error";
-        case AMAEventTypeCrash:
-            return @"Deprecated Crash";
-#pragma clang diagnostic pop
         default:
             return nil;
     }

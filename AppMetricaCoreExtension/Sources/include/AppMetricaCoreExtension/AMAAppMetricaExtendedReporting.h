@@ -17,14 +17,16 @@ NS_SWIFT_NAME(AppMetricaExtendedReporting)
  @param eventType The type of the event. See AMAEventTypes.h file for reserved event types.
  @param name The name of the event, can be nil.
  @param value The string value of the event, can be nil.
- @param environment The environment data, can be nil.
+ @param eventEnvironment The event environment data, can be nil.
+ @param appEnvironment  The app environment data, can be nil.
  @param extras The additional data for the event, can be nil.
  @param onFailure The block to be called when the operation fails, can be nil.
  */
 - (void)reportEventWithType:(NSUInteger)eventType
                        name:(nullable NSString *)name
                       value:(nullable NSString *)value
-                environment:(nullable NSDictionary *)environment
+           eventEnvironment:(nullable NSDictionary *)eventEnvironment
+             appEnvironment:(nullable NSDictionary *)appEnvironment
                      extras:(nullable NSDictionary<NSString *, NSData *> *)extras
                   onFailure:(nullable void (^)(NSError *error))onFailure;
 
@@ -33,14 +35,16 @@ NS_SWIFT_NAME(AppMetricaExtendedReporting)
  @param eventType The type of the event. See AMAEventTypes.h file for reserved event types.
  @param data The data of the event, can be nil.
  @param gZipped The boolean value, determines whether data should be compressed using the gzip compression.
- @param environment The environment data, can be nil.
+ @param eventEnvironment The event environment data, can be nil.
+ @param appEnvironment  The app environment data, can be nil.
  @param extras The additional data for the event, can be nil.
  @param onFailure The block to be called when the operation fails, can be nil.
  */
 - (void)reportBinaryEventWithType:(NSUInteger)eventType
                              data:(NSData *)data
                           gZipped:(BOOL)gZipped
-                      environment:(nullable NSDictionary *)environment
+                 eventEnvironment:(nullable NSDictionary *)eventEnvironment
+                   appEnvironment:(nullable NSDictionary *)appEnvironment
                            extras:(nullable NSDictionary<NSString *, NSData *> *)extras
                         onFailure:(nullable void (^)(NSError *error))onFailure;
 
@@ -49,10 +53,11 @@ NS_SWIFT_NAME(AppMetricaExtendedReporting)
  @param eventType The type of the event. See AMAEventTypes.h file for reserved event types.
  @param data The data of the event, can be nil.
  @param fileName The name of file, can be nil.
- @param gZipped The boolean value, determines whether data should be compressed using the gzip compression.
+ @param gZipped The boolean value, determines whether data should be compressed using the gzip compression. If true, encryption is ignored.
  @param encrypted The boolean value, determines whether data should be encrypted.
  @param truncated  The boolean value, determines whether data should be truncated partially or completely.
- @param environment The environment data, can be nil.
+ @param eventEnvironment The event environment data, can be nil.
+ @param appEnvironment  The app environment data, can be nil.
  @param extras The additional data for the event, can be nil.
  @param onFailure The block to be called when the operation fails, can be nil.
  */
@@ -62,7 +67,8 @@ NS_SWIFT_NAME(AppMetricaExtendedReporting)
                         gZipped:(BOOL)gZipped
                       encrypted:(BOOL)encrypted
                       truncated:(BOOL)truncated
-                    environment:(nullable NSDictionary *)environment
+               eventEnvironment:(nullable NSDictionary *)eventEnvironment
+                 appEnvironment:(nullable NSDictionary *)appEnvironment
                          extras:(nullable NSDictionary<NSString *, NSData *> *)extras
                       onFailure:(nullable void (^)(NSError *error))onFailure;
 
