@@ -1,6 +1,5 @@
 
 #import "AMADecodedCrashSerializer+CustomEventParameters.h"
-
 #import <AppMetricaCoreExtension/AppMetricaCoreExtension.h>
 #import "AMACrashReportCrash.h"
 #import "AMACrashReportError.h"
@@ -9,7 +8,7 @@
 
 @implementation AMADecodedCrashSerializer (CustomEventParameters)
 
-- (AMACustomEventParameters *)eventParametersFromDecodedData:(AMADecodedCrash *)decodedCrash
+- (AMAEventPollingParameters *)eventParametersFromDecodedData:(AMADecodedCrash *)decodedCrash
                                                 forEventType:(AMACrashEventType)eventType
                                                        error:(NSError **)error
 {
@@ -18,18 +17,18 @@
         return nil;
     }
     
-    AMACustomEventParameters *encodedEvent = [[AMACustomEventParameters alloc] initWithEventType:eventType];
-    encodedEvent.valueType = AMAEventValueTypeFile;
+    AMAEventPollingParameters *encodedEvent = [[AMAEventPollingParameters alloc] initWithEventType:eventType];
+    encodedEvent.fileName = [NSString stringWithFormat:@"%@.crash", [[NSUUID UUID] UUIDString]];
     encodedEvent.data = rawData;
     encodedEvent.creationDate = decodedCrash.info.timestamp;
     encodedEvent.appState = decodedCrash.appState;
-    encodedEvent.errorEnvironment = decodedCrash.errorEnvironment;
+    encodedEvent.eventEnvironment = decodedCrash.errorEnvironment;
     encodedEvent.appEnvironment = decodedCrash.appEnvironment;
     
     return encodedEvent;
 }
 
-- (AMACustomEventParameters *)eventParametersFromDecodedData:(AMADecodedCrash *)decodedCrash error:(NSError **)error
+- (AMAEventPollingParameters *)eventParametersFromDecodedData:(AMADecodedCrash *)decodedCrash error:(NSError **)error
 {
     AMACrashEventType type = decodedCrash.crash.error.type == AMACrashTypeMainThreadDeadlock
         ? AMACrashEventTypeANR

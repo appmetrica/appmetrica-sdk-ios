@@ -1,18 +1,18 @@
 #import <Kiwi/Kiwi.h>
 
-#import "AMACrashesConfiguration.h"
+#import "AMAAppMetricaCrashesConfiguration.h"
 
-@interface TestConfigSubclass : AMACrashesConfiguration
+@interface TestConfigSubclass : AMAAppMetricaCrashesConfiguration
 @end
 
 @implementation TestConfigSubclass
 @end
 
-SPEC_BEGIN(AMACrashesConfigurationSpec)
+SPEC_BEGIN(AMAAppMetricaCrashesConfigurationTests)
 
-describe(@"AMACrashesConfiguration", ^{
+describe(@"AMAAppMetricaCrashesConfiguration", ^{
     
-    let(config, ^{ return [[AMACrashesConfiguration alloc] init]; });
+    let(config, ^{ return [[AMAAppMetricaCrashesConfiguration alloc] init]; });
     
     context(@"Default property values", ^{
         
@@ -51,7 +51,7 @@ describe(@"AMACrashesConfiguration", ^{
             config.applicationNotRespondingWatchdogInterval = 5.0;
             config.applicationNotRespondingPingInterval = 0.2;
             
-            AMACrashesConfiguration *configCopy = [config copy];
+            AMAAppMetricaCrashesConfiguration *configCopy = [config copy];
             
             [[theValue(configCopy.autoCrashTracking) should] beNo];
             [[theValue(configCopy.probablyUnhandledCrashReporting) should] beYes];
@@ -88,16 +88,16 @@ describe(@"AMACrashesConfiguration", ^{
     context(@"Comparison and hashing", ^{
         
         it(@"Should consider two configurations with the same property values as equal", ^{
-            AMACrashesConfiguration *configA = [[AMACrashesConfiguration alloc] init];
-            AMACrashesConfiguration *configB = [[AMACrashesConfiguration alloc] init];
+            AMAAppMetricaCrashesConfiguration *configA = [[AMAAppMetricaCrashesConfiguration alloc] init];
+            AMAAppMetricaCrashesConfiguration *configB = [[AMAAppMetricaCrashesConfiguration alloc] init];
             
             [[configA should] equal:configB];   // Uses isEqual:
             [[theValue([configA hash]) should] equal:theValue([configB hash])];
         });
         
         it(@"Should not consider two configurations with different property values as equal", ^{
-            AMACrashesConfiguration *configA = [[AMACrashesConfiguration alloc] init];
-            AMACrashesConfiguration *configB = [[AMACrashesConfiguration alloc] init];
+            AMAAppMetricaCrashesConfiguration *configA = [[AMAAppMetricaCrashesConfiguration alloc] init];
+            AMAAppMetricaCrashesConfiguration *configB = [[AMAAppMetricaCrashesConfiguration alloc] init];
             configB.autoCrashTracking = !configA.autoCrashTracking;
             
             [[configA shouldNot] equal:configB];  // Uses isEqual:
@@ -105,7 +105,7 @@ describe(@"AMACrashesConfiguration", ^{
         });
         
         it(@"Should produce consistent hash values for the same property configuration", ^{
-            AMACrashesConfiguration *configA = [[AMACrashesConfiguration alloc] init];
+            AMAAppMetricaCrashesConfiguration *configA = [[AMAAppMetricaCrashesConfiguration alloc] init];
             configA.autoCrashTracking = YES;
             configA.probablyUnhandledCrashReporting = YES;
             configA.ignoredCrashSignals = @[ @SIGABRT, @SIGILL ];
@@ -113,7 +113,7 @@ describe(@"AMACrashesConfiguration", ^{
             configA.applicationNotRespondingWatchdogInterval = 5.0;
             configA.applicationNotRespondingPingInterval = 0.2;
             
-            AMACrashesConfiguration *configB = [[AMACrashesConfiguration alloc] init];
+            AMAAppMetricaCrashesConfiguration *configB = [[AMAAppMetricaCrashesConfiguration alloc] init];
             configB.autoCrashTracking = YES;
             configB.probablyUnhandledCrashReporting = YES;
             configB.ignoredCrashSignals = @[ @SIGABRT, @SIGILL ];
@@ -125,17 +125,17 @@ describe(@"AMACrashesConfiguration", ^{
         });
         
         it(@"Should not produce the same hash for configurations with different properties", ^{
-            AMACrashesConfiguration *configA = [[AMACrashesConfiguration alloc] init];
+            AMAAppMetricaCrashesConfiguration *configA = [[AMAAppMetricaCrashesConfiguration alloc] init];
             configA.autoCrashTracking = YES;
             
-            AMACrashesConfiguration *configB = [[AMACrashesConfiguration alloc] init];
+            AMAAppMetricaCrashesConfiguration *configB = [[AMAAppMetricaCrashesConfiguration alloc] init];
             configB.autoCrashTracking = NO;
             
             [[theValue([configA hash]) shouldNot] equal:theValue([configB hash])];
         });
         
         it(@"Should not consider a configuration equal to its subclassed instance", ^{
-            AMACrashesConfiguration *configA = [[AMACrashesConfiguration alloc] init];
+            AMAAppMetricaCrashesConfiguration *configA = [[AMAAppMetricaCrashesConfiguration alloc] init];
             
             TestConfigSubclass *configSubclassInstance = [[TestConfigSubclass alloc] init];
             
@@ -143,8 +143,8 @@ describe(@"AMACrashesConfiguration", ^{
             [[theValue([configA hash]) shouldNot] equal:theValue([configSubclassInstance hash])];
         });
         
-        it(@"Should not consider a configuration equal to a non-AMACrashesConfiguration object", ^{
-            AMACrashesConfiguration *configA = [[AMACrashesConfiguration alloc] init];
+        it(@"Should not consider a configuration equal to a non-AMAAppMetricaCrashesConfiguration object", ^{
+            AMAAppMetricaCrashesConfiguration *configA = [[AMAAppMetricaCrashesConfiguration alloc] init];
             NSString *someString = @"A Random String";
             
             [[configA shouldNot] equal:someString];

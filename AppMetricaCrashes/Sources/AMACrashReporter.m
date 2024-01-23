@@ -1,10 +1,8 @@
+
 #import "AMACrashLogging.h"
-
 #import "AMACrashReporter.h"
-
 #import <AppMetricaCoreExtension/AppMetricaCoreExtension.h>
 #import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
-
 #import "AMACrashProcessingReporting.h"
 
 static NSString *const kAppMetricaAPIKey = @"20799a27-fa80-4b36-b2db-0f8141f24180";
@@ -34,32 +32,32 @@ static NSString *const kAppMetricaAPIKey = @"20799a27-fa80-4b36-b2db-0f8141f2418
 
 #pragma mark - Public -
 
-- (void)reportCrashWithParameters:(nonnull AMACustomEventParameters *)parameters 
+- (void)reportCrashWithParameters:(nonnull AMAEventPollingParameters *)parameters
 {
-    [AMAAppMetrica reportEventWithParameters:parameters onFailure:^(NSError *error) {
-        if (error != nil) {
-            AMALogError(@"Failed to report app crash with error: %@", error);
-            [self reportErrorToAppMetricaWithError:error eventName:@"internal_error_crash"];
-        }
-    }];
+//    [AMAAppMetrica reportEventWithParameters:parameters onFailure:^(NSError *error) {
+//        if (error != nil) {
+//            AMALogError(@"Failed to report app crash with error: %@", error);
+//            [self reportErrorToAppMetricaWithError:error eventName:@"internal_error_crash"];
+//        }
+//    }];
     
     [self reportExtendedCrashes];
 }
 
-- (void)reportANRWithParameters:(nonnull AMACustomEventParameters *)parameters 
+- (void)reportANRWithParameters:(nonnull AMAEventPollingParameters *)parameters
 {
-    [AMAAppMetrica reportEventWithParameters:parameters onFailure:^(NSError *error) {
-        if (error != nil) {
-            AMALogError(@"Failed to report app ANR with error: %@", error);
-            [self reportErrorToAppMetricaWithError:error eventName:@"internal_error_anr"];
-        }
-    }];
+//    [AMAAppMetrica reportEventWithParameters:parameters onFailure:^(NSError *error) {
+//        if (error != nil) {
+//            AMALogError(@"Failed to report app ANR with error: %@", error);
+//            [self reportErrorToAppMetricaWithError:error eventName:@"internal_error_anr"];
+//        }
+//    }];
 }
 
-- (void)reportErrorWithParameters:(nonnull AMACustomEventParameters *)parameters
+- (void)reportErrorWithParameters:(nonnull AMAEventPollingParameters *)parameters
                         onFailure:(void (^)(NSError *))onFailure;
 {
-    [AMAAppMetrica reportEventWithParameters:parameters onFailure:onFailure];
+//    [AMAAppMetrica reportEventWithParameters:parameters onFailure:onFailure];
 }
 
 - (void)reportInternalError:(NSError *)error

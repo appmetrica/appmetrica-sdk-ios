@@ -16,7 +16,6 @@
 @class AMAAttributionChecker;
 @protocol AMAExecuting;
 @class AMASessionExpirationHandler;
-@class AMACustomEventParameters;
 
 @protocol AMAReporterDelegate <NSObject>
 

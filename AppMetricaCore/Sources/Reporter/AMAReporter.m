@@ -344,11 +344,11 @@
 }
 
 - (void)reportEventWithType:(NSUInteger)eventType
-                       name:(NSString *)name
-                      value:(NSString *)value
-           eventEnvironment:(NSDictionary *)eventEnvironment
-             appEnvironment:(NSDictionary *)appEnvironment
-                     extras:(NSDictionary<NSString *, NSData *> *)extras
+                       name:(nullable NSString *)name
+                      value:(nullable NSString *)value
+           eventEnvironment:(nullable NSDictionary *)eventEnvironment
+             appEnvironment:(nullable NSDictionary *)appEnvironment
+                     extras:(nullable NSDictionary<NSString *, NSData *> *)extras
                   onFailure:(void (^)(NSError *))onFailure
 {
     [self reportCommonEventWithBlock:^AMAEvent *(NSError **error) {
@@ -364,12 +364,12 @@
 }
 
 - (void)reportBinaryEventWithType:(NSUInteger)eventType
-                            data:(NSData *)data
-                         gZipped:(BOOL)gZipped
-                eventEnvironment:(nullable NSDictionary *)eventEnvironment
-                  appEnvironment:(nullable NSDictionary *)appEnvironment
-                          extras:(nullable NSDictionary<NSString *, NSData *> *)extras
-                       onFailure:(nullable void (^)(NSError *error))onFailure
+                             data:(NSData *)data
+                          gZipped:(BOOL)gZipped
+                 eventEnvironment:(nullable NSDictionary *)eventEnvironment
+                   appEnvironment:(nullable NSDictionary *)appEnvironment
+                           extras:(nullable NSDictionary<NSString *, NSData *> *)extras
+                        onFailure:(nullable void (^)(NSError *error))onFailure
 {
     [self reportCommonEventWithBlock:^AMAEvent *(NSError **error) {
         return [self.eventBuilder binaryEventWithType:eventType
@@ -391,7 +391,7 @@
                       truncated:(BOOL)truncated
                eventEnvironment:(nullable NSDictionary *)eventEnvironment
                  appEnvironment:(nullable NSDictionary *)appEnvironment
-                         extras:(NSDictionary<NSString *,NSData *> *)extras
+                         extras:(nullable NSDictionary<NSString *,NSData *> *)extras
                       onFailure:(void (^)(NSError *))onFailure
 {
     [self reportCommonEventWithBlock:^AMAEvent *(NSError **error) {
@@ -701,93 +701,6 @@
 }
 
 #pragma mark - Events -
-
-- (void)reportEventWithParameters:(AMACustomEventParameters *)parameters
-                        onFailure:(void (^)(NSError *))onFailure
-{
-    [self stampedExecute:^(NSDate *date) {
-        NSError *error = nil;
-        AMAEvent *event = [self buildEventWithParameters:parameters error:&error];
-
-        if (event == nil) {
-            [AMAFailureDispatcher dispatchError:error withBlock:onFailure];
-            return;
-        }
-
-        NSDate *creationDate = parameters.creationDate ?: date;
-        if ([creationDate compare:date] == NSOrderedDescending) {
-            [self dispatchFutureDateErrorWithFailure:onFailure];
-            return;
-        }
-
-        [self createAndReportSessionWithEvent:event
-                                   parameters:parameters
-                                 creationDate:creationDate
-                                    onFailure:onFailure];
-    }];
-}
-
-- (AMAEvent *)buildEventWithParameters:(AMACustomEventParameters *)parameters error:(NSError **)error
-{
-    AMAEvent *event = [self.eventBuilder eventWithInternalParameters:parameters error:error];
-    if (*error != nil || event == nil) {
-        AMALogWarn(@"Failed to report event with internal parameters; Reporting failed with error %@", *error);
-    }
-    return event;
-}
-
-- (BOOL)createAndReportSessionWithEvent:(AMAEvent *)event
-                             parameters:(AMACustomEventParameters *)parameters
-                          creationDate:(NSDate *)creationDate
-                            onFailure:(void (^)(NSError *))onFailure
-{
-    NSError *error = nil;
-    __auto_type onNewSession = ^(AMASession *newSession) {
-        [self addStartEventWithDate:creationDate toSession:newSession];
-    };
-
-    AMASession *session = parameters.isPast
-        ? [self finishedSessionForEventCreatedAt:creationDate
-                                        appState:parameters.appState
-                                        error:&error
-                                    onNewSession:onNewSession]
-        : [self currentSessionForEventCreatedAt:creationDate
-                                        error:&error
-                                onNewSession:onNewSession];
-
-    if (session == nil) {
-        [self handleErrorWhenCreatingSession:error onFailure:onFailure];
-        return NO;
-    }
-
-    parameters.isPast
-        ? [self reportPastEvent:event createdAt:creationDate toSession:session onFailure:onFailure]
-        : [self reportEvent:event createdAt:creationDate toSession:session onFailure:onFailure];
-    
-    return YES;
-}
-
-- (void)handleErrorWhenCreatingSession:(NSError *)error onFailure:(void (^)(NSError *))onFailure
-{
-    AMALogError(@"Failed to create session for event: %@", error);
-    NSError *dispatchError = nil;
-    if (error != nil) {
-        dispatchError = [AMAErrorUtilities errorByAddingUnderlyingError:error
-                                                               toError:[AMAErrorsFactory internalInconsistencyError]];
-    }
-    else {
-        dispatchError = [AMAErrorsFactory internalInconsistencyError];
-    }
-    [AMAFailureDispatcher dispatchError:dispatchError withBlock:onFailure];
-}
-
-- (void)dispatchFutureDateErrorWithFailure:(void (^)(NSError *))onFailure
-{
-    NSError *futureDateError = nil;
-    [AMAErrorUtilities fillError:&futureDateError withInternalErrorName:@"Event was created in the future"];
-    [AMAFailureDispatcher dispatchError:futureDateError withBlock:onFailure];
-    AMALogWarn(@"Failed to report event because it was created in the future");
-}
 
 - (void)reportEvent:(AMAEvent *)event createdAt:(NSDate *)creationDate onFailure:(void (^)(NSError *))onFailure
 {

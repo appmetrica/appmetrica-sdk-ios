@@ -5,7 +5,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @class AMALogConfigurator;
-@class AMACustomEventParameters;
+@class AMAEventPollingParameters;
 @class AMAServiceConfiguration;
 @class AMAInternalEventsReporter;
 
@@ -103,14 +103,6 @@ NS_SWIFT_NAME(extendedReporter(for:));
                  appEnvironment:(nullable NSDictionary *)appEnvironment
                          extras:(nullable NSDictionary<NSString *, NSData *> *)extras
                       onFailure:(nullable void (^)(NSError *error))onFailure;
-
-/** Reports an event of a specified type to the server. This method is intended for reporting binary data.
-
- @param parameters The internal parameters to report event. See AMAEventInternalReportParameters.
- @param onFailure The block to be called when the operation fails, can be nil.
- */
-+ (void)reportEventWithParameters:(AMACustomEventParameters *)parameters
-                        onFailure:(nullable void (^)(NSError *error))onFailure;
 
 @end
 

@@ -1,6 +1,7 @@
-#import "AMACrashesConfiguration.h"
 
-@implementation AMACrashesConfiguration
+#import "AMAAppMetricaCrashesConfiguration.h"
+
+@implementation AMAAppMetricaCrashesConfiguration
 
 - (instancetype)init 
 {
@@ -22,7 +23,7 @@
         return NO;
     }
     
-    AMACrashesConfiguration *config = (AMACrashesConfiguration *)object;
+    AMAAppMetricaCrashesConfiguration *config = (AMAAppMetricaCrashesConfiguration *)object;
     
     return (self.autoCrashTracking == config.autoCrashTracking &&
             self.probablyUnhandledCrashReporting == config.probablyUnhandledCrashReporting &&
@@ -55,7 +56,7 @@
 
 - (nonnull id)copyWithZone:(nullable NSZone *)zone
 {
-    AMACrashesConfiguration *copy = [[[self class] allocWithZone:zone] init];
+    AMAAppMetricaCrashesConfiguration *copy = [[[self class] allocWithZone:zone] init];
     if (copy) {
         copy->_autoCrashTracking = _autoCrashTracking;
         copy->_probablyUnhandledCrashReporting = _probablyUnhandledCrashReporting;

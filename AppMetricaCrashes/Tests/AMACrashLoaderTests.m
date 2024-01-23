@@ -8,7 +8,7 @@
 
 #import "AMACrashReportDecoder.h"
 #import "AMACrashSafeTransactor.h"
-#import "AMACrashes.h"
+#import "AMAAppMetricaCrashes.h"
 #import "AMADecodedCrash.h"
 #import "AMAKSCrash.h"
 #import "AMAUnhandledCrashDetector.h"

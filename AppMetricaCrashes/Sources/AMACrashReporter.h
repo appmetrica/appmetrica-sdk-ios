@@ -6,7 +6,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @protocol AMACrashProcessingReporting;
 @protocol AMAAppMetricaReporting;
-@class AMACustomEventParameters;
+@class AMAEventPollingParameters;
 
 @interface AMACrashReporter : NSObject <AMATransactionReporter>
 
@@ -14,9 +14,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (instancetype)initWithReporter:(id<AMAAppMetricaReporting>)reporter NS_DESIGNATED_INITIALIZER;
 
-- (void)reportCrashWithParameters:(AMACustomEventParameters *)parameters;
-- (void)reportANRWithParameters:(AMACustomEventParameters *)parameters;
-- (void)reportErrorWithParameters:(AMACustomEventParameters *)parameters
+- (void)reportCrashWithParameters:(AMAEventPollingParameters *)parameters;
+- (void)reportANRWithParameters:(AMAEventPollingParameters *)parameters;
+- (void)reportErrorWithParameters:(AMAEventPollingParameters *)parameters
                         onFailure:(nullable void (^)(NSError *))onFailure;
 
 - (void)reportInternalError:(NSError *)error;

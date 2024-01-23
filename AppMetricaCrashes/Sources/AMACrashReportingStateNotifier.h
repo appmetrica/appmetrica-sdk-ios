@@ -3,7 +3,7 @@
 #import <dispatch/dispatch.h>
 
 #import "AMACrashLogging.h"
-#import "AMACrashes.h"
+#import "AMAAppMetricaCrashes.h"
 
 extern NSString *const kAMACrashReportingStateEnabledKey;
 extern NSString *const kAMACrashReportingStateCrashedLastLaunchKey;

@@ -1,3 +1,4 @@
+
 #import <Foundation/Foundation.h>
 
 #if __has_include("AMAErrorRepresentable.h")
@@ -19,14 +20,14 @@ typedef void(^AMACrashReportingStateCompletionBlock)(NSDictionary * _Nullable st
     NS_SWIFT_UNAVAILABLE("Use Swift closures.");
 
 @protocol AMAErrorRepresentable;
-@class AMACrashesConfiguration;
+@class AMAAppMetricaCrashesConfiguration;
 
 ///`AMACrashes` provides error and crash reporting functionalities for integration with AppMetrica.
 ///
 ///The class offers a singleton instance and should not be subclassed. Initialize using `[AMACrashes crashes]`.
 ///
-NS_SWIFT_NAME(Crashes)
-@interface AMACrashes : NSObject
+NS_SWIFT_NAME(AppMetricaCrashes)
+@interface AMAAppMetricaCrashes : NSObject
 
 /// Accesses the singleton `AMACrashes` instance.
 ///
@@ -35,15 +36,15 @@ NS_SWIFT_NAME(Crashes)
 
 /// Sets the crash reporting configuration for the application.
 ///
-/// - Parameter configuration: An `AMACrashesConfiguration` object that specifies how the application should handle and report crashes.
+/// - Parameter configuration: An `AMAAppMetricaCrashesConfiguration` object that specifies how the application should handle and report crashes.
 ///
 /// This method allows you to customize the behavior of the crash reporting mechanism.
-/// Use the properties of the `AMACrashesConfiguration` class to enable or disable specific types of crash reporting, as well as customize other related settings.
+/// Use the properties of the `AMAAppMetricaCrashesConfiguration` class to enable or disable specific types of crash reporting, as well as customize other related settings.
 /// Once set, the configuration will control how the app deals with various types of crashes and issues.
 ///
 /// ## Example
 /// ```objc
-/// AMACrashesConfiguration *config = [AMACrashesConfiguration new];
+/// AMAAppMetricaCrashesConfiguration *config = [AMAAppMetricaCrashesConfiguration new];
 /// config.autoCrashTracking = YES;
 /// config.probablyUnhandledCrashReporting = NO;
 /// config.applicationNotRespondingDetection = YES;
@@ -51,8 +52,8 @@ NS_SWIFT_NAME(Crashes)
 /// [[AMACrashes crashes] setConfiguration:config];
 /// ```
 ///
-/// - SeeAlso: `AMACrashesConfiguration`
-- (void)setConfiguration:(AMACrashesConfiguration *)configuration;
+/// - SeeAlso: `AMAAppMetricaCrashesConfiguration`
+- (void)setConfiguration:(AMAAppMetricaCrashesConfiguration *)configuration;
 
 /// Reports an error of the `NSError` type to AppMetrica.
 ///
@@ -141,7 +142,6 @@ NS_SWIFT_NAME(Crashes)
 /// - SeeAlso: `AMACrashReportingStateCompletionBlock` for more information on the dictionary keys and their associated values.
 - (void)requestCrashReportingStateWithCompletionQueue:(dispatch_queue_t)completionQueue
                                       completionBlock:(AMACrashReportingStateCompletionBlock)completionBlock;
-
 
 @end
 

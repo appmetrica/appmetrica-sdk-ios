@@ -1,22 +1,17 @@
 
 #import "AMACore.h"
 
-@implementation AMACustomEventParameters
+@implementation AMAEventPollingParameters
 
 - (instancetype)initWithEventType:(NSUInteger)eventType
 {
     self = [super init];
     if (self != nil) {
         _eventType = eventType;
-        _valueType = AMAEventValueTypeString;
         _fileName = nil;
-        _GZipped = YES;
-        _truncated = YES;
-        _encrypted = YES;
         _appEnvironment = self.appEnvironment.copy;
-        _errorEnvironment = self.errorEnvironment.copy;
+        _eventEnvironment = self.eventEnvironment.copy;
         _extras = self.extras.copy;
-        _isPast = NO;
         _bytesTruncated = 0;
     }
     return self;

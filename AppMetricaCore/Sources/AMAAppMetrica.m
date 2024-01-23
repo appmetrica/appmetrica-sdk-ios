@@ -222,19 +222,11 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
                     onFailure:onFailure];
 }
 
-+ (void)reportEventWithParameters:(AMACustomEventParameters *)parameters
-                        onFailure:(void (^)(NSError * _Nonnull))onFailure
-{
-    if ([self isAppMetricaStartedWithLogging:onFailure]) {
-        [[self sharedImpl] reportEventWithParameters:parameters onFailure:onFailure];
-    }
-}
-
 + (void)reportEventWithType:(NSUInteger)eventType
                        name:(nullable NSString *)name
                       value:(nullable NSString *)value
-           eventEnvironment:(NSDictionary *)eventEnvironment
-             appEnvironment:(NSDictionary *)appEnvironment
+           eventEnvironment:(nullable NSDictionary *)eventEnvironment
+             appEnvironment:(nullable NSDictionary *)appEnvironment
                      extras:(nullable NSDictionary<NSString *, NSData *> *)extras
                   onFailure:(nullable void (^)(NSError *error))onFailure
 {
@@ -250,12 +242,12 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
 }
 
 + (void)reportBinaryEventWithType:(NSUInteger)eventType
-                            data:(NSData *)data
-                         gZipped:(BOOL)gZipped
-                eventEnvironment:(nullable NSDictionary *)eventEnvironment
-                  appEnvironment:(nullable NSDictionary *)appEnvironment
-                          extras:(nullable NSDictionary<NSString *, NSData *> *)extras
-                       onFailure:(nullable void (^)(NSError *error))onFailure
+                             data:(NSData *)data
+                          gZipped:(BOOL)gZipped
+                 eventEnvironment:(nullable NSDictionary *)eventEnvironment
+                   appEnvironment:(nullable NSDictionary *)appEnvironment
+                           extras:(nullable NSDictionary<NSString *, NSData *> *)extras
+                        onFailure:(nullable void (^)(NSError *error))onFailure
 {
     if ([self isAppMetricaStartedWithLogging:onFailure]) {
         [[self sharedImpl] reportBinaryEventWithType:eventType
@@ -271,11 +263,11 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
 + (void)reportFileEventWithType:(NSUInteger)eventType
                            data:(NSData *)data
                        fileName:(NSString *)fileName
-                       gZipped:(BOOL)gZipped
+                        gZipped:(BOOL)gZipped
                       encrypted:(BOOL)encrypted
                       truncated:(BOOL)truncated
-               eventEnvironment:(NSDictionary *)eventEnvironment
-                 appEnvironment:(NSDictionary *)appEnvironment
+               eventEnvironment:(nullable NSDictionary *)eventEnvironment
+                 appEnvironment:(nullable NSDictionary *)appEnvironment
                          extras:(nullable NSDictionary<NSString *, NSData *> *)extras
                       onFailure:(nullable void (^)(NSError *error))onFailure
 {

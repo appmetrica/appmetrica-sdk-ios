@@ -208,8 +208,8 @@ describe(@"AMAAppMetricaImpl", ^{
                                                                                appState:nil error:NULL];
             
             AMAEventPollingDelegateMock.mockedEvents = @[
-                [[AMACustomEventParameters alloc] initWithEventType:AMAEventTypeProtobufCrash],
-                [[AMACustomEventParameters alloc] initWithEventType:AMAEventTypeProtobufError],
+                [[AMAEventPollingParameters alloc] initWithEventType:AMAEventTypeProtobufCrash],
+                [[AMAEventPollingParameters alloc] initWithEventType:AMAEventTypeProtobufError],
             ];
             [impl activateWithConfiguration:configuration];
             
@@ -340,17 +340,6 @@ describe(@"AMAAppMetricaImpl", ^{
             [appMetricaImpl reportUserProfile:[profile copy] onFailure:nil];
 
             AMAEvent *event = [eventStorage amatest_savedEventWithType:AMAEventTypeProfile];
-            [[event shouldNot] beNil];
-        });
-    });
-
-    context(@"Sends Custom events", ^{
-        it(@"Should save PROFILE event", ^{
-            [appMetricaImpl activateWithConfiguration:configuration];
-            AMACustomEventParameters *params = [[AMACustomEventParameters alloc] initWithEventType:AMAEventTypeClient];
-            [appMetricaImpl reportEventWithParameters:params onFailure:nil];
-
-            AMAEvent *event = [eventStorage amatest_savedEventWithType:AMAEventTypeClient];
             [[event shouldNot] beNil];
         });
     });

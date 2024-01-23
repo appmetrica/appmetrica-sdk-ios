@@ -33,33 +33,33 @@ describe(@"AMACrashReporter", ^{
         it(@"Should properly report a crash", ^{
             [[AMAAppMetrica should] receive:@selector(reportEventWithParameters:onFailure:)];
             
-            [crashReporter reportCrashWithParameters:[AMACustomEventParameters mock]];
+            [crashReporter reportCrashWithParameters:[AMAEventPollingParameters mock]];
         });
         
         it(@"Should properly report an ANR", ^{
             [[AMAAppMetrica should] receive:@selector(reportEventWithParameters:onFailure:)];
             
-            [crashReporter reportANRWithParameters:[AMACustomEventParameters mock]];
+            [crashReporter reportANRWithParameters:[AMAEventPollingParameters mock]];
         });
         
         it(@"Should properly report an Error", ^{
             [[AMAAppMetrica should] receive:@selector(reportEventWithParameters:onFailure:)];
             
-            [crashReporter reportErrorWithParameters:[AMACustomEventParameters mock] onFailure:nil];
+            [crashReporter reportErrorWithParameters:[AMAEventPollingParameters mock] onFailure:nil];
         });
         
         it(@"Should report internal error when AMAAppMetrica's onFailure is called for crash", ^{
             [[mockReporter should] receive:@selector(reportEvent:parameters:onFailure:)
                              withArguments:@"internal_error_crash", kw_any(), kw_any()];
             
-            [crashReporter reportCrashWithParameters:[AMACustomEventParameters mock]];
+            [crashReporter reportCrashWithParameters:[AMAEventPollingParameters mock]];
         });
         
         it(@"Should report internal error when AMAAppMetrica's onFailure is called for ANR", ^{
             [[mockReporter should] receive:@selector(reportEvent:parameters:onFailure:)
                              withArguments:@"internal_error_anr", kw_any(), kw_any()];
             
-            [crashReporter reportANRWithParameters:[AMACustomEventParameters mock]];
+            [crashReporter reportANRWithParameters:[AMAEventPollingParameters mock]];
         });
         
         it(@"Should call the onFailure block when reporting an Error fails", ^{
@@ -71,7 +71,7 @@ describe(@"AMACrashReporter", ^{
                 [[error should] equal:failureError];
             };
             
-            [crashReporter reportErrorWithParameters:[AMACustomEventParameters mock] onFailure:failureBlock];
+            [crashReporter reportErrorWithParameters:[AMAEventPollingParameters mock] onFailure:failureBlock];
             
             [[theValue(onFailureCalled) should] beYes];
         });
@@ -96,7 +96,7 @@ describe(@"AMACrashReporter", ^{
             [[extendedReporterMock1 should] receive:@selector(reportCrash:) withArguments:@"Unhandled crash"];
             [[extendedReporterMock2 should] receive:@selector(reportCrash:) withArguments:@"Unhandled crash"];
             
-            [crashReporter reportCrashWithParameters:[AMACustomEventParameters mock]];
+            [crashReporter reportCrashWithParameters:[AMAEventPollingParameters mock]];
         });
     });
     

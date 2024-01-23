@@ -266,17 +266,6 @@
     }];
 }
 
-- (void)reportEventWithParameters:(AMACustomEventParameters *)parameters
-                        onFailure:(nullable void (^)(NSError *error))onFailure
-{
-    
-    [self execute:^{
-        [self reportEventWithBlock:^{
-            [self.reporter reportEventWithParameters:parameters onFailure:onFailure];
-        } onFailure:onFailure];
-    }];
-}
-
 - (void)reportEventWithBlock:(dispatch_block_t)reportEvent
                    onFailure:(nullable void (^)(NSError *error))onFailure
 {
@@ -662,7 +651,7 @@
                                               main:YES
                                  onStorageRestored:^(AMAEventBuilder *eventBuilder){
             // called on reporter.executor queue
-            [weakSelf applyDeferedAppEnvironmentUpdatesWithStorage:reporterStorage];
+            [weakSelf applyDeferredAppEnvironmentUpdatesWithStorage:reporterStorage];
             [weakSelf applyEventsFromPollingDelegatesWithStorage:reporterStorage eventBuilder:eventBuilder];
             [weakSelf applyUserProfileIDWithStorage:reporterStorage
                                       userProfileID:[self mergeUserProfileIDs:configuration.userProfileID]];
@@ -685,8 +674,8 @@
     NSArray<AMAEvent *> *events = [AMACollectionUtilities flatMapArray:self.eventPollingDelegates
                                                              withBlock:^NSArray *(Class<AMAEventPollingDelegate> delegate) {
         return [AMACollectionUtilities mapArray:[delegate eventsForPreviousSession]
-                                      withBlock:^id(AMACustomEventParameters *params) {
-            return [eventBuilder eventWithInternalParameters:params error:NULL];
+                                      withBlock:^id(AMAEventPollingParameters *params) {
+            return [eventBuilder eventWithPollingParameters:params error:NULL];
         }];
     }];
     
@@ -701,7 +690,7 @@
     }
 }
 
-- (void)applyDeferedAppEnvironmentUpdatesWithStorage:(AMAReporterStorage *)reporterStorage
+- (void)applyDeferredAppEnvironmentUpdatesWithStorage:(AMAReporterStorage *)reporterStorage
 {
     @synchronized (self) {
         AMAEnvironmentContainerActionRedoManager *manager = [AMAEnvironmentContainerActionRedoManager new];

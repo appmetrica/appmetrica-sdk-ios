@@ -4,7 +4,6 @@
 
 @class AMAAdRevenueInfo;
 @class AMAAppMetricaConfiguration;
-@class AMACustomEventParameters;
 @class AMAECommerce;
 @class AMARevenueInfo;
 @class AMAUserProfile;
@@ -69,9 +68,6 @@ NS_ASSUME_NONNULL_BEGIN
                  appEnvironment:(nullable NSDictionary *)appEnvironment
                          extras:(nullable NSDictionary<NSString *, NSData *> *)extras
                       onFailure:(nullable void (^)(NSError *error))onFailure;
-
-- (void)reportEventWithParameters:(AMACustomEventParameters * )parameters
-                        onFailure:(nullable void (^)(NSError *error))onFailure;
 
 - (void)reportUserProfile:(AMAUserProfile *)userProfile onFailure:(nullable void (^)(NSError *error))onFailure;
 - (void)reportRevenue:(AMARevenueInfo *)revenueInfo onFailure:(nullable void (^)(NSError *error))onFailure;

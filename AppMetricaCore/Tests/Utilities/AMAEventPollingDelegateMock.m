@@ -2,19 +2,19 @@
 
 @implementation AMAEventPollingDelegateMock
 
-static NSArray<AMACustomEventParameters *> *_mockedEvents = nil;
+static NSArray<AMAEventPollingParameters *> *_mockedEvents = nil;
 
-+ (NSArray<AMACustomEventParameters *> *)mockedEvents
++ (NSArray<AMAEventPollingParameters *> *)mockedEvents
 {
     return _mockedEvents;
 }
 
-+ (void)setMockedEvents:(NSArray<AMACustomEventParameters *> *)mockedEvents 
++ (void)setMockedEvents:(NSArray<AMAEventPollingParameters *> *)mockedEvents
 {
     _mockedEvents = mockedEvents;
 }
 
-+ (NSArray<AMACustomEventParameters *> *)eventsForPreviousSession 
++ (NSArray<AMAEventPollingParameters *> *)eventsForPreviousSession 
 {
     return _mockedEvents ?: @[];
 }

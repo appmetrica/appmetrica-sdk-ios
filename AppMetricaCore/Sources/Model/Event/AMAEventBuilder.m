@@ -78,79 +78,43 @@
     return event;
 }
 
-- (AMAEvent *)eventWithInternalParameters:(AMACustomEventParameters *)parameters
-                                    error:(NSError **)error
+- (AMAEvent *)eventWithPollingParameters:(AMAEventPollingParameters *)parameters
+                                   error:(NSError **)error
 {
     NSError *internalError = nil;
     BOOL gZipped = NO;
     NSData *data = parameters.data;
     
-    if (parameters.GZipped) {
-        NSData *gZippedData = [self.gZipEncoder encodeData:data error:&internalError];
-        if (internalError == nil) {
-            data = gZippedData;
-            gZipped = YES;
-        }
-        else {
-            AMALogWarn(@"Failed to gzip data: %@", internalError);
-            [AMAErrorUtilities fillError:error withError:internalError];
-        }
+    NSData *gZippedData = [self.gZipEncoder encodeData:data error:&internalError];
+    if (internalError == nil) {
+        data = gZippedData;
+        gZipped = YES;
+    }
+    else {
+        AMALogWarn(@"Failed to gzip data: %@", internalError);
+        [AMAErrorUtilities fillError:error withError:internalError];
     }
     
     AMAEvent *event = [self eventOfType:parameters.eventType];
     
     NSUInteger bytesTruncated = 0;
-    switch (parameters.valueType) {
-        case AMAEventValueTypeFile: {
-            AMAEventEncryptionType encryption = parameters.encrypted ? AMAEventEncryptionTypeAESv1 : AMAEventEncryptionTypeNoEncryption;
-            AMAEventValueFactoryTruncationType truncation = parameters.truncated
-                ? AMAEventValueFactoryTruncationTypeFull
-                : AMAEventValueFactoryTruncationTypePartial;
-            
-            NSString *fileName = parameters.fileName ?: [NSString stringWithFormat:@"%@.event", NSUUID.UUID.UUIDString];
-            event.value = [self.eventValueFactory fileEventValue:data
-                                                        fileName:fileName
-                                                         gZipped:gZipped
-                                                  encryptionType:encryption
-                                                  truncationType:truncation
-                                                  bytesTruncated:&bytesTruncated
-                                                           error:&internalError];
-        }
-            break;
-        case AMAEventValueTypeBinary:
-            event.value = [self.eventValueFactory binaryEventValue:data
-                                                           gZipped:gZipped
-                                                    bytesTruncated:&bytesTruncated];
-            break;
-        case AMAEventValueTypeString: {
-            NSError *serializationError = nil;
-            //TODO: rewrite event parameters
-            NSString *stringValue = [AMAJSONSerialization stringWithJSONObject:data error:&serializationError];
-            
-            if (serializationError != nil) {
-                [AMAErrorUtilities fillError:error withError:internalError];
-                return nil;
-            }
-            event.value = [self.eventValueFactory stringEventValue:stringValue
-                                                    bytesTruncated:&bytesTruncated];
-        }
-            break;
-        default:
-            internalError = [NSError errorWithDomain:@"AMAEventBuilderErrorDomain"
-                                                code:0
-                                            userInfo:@{NSLocalizedDescriptionKey: @"Invalid storage type"}];
-            AMALogAssert(@"Invalid value type: %ld", (long)parameters.valueType);
-            [AMAErrorUtilities fillError:error withError:internalError];
-            return nil;
-    }
+    
+    event.value = [self.eventValueFactory fileEventValue:data
+                                                fileName:parameters.fileName
+                                                 gZipped:YES
+                                          encryptionType:AMAEventEncryptionTypeGZip
+                                          truncationType:AMAEventValueFactoryTruncationTypeFull
+                                          bytesTruncated:&bytesTruncated
+                                                   error:&internalError];
+    
     [self logTruncation:@"value" event:event bytesTruncated:bytesTruncated];
     
-    [self fillEvent:event withName:parameters.name];
     event.bytesTruncated += (parameters.bytesTruncated + bytesTruncated);
     event.appEnvironment = parameters.appEnvironment;
-    event.eventEnvironment = parameters.errorEnvironment;
+    event.eventEnvironment = parameters.eventEnvironment;
     [self fillEvent:event withExtras:parameters.extras];
-    event.createdAt = parameters.isPast ? parameters.creationDate : event.createdAt;
+    
+    event.createdAt = parameters.creationDate ? parameters.creationDate : event.createdAt;
 
     return event;
 }

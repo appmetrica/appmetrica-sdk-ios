@@ -5,7 +5,6 @@
 @class AMARevenueInfo;
 @class AMAECommerce;
 @class AMAAdRevenueInfo;
-@class AMACustomEventParameters;
 @protocol AMAAppMetricaPluginReporting;
 
 #if !TARGET_OS_TV
@@ -148,13 +147,6 @@ NS_SWIFT_NAME(reportEvent(name:params:onFailure:));
 - (void)setupWebViewReporting:(id<AMAJSControlling>)controller
                     onFailure:(nullable void (^)(NSError *error))onFailure;
 #endif
-/** Reports an event of a specified type to the server. This method is intended for reporting binary data.
-
- @param parameters The internal parameters to report event. See AMAEventInternalReportParameters.
- @param onFailure The block to be called when the operation fails, can be nil.
- */
-- (void)reportEventWithParameters:(AMACustomEventParameters *)parameters
-                        onFailure:(nullable void (^)(NSError *error))onFailure;
 
 /** Setting key - value data to be used as additional information, associated with all future events.
  If value is nil previously set key-value is removed, does nothing if key hasn't been added.

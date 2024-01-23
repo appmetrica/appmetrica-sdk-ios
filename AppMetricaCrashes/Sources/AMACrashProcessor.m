@@ -65,9 +65,9 @@
     if ([self shouldIgnoreCrash:decodedCrash]) { return; }
     
     NSError *localError = nil;
-    AMACustomEventParameters *parameters = [self.serializer eventParametersFromDecodedData:decodedCrash
-                                                                              forEventType:AMACrashEventTypeCrash
-                                                                                     error:&localError];
+    AMAEventPollingParameters *parameters = [self.serializer eventParametersFromDecodedData:decodedCrash
+                                                                               forEventType:AMACrashEventTypeCrash
+                                                                                      error:&localError];
     
     if (parameters == nil) {
         [self.crashReporter reportInternalCorruptedCrash:localError];
@@ -84,9 +84,9 @@
     }
     
     NSError *localError = nil;
-    AMACustomEventParameters *parameters = [self.serializer eventParametersFromDecodedData:decodedCrash
-                                                                              forEventType:AMACrashEventTypeANR
-                                                                                     error:&localError];
+    AMAEventPollingParameters *parameters = [self.serializer eventParametersFromDecodedData:decodedCrash
+                                                                               forEventType:AMACrashEventTypeANR
+                                                                                      error:&localError];
     
     if (parameters == nil) {
         [self.crashReporter reportInternalCorruptedCrash:localError];
@@ -106,13 +106,13 @@
         return;
     }
     
-    AMACustomEventParameters *params = [[AMACustomEventParameters alloc] initWithEventType:AMACrashEventTypeError];
-    params.valueType = AMAEventValueTypeBinary;
+    AMAEventPollingParameters *params = [[AMAEventPollingParameters alloc] initWithEventType:AMACrashEventTypeError];
+//    params.valueType = AMAEventValueTypeBinary;
     params.data = formattedData;
-    params.GZipped = YES;
+//    params.GZipped = YES;
     params.bytesTruncated = errorModel.bytesTruncated;
     if (self.currentErrorEnvironment.count > 0) {
-        params.errorEnvironment = self.currentErrorEnvironment;
+        params.eventEnvironment = self.currentErrorEnvironment;
     }
     
     [self.crashReporter reportErrorWithParameters:params onFailure:onFailure];

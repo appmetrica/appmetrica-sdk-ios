@@ -3,10 +3,8 @@
 #import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
 #import <AppMetricaHostState/AppMetricaHostState.h>
 #import <AppMetricaPlatform/AppMetricaPlatform.h>
-
-#import "AMACrashes.h"
+#import "AMAAppMetricaCrashes.h"
 #import "AMACrashes+Private.h"
-
 #import "AMAANRWatchdog.h"
 #import "AMACrashContext.h"
 #import "AMACrashEventType.h"
@@ -18,14 +16,14 @@
 #import "AMACrashReporter.h"
 #import "AMACrashReportingStateNotifier.h"
 #import "AMACrashSafeTransactor.h"
-#import "AMACrashesConfiguration.h"
+#import "AMAAppMetricaCrashesConfiguration.h"
 #import "AMADecodedCrash.h"
 #import "AMADecodedCrashSerializer+CustomEventParameters.h"
 #import "AMADecodedCrashSerializer.h"
 #import "AMAErrorEnvironment.h"
 #import "AMAErrorModelFactory.h"
 
-@interface AMACrashes ()
+@interface AMAAppMetricaCrashes ()
 
 @property (nonatomic, strong) AMACrashProcessor *crashProcessor;
 @property (nonatomic, strong) AMACrashReportingStateNotifier *stateNotifier;
@@ -44,7 +42,7 @@
 
 @end
 
-@implementation AMACrashes
+@implementation AMAAppMetricaCrashes
 
 @synthesize activated = _activated;
 
@@ -56,7 +54,7 @@
 
 + (void)initialize
 {
-    if (self == [AMACrashes class]) {
+    if (self == [AMAAppMetricaCrashes class]) {
         [AMAAppMetrica.sharedLogConfigurator setupLogWithChannel:AMA_LOG_CHANNEL];
         [AMAAppMetrica.sharedLogConfigurator setChannel:AMA_LOG_CHANNEL enabled:NO];
     }
@@ -64,7 +62,7 @@
 
 + (instancetype)crashes
 {
-    static AMACrashes *sharedInstance = nil;
+    static AMAAppMetricaCrashes *sharedInstance = nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         sharedInstance = [[self alloc] init];
@@ -84,19 +82,18 @@
                     stateNotifier:[[AMACrashReportingStateNotifier alloc] init]
                 hostStateProvider:[[AMAHostStateProvider alloc] init]
                        serializer:[[AMADecodedCrashSerializer alloc] init]
-                    configuration:[[AMACrashesConfiguration alloc] init]
+                    configuration:[[AMAAppMetricaCrashesConfiguration alloc] init]
                  errorEnvironment:[AMAErrorEnvironment new]
                 errorModelFactory:[AMAErrorModelFactory sharedInstance]
                     crashReporter:[[AMACrashReporter alloc] init]];
 }
-
 
 - (instancetype)initWithExecutor:(id<AMAExecuting>)executor
                      crashLoader:(AMACrashLoader *)crashLoader
                    stateNotifier:(AMACrashReportingStateNotifier *)stateNotifier
                hostStateProvider:(AMAHostStateProvider *)hostStateProvider
                       serializer:(AMADecodedCrashSerializer *)serializer
-                   configuration:(AMACrashesConfiguration *)configuration
+                   configuration:(AMAAppMetricaCrashesConfiguration *)configuration
                 errorEnvironment:(AMAErrorEnvironment *)errorEnvironment
                errorModelFactory:(AMAErrorModelFactory *)errorModelFactory
                    crashReporter:(AMACrashReporter *)crashReporter
@@ -121,7 +118,7 @@
 
 #pragma mark - Public -
 
-- (void)setConfiguration:(AMACrashesConfiguration *)configuration
+- (void)setConfiguration:(AMAAppMetricaCrashesConfiguration *)configuration
 {
     if (configuration == nil) {
         return;
@@ -135,7 +132,6 @@
         }
     }
 }
-
 
 - (void)reportNSError:(NSError *)error onFailure:(void (^)(NSError *))onFailure
 {
@@ -188,7 +184,7 @@
 
 - (void)activate
 {
-    AMACrashesConfiguration *config = nil;
+    AMAAppMetricaCrashesConfiguration *config = nil;
     @synchronized (self) {
         self.activated = YES;
         config = self.internalConfiguration;
@@ -258,7 +254,7 @@ them while retaining external immutability. Needed for testability. */
     }
 }
 
-- (void)setInternalConfiguration:(AMACrashesConfiguration *)internalConfiguration
+- (void)setInternalConfiguration:(AMAAppMetricaCrashesConfiguration *)internalConfiguration
 {
     _internalConfiguration = internalConfiguration;
 }
@@ -377,13 +373,13 @@ them while retaining external immutability. Needed for testability. */
     return result;
 }
 
-- (NSArray<AMACustomEventParameters *> *)eventsForPreviousSession
+- (NSArray<AMAEventPollingParameters *> *)eventsForPreviousSession
 {
     __weak typeof(self) weakSelf = self;
     return [self syncExecute:^id{
         __strong typeof(weakSelf) strongSelf = weakSelf;
         NSArray<AMADecodedCrash *> *crashes = [strongSelf.crashLoader syncLoadCrashReports];
-        return [AMACollectionUtilities mapArray:crashes withBlock:^AMACustomEventParameters *(AMADecodedCrash *item) {
+        return [AMACollectionUtilities mapArray:crashes withBlock:^AMAEventPollingParameters *(AMADecodedCrash *item) {
             return [strongSelf.serializer eventParametersFromDecodedData:item error:NULL];
         }];
     }];
@@ -407,14 +403,14 @@ them while retaining external immutability. Needed for testability. */
 
 #pragma mark - AMAEventPollingDelegate
 
-+ (NSArray<AMACustomEventParameters *> *)eventsForPreviousSession 
++ (NSArray<AMAEventPollingParameters *> *)eventsForPreviousSession 
 {
     return [[[self class] crashes] eventsForPreviousSession];
 }
 
 #pragma mark - AMACrashLoaderDelegate
 
-// FIXME: (glinnik) this logic is not needed any more, as crashes are now loaded on statrup
+// FIXME: (glinnik) this logic is not needed any more, as crashes are now loaded on startup
 - (void)crashLoader:(AMACrashLoader *)crashLoader
        didLoadCrash:(AMADecodedCrash *)decodedCrash
           withError:(NSError *)error

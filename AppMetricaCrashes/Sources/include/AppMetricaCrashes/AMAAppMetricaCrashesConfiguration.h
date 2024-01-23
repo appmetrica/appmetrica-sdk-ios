@@ -3,13 +3,13 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-/// `AMACrashesConfiguration` provides a customizable interface for controlling how your application
+/// `AMAAppMetricaCrashesConfiguration` provides a customizable interface for controlling how your application
 /// deals with various types of crashes and issues.
 ///
 /// This class allows you to enable or disable specific types of crash reporting and to customize the behavior
 /// of the reporting mechanism.
-NS_SWIFT_NAME(CrashesConfiguration)
-@interface AMACrashesConfiguration : NSObject <NSCopying>
+NS_SWIFT_NAME(AppMetricaCrashesConfiguration)
+@interface AMAAppMetricaCrashesConfiguration : NSObject <NSCopying>
 
 /// Controls the automated tracking of application crashes.
 ///

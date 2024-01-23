@@ -299,7 +299,7 @@ NSString *const kAMAApplicationNotRespondingCrashType = @"AMAApplicationNotRespo
         if (decodedCrash != nil && error == nil) {
             [self.syncLoadedCrashes addObject:decodedCrash];
         }
-    } 
+    }
     else {
         [self.delegate crashLoader:self didLoadANR:decodedCrash withError:error];
     }

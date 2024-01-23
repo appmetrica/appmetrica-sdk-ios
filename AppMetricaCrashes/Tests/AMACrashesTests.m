@@ -1,14 +1,14 @@
 #import <Kiwi/Kiwi.h>
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
 #import <AppMetricaCoreExtension/AppMetricaCoreExtension.h>
-#import "AMACrashes.h"
+#import "AMAAppMetricaCrashes.h"
 #import "AMACrashes+Private.h"
 #import "AMAANRWatchdog.h"
 #import "AMACrashLoader.h"
 #import "AMACrashProcessor.h"
 #import "AMACrashReporter.h"
 #import "AMACrashReportingStateNotifier.h"
-#import "AMACrashesConfiguration.h"
+#import "AMAAppMetricaCrashesConfiguration.h"
 #import "AMADecodedCrash.h"
 #import "AMADecodedCrashSerializer.h"
 #import "AMAErrorEnvironment.h"
@@ -29,7 +29,7 @@ describe(@"AMACrashes", ^{
     let(errorEnvironment, ^{ return [AMAErrorEnvironment nullMock]; });
     let(errorModelFactory, ^{ return [AMAErrorModelFactory nullMock]; });
     let(crashReporter, ^{ return [AMACrashReporter nullMock]; });
-    
+
     let(crashProcessor, ^{
         // TODO: replace with factory
         AMACrashProcessor *mock = [AMACrashProcessor nullMock];
@@ -37,41 +37,41 @@ describe(@"AMACrashes", ^{
         [mock stub:@selector(initWithIgnoredSignals:serializer:crashReporter:) andReturn:mock];
         return mock;
     });
-    let(anrDetectorMock, ^{ 
+    let(anrDetectorMock, ^{
         // TODO: replace with factory
         AMAANRWatchdog *mock = [AMAANRWatchdog nullMock];
         [AMAANRWatchdog stub:@selector(alloc) andReturn:mock];
         [mock stub:@selector(initWithWatchdogInterval:pingInterval:) andReturn:mock];
         return mock;
     });
-    
+
     let(crashes, ^{
-        return [[AMACrashes alloc] initWithExecutor:executor
-                                        crashLoader:crashLoader
-                                      stateNotifier:stateNotifier
-                                  hostStateProvider:hostStateProvider
-                                         serializer:serializer
-                                      configuration:[AMACrashesConfiguration new]
-                                   errorEnvironment:errorEnvironment
-                                  errorModelFactory:errorModelFactory
-                                      crashReporter:crashReporter];
+        return [[AMAAppMetricaCrashes alloc] initWithExecutor:executor
+                                                  crashLoader:crashLoader
+                                                stateNotifier:stateNotifier
+                                            hostStateProvider:hostStateProvider
+                                                   serializer:serializer
+                                                configuration:[AMAAppMetricaCrashesConfiguration new]
+                                             errorEnvironment:errorEnvironment
+                                            errorModelFactory:errorModelFactory
+                                                crashReporter:crashReporter];
     });
-    
+
     context(@"Initialization and Singleton", ^{
         it(@"Should correctly initialize shared instance", ^{
-            AMACrashes *firstInstance = [AMACrashes crashes];
-            AMACrashes *secondInstance = [AMACrashes crashes];
+            AMAAppMetricaCrashes *firstInstance = [AMAAppMetricaCrashes crashes];
+            AMAAppMetricaCrashes *secondInstance = [AMAAppMetricaCrashes crashes];
             [[firstInstance should] equal:secondInstance];
         });
     });
-    
+
     context(@"Initialization with default configuration", ^{
 
-        let(defaultInitCrashes, ^{ return [AMACrashes new]; });
-        
+        let(defaultInitCrashes, ^{ return [AMAAppMetricaCrashes new]; });
+
         it(@"Should have the default internalConfiguration values when initialized with [AMACrashes init]", ^{
-            AMACrashesConfiguration *config = [defaultInitCrashes internalConfiguration];
-            
+            AMAAppMetricaCrashesConfiguration *config = [defaultInitCrashes internalConfiguration];
+
             [[theValue(config.autoCrashTracking) should] beYes];
             [[theValue(config.probablyUnhandledCrashReporting) should] beNo];
             [[config.ignoredCrashSignals should] beNil];
@@ -80,29 +80,29 @@ describe(@"AMACrashes", ^{
             [[theValue(config.applicationNotRespondingPingInterval) should] equal:theValue(0.1)];
         });
     });
-    
+
     context(@"Configuration Setup", ^{
-        
-        __block AMACrashesConfiguration *initialConfig = nil;
-        __block AMACrashesConfiguration *newConfig = nil;
-        
+
+        __block AMAAppMetricaCrashesConfiguration *initialConfig = nil;
+        __block AMAAppMetricaCrashesConfiguration *newConfig = nil;
+
         beforeEach(^{
-            initialConfig = [AMACrashesConfiguration new];
-            newConfig = [AMACrashesConfiguration new];
+            initialConfig = [AMAAppMetricaCrashesConfiguration new];
+            newConfig = [AMAAppMetricaCrashesConfiguration new];
             newConfig.autoCrashTracking = NO;
         });
-        
+
         it(@"Should set a new configuration when not activated", ^{
             [[theValue(crashes.isActivated) should] beNo];
             [crashes setConfiguration:newConfig];
             [[[crashes internalConfiguration] should] equal:newConfig];
         });
-        
+
         it(@"Should have copied the configuration such that changes to the original do not affect the internal configuration", ^{
             [crashes setConfiguration:initialConfig];
             initialConfig.autoCrashTracking = !initialConfig.autoCrashTracking;
             initialConfig.applicationNotRespondingDetection = !initialConfig.applicationNotRespondingDetection;
-            
+
             [[[crashes internalConfiguration] shouldNot] equal:initialConfig];
         });
 #pragma clang diagnostic push
@@ -115,117 +115,117 @@ describe(@"AMACrashes", ^{
         });
 #pragma clang diagnostic pop
         context(@"When activated", ^{
-            
+
             beforeEach(^{
                 [crashes setConfiguration:initialConfig];
                 [crashes activate];
             });
-            
+
             it(@"Should be activated", ^{
                 [[theValue(crashes.isActivated) should] beYes];
             });
-            
+
             it(@"Should not overwrite the existing configuration once activated", ^{
                 [crashes setConfiguration:newConfig];
                 [[[crashes internalConfiguration] shouldNot] equal:newConfig];
             });
-            
+
             it(@"Should retain the initial configuration after trying to set a new one", ^{
                 [crashes setConfiguration:newConfig];
                 [[[crashes internalConfiguration] should] equal:initialConfig];
             });
         });
-        
+
         context(@"Activation side-effects", ^{
-                    
+
             context(@"ANR", ^{
-                
+
                 it(@"Should have ANR watchdog enabled if it's part of the configuration", ^{
                     initialConfig.applicationNotRespondingDetection = YES;
                     initialConfig.autoCrashTracking = YES;
                     [crashes setConfiguration:initialConfig];
-                    
+
                     [[anrDetectorMock should] receive:@selector(start)];
                     [crashes activate];
                 });
-                
+
                 it(@"Should not have ANR watchdog enabled if auto crash tracking is off, even if ANR detection is on", ^{
                     initialConfig.applicationNotRespondingDetection = YES;
                     initialConfig.autoCrashTracking = NO;
                     [crashes setConfiguration:initialConfig];
-                    
+
                     [[anrDetectorMock shouldNot] receive:@selector(start)];
                     [crashes activate];
                 });
-                
+
                 it(@"Should not have ANR watchdog enabled if it's not part of the configuration", ^{
                     initialConfig.applicationNotRespondingDetection = NO;
                     initialConfig.autoCrashTracking = YES;
                     [crashes setConfiguration:initialConfig];
-                    
+
                     [[anrDetectorMock shouldNot] receive:@selector(start)];
                     [crashes activate];
                 });
-                
+
                 context(@"When the app transitions between states", ^{
-                    
+
                     beforeEach(^{
                         initialConfig.applicationNotRespondingDetection = YES;
                         initialConfig.autoCrashTracking = YES;
                         [crashes setConfiguration:initialConfig];
                         [crashes activate];
                     });
-                    
+
                     it(@"Should cancel ANR watchdog when app goes to background", ^{
                         [[anrDetectorMock should] receive:@selector(cancel)];
                         [crashes hostStateDidChange:AMAHostAppStateBackground];
                     });
-                    
+
                     it(@"Should start ANR watchdog when app comes to foreground", ^{
                         [[anrDetectorMock should] receive:@selector(start)];
                         [crashes hostStateDidChange:AMAHostAppStateForeground];
                     });
                 });
             });
-            
+
             it(@"Should initialize crash processor with provided ignored signals and serializer", ^{
                 initialConfig.ignoredCrashSignals = @[ @SIGABRT, @SIGILL, @SIGSEGV ];
                 [[crashProcessor should] receive:@selector(initWithIgnoredSignals:serializer:crashReporter:)
                                    withArguments:initialConfig.ignoredCrashSignals, serializer, crashReporter];
-                
+
                 [crashes setConfiguration:initialConfig];
                 [crashes activate];
             });
-            
+
             context(@"CrashLoader Configuration", ^{
 
                 it(@"Should enable required monitoring when autoCrashTracking is disabled", ^{
                     initialConfig.autoCrashTracking = NO;
                     [crashes setConfiguration:initialConfig];
-                    
+
                     [[crashLoader should] receive:@selector(enableRequiredMonitoring)];
                     [[crashLoader shouldNot] receive:@selector(enableCrashLoader)];
-                    
+
                     [crashes activate];
                 });
 
                 it(@"Should not enable required monitoring when autoCrashTracking is enabled", ^{
                     initialConfig.autoCrashTracking = YES;
                     [crashes setConfiguration:initialConfig];
-                    
+
                     [[crashLoader shouldNot] receive:@selector(enableRequiredMonitoring)];
                     [[crashLoader should] receive:@selector(enableCrashLoader)];
-                    
+
                     [crashes activate];
                 });
 
                 it(@"Should configure the crash loader based on probable unhandled crash reporting", ^{
                     initialConfig.probablyUnhandledCrashReporting = YES;
                     [crashes setConfiguration:initialConfig];
-                    
-                    [[crashLoader should] receive:@selector(setIsUnhandledCrashDetectingEnabled:) 
+
+                    [[crashLoader should] receive:@selector(setIsUnhandledCrashDetectingEnabled:)
                                     withArguments:theValue(YES)];
-                    
+
                     [crashes activate];
                 });
 
@@ -237,27 +237,27 @@ describe(@"AMACrashes", ^{
                 it(@"Should call purgeCrashesDirectory when autoCrashTracking is disabled", ^{
                     initialConfig.autoCrashTracking = NO;
                     [crashes setConfiguration:initialConfig];
-                    
+
                     [[AMACrashLoader should] receive:@selector(purgeCrashesDirectory)];
-                    
+
                     [crashes activate];
                 });
-                
+
                 it(@"Should load crash reports after activation when autoCrashTracking is enabled", ^{
                     initialConfig.autoCrashTracking = YES;
                     [crashes setConfiguration:initialConfig];
-                    
+
                     [[crashLoader should] receive:@selector(loadCrashReports)];
-                    
+
                     [crashes activate];
                 });
-                
+
                 it(@"Should not load crash reports after activation when autoCrashTracking is disabled", ^{
                     initialConfig.autoCrashTracking = NO;
                     [crashes setConfiguration:initialConfig];
-                    
+
                     [[crashLoader shouldNot] receive:@selector(loadCrashReports)];
-                    
+
                     [crashes activate];
                 });
             });
@@ -267,7 +267,7 @@ describe(@"AMACrashes", ^{
                     [[stateNotifier should] receive:@selector(notifyWithEnabled:crashedLastLaunch:)];
                     [crashes activate];
                 });
-                
+
                 it(@"Should not notify when configuration is set", ^{
                     [[stateNotifier shouldNot] receive:@selector(notifyWithEnabled:crashedLastLaunch:)];
                     [crashes setConfiguration:initialConfig];
@@ -276,7 +276,7 @@ describe(@"AMACrashes", ^{
         });
 
     });
-    
+
     context(@"Error Reporting", ^{
 
         NSError *const sampleNSError = [NSError errorWithDomain:@"SampleDomain" code:100 userInfo:nil];
@@ -316,7 +316,7 @@ describe(@"AMACrashes", ^{
             });
         });
     });
-    
+
     context(@"Error Environment Manipulation", ^{
 
         it(@"Should correctly set the error environment value for a given key", ^{
@@ -329,13 +329,13 @@ describe(@"AMACrashes", ^{
             [crashes clearErrorEnvironment];
         });
     });
-    
+
     context(@"CrashLoader Delegate Methods", ^{
 
         beforeEach(^{
             [crashes activate];
         });
-        
+
         it(@"Should process crash on didLoadCrash callback", ^{
             AMADecodedCrash *sampleCrash = [AMADecodedCrash mock];
             [[crashProcessor should] receive:@selector(processCrash:withError:)];
@@ -348,25 +348,25 @@ describe(@"AMACrashes", ^{
             [crashes crashLoader:crashLoader didLoadANR:sampleANR withError:nil];
         });
     });
-    
+
     context(@"AMAModuleActivationDelegate", ^{
-        
+
         it(@"Should activate crashes on delegate callback", ^{
-            [AMACrashes stub:@selector(crashes) andReturn:crashes];
-            [AMACrashes willActivateWithConfiguration:[AMAAppMetricaConfiguration mock]];
+            [AMAAppMetricaCrashes stub:@selector(crashes) andReturn:crashes];
+            [AMAAppMetricaCrashes willActivateWithConfiguration:[AMAAppMetricaConfiguration mock]];
             [[theValue(crashes.isActivated) should] beYes];
         });
     });
-    
+
     context(@"AMAEventPollingDelegate", ^{
-        
+
         beforeEach(^{
-            [AMACrashes stub:@selector(crashes) andReturn:crashes];
+            [AMAAppMetricaCrashes stub:@selector(crashes) andReturn:crashes];
         });
-        
+
         it(@"Should return events for the previous session", ^{
             NSArray *mockedCrashes = @[[AMADecodedCrash mock], [AMADecodedCrash mock]];
-            NSArray *mockedEvents = @[[AMACustomEventParameters mock], [AMACustomEventParameters mock]];
+            NSArray *mockedEvents = @[[AMAEventPollingParameters mock], [AMAEventPollingParameters mock]];
             [crashLoader stub:@selector(syncLoadCrashReports) andReturn:mockedCrashes];
 
             [[serializer should] receive:@selector(eventParametersFromDecodedData:error:)
@@ -376,57 +376,57 @@ describe(@"AMACrashes", ^{
                                andReturn:mockedEvents[1]
                            withArguments:mockedCrashes[1], KWNull.null];
 
-            [[[AMACrashes eventsForPreviousSession] should] equal:mockedEvents];
+            [[[AMAAppMetricaCrashes eventsForPreviousSession] should] equal:mockedEvents];
         });
-        
+
         it(@"Should handle serialization errors gracefully", ^{
             NSArray *mockedCrashes = @[[AMADecodedCrash mock], [AMADecodedCrash mock]];
             [crashLoader stub:@selector(syncLoadCrashReports) andReturn:mockedCrashes];
-            
+
             [[serializer should] receive:@selector(eventParametersFromDecodedData:error:)
                                andReturn:nil
                                withCount:mockedCrashes.count];
-            
-            [[[AMACrashes eventsForPreviousSession] should] beEmpty];
+
+            [[[AMAAppMetricaCrashes eventsForPreviousSession] should] beEmpty];
         });
 
         it(@"Should return events even if some crashes fail to serialize", ^{
             NSArray *mockedCrashes = @[[AMADecodedCrash mock], [AMADecodedCrash mock]];
-            AMACustomEventParameters *event = [AMACustomEventParameters mock];
+            AMAEventPollingParameters *event = [AMAEventPollingParameters mock];
             [crashLoader stub:@selector(syncLoadCrashReports) andReturn:mockedCrashes];
-            
-            [serializer stub:@selector(eventParametersFromDecodedData:error:) 
+
+            [serializer stub:@selector(eventParametersFromDecodedData:error:)
                    andReturn:event withArguments:mockedCrashes[0], nil];
             [serializer stub:@selector(eventParametersFromDecodedData:error:)
                    andReturn:nil withArguments:mockedCrashes[1], nil];
-            
-            NSArray *events = [AMACrashes eventsForPreviousSession];
+
+            NSArray *events = [AMAAppMetricaCrashes eventsForPreviousSession];
             [[events should] haveCountOf:1];
             [[events[0] should] equal:event];
         });
     });
-    
+
     context(@"AMACrashLoaderDelegate", ^{
-        
+
         let(sampleError, ^{ return [NSError errorWithDomain:@"test" code:123 userInfo:nil]; });
         let(sampleCrash, ^{ return [AMADecodedCrash mock]; });
-        
+
         beforeEach(^{
             [crashes activate];
         });
-        
+
         it(@"Should process a crash when didLoadCrash:withError: is called", ^{
             [[crashProcessor should] receive:@selector(processCrash:withError:)];
             [crashes crashLoader:crashLoader didLoadCrash:sampleCrash withError:sampleError];
         });
-        
+
         it(@"Should process an ANR when didLoadANR:withError: is called", ^{
             [[crashProcessor should] receive:@selector(processANR:withError:)];
             [crashes crashLoader:crashLoader didLoadANR:sampleCrash withError:sampleError];
         });
-        
+
         it(@"Should report a foreground unhandled crash", ^{
-            [AMACrashes stub:@selector(errorMessageForProbableUnhandledCrash:) andReturn:
+            [AMAAppMetricaCrashes stub:@selector(errorMessageForProbableUnhandledCrash:) andReturn:
                  @"Detected probable unhandled exception when app was "
                  "in foreground. Exception mean that previous working session have not finished correctly."
             ];

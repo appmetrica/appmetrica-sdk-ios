@@ -1,14 +1,14 @@
 
-#import "AMACrashes.h"
+#import "AMAAppMetricaCrashes.h"
 #import "AMACrashLoader.h"
 
-@interface AMACrashes (Private) <AMACrashLoaderDelegate>
+@interface AMAAppMetricaCrashes (Private) <AMACrashLoaderDelegate>
 
 - (void)reportCrashReportErrorToMetrica:(AMADecodedCrash *)decodedCrash withError:(NSError *)error;
 
 @end
 
-@interface AMACrashes (Test)
+@interface AMAAppMetricaCrashes (Test)
 
 - (NSDictionary *)crashContext;
 

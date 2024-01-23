@@ -9,7 +9,7 @@
 @class AMAEventValueFactory;
 @protocol AMADataEncoding;
 @class AMAEventComposerProvider;
-@class AMACustomEventParameters;
+@class AMAEventPollingParameters;
 
 @interface AMAEventBuilder : NSObject
 
@@ -30,8 +30,8 @@
                firstOccurrence:(AMAOptionalBool)firstOccurrence
                          error:(NSError **)error;
 
-- (AMAEvent *)eventWithInternalParameters:(AMACustomEventParameters *)parameters
-                                    error:(NSError **)error;
+- (AMAEvent *)eventWithPollingParameters:(AMAEventPollingParameters *)parameters
+                                   error:(NSError **)error;
 
 - (AMAEvent *)eventReferrerWithValue:(NSString *)value
                                error:(NSError **)error;

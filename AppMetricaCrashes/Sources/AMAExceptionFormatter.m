@@ -25,14 +25,12 @@
 #import "AMAVirtualMachineCrash.h"
 #import "AMAVirtualMachineError.h"
 #import "AMAVirtualMachineInfo.h"
-
 #import <mach/exception.h>
-
 #import "KSCrash.h"
 
 static NSString *const kAMAKSCrashReporterVersion = @"3.2.0";
 
-@interface AMAExceptionFormatter()
+@interface AMAExceptionFormatter ()
 
 @property (nonatomic, strong, readonly) id<AMADateProviding> dateProvider;
 @property (nonatomic, strong, readonly) AMADecodedCrashSerializer *serializer;
