@@ -1,5 +1,5 @@
 
-#import "AMACrashes+Private.h"
+#import "AMAAppMetricaCrashes+Private.h"
 
 @implementation AMAAppMetricaCrashes (Test)
 

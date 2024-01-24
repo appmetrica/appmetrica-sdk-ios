@@ -22,16 +22,16 @@ typedef void(^AMACrashReportingStateCompletionBlock)(NSDictionary * _Nullable st
 @protocol AMAErrorRepresentable;
 @class AMAAppMetricaCrashesConfiguration;
 
-///`AMACrashes` provides error and crash reporting functionalities for integration with AppMetrica.
+///`AMAAppMetricaCrashes` provides error and crash reporting functionalities for integration with AppMetrica.
 ///
-///The class offers a singleton instance and should not be subclassed. Initialize using `[AMACrashes crashes]`.
+///The class offers a singleton instance and should not be subclassed. Initialize using `[AMAAppMetricaCrashes crashes]`.
 ///
 NS_SWIFT_NAME(AppMetricaCrashes)
 @interface AMAAppMetricaCrashes : NSObject
 
-/// Accesses the singleton `AMACrashes` instance.
+/// Accesses the singleton `AMAAppMetricaCrashes` instance.
 ///
-/// - Returns: The singleton `AMACrashes` instance.
+/// - Returns: The singleton `AMAAppMetricaCrashes` instance.
 + (instancetype)crashes NS_SWIFT_NAME(crashes());
 
 /// Sets the crash reporting configuration for the application.
@@ -49,7 +49,7 @@ NS_SWIFT_NAME(AppMetricaCrashes)
 /// config.probablyUnhandledCrashReporting = NO;
 /// config.applicationNotRespondingDetection = YES;
 /// config.applicationNotRespondingWatchdogInterval = 5.0;
-/// [[AMACrashes crashes] setConfiguration:config];
+/// [[AMAAppMetricaCrashes crashes] setConfiguration:config];
 /// ```
 ///
 /// - SeeAlso: `AMAAppMetricaCrashesConfiguration`

@@ -4,7 +4,7 @@
 #import <AppMetricaHostState/AppMetricaHostState.h>
 #import <AppMetricaPlatform/AppMetricaPlatform.h>
 #import "AMAAppMetricaCrashes.h"
-#import "AMACrashes+Private.h"
+#import "AMAAppMetricaCrashes+Private.h"
 #import "AMAANRWatchdog.h"
 #import "AMACrashContext.h"
 #import "AMACrashEventType.h"

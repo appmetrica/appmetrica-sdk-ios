@@ -2,7 +2,7 @@
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
 #import <AppMetricaCoreExtension/AppMetricaCoreExtension.h>
 #import "AMAAppMetricaCrashes.h"
-#import "AMACrashes+Private.h"
+#import "AMAAppMetricaCrashes+Private.h"
 #import "AMAANRWatchdog.h"
 #import "AMACrashLoader.h"
 #import "AMACrashProcessor.h"
@@ -15,9 +15,9 @@
 #import "AMAErrorModel.h"
 #import "AMAErrorModelFactory.h"
 
-SPEC_BEGIN(AMACrashesTests)
+SPEC_BEGIN(AMAAppMetricaCrashesTests)
 
-describe(@"AMACrashes", ^{
+describe(@"AMAAppMetricaCrashes", ^{
 
     let(crashLoader, ^{ return [AMACrashLoader nullMock]; });
     let(stateNotifier, ^{ return [AMACrashReportingStateNotifier nullMock]; });
@@ -69,7 +69,7 @@ describe(@"AMACrashes", ^{
 
         let(defaultInitCrashes, ^{ return [AMAAppMetricaCrashes new]; });
 
-        it(@"Should have the default internalConfiguration values when initialized with [AMACrashes init]", ^{
+        it(@"Should have the default internalConfiguration values when initialized with [AMAAppMetricaCrashes init]", ^{
             AMAAppMetricaCrashesConfiguration *config = [defaultInitCrashes internalConfiguration];
 
             [[theValue(config.autoCrashTracking) should] beYes];
