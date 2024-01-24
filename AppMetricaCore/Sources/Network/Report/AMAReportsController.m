@@ -16,7 +16,7 @@ static NSUInteger const kAMATooBigRequestSplitSize = 2;
 
 @interface AMAReportsController () <AMAHTTPRequestDelegate, AMAReportPayloadProviderDelegate>
 
-@property (nonatomic, strong, readonly) id<AMAExecuting> executor;
+@property (nonatomic, strong, readonly) id<AMAAsyncExecuting> executor;
 @property (nonatomic, strong, readonly) id<AMAResettableIterable> hostProvider;
 @property (nonatomic, strong, readonly) AMAHTTPRequestsFactory *httpRequestsFactory;
 @property (nonatomic, strong, readonly) AMAReportResponseParser *responseParser;
@@ -33,7 +33,7 @@ static NSUInteger const kAMATooBigRequestSplitSize = 2;
 
 @implementation AMAReportsController
 
-- (instancetype)initWithExecutor:(id<AMAExecuting>)executor
+- (instancetype)initWithExecutor:(id<AMAAsyncExecuting>)executor
        timeoutRequestsController:(AMATimeoutRequestsController *)timeoutRequestsController
 {
     id<AMAResettableIterable> hostProvider = [[AMAReportHostProvider alloc] init];
@@ -49,7 +49,7 @@ static NSUInteger const kAMATooBigRequestSplitSize = 2;
         timeoutRequestsController:timeoutRequestsController];
 }
 
-- (instancetype)initWithExecutor:(id<AMAExecuting>)executor
+- (instancetype)initWithExecutor:(id<AMAAsyncExecuting>)executor
                     hostProvider:(id<AMAResettableIterable>)hostProvider
              httpRequestsFactory:(AMAHTTPRequestsFactory *)httpRequestsFactory
                   responseParser:(AMAReportResponseParser *)responseParser

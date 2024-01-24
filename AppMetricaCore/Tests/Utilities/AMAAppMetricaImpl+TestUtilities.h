@@ -18,7 +18,7 @@
 @property (nonatomic, strong) AMADispatchStrategiesContainer *strategiesContainer;
 
 - (instancetype)initWithHostStateProvider:(id<AMAHostStateProviding>)hostStateProvider
-                                 executor:(id<AMAExecuting>)executor;
+                                 executor:(id<AMAAsyncExecuting>)executor;
 
 - (AMAReporter *)reporterForApiKey:(NSString *)apiKey;
 - (void)dispatcherDidPerformStartup:(AMADispatcher *)dispatcher

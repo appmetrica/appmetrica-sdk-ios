@@ -4,7 +4,7 @@
 #import "AMACrashLogging.h"
 
 @class AMAUserDefaultsStorage;
-@protocol AMAExecuting;
+@protocol AMAAsyncExecuting;
 
 typedef NS_ENUM(NSInteger, AMAUnhandledCrashType) {
     AMAUnhandledCrashUnknown,
@@ -19,11 +19,11 @@ typedef void (^AMAUnhandledCrashCallback)(AMAUnhandledCrashType crashType);
 - (instancetype)init NS_UNAVAILABLE;
 
 - (instancetype)initWithStorage:(AMAUserDefaultsStorage *)storage
-                       executor:(id<AMAExecuting>)executor;
+                       executor:(id<AMAAsyncExecuting>)executor;
 
 - (instancetype)initWithStorage:(AMAUserDefaultsStorage *)storage
               hostStateProvider:(id<AMAHostStateProviding>)hostStateProvider
-                       executor:(id<AMAExecuting>)executor NS_DESIGNATED_INITIALIZER;
+                       executor:(id<AMAAsyncExecuting>)executor NS_DESIGNATED_INITIALIZER;
 
 - (void)startDetecting;
 

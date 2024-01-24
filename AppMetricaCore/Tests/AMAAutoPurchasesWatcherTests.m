@@ -19,7 +19,7 @@ describe(@"AMAAutoPurchasesWatcher", ^{
     AMAMetricaConfiguration *__block configuration = nil;
     AMARevenueInfoModelFactory *__block factory= nil;
     
-    id<AMAExecuting> __block executor = nil;
+    id<AMAAsyncExecuting> __block executor = nil;
     
     __auto_type createWatcher = ^void {
         watcher = [[AMAAutoPurchasesWatcher alloc] initWithExecutor:executor

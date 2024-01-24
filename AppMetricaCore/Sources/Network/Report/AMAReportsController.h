@@ -1,7 +1,7 @@
 
 #import <Foundation/Foundation.h>
 
-@protocol AMAExecuting;
+@protocol AMAAsyncExecuting;
 @protocol AMAResettableIterable;
 @class AMAHTTPRequestsFactory;
 @class AMAReportRequest;
@@ -44,9 +44,9 @@ typedef NS_ERROR_ENUM(kAMAReportsControllerErrorDomain, AMAReportsControllerErro
 - (instancetype)init NS_UNAVAILABLE;
 + (instancetype)new NS_UNAVAILABLE;
 
-- (instancetype)initWithExecutor:(id<AMAExecuting>)executor
+- (instancetype)initWithExecutor:(id<AMAAsyncExecuting>)executor
        timeoutRequestsController:(AMATimeoutRequestsController *)timeoutRequestsController;
-- (instancetype)initWithExecutor:(id<AMAExecuting>)executor
+- (instancetype)initWithExecutor:(id<AMAAsyncExecuting>)executor
                     hostProvider:(id<AMAResettableIterable>)hostProvider
              httpRequestsFactory:(AMAHTTPRequestsFactory *)httpRequestsFactory
                   responseParser:(AMAReportResponseParser *)responseParser

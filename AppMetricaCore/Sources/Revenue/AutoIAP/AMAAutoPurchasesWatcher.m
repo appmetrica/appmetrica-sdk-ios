@@ -7,7 +7,7 @@
 @interface AMAAutoPurchasesWatcher ()
 
 @property (atomic, strong) AMAReporter *reporter;
-@property (nonatomic, strong, readonly) id<AMAExecuting> executor;
+@property (nonatomic, strong, readonly) id<AMAAsyncExecuting> executor;
 @property (nonatomic, strong, readonly) AMATransactionObserver *observer;
 @property (nonatomic, strong, readonly) NSMutableSet *requesters;
 @property (nonatomic, strong, readonly) AMARevenueInfoModelFactory *factory;
@@ -16,7 +16,7 @@
 
 @implementation AMAAutoPurchasesWatcher
 
-- (instancetype)initWithExecutor:(id<AMAExecuting>)executor
+- (instancetype)initWithExecutor:(id<AMAAsyncExecuting>)executor
              transactionObserver:(AMATransactionObserver *)observer
                          factory:(AMARevenueInfoModelFactory *)factory
 {
@@ -30,7 +30,7 @@
     return self;
 }
 
-- (instancetype)initWithExecutor:(id<AMAExecuting>)executor
+- (instancetype)initWithExecutor:(id<AMAAsyncExecuting>)executor
 {
     return [self initWithExecutor:executor
               transactionObserver:[[AMATransactionObserver alloc] initWithDelegate:self]

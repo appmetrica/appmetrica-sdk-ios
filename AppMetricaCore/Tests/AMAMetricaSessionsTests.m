@@ -39,7 +39,7 @@ describe(@"AMAMetricaSessions", ^{
                                                              hostStateProvider:hostAppStateProvider];
         [AMAAppMetrica stub:@selector(sharedImpl) andReturn:impl];
 
-        id<AMAExecuting>executor = [AMACurrentQueueExecutor new];
+        id<AMAAsyncExecuting>executor = [AMACurrentQueueExecutor new];
         [AMAAppMetrica stub:@selector(sharedExecutor) andReturn:executor];
 
         AMAReporterStorage *reporterStorage = [reporterTestHelper appReporterForApiKey:apiKey].reporterStorage;

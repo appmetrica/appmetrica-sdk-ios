@@ -6,7 +6,7 @@ NS_ASSUME_NONNULL_BEGIN
 @class AMAHTTPRequestor;
 @class AMAHTTPSessionProvider;
 @protocol AMARequest;
-@protocol AMAExecuting;
+@protocol AMAAsyncExecuting;
 @protocol AMANetworkSessionProviding;
 
 NS_SWIFT_NAME(HTTPRequestDelegate)
@@ -27,7 +27,7 @@ NS_SWIFT_NAME(HTTPRequestor)
 
 @property (nonatomic, copy, readonly) id<AMARequest> request;
 @property (nonatomic, nullable, weak) id<AMAHTTPRequestDelegate> delegate;
-@property (nonatomic, nullable, strong) id<AMAExecuting> delegateExecutor;
+@property (nonatomic, nullable, strong) id<AMAAsyncExecuting> delegateExecutor;
 
 + (instancetype)requestorWithRequest:(id<AMARequest>)request;
 

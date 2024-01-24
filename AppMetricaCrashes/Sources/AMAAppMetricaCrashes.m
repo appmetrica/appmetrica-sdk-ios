@@ -27,7 +27,7 @@
 
 @property (nonatomic, strong) AMACrashProcessor *crashProcessor;
 @property (nonatomic, strong) AMACrashReportingStateNotifier *stateNotifier;
-@property (nonatomic, strong) id<AMAExecuting> executor;
+@property (nonatomic, strong) id<AMAAsyncExecuting, AMASyncExecuting> executor;
 @property (nonatomic, strong) AMAANRWatchdog *ANRDetector;
 
 //@property (nonatomic, strong) AMAEnvironmentContainer *appEnvironment;
@@ -72,7 +72,7 @@
 
 - (instancetype)init
 {
-    id<AMAExecuting> executor = [[AMAAsyncExecutor alloc] initWithIdentifier:self];
+    AMAExecutor *executor = [[AMAExecutor alloc] initWithIdentifier:self];
     AMAUserDefaultsStorage *storage = [[AMAUserDefaultsStorage alloc] init];
     AMAUnhandledCrashDetector *detector = [[AMAUnhandledCrashDetector alloc] initWithStorage:storage executor:executor];
     AMACrashSafeTransactor *transactor = [[AMACrashSafeTransactor alloc] initWithReporter:nil];
@@ -88,7 +88,7 @@
                     crashReporter:[[AMACrashReporter alloc] init]];
 }
 
-- (instancetype)initWithExecutor:(id<AMAExecuting>)executor
+- (instancetype)initWithExecutor:(id<AMAAsyncExecuting, AMASyncExecuting>)executor
                      crashLoader:(AMACrashLoader *)crashLoader
                    stateNotifier:(AMACrashReportingStateNotifier *)stateNotifier
                hostStateProvider:(AMAHostStateProvider *)hostStateProvider
@@ -358,25 +358,10 @@ them while retaining external immutability. Needed for testability. */
     [self.executor execute:block];
 }
 
-- (id)syncExecute:(id (^)(void))block 
-{
-    dispatch_semaphore_t sema = dispatch_semaphore_create(0);
-    __block id result;
-
-    [self.executor execute:^{
-        result = block();
-        dispatch_semaphore_signal(sema);
-    }];
-
-    dispatch_semaphore_wait(sema, DISPATCH_TIME_FOREVER);
-
-    return result;
-}
-
 - (NSArray<AMAEventPollingParameters *> *)eventsForPreviousSession
 {
     __weak typeof(self) weakSelf = self;
-    return [self syncExecute:^id{
+    return [self.executor syncExecute:^id{
         __strong typeof(weakSelf) strongSelf = weakSelf;
         NSArray<AMADecodedCrash *> *crashes = [strongSelf.crashLoader syncLoadCrashReports];
         return [AMACollectionUtilities mapArray:crashes withBlock:^AMAEventPollingParameters *(AMADecodedCrash *item) {

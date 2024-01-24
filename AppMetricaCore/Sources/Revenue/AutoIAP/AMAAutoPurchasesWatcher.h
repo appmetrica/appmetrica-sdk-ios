@@ -7,18 +7,18 @@
 @class AMAReporter;
 @class AMATransactionObserver;
 @class AMARevenueInfoModelFactory;
-@protocol AMAExecuting;
+@protocol AMAAsyncExecuting;
 
 @interface AMAAutoPurchasesWatcher : NSObject<AMATransactionObserverDelegate, AMAProductRequestorDelegate>
 
 - (instancetype)init NS_UNAVAILABLE;
 + (instancetype)new NS_UNAVAILABLE;
 
-- (instancetype)initWithExecutor:(id<AMAExecuting>)executor
+- (instancetype)initWithExecutor:(id<AMAAsyncExecuting>)executor
              transactionObserver:(AMATransactionObserver *)observer
                          factory:(AMARevenueInfoModelFactory *)factory;
 
-- (instancetype)initWithExecutor:(id<AMAExecuting>)executor;
+- (instancetype)initWithExecutor:(id<AMAAsyncExecuting>)executor;
 
 - (void)startWatchingWithReporter:(AMAReporter *)reporter;
 

@@ -8,7 +8,7 @@
 
 @property (nonatomic, strong) AMAHostStateProvider *hostStateProvider;
 @property (nonatomic, strong) AMAUserDefaultsStorage *storage;
-@property (nonatomic, strong, readonly) id<AMAExecuting> executor;
+@property (nonatomic, strong, readonly) id<AMAAsyncExecuting> executor;
 
 @property (nonatomic, copy) NSString *previousBundleVersion;
 @property (nonatomic, copy) NSString *previousOSVersion;
@@ -20,7 +20,7 @@
 @implementation AMAUnhandledCrashDetector
 
 - (instancetype)initWithStorage:(AMAUserDefaultsStorage *)storage
-                       executor:(id<AMAExecuting>)executor
+                       executor:(id<AMAAsyncExecuting>)executor
 {
     return [self initWithStorage:storage
                hostStateProvider:[[AMAHostStateProvider alloc] init]
@@ -30,7 +30,7 @@
 
 - (instancetype)initWithStorage:(AMAUserDefaultsStorage *)storage
               hostStateProvider:(id<AMAHostStateProviding>)hostStateProvider
-                       executor:(id<AMAExecuting>)executor
+                       executor:(id<AMAAsyncExecuting>)executor
 {
     self = [super init];
     if (self != nil) {

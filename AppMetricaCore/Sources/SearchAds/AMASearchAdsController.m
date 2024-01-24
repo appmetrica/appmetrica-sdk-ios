@@ -7,7 +7,7 @@
 
 @interface AMASearchAdsController () <AMASearchAdsRequesterDelegate>
 
-@property (nonatomic, strong, readonly) id<AMAExecuting> executor;
+@property (nonatomic, strong, readonly) id<AMAAsyncExecuting> executor;
 @property (nonatomic, strong, readonly) AMAReporterStateStorage *reporterStateStorage;
 @property (nonatomic, strong, readonly) AMASearchAdsRequester *requester;
 @property (nonatomic, strong, readonly) AMASearchAdsReporter *reporter;
@@ -19,7 +19,7 @@
 @implementation AMASearchAdsController
 
 - (instancetype)initWithApiKey:(NSString *)apiKey
-                      executor:(id<AMAExecuting>)executor
+                      executor:(id<AMAAsyncExecuting>)executor
           reporterStateStorage:(AMAReporterStateStorage *)reporterStateStorage
 {
     AMASearchAdsRequester *requester = [[AMASearchAdsRequester alloc] init];
@@ -30,7 +30,7 @@
                          reporter:reporter];
 }
 
-- (instancetype)initWithExecutor:(id<AMAExecuting>)executor
+- (instancetype)initWithExecutor:(id<AMAAsyncExecuting>)executor
             reporterStateStorage:(AMAReporterStateStorage *)reporterStateStorage
                        requester:(AMASearchAdsRequester *)requester
                         reporter:(AMASearchAdsReporter *)reporter

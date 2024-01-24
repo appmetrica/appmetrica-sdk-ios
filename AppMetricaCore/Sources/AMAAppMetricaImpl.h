@@ -9,7 +9,7 @@
 @class AMAUserProfile;
 @protocol AMAAppMetricaExtendedReporting;
 @protocol AMAEventPollingDelegate;
-@protocol AMAExecuting;
+@protocol AMAAsyncExecuting;
 @protocol AMAExtendedStartupObserving;
 @protocol AMAHostStateProviding;
 @protocol AMAModuleActivationDelegate;
@@ -27,11 +27,11 @@ NS_ASSUME_NONNULL_BEGIN
 + (instancetype)new NS_UNAVAILABLE;
 
 - (instancetype)initWithHostStateProvider:(nullable id<AMAHostStateProviding>)hostStateProvider
-                                 executor:(id<AMAExecuting>)executor
+                                 executor:(id<AMAAsyncExecuting>)executor
                     eventPollingDelegates:(nullable NSArray<Class<AMAEventPollingDelegate>> *)eventPollingDelegates;
 
 @property (nonatomic, copy, readonly) NSString *apiKey;
-@property (nonatomic, strong, readonly) id<AMAExecuting> executor;
+@property (nonatomic, strong, readonly) id<AMAAsyncExecuting> executor;
 
 - (void)activateWithConfiguration:(AMAAppMetricaConfiguration *)configuration;
 

@@ -17,7 +17,7 @@ static NSString *const kAMASearchAdsCompletionEventParametersTypeAbsentValue = @
 
 @interface AMAInternalEventsReporter ()
 
-@property (nonatomic, strong, readonly) id<AMAExecuting> executor;
+@property (nonatomic, strong, readonly) id<AMAAsyncExecuting> executor;
 @property (nonatomic, strong, readonly) id<AMAReporterProviding> reporterProvider;
 
 @property (nonatomic, strong) id<AMAHostStateProviding> hostStateProvider;
@@ -26,7 +26,7 @@ static NSString *const kAMASearchAdsCompletionEventParametersTypeAbsentValue = @
 
 @implementation AMAInternalEventsReporter
 
-- (instancetype)initWithExecutor:(id<AMAExecuting>)executor
+- (instancetype)initWithExecutor:(id<AMAAsyncExecuting>)executor
                 reporterProvider:(id<AMAReporterProviding>)reporterProvider
 {
     return [self initWithExecutor:executor
@@ -34,7 +34,7 @@ static NSString *const kAMASearchAdsCompletionEventParametersTypeAbsentValue = @
                 hostStateProvider:[[AMAHostStateProvider alloc] init]];
 }
 
-- (instancetype)initWithExecutor:(id<AMAExecuting>)executor
+- (instancetype)initWithExecutor:(id<AMAAsyncExecuting>)executor
                 reporterProvider:(id<AMAReporterProviding>)reporterProvider
                hostStateProvider:(id<AMAHostStateProviding>)hostStateProvider
 {

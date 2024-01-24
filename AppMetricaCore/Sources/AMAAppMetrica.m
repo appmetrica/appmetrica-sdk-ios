@@ -729,13 +729,13 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
     return hostStateProvider;
 }
 
-+ (id<AMAExecuting>)sharedExecutor
++ (id<AMAAsyncExecuting>)sharedExecutor
 {
-    static id<AMAExecuting> executor = nil;
+    static id<AMAAsyncExecuting> executor = nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         @autoreleasepool {
-            executor = [AMAAsyncExecutor new];
+            executor = [AMAExecutor new];
         }
     });
     return executor;
@@ -747,7 +747,7 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         @autoreleasepool {
-            id<AMAExecuting> executor = [self sharedExecutor];
+            id<AMAAsyncExecuting> executor = [self sharedExecutor];
             id<AMAReporterProviding> reporterProvider =
                 [[AMASharedReporterProvider alloc] initWithApiKey:kAMAMetricaLibraryApiKey];
             reporter = [[AMAInternalEventsReporter alloc] initWithExecutor:executor

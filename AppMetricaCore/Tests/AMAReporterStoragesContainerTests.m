@@ -50,12 +50,12 @@ describe(@"AMAReporterStoragesContainer", ^{
         NSTimeInterval const timeout = 0.5;
         NSTimeInterval const delta = 0.3;
 
-        id<AMAExecuting> __block executor = nil;
-        id<AMAExecuting> __block apiKeyMigrationExecutor = nil;
+        id<AMAAsyncExecuting> __block executor = nil;
+        id<AMAAsyncExecuting> __block apiKeyMigrationExecutor = nil;
 
         beforeEach(^{
-            executor = [[AMAAsyncExecutor alloc] initWithIdentifier:self];
-            apiKeyMigrationExecutor = [[AMAAsyncExecutor alloc] initWithIdentifier:self];
+            executor = [[AMAExecutor alloc] initWithIdentifier:self];
+            apiKeyMigrationExecutor = [[AMAExecutor alloc] initWithIdentifier:self];
         });
         afterEach(^{
             [container waitMigrationForApiKey:apiKey];

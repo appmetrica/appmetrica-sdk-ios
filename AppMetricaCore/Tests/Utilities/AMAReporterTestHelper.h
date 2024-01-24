@@ -8,7 +8,7 @@
 @class AMAAppMetricaPreloadInfo;
 @protocol AMACancelableExecuting;
 @protocol AMADatabaseProtocol;
-@protocol AMAExecuting;
+@protocol AMAAsyncExecuting;
 
 @interface AMAReporterTestHelper : NSObject
 
@@ -26,7 +26,7 @@
 
 - (AMAReporter *)appReporter;
 - (AMAReporter *)appReporterForApiKey:(NSString *)apiKey;
-- (AMAReporter *)appReporterForApiKey:(NSString *)apiKey attributionCheckExecutor:(id<AMAExecuting>)attributionCheckExecutor;
+- (AMAReporter *)appReporterForApiKey:(NSString *)apiKey attributionCheckExecutor:(id<AMAAsyncExecuting>)attributionCheckExecutor;
 - (AMAReporter *)appReporterForApiKey:(NSString *)apiKey
                                  main:(BOOL)main
                                 async:(BOOL)isAsync;
@@ -44,7 +44,7 @@
                              executor:(id<AMACancelableExecuting>)executor
                              inMemory:(BOOL)inMemory
                           preloadInfo:(AMAAppMetricaPreloadInfo *)preloadInfo
-             attributionCheckExecutor:(id<AMAExecuting>)attributionCheckExecutor;
+             attributionCheckExecutor:(id<AMAAsyncExecuting>)attributionCheckExecutor;
 
 - (NSObject<AMADatabaseProtocol> *)databaseForApiKey:(NSString *)apiKey;
 

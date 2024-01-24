@@ -15,7 +15,7 @@
 + (NSUInteger)sessionTimeout;
 
 + (AMAAppMetricaImpl *)sharedImpl;
-+ (id<AMAExecuting>)sharedExecutor;
++ (id<AMAAsyncExecuting>)sharedExecutor;
 
 + (void)asyncUpdatePersistentConfigurationWithUUID:(NSString *)UUID;
 

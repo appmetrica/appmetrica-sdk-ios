@@ -21,8 +21,8 @@
 @property (nonatomic, assign) BOOL currentAccurateLocationEnabled;
 @property (nonatomic, assign) BOOL currentAllowsBackgroundLocationUpdates;
 
-@property (nonatomic, strong, readonly) id<AMAExecuting> executor;
-@property (nonatomic, strong, readonly) id<AMAExecuting> mainQueueExecutor;
+@property (nonatomic, strong, readonly) id<AMAAsyncExecuting> executor;
+@property (nonatomic, strong, readonly) id<AMAAsyncExecuting> mainQueueExecutor;
 @property (nonatomic, strong, readonly) AMAStartupPermissionController *startupPermissionController;
 @property (nonatomic, strong, readonly) AMALocationCollectingController *locationCollectingController;
 @property (nonatomic, strong, readonly) AMALocationCollectingConfiguration *configuration;
@@ -33,8 +33,8 @@
 
 - (instancetype)init
 {
-    id<AMAExecuting> executor = [[AMAAsyncExecutor alloc] initWithIdentifier:self];
-    id<AMAExecuting> mainQueueExecutor = [[AMAAsyncExecutor alloc] initWithQueue:dispatch_get_main_queue()];
+    id<AMAAsyncExecuting> executor = [[AMAExecutor alloc] initWithIdentifier:self];
+    id<AMAAsyncExecuting> mainQueueExecutor = [[AMAExecutor alloc] initWithQueue:dispatch_get_main_queue()];
     AMAStartupPermissionController *startupPermissionController = [[AMAStartupPermissionController alloc] init];
     AMALocationCollectingConfiguration *configuration = [[AMALocationCollectingConfiguration alloc] init];
     AMAPersistentTimeoutConfiguration *timeoutConfiguration =
@@ -48,8 +48,8 @@
                                                                             timeoutConfiguration:timeoutConfiguration]];
 }
 
-- (instancetype)initWithExecutor:(id<AMAExecuting>)executor
-               mainQueueExecutor:(id<AMAExecuting>)mainQueueExecutor
+- (instancetype)initWithExecutor:(id<AMAAsyncExecuting>)executor
+               mainQueueExecutor:(id<AMAAsyncExecuting>)mainQueueExecutor
      startupPermissionController:(AMAStartupPermissionController *)startupPermissionController
                    configuration:(AMALocationCollectingConfiguration *)configuration
     locationCollectingController:(AMALocationCollectingController *)locationCollectingController

@@ -8,7 +8,7 @@
 @interface AMAReporterStoragesContainer ()
 
 @property (nonatomic, strong, readonly) NSCondition *condition;
-@property (nonatomic, strong, readonly) id<AMAExecuting> executor;
+@property (nonatomic, strong, readonly) id<AMAAsyncExecuting> executor;
 @property (nonatomic, strong, readonly) NSMutableDictionary *storages;
 @property (nonatomic, strong, readonly) NSMutableSet *migratedKeys;
 @property (nonatomic, assign) BOOL migrated;
@@ -24,7 +24,7 @@
     if (self != nil) {
         _eventEnvironment = [[AMAEnvironmentContainer alloc] init];
         _condition = [[NSCondition alloc] init];
-        _executor = [[AMAAsyncExecutor alloc] initWithIdentifier:self];
+        _executor = [[AMAExecutor alloc] initWithIdentifier:self];
         _storages = [NSMutableDictionary dictionary];
         _migratedKeys = [NSMutableSet set];
         _migrated = NO;

@@ -1576,7 +1576,7 @@ describe(@"AMAReporter", ^{
         AMAReporter *__block reporter = nil;
         AMAMetricaPersistentConfiguration *__block persistentConfiguration = nil;
         beforeEach(^{
-            attributionCheckExecutor = [KWMock nullMockForProtocol:@protocol(AMAExecuting)];
+            attributionCheckExecutor = [KWMock nullMockForProtocol:@protocol(AMAAsyncExecuting)];
             [attributionCheckExecutor stub:@selector(execute:) withBlock:^id (NSArray *params) {
                 void (^block)(void) = params[0];
                 block();

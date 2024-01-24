@@ -107,7 +107,7 @@
     return [self appReporterForApiKey:apiKey main:NO async:NO];
 }
 
-- (AMAReporter *)appReporterForApiKey:(NSString *)apiKey attributionCheckExecutor:(id<AMAExecuting>)attributionCheckExecutor
+- (AMAReporter *)appReporterForApiKey:(NSString *)apiKey attributionCheckExecutor:(id<AMAAsyncExecuting>)attributionCheckExecutor
 {
     id executor = [KWMock nullMockForProtocol:@protocol(AMACancelableExecuting)];
     [executor stub:@selector(execute:) withBlock:^id (NSArray *params) {
@@ -148,7 +148,7 @@
                              executor:(id<AMACancelableExecuting>)executor
                              inMemory:(BOOL)inMemory
                           preloadInfo:(AMAAppMetricaPreloadInfo *)preloadInfo
-             attributionCheckExecutor:(id<AMAExecuting>)attributionCheckExecutor
+             attributionCheckExecutor:(id<AMAAsyncExecuting>)attributionCheckExecutor
 {
     if (self.reporters[apiKey] != nil) {
         return self.reporters[apiKey];

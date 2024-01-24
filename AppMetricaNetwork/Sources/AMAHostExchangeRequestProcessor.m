@@ -7,7 +7,7 @@ NSString *const kAMAHostExchangeRequestProcessorErrorDomain = @"kAMAHostExchange
 @interface AMAHostExchangeRequestProcessor () <AMAHTTPRequestDelegate>
 
 @property (nonatomic, strong, readonly) id<AMARequest> request;
-@property (nonatomic, strong, readonly) id<AMAExecuting> executor;
+@property (nonatomic, strong, readonly) id<AMAAsyncExecuting> executor;
 @property (nonatomic, strong, readonly) AMAHTTPRequestsFactory *httpRequestsFactory;
 @property (nonatomic, strong, readonly) id<AMAIterable> hostProvider;
 @property (nonatomic, strong, readonly) id<AMAHostExchangeResponseValidating> responseValidator;
@@ -20,7 +20,7 @@ NSString *const kAMAHostExchangeRequestProcessorErrorDomain = @"kAMAHostExchange
 @implementation AMAHostExchangeRequestProcessor
 
 - (instancetype)initWithRequest:(id<AMARequest>)request
-                       executor:(id<AMAExecuting>)executor
+                       executor:(id<AMAAsyncExecuting>)executor
                    hostProvider:(id<AMAIterable>)hostProvider
               responseValidator:(id<AMAHostExchangeResponseValidating>)responseValidator
 {
@@ -32,7 +32,7 @@ NSString *const kAMAHostExchangeRequestProcessorErrorDomain = @"kAMAHostExchange
 }
 
 - (instancetype)initWithRequest:(id<AMARequest>)request
-                       executor:(id<AMAExecuting>)executor
+                       executor:(id<AMAAsyncExecuting>)executor
                    hostProvider:(id<AMAIterable>)hostProvider
               responseValidator:(id<AMAHostExchangeResponseValidating>)responseValidator
             httpRequestsFactory:(AMAHTTPRequestsFactory *)httpRequestsFactory

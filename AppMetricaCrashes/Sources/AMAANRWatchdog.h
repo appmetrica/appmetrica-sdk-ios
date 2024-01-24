@@ -1,7 +1,7 @@
 
 #import <Foundation/Foundation.h>
 
-@protocol AMAExecuting;
+@protocol AMAAsyncExecuting;
 @protocol AMAANRWatchdogDelegate;
 
 @interface AMAANRWatchdog : NSObject
@@ -15,8 +15,8 @@
 
 - (instancetype)initWithWatchdogInterval:(NSTimeInterval)ANRDuration
                             pingInterval:(NSTimeInterval)checkPeriod
-                        watchingExecutor:(id<AMAExecuting>)watchingExecutor
-                        observedExecutor:(id<AMAExecuting>)observedExecutor NS_DESIGNATED_INITIALIZER;
+                        watchingExecutor:(id<AMAAsyncExecuting>)watchingExecutor
+                        observedExecutor:(id<AMAAsyncExecuting>)observedExecutor NS_DESIGNATED_INITIALIZER;
 
 - (void)start;
 

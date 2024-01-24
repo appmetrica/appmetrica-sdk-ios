@@ -47,7 +47,7 @@
 @property (nonatomic, copy) NSString *apiKey;
 @property (nonatomic, strong) AMAEventBuilder *eventBuilder;
 @property (nonatomic, strong) id<AMACancelableExecuting> executor;
-@property (nonatomic, strong) id<AMAExecuting> attributionCheckExecutor;
+@property (nonatomic, strong) id<AMAAsyncExecuting> attributionCheckExecutor;
 @property (nonatomic, assign) BOOL isActive;
 @property (nonatomic, strong) AMAUserProfileUpdatesProcessor *userProfileUpdatesProcessor;
 @property (nonatomic, strong) AMARevenueInfoProcessor *revenueInfoProcessor;
@@ -67,7 +67,7 @@
                reporterStorage:(AMAReporterStorage *)reporterStorage
                   eventBuilder:(AMAEventBuilder *)eventBuilder
               internalReporter:(AMAInternalEventsReporter *)internalReporter
-      attributionCheckExecutor:(id<AMAExecuting>)attributionCheckExecutor
+      attributionCheckExecutor:(id<AMAAsyncExecuting>)attributionCheckExecutor
 {
     id<AMACancelableExecuting> executor = [[AMACancelableDelayedExecutor alloc] initWithIdentifier:self];
 
@@ -99,7 +99,7 @@
                   eventBuilder:(AMAEventBuilder *)eventBuilder
               internalReporter:(AMAInternalEventsReporter *)internalReporter
                       executor:(id<AMACancelableExecuting>)executor
-      attributionCheckExecutor:(id<AMAExecuting>)attributionCheckExecutor
+      attributionCheckExecutor:(id<AMAAsyncExecuting>)attributionCheckExecutor
            eCommerceSerializer:(AMAECommerceSerializer *)eCommerceSerializer
             eCommerceTruncator:(AMAECommerceTruncator *)eCommerceTruncator
                     adServices:(AMAAdServicesDataProvider *)adServices

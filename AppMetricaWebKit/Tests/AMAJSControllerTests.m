@@ -14,7 +14,7 @@ describe(@"AMAJSController", ^{
 
     beforeEach(^{
         reporter = [KWMock nullMockForProtocol:@protocol(AMAJSReporting)];
-        executor = [KWMock nullMockForProtocol:@protocol(AMAExecuting)];
+        executor = [KWMock nullMockForProtocol:@protocol(AMAAsyncExecuting)];
         userContentController = [WKUserContentController nullMock];
         jsController = [[AMAJSController alloc] initWithUserContentController:userContentController];
     });

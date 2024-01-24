@@ -14,7 +14,7 @@
 @class AMARevenueInfoModel;
 @class AMAAdServicesDataProvider;
 @class AMAAttributionChecker;
-@protocol AMAExecuting;
+@protocol AMAAsyncExecuting;
 @class AMASessionExpirationHandler;
 
 @protocol AMAReporterDelegate <NSObject>
@@ -45,7 +45,7 @@
                reporterStorage:(AMAReporterStorage *)reporterStorage
                   eventBuilder:(AMAEventBuilder *)eventBuilder
               internalReporter:(AMAInternalEventsReporter *)internalReporter
-      attributionCheckExecutor:(id<AMAExecuting>)attributionCheckExecutor;
+      attributionCheckExecutor:(id<AMAAsyncExecuting>)attributionCheckExecutor;
 
 - (instancetype)initWithApiKey:(NSString *)apiKey
                           main:(BOOL)main
@@ -53,7 +53,7 @@
                   eventBuilder:(AMAEventBuilder *)eventBuilder
               internalReporter:(AMAInternalEventsReporter *)internalReporter
                       executor:(id<AMACancelableExecuting>)executor
-      attributionCheckExecutor:(id<AMAExecuting>)attributionCheckExecutor
+      attributionCheckExecutor:(id<AMAAsyncExecuting>)attributionCheckExecutor
            eCommerceSerializer:(AMAECommerceSerializer *)eCommerceSerializer
             eCommerceTruncator:(AMAECommerceTruncator *)eCommerceTruncator
                     adServices:(AMAAdServicesDataProvider *)adServices

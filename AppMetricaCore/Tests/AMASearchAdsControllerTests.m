@@ -14,7 +14,7 @@ SPEC_BEGIN(AMASearchAdsControllerTests)
 
 describe(@"AMASearchAdsController", ^{
 
-    id<AMAExecuting> __block executor = nil;
+    id<AMAAsyncExecuting> __block executor = nil;
     AMASearchAdsRequester *__block requester = nil;
     AMASearchAdsReporter *__block reporter = nil;
     AMAReporterStateStorage *__block stateStorage = nil;

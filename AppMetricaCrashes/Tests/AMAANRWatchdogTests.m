@@ -14,7 +14,7 @@ describe(@"AMAANRWatchdog", ^{
     NSTimeInterval const kCheckPeriod = 0.01;
 
     AMAANRWatchdog *__block ANRDetector = nil;
-    AMAAsyncExecutor *__block watchingExecutor = nil;
+    AMAExecutor *__block watchingExecutor = nil;
     AMAManualCurrentQueueExecutor *__block observedExecutor = nil;
 
     id __block delegate = nil;
@@ -22,7 +22,7 @@ describe(@"AMAANRWatchdog", ^{
     NSInteger __block hitTimes = 0;
 
     beforeEach(^{
-        watchingExecutor = [[AMAAsyncExecutor alloc] initWithQueue:dispatch_queue_create("Watching test queue", NULL)];
+        watchingExecutor = [[AMAExecutor alloc] initWithQueue:dispatch_queue_create("Watching test queue", NULL)];
         observedExecutor = [[AMAManualCurrentQueueExecutor alloc] init];
         hitTimes = 0;
         delegate = [KWMock mockForProtocol:@protocol(AMAANRWatchdogDelegate)];

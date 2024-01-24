@@ -6,13 +6,13 @@ static NSString *const kAppMetricaCoreUtilsDomain = @"io.appmetrica.CoreUtils";
 
 #pragma mark - async queue
 
-@interface AMAAsyncExecutor ()
+@interface AMAExecutor ()
 
 @property (nonatomic, strong) dispatch_queue_t queue;
 
 @end
 
-@implementation AMAAsyncExecutor
+@implementation AMAExecutor
 
 - (instancetype)init
 {
@@ -35,7 +35,7 @@ static NSString *const kAppMetricaCoreUtilsDomain = @"io.appmetrica.CoreUtils";
     }
     dispatch_queue_t queue = [AMAQueuesFactory serialQueueForIdentifierObject:identifier
                                                                        domain:kAppMetricaCoreUtilsDomain];
-
+    
     return [self initWithQueue:queue];
 }
 
@@ -47,6 +47,18 @@ static NSString *const kAppMetricaCoreUtilsDomain = @"io.appmetrica.CoreUtils";
             block();
         }
     });
+}
+
+- (nullable id)syncExecute:(id _Nullable (^)(void))block
+{
+    AMALogBacktrace(@"Sync execution on queue: %@", self.queue);
+    __block id result = nil;
+    dispatch_sync(self.queue, ^{
+        @autoreleasepool {
+            result = block();
+        }
+    });
+    return result;
 }
 
 @end

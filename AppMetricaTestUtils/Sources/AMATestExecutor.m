@@ -52,6 +52,11 @@
 {
 }
 
+- (nullable id)syncExecute:(id _Nullable (^)(void))block 
+{
+    return block();
+}
+
 @end
 
 #pragma mark - manual

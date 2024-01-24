@@ -46,7 +46,7 @@ describe(@"AMALocationManager", ^{
             stubSystemLocationManagerWithBlock(nil);
         };
     
-        NSObject<AMAExecuting> *__block mainQueueExecutor = nil;
+        NSObject<AMAAsyncExecuting> *__block mainQueueExecutor = nil;
         AMAStartupPermissionController *__block startupPermissionController = nil;
         AMALocationCollectingController *__block locationCollectingController = nil;
         AMALocationCollectingConfiguration *__block configurationMock = nil;

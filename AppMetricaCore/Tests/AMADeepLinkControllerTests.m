@@ -21,7 +21,7 @@ describe(@"AMADeepLinkController", ^{
     NSDictionary *const payload = [NSDictionary nullMock];
 
     beforeEach(^{
-        id<AMAExecuting> executor = [[AMACurrentQueueExecutor alloc] init];
+        id<AMAAsyncExecuting> executor = [[AMACurrentQueueExecutor alloc] init];
         reporter = [AMAReporter nullMock];
         controller = [[AMADeepLinkController alloc] initWithReporter:reporter executor:executor];
 

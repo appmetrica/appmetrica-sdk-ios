@@ -116,7 +116,7 @@ describe(@"AMAAppMetricaImpl", ^{
                                                                  hostStateProvider:hostStateProvider];
         [AMAAppMetrica stub:@selector(sharedImpl) andReturn:appMetricaImpl];
         
-        id<AMAExecuting>executor = [AMACurrentQueueExecutor new];
+        id<AMAAsyncExecuting>executor = [AMACurrentQueueExecutor new];
         [AMAAppMetrica stub:@selector(sharedExecutor) andReturn:executor];
         [AMAAppMetrica stub:@selector(sharedInternalEventsReporter) andReturn:internalEventsReporter];
     });

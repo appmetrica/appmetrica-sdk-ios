@@ -12,32 +12,52 @@ describe(@"AMAExecuting", ^{
     NSTimeInterval const timeout = 0.7;
     NSTimeInterval const delta = 0.2;
 
-    context(@"AMAAsyncExecutor", ^{
+    context(@"AMAExecutor", ^{
         it(@"Shoud create queue with same identifier", ^{
             NSObject *identifier = [[NSObject alloc] init];
             [[AMAQueuesFactory should] receive:@selector(serialQueueForIdentifierObject:domain:)
                                  withArguments:identifier, domain];
-            id instance __unused = [[AMAAsyncExecutor alloc] initWithIdentifier:identifier];
+            id instance __unused = [[AMAExecutor alloc] initWithIdentifier:identifier];
         });
         it(@"Should use self as default identifier", ^{
             KWCaptureSpy *spy = [AMAQueuesFactory captureArgument:@selector(serialQueueForIdentifierObject:domain:)
                                                           atIndex:0];
-            AMAAsyncExecutor *executor = [[AMAAsyncExecutor alloc] init];
+            AMAExecutor *executor = [[AMAExecutor alloc] init];
             [[spy.argument should] equal:executor];
         });
         context(@"Default identifier", ^{
-            AMAAsyncExecutor *__block executor = nil;
+            AMAExecutor *__block executor = nil;
 
             beforeEach(^{
-                executor = [[AMAAsyncExecutor alloc] init];
+                executor = [[AMAExecutor alloc] init];
             });
-            it(@"Should dispatch async", ^{
-                BOOL __block executed = NO;
-                [executor execute:^{
-                    [NSThread sleepForTimeInterval:timeout];
-                    executed = YES;
-                }];
-                [[theValue(executed) should] beNo];
+            
+            context(@"Async", ^{
+                it(@"Should dispatch async", ^{
+                    BOOL __block executed = NO;
+                    [executor execute:^{
+                        [NSThread sleepForTimeInterval:timeout];
+                        executed = YES;
+                    }];
+                    [[theValue(executed) should] beNo];
+                });
+            });
+
+            context(@"Sync", ^{
+                it(@"Should execute and return object", ^{
+                    NSString *expectedResult = @"Result";
+                    id result = [executor syncExecute:^id {
+                        return expectedResult;
+                    }];
+                    [[result should] equal:expectedResult];
+                });
+                
+                it(@"Should execute and return nil", ^{
+                    id result = [executor syncExecute:^id {
+                        return nil;
+                    }];
+                    [[result should] beNil];
+                });
             });
         });
     });

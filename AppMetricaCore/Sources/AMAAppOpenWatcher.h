@@ -4,7 +4,7 @@
 
 @class AMAStartupParametersConfiguration;
 @class AMAReporter;
-@protocol AMAExecuting;
+@protocol AMAAsyncExecuting;
 @class AMADeepLinkController;
 
 @interface AMAAppOpenWatcher : NSObject

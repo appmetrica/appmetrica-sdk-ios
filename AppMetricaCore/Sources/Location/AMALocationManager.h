@@ -2,7 +2,7 @@
 #import <Foundation/Foundation.h>
 #import <CoreLocation/CoreLocation.h>
 
-@protocol AMAExecuting;
+@protocol AMAAsyncExecuting;
 @class AMAStartupPermissionController;
 @class AMALocationCollectingController;
 @class AMALocationCollectingConfiguration;
@@ -13,8 +13,8 @@
 
 + (instancetype)sharedManager;
 
-- (instancetype)initWithExecutor:(id<AMAExecuting>)executor
-               mainQueueExecutor:(id<AMAExecuting>)mainQueueExecutor
+- (instancetype)initWithExecutor:(id<AMAAsyncExecuting>)executor
+               mainQueueExecutor:(id<AMAAsyncExecuting>)mainQueueExecutor
      startupPermissionController:(AMAStartupPermissionController *)startupPermissionController
                    configuration:(AMALocationCollectingConfiguration *)configuration
     locationCollectingController:(AMALocationCollectingController *)locationCollectingController;

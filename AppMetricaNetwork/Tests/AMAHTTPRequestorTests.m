@@ -139,7 +139,7 @@ describe(@"AMAHTTPRequestor", ^{
                 AMACurrentQueueExecutor *__block executor = nil;
 
                 beforeEach(^{
-                    executor = [KWMock nullMockForProtocol:@protocol(AMAExecuting)];
+                    executor = [KWMock nullMockForProtocol:@protocol(AMAAsyncExecuting)];
                     requestor.delegateExecutor = executor;
                 });
 

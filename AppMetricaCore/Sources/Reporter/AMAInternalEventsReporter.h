@@ -2,7 +2,7 @@
 
 #import <AppMetricaHostState/AppMetricaHostState.h>
 
-@protocol AMAExecuting;
+@protocol AMAAsyncExecuting;
 @protocol AMAReporterProviding;
 @protocol AMAHostStateProviding;
 
@@ -11,9 +11,9 @@
 - (instancetype)init NS_UNAVAILABLE;
 + (instancetype)new NS_UNAVAILABLE;
 
-- (instancetype)initWithExecutor:(id<AMAExecuting>)executor
+- (instancetype)initWithExecutor:(id<AMAAsyncExecuting>)executor
                 reporterProvider:(id<AMAReporterProviding>)reporterProvider;
-- (instancetype)initWithExecutor:(id<AMAExecuting>)executor
+- (instancetype)initWithExecutor:(id<AMAAsyncExecuting>)executor
                 reporterProvider:(id<AMAReporterProviding>)reporterProvider
                hostStateProvider:(id<AMAHostStateProviding>)hostStateProvider;
 

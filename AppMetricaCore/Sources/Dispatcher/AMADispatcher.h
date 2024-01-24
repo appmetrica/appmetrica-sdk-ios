@@ -2,7 +2,7 @@
 #import <Foundation/Foundation.h>
 
 @protocol AMADispatcherDelegate;
-@protocol AMAExecuting;
+@protocol AMAAsyncExecuting;
 @class AMAReportsController;
 @class AMAReporterStorage;
 @class AMATimeoutRequestsController;
@@ -20,7 +20,7 @@
                       timeoutController:(AMATimeoutRequestsController *)timeoutController;
 - (instancetype)initWithReporterStorage:(AMAReporterStorage *)reporterStorage
                                    main:(BOOL)main
-                               executor:(id<AMAExecuting>)executor
+                               executor:(id<AMAAsyncExecuting>)executor
                       reportsController:(AMAReportsController *)reportsController;
 
 - (void)cancelPending;

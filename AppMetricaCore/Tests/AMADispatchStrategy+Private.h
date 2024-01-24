@@ -1,11 +1,11 @@
 
 #import "AMADispatchStrategy.h"
 
-@protocol AMAExecuting;
+@protocol AMAAsyncExecuting;
 
 @interface AMADispatchStrategy ()
 
-@property (nonatomic, strong) id<AMAExecuting> executor;
+@property (nonatomic, strong) id<AMAAsyncExecuting> executor;
 @property (nonatomic, weak) id<AMADispatchStrategyDelegate> delegate;
 @property (nonatomic, strong) AMAReporterStorage *storage;
 

@@ -1,7 +1,7 @@
 
 #import <Foundation/Foundation.h>
 
-@protocol AMAExecuting;
+@protocol AMAAsyncExecuting;
 @class AMASearchAdsRequester;
 @class AMASearchAdsReporter;
 @class AMAReporterStateStorage;
@@ -12,9 +12,9 @@
 + (instancetype)new NS_UNAVAILABLE;
 
 - (instancetype)initWithApiKey:(NSString *)apiKey
-                      executor:(id<AMAExecuting>)executor
+                      executor:(id<AMAAsyncExecuting>)executor
           reporterStateStorage:(AMAReporterStateStorage *)reporterStateStorage;
-- (instancetype)initWithExecutor:(id<AMAExecuting>)executor
+- (instancetype)initWithExecutor:(id<AMAAsyncExecuting>)executor
             reporterStateStorage:(AMAReporterStateStorage *)reporterStateStorage
                        requester:(AMASearchAdsRequester *)requester
                         reporter:(AMASearchAdsReporter *)reporter;

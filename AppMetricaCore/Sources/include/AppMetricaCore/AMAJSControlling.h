@@ -6,7 +6,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@protocol AMAExecuting;
+@protocol AMAAsyncExecuting;
 
 NS_SWIFT_NAME(JSReporting)
 @protocol AMAJSReporting <NSObject>
@@ -24,7 +24,7 @@ NS_SWIFT_NAME(JSControlling)
 - (instancetype)init NS_UNAVAILABLE;
 + (instancetype)new NS_UNAVAILABLE;
 
-- (void)setUpWebViewReporting:(id<AMAExecuting>)executor
+- (void)setUpWebViewReporting:(id<AMAAsyncExecuting>)executor
                  withReporter:(id<AMAJSReporting>)reporter;
 
 @end

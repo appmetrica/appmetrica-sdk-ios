@@ -23,7 +23,7 @@ NSString *const kAMADispatcherErrorApiKeyUserInfoKey = @"kAMADispatcherErrorApiK
 @interface AMADispatcher () <AMAReportsControllerDelegate>
 
 @property (nonatomic, assign, readonly) BOOL main;
-@property (nonatomic, strong, readonly) id<AMAExecuting> executor;
+@property (nonatomic, strong, readonly) id<AMAAsyncExecuting> executor;
 @property (nonatomic, strong, readonly) AMAReporterStorage *reporterStorage;
 @property (nonatomic, strong, readonly) AMAReportsController *reportsController;
 
@@ -35,7 +35,7 @@ NSString *const kAMADispatcherErrorApiKeyUserInfoKey = @"kAMADispatcherErrorApiK
                                    main:(BOOL)main
                       timeoutController:(AMATimeoutRequestsController *)timeoutController
 {
-    id<AMAExecuting> executor = [[AMAAsyncExecutor alloc] initWithIdentifier:self];
+    id<AMAAsyncExecuting> executor = [[AMAExecutor alloc] initWithIdentifier:self];
 
     AMAReportsController *reportsController = [[AMAReportsController alloc] initWithExecutor:executor
                                                                    timeoutRequestsController:timeoutController];
@@ -50,7 +50,7 @@ NSString *const kAMADispatcherErrorApiKeyUserInfoKey = @"kAMADispatcherErrorApiK
 
 - (instancetype)initWithReporterStorage:(AMAReporterStorage *)reporterStorage
                                    main:(BOOL)main
-                               executor:(id<AMAExecuting>)executor
+                               executor:(id<AMAAsyncExecuting>)executor
                       reportsController:(AMAReportsController *)reportsController
 {
     self = [super init];

@@ -12,14 +12,14 @@ NSString *const kAMADLControllerUrlTypeReferral = @"referral";
 @interface AMADeepLinkController ()
 
 @property (nonatomic, strong, readonly) AMAReporter *reporter;
-@property (nonatomic, strong, readonly) id<AMAExecuting> executor;
+@property (nonatomic, strong, readonly) id<AMAAsyncExecuting> executor;
 @property (nonatomic, strong, readonly) NSMutableSet<NSString *> *reportedURLs;
 
 @end
 
 @implementation AMADeepLinkController
 
-- (instancetype)initWithReporter:(AMAReporter *)reporter executor:(id<AMAExecuting>)executor
+- (instancetype)initWithReporter:(AMAReporter *)reporter executor:(id<AMAAsyncExecuting>)executor
 {
     self = [super init];
     if (self != nil) {

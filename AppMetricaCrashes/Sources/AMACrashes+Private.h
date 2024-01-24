@@ -17,7 +17,8 @@
 @class AMAReporterStateStorage;
 
 @protocol AMACrashProcessingReporting;
-@protocol AMAExecuting;
+@protocol AMAAsyncExecuting;
+@protocol AMASyncExecuting;
 
 @interface AMAAppMetricaCrashes() <AMACrashLoaderDelegate,
                          AMAANRWatchdogDelegate,
@@ -29,7 +30,7 @@
 @property (nonatomic, strong, readonly) AMAAppMetricaCrashesConfiguration *internalConfiguration;
 @property (nonatomic, assign, getter=isActivated, readonly) BOOL activated;
 
-- (instancetype)initWithExecutor:(id<AMAExecuting>)executor
+- (instancetype)initWithExecutor:(id<AMAAsyncExecuting, AMASyncExecuting>)executor
                      crashLoader:(AMACrashLoader *)crashLoader
                    stateNotifier:(AMACrashReportingStateNotifier *)stateNotifier
                hostStateProvider:(AMAHostStateProvider *)hostStateProvider

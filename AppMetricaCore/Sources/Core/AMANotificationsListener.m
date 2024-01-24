@@ -4,7 +4,7 @@
 
 @interface AMANotificationsListener ()
 
-@property (nonatomic, strong) id<AMAExecuting> executor;
+@property (nonatomic, strong) id<AMAAsyncExecuting> executor;
 @property (nonatomic, strong) NSMapTable *objectCallbacks;
 @property (nonatomic, strong) NSCountedSet *notifications;
 
@@ -19,10 +19,10 @@
 
 - (instancetype)init
 {
-    return [self initWithExecutor:[AMAAsyncExecutor new]];
+    return [self initWithExecutor:[AMAExecutor new]];
 }
 
-- (instancetype)initWithExecutor:(id<AMAExecuting>)executor
+- (instancetype)initWithExecutor:(id<AMAAsyncExecuting>)executor
 {
     self = [super init];
     if (self) {

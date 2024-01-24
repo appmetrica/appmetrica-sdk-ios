@@ -11,8 +11,8 @@
 @property (nonatomic, assign) NSTimeInterval checkPeriod;
 
 @property (nonatomic, strong) NSCondition *condition;
-@property (nonatomic, strong) id<AMAExecuting> watchingExecutor;
-@property (nonatomic, strong) id<AMAExecuting> observedExecutor;
+@property (nonatomic, strong) id<AMAAsyncExecuting> watchingExecutor;
+@property (nonatomic, strong) id<AMAAsyncExecuting> observedExecutor;
 @property (nonatomic, assign) BOOL predicate;
 
 @end
@@ -25,8 +25,8 @@
 {
     dispatch_queue_t watchingQueue = [AMAQueuesFactory serialQueueForIdentifierObject:self
                                                                                domain:[AMAPlatformDescription SDKBundleName]];
-    AMAAsyncExecutor *watchingExecutor = [[AMAAsyncExecutor alloc] initWithQueue:watchingQueue];
-    AMAAsyncExecutor *observedExecutor = [[AMAAsyncExecutor alloc] initWithQueue:dispatch_get_main_queue()];
+    AMAExecutor *watchingExecutor = [[AMAExecutor alloc] initWithQueue:watchingQueue];
+    AMAExecutor *observedExecutor = [[AMAExecutor alloc] initWithQueue:dispatch_get_main_queue()];
 
     return [self initWithWatchdogInterval:watchdogInterval
                              pingInterval:pingInterval
@@ -36,8 +36,8 @@
 
 - (instancetype)initWithWatchdogInterval:(NSTimeInterval)watchdogInterval
                             pingInterval:(NSTimeInterval)pingInterval
-                        watchingExecutor:(id<AMAExecuting>)watchingExecutor
-                        observedExecutor:(id<AMAExecuting>)observedExecutor
+                        watchingExecutor:(id<AMAAsyncExecuting>)watchingExecutor
+                        observedExecutor:(id<AMAAsyncExecuting>)observedExecutor
 {
     self = [super init];
     if (self != nil) {

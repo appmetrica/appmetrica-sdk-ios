@@ -69,7 +69,7 @@
 @property (nonatomic, strong) AMAStartupController *startupController;
 @property (nonatomic, strong) AMADispatchStrategiesContainer *strategiesContainer;
 @property (nonatomic, strong) AMAReportersContainer *reportersContainer;
-@property (nonatomic, strong) id<AMAExecuting> executor;
+@property (nonatomic, strong) id<AMAAsyncExecuting> executor;
 @property (nonatomic, strong) id<AMAHostStateProviding> stateProvider;
 
 @property (nonatomic, strong, readonly) AMAPreactivationActionHistory *preactivationActionHistory;
@@ -95,12 +95,12 @@
 
 - (instancetype)init
 {
-    id<AMAExecuting> executor = [[AMAAsyncExecutor alloc] initWithIdentifier:self];
+    id<AMAAsyncExecuting> executor = [[AMAExecutor alloc] initWithIdentifier:self];
     return [self initWithHostStateProvider:nil executor:executor eventPollingDelegates:nil];
 }
 
 - (instancetype)initWithHostStateProvider:(id<AMAHostStateProviding>)hostStateProvider
-                                 executor:(id<AMAExecuting>)executor
+                                 executor:(id<AMAAsyncExecuting>)executor
                     eventPollingDelegates:(NSArray<Class<AMAEventPollingDelegate>> *)eventPollingDelegates
 {
     self = [super init];

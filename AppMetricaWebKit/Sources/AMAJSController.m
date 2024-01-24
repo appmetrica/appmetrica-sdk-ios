@@ -31,7 +31,7 @@ static NSString *const kAMAKeyEventValue = @"value";
 
 @property (nonatomic, strong, readwrite) WKUserContentController *userContentController;
 
-@property(nonatomic, strong) id<AMAExecuting> executor;
+@property(nonatomic, strong) id<AMAAsyncExecuting> executor;
 @property(atomic, strong) id<AMAJSReporting> reporter;
 
 @end
@@ -48,7 +48,7 @@ static NSString *const kAMAKeyEventValue = @"value";
     return self;
 }
 
-- (void)setUpWebViewReporting:(id<AMAExecuting>)executor
+- (void)setUpWebViewReporting:(id<AMAAsyncExecuting>)executor
                  withReporter:(id<AMAJSReporting>)reporter
 {
     AMALogInfo(@"Setting up web view reporting");

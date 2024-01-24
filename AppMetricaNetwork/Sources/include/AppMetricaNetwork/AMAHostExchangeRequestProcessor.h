@@ -3,7 +3,7 @@
 
 @class AMAHTTPRequestsFactory;
 @protocol AMARequest;
-@protocol AMAExecuting;
+@protocol AMAAsyncExecuting;
 @protocol AMAIterable;
 @protocol AMAHostExchangeResponseValidating;
 
@@ -25,11 +25,11 @@ NS_SWIFT_NAME(HostExchangeRequestProcessor)
 + (instancetype)new NS_UNAVAILABLE;
 
 - (instancetype)initWithRequest:(id<AMARequest>)request
-                       executor:(id<AMAExecuting>)executor
+                       executor:(id<AMAAsyncExecuting>)executor
                    hostProvider:(id<AMAIterable>)hostProvider
               responseValidator:(id<AMAHostExchangeResponseValidating>)responseValidator;
 - (instancetype)initWithRequest:(id<AMARequest>)request
-                       executor:(id<AMAExecuting>)executor
+                       executor:(id<AMAAsyncExecuting>)executor
                    hostProvider:(id<AMAIterable>)hostProvider
               responseValidator:(id<AMAHostExchangeResponseValidating>)responseValidator
             httpRequestsFactory:(AMAHTTPRequestsFactory *)httpRequestsFactory;

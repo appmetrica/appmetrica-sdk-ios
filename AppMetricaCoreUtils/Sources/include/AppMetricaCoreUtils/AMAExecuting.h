@@ -3,19 +3,25 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-#pragma mark - protocols
+#pragma mark - Protocols
 
-NS_SWIFT_NAME(Executing)
-@protocol AMAExecuting <NSObject>
+NS_SWIFT_NAME(AsyncExecuting)
+@protocol AMAAsyncExecuting <NSObject>
 
-- (void)execute:(nullable dispatch_block_t)block;
+- (void)execute:(dispatch_block_t)block;
 
 @end
 
-NS_SWIFT_NAME(DelayedExecuting)
-@protocol AMADelayedExecuting <AMAExecuting>
+NS_SWIFT_NAME(SyncExecuting)
+@protocol AMASyncExecuting <NSObject>
+- (nullable id)syncExecute:(id _Nullable (^)(void))block;
+@end
 
-- (void)executeAfterDelay:(NSTimeInterval)delay block:(nullable dispatch_block_t)block;
+
+NS_SWIFT_NAME(DelayedExecuting)
+@protocol AMADelayedExecuting <AMAAsyncExecuting>
+
+- (void)executeAfterDelay:(NSTimeInterval)delay block:(dispatch_block_t)block;
 
 @end
 
@@ -29,7 +35,7 @@ NS_SWIFT_NAME(CancelableExecuting)
 #pragma mark - AMAExecutor
 
 NS_SWIFT_NAME(AsyncExecutor)
-@interface AMAAsyncExecutor : NSObject <AMAExecuting>
+@interface AMAExecutor : NSObject <AMAAsyncExecuting, AMASyncExecuting>
 
 - (instancetype)initWithQueue:(dispatch_queue_t)queue NS_DESIGNATED_INITIALIZER;
 - (instancetype)initWithIdentifier:(nullable NSObject *)identifier;
@@ -39,12 +45,12 @@ NS_SWIFT_NAME(AsyncExecutor)
 #pragma mark - AMADelayedExecutor
 
 NS_SWIFT_NAME(DelayedExecutor)
-@interface AMADelayedExecutor : AMAAsyncExecutor <AMADelayedExecuting>
+@interface AMADelayedExecutor : AMAExecutor <AMADelayedExecuting>
 
 @end
 
 NS_SWIFT_NAME(CancelableDelayedExecutor)
-@interface AMACancelableDelayedExecutor : AMAAsyncExecutor <AMACancelableExecuting>
+@interface AMACancelableDelayedExecutor : AMAExecutor <AMACancelableExecuting>
 
 @end
 
