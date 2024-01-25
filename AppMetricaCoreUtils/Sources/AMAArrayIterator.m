@@ -38,4 +38,12 @@
     return current;
 }
 
+- (void)reset
+{
+    @synchronized (self) {
+        self.currentIndex = 0;
+        self.current = self.items.firstObject;
+    }
+}
+
 @end

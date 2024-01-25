@@ -25,6 +25,7 @@
     #import "AMAIterable.h"
     #import "AMAJSONSerialization.h"
     #import "AMALengthStringTruncator.h"
+    #import "AMAMultiTimer.h"
     #import "AMANumberUtilities.h"
     #import "AMAPermissiveTruncator.h"
     #import "AMAQueuesFactory.h"
@@ -61,6 +62,7 @@
     #import <AppMetricaCoreUtils/AMAIterable.h>
     #import <AppMetricaCoreUtils/AMAJSONSerialization.h>
     #import <AppMetricaCoreUtils/AMALengthStringTruncator.h>
+    #import <AppMetricaCoreUtils/AMAMultitimer.h>
     #import <AppMetricaCoreUtils/AMANumberUtilities.h>
     #import <AppMetricaCoreUtils/AMAPermissiveTruncator.h>
     #import <AppMetricaCoreUtils/AMAQueuesFactory.h>

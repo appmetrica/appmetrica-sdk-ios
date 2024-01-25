@@ -5,7 +5,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 NS_SWIFT_NAME(ArrayIterator)
-@interface AMAArrayIterator : NSObject <AMAIterable>
+@interface AMAArrayIterator : NSObject <AMAResettableIterable>
 
 - (instancetype)init NS_UNAVAILABLE;
 + (instancetype)new NS_UNAVAILABLE;

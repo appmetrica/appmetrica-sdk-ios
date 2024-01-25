@@ -23,6 +23,17 @@ describe(@"AMAArrayIterator", ^{
 
         [[theValue(result) should] beYes];
     });
+    
+    it(@"Reset iterator", ^{
+        BOOL result = NO;
+        iterator = [[AMAArrayIterator alloc] initWithArray:items1];
+        
+        [iterator next];
+        [[iterator.current should] equal: @"2"];
+        
+        [iterator reset];
+        [[iterator.current should] equal: @"1"];
+    });
 
     it(@"Out of bounds check", ^{
         iterator = [[AMAArrayIterator alloc] initWithArray:items1];
@@ -37,6 +48,10 @@ describe(@"AMAArrayIterator", ^{
     
     it(@"Should comform to AMAIterable", ^{
         [[iterator should] conformToProtocol:@protocol(AMAIterable)];
+    });
+    
+    it(@"Should comform to AMAResettableIterable", ^{
+        [[iterator should] conformToProtocol:@protocol(AMAResettableIterable)];
     });
 });
 
