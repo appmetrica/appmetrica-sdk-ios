@@ -1,5 +1,5 @@
 
-#import "AMAEnvironmentContainer.h"
+#import "AMACore.h"
 #import "AMAEnvironmentLimiter.h"
 
 @interface AMAEnvironmentContainer ()

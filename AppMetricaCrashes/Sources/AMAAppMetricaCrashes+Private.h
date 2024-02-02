@@ -14,7 +14,6 @@
 @class AMADecodedCrashSerializer;
 @class AMAErrorEnvironment;
 @class AMAErrorModelFactory;
-@class AMAReporterStateStorage;
 
 @protocol AMACrashProcessingReporting;
 @protocol AMAAsyncExecuting;
@@ -35,10 +34,7 @@
                    stateNotifier:(AMACrashReportingStateNotifier *)stateNotifier
                hostStateProvider:(AMAHostStateProvider *)hostStateProvider
                       serializer:(AMADecodedCrashSerializer *)serializer
-                   configuration:(AMAAppMetricaCrashesConfiguration *)configuration
-                errorEnvironment:(AMAErrorEnvironment *)errorEnvironment
-               errorModelFactory:(AMAErrorModelFactory *)errorModelFactory
-                   crashReporter:(AMACrashReporter *)crashReporter NS_DESIGNATED_INITIALIZER;
+                   configuration:(AMAAppMetricaCrashesConfiguration *)configuration NS_DESIGNATED_INITIALIZER;
 
 - (void)activate;
 
@@ -48,6 +44,6 @@
 - (void)enableANRWatchdogWithWatchdogInterval:(NSTimeInterval)watchdogInterval
                                  pingInterval:(NSTimeInterval)pingInterval;
 
-- (void)addCrashProcessingReporter:(id<AMACrashProcessingReporting>)crashReporter;
+- (void)handlePluginInitFinished;
 
 @end

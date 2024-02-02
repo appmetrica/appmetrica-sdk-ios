@@ -33,6 +33,8 @@ NS_SWIFT_NAME(EventFlushableDelegate)
 
 + (NSArray<AMAEventPollingParameters *> *)eventsForPreviousSession;
 
++ (void)setupAppEnvironment:(AMAEnvironmentContainer *)appEnvironment;
+
 @end
 
 NS_ASSUME_NONNULL_END

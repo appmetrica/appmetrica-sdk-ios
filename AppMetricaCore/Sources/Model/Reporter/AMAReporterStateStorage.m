@@ -1,7 +1,7 @@
 
 #import "AMAReporterStateStorage+Migration.h"
 #import "AMADatabaseProtocol.h"
-#import "AMAEnvironmentContainer.h"
+#import "AMACore.h"
 #import "AMAExtrasContainer.h"
 #import "AMAModelSerialization.h"
 #import "Extras.pb-c.h"

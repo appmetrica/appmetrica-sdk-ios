@@ -1,6 +1,7 @@
 #import <Foundation/Foundation.h>
-
 #import "AMACrashSafeTransactor.h"
+#import "AMAAppMetricaCrashReporting.h"
+#import "AMAAppMetricaPluginReporting.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -8,16 +9,13 @@ NS_ASSUME_NONNULL_BEGIN
 @protocol AMAAppMetricaReporting;
 @class AMAEventPollingParameters;
 
-@interface AMACrashReporter : NSObject <AMATransactionReporter>
+@interface AMACrashReporter : NSObject <AMATransactionReporter, AMAAppMetricaCrashReporting, AMAAppMetricaPluginReporting>
 
-@property (nonatomic, strong) NSMutableSet<id<AMACrashProcessingReporting>> *extendedCrashReporters; // FIXME: (glinnik, belanovich-sy) needed any more?
-
-- (instancetype)initWithReporter:(id<AMAAppMetricaReporting>)reporter NS_DESIGNATED_INITIALIZER;
+- (instancetype)init NS_UNAVAILABLE;
+- (instancetype)initWithApiKey:(NSString *)apiKey;
 
 - (void)reportCrashWithParameters:(AMAEventPollingParameters *)parameters;
 - (void)reportANRWithParameters:(AMAEventPollingParameters *)parameters;
-- (void)reportErrorWithParameters:(AMAEventPollingParameters *)parameters
-                        onFailure:(nullable void (^)(NSError *))onFailure;
 
 - (void)reportInternalError:(NSError *)error;
 - (void)reportInternalCorruptedCrash:(NSError *)error;

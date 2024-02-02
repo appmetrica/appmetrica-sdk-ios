@@ -1,7 +1,5 @@
 #import <Kiwi/Kiwi.h>
-
 #import "AMACrashProcessor.h"
-
 #import "AMACrashProcessingReporting.h"
 #import "AMACrashReportCrash.h"
 #import "AMACrashReportError.h"
@@ -23,7 +21,8 @@ describe(@"AMACrashProcessor", ^{
         return [[AMACrashProcessor alloc] initWithIgnoredSignals:nil
                                                       serializer:serializer
                                                    crashReporter:crashReporterMock
-                                                       formatter:formatterMock];
+                                                       formatter:formatterMock
+                                              extendedProcessors:@[]];
     });
     
     context(@"Initialization", ^{
@@ -31,7 +30,8 @@ describe(@"AMACrashProcessor", ^{
         it(@"Should properly initialize with default serializer when only signals are given", ^{
             AMACrashProcessor *processor = [[AMACrashProcessor alloc] initWithIgnoredSignals:@[ @SIGABRT ]
                                                                                   serializer:serializer
-                                                                               crashReporter:crashReporterMock];
+                                                                               crashReporter:crashReporterMock
+                                                                          extendedProcessors:@[]];
             [[processor.ignoredCrashSignals should] contain:@SIGABRT];
         });
         
@@ -39,7 +39,8 @@ describe(@"AMACrashProcessor", ^{
             AMACrashProcessor *processor = [[AMACrashProcessor alloc] initWithIgnoredSignals:@[ @SIGABRT ]
                                                                                   serializer:serializer
                                                                                crashReporter:crashReporterMock
-                                                                                   formatter:formatterMock];
+                                                                                   formatter:formatterMock
+                                                                          extendedProcessors:@[]];
             [[processor.ignoredCrashSignals should] contain:@SIGABRT];
         });
     });
@@ -88,7 +89,8 @@ describe(@"AMACrashProcessor", ^{
                 return [[AMACrashProcessor alloc] initWithIgnoredSignals:@[ @SIGABRT ]
                                                               serializer:serializer
                                                            crashReporter:crashReporterMock
-                                                               formatter:formatterMock];
+                                                               formatter:formatterMock
+                                                      extendedProcessors:@[]];
             });
             beforeEach(^{
                 [signalMock stub:@selector(signal) andReturn:theValue(SIGABRT)];
@@ -105,7 +107,8 @@ describe(@"AMACrashProcessor", ^{
                 return [[AMACrashProcessor alloc] initWithIgnoredSignals:@[ @SIGQUIT ]
                                                               serializer:serializer
                                                            crashReporter:crashReporterMock
-                                                               formatter:formatterMock];
+                                                               formatter:formatterMock
+                                                      extendedProcessors:@[]];
             });
             beforeEach(^{
                 [signalMock stub:@selector(signal) andReturn:theValue(SIGABRT)];
@@ -138,47 +141,13 @@ describe(@"AMACrashProcessor", ^{
         });
         
         context(@"Process Error", ^{
+            let(errorMock, ^{ return [NSError nullMock]; });
             
-            let(errorModelMock, ^{ return [AMAErrorModel nullMock]; });
-            
-            it(@"Should call onFailure when formatter returns nil", ^{
-                [formatterMock stub:@selector(formattedError:) andReturn:nil];
+            it(@"Should report nserror", ^{
+                [[crashReporterMock should] receive:@selector(reportNSError:onFailure:)
+                                      withArguments:errorMock, kw_any()];
                 
-                __block BOOL onFailureCalled = NO;
-                [crashProcessor processError:errorModelMock onFailure:^(NSError *error) {
-                    onFailureCalled = YES;
-                }];
-                
-                [[theValue(onFailureCalled) should] beYes];
-            });
-            
-            it(@"Should call reportErrorWithParameters:onFailure: when formatted data is not nil", ^{
-                NSData *mockData = [NSData new];
-                [formatterMock stub:@selector(formattedError:error:) andReturn:mockData];
-                
-                [[crashReporterMock should] receive:@selector(reportErrorWithParameters:onFailure:)];
-                
-                [crashProcessor processError:errorModelMock onFailure:^(NSError *error) {}];
-            });
-            
-            it(@"Should call onFailure when reportErrorWithParameters:onFailure: reports an error", ^{
-                NSData *mockData = [NSData new];
-                [formatterMock stub:@selector(formattedError:) andReturn:mockData];
-                
-                NSError *sampleError = [NSError errorWithDomain:@"TestDomain" code:1 userInfo:nil];
-                
-                [crashReporterMock stub:@selector(reportErrorWithParameters:onFailure:) withBlock:^id(NSArray *params) {
-                    void (^failureBlock)(NSError *) = params[1];
-                    failureBlock(sampleError);
-                    return nil;
-                }];
-                
-                __block BOOL onFailureCalled = NO;
-                [crashProcessor processError:errorModelMock onFailure:^(NSError *error) {
-                    onFailureCalled = YES;
-                }];
-                
-                [[theValue(onFailureCalled) should] beYes];
+                [crashProcessor processError:errorMock];
             });
         });
     });

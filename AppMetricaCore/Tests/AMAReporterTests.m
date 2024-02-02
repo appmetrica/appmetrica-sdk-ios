@@ -845,16 +845,20 @@ describe(@"AMAReporter", ^{
                 AMAEvent *lastEvent = [eventStorage() amatest_savedEventWithType:AMAEventTypeClient name:lastEventName];
                 NSTimeInterval lastEventInterval = [lastEvent.createdAt timeIntervalSince1970];
                 [NSDate stub:@selector(date) andReturn:[NSDate dateWithTimeIntervalSinceNow:updateSessionInterval]];
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wnonnull"
+                // TODO: Fix test passing nonnull block
                 [reporter.executor execute:nil];
+#pragma clang diagnostic pop
                 session = [sessionStorage() amatest_sessionWithOid:@1];
-                NSTimeInterval pauteTimeInterval = [session.pauseTime timeIntervalSince1970];
-                [[theValue(pauteTimeInterval) should] beGreaterThan:theValue(lastEventInterval)];
+                NSTimeInterval pauseTimeInterval = [session.pauseTime timeIntervalSince1970];
+                [[theValue(pauseTimeInterval) should] beGreaterThan:theValue(lastEventInterval)];
             });
             it(@"Should update session stamp immediately after start", ^{
                 AMAReporter *reporter = createReporterAndStubUpdateInterval();
                 [reporter shutdown];
                 [[AMAMetricaConfiguration sharedInstance] clearStubs];
-                [reporter.executor execute:nil];
+                [reporter.executor execute:^{}];
                 NSTimeInterval beforeStart = [[NSDate date] timeIntervalSince1970] - floatingComparisonDelta;
                 [reporter start];
                 NSTimeInterval afterStart = [[NSDate date] timeIntervalSince1970] + floatingComparisonDelta;
@@ -868,7 +872,7 @@ describe(@"AMAReporter", ^{
                 [reporter shutdown];
                 AMASession *session = [sessionStorage() amatest_sessionWithOid:@1];
                 NSTimeInterval shutdownInterval = [session.pauseTime timeIntervalSince1970];
-                [reporter.executor execute:nil];
+                [reporter.executor execute:^{}];
                 session = [sessionStorage() amatest_sessionWithOid:@1];
                 NSTimeInterval pauteTimeInterval = [session.pauseTime timeIntervalSince1970];
                 [[theValue(pauteTimeInterval) should] equal:shutdownInterval withDelta:floatingComparisonDelta];
@@ -883,7 +887,7 @@ describe(@"AMAReporter", ^{
                 NSTimeInterval shutdownInterval = [session.pauseTime timeIntervalSince1970];
 
                 [NSDate stub:@selector(date) andReturn:nowDate];
-                [reporter.executor execute:nil];
+                [reporter.executor execute:^{}];
                 session = [sessionStorage() amatest_sessionWithOid:@1];
                 NSTimeInterval pauteTimeInterval = [session.pauseTime timeIntervalSince1970];
 
@@ -1700,10 +1704,12 @@ describe(@"AMAReporter", ^{
             beforeEach(^{
                 [reporter reportBinaryEventWithType:AMAEventTypeClient
                                                data:data
+                                               name:nil
                                             gZipped:YES
                                    eventEnvironment:nil
                                      appEnvironment:nil
                                              extras:nil
+                                     bytesTruncated:0
                                           onFailure:^(NSError *anError) { error = anError; }];
                 event = [eventStorage() amatest_savedEventWithType:AMAEventTypeClient];
             });

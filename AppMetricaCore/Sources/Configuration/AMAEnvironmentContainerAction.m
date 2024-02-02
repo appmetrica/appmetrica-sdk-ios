@@ -1,6 +1,6 @@
 
 #import "AMAEnvironmentContainerAction.h"
-#import "AMAEnvironmentContainer.h"
+#import "AMACore.h"
 
 @implementation AMAEnvironmentContainerAddValueAction
 

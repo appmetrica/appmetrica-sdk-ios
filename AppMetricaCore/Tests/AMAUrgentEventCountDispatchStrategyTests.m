@@ -66,14 +66,14 @@ describe(@"AMAUrgentEventCountDispatchStrategy", ^{
         AMAUrgentEventCountDispatchStrategy *strategy = mockEnv(2);
         [[(id)strategy.delegate should] receive:@selector(dispatchStrategyWantsReportingToHappen:)];
         [strategy start];
-        [strategy.executor execute:nil];
+        [strategy.executor execute:^{}];
     });
 
     it(@"Should not trigger dispatch if there is no important events", ^{
         AMAUrgentEventCountDispatchStrategy *strategy = mockEnv(0);
         [[(id)strategy.delegate shouldNot] receive:@selector(dispatchStrategyWantsReportingToHappen:)];
         [strategy start];
-        [strategy.executor execute:nil];
+        [strategy.executor execute:^{}];
     });
 
     it(@"Should not react on notification if event type is not in list", ^{
@@ -81,7 +81,7 @@ describe(@"AMAUrgentEventCountDispatchStrategy", ^{
         [[strategy shouldNot] receive:@selector(updateEventsCount)];
         [strategy start];
         postNotificationWithEventType(AMAEventTypeClient, strategy);
-        [strategy.executor execute:nil];
+        [strategy.executor execute:^{}];
     });
 
     it(@"Should react on notification for EVENT_INIT", ^{
@@ -89,7 +89,7 @@ describe(@"AMAUrgentEventCountDispatchStrategy", ^{
         [[strategy should] receive:@selector(updateEventsCount)];
         [strategy start];
         postNotificationWithEventType(AMAEventTypeInit, strategy);
-        [strategy.executor execute:nil];
+        [strategy.executor execute:^{}];
     });
 
     it(@"Should react on notification for EVENT_START", ^{
@@ -97,7 +97,7 @@ describe(@"AMAUrgentEventCountDispatchStrategy", ^{
         [[strategy should] receive:@selector(updateEventsCount)];
         [strategy start];
         postNotificationWithEventType(AMAEventTypeStart, strategy);
-        [strategy.executor execute:nil];
+        [strategy.executor execute:^{}];
     });
 
     it(@"Should react on notification for EVENT_REFERRER", ^{
@@ -105,7 +105,7 @@ describe(@"AMAUrgentEventCountDispatchStrategy", ^{
         [[strategy should] receive:@selector(updateEventsCount)];
         [strategy start];
         postNotificationWithEventType(AMAEventTypeReferrer, strategy);
-        [strategy.executor execute:nil];
+        [strategy.executor execute:^{}];
     });
     
     context(@"Can be executed", ^{

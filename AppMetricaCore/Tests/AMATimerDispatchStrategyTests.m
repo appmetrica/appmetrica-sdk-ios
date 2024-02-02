@@ -43,7 +43,10 @@ describe(@"AMATimerDispatchStrategy", ^{
     it(@"Should trigger dispatch after timeout", ^{
         [timerStrategy start];
         [[timerStrategy should] receive:@selector(triggerDispatch)];
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wnonnull"
         [timerStrategy.executor execute:nil];
+#pragma clang diagnostic pop
     });
 
     it(@"Should triger with proper delayed timeout", ^{
@@ -56,7 +59,10 @@ describe(@"AMATimerDispatchStrategy", ^{
         [timerStrategy start];
         [timerStrategy shutdown];
         [[timerStrategy shouldNot] receive:@selector(triggerDispatch)];
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wnonnull"
         [timerStrategy.executor execute:nil];
+#pragma clang diagnostic pop
 
     });
     context(@"Can be executed", ^{

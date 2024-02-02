@@ -1,5 +1,6 @@
 
 #if __has_include("AppMetricaCrashes.h")
+    #import "AMAAppMetricaCrashReporting.h"
     #import "AMAAppMetricaCrashes.h"
     #import "AMAAppMetricaCrashesConfiguration.h"
     #import "AMAAppMetricaPluginReporting.h"
@@ -10,6 +11,7 @@
     #import "AMAPluginErrorDetails.h"
     #import "AMAStackTraceElement.h"
 #else
+    #import <AppMetricaCrashes/AMAAppMetricaCrashReporting.h>
     #import <AppMetricaCrashes/AMAAppMetricaCrashes.h>
     #import <AppMetricaCrashes/AMAAppMetricaCrashesConfiguration.h>
     #import <AppMetricaCrashes/AMAAppMetricaPluginReporting.h>

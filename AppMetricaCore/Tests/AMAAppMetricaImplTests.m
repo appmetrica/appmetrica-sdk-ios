@@ -216,6 +216,15 @@ describe(@"AMAAppMetricaImpl", ^{
             [[theValue([eventStorage totalCountOfEventsWithTypes:@[ @(AMAEventTypeProtobufCrash) ]]) should] equal:theValue(1)];
             [[theValue([eventStorage totalCountOfEventsWithTypes:@[ @(AMAEventTypeProtobufError) ]]) should] equal:theValue(1)];
         });
+        
+        it(@"Should setup app environment events", ^{
+            AMAEnvironmentContainer *appEnvironmentMock = [AMAEnvironmentContainer nullMock];
+            [reporterTestHelper.appReporter.reporterStorage.stateStorage stub:@selector(appEnvironment) andReturn:appEnvironmentMock];
+            
+            [[AMAEventPollingDelegateMock.class should] receive:@selector(setupAppEnvironment:) withArguments:appEnvironmentMock];
+            
+            [impl activateWithConfiguration:configuration];
+        });
     });
     context(@"Setting user profile ID", ^{
         NSString *profileIDBeforeActivation = @"Profile ID before activation";
@@ -427,34 +436,41 @@ describe(@"AMAAppMetricaImpl", ^{
     
     context(@"Sends binary events with custom EventType", ^{
         NSUInteger const eventType = 4321;
+        NSString *const eventName = @"name";
         it(@"Should dispatch reporter with correct event type", ^{
             [appMetricaImpl activateWithConfiguration:configuration];
             
             [[appMetricaImpl.reporter should] receive:@selector(reportBinaryEventWithType:
                                                                 data:
+                                                                name:
                                                                 gZipped:
                                                                 eventEnvironment:
                                                                 appEnvironment:
                                                                 extras:
+                                                                bytesTruncated:
                                                                 onFailure:)
-                                        withArguments:theValue(eventType), kw_any(), theValue(YES), @{}, @{}, nil, nil];
+                                        withArguments:theValue(eventType), kw_any(), eventName, theValue(YES), @{}, @{}, nil, theValue(2), nil];
             
             [appMetricaImpl reportBinaryEventWithType:eventType
                                                  data:[NSData data]
+                                                 name:eventName
                                               gZipped:YES
                                      eventEnvironment:@{}
                                        appEnvironment:@{}
                                                extras:nil
+                                       bytesTruncated:2
                                             onFailure:nil];
         });
         it(@"Should save event with custom EventType", ^{
             [appMetricaImpl activateWithConfiguration:configuration];
             [appMetricaImpl reportBinaryEventWithType:eventType
                                                  data:[NSData data]
+                                                 name:nil
                                               gZipped:YES
                                      eventEnvironment:@{}
                                        appEnvironment:@{}
                                                extras:nil
+                                       bytesTruncated:0
                                             onFailure:nil];
             
             AMAEvent *event = [eventStorage amatest_savedEventWithType:eventType];

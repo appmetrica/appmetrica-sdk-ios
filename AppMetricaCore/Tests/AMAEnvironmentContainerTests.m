@@ -3,6 +3,13 @@
 #import "AMAEnvironmentContainer.h"
 #import "AMAEnvironmentLimiter.h"
 
+@interface AMAEnvironmentContainer ()
+
+- (instancetype)initWithDictionaryEnvironment:(nullable NSDictionary *)dictionaryEnvironment
+                                      limiter:(AMAEnvironmentLimiter *)limiter;
+
+@end
+
 SPEC_BEGIN(AMAEnvironmentContainerTests)
 
 describe(@"AMAEnvironmentContainer", ^{

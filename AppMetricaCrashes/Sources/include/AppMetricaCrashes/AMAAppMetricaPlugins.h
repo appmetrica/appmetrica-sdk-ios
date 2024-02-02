@@ -6,9 +6,9 @@
 NS_ASSUME_NONNULL_BEGIN
 
 /**
- * `AMAAppMetricaPlugins` is an extension of `AMAAppMetrica`.
+ * `AMAAppMetricaPlugins` is an extension of `AMAAppMetricaCrashes`.
  * Instance of object that implements `AMAAppMetricaPlugins` can be obtained via
- * `AMAAppMetrica#pluginExtension` property.
+ * `AMAAppMetricaCrashes#pluginExtension` property.
  * Only one `AMAAppMetricaPlugins` instance is created.
  * You can either query it each time you need it, or save the reference by yourself.
  * NOTE: to use this extension you must activate AppMetrica first
@@ -17,7 +17,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @note See `AMAAppMetrica#pluginExtension`.
  */
 NS_SWIFT_NAME(AppMetricaPlugins)
-@protocol AMAAppMetricaPlugins <NSObject> // FIXME: Come up with where to move plugins
+@protocol AMAAppMetricaPlugins <NSObject>
 
 /**
  Sends unhandled error.

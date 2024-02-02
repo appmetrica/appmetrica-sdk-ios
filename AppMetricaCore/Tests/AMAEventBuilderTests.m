@@ -408,10 +408,12 @@ describe(@"AMAEventBuilder", ^{
                 it(@"Binary event type", ^{
                     event = [builder binaryEventWithType:internalEventType
                                                     data:nil
+                                                    name:nil
                                                  gZipped:YES
                                         eventEnvironment:nil
                                           appEnvironment:nil
                                                   extras:nil
+                                          bytesTruncated:0
                                                    error:nil];
                     [[event should] beNil];
                 });
@@ -625,16 +627,19 @@ describe(@"AMAEventBuilder", ^{
         });
         context(@"Binary events", ^{
             NSUInteger const eventType = 120;
+            NSString *const eventName = @"name";
             NSData *__block data = [@"data" dataUsingEncoding:NSUTF8StringEncoding];
             __block AMAEvent *event;
             __block NSError *error;
             void(^buildEvent)(BOOL) = ^(BOOL gZipped) {
                 event = [builder binaryEventWithType:eventType
                                                 data:data
+                                                name:eventName
                                              gZipped:gZipped
                                     eventEnvironment:eventEnvironment
                                       appEnvironment:appEnvironment
                                               extras:extras
+                                      bytesTruncated:5
                                                error:&error];
             };
             beforeEach(^{
@@ -685,6 +690,14 @@ describe(@"AMAEventBuilder", ^{
                 [[error should] beNil];
                 [[event.extras should] equal:extras];
             });
+            it(@"Should add bytes truncated", ^{
+                [[error should] beNil];
+                [[theValue(event.bytesTruncated) should] equal:theValue(5)];
+            });
+            it(@"Should set event name", ^{
+                [[error should] beNil];
+                [[event.name should] equal:eventName];
+            });
             it(@"Should be passed to composer", ^{
                 [[eventComposerProvider should] receive:@selector(composerForType:) withArguments:theValue(eventType)];
                 [[eventComposer should] receive:@selector(compose:)];
@@ -701,10 +714,12 @@ describe(@"AMAEventBuilder", ^{
                 NSError *actualError = nil;
                 event = [builder binaryEventWithType:eventType
                                                 data:data
+                                                name:nil
                                              gZipped:YES
                                     eventEnvironment:eventEnvironment
                                       appEnvironment:appEnvironment
                                               extras:extras
+                                      bytesTruncated:0
                                                error:&actualError];
                 
                 [[theValue(actualError.code) should] equal:theValue(expectedError.code)];

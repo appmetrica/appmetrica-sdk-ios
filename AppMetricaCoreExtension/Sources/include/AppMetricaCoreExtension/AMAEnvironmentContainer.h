@@ -1,7 +1,6 @@
 
 #import <Foundation/Foundation.h>
 
-@class AMAEnvironmentLimiter;
 @class AMAEnvironmentContainer;
 
 NS_ASSUME_NONNULL_BEGIN
@@ -13,9 +12,6 @@ typedef void (^AMAEnvironmentContainerUpdatesBlock)(void);
 @interface AMAEnvironmentContainer : NSObject
 
 - (instancetype)initWithDictionaryEnvironment:(nullable NSDictionary *)dictionaryEnvironment;
-
-- (instancetype)initWithDictionaryEnvironment:(nullable NSDictionary *)dictionaryEnvironment
-                                      limiter:(AMAEnvironmentLimiter *)limiter NS_DESIGNATED_INITIALIZER;
 
 - (void)addValue:(nullable NSString *)value forKey:(NSString *)key;
 - (void)clearEnvironment;

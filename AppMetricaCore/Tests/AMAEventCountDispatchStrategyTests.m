@@ -38,16 +38,20 @@ describe(@"AMAEventCountDispatchStrategy", ^{
                                                      executionConditionChecker:executionConditionChecker];
         };
         void (^postNotifications)(AMAEventCountDispatchStrategy *, NSUInteger) =
-            ^(AMAEventCountDispatchStrategy *strategy, NSUInteger notificationsNumber) {
+        ^(AMAEventCountDispatchStrategy *strategy, NSUInteger notificationsNumber) {
             AMAReporter *reporter = [reporterTestHelper appReporter];
             for (NSUInteger i = 0; i < notificationsNumber; ++i) {
                 [reporter reportEvent:@"Test" onFailure:nil];
             }
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wnonnull"
+                // TODO: Fix test passing nonnull block
             [strategy.executor execute:nil];
         };
         __auto_type reportCleanupEvent = ^{
             [[reporterTestHelper appReporter] reportCleanupEvent:@{} onFailure:NULL];
             [strategy.executor execute:nil];
+#pragma clang diagnostic pop
         };
         void (^stubConfigurationWithMaxReportsCount)(NSUInteger) = ^(NSUInteger count) {
             [AMAMetricaConfigurationTestUtilities stubConfiguration];

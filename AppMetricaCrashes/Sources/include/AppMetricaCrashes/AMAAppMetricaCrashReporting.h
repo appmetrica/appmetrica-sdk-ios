@@ -1,61 +1,16 @@
 
 #import <Foundation/Foundation.h>
-
-#if __has_include("AMAErrorRepresentable.h")
-    #import "AMAErrorRepresentable.h"
-#else
-    #import <AppMetricaCrashes/AMAErrorRepresentable.h>
-#endif
+#import "AMAErrorRepresentable.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-/// Type definition for the crash reporting state callback block.
-///
-/// The 'state' parameter is a dictionary that can contain any combination of the following keys:
-/// - kAMACrashReportingStateEnabledKey: An NSNumber containing a boolean value indicating if crash reporting is enabled.
-/// - kAMACrashReportingStateCrashedLastLaunchKey: An NSNumber containing a boolean value indicating if the app crashed during the last launch.
-///
-/// Use this block type with methods that require crash reporting state completion callbacks.
-typedef void(^AMACrashReportingStateCompletionBlock)(NSDictionary * _Nullable state)
-    NS_SWIFT_UNAVAILABLE("Use Swift closures.");
+/** AppMetricaCrashReporting protocol groups methods that are used by custom reporting errors.
+ */
 
-@protocol AMAErrorRepresentable;
-@protocol AMAAppMetricaPlugins;
-@protocol AMAAppMetricaCrashReporting;
-@class AMAAppMetricaCrashesConfiguration;
+@protocol AMAAppMetricaPluginReporting;
 
-///`AMAAppMetricaCrashes` provides error and crash reporting functionalities for integration with AppMetrica.
-///
-///The class offers a singleton instance and should not be subclassed. Initialize using `[AMAAppMetricaCrashes crashes]`.
-///
-NS_SWIFT_NAME(AppMetricaCrashes)
-@interface AMAAppMetricaCrashes : NSObject
-
-/// Accesses the singleton `AMAAppMetricaCrashes` instance.
-///
-/// - Returns: The singleton `AMAAppMetricaCrashes` instance.
-+ (instancetype)crashes NS_SWIFT_NAME(crashes());
-
-/// Sets the crash reporting configuration for the application.
-///
-/// - Parameter configuration: An `AMAAppMetricaCrashesConfiguration` object that specifies how the application should handle and report crashes.
-///
-/// This method allows you to customize the behavior of the crash reporting mechanism.
-/// Use the properties of the `AMAAppMetricaCrashesConfiguration` class to enable or disable specific types of crash reporting, as well as customize other related settings.
-/// Once set, the configuration will control how the app deals with various types of crashes and issues.
-///
-/// ## Example
-/// ```objc
-/// AMAAppMetricaCrashesConfiguration *config = [AMAAppMetricaCrashesConfiguration new];
-/// config.autoCrashTracking = YES;
-/// config.probablyUnhandledCrashReporting = NO;
-/// config.applicationNotRespondingDetection = YES;
-/// config.applicationNotRespondingWatchdogInterval = 5.0;
-/// [[AMAAppMetricaCrashes crashes] setConfiguration:config];
-/// ```
-///
-/// - SeeAlso: `AMAAppMetricaCrashesConfiguration`
-- (void)setConfiguration:(AMAAppMetricaCrashesConfiguration *)configuration;
+NS_SWIFT_NAME(AppMetricaCrashReporting)
+@protocol AMAAppMetricaCrashReporting <NSObject>
 
 /// Reports an error of the `NSError` type to AppMetrica.
 ///
@@ -134,35 +89,14 @@ NS_SWIFT_NAME(AppMetricaCrashes)
 /// - SeeAlso: `-setErrorEnvironmentValue:forKey:` for setting individual key-value pairs.
 - (void)clearErrorEnvironment;
 
-/// Requests the current crash reporting state.
-///
-/// This method asynchronously fetches the current crash reporting state and returns it via a completion block.
-///
-/// - Parameter completionQueue: The dispatch queue on which to execute the completion block.
-/// - Parameter completionBlock: A block to be executed upon completion of the request.
-///
-/// - SeeAlso: `AMACrashReportingStateCompletionBlock` for more information on the dictionary keys and their associated values.
-- (void)requestCrashReportingStateWithCompletionQueue:(dispatch_queue_t)completionQueue
-                                      completionBlock:(AMACrashReportingStateCompletionBlock)completionBlock;
-
-/** Returns id<AMAAppMetricaCrashReporting> that can send errors to specific API key.
-
- @param apiKey Api key to send events to.
- @return id<AMAAppMetricaCrashReporting> that conforms to AMAAppMetricaCrashReporting and handles
- sending errors to specified apikey
- */
-- (nullable id<AMAAppMetricaCrashReporting>)reporterForAPIKey:(NSString *)apiKey NS_SWIFT_NAME(reporter(for:));
-
 /**
- * Creates a `AMAAppMetricaPlugins` that can send plugin events to main API key.
- * Only one `AMAAppMetricaPlugins` instance is created.
+ * Creates a `AMAAppMetricaPluginReporting` that can send plugin events to this reporter.
+ * For every reporter only one `AMAAppMetricaPluginReporting` instance is created.
  * You can either query it each time you need it, or save the reference by yourself.
- * NOTE: to use this extension you must activate AppMetrica first
- * via `[AMAAppMetrica activateWithConfiguration:]`.
  *
- * @return plugin extension instance
+ * @return plugin extension instance for this reporter
  */
-- (id<AMAAppMetricaPlugins>)pluginExtension;
+- (id<AMAAppMetricaPluginReporting>)pluginExtension;
 
 @end
 

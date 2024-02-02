@@ -21,7 +21,13 @@
 #import "AMADecodedCrashSerializer+CustomEventParameters.h"
 #import "AMADecodedCrashSerializer.h"
 #import "AMAErrorEnvironment.h"
-#import "AMAErrorModelFactory.h"
+#import "AMAAppMetricaPluginsImpl.h"
+#import "AMACrashReportersContainer.h"
+#import "AMAAppMetricaCrashReporting.h"
+#import "AMACrashReportCrash.h"
+#import "AMACrashReportError.h"
+#import "AMASignal.h"
+#import "AMAAppMetricaPluginsImpl.h"
 
 @interface AMAAppMetricaCrashes ()
 
@@ -30,15 +36,18 @@
 @property (nonatomic, strong) id<AMAAsyncExecuting, AMASyncExecuting> executor;
 @property (nonatomic, strong) AMAANRWatchdog *ANRDetector;
 
-//@property (nonatomic, strong) AMAEnvironmentContainer *appEnvironment;
+@property (nonatomic, strong) AMAEnvironmentContainer *appEnvironment;
 @property (nonatomic, strong) AMAErrorEnvironment *errorEnvironment;
+
+@property (nonatomic, strong) AMACrashReportersContainer *reportersContainer;
 
 @property (nonatomic, strong, readonly) AMAHostStateProvider *hostStateProvider;
 @property (nonatomic, strong, readonly) AMADecodedCrashSerializer *serializer;
-@property (nonatomic, strong, readonly) AMAErrorModelFactory *errorModelFactory;
-@property (nonatomic, strong, readonly) AMACrashReporter *crashReporter;
+@property (nonatomic, strong, readwrite) NSString *apiKey;
 
-@property (nonatomic, strong) NSMutableSet<id<AMACrashProcessingReporting>> *extendedCrashReporters;
+@property (nonatomic, strong) NSMutableSet<id<AMACrashProcessingReporting>> *extendedCrashProcessors;
+
+@property (nonatomic, strong) AMAAppMetricaPluginsImpl *pluginsImpl;
 
 @end
 
@@ -82,10 +91,7 @@
                     stateNotifier:[[AMACrashReportingStateNotifier alloc] init]
                 hostStateProvider:[[AMAHostStateProvider alloc] init]
                        serializer:[[AMADecodedCrashSerializer alloc] init]
-                    configuration:[[AMAAppMetricaCrashesConfiguration alloc] init]
-                 errorEnvironment:[AMAErrorEnvironment new]
-                errorModelFactory:[AMAErrorModelFactory sharedInstance]
-                    crashReporter:[[AMACrashReporter alloc] init]];
+                    configuration:[[AMAAppMetricaCrashesConfiguration alloc] init]];
 }
 
 - (instancetype)initWithExecutor:(id<AMAAsyncExecuting, AMASyncExecuting>)executor
@@ -94,29 +100,37 @@
                hostStateProvider:(AMAHostStateProvider *)hostStateProvider
                       serializer:(AMADecodedCrashSerializer *)serializer
                    configuration:(AMAAppMetricaCrashesConfiguration *)configuration
-                errorEnvironment:(AMAErrorEnvironment *)errorEnvironment
-               errorModelFactory:(AMAErrorModelFactory *)errorModelFactory
-                   crashReporter:(AMACrashReporter *)crashReporter
 {
     self = [super init];
     if (self != nil) {
         _executor = executor;
         _crashProcessor = nil;
+        _apiKey = nil;
+        _reportersContainer = [[AMACrashReportersContainer alloc] init];
         _crashLoader = crashLoader;
         _stateNotifier = stateNotifier;
         _hostStateProvider = [[AMAHostStateProvider alloc] init];
         _hostStateProvider.delegate = self;
-        _extendedCrashReporters = [NSMutableSet new];
+        _extendedCrashProcessors = [NSMutableSet new];
         _serializer = serializer;
         _internalConfiguration = configuration;
-        _errorEnvironment = errorEnvironment;
-        _errorModelFactory = errorModelFactory;
-        _crashReporter = crashReporter;
+        _errorEnvironment = [AMAErrorEnvironment new];
+        _pluginsImpl = [[AMAAppMetricaPluginsImpl alloc] init];
     }
     return self;
 }
 
 #pragma mark - Public -
+
+- (id<AMAAppMetricaCrashReporting>)reporterForAPIKey:(NSString *)apiKey
+{
+    id<AMAAppMetricaCrashReporting> crashReporter = [self.reportersContainer reporterForAPIKey:apiKey];
+    if (crashReporter == nil) {
+        crashReporter = [[AMACrashReporter alloc] initWithApiKey:apiKey];
+        [self.reportersContainer setReporter:crashReporter forAPIKey:apiKey];
+    }
+    return crashReporter;
+}
 
 - (void)setConfiguration:(AMAAppMetricaCrashesConfiguration *)configuration
 {
@@ -135,7 +149,10 @@
 
 - (void)reportNSError:(NSError *)error onFailure:(void (^)(NSError *))onFailure
 {
-    [self reportNSError:error options:0 onFailure:onFailure];
+    if (self.isActivated) {
+        [self.mainCrashReporter reportNSError:error
+                                    onFailure:onFailure];
+    }
 }
 
 - (void)reportNSError:(NSError *)error
@@ -143,13 +160,18 @@
             onFailure:(void (^)(NSError *))onFailure
 {
     if (self.isActivated) {
-        [self reportErrorModel:[self.errorModelFactory modelForNSError:error options:options] onFailure:onFailure];
+        [self.mainCrashReporter reportNSError:error
+                                      options:options
+                                    onFailure:onFailure];
     }
 }
 
 - (void)reportError:(id<AMAErrorRepresentable>)error onFailure:(void (^)(NSError *))onFailure
 {
-    [self reportError:error options:0 onFailure:onFailure];
+    if (self.isActivated) {
+        [self.mainCrashReporter reportError:error
+                                  onFailure:onFailure];
+    }
 }
 
 - (void)reportError:(id<AMAErrorRepresentable>)error
@@ -157,8 +179,9 @@
           onFailure:(void (^)(NSError *))onFailure
 {
     if (self.isActivated) {
-        [self reportErrorModel:[self.errorModelFactory modelForErrorRepresentable:error options:options]
-                     onFailure:onFailure];
+        [self.mainCrashReporter reportError:error
+                                    options:options
+                                  onFailure:onFailure];
     }
 }
 
@@ -166,8 +189,9 @@
 {
     [self execute:^{
         [self.errorEnvironment addValue:value forKey:key];
+        [self.mainCrashReporter setErrorEnvironmentValue:value forKey:key];
         [self updateCrashContextQuickly:YES];
-        [self updateCrashProcessorEnvironmentIfNeeded];
+        
     }];
 }
 
@@ -175,9 +199,15 @@
 {
     [self execute:^{
         [self.errorEnvironment clearEnvironment];
+        [self.mainCrashReporter clearErrorEnvironment];
         [self updateCrashContextQuickly:YES];
-        [self updateCrashProcessorEnvironmentIfNeeded];
+        
     }];
+}
+
+- (id<AMAAppMetricaPlugins>)pluginExtension
+{
+    return self.pluginsImpl;
 }
 
 #pragma mark - Internal -
@@ -195,7 +225,6 @@
             [self enableANRWatchdogWithWatchdogInterval:config.applicationNotRespondingWatchdogInterval
                                            pingInterval:config.applicationNotRespondingPingInterval];
         }
-        [self setupCrashProcessorWithIgnoredSignals:config.ignoredCrashSignals];
         [self setupCrashLoaderWithDetection:config.probablyUnhandledCrashReporting];
         [self loadCrashReports];
     }
@@ -205,6 +234,28 @@
     }
     [self notifyState];
     [self updateCrashContextAsync];
+}
+
+- (void)setupReporterWithConfiguration:(AMAModuleActivationConfiguration *)configuration
+{
+    AMACrashReporter *crashReporter = [[AMACrashReporter alloc] initWithApiKey:configuration.apiKey];
+    [self.reportersContainer setReporter:crashReporter forAPIKey:configuration.apiKey];
+    self.apiKey = configuration.apiKey;
+    
+    [self setupCrashProcessorWithCrashReporter:crashReporter ignoredSignals:self.internalConfiguration.ignoredCrashSignals];
+    
+    [self.pluginsImpl setupCrashReporter:crashReporter];
+}
+
+- (void)setupCrashProcessorWithCrashReporter:(AMACrashReporter *)crashReporter ignoredSignals:(NSArray<NSNumber *> *)ignoredSignals
+{
+    [self execute:^{
+        NSArray<NSNumber *> *ignoredCrashSignals = self.internalConfiguration.ignoredCrashSignals;
+        self.crashProcessor = [[AMACrashProcessor alloc] initWithIgnoredSignals:ignoredSignals
+                                                                     serializer:self.serializer
+                                                                  crashReporter:crashReporter
+                                                             extendedProcessors:[self.extendedCrashProcessors allObjects]];
+    }];
 }
 
 - (void)requestCrashReportingStateWithCompletionQueue:(dispatch_queue_t)completionQueue
@@ -225,14 +276,13 @@
         [self.ANRDetector start];
     }];
 }
-// FIXME: (belanovich-sy) deadcode, not tested
-- (void)addCrashProcessingReporter:(id<AMACrashProcessingReporting>)crashReporter
+
+- (id<AMAAppMetricaCrashReporting>)mainCrashReporter
 {
-    if (crashReporter != nil) {
-        [self execute:^{
-            [self.crashReporter.extendedCrashReporters addObject:crashReporter];
-        }];
+    if (self.apiKey != nil) {
+        return [self reporterForAPIKey:self.apiKey];
     }
+    return nil;
 }
 
 #pragma mark - Properties
@@ -240,14 +290,14 @@
 In Objective-C, properties can't be redefined in class extensions. Thus, private setters are used to modify
 them while retaining external immutability. Needed for testability. */
 
-- (void)setActivated:(BOOL)activated 
+- (void)setActivated:(BOOL)activated
 {
     @synchronized (self) {
         _activated = activated;
     }
 }
 
-- (BOOL)isActivated 
+- (BOOL)isActivated
 {
     @synchronized (self) {
         return _activated;
@@ -261,18 +311,13 @@ them while retaining external immutability. Needed for testability. */
 
 #pragma mark - Private -
 
-- (void)reportErrorModel:(AMAErrorModel *)model onFailure:(void (^)(NSError *))onFailure
+- (void)handlePluginInitFinished
 {
-    __weak typeof(self) weakSelf = self;
-    [self execute:^{
-        __strong typeof(weakSelf) strongSelf = weakSelf;
-        [strongSelf.crashProcessor processError:model onFailure:onFailure];
-    }];
-}
-
-- (void)reportUnhandledException:(AMAPluginErrorDetails *)crash onFailure:(void(^)(NSError *error))onFailure
-{
-    // FIXME: (glinnik) implement for Plugins
+    if (self.apiKey == nil) {
+        return;
+    }
+    id<AMAAppMetricaReporting> reporter = [AMAAppMetrica reporterForApiKey:self.apiKey];
+    [reporter resumeSession];
 }
 
 #pragma mark - Activation
@@ -303,23 +348,6 @@ them while retaining external immutability. Needed for testability. */
     }];
 }
 
-- (void)setupCrashProcessorWithIgnoredSignals:(NSArray<NSNumber *> *)ignoredSignals
-{
-    [self execute:^{
-        self.crashProcessor = [[AMACrashProcessor alloc] initWithIgnoredSignals:ignoredSignals
-                                                                     serializer:self.serializer
-                                                                  crashReporter:self.crashReporter];
-        [self updateCrashProcessorEnvironmentIfNeeded];
-    }];
-}
-// FIXME: (belanovich-sy) deadcode, not tested
-- (void)addExtendedCrashReporters
-{
-    [self execute:^{
-        [self.crashReporter.extendedCrashReporters addObjectsFromArray:[self.extendedCrashReporters allObjects]];
-    }];
-}
-
 - (void)loadCrashReports
 {
     [self execute:^{
@@ -337,7 +365,7 @@ them while retaining external immutability. Needed for testability. */
         kAMACrashContextAppBuildUIDKey : AMABuildUID.buildUID.stringValue ?: @"",
         kAMACrashContextAppStateKey : appState.dictionaryRepresentation ?: @{},
         kAMACrashContextErrorEnvironmentKey : self.errorEnvironment.currentEnvironment ?: @{},
-//        kAMACrashContextAppEnvironmentKey : self.appEnvironment.dictionaryEnvironment ?: @{},
+        kAMACrashContextAppEnvironmentKey : self.appEnvironment.dictionaryEnvironment ?: @{},
     };
 
     [AMACrashLoader addCrashContext:context];
@@ -363,16 +391,18 @@ them while retaining external immutability. Needed for testability. */
     __weak typeof(self) weakSelf = self;
     return [self.executor syncExecute:^id{
         __strong typeof(weakSelf) strongSelf = weakSelf;
-        NSArray<AMADecodedCrash *> *crashes = [strongSelf.crashLoader syncLoadCrashReports];
+        NSArray<AMADecodedCrash *> *crashes = [AMACollectionUtilities filteredArray:[strongSelf.crashLoader syncLoadCrashReports]
+                                                                      withPredicate:^BOOL(AMADecodedCrash *crash) {
+            if (self.internalConfiguration.ignoredCrashSignals != nil) {
+                return [self.internalConfiguration.ignoredCrashSignals containsObject:@(crash.crash.error.signal.signal)];
+            }
+            return YES;
+        }];
+        
         return [AMACollectionUtilities mapArray:crashes withBlock:^AMAEventPollingParameters *(AMADecodedCrash *item) {
             return [strongSelf.serializer eventParametersFromDecodedData:item error:NULL];
         }];
     }];
-}
-
-- (void)updateCrashProcessorEnvironmentIfNeeded
-{
-    [self.crashProcessor updateErrorEnvironment:self.errorEnvironment.currentEnvironment ?: @{}];
 }
 
 #pragma mark - AMAModuleActivationDelegate
@@ -384,18 +414,39 @@ them while retaining external immutability. Needed for testability. */
 
 + (void)didActivateWithConfiguration:(__unused AMAModuleActivationConfiguration *)configuration
 {
+    [[[self class] crashes] setupReporterWithConfiguration:configuration];
 }
 
 #pragma mark - AMAEventPollingDelegate
 
-+ (NSArray<AMAEventPollingParameters *> *)eventsForPreviousSession 
++ (NSArray<AMAEventPollingParameters *> *)eventsForPreviousSession
 {
     return [[[self class] crashes] eventsForPreviousSession];
 }
 
++ (void)setupAppEnvironment:(AMAEnvironmentContainer *)appEnvironment
+{
+    AMAAppMetricaCrashes *crashes = [[self class] crashes];
+    [crashes setupAppEnvironment:appEnvironment];
+}
+
+- (void)setupAppEnvironment:(AMAEnvironmentContainer *)appEnvironment
+{
+    [self execute:^{
+        [self.appEnvironment removeObserver:self];
+        
+        self.appEnvironment = appEnvironment;
+        
+        [self updateCrashContextQuickly:NO];
+        
+        [self.appEnvironment addObserver:self withBlock:^(AMAAppMetricaCrashes *crashes, AMAEnvironmentContainer *e) {
+            [crashes updateCrashContextAsync];
+        }];
+    }];
+}
+
 #pragma mark - AMACrashLoaderDelegate
 
-// FIXME: (glinnik) this logic is not needed any more, as crashes are now loaded on startup
 - (void)crashLoader:(AMACrashLoader *)crashLoader
        didLoadCrash:(AMADecodedCrash *)decodedCrash
           withError:(NSError *)error
@@ -425,7 +476,7 @@ them while retaining external immutability. Needed for testability. */
         NSString *errorMessage = [[self class] errorMessageForProbableUnhandledCrash:crashType];
         NSError *error = [AMAErrorUtilities internalErrorWithCode:AMAAppMetricaInternalEventErrorCodeProbableUnhandledCrash
                                                       description:errorMessage];
-        [self reportNSError:error onFailure:nil];
+        [self.crashProcessor processError:error];
     }
 }
 
@@ -466,6 +517,17 @@ them while retaining external immutability. Needed for testability. */
             break;
         default:
             break;
+    }
+}
+
+#pragma mark - ExtendedCrashProcessors
+
+- (void)addCrashProcessingReporter:(id<AMACrashProcessingReporting>)crashProcessor
+{
+    if (crashProcessor != nil) {
+        [self execute:^{
+            [self.extendedCrashProcessors addObject:crashProcessor];
+        }];
     }
 }
 

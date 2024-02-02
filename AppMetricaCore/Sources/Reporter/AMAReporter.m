@@ -9,7 +9,6 @@
 #import "AMAEventBuilder.h"
 #import "AMASessionStorage.h"
 #import "AMAEventStorage.h"
-#import "AMAEnvironmentContainer.h"
 #import "AMADate.h"
 #import "AMAUserProfile.h"
 #import "AMAUserProfileUpdatesProcessor.h"
@@ -365,19 +364,23 @@
 
 - (void)reportBinaryEventWithType:(NSUInteger)eventType
                              data:(NSData *)data
+                             name:(nullable NSString *)name
                           gZipped:(BOOL)gZipped
                  eventEnvironment:(nullable NSDictionary *)eventEnvironment
                    appEnvironment:(nullable NSDictionary *)appEnvironment
                            extras:(nullable NSDictionary<NSString *, NSData *> *)extras
+                   bytesTruncated:(NSUInteger)bytesTruncated
                         onFailure:(nullable void (^)(NSError *error))onFailure
 {
     [self reportCommonEventWithBlock:^AMAEvent *(NSError **error) {
         return [self.eventBuilder binaryEventWithType:eventType
                                                  data:data
+                                                 name:name
                                               gZipped:gZipped
                                      eventEnvironment:eventEnvironment
                                        appEnvironment:appEnvironment
                                                extras:extras
+                                       bytesTruncated:bytesTruncated
                                                 error:error];
     }
                            onFailure:onFailure];

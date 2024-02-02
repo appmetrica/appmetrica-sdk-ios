@@ -14,47 +14,59 @@
 #import "AMAErrorEnvironment.h"
 #import "AMAErrorModel.h"
 #import "AMAErrorModelFactory.h"
+#import "AMACrashReportCrash.h"
+#import "AMACrashReportError.h"
+#import "AMASignal.h"
+
+@interface AMAAppMetricaCrashes () <AMAModuleActivationDelegate>
+@property (nonatomic, strong) AMAErrorEnvironment *errorEnvironment;
+@property (nonatomic, strong) AMAEnvironmentContainer *appEnvironment;
+@end
 
 SPEC_BEGIN(AMAAppMetricaCrashesTests)
 
 describe(@"AMAAppMetricaCrashes", ^{
+    NSString *const testsAPIKey = @"550e8400-e29b-41d4-a716-446655440000";
 
-    let(crashLoader, ^{ return [AMACrashLoader nullMock]; });
-    let(stateNotifier, ^{ return [AMACrashReportingStateNotifier nullMock]; });
     let(amaReporting, ^{ return [KWMock nullMockForProtocol:@protocol(AMAAppMetricaReporting)]; });
     let(crashProcessors, ^{ return [NSMutableArray array]; });
-    let(executor, ^{ return [AMACurrentQueueExecutor new]; });
     let(hostStateProvider, ^{ return [KWMock nullMockForClass:[AMAHostStateProvider class]]; });
-    let(serializer, ^{ return [AMADecodedCrashSerializer nullMock]; });
-    let(errorEnvironment, ^{ return [AMAErrorEnvironment nullMock]; });
-    let(errorModelFactory, ^{ return [AMAErrorModelFactory nullMock]; });
-    let(crashReporter, ^{ return [AMACrashReporter nullMock]; });
-
-    let(crashProcessor, ^{
+    
+    AMACurrentQueueExecutor *__block executor = nil;
+    AMACrashProcessor *__block crashProcessor = nil;
+    AMAANRWatchdog *__block anrDetectorMock = nil;
+    AMACrashReportingStateNotifier *__block stateNotifier = nil;
+    AMACrashLoader *__block crashLoader = nil;
+    AMACrashReporter *__block crashReporter = nil;
+    AMADecodedCrashSerializer *__block serializer = nil;
+    AMAAppMetricaCrashes *__block crashes = nil;
+    
+    beforeEach(^{
+        executor = [AMACurrentQueueExecutor new];
+        
         // TODO: replace with factory
-        AMACrashProcessor *mock = [AMACrashProcessor nullMock];
-        [AMACrashProcessor stub:@selector(alloc) andReturn:mock];
-        [mock stub:@selector(initWithIgnoredSignals:serializer:crashReporter:) andReturn:mock];
-        return mock;
-    });
-    let(anrDetectorMock, ^{
-        // TODO: replace with factory
-        AMAANRWatchdog *mock = [AMAANRWatchdog nullMock];
-        [AMAANRWatchdog stub:@selector(alloc) andReturn:mock];
-        [mock stub:@selector(initWithWatchdogInterval:pingInterval:) andReturn:mock];
-        return mock;
-    });
-
-    let(crashes, ^{
-        return [[AMAAppMetricaCrashes alloc] initWithExecutor:executor
-                                                  crashLoader:crashLoader
-                                                stateNotifier:stateNotifier
-                                            hostStateProvider:hostStateProvider
-                                                   serializer:serializer
-                                                configuration:[AMAAppMetricaCrashesConfiguration new]
-                                             errorEnvironment:errorEnvironment
-                                            errorModelFactory:errorModelFactory
-                                                crashReporter:crashReporter];
+        crashProcessor = [AMACrashProcessor nullMock];
+        [AMACrashProcessor stub:@selector(alloc) andReturn:crashProcessor];
+        [crashProcessor stub:@selector(initWithIgnoredSignals:serializer:crashReporter:extendedProcessors:) andReturn:crashProcessor];
+        
+        anrDetectorMock = [AMAANRWatchdog nullMock];
+        [AMAANRWatchdog stub:@selector(alloc) andReturn:anrDetectorMock];
+        [anrDetectorMock stub:@selector(initWithWatchdogInterval:pingInterval:) andReturn:anrDetectorMock];
+        
+        crashReporter = [AMACrashReporter nullMock];
+        [AMACrashReporter stub:@selector(alloc) andReturn:crashReporter];
+        [crashReporter stub:@selector(initWithApiKey:) andReturn:crashReporter];
+        
+        serializer = [AMADecodedCrashSerializer nullMock];
+        crashLoader = [AMACrashLoader nullMock];
+        stateNotifier = [AMACrashReportingStateNotifier nullMock];
+        
+        crashes = [[AMAAppMetricaCrashes alloc] initWithExecutor:executor
+                                                     crashLoader:crashLoader
+                                                   stateNotifier:stateNotifier
+                                               hostStateProvider:hostStateProvider
+                                                      serializer:serializer
+                                                   configuration:[AMAAppMetricaCrashesConfiguration new]];
     });
 
     context(@"Initialization and Singleton", ^{
@@ -190,11 +202,16 @@ describe(@"AMAAppMetricaCrashes", ^{
 
             it(@"Should initialize crash processor with provided ignored signals and serializer", ^{
                 initialConfig.ignoredCrashSignals = @[ @SIGABRT, @SIGILL, @SIGSEGV ];
-                [[crashProcessor should] receive:@selector(initWithIgnoredSignals:serializer:crashReporter:)
-                                   withArguments:initialConfig.ignoredCrashSignals, serializer, crashReporter];
-
+                [[crashProcessor should] receive:@selector(initWithIgnoredSignals:serializer:crashReporter:extendedProcessors:)
+                                   withArguments:initialConfig.ignoredCrashSignals, serializer, crashReporter, kw_any()];
+                
+                
                 [crashes setConfiguration:initialConfig];
                 [crashes activate];
+                
+                [AMAAppMetricaCrashes stub:@selector(crashes) andReturn:crashes];
+                AMAModuleActivationConfiguration *config = [[AMAModuleActivationConfiguration alloc] initWithApiKey:testsAPIKey];
+                [AMAAppMetricaCrashes didActivateWithConfiguration:config];
             });
 
             context(@"CrashLoader Configuration", ^{
@@ -284,17 +301,18 @@ describe(@"AMAAppMetricaCrashes", ^{
         let(sampleErrorModel, ^{ return [AMAErrorModel mock]; });
 
         beforeEach(^{
-            [errorModelFactory stub:@selector(modelForNSError:options:) andReturn:sampleErrorModel];
-            [errorModelFactory stub:@selector(modelForErrorRepresentable:options:) andReturn:sampleErrorModel];
+            [AMAAppMetricaCrashes stub:@selector(crashes) andReturn:crashes];
+            AMAModuleActivationConfiguration *config = [[AMAModuleActivationConfiguration alloc] initWithApiKey:testsAPIKey];
+            [AMAAppMetricaCrashes didActivateWithConfiguration:config];
         });
 
         it(@"Should not report NSError objects if not activated", ^{
-            [[crashProcessor shouldNot] receive:@selector(processError:onFailure:)];
+            [[crashReporter shouldNot] receive:@selector(reportNSError:onFailure:)];
             [crashes reportNSError:sampleNSError onFailure:nil];
         });
 
         it(@"Should not report errors conforming to AMAErrorRepresentable if not activated", ^{
-            [[crashProcessor shouldNot] receive:@selector(processError:onFailure:)];
+            [[crashReporter shouldNot] receive:@selector(reportError:onFailure:)];
             [crashes reportError:errorRepresentableMock onFailure:nil];
         });
 
@@ -304,20 +322,26 @@ describe(@"AMAAppMetricaCrashes", ^{
             });
 
             it(@"Should correctly report NSError objects", ^{
-                [[errorModelFactory should] receive:@selector(modelForNSError:options:) andReturn:sampleErrorModel];
-                [[crashProcessor should] receive:@selector(processError:onFailure:) withArguments:sampleErrorModel, kw_any()];
+                [[crashReporter should] receive:@selector(reportNSError:onFailure:) withArguments:sampleNSError, kw_any()];
                 [crashes reportNSError:sampleNSError onFailure:nil];
             });
 
             it(@"Should correctly report errors conforming to AMAErrorRepresentable", ^{
-                [[errorModelFactory should] receive:@selector(modelForErrorRepresentable:options:) andReturn:sampleErrorModel];
-                [[crashProcessor should] receive:@selector(processError:onFailure:) withArguments:sampleErrorModel, kw_any()];
+                [[crashReporter should] receive:@selector(reportError:onFailure:) withArguments:errorRepresentableMock, kw_any()];
                 [crashes reportError:errorRepresentableMock onFailure:nil];
             });
         });
     });
 
     context(@"Error Environment Manipulation", ^{
+        
+        AMAErrorEnvironment *__block errorEnvironment = nil;
+        
+        beforeEach(^{
+            errorEnvironment = [AMAErrorEnvironment nullMock];
+            
+            [crashes stub:@selector(errorEnvironment) andReturn:errorEnvironment];
+        });
 
         it(@"Should correctly set the error environment value for a given key", ^{
             [[errorEnvironment should] receive:@selector(addValue:forKey:) withArguments:@"sampleValue", @"sampleKey"];
@@ -329,11 +353,30 @@ describe(@"AMAAppMetricaCrashes", ^{
             [crashes clearErrorEnvironment];
         });
     });
+    
+    context(@"App Environment Setup", ^{
+        AMAEnvironmentContainer *__block appEnvironment = nil;
+        
+        beforeEach(^{
+            appEnvironment = [AMAEnvironmentContainer nullMock];
+            [AMAAppMetricaCrashes stub:@selector(crashes) andReturn:crashes];
+        });
+
+        it(@"Should setup app environment", ^{
+            [AMAAppMetricaCrashes setupAppEnvironment:appEnvironment];
+            
+            [[crashes.appEnvironment should] equal:appEnvironment];
+        });
+    });
 
     context(@"CrashLoader Delegate Methods", ^{
 
         beforeEach(^{
             [crashes activate];
+            
+            [AMAAppMetricaCrashes stub:@selector(crashes) andReturn:crashes];
+            AMAModuleActivationConfiguration *config = [[AMAModuleActivationConfiguration alloc] initWithApiKey:testsAPIKey];
+            [AMAAppMetricaCrashes didActivateWithConfiguration:config];
         });
 
         it(@"Should process crash on didLoadCrash callback", ^{
@@ -364,6 +407,7 @@ describe(@"AMAAppMetricaCrashes", ^{
             [AMAAppMetricaCrashes stub:@selector(crashes) andReturn:crashes];
         });
 
+        //TODO: Add tests for ignored signals filtering
         it(@"Should return events for the previous session", ^{
             NSArray *mockedCrashes = @[[AMADecodedCrash mock], [AMADecodedCrash mock]];
             NSArray *mockedEvents = @[[AMAEventPollingParameters mock], [AMAEventPollingParameters mock]];
@@ -413,6 +457,10 @@ describe(@"AMAAppMetricaCrashes", ^{
 
         beforeEach(^{
             [crashes activate];
+            
+            [AMAAppMetricaCrashes stub:@selector(crashes) andReturn:crashes];
+            AMAModuleActivationConfiguration *config = [[AMAModuleActivationConfiguration alloc] initWithApiKey:testsAPIKey];
+            [AMAAppMetricaCrashes didActivateWithConfiguration:config];
         });
 
         it(@"Should process a crash when didLoadCrash:withError: is called", ^{
@@ -430,13 +478,12 @@ describe(@"AMAAppMetricaCrashes", ^{
                  @"Detected probable unhandled exception when app was "
                  "in foreground. Exception mean that previous working session have not finished correctly."
             ];
-            [[crashes should] receive:@selector(reportNSError:onFailure:)];
+            [[crashProcessor should] receive:@selector(processError:)];
             [crashes crashLoader:crashLoader didDetectProbableUnhandledCrash:AMAUnhandledCrashForeground];
         });
 
         context(@"Probable unhandled crash", ^{
             let(mockedError, ^{ return [NSError mock]; });
-            let(mockedErrorModel, ^{ return [AMAErrorModel mock]; });
             
             beforeEach(^{
                 [crashes activate];
@@ -445,35 +492,29 @@ describe(@"AMAAppMetricaCrashes", ^{
             it(@"Should report probable unhandled crash with correct error message for foreground crash type", ^{
                 NSString *errorMessage = @"Detected probable unhandled exception when app was in foreground. Exception mean that previous working session have not finished correctly.";
                 
-                [[AMAErrorUtilities should] receive:@selector(internalErrorWithCode:description:)
-                                          andReturn:mockedError
-                                      withArguments:theValue(AMAAppMetricaInternalEventErrorCodeProbableUnhandledCrash), errorMessage];
-                
-                [[errorModelFactory should] receive:@selector(modelForNSError:options:)
-                                          andReturn:mockedErrorModel
-                                      withArguments:mockedError, theValue(0)];
-                
-                [[crashProcessor should] receive:@selector(processError:onFailure:)
-                                   withArguments:mockedErrorModel, kw_any()];
+                KWCaptureSpy *spy = [crashProcessor captureArgument:@selector(processError:) atIndex:0];
                 
                 [crashes crashLoader:crashLoader didDetectProbableUnhandledCrash:AMAUnhandledCrashForeground];
+                
+                NSError *receivedError = spy.argument;
+                
+                [[theValue(receivedError.code) should] equal:theValue(AMAAppMetricaInternalEventErrorCodeProbableUnhandledCrash)];
+                [[receivedError.domain should] equal:kAMAAppMetricaInternalErrorDomain];
+                [[receivedError.localizedDescription should] equal:errorMessage];
             });
             
             it(@"Should report probable unhandled crash with correct error message for background crash type", ^{
                 NSString *errorMessage = @"Detected probable unhandled exception when app was in background. Exception mean that previous working session have not finished correctly.";
                 
-                [[AMAErrorUtilities should] receive:@selector(internalErrorWithCode:description:)
-                                          andReturn:mockedError
-                                      withArguments:theValue(AMAAppMetricaInternalEventErrorCodeProbableUnhandledCrash), errorMessage];
-                
-                [[errorModelFactory should] receive:@selector(modelForNSError:options:)
-                                          andReturn:mockedErrorModel
-                                      withArguments:mockedError, theValue(0)];
-                
-                [[crashProcessor should] receive:@selector(processError:onFailure:)
-                                   withArguments:mockedErrorModel, kw_any()];
+                KWCaptureSpy *spy = [crashProcessor captureArgument:@selector(processError:) atIndex:0];
                 
                 [crashes crashLoader:crashLoader didDetectProbableUnhandledCrash:AMAUnhandledCrashBackground];
+                
+                NSError *receivedError = spy.argument;
+                
+                [[theValue(receivedError.code) should] equal:theValue(AMAAppMetricaInternalEventErrorCodeProbableUnhandledCrash)];
+                [[receivedError.domain should] equal:kAMAAppMetricaInternalErrorDomain];
+                [[receivedError.localizedDescription should] equal:errorMessage];
             });
         });
     });

@@ -225,10 +225,12 @@
 
 - (AMAEvent *)binaryEventWithType:(NSUInteger)eventType
                              data:(NSData *)data
+                             name:(nullable NSString *)name
                           gZipped:(BOOL)gZipped
                  eventEnvironment:(NSDictionary *)eventEnvironment
                    appEnvironment:(NSDictionary *)appEnvironment
                            extras:(NSDictionary<NSString *, NSData *> *)extras
+                   bytesTruncated:(NSUInteger)bytesTruncated
                             error:(NSError **)outError
 {
     if ([AMAEventTypeResolver isEventTypeReserved:eventType]) {
@@ -252,9 +254,14 @@
     }
     
     AMAEvent *event = [self eventOfType:eventType];
+    if (name != nil) {
+        [self fillEvent:event withName:name];
+    }
     [self fillEvent:event withBinaryValue:validData gZipped:gZippedValid];
     [self fillEvent:event withExtras:extras];
     [self fillEvent:event eventEnvironment:eventEnvironment appEnvironment:appEnvironment];
+    
+    event.bytesTruncated += bytesTruncated;
     
     return event;
 }

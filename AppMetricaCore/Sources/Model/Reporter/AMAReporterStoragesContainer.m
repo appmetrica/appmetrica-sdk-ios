@@ -2,7 +2,6 @@
 #import "AMACore.h"
 #import "AMAReporterStoragesContainer.h"
 #import "AMAReporterStorage.h"
-#import "AMAEnvironmentContainer.h"
 #import "AMAMetricaConfiguration.h"
 
 @interface AMAReporterStoragesContainer ()

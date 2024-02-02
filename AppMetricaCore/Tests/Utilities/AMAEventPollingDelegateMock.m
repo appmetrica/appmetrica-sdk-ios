@@ -19,4 +19,8 @@ static NSArray<AMAEventPollingParameters *> *_mockedEvents = nil;
     return _mockedEvents ?: @[];
 }
 
++ (void)setupAppEnvironment:(nonnull AMAEnvironmentContainer *)appEnvironment
+{
+}
+
 @end

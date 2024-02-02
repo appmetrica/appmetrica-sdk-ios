@@ -18,7 +18,6 @@
 #import "AMADispatcher.h"
 #import "AMADispatcherDelegate.h"
 #import "AMADispatchingController.h"
-#import "AMAEnvironmentContainer.h"
 #import "AMAEnvironmentContainerActionHistory.h"
 #import "AMAEnvironmentContainerActionRedoManager.h"
 #import "AMAErrorsFactory.h"
@@ -220,20 +219,24 @@
 
 - (void)reportBinaryEventWithType:(NSUInteger)eventType
                              data:(NSData *)data
+                             name:(nullable NSString *)name
                           gZipped:(BOOL)gZipped
                  eventEnvironment:(NSDictionary *)eventEnvironment
                    appEnvironment:(NSDictionary *)appEnvironment
                            extras:(NSDictionary<NSString *,NSData *> *)extras
+                   bytesTruncated:(NSUInteger)bytesTruncated
                         onFailure:(void (^)(NSError *))onFailure
 {
     [self execute:^{
         [self reportEventWithBlock:^{
             [self.reporter reportBinaryEventWithType:eventType
                                                 data:data
+                                                name:name
                                              gZipped:gZipped
                                     eventEnvironment:eventEnvironment
                                       appEnvironment:appEnvironment
                                               extras:extras
+                                      bytesTruncated:bytesTruncated
                                            onFailure:onFailure];
         } onFailure:onFailure];
     }];
@@ -655,6 +658,7 @@
             [weakSelf applyEventsFromPollingDelegatesWithStorage:reporterStorage eventBuilder:eventBuilder];
             [weakSelf applyUserProfileIDWithStorage:reporterStorage
                                       userProfileID:[self mergeUserProfileIDs:configuration.userProfileID]];
+            [weakSelf setupAppEnvironmentPollingDelegatesWithStorage:reporterStorage];
         } onSetupComplete:^{
             [weakSelf postSetupMainReporterWithStorage:reporterStorage];
         }];
@@ -688,6 +692,15 @@
             }
         }
     }
+}
+
+- (void)setupAppEnvironmentPollingDelegatesWithStorage:(AMAReporterStorage *)reporterStorage
+{
+    [self execute:^{
+        for (id<AMAEventPollingDelegate> delegate in self.eventPollingDelegates) {
+            [delegate setupAppEnvironment:reporterStorage.stateStorage.appEnvironment];
+        }
+    }];
 }
 
 - (void)applyDeferredAppEnvironmentUpdatesWithStorage:(AMAReporterStorage *)reporterStorage

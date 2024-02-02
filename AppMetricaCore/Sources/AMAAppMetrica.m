@@ -14,7 +14,6 @@
 #import "AMADataSendingRestrictionController.h"
 #import "AMADatabaseQueueProvider.h"
 #import "AMADeepLinkController.h"
-#import "AMAEnvironmentContainer.h"
 #import "AMAErrorLogger.h"
 #import "AMAInternalEventsReporter.h"
 #import "AMALocationManager.h"
@@ -243,19 +242,23 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
 
 + (void)reportBinaryEventWithType:(NSUInteger)eventType
                              data:(NSData *)data
+                             name:(NSString *)name
                           gZipped:(BOOL)gZipped
                  eventEnvironment:(nullable NSDictionary *)eventEnvironment
                    appEnvironment:(nullable NSDictionary *)appEnvironment
                            extras:(nullable NSDictionary<NSString *, NSData *> *)extras
+                   bytesTruncated:(NSUInteger)bytesTruncated
                         onFailure:(nullable void (^)(NSError *error))onFailure
 {
     if ([self isAppMetricaStartedWithLogging:onFailure]) {
         [[self sharedImpl] reportBinaryEventWithType:eventType
                                                 data:data
+                                                name:name
                                              gZipped:gZipped
                                     eventEnvironment:eventEnvironment
                                       appEnvironment:appEnvironment
                                               extras:extras
+                                      bytesTruncated:bytesTruncated
                                            onFailure:onFailure];
     }
 }

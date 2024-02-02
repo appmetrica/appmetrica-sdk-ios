@@ -1,7 +1,7 @@
 
 #import "AMAFilledAppEnvironmentComposer.h"
 #import "AMAReporterStateStorage.h"
-#import "AMAEnvironmentContainer.h"
+#import "AMACore.h"
 
 @interface AMAFilledAppEnvironmentComposer()
 

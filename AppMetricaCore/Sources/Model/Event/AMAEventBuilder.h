@@ -51,10 +51,12 @@
                       error:(NSError **)outError;
 - (AMAEvent *)binaryEventWithType:(NSUInteger)eventType
                              data:(NSData *)data
+                             name:(NSString *)name
                           gZipped:(BOOL)gZipped
                  eventEnvironment:(NSDictionary *)eventEnvironment
                    appEnvironment:(NSDictionary *)appEnvironment
                            extras:(NSDictionary<NSString *, NSData *> *)extras
+                   bytesTruncated:(NSUInteger)bytesTruncated
                             error:(NSError **)outError;
 - (AMAEvent *)fileEventWithType:(NSUInteger)eventType
                            data:(NSData *)data

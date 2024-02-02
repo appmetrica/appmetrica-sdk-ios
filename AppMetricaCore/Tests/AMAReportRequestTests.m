@@ -344,10 +344,12 @@ describe(@"AMAReportRequestTests", ^{
                 void(^reportEvent)(BOOL) = ^(BOOL gZipped) {
                     [reporterTestHelper.appReporter reportBinaryEventWithType:AMAEventTypeClient
                                                                          data:bigData
+                                                                         name:nil
                                                                       gZipped:gZipped
                                                              eventEnvironment:nil
                                                                appEnvironment:nil
                                                                        extras:nil
+                                                               bytesTruncated:0
                                                                     onFailure:nil];
                 };
                 

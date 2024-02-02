@@ -4,60 +4,214 @@
 #import <AppMetricaCoreExtension/AppMetricaCoreExtension.h>
 #import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
 #import "AMACrashProcessingReporting.h"
+#import "AMAErrorModel.h"
+#import "AMAExceptionFormatter.h"
+#import "AMACrashEventType.h"
+#import "AMAErrorModelFactory.h"
+#import "AMAPluginErrorDetails.h"
 
-static NSString *const kAppMetricaAPIKey = @"20799a27-fa80-4b36-b2db-0f8141f24180";
+static NSString *const kAppMetricaLibraryAPIKey = @"20799a27-fa80-4b36-b2db-0f8141f24180";
 
 @interface AMACrashReporter ()
 
-@property (nonatomic, strong, readonly) id<AMAAppMetricaReporting> reporter;
+@property (nonatomic, strong, readonly) id<AMAAppMetricaReporting> libraryErrorReporter;
+@property (nonatomic, strong, readonly) id<AMAExceptionFormatting> exceptionFormatter;
+@property (nonatomic, strong, readonly) AMAErrorModelFactory *errorModelFactory;
+@property (nonatomic, copy, readonly) NSString *apiKey;
+
+@property (nonatomic, strong) AMAEnvironmentContainer *errorEnvironment;
 
 @end
 
 @implementation AMACrashReporter
 
-- (instancetype)init
-{
-    return [self initWithReporter:[AMAAppMetrica reporterForApiKey:kAppMetricaAPIKey]];
-}
-
-- (instancetype)initWithReporter:(id<AMAAppMetricaReporting>)reporter
+- (instancetype)initWithApiKey:(NSString *)apiKey
 {
     self = [super init];
     if (self != nil) {
-        _extendedCrashReporters = [NSMutableSet set];
-        _reporter = reporter;
+        _apiKey = apiKey;
+        _libraryErrorReporter = [AMAAppMetrica reporterForApiKey:kAppMetricaLibraryAPIKey];
+        _exceptionFormatter = [[AMAExceptionFormatter alloc] init];
+        _errorEnvironment = [[AMAEnvironmentContainer alloc] init];
+        _errorModelFactory = [AMAErrorModelFactory sharedInstance];
     }
     return self;
 }
 
-#pragma mark - Public -
+#pragma mark - AMAAppMetricaCrashReporting -
 
+- (void)setErrorEnvironmentValue:(NSString *)value forKey:(NSString *)key
+{
+    [self.errorEnvironment addValue:value forKey:key];
+}
+
+- (void)clearErrorEnvironment
+{
+    [self.errorEnvironment clearEnvironment];
+}
+
+- (void)reportNSError:(NSError *)error onFailure:(void (^)(NSError *))onFailure
+{
+    [self reportNSError:error options:0 onFailure:onFailure];
+}
+
+- (void)reportNSError:(NSError *)error 
+              options:(AMAErrorReportingOptions)options
+            onFailure:(void (^)(NSError *))onFailure
+{
+    [self reportErrorModel:[self.errorModelFactory modelForNSError:error options:options]
+                 onFailure:onFailure];
+}
+
+- (void)reportError:(id<AMAErrorRepresentable>)error onFailure:(void (^)(NSError *))onFailure
+{
+    [self reportError:error options:0 onFailure:onFailure];
+}
+
+- (void)reportError:(id<AMAErrorRepresentable>)error 
+            options:(AMAErrorReportingOptions)options
+          onFailure:(void (^)(NSError *))onFailure
+{
+    [self reportErrorModel:[self.errorModelFactory modelForErrorRepresentable:error options:options]
+                 onFailure:onFailure];
+}
+
+- (id<AMAAppMetricaPluginReporting>)pluginExtension
+{
+    return self;
+}
+
+#pragma mark - AMAAppMetricaPluginReporting -
+
+- (void)reportUnhandledException:(AMAPluginErrorDetails *)errorDetails onFailure:(void (^)(NSError *))onFailure
+{
+    NSError *potentialError = nil;
+    NSUInteger bytesTruncated = 0;
+    NSData *formattedData = [self.exceptionFormatter formattedCrashErrorDetails:errorDetails
+                                                                 bytesTruncated:&bytesTruncated
+                                                                          error:&potentialError];
+
+    if (formattedData == nil) {
+        [self reportInternalCorruptedError:potentialError];
+        onFailure(potentialError);
+        return;
+    }
+    
+    id<AMAAppMetricaExtendedReporting> reporter = [AMAAppMetrica extendedReporterForApiKey:self.apiKey];
+    
+    [reporter reportBinaryEventWithType:AMACrashEventTypeCrash
+                                   data:formattedData
+                                   name:errorDetails.exceptionClass
+                                gZipped:YES
+                       eventEnvironment:self.errorEnvironment.dictionaryEnvironment
+                         appEnvironment:nil
+                                 extras:nil
+                         bytesTruncated:bytesTruncated
+                              onFailure:onFailure];
+}
+
+- (void)reportError:(AMAPluginErrorDetails *)errorDetails
+            message:(NSString *)message
+          onFailure:(void (^)(NSError *))onFailure
+{
+    NSError *potentialError = nil;
+    NSUInteger bytesTruncated = 0;
+    NSData *formattedData = [self.exceptionFormatter formattedErrorErrorDetails:errorDetails
+                                                                 bytesTruncated:&bytesTruncated
+                                                                          error:&potentialError];
+    
+    if (formattedData == nil) {
+        [self reportInternalCorruptedError:potentialError];
+        onFailure(potentialError);
+        return;
+    }
+    
+    id<AMAAppMetricaExtendedReporting> reporter = [AMAAppMetrica extendedReporterForApiKey:self.apiKey];
+    
+    [reporter reportBinaryEventWithType:AMACrashEventTypeError
+                                   data:formattedData
+                                   name:message
+                                gZipped:YES
+                       eventEnvironment:self.errorEnvironment.dictionaryEnvironment
+                         appEnvironment:nil
+                                 extras:nil
+                         bytesTruncated:bytesTruncated
+                              onFailure:onFailure];
+}
+
+- (void)reportErrorWithIdentifier:(NSString *)identifier
+                          message:(NSString *)message
+                          details:(AMAPluginErrorDetails *)errorDetails
+                        onFailure:(void (^)(NSError *))onFailure
+{
+    NSError *potentialError = nil;
+    NSUInteger bytesTruncated = 0;
+    NSData *formattedData = [self.exceptionFormatter formattedCustomErrorErrorDetails:errorDetails
+                                                                           identifier:identifier
+                                                                       bytesTruncated:&bytesTruncated
+                                                                                error:&potentialError];
+    
+    if (formattedData == nil) {
+        [self reportInternalCorruptedError:potentialError];
+        onFailure(potentialError);
+        return;
+    }
+    
+    id<AMAAppMetricaExtendedReporting> reporter = [AMAAppMetrica extendedReporterForApiKey:self.apiKey];
+    
+    [reporter reportBinaryEventWithType:AMACrashEventTypeError
+                                   data:formattedData
+                                   name:message
+                                gZipped:YES
+                       eventEnvironment:self.errorEnvironment.dictionaryEnvironment
+                         appEnvironment:nil
+                                 extras:nil
+                         bytesTruncated:bytesTruncated
+                              onFailure:onFailure];
+}
+
+#pragma mark - Public -
+// FIXME: Inconsistent code, required refactoring
 - (void)reportCrashWithParameters:(nonnull AMAEventPollingParameters *)parameters
 {
-//    [AMAAppMetrica reportEventWithParameters:parameters onFailure:^(NSError *error) {
-//        if (error != nil) {
-//            AMALogError(@"Failed to report app crash with error: %@", error);
-//            [self reportErrorToAppMetricaWithError:error eventName:@"internal_error_crash"];
-//        }
-//    }];
+    id<AMAAppMetricaExtendedReporting> reporter = [AMAAppMetrica extendedReporterForApiKey:self.apiKey];
     
-    [self reportExtendedCrashes];
+    [reporter reportFileEventWithType:AMACrashEventTypeCrash
+                                 data:parameters.data
+                             fileName:parameters.fileName
+                              gZipped:YES
+                            encrypted:NO
+                            truncated:NO
+                     eventEnvironment:parameters.eventEnvironment
+                       appEnvironment:parameters.appEnvironment
+                               extras:parameters.extras
+                            onFailure:^(NSError *error) {
+        if (error != nil) {
+            AMALogError(@"Failed to report app crash with error: %@", error);
+            [self reportErrorToAppMetricaWithError:error eventName:@"internal_error_crash"];
+        }
+    }];
 }
 
 - (void)reportANRWithParameters:(nonnull AMAEventPollingParameters *)parameters
 {
-//    [AMAAppMetrica reportEventWithParameters:parameters onFailure:^(NSError *error) {
-//        if (error != nil) {
-//            AMALogError(@"Failed to report app ANR with error: %@", error);
-//            [self reportErrorToAppMetricaWithError:error eventName:@"internal_error_anr"];
-//        }
-//    }];
-}
-
-- (void)reportErrorWithParameters:(nonnull AMAEventPollingParameters *)parameters
-                        onFailure:(void (^)(NSError *))onFailure;
-{
-//    [AMAAppMetrica reportEventWithParameters:parameters onFailure:onFailure];
+    id<AMAAppMetricaExtendedReporting> reporter = [AMAAppMetrica extendedReporterForApiKey:self.apiKey];
+    
+    [reporter reportFileEventWithType:AMACrashEventTypeANR
+                                 data:parameters.data
+                             fileName:parameters.fileName
+                              gZipped:YES
+                            encrypted:NO
+                            truncated:NO
+                     eventEnvironment:parameters.eventEnvironment
+                       appEnvironment:parameters.appEnvironment
+                               extras:parameters.extras
+                            onFailure:^(NSError *error) {
+        if (error != nil) {
+            AMALogError(@"Failed to report app crash with error: %@", error);
+            [self reportErrorToAppMetricaWithError:error eventName:@"internal_error_anr"];
+        }
+    }];
 }
 
 - (void)reportInternalError:(NSError *)error
@@ -93,6 +247,30 @@ static NSString *const kAppMetricaAPIKey = @"20799a27-fa80-4b36-b2db-0f8141f2418
 
 #pragma mark - Private -
 
+- (void)reportErrorModel:(AMAErrorModel *)error onFailure:(void (^)(NSError *error))onFailure
+{
+    NSError *potentialError = nil;
+    NSData *formattedData = [self.exceptionFormatter formattedError:error error:&potentialError];
+    
+    if (formattedData == nil) {
+        [self reportInternalCorruptedError:potentialError];
+        onFailure(potentialError);
+        return;
+    }
+    
+    id<AMAAppMetricaExtendedReporting> reporter = [AMAAppMetrica extendedReporterForApiKey:self.apiKey];
+    
+    [reporter reportBinaryEventWithType:AMACrashEventTypeError
+                                   data:formattedData
+                                   name:nil
+                                gZipped:YES
+                       eventEnvironment:self.errorEnvironment.dictionaryEnvironment
+                         appEnvironment:nil
+                                 extras:nil
+                         bytesTruncated:0
+                              onFailure:onFailure];
+}
+
 - (void)reportErrorToAppMetricaWithError:(NSError *)error eventName:(NSString *)eventName
 {
     NSDictionary *parameters = @{
@@ -101,16 +279,7 @@ static NSString *const kAppMetricaAPIKey = @"20799a27-fa80-4b36-b2db-0f8141f2418
         @"error_details" : error.userInfo.count > 0 ? error.userInfo.description : @"No error details supplied",
     };
     
-    [self.reporter reportEvent:eventName parameters:parameters onFailure:nil];
-}
-
-- (void)reportExtendedCrashes
-{
-    for (id<AMACrashProcessingReporting> crashReporter in self.extendedCrashReporters) {
-        if (crashReporter != nil) {
-            [crashReporter reportCrash:@"Unhandled crash"];
-        }
-    }
+    [self.libraryErrorReporter reportEvent:eventName parameters:parameters onFailure:nil];
 }
 
 - (NSDictionary *)descriptionParametersForException:(NSException *)exception
@@ -145,7 +314,9 @@ static NSString *const kAppMetricaAPIKey = @"20799a27-fa80-4b36-b2db-0f8141f2418
     parameters[@"rollbackcontent"] = rollbackContent;
     parameters[@"rollback"] = rollbackFailed ? @"failed" : @"succeeded";
 
-    [self.reporter reportEvent:@"TransactionFailure" parameters:@{ parametersKey: [parameters copy] } onFailure:nil];
+    [self.libraryErrorReporter reportEvent:@"TransactionFailure"
+                                parameters:@{ parametersKey: [parameters copy] }
+                                 onFailure:nil];
 }
 
 @end

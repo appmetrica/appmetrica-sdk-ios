@@ -6,6 +6,7 @@
 @class AMADecodedCrashSerializer;
 @class AMAErrorModel;
 @class AMAExceptionFormatter;
+@protocol AMACrashProcessingReporting;
 
 @interface AMACrashProcessor : NSObject
 
@@ -14,16 +15,16 @@
 - (instancetype)init NS_UNAVAILABLE;
 - (instancetype)initWithIgnoredSignals:(NSArray *)ignoredSignals
                             serializer:(AMADecodedCrashSerializer *)serializer
-                         crashReporter:(AMACrashReporter *)crashReporter;
+                         crashReporter:(AMACrashReporter *)crashReporter
+                    extendedProcessors:(NSArray<id<AMACrashProcessingReporting>> *)extendedCrashProcessors;
 - (instancetype)initWithIgnoredSignals:(NSArray *)ignoredSignals
                             serializer:(AMADecodedCrashSerializer *)serializer
                          crashReporter:(AMACrashReporter *)crashReporter
-                             formatter:(AMAExceptionFormatter *)formatter NS_DESIGNATED_INITIALIZER;
+                             formatter:(AMAExceptionFormatter *)formatter
+                    extendedProcessors:(NSArray<id<AMACrashProcessingReporting>> *)extendedCrashProcessors NS_DESIGNATED_INITIALIZER;
 
 - (void)processCrash:(AMADecodedCrash *)decodedCrash withError:(NSError *)error;
 - (void)processANR:(AMADecodedCrash *)decodedCrash withError:(NSError *)error;
-- (void)processError:(AMAErrorModel *)errorModel onFailure:(void (^)(NSError *))onFailure;
-
-- (void)updateErrorEnvironment:(NSDictionary *)errorEnvironment;
+- (void)processError:(NSError *)error;
 
 @end

@@ -1,19 +1,49 @@
 #import <Kiwi/Kiwi.h>
-
 #import <AppMetricaCore/AppMetricaCore.h>
 #import <AppMetricaCoreExtension/AppMetricaCoreExtension.h>
 #import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
-
 #import "AMACrashReporter.h"
-
 #import "AMACrashProcessingReporting.h"
+#import "AMACrashEventType.h"
+#import "AMAExceptionFormatter.h"
+#import "AMAErrorEnvironment.h"
+#import "AMAErrorModelFactory.h"
+
+// FIXME: Fix exposing properties
+@interface AMACrashReporter ()
+@property (nonatomic, strong, readonly) id<AMAAppMetricaReporting> libraryErrorReporter;
+@property (nonatomic, strong, readonly) id<AMAExceptionFormatting> exceptionFormatter;
+@property (nonatomic, strong, readonly) AMAErrorModelFactory *errorModelFactory;
+@property (nonatomic, strong) AMAEnvironmentContainer *errorEnvironment;
+@end
 
 SPEC_BEGIN(AMACrashReporterTests)
 
 describe(@"AMACrashReporter", ^{
+    NSString *const testsAPIKey = @"550e8400-e29b-41d4-a716-446655440000";
     
-    let(mockReporter, ^{ return [KWMock nullMockForProtocol:@protocol(AMAAppMetricaReporting)]; });
-    let(crashReporter, ^{ return [[AMACrashReporter alloc] initWithReporter:mockReporter]; });
+    AMACrashReporter *__block crashReporter = nil;
+    
+    NSObject *__block mockReporter = nil;
+    NSObject *__block extendedReporter = nil;
+    
+    AMAExceptionFormatter *__block exceptionFormatter = nil;
+    AMAErrorModelFactory *__block errorModelFactory = nil;
+    
+    beforeEach(^{
+        errorModelFactory = [AMAErrorModelFactory nullMock];
+        
+        exceptionFormatter = [AMAExceptionFormatter nullMock];
+        
+        crashReporter = [[AMACrashReporter alloc] initWithApiKey:testsAPIKey];
+        mockReporter = [KWMock nullMockForProtocol:@protocol(AMAAppMetricaReporting)];
+        
+        extendedReporter = [KWMock nullMockForProtocol:@protocol(AMAAppMetricaExtendedReporting)];
+        
+        [crashReporter stub:@selector(libraryErrorReporter) andReturn:mockReporter];
+        
+        [AMAAppMetrica stub:@selector(extendedReporterForApiKey:) andReturn:extendedReporter withArguments:testsAPIKey];
+    });
     
     context(@"Reporting crash", ^{
         
@@ -21,8 +51,16 @@ describe(@"AMACrashReporter", ^{
         __block void (^onFailureBlock)(NSError *);
         
         beforeEach(^{
-            [AMAAppMetrica stub:@selector(reportEventWithParameters:onFailure:) withBlock:^id(NSArray *params) {
-                void (^failureBlock)(NSError *) = params[1];
+            [extendedReporter stub:@selector(reportBinaryEventWithType:data:name:gZipped:eventEnvironment:appEnvironment:extras:bytesTruncated:onFailure:) withBlock:^id(NSArray *params) {
+                void (^failureBlock)(NSError *) = params[8];
+                if ([failureBlock isEqual:NSNull.null] == NO) {
+                    failureBlock(failureError);
+                }
+                return nil;
+            }];
+            
+            [extendedReporter stub:@selector(reportFileEventWithType:data:fileName:gZipped:encrypted:truncated:eventEnvironment:appEnvironment:extras:onFailure:) withBlock:^id(NSArray *params) {
+                void (^failureBlock)(NSError *) = params[9];
                 if ([failureBlock isEqual:NSNull.null] == NO) {
                     failureBlock(failureError);
                 }
@@ -30,36 +68,166 @@ describe(@"AMACrashReporter", ^{
             }];
         });
         
-        it(@"Should properly report a crash", ^{
-            [[AMAAppMetrica should] receive:@selector(reportEventWithParameters:onFailure:)];
+        it(@"Should report a crash", ^{
+            [[extendedReporter should] receive:@selector(reportFileEventWithType:
+                                                         data:
+                                                         fileName:
+                                                         gZipped:
+                                                         encrypted:
+                                                         truncated:
+                                                         eventEnvironment:
+                                                         appEnvironment:
+                                                         extras:
+                                                         onFailure:)
+                                 withArguments:theValue(AMACrashEventTypeCrash), kw_any(), kw_any(),
+             theValue(YES), theValue(NO), theValue(NO), kw_any(), kw_any(), kw_any(), kw_any()];
             
-            [crashReporter reportCrashWithParameters:[AMAEventPollingParameters mock]];
+            [crashReporter reportCrashWithParameters:[[AMAEventPollingParameters alloc] initWithEventType:99]];
         });
         
-        it(@"Should properly report an ANR", ^{
-            [[AMAAppMetrica should] receive:@selector(reportEventWithParameters:onFailure:)];
+        it(@"Should report an ANR", ^{
+            [[extendedReporter should] receive:@selector(reportFileEventWithType:
+                                                         data:
+                                                         fileName:
+                                                         gZipped:
+                                                         encrypted:
+                                                         truncated:
+                                                         eventEnvironment:
+                                                         appEnvironment:
+                                                         extras:
+                                                         onFailure:)
+                                 withArguments:theValue(AMACrashEventTypeANR), kw_any(), kw_any(),
+             theValue(YES), theValue(NO), theValue(NO), kw_any(), kw_any(), kw_any(), kw_any()];
             
-            [crashReporter reportANRWithParameters:[AMAEventPollingParameters mock]];
+            [crashReporter reportANRWithParameters:[[AMAEventPollingParameters alloc] initWithEventType:99]];
         });
         
-        it(@"Should properly report an Error", ^{
-            [[AMAAppMetrica should] receive:@selector(reportEventWithParameters:onFailure:)];
+        it(@"Should report an Error", ^{
+            [crashReporter stub:@selector(exceptionFormatter) andReturn:exceptionFormatter];
+            [crashReporter stub:@selector(errorModelFactory) andReturn:errorModelFactory];
+            [exceptionFormatter stub:@selector(formattedError:error:) andReturn:[NSData data]];
             
-            [crashReporter reportErrorWithParameters:[AMAEventPollingParameters mock] onFailure:nil];
+            id errorModel = [KWMock nullMockForProtocol:@protocol(AMAErrorRepresentable)];
+            [[errorModelFactory should] receive:@selector(modelForErrorRepresentable:options:) withArguments:errorModel, kw_any()];
+            
+            [[extendedReporter should] receive:@selector(reportBinaryEventWithType:
+                                                         data:
+                                                         name:
+                                                         gZipped:
+                                                         eventEnvironment:
+                                                         appEnvironment:
+                                                         extras:
+                                                         bytesTruncated:
+                                                         onFailure:)
+                                 withArguments:theValue(AMACrashEventTypeError), kw_any(), kw_any(),
+             theValue(YES), kw_any(), kw_any(), kw_any(), theValue(0), kw_any(), kw_any()];
+            
+            [crashReporter reportError:errorModel onFailure:nil];
+        });
+        
+        it(@"Should report a NSError", ^{
+            [crashReporter stub:@selector(exceptionFormatter) andReturn:exceptionFormatter];
+            [crashReporter stub:@selector(errorModelFactory) andReturn:errorModelFactory];
+            [exceptionFormatter stub:@selector(formattedError:error:) andReturn:[NSData data]];
+            
+            NSError *error = [NSError nullMock];
+            [[errorModelFactory should] receive:@selector(modelForNSError:options:) withArguments:error, kw_any()];
+            
+            [[extendedReporter should] receive:@selector(reportBinaryEventWithType:
+                                                         data:
+                                                         name:
+                                                         gZipped:
+                                                         eventEnvironment:
+                                                         appEnvironment:
+                                                         extras:
+                                                         bytesTruncated:
+                                                         onFailure:)
+                                 withArguments:theValue(AMACrashEventTypeError), kw_any(), kw_any(),
+             theValue(YES), kw_any(), kw_any(), kw_any(), theValue(0), kw_any(), kw_any()];
+            
+            [crashReporter reportNSError:error onFailure:nil];
+        });
+        
+        // TODO: Add arguments check
+        context(@"Plugin error reporting", ^{
+            NSString *const message = @"message";
+            
+            it(@"Should report an Unhandled exception", ^{
+                [crashReporter stub:@selector(exceptionFormatter) andReturn:exceptionFormatter];
+                [exceptionFormatter stub:@selector(formattedCrashErrorDetails:bytesTruncated:error:) 
+                               andReturn:[NSData data]];
+                
+                [[extendedReporter should] receive:@selector(reportBinaryEventWithType:
+                                                             data:
+                                                             name:
+                                                             gZipped:
+                                                             eventEnvironment:
+                                                             appEnvironment:
+                                                             extras:
+                                                             bytesTruncated:
+                                                             onFailure:)
+                                     withArguments:theValue(AMACrashEventTypeCrash), kw_any(), kw_any(),
+                 theValue(YES), kw_any(), kw_any(), kw_any(), theValue(0), kw_any(), kw_any()];
+                
+                [crashReporter reportUnhandledException:[AMAPluginErrorDetails nullMock] onFailure:nil];
+            });
+            
+            it(@"Should report an exception with message", ^{
+                [crashReporter stub:@selector(exceptionFormatter) andReturn:exceptionFormatter];
+                [exceptionFormatter stub:@selector(formattedErrorErrorDetails:bytesTruncated:error:)
+                               andReturn:[NSData data]];
+                
+                [[extendedReporter should] receive:@selector(reportBinaryEventWithType:
+                                                             data:
+                                                             name:
+                                                             gZipped:
+                                                             eventEnvironment:
+                                                             appEnvironment:
+                                                             extras:
+                                                             bytesTruncated:
+                                                             onFailure:)
+                                     withArguments:theValue(AMACrashEventTypeError), kw_any(), message,
+                 theValue(YES), kw_any(), kw_any(), kw_any(), theValue(0), kw_any(), kw_any()];
+                
+                [crashReporter reportError:[AMAPluginErrorDetails nullMock] message:message onFailure:nil];
+            });
+            
+            it(@"Should report an error with identifier", ^{
+                [crashReporter stub:@selector(exceptionFormatter) andReturn:exceptionFormatter];
+                [exceptionFormatter stub:@selector(formattedCustomErrorErrorDetails:identifier:bytesTruncated:error:)
+                               andReturn:[NSData data]];
+                
+                [[extendedReporter should] receive:@selector(reportBinaryEventWithType:
+                                                             data:
+                                                             name:
+                                                             gZipped:
+                                                             eventEnvironment:
+                                                             appEnvironment:
+                                                             extras:
+                                                             bytesTruncated:
+                                                             onFailure:)
+                                     withArguments:theValue(AMACrashEventTypeError), kw_any(), message,
+                 theValue(YES), kw_any(), kw_any(), kw_any(), theValue(0), kw_any(), kw_any()];
+                
+                [crashReporter reportErrorWithIdentifier:@""
+                                                 message:message
+                                                 details:[AMAPluginErrorDetails nullMock]
+                                               onFailure:nil];;
+            });
         });
         
         it(@"Should report internal error when AMAAppMetrica's onFailure is called for crash", ^{
             [[mockReporter should] receive:@selector(reportEvent:parameters:onFailure:)
                              withArguments:@"internal_error_crash", kw_any(), kw_any()];
             
-            [crashReporter reportCrashWithParameters:[AMAEventPollingParameters mock]];
+            [crashReporter reportCrashWithParameters:[[AMAEventPollingParameters alloc] initWithEventType:99]];
         });
         
         it(@"Should report internal error when AMAAppMetrica's onFailure is called for ANR", ^{
             [[mockReporter should] receive:@selector(reportEvent:parameters:onFailure:)
                              withArguments:@"internal_error_anr", kw_any(), kw_any()];
             
-            [crashReporter reportANRWithParameters:[AMAEventPollingParameters mock]];
+            [crashReporter reportANRWithParameters:[[AMAEventPollingParameters alloc] initWithEventType:99]];
         });
         
         it(@"Should call the onFailure block when reporting an Error fails", ^{
@@ -71,32 +239,30 @@ describe(@"AMACrashReporter", ^{
                 [[error should] equal:failureError];
             };
             
-            [crashReporter reportErrorWithParameters:[AMAEventPollingParameters mock] onFailure:failureBlock];
+            [crashReporter reportError:[KWMock nullMockForProtocol:@protocol(AMAErrorRepresentable)] onFailure:failureBlock];
             
             [[theValue(onFailureCalled) should] beYes];
         });
-    });
-    
-    
-    context(@"Reporting crash with extended reporters", ^{
         
-        let(extendedReporterMock1, ^id{
-            return [KWMock mockForProtocol:@protocol(AMACrashProcessingReporting)];
-        });
-        let(extendedReporterMock2, ^id{
-            return [KWMock mockForProtocol:@protocol(AMACrashProcessingReporting)];
-        });
-        
-        beforeEach(^{
-            [crashReporter.extendedCrashReporters addObject:extendedReporterMock1];
-            [crashReporter.extendedCrashReporters addObject:extendedReporterMock2];
-        });
-        
-        it(@"Should call reportCrash: on extendedCrashReporters", ^{
-            [[extendedReporterMock1 should] receive:@selector(reportCrash:) withArguments:@"Unhandled crash"];
-            [[extendedReporterMock2 should] receive:@selector(reportCrash:) withArguments:@"Unhandled crash"];
+        context(@"Error Environment Manipulation", ^{
             
-            [crashReporter reportCrashWithParameters:[AMAEventPollingParameters mock]];
+            AMAErrorEnvironment *__block errorEnvironment = nil;
+            
+            beforeEach(^{
+                errorEnvironment = [AMAErrorEnvironment nullMock];
+                
+                [crashReporter stub:@selector(errorEnvironment) andReturn:errorEnvironment];
+            });
+
+            it(@"Should correctly set the error environment value for a given key", ^{
+                [[errorEnvironment should] receive:@selector(addValue:forKey:) withArguments:@"sampleValue", @"sampleKey"];
+                [crashReporter setErrorEnvironmentValue:@"sampleValue" forKey:@"sampleKey"];
+            });
+
+            it(@"Should clear the error environment", ^{
+                [[errorEnvironment should] receive:@selector(clearEnvironment)];
+                [crashReporter clearErrorEnvironment];
+            });
         });
     });
     

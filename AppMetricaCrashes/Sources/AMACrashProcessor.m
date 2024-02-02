@@ -19,7 +19,7 @@
 @property (nonatomic, strong, readonly) AMAExceptionFormatter *formatter;
 @property (nonatomic, strong, readonly) AMACrashReporter *crashReporter;
 
-@property (nonatomic, copy, readwrite) NSDictionary *currentErrorEnvironment;
+@property (nonatomic, strong, readonly) NSArray<id<AMACrashProcessingReporting>> *extendedCrashProcessors;
 
 @end
 
@@ -28,17 +28,20 @@
 - (instancetype)initWithIgnoredSignals:(NSArray *)ignoredSignals
                             serializer:(AMADecodedCrashSerializer *)serializer
                          crashReporter:(AMACrashReporter *)crashReporter
+                    extendedProcessors:(NSArray<id<AMACrashProcessingReporting>> *)extendedCrashProcessors
 {
     return [self initWithIgnoredSignals:ignoredSignals
                              serializer:serializer
-                          crashReporter:[[AMACrashReporter alloc] init]
-                              formatter:[[AMAExceptionFormatter alloc] init]];
+                          crashReporter:crashReporter
+                              formatter:[[AMAExceptionFormatter alloc] init]
+                     extendedProcessors:extendedCrashProcessors];
 }
 
 - (instancetype)initWithIgnoredSignals:(NSArray *)ignoredSignals
                             serializer:(AMADecodedCrashSerializer *)serializer
                          crashReporter:(AMACrashReporter *)crashReporter
                              formatter:(AMAExceptionFormatter *)formatter
+                    extendedProcessors:(NSArray<id<AMACrashProcessingReporting>> *)extendedCrashProcessors
 {
     self = [super init];
 
@@ -47,7 +50,7 @@
         _formatter = formatter;
         _ignoredCrashSignals = [ignoredSignals copy];
         _crashReporter = crashReporter;
-        _currentErrorEnvironment = nil;
+        _extendedCrashProcessors = extendedCrashProcessors;
     }
 
     return self;
@@ -95,32 +98,9 @@
     [self.crashReporter reportANRWithParameters:parameters];
 }
 
-- (void)processError:(AMAErrorModel *)errorModel onFailure:(void (^)(NSError *))onFailure
+- (void)processError:(NSError *)error
 {
-    NSError *potentialError = nil;
-    NSData *formattedData = [self.formatter formattedError:errorModel error:&potentialError];
-    
-    if (formattedData == nil) {
-        [self.crashReporter reportInternalCorruptedError:potentialError];
-        onFailure(potentialError);
-        return;
-    }
-    
-    AMAEventPollingParameters *params = [[AMAEventPollingParameters alloc] initWithEventType:AMACrashEventTypeError];
-//    params.valueType = AMAEventValueTypeBinary;
-    params.data = formattedData;
-//    params.GZipped = YES;
-    params.bytesTruncated = errorModel.bytesTruncated;
-    if (self.currentErrorEnvironment.count > 0) {
-        params.eventEnvironment = self.currentErrorEnvironment;
-    }
-    
-    [self.crashReporter reportErrorWithParameters:params onFailure:onFailure];
-}
-
-- (void)updateErrorEnvironment:(NSDictionary *)errorEnvironment
-{
-    self.currentErrorEnvironment = [errorEnvironment copy];
+    [self.crashReporter reportNSError:error onFailure:nil];
 }
 
 #pragma mark - Private -

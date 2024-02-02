@@ -1,7 +1,7 @@
 
 #import "AMAEnvironmentContainerActionRedoManager.h"
 #import "AMAEnvironmentContainerActionHistory.h"
-#import "AMAEnvironmentContainer.h"
+#import "AMACore.h"
 #import "AMAEnvironmentContainerAction.h"
 
 @implementation AMAEnvironmentContainerActionRedoManager

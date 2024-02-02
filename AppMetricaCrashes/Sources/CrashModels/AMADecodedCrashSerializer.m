@@ -1,8 +1,6 @@
 #import "AMADecodedCrashSerializer.h"
-
 #import <AppMetricaProtobufUtils/AppMetricaProtobufUtils.h>
 #import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
-
 #import "AMACrashLogging.h"
 #import "AMAApplicationStatistics.h"
 #import "AMABacktrace.h"
