@@ -1,5 +1,4 @@
 #import "AMAAdServicesReportingController.h"
-
 #import "AMAAdServicesDataProvider.h"
 #import "AMAAppMetrica+Internal.h"
 #import "AMAAttributionModelParser.h"

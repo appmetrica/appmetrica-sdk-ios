@@ -1,6 +1,5 @@
 #import <AppMetricaHostState/AppMetricaHostState.h>
 #import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
-
 #import "AMAApplicationHostStateProvider.h"
 #import "AMAHostStateControllerFactory.h"
 

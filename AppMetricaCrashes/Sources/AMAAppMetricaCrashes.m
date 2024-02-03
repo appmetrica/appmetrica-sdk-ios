@@ -313,11 +313,8 @@ them while retaining external immutability. Needed for testability. */
 
 - (void)handlePluginInitFinished
 {
-    if (self.apiKey == nil) {
-        return;
-    }
-    id<AMAAppMetricaReporting> reporter = [AMAAppMetrica reporterForApiKey:self.apiKey];
-    [reporter resumeSession];
+    AMAHostStateProvider *hostStateProvider = [[AMAHostStateProvider alloc] init];
+    [hostStateProvider forceUpdateToForeground];
 }
 
 #pragma mark - Activation

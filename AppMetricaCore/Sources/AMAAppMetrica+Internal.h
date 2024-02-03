@@ -11,6 +11,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 + (AMAAppMetricaImpl *)sharedImpl;
 + (id<AMAHostStateProviding>)sharedHostStateProvider;
++ (AMAInternalEventsReporter *)sharedInternalEventsReporter;
 
 @end
 

@@ -7,7 +7,6 @@ NS_ASSUME_NONNULL_BEGIN
 @class AMALogConfigurator;
 @class AMAEventPollingParameters;
 @class AMAServiceConfiguration;
-@class AMAInternalEventsReporter;
 
 @protocol AMAModuleActivationDelegate;
 @protocol AMAEventFlushableDelegate;
@@ -36,13 +35,12 @@ NS_ASSUME_NONNULL_BEGIN
                   forKey:(NSString *)key NS_SWIFT_NAME(setSessionExtra(value:for:));
 + (void)clearSessionExtra;
 
-// Reporting
-+ (AMAInternalEventsReporter *)sharedInternalEventsReporter;
-+ (nullable id<AMAAppMetricaExtendedReporting>)extendedReporterForApiKey:(NSString *)apiKey
-NS_SWIFT_NAME(extendedReporter(for:));
-
 // Logging Configuration
 + (AMALogConfigurator *)sharedLogConfigurator;
+
+// Reporting
++ (nullable id<AMAAppMetricaExtendedReporting>)extendedReporterForApiKey:(NSString *)apiKey
+NS_SWIFT_NAME(extendedReporter(for:));
 
 /** Reports an event of a specified type to the server. This method is intended for reporting string data.
  
