@@ -754,7 +754,6 @@
   "AppMetricaCore/Sources/include/AppMetricaCore/AMAAppMetricaConfiguration.h":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCore/Sources/include/AppMetricaCore/AMAAppMetricaConfiguration.h",
   "AppMetricaCore/Sources/include/AppMetricaCore/AMAAppMetricaPreloadInfo.h":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCore/Sources/include/AppMetricaCore/AMAAppMetricaPreloadInfo.h",
   "AppMetricaCore/Sources/include/AppMetricaCore/AMAAppMetricaReporting.h":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCore/Sources/include/AppMetricaCore/AMAAppMetricaReporting.h",
-  "AppMetricaCore/Sources/include/AppMetricaCore/AMACompletionBlocks.h":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCore/Sources/include/AppMetricaCore/AMACompletionBlocks.h",
   "AppMetricaCore/Sources/include/AppMetricaCore/AMAECommerce.h":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCore/Sources/include/AppMetricaCore/AMAECommerce.h",
   "AppMetricaCore/Sources/include/AppMetricaCore/AMAJSControlling.h":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCore/Sources/include/AppMetricaCore/AMAJSControlling.h",
   "AppMetricaCore/Sources/include/AppMetricaCore/AMAProfileAttribute.h":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCore/Sources/include/AppMetricaCore/AMAProfileAttribute.h",

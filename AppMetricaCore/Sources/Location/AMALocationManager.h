@@ -3,6 +3,7 @@
 #import <CoreLocation/CoreLocation.h>
 
 @protocol AMAAsyncExecuting;
+@protocol AMASyncExecuting;
 @class AMAStartupPermissionController;
 @class AMALocationCollectingController;
 @class AMALocationCollectingConfiguration;
@@ -10,10 +11,13 @@
 @interface AMALocationManager : NSObject
 
 @property (nonatomic, assign) BOOL trackLocationEnabled;
+@property (nonatomic, assign) BOOL accurateLocationEnabled;
+@property (nonatomic, assign) BOOL allowsBackgroundLocationUpdates;
+@property (nonatomic, strong) CLLocation *location;
 
 + (instancetype)sharedManager;
 
-- (instancetype)initWithExecutor:(id<AMAAsyncExecuting>)executor
+- (instancetype)initWithExecutor:(id<AMAAsyncExecuting, AMASyncExecuting>)executor
                mainQueueExecutor:(id<AMAAsyncExecuting>)mainQueueExecutor
      startupPermissionController:(AMAStartupPermissionController *)startupPermissionController
                    configuration:(AMALocationCollectingConfiguration *)configuration
@@ -23,9 +27,6 @@
 #if TARGET_OS_IOS
 - (void)sendMockVisit:(CLVisit *)visit;
 # endif
-- (void)setLocation:(CLLocation *)location;
-- (void)setAccurateLocationEnabled:(BOOL)accurateLocationEnabled;
-- (void)setAllowsBackgroundLocationUpdates:(BOOL)allowsBackgroundLocationUpdates;
 
 - (void)start;
 - (void)updateAuthorizationStatus;

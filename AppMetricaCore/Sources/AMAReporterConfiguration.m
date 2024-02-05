@@ -6,12 +6,12 @@
 
 @interface AMAReporterConfiguration ()
 
-@property (nonatomic, copy, readwrite) NSString *apiKey;
+@property (nonatomic, copy, readwrite) NSString *APIKey;
 @property (nonatomic, assign, readwrite) NSUInteger dispatchPeriod;
 @property (nonatomic, assign, readwrite) NSUInteger maxReportsCount;
 @property (nonatomic, assign, readwrite) NSUInteger sessionTimeout;
 @property (nonatomic, assign, readwrite) NSUInteger maxReportsInDatabaseCount;
-@property (nonatomic, assign, readwrite) BOOL logs;
+@property (nonatomic, assign, readwrite) BOOL logsEnabled;
 @property (nonatomic, copy, readwrite) NSString *userProfileID;
 
 @property (nonatomic, strong, nullable, readwrite) NSNumber *dataSendingEnabledState;
@@ -20,7 +20,7 @@
 
 @implementation AMAReporterConfiguration
 
-- (instancetype)initWithoutApiKey
+- (instancetype)initWithoutAPIKey
 {
     self = [super init];
     if (self != nil) {
@@ -29,17 +29,17 @@
     return self;
 }
 
-- (instancetype)initWithApiKey:(NSString *)apiKey
+- (instancetype)initWithAPIKey:(NSString *)APIKey
 {
     self = [super init];
     if (self != nil) {
-        BOOL isKeyValid = [AMAIdentifierValidator isValidUUIDKey:apiKey];
+        BOOL isKeyValid = [AMAIdentifierValidator isValidUUIDKey:APIKey];
         if (isKeyValid) {
-            _apiKey = [apiKey copy];
+            _APIKey = [APIKey copy];
             [self setDefaultValues];
         }
         else {
-            [AMAErrorLogger logInvalidApiKeyError:apiKey];
+            [AMAErrorLogger logInvalidApiKeyError:APIKey];
             self = nil;
         }
     }
@@ -53,7 +53,7 @@
     _dispatchPeriod = kAMADefaultDispatchPeriodSeconds;
     _maxReportsCount = kAMAManualReporterDefaultMaxReportsCount;
     _maxReportsInDatabaseCount = kAMAMaxReportsInDatabaseCount;
-    _logs = NO;
+    _logsEnabled = NO;
     _userProfileID = nil;
 }
 
@@ -64,14 +64,14 @@
 
 - (id)mutableCopyWithZone:(NSZone *)zone
 {
-    AMAMutableReporterConfiguration *mutableConfiguration = [[AMAMutableReporterConfiguration alloc] initWithoutApiKey];
+    AMAMutableReporterConfiguration *mutableConfiguration = [[AMAMutableReporterConfiguration alloc] initWithoutAPIKey];
     if (mutableConfiguration != nil) {
-        mutableConfiguration.apiKey = self.apiKey;
+        mutableConfiguration.APIKey = self.APIKey;
         mutableConfiguration.sessionTimeout = self.sessionTimeout;
         mutableConfiguration.dispatchPeriod = self.dispatchPeriod;
         mutableConfiguration.maxReportsCount = self.maxReportsCount;
         mutableConfiguration.maxReportsInDatabaseCount = self.maxReportsInDatabaseCount;
-        mutableConfiguration.logs = self.logs;
+        mutableConfiguration.logsEnabled = self.areLogsEnabled;
         mutableConfiguration.userProfileID = self.userProfileID;
         mutableConfiguration.dataSendingEnabledState = self.dataSendingEnabledState;
     }
@@ -90,9 +90,9 @@
     return [NSString stringWithFormat:@"%@ apiKey=%@, sessionTimeout=%@, dispatchPeriod=%@, "
                                        "maxReportsCount=%@, maxReportsInDatabaseCount=%@, "
                                        "logs=%@, userProfileID=%@, dataSendingEnabledState=%@",
-                                       [super description], self.apiKey, @(self.sessionTimeout),
+                                       [super description], self.APIKey, @(self.sessionTimeout),
                                        @(self.dispatchPeriod), @(self.maxReportsCount),
-                                       @(self.maxReportsInDatabaseCount), @(self.logs), self.userProfileID,
+                                       @(self.maxReportsInDatabaseCount), @(self.logsEnabled), self.userProfileID,
                                        self.dataSendingEnabledState];
 }
 
@@ -106,26 +106,26 @@
 @dynamic sessionTimeout;
 @dynamic maxReportsInDatabaseCount;
 @dynamic maxReportsCount;
-@dynamic logs;
+@dynamic logsEnabled;
 @dynamic userProfileID;
 @dynamic dispatchPeriod;
 
-- (instancetype)initWithApiKey:(NSString *)apiKey
+- (instancetype)initWithAPIKey:(NSString *)APIKey
 {
-    self = [super initWithApiKey:apiKey];
+    self = [super initWithAPIKey:APIKey];
     return self;
 }
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    AMAReporterConfiguration *configuration = [[AMAReporterConfiguration alloc] initWithoutApiKey];
+    AMAReporterConfiguration *configuration = [[AMAReporterConfiguration alloc] initWithoutAPIKey];
     if (configuration != nil) {
-        configuration.apiKey = self.apiKey;
+        configuration.APIKey = self.APIKey;
         configuration.sessionTimeout = self.sessionTimeout;
         configuration.dispatchPeriod = self.dispatchPeriod;
         configuration.maxReportsCount = self.maxReportsCount;
         configuration.maxReportsInDatabaseCount = self.maxReportsInDatabaseCount;
-        configuration.logs = self.logs;
+        configuration.logsEnabled = self.areLogsEnabled;
         configuration.userProfileID = self.userProfileID;
         configuration.dataSendingEnabledState = self.dataSendingEnabledState;
     }

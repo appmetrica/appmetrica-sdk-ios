@@ -12,18 +12,18 @@ NS_SWIFT_NAME(AppMetricaConfiguration)
 /** Initialize configuration with specified Application key.
  For invalid Application initialization returns nil in release and raises an exception in debug.
 
- @param apiKey Application key that is issued during application registration in AppMetrica.
+ @param APIKey Application key that is issued during application registration in AppMetrica.
  Application key must be a hexadecimal string in format xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx.
  The key can be requested or checked at https://appmetrica.io
  */
-- (nullable instancetype)initWithApiKey:(NSString *)apiKey;
+- (nullable instancetype)initWithAPIKey:(NSString *)APIKey;
 
 - (instancetype)init NS_UNAVAILABLE;
 + (instancetype)new NS_UNAVAILABLE;
 
 /** Get Application key used to initialize the configuration.
  */
-@property (nonatomic, copy, readonly) NSString *apiKey;
+@property (nonatomic, copy, readonly) NSString *APIKey;
 
 /** Whether first activation of AppMetrica should be considered as app update or new app install.
  If this option is enabled the first call of +[AMAAppMetrica activateWithApiKey:] or
@@ -55,7 +55,7 @@ NS_SWIFT_NAME(AppMetricaConfiguration)
 
 /** A boolean value indicating whether data sending to the AppMetrica server is enabled.
 
- @note Disabling this option also turns off data sending from the reporters that initialized for different apiKey.
+ @note Disabling this option also turns off data sending from the reporters that initialized for different APIKey.
 
  By default, the data sending is enabled.
  */
@@ -67,8 +67,8 @@ NS_SWIFT_NAME(AppMetricaConfiguration)
  trims it to closest border value.
 
  @note Different apiKeys use different databases and can have different limits of reports count.
- The parameter only affects the configuration created for that apiKey.
- To set the parameter for a different apiKey, see `AMAReporterConfiguration.maxReportsInDatabaseCount`
+ The parameter only affects the configuration created for that APIKey.
+ To set the parameter for a different APIKey, see `AMAReporterConfiguration.maxReportsInDatabaseCount`
 
  By default, the parameter value is 1000.
  */
@@ -108,7 +108,7 @@ NS_SWIFT_NAME(AppMetricaConfiguration)
 
  By default is nil
  */
-@property (nonatomic, strong, nullable) CLLocation *location;
+@property (nonatomic, strong, nullable) CLLocation *customLocation;
 
 /** Set/get session timeout (in seconds).
  Time limit before the application is considered inactive.
@@ -128,7 +128,7 @@ NS_SWIFT_NAME(AppMetricaConfiguration)
 
  By default logging is disabled.
  */
-@property (nonatomic, assign) BOOL logs;
+@property (nonatomic, assign, getter=areLogsEnabled) BOOL logsEnabled;
 
 /** Set/get preload info, which is used for tracking preload installs.
  Additional info could be https://appmetrica.io

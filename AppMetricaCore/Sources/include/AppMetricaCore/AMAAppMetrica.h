@@ -1,11 +1,4 @@
-
 #import <Foundation/Foundation.h>
-
-#if __has_include("AMACompletionBlocks.h")
-    #import "AMACompletionBlocks.h"
-#else
-    #import <AppMetricaCore/AMACompletionBlocks.h>
-#endif
 
 @class CLLocation;
 @class AMAAppMetricaConfiguration;
@@ -23,14 +16,32 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+typedef NSString *AMAStartupKey NS_TYPED_EXTENSIBLE_ENUM NS_SWIFT_NAME(StartupKey);
+
+extern AMAStartupKey const kAMAUUIDKey NS_SWIFT_NAME(uuidKey);
+extern AMAStartupKey const kAMADeviceIDKey;
+extern AMAStartupKey const kAMADeviceIDHashKey;
+
+/** Identifiers callback block
+
+ @param identifiers  Contains any combination of following identifiers on success:
+     kAMAUUIDKey
+     kAMADeviceIDKey
+     kAMADeviceIDHashKey (requires startup request)
+     and any other custom keys that are defined in startup
+ Empty dictionary may be returned if server by any reason did not provide any of above listed
+ identifiers.
+
+ @param error Error of NSURLErrorDomain. In a case of error identifiers param is nil.
+ */
+typedef void(^AMAIdentifiersCompletionBlock)(NSDictionary<AMAStartupKey, id> * _Nullable identifiers,
+                                             NSError * _Nullable error)
+NS_SWIFT_UNAVAILABLE("Use closures instead");
+
 NS_SWIFT_NAME(AppMetrica)
 @interface AMAAppMetrica : NSObject
 
-/** Retrieves current UUID.
-
- Synchronous interface.
- */
-@property (class, nonatomic, readonly) NSString *uuid;
+//MARK: - Activation
 
 /** Starts the statistics collection process.
 
@@ -41,6 +52,21 @@ NS_SWIFT_NAME(AppMetrica)
  */
 + (void)activateWithConfiguration:(AMAAppMetricaConfiguration *)configuration;
 
+/** Indicates whether AppMetrica has been activated.
+
+ @discussion Use this property to check if AppMetrica was already activated,
+ typically to avoid redundant activation calls or to ensure that statistics collection has started.
+*/
+@property (class, assign, readonly, getter=isActivated) BOOL activated;
+
+//MARK: - Identifier Access
+
+/** Retrieves current UUID.
+
+ Synchronous interface.
+ */
+@property (class, nonatomic, readonly) NSString *UUID;
+
 /** Retrieves current device ID hash.
 
  Synchronous interface. If it is not available at the moment of call nil is returned.
@@ -49,24 +75,40 @@ NS_SWIFT_NAME(AppMetrica)
 
 /** Retrieves current device ID.
 
- @return Device ID string. If it is not available at the moment of call nil is returned.
+ Device ID string. If it is not available at the moment of call nil is returned.
  */
-+ (nullable NSString *)deviceID;
+@property (class, nonatomic, nullable, readonly) NSString *deviceID;
 
-/** Enabling/disabling accurate location retrieval for internal location manager.
+/** Getting all predefined identifiers
 
- @param accurateLocationEnabled Indicates whether accurate location retrieval should be enabled.
- Has effect only when locationTrackingEnabled is 'YES', and location is not set manually.
+ @param queue Queue for the block to be dispatched to. If nil, main queue is used.
+ @param block Block will be dispatched upon identifiers becoming available or in a case of error.
+ Predefined identifiers are:
+    kAMAUUIDKey
+    kAMADeviceIDKey
+    kAMADeviceIDHashKey
+ If they are available at the moment of call - block is dispatched immediately. See definition
+ of AMAIdentifiersCompletionBlock for more detailed information on returned types.
  */
-+ (void)setAccurateLocationTracking:(BOOL)accurateLocationEnabled;
++ (void)requestStartupIdentifiersWithCompletionQueue:(nullable dispatch_queue_t)queue
+                                     completionBlock:(AMAIdentifiersCompletionBlock)block
+NS_SWIFT_NAME(requestStartupIdentifiers(on:completion:));
 
-/** Enable/disable background location updates tracking.
+/** Getting identifiers for specific keys
 
- Disabled by default.
- @param allowsBackgroundLocationUpdates Indicates whether background location updating should be enabled.
- @see https://developer.apple.com/reference/corelocation/cllocationmanager/1620568-allowsbackgroundlocationupdates
+ @param keys Array of identifier keys to request. See AMACompletionBlocks.h.
+ @param queue Queue for the block to be dispatched to. If nil, main queue is used.
+ @param block Block will be dispatched upon identifiers becoming available or in a case of error.
+ If they are available at the moment of call - block is dispatched immediately. Some keys may require
+ a network request to startup. See definition of AMAIdentifiersCompletionBlock for more detailed
+ information on returned types.
  */
-+ (void)setAllowsBackgroundLocationUpdates:(BOOL)allowsBackgroundLocationUpdates;
++ (void)requestStartupIdentifiersWithKeys:(NSArray<AMAStartupKey> *)keys
+                          completionQueue:(nullable dispatch_queue_t)queue
+                          completionBlock:(AMAIdentifiersCompletionBlock)block
+NS_SWIFT_NAME(requestStartupIdentifiers(for:on:completion:));
+
+//MARK: - Event Reporting
 
 /** Reports a custom event.
 
@@ -94,7 +136,8 @@ NS_SWIFT_NAME(reportEvent(name:parameters:onFailure:));
  @param onFailure Block to be executed if an error occurs while reporting, the error is passed as block argument.
  */
 + (void)reportUserProfile:(AMAUserProfile *)userProfile
-                onFailure:(nullable void (^)(NSError *error))onFailure NS_SWIFT_NAME(report(userProfile:onFailure:));
+                onFailure:(nullable void (^)(NSError *error))onFailure 
+NS_SWIFT_NAME(reportUserProfile(_:onFailure:));
 
 /** Sends information about the purchase.
 
@@ -102,128 +145,20 @@ NS_SWIFT_NAME(reportEvent(name:parameters:onFailure:));
  @param onFailure Block to be executed if an error occurs while reporting, the error is passed as block argument.
  */
 + (void)reportRevenue:(AMARevenueInfo *)revenueInfo
-            onFailure:(nullable void (^)(NSError *error))onFailure NS_SWIFT_NAME(report(revenue:onFailure:));
-
-/** Sets the ID of the user profile.
-
- @warning The value can contain up to 200 characters
- @param userProfileID The custom user profile ID
- */
-+ (void)setUserProfileID:(nullable NSString *)userProfileID;
-
-/** Enables/disables data sending to the AppMetrica server.
-
- @note Disabling this option also turns off data sending from the reporters that initialized for different apiKey.
-
- @param enabled Flag indicating whether the data sending is enabled. By default, the sending is enabled.
- */
-+ (void)setDataSendingEnabled:(BOOL)enabled;
-
-/** Enables/disables location reporting to AppMetrica.
- If enabled and location set via setLocation: method - that location would be used.
- If enabled and location is not set via setLocation,
- but application has appropriate permission - CLLocationManager would be used to acquire location data.
-
- @param enabled Flag indicating if reporting location to AppMetrica enabled
- Enabled by default.
- */
-+ (void)setLocationTracking:(BOOL)enabled;
-
-/** Sets location to AppMetrica.
- To enable AppMetrica to use this location trackLocationEnabled should be 'YES'
-
- @param location Custom device location to be reported.
- */
-+ (void)setLocation:(nullable CLLocation *)location;
-
-/** Retrieves current version of library.
- */
-+ (NSString *)libraryVersion;
-
-/** Getting all predefined identifiers
-
- @param queue Queue for the block to be dispatched to. If nil, main queue is used.
- @param block Block will be dispatched upon identifiers becoming available or in a case of error.
- Predefined identifiers are:
-    kAMAUUIDKey
-    kAMADeviceIDKey
-    kAMADeviceIDHashKey
- If they are available at the moment of call - block is dispatched immediately. See definition
- of AMAIdentifiersCompletionBlock for more detailed information on returned types.
- */
-+ (void)requestStartupIdentifiersWithCompletionQueue:(nullable dispatch_queue_t)queue
-                                     completionBlock:(AMAIdentifiersCompletionBlock)block
-NS_SWIFT_NAME(requestStartupIdentifiers(completionQueue:completionBlock:));
-
-/** Getting identifiers for specific keys
-
- @param keys Array of identifier keys to request. See AMACompletionBlocks.h.
- @param queue Queue for the block to be dispatched to. If nil, main queue is used.
- @param block Block will be dispatched upon identifiers becoming available or in a case of error.
- If they are available at the moment of call - block is dispatched immediately. Some keys may require
- a network request to startup. See definition of AMAIdentifiersCompletionBlock for more detailed
- information on returned types.
- */
-+ (void)requestStartupIdentifiersWithKeys:(NSArray<NSString *> *)keys
-                          completionQueue:(nullable dispatch_queue_t)queue
-                          completionBlock:(AMAIdentifiersCompletionBlock)block
-NS_SWIFT_NAME(requestStartupIdentifiers(keys:completionQueue:completionBlock:));
-
-/** Handles the URL that has opened the application.
- Reports the URL for deep links tracking.
-
- @param url URL that has opened the application.
- */
-+ (void)handleOpenURL:(NSURL *)url;
-
-/** Activates reporter with specific configuration.
-
- @param configuration Configuration combines all reporter settings in one place.
- Configuration initialized with unique application key that is issued during application registration in AppMetrica.
- Application key must be a hexadecimal string in format xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx.
- The key can be requested or checked at https://appmetrica.io
- */
-+ (void)activateReporterWithConfiguration:(AMAReporterConfiguration *)configuration;
-
-/** Returns id<AMAAppMetricaReporting> that can send events to specific API key.
- To customize configuration of reporter activate with 'activateReporterWithConfiguration:' method first.
-
- @param apiKey Api key to send events to.
- @return id<AMAAppMetricaReporting> that conforms to AMAAppMetricaReporting and handles
- sending events to specified apikey
- */
-+ (nullable id<AMAAppMetricaReporting>)reporterForApiKey:(NSString *)apiKey NS_SWIFT_NAME(reporter(for:));
+            onFailure:(nullable void (^)(NSError *error))onFailure
+NS_SWIFT_NAME(reportRevenue(_:onFailure:));
 
 /**
- * Sets referral URL for this installation. This might be required to track some specific traffic sources like Facebook.
- * @param url referral URL value.
+ * Sends information about ad revenue.
+ * @note See `AMAAdRevenueInfo` for more info.
+ *
+ * @param adRevenue Object containing the information about ad revenue.
+ * @param onFailure Block to be executed if an error occurs while sending ad revenue,
+ *                  the error is passed as block argument.
  */
-+ (void)reportReferralUrl:(NSURL *)url NS_SWIFT_NAME(report(referralUrl:));
-
-/** Sends all stored events from the buffer.
-
- AppMetrica SDK doesn't send events immediately after they occurred. It stores events data in the buffer.
- This method sends all the data from the buffer and flushes it.
- Use the method to force stored events sending after important checkpoints of user scenarios.
-
- @warning Frequent use of the method can lead to increasing outgoing internet traffic and energy consumption.
- */
-+ (void)sendEventsBuffer;
-
-/** Resumes the last session or creates a new one if it has been expired.
-
- @warning You should disable the automatic tracking before using this method.
- See the sessionsAutoTracking property of AMAAppMetricaConfiguration.
- */
-+ (void)resumeSession;
-
-/** Pauses the current session.
- All events reported after calling this method and till the session timeout will still join this session.
-
- @warning You should disable the automatic tracking before using this method.
- See the sessionsAutoTracking property of AMAAppMetricaConfiguration.
- */
-+ (void)pauseSession;
++ (void)reportAdRevenue:(AMAAdRevenueInfo *)adRevenue
+              onFailure:(nullable void (^)(NSError *error))onFailure
+NS_SWIFT_NAME(reportAdRevenue(_:onFailure:));
 
 /** Sends information about the E-commerce event.
 
@@ -233,7 +168,10 @@ NS_SWIFT_NAME(requestStartupIdentifiers(keys:completionQueue:completionBlock:));
  @param onFailure Block to be executed if an error occurs while reporting, the error is passed as block argument.
  */
 + (void)reportECommerce:(AMAECommerce *)eCommerce
-              onFailure:(nullable void (^)(NSError *error))onFailure NS_SWIFT_NAME(report(eCommerce:onFailure:));
+              onFailure:(nullable void (^)(NSError *error))onFailure 
+NS_SWIFT_NAME(reportECommerce(_:onFailure:));
+
+//MARK: - Web View Reporting
 
 #if !TARGET_OS_TV
 /**
@@ -269,19 +207,127 @@ NS_SWIFT_NAME(requestStartupIdentifiers(keys:completionQueue:completionBlock:));
  *                  the error is passed as block argument.
  */
 + (void)setupWebViewReporting:(id<AMAJSControlling>)controller
-                    onFailure:(nullable void (^)(NSError *error))onFailure;
+                    onFailure:(nullable void (^)(NSError *error))onFailure
+NS_SWIFT_NAME(setupWebViewReporting(with:onFailure:));
 #endif
 
-/**
- * Sends information about ad revenue.
- * @note See `AMAAdRevenueInfo` for more info.
- *
- * @param adRevenue Object containing the information about ad revenue.
- * @param onFailure Block to be executed if an error occurs while sending ad revenue,
- *                  the error is passed as block argument.
+//MARK: - Session Management
+
+/** Resumes the last session or creates a new one if it has been expired.
+
+ @warning You should disable the automatic tracking before using this method.
+ See the sessionsAutoTracking property of AMAAppMetricaConfiguration.
  */
-+ (void)reportAdRevenue:(AMAAdRevenueInfo *)adRevenue
-              onFailure:(nullable void (^)(NSError *error))onFailure NS_SWIFT_NAME(report(adRevenue:onFailure:));
++ (void)resumeSession;
+
+/** Pauses the current session.
+ All events reported after calling this method and till the session timeout will still join this session.
+
+ @warning You should disable the automatic tracking before using this method.
+ See the sessionsAutoTracking property of AMAAppMetricaConfiguration.
+ */
++ (void)pauseSession;
+
+//MARK: - Reporters
+
+/** Returns id<AMAAppMetricaReporting> that can send events to specific API key.
+ To customize configuration of reporter activate with 'activateReporterWithConfiguration:' method first.
+
+ @param APIKey Api key to send events to.
+ @return id<AMAAppMetricaReporting> that conforms to AMAAppMetricaReporting and handles
+ sending events to specified apikey
+ */
++ (nullable id<AMAAppMetricaReporting>)reporterForAPIKey:(NSString *)APIKey NS_SWIFT_NAME(reporter(for:));
+
+/** Activates reporter with specific configuration.
+
+ @param configuration Configuration combines all reporter settings in one place.
+ Configuration initialized with unique application key that is issued during application registration in AppMetrica.
+ Application key must be a hexadecimal string in format xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx.
+ The key can be requested or checked at https://appmetrica.io
+ */
++ (void)activateReporterWithConfiguration:(AMAReporterConfiguration *)configuration;
+
+//MARK: - Location Tracking
+
+/** Enables/disables location reporting to AppMetrica.
+
+ If enabled and location set via `customLocation` property - that location would be used.
+ If enabled and location is not set via setLocation,
+ but application has appropriate permission - CLLocationManager would be used to acquire location data.
+
+ @note Enabled by default.
+ */
+@property (class, nonatomic, getter=isLocationTrackingEnabled) BOOL locationTrackingEnabled;
+
+/** Controls the accuracy of the location tracking used by the internal location manager.
+ 
+ When set to `YES`, the location manager attempts to use the most accurate location data available.
+ This property only takes effect if `isLocationTrackingEnabled` is set to `YES` and the location
+ has not been manually set using the `customLocation` property.
+ */
+@property (class, nonatomic, getter=isAccurateLocationTrackingEnabled) BOOL accurateLocationTrackingEnabled;
+
+/** Enable/disable background location updates tracking.
+
+ @note Disabled by default.
+ @see https://developer.apple.com/reference/corelocation/cllocationmanager/1620568-allowsbackgroundlocationupdates
+ */
+@property (class, nonatomic) BOOL allowsBackgroundLocationUpdates;
+
+/** Sets a custom location for AppMetrica tracking.
+
+ @note To utilize this custom location, ensure `isLocationTrackingEnabled` is set to `YES`.
+ */
+@property (class, nonatomic, nullable) CLLocation *customLocation;
+
+//MARK: - User Profile
+
+/** ID of the user profile.
+
+ @warning The value can contain up to 200 characters
+ */
+@property (class, nonatomic, nullable) NSString *userProfileID;
+
+//MARK: - URL Tracking
+
+/** Handles the URL that has opened the application.
+ Reports the URL for deep links tracking.
+
+ @param URL URL that has opened the application.
+ */
++ (void)trackOpeningURL:(NSURL *)URL NS_SWIFT_NAME(trackOpeningURL(_:));
+
+/**
+ * Sets referral URL for this installation. This might be required to track some specific traffic sources like Facebook.
+ * @param URL referral URL value.
+ */
++ (void)trackReferralURL:(NSURL *)URL NS_SWIFT_NAME(trackReferralURL(_:));
+
+//MARK: - Data Sending and Handling
+
+/** Enables/disables data sending to the AppMetrica server.
+
+ The `enabled` value can be overridden by the configuration settings during the activation process if it was set before activation.
+ After activation, this method's value overrides the configuration's value.
+ 
+ @note Disabling this option also turns off data sending from the reporters that initialized for different APIKey.
+
+ @param enabled Flag indicating whether the data sending is enabled. By default, the sending is enabled.
+ */
++ (void)setDataSendingEnabled:(BOOL)enabled;
+
+/** Sends all stored events from the buffer.
+
+ AppMetrica SDK doesn't send events immediately after they occurred. It stores events data in the buffer.
+ This method sends all the data from the buffer and flushes it.
+ Use the method to force stored events sending after important checkpoints of user scenarios.
+
+ @warning Frequent use of the method can lead to increasing outgoing internet traffic and energy consumption.
+ */
++ (void)sendEventsBuffer;
+
+//MARK: - Environment
 
 /** Setting key - value data to be used as additional information, associated with all future events.
  If value is nil, previously set key-value is removed. Does nothing if key hasn't been added.
@@ -290,11 +336,17 @@ NS_SWIFT_NAME(requestStartupIdentifiers(keys:completionQueue:completionBlock:));
  @param key The app environment key.
  */
 + (void)setAppEnvironmentValue:(nullable NSString *)value
-                        forKey:(NSString *)key NS_SWIFT_NAME(setAppEnvironment(value:for:));
+                        forKey:(NSString *)key NS_SWIFT_NAME(setAppEnvironment(_:forKey:));
 
 /** Clearing app environment, e.g. removes all key - value data associated with all future events.
  */
 + (void)clearAppEnvironment;
+
+//MARK: - Utility
+
+/** Retrieves current version of library.
+ */
+@property (class, nonatomic, readonly) NSString *libraryVersion;
 
 @end
 

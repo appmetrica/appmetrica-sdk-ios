@@ -40,7 +40,7 @@ describe(@"AMAAdServicesReportingController", ^{
         [dataProviderMock stub:@selector(tokenWithError:) andReturn:kAMATokenMock];
         
         reporterMock = [AMAReporter nullMock];
-        [AMAAppMetrica stub:@selector(reporterForApiKey:) andReturn:reporterMock];
+        [AMAAppMetrica stub:@selector(reporterForAPIKey:) andReturn:reporterMock];
         
         internalEventsReporter = [AMAInternalEventsReporter nullMock];
         [AMAAppMetrica stub:@selector(sharedInternalEventsReporter) andReturn:internalEventsReporter];

@@ -15,7 +15,7 @@ describe(@"AMALocationManager", ^{
 
         CLLocationManager *__block systemLocationManager = nil;
         NSObject<CLLocationManagerDelegate> *__block delegate = nil;
-        BOOL __block allowsBackgroundLocationUpdates = NO;
+        BOOL __block systemAllowsBackgroundLocationUpdates = NO;
 
         __auto_type setAuthorizationStatus = ^(CLAuthorizationStatus status, BOOL notifyDelegate) {
             [CLLocationManager stub:@selector(authorizationStatus) andReturn:theValue(status)];
@@ -31,9 +31,9 @@ describe(@"AMALocationManager", ^{
                     delegate = params[0];
                     return nil;
                 }];
-                allowsBackgroundLocationUpdates = NO;
+                systemAllowsBackgroundLocationUpdates = NO;
                 [systemLocationManager stub:@selector(setAllowsBackgroundLocationUpdates:) withBlock:^id(NSArray *params) {
-                    allowsBackgroundLocationUpdates = [params[0] boolValue];
+                    systemAllowsBackgroundLocationUpdates = [params[0] boolValue];
                     return nil;
                 }];
                 if (block != nil) {
@@ -223,6 +223,13 @@ describe(@"AMALocationManager", ^{
                 setAuthorizationStatus(kCLAuthorizationStatusAuthorizedAlways, YES);
                 stubSystemLocationManager();
             });
+            it(@"Should have no custom location by default", ^{
+                [[[AMALocationManager sharedManager].location should] beNil];
+            });
+            it(@"Should return set custom location", ^{
+                [AMALocationManager sharedManager].location = customLocation;
+                [[[AMALocationManager sharedManager].location should] equal:customLocation];
+            });
             it(@"Should not start if custom location is set", ^{
                 [[AMALocationManager sharedManager] setLocation:customLocation];
                 stubSystemLocationManagerWithBlock(^(CLLocationManager *locationManager) {
@@ -297,24 +304,45 @@ describe(@"AMALocationManager", ^{
                 [AMALocationManager sharedManager].accurateLocationEnabled = YES;
                 [[AMALocationManager sharedManager] start];
             });
-            it(@"Should store flag before start", ^{
+            it(@"Should pass flag value to the system before start", ^{
                 if (hasProperAPILevel) {
                     [AMALocationManager sharedManager].allowsBackgroundLocationUpdates = YES;
                     [[AMALocationManager sharedManager] start];
                     setAuthorizationStatus(kCLAuthorizationStatusAuthorizedAlways, YES);
-                    [[theValue(allowsBackgroundLocationUpdates) should] beYes];
+                    BOOL actual = [AMALocationManager sharedManager].allowsBackgroundLocationUpdates;
+                    [[theValue(actual) should] beYes];
                 }
             });
-            it(@"Should pass flag after start", ^{
+            it(@"Should return flag value before start", ^{
+                if (hasProperAPILevel) {
+                    [AMALocationManager sharedManager].allowsBackgroundLocationUpdates = YES;
+                    [[AMALocationManager sharedManager] start];
+                    setAuthorizationStatus(kCLAuthorizationStatusAuthorizedAlways, YES);
+                    [[theValue(systemAllowsBackgroundLocationUpdates) should] beYes];
+                }
+            });
+            it(@"Should pass flag value to the system after start", ^{
                 if (hasProperAPILevel) {
                     [[AMALocationManager sharedManager] start];
                     [AMALocationManager sharedManager].allowsBackgroundLocationUpdates = YES;
-                    [[theValue(allowsBackgroundLocationUpdates) should] beYes];
+                    [[theValue(systemAllowsBackgroundLocationUpdates) should] beYes];
                 }
+            });
+            it(@"Should return flag value after start", ^{
+                if (hasProperAPILevel) {
+                    [[AMALocationManager sharedManager] start];
+                    [AMALocationManager sharedManager].allowsBackgroundLocationUpdates = YES;
+                    BOOL actual = [AMALocationManager sharedManager].allowsBackgroundLocationUpdates;
+                    [[theValue(actual) should] beYes];
+                }
+            });
+            it(@"Should indicate the system value is NO by default", ^{
+                [[AMALocationManager sharedManager] start];
+                [[theValue(systemAllowsBackgroundLocationUpdates) should] beNo];
             });
             it(@"Should be NO by default", ^{
                 [[AMALocationManager sharedManager] start];
-                [[theValue(allowsBackgroundLocationUpdates) should] beNo];
+                [[theValue([AMALocationManager sharedManager].allowsBackgroundLocationUpdates) should] beNo];
             });
             context(@"pausesLocationUpdatesAutomatically", ^{
                 BOOL __block pausesLocationUpdatesAutomatically = YES;

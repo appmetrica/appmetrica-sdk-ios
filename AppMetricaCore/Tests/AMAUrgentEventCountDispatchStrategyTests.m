@@ -61,7 +61,8 @@ describe(@"AMAUrgentEventCountDispatchStrategy", ^{
             @(AMAEventTypeReferrer),
         ]];
     });
-
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wnonnull"
     it(@"Should trigger dispatch if there is any event with specified type", ^{
         AMAUrgentEventCountDispatchStrategy *strategy = mockEnv(2);
         [[(id)strategy.delegate should] receive:@selector(dispatchStrategyWantsReportingToHappen:)];
@@ -107,7 +108,7 @@ describe(@"AMAUrgentEventCountDispatchStrategy", ^{
         postNotificationWithEventType(AMAEventTypeReferrer, strategy);
         [strategy.executor execute:^{}];
     });
-    
+#pragma clang diagnostic pop
     context(@"Can be executed", ^{
         AMAStartupController *__block controller = nil;
         beforeEach(^{

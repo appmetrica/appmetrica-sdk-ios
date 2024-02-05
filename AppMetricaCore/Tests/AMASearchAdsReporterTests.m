@@ -18,7 +18,7 @@ describe(@"AMASearchAdsReporter", ^{
 
     beforeEach(^{
         appReporter = [AMAReporter nullMock];
-        [AMAAppMetrica stub:@selector(reporterForApiKey:) andReturn:appReporter withArguments:apiKey];
+        [AMAAppMetrica stub:@selector(reporterForAPIKey:) andReturn:appReporter withArguments:apiKey];
 
         internalReporter = [AMAInternalEventsReporter nullMock];
         [AMAAppMetrica stub:@selector(sharedInternalEventsReporter) andReturn:internalReporter];

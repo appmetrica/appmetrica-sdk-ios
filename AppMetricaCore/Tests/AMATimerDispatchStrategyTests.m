@@ -28,7 +28,7 @@ describe(@"AMATimerDispatchStrategy", ^{
         reporterStorage = reporterTestHelper.appReporter.reporterStorage;
         delegate = [KWMock nullMockForProtocol:@protocol(AMADispatchStrategyDelegate)];
 
-        AMAMutableReporterConfiguration *configuration = [[AMAMutableReporterConfiguration alloc] initWithApiKey:apiKey];
+        AMAMutableReporterConfiguration *configuration = [[AMAMutableReporterConfiguration alloc] initWithAPIKey:apiKey];
         configuration.dispatchPeriod = dispatchPeriod;
         [[AMAMetricaConfiguration sharedInstance] stub:@selector(configurationForApiKey:) andReturn:configuration];
         conditionChecker = [KWMock nullMockForProtocol:@protocol(AMAReportExecutionConditionChecker)];
@@ -39,7 +39,8 @@ describe(@"AMATimerDispatchStrategy", ^{
                                                                   executor:manualExecutor
                                                  executionConditionChecker:conditionChecker];
     });
-
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wnonnull"
     it(@"Should trigger dispatch after timeout", ^{
         [timerStrategy start];
         [[timerStrategy should] receive:@selector(triggerDispatch)];
@@ -65,6 +66,7 @@ describe(@"AMATimerDispatchStrategy", ^{
 #pragma clang diagnostic pop
 
     });
+#pragma clang diagnostic pop
     context(@"Can be executed", ^{
         AMAStartupController *__block controller = nil;
         beforeEach(^{

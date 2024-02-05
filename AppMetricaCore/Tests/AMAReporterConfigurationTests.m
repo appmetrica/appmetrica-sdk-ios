@@ -18,10 +18,10 @@ describe(@"AMAReporterConfiguration", ^{
         context(@"Immutable", ^{
             AMAReporterConfiguration *__block configuration = nil;
             beforeEach(^{
-                configuration = [[AMAReporterConfiguration alloc] initWithoutApiKey];
+                configuration = [[AMAReporterConfiguration alloc] initWithoutAPIKey];
             });
             it(@"Should have nil API key", ^{
-                [[configuration.apiKey should] beNil];
+                [[configuration.APIKey should] beNil];
             });
             it(@"Should have valid session timeout", ^{
                 [[theValue(configuration.sessionTimeout) should] equal:theValue(defaultSessionTimeout)];
@@ -42,10 +42,10 @@ describe(@"AMAReporterConfiguration", ^{
         context(@"Mutable", ^{
             AMAMutableReporterConfiguration *__block configuration = nil;
             beforeEach(^{
-                configuration = [[AMAMutableReporterConfiguration alloc] initWithoutApiKey];
+                configuration = [[AMAMutableReporterConfiguration alloc] initWithoutAPIKey];
             });
             it(@"Should have nil API key", ^{
-                [[configuration.apiKey should] beNil];
+                [[configuration.APIKey should] beNil];
             });
             it(@"Should have valid session timeout", ^{
                 [[theValue(configuration.sessionTimeout) should] equal:theValue(defaultSessionTimeout)];
@@ -72,19 +72,19 @@ describe(@"AMAReporterConfiguration", ^{
         context(@"Immutable", ^{
             it(@"Should log", ^{
                 [[AMAErrorLogger should] receive:@selector(logInvalidApiKeyError:) withArguments:apiKey];
-                id some __unused = [[AMAReporterConfiguration alloc] initWithApiKey:apiKey];
+                id some __unused = [[AMAReporterConfiguration alloc] initWithAPIKey:apiKey];
             });
             it(@"Should return nil", ^{
-                [[[[AMAReporterConfiguration alloc] initWithApiKey:apiKey] should] beNil];
+                [[[[AMAReporterConfiguration alloc] initWithAPIKey:apiKey] should] beNil];
             });
         });
         context(@"Mutable", ^{
             it(@"Should log", ^{
                 [[AMAErrorLogger should] receive:@selector(logInvalidApiKeyError:) withArguments:apiKey];
-                id some __unused = [[AMAMutableReporterConfiguration alloc] initWithApiKey:apiKey];
+                id some __unused = [[AMAMutableReporterConfiguration alloc] initWithAPIKey:apiKey];
             });
             it(@"Should return nil", ^{
-                [[[[AMAMutableReporterConfiguration alloc] initWithApiKey:apiKey] should] beNil];
+                [[[[AMAMutableReporterConfiguration alloc] initWithAPIKey:apiKey] should] beNil];
             });
         });
     });
@@ -95,10 +95,10 @@ describe(@"AMAReporterConfiguration", ^{
         context(@"Immutable", ^{
             AMAReporterConfiguration *__block configuration = nil;
             beforeEach(^{
-                configuration = [[AMAReporterConfiguration alloc] initWithApiKey:apiKey];
+                configuration = [[AMAReporterConfiguration alloc] initWithAPIKey:apiKey];
             });
             it(@"Should have valid API key", ^{
-                [[configuration.apiKey should] equal:apiKey];
+                [[configuration.APIKey should] equal:apiKey];
             });
             it(@"Should have valid session timeout", ^{
                 [[theValue(configuration.sessionTimeout) should] equal:theValue(defaultSessionTimeout)];
@@ -126,7 +126,7 @@ describe(@"AMAReporterConfiguration", ^{
                     mutableCopy = [configuration mutableCopy];
                 });
                 it(@"Should have valid API key", ^{
-                    [[configuration.apiKey should] equal:apiKey];
+                    [[configuration.APIKey should] equal:apiKey];
                 });
                 it(@"Should have valid session timeout", ^{
                     [[theValue(mutableCopy.sessionTimeout) should] equal:theValue(defaultSessionTimeout)];
@@ -148,10 +148,10 @@ describe(@"AMAReporterConfiguration", ^{
         context(@"Mutable", ^{
             AMAMutableReporterConfiguration *__block configuration = nil;
             beforeEach(^{
-                configuration = [[AMAMutableReporterConfiguration alloc] initWithApiKey:apiKey];
+                configuration = [[AMAMutableReporterConfiguration alloc] initWithAPIKey:apiKey];
             });
             it(@"Should have valid API key", ^{
-                [[configuration.apiKey should] equal:apiKey];
+                [[configuration.APIKey should] equal:apiKey];
             });
             it(@"Should have valid session timeout", ^{
                 [[theValue(configuration.sessionTimeout) should] equal:theValue(defaultSessionTimeout)];
@@ -176,7 +176,7 @@ describe(@"AMAReporterConfiguration", ^{
                 NSUInteger const newMaxReportsInDatabaseCount = 10000;
                 NSString *const newUserProfileID = @"profile id";
                 beforeEach(^{
-                    configuration.apiKey = newAPIKey;
+                    configuration.APIKey = newAPIKey;
                     configuration.sessionTimeout = newSessionTimeout;
                     configuration.dispatchPeriod = newDispatchPeriod;
                     configuration.maxReportsCount = newMaxReportsCount;
@@ -189,7 +189,7 @@ describe(@"AMAReporterConfiguration", ^{
                         immutableCopy = [configuration copy];
                     });
                     it(@"Should have valid API key", ^{
-                        [[immutableCopy.apiKey should] equal:newAPIKey];
+                        [[immutableCopy.APIKey should] equal:newAPIKey];
                     });
                     it(@"Should have valid session timeout", ^{
                         [[theValue(immutableCopy.sessionTimeout) should] equal:theValue(newSessionTimeout)];
@@ -213,7 +213,7 @@ describe(@"AMAReporterConfiguration", ^{
                         mutableCopy = [configuration copy];
                     });
                     it(@"Should have valid API key", ^{
-                        [[mutableCopy.apiKey should] equal:newAPIKey];
+                        [[mutableCopy.APIKey should] equal:newAPIKey];
                     });
                     it(@"Should have valid session timeout", ^{
                         [[theValue(mutableCopy.sessionTimeout) should] equal:theValue(newSessionTimeout)];
@@ -232,7 +232,7 @@ describe(@"AMAReporterConfiguration", ^{
                     });
                     context(@"Original configuration values changed", ^{
                         beforeEach(^{
-                            configuration.apiKey = apiKey;
+                            configuration.APIKey = apiKey;
                             configuration.sessionTimeout = defaultSessionTimeout;
                             configuration.dispatchPeriod = defaultDispatchPeriod;
                             configuration.maxReportsCount = defaultMaxReportsCount;
@@ -240,7 +240,7 @@ describe(@"AMAReporterConfiguration", ^{
                             configuration.userProfileID = nil;
                         });
                         it(@"Should have valid API key", ^{
-                            [[mutableCopy.apiKey should] equal:newAPIKey];
+                            [[mutableCopy.APIKey should] equal:newAPIKey];
                         });
                         it(@"Should have valid session timeout", ^{
                             [[theValue(mutableCopy.sessionTimeout) should] equal:theValue(newSessionTimeout)];

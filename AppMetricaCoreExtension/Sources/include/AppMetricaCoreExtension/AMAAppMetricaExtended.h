@@ -26,7 +26,6 @@ NS_ASSUME_NONNULL_BEGIN
 + (void)registerExternalService:(AMAServiceConfiguration *)configuration;
 
 // State Checks
-+ (BOOL)isAppMetricaStarted;
 + (BOOL)isAPIKeyValid:(NSString *)apiKey;
 + (BOOL)isReporterCreatedForAPIKey:(NSString *)apiKey;
 

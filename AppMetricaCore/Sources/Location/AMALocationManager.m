@@ -21,7 +21,7 @@
 @property (nonatomic, assign) BOOL currentAccurateLocationEnabled;
 @property (nonatomic, assign) BOOL currentAllowsBackgroundLocationUpdates;
 
-@property (nonatomic, strong, readonly) id<AMAAsyncExecuting> executor;
+@property (nonatomic, strong, readonly) id<AMAAsyncExecuting, AMASyncExecuting> executor;
 @property (nonatomic, strong, readonly) id<AMAAsyncExecuting> mainQueueExecutor;
 @property (nonatomic, strong, readonly) AMAStartupPermissionController *startupPermissionController;
 @property (nonatomic, strong, readonly) AMALocationCollectingController *locationCollectingController;
@@ -33,7 +33,7 @@
 
 - (instancetype)init
 {
-    id<AMAAsyncExecuting> executor = [[AMAExecutor alloc] initWithIdentifier:self];
+    AMAExecutor *executor = [[AMAExecutor alloc] initWithIdentifier:self];
     id<AMAAsyncExecuting> mainQueueExecutor = [[AMAExecutor alloc] initWithQueue:dispatch_get_main_queue()];
     AMAStartupPermissionController *startupPermissionController = [[AMAStartupPermissionController alloc] init];
     AMALocationCollectingConfiguration *configuration = [[AMALocationCollectingConfiguration alloc] init];
@@ -48,7 +48,7 @@
                                                                             timeoutConfiguration:timeoutConfiguration]];
 }
 
-- (instancetype)initWithExecutor:(id<AMAAsyncExecuting>)executor
+- (instancetype)initWithExecutor:(id<AMAAsyncExecuting, AMASyncExecuting>)executor
                mainQueueExecutor:(id<AMAAsyncExecuting>)mainQueueExecutor
      startupPermissionController:(AMAStartupPermissionController *)startupPermissionController
                    configuration:(AMALocationCollectingConfiguration *)configuration
@@ -115,6 +115,15 @@
     }];
 }
 
+- (CLLocation *)location
+{
+    CLLocation *result = nil;
+    @synchronized (self) {
+        result = self.externalLocation;
+    }
+    return result;
+}
+
 - (void)setAccurateLocationEnabled:(BOOL)preciseLocationNeeded
 {
     [self.executor execute:^{
@@ -123,12 +132,26 @@
     }];
 }
 
+- (BOOL)accurateLocationEnabled
+{
+    return [[self.executor syncExecute:^id {
+        return @(self.currentAccurateLocationEnabled);
+    }] boolValue];
+}
+
 - (void)setAllowsBackgroundLocationUpdates:(BOOL)allowsBackgroundLocationUpdates
 {
     [self.executor execute:^{
         self.currentAllowsBackgroundLocationUpdates = allowsBackgroundLocationUpdates;
         [self configureLocationManager];
     }];
+}
+
+- (BOOL)allowsBackgroundLocationUpdates
+{
+    return [[self.executor syncExecute:^id {
+        return @(self.currentAllowsBackgroundLocationUpdates);
+    }] boolValue];
 }
 
 - (void)start

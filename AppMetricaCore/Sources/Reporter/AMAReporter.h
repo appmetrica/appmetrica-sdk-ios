@@ -29,7 +29,7 @@
 #endif
 >
 
-@property (nonatomic, strong, readonly) id<AMACancelableExecuting> executor;
+@property (nonatomic, strong, readonly) id<AMACancelableExecuting, AMASyncExecuting> executor;
 @property (nonatomic, copy, readonly) NSString *apiKey;
 @property (nonatomic, strong, readonly) AMAInternalEventsReporter *internalReporter;
 @property (nonatomic, weak) id<AMAReporterDelegate> delegate;
@@ -52,7 +52,7 @@
                reporterStorage:(AMAReporterStorage *)reporterStorage
                   eventBuilder:(AMAEventBuilder *)eventBuilder
               internalReporter:(AMAInternalEventsReporter *)internalReporter
-                      executor:(id<AMACancelableExecuting>)executor
+                      executor:(id<AMACancelableExecuting, AMASyncExecuting>)executor
       attributionCheckExecutor:(id<AMAAsyncExecuting>)attributionCheckExecutor
            eCommerceSerializer:(AMAECommerceSerializer *)eCommerceSerializer
             eCommerceTruncator:(AMAECommerceTruncator *)eCommerceTruncator

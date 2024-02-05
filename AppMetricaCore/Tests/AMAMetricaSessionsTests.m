@@ -47,7 +47,7 @@ describe(@"AMAMetricaSessions", ^{
         sessionStorage = reporterStorage.sessionStorage;
     };
     void (^start)(void) = ^{
-        [AMAAppMetrica activateWithConfiguration:[[AMAAppMetricaConfiguration alloc] initWithApiKey:apiKey]];
+        [AMAAppMetrica activateWithConfiguration:[[AMAAppMetricaConfiguration alloc] initWithAPIKey:apiKey]];
         sleep(2);
     };
     void (^clearAndStart)(void) = ^{
@@ -135,7 +135,7 @@ describe(@"AMAMetricaSessions", ^{
             });
             it(@"Should not finish last session for manual reporters on application start", ^{
                 NSString *manualApiKey = @"550e8400-e29b-41d4-a716-446655440001";
-                AMAReporter *reporter = (AMAReporter *)[AMAAppMetrica reporterForApiKey:manualApiKey];
+                AMAReporter *reporter = (AMAReporter *)[AMAAppMetrica reporterForAPIKey:manualApiKey];
                 [reporter.reporterStorage.sessionStorage newGeneralSessionCreatedAt:[NSDate date] error:nil];
 
                 start();
@@ -155,7 +155,7 @@ describe(@"AMAMetricaSessions", ^{
             it(@"Should not start manual reporters on applicationDidBecomeActive", ^{
                 stubSharedImpl();
                 NSString *manualApiKey = @"550e8400-e29b-41d4-a716-446655440001";
-                id<AMAAppMetricaReporting> __unused reporter = [AMAAppMetrica reporterForApiKey:manualApiKey];
+                id<AMAAppMetricaReporting> __unused reporter = [AMAAppMetrica reporterForAPIKey:manualApiKey];
                 start();
                 [[NSNotificationCenter defaultCenter] postNotificationName:UIApplicationDidBecomeActiveNotification
                                                                     object:nil];
@@ -167,7 +167,7 @@ describe(@"AMAMetricaSessions", ^{
             it(@"Should not start new session after receiving notification before start and then starting Impl", ^{
                 stubSharedImpl();
                 hostStateProvider.hostState = AMAHostAppStateForeground;
-                [AMAAppMetrica activateWithConfiguration:[[AMAAppMetricaConfiguration alloc] initWithApiKey:apiKey]];
+                [AMAAppMetrica activateWithConfiguration:[[AMAAppMetricaConfiguration alloc] initWithAPIKey:apiKey]];
                 AMASession *session = [sessionStorage amatest_sessionWithOid:@3];
                 [[session should] beNil];
             });

@@ -186,21 +186,21 @@ describe(@"AMAMetricaConfiguration", ^{
             [configuration resetDetectedInconsistencyDescription];
         });
         it(@"Should set app configuration", ^{
-            AMAReporterConfiguration *appConfiguration = [[AMAReporterConfiguration alloc] initWithApiKey:apiKey];
+            AMAReporterConfiguration *appConfiguration = [[AMAReporterConfiguration alloc] initWithAPIKey:apiKey];
             
             [configuration setAppConfiguration:appConfiguration];
             
             [[configuration.appConfiguration should] equal:appConfiguration];
         });
         it(@"Should return configuration for api key if app configuration set", ^{
-            AMAReporterConfiguration *appConfiguration = [[AMAReporterConfiguration alloc] initWithApiKey:apiKey];
+            AMAReporterConfiguration *appConfiguration = [[AMAReporterConfiguration alloc] initWithAPIKey:apiKey];
             
             [configuration setAppConfiguration:appConfiguration];
             
             [[[configuration configurationForApiKey:apiKey] should] equal:appConfiguration];
         });
         it(@"Should return configuration for api key if configuration set", ^{
-            AMAReporterConfiguration *appConfiguration = [[AMAReporterConfiguration alloc] initWithApiKey:apiKey];
+            AMAReporterConfiguration *appConfiguration = [[AMAReporterConfiguration alloc] initWithAPIKey:apiKey];
             
             [configuration setConfiguration:appConfiguration];
             

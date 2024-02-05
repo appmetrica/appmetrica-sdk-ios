@@ -56,7 +56,7 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
         activationDelegates = [[NSMutableSet alloc] init];
     });
     @synchronized(self) {
-        if ([self isAppMetricaStarted] == NO) {
+        if ([self isActivated] == NO) {
             [activationDelegates addObject:delegate];
         }
     }
@@ -69,7 +69,7 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
         eventFlushableDelegates = [[NSMutableSet alloc] init];
     });
     @synchronized(self) {
-        if ([self isAppMetricaStarted] == NO) {
+        if ([self isActivated] == NO) {
             [eventFlushableDelegates addObject:delegate];
         }
     }
@@ -82,7 +82,7 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
         eventPollingDelegates = [[NSMutableSet alloc] init];
     });
     @synchronized(self) {
-        if ([self isAppMetricaStarted] == NO) {
+        if ([self isActivated] == NO) {
             [eventPollingDelegates addObject:delegate];
         }
     }
@@ -91,7 +91,7 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
 + (void)willActivateDelegates:(AMAAppMetricaConfiguration *)configuration
 {
     @synchronized(self) {
-        __auto_type moduleConfig = [[AMAModuleActivationConfiguration alloc] initWithApiKey:configuration.apiKey
+        __auto_type moduleConfig = [[AMAModuleActivationConfiguration alloc] initWithApiKey:configuration.APIKey
                                                                                  appVersion:configuration.appVersion
                                                                              appBuildNumber:configuration.appBuildNumber];
         for (Class<AMAModuleActivationDelegate> delegate in activationDelegates) {
@@ -103,7 +103,7 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
 + (void)didActivateDelegates:(AMAAppMetricaConfiguration *)configuration
 {
     @synchronized(self) {
-        __auto_type moduleConfig = [[AMAModuleActivationConfiguration alloc] initWithApiKey:configuration.apiKey
+        __auto_type moduleConfig = [[AMAModuleActivationConfiguration alloc] initWithApiKey:configuration.APIKey
                                                                                  appVersion:configuration.appVersion
                                                                              appBuildNumber:configuration.appBuildNumber];
         for (Class<AMAModuleActivationDelegate> delegate in activationDelegates) {
@@ -151,7 +151,7 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
 + (void)registerAdProvider:(id<AMAAdProviding>)provider
 {
     @synchronized(self) {
-        if ([self isAppMetricaStarted] == NO) {
+        if ([self isActivated] == NO) {
             adProvider = provider;
         }
     }
@@ -191,7 +191,7 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
     return [AMAIdentifierValidator isValidUUIDKey:apiKey];
 }
 
-+ (BOOL)isAppMetricaStarted
++ (BOOL)isActivated
 {
     @synchronized(self) {
         return [AMAMetricaConfiguration sharedInstance].inMemory.appMetricaStarted;
@@ -293,9 +293,9 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
 
 + (void)importLogConfiguration:(AMAAppMetricaConfiguration *)configuration
 {
-    [self setLogs:configuration.logs];
+    [self setLogs:configuration.areLogsEnabled];
     [[self sharedExecutor] execute:^{
-        [AMADatabaseQueueProvider sharedInstance].logsEnabled = configuration.logs;
+        [AMADatabaseQueueProvider sharedInstance].logsEnabled = configuration.areLogsEnabled;
     }];
 }
 
@@ -309,19 +309,19 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
     }
 
     AMADataSendingRestrictionController *controller = [AMADataSendingRestrictionController sharedInstance];
-    [controller setMainApiKey:configuration.apiKey];
+    [controller setMainApiKey:configuration.APIKey];
     [controller setMainApiKeyRestriction:restriction];
 }
 
 + (void)importLocationConfiguration:(AMAAppMetricaConfiguration *)configuration
 {
     if (configuration.locationTrackingState != nil) {
-        [self setLocationTracking:configuration.locationTracking];
+        self.locationTrackingEnabled = configuration.locationTracking;
     }
-    if (configuration.location != nil) {
-        [self setLocation:configuration.location];
+    if (configuration.customLocation != nil) {
+        [self setCustomLocation:configuration.customLocation];
     }
-    [self setAccurateLocationTracking:configuration.accurateLocationTracking];
+    [self setAccurateLocationTrackingEnabled:configuration.accurateLocationTracking];
 }
 
 + (void)importReporterConfiguration:(AMAAppMetricaConfiguration *)configuration
@@ -329,12 +329,12 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
     AMAMetricaConfiguration *metricaConfiguration = [AMAMetricaConfiguration sharedInstance];
     AMAMutableReporterConfiguration *appConfiguration =
         [metricaConfiguration.appConfiguration mutableCopy];
-    appConfiguration.apiKey = configuration.apiKey;
+    appConfiguration.APIKey = configuration.APIKey;
     appConfiguration.sessionTimeout = configuration.sessionTimeout;
     appConfiguration.maxReportsCount = configuration.maxReportsCount;
     appConfiguration.maxReportsInDatabaseCount = configuration.maxReportsInDatabaseCount;
     appConfiguration.dispatchPeriod = configuration.dispatchPeriod;
-    appConfiguration.logs = configuration.logs;
+    appConfiguration.logsEnabled = configuration.areLogsEnabled;
     appConfiguration.dataSendingEnabled = configuration.dataSendingEnabled;
     metricaConfiguration.appConfiguration = [appConfiguration copy];
 
@@ -393,9 +393,9 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
 + (void)activateWithConfiguration:(AMAAppMetricaConfiguration *)configuration
 {
     @synchronized (self) {
-        NSString *apiKey = configuration.apiKey;
+        NSString *apiKey = configuration.APIKey;
 
-        if ([self isAppMetricaStarted]) {
+        if ([self isActivated]) {
             [AMAErrorLogger logMetricaAlreadyStartedError];
             return;
         }
@@ -476,6 +476,11 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
     [[self sharedImpl] setUserProfileID:[userProfileID copy]];
 }
 
++ (NSString *)userProfileID
+{
+    return [self sharedImpl].userProfileID;
+}
+
 + (void)setLogs:(BOOL)enabled
 {
     [[self sharedLogConfigurator] setChannel:AMA_LOG_CHANNEL enabled:enabled];
@@ -496,16 +501,26 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
 }
 # endif
 
-+ (void)setLocation:(CLLocation *)location
++ (void)setCustomLocation:(CLLocation *)location
 {
     [[AMALocationManager sharedManager] setLocation:location];
     AMALogInfo(@"Set location %@", location);
 }
 
-+ (void)setLocationTracking:(BOOL)enabled
++ (CLLocation *)customLocation
+{
+    return [AMALocationManager sharedManager].location;
+}
+
++ (void)setLocationTrackingEnabled:(BOOL)enabled
 {
     [[AMALocationManager sharedManager] setTrackLocationEnabled:enabled];
     AMALogInfo(@"Set track location enabled %i", enabled);
+}
+
++ (BOOL)isLocationTrackingEnabled
+{
+    return [AMALocationManager sharedManager].trackLocationEnabled;
 }
 
 + (NSString *)libraryVersion
@@ -513,22 +528,22 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
     return [AMAPlatformDescription SDKVersionName];
 }
 
-+ (void)handleOpenURL:(NSURL *)url
++ (void)trackOpeningURL:(NSURL *)URL
 {
-    if ([self isAppMetricaStarted] == NO) {
+    if ([self isActivated] == NO) {
         AMALogWarn(@"Metrica is not started");
         return;
     }
-    [[self sharedImpl] reportUrl:url ofType:kAMADLControllerUrlTypeOpen isAuto:NO];
+    [[self sharedImpl] reportUrl:URL ofType:kAMADLControllerUrlTypeOpen isAuto:NO];
 }
 
-+ (void)reportReferralUrl:(NSURL *)url
++ (void)trackReferralURL:(NSURL *)URL
 {
-    if ([self isAppMetricaStarted] == NO) {
+    if ([self isActivated] == NO) {
         AMALogWarn(@"Metrica is not started");
         return;
     }
-    [[self sharedImpl] reportUrl:url ofType:kAMADLControllerUrlTypeReferral isAuto:NO];
+    [[self sharedImpl] reportUrl:URL ofType:kAMADLControllerUrlTypeReferral isAuto:NO];
 }
 
 + (void)setErrorEnvironmentValue:(NSString *)value forKey:(NSString *)key
@@ -585,9 +600,14 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
     [[self sharedImpl] resumeSession];
 }
 
-+ (void)setAccurateLocationTracking:(BOOL)enabled
++ (void)setAccurateLocationTrackingEnabled:(BOOL)enabled
 {
     [AMALocationManager sharedManager].accurateLocationEnabled = enabled;
+}
+
++ (BOOL)isAccurateLocationTrackingEnabled
+{
+    return [AMALocationManager sharedManager].accurateLocationEnabled;
 }
 
 + (void)setAllowsBackgroundLocationUpdates:(BOOL)allowsBackgroundLocationUpdates
@@ -595,15 +615,20 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
     [AMALocationManager sharedManager].allowsBackgroundLocationUpdates = allowsBackgroundLocationUpdates;
 }
 
++ (BOOL)allowsBackgroundLocationUpdates
+{
+    return [AMALocationManager sharedManager].allowsBackgroundLocationUpdates;
+}
+
 + (void)activateReporterWithConfiguration:(AMAReporterConfiguration *)configuration
 {
-    if ([self isAPIKeyValid:configuration.apiKey] == NO) {
-        [AMAErrorLogger logInvalidApiKeyError:configuration.apiKey];
+    if ([self isAPIKeyValid:configuration.APIKey] == NO) {
+        [AMAErrorLogger logInvalidApiKeyError:configuration.APIKey];
         return;
     }
 
     @synchronized (self) {
-        if ([self isReporterCreatedForAPIKey:configuration.apiKey]) {
+        if ([self isReporterCreatedForAPIKey:configuration.APIKey]) {
             [AMAErrorLogger logMetricaActivationWithAlreadyPresentedKeyError];
         }
         else {
@@ -615,7 +640,7 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
                     : AMADataSendingRestrictionForbidden;
             }
             [[AMADataSendingRestrictionController sharedInstance] setReporterRestriction:restriction
-                                                                               forApiKey:configuration.apiKey];
+                                                                               forApiKey:configuration.APIKey];
 
             [[AMAMetricaConfiguration sharedInstance] setConfiguration:configuration];
             [self handleConfigurationUpdate];
@@ -624,9 +649,9 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
     }
 }
 
-+ (id<AMAAppMetricaReporting>)reporterForApiKey:(NSString *)apiKey
++ (id<AMAAppMetricaReporting>)reporterForAPIKey:(NSString *)APIKey
 {
-    return [self extendedReporterForApiKey:apiKey];
+    return [self extendedReporterForApiKey:APIKey];
 }
 
 + (id<AMAAppMetricaExtendedReporting>)extendedReporterForApiKey:(NSString *)apiKey
@@ -641,7 +666,7 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
             [[AMADataSendingRestrictionController sharedInstance] setReporterRestriction:AMADataSendingRestrictionUndefined
                                                                               forApiKey:apiKey];
         }
-        AMAReporterConfiguration *configuration = [[AMAReporterConfiguration alloc] initWithApiKey:apiKey];
+        AMAReporterConfiguration *configuration = [[AMAReporterConfiguration alloc] initWithAPIKey:apiKey];
         id<AMAAppMetricaExtendedReporting> reporter = [[self sharedImpl] manualReporterForConfiguration:configuration];
         return reporter;
     }
@@ -665,7 +690,7 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
                                            notifyOnError:YES];
 }
 
-+ (NSString *)uuid
++ (NSString *)UUID
 {
     return [AMAUUIDProvider sharedInstance].retrieveUUID;
 }
@@ -732,9 +757,9 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
     return hostStateProvider;
 }
 
-+ (id<AMAAsyncExecuting>)sharedExecutor
++ (id<AMAAsyncExecuting, AMASyncExecuting>)sharedExecutor
 {
-    static id<AMAAsyncExecuting> executor = nil;
+    static id<AMAAsyncExecuting, AMASyncExecuting> executor = nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         @autoreleasepool {
@@ -781,7 +806,7 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
 
 
 + (BOOL)isAppMetricaStartedWithLogging:(void (^)(NSError *))onFailure {
-    if ([self isAppMetricaStarted] == NO) {
+    if ([self isActivated] == NO) {
         [AMAErrorLogger logAppMetricaNotStartedErrorWithOnFailure:onFailure];
         return NO;
     }

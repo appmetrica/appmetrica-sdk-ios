@@ -75,7 +75,7 @@ static NSString *const kAMASearchAdsReporterCallbackTypeJSONError = @"json-error
 
 - (AMAReporter *)appReporter
 {
-    return (AMAReporter *)[AMAAppMetrica reporterForApiKey:self.apiKey];
+    return (AMAReporter *)[AMAAppMetrica reporterForAPIKey:self.apiKey];
 }
 
 - (AMAInternalEventsReporter *)internalEventsReporter

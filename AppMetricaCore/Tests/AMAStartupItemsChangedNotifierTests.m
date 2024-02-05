@@ -1,5 +1,7 @@
-
 #import <Kiwi/Kiwi.h>
+
+#import <AppMetricaCore/AppMetricaCore.h>
+
 #import "AMAMetricaConfigurationTestUtilities.h"
 #import "AMAStartupItemsChangedNotifier.h"
 #import "AMAStartupItemsChangedNotifier+Tests.h"

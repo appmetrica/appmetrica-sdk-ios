@@ -25,7 +25,7 @@
 @implementation AMAAppMetricaImplStub
 
 - (instancetype)initWithHostStateProvider:(nullable id<AMAHostStateProviding>)hostStateProvider
-                                 executor:(id<AMAAsyncExecuting>)executor
+                                 executor:(id<AMAAsyncExecuting, AMASyncExecuting>)executor
                     eventPollingDelegates:(nullable NSArray<Class<AMAEventPollingDelegate>> *)eventPollingDelegates
                        reporterTestHelper:(AMAReporterTestHelper *)reporterTestHelper
 {
@@ -127,7 +127,7 @@
                                               hostStateProvider:(id<AMAHostStateProviding>)hostStateProvider
                                           eventPollingDelegates:(NSArray<Class<AMAEventPollingDelegate>> *)eventPollingDelegates
 {
-    id<AMAAsyncExecuting> executor = [AMACurrentQueueExecutor new];
+    AMACurrentQueueExecutor *executor = [AMACurrentQueueExecutor new];
     AMAAppMetricaImpl *impl = [[AMAAppMetricaImplStub alloc] initWithHostStateProvider:hostStateProvider
                                                                               executor:executor
                                                                  eventPollingDelegates:eventPollingDelegates
@@ -146,7 +146,7 @@
 
 + (AMAAppMetricaImpl *)createNoQueueImplWithReporterHelper:(AMAReporterTestHelper *)reporterTestHelper
 {
-    id<AMAAsyncExecuting> executor = [AMAManualCurrentQueueExecutor new];
+    AMAManualCurrentQueueExecutor *executor = [AMAManualCurrentQueueExecutor new];
     AMAStubHostAppStateProvider *hostStateProvider = [AMAStubHostAppStateProvider new];
     hostStateProvider.hostState = AMAHostAppStateBackground;
     

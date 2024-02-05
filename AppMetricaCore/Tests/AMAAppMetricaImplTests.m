@@ -83,7 +83,7 @@ describe(@"AMAAppMetricaImpl", ^{
     beforeEach(^{
         [AMALocationManager stub:@selector(sharedManager)];
         configuration = [AMAAppMetricaConfiguration nullMock];
-        [configuration stub:@selector(apiKey) andReturn:apiKey];
+        [configuration stub:@selector(APIKey) andReturn:apiKey];
         startupController = [AMAStartupController stubbedNullMockForInit:@selector(initWithTimeoutRequestsController:)];
         permissionsController = [AMAPermissionsController stubbedNullMockForInit:@selector(initWithConfiguration:
                                                                                            extrcator:
@@ -226,7 +226,7 @@ describe(@"AMAAppMetricaImpl", ^{
             [impl activateWithConfiguration:configuration];
         });
     });
-    context(@"Setting user profile ID", ^{
+    context(@"User profile ID", ^{
         NSString *profileIDBeforeActivation = @"Profile ID before activation";
         NSString *profileIDDuringActivation = @"Profile ID during activation";
         __block AMAAppMetricaImpl *impl;
@@ -239,6 +239,15 @@ describe(@"AMAAppMetricaImpl", ^{
             NSString *(^resultProfileID)(void) = ^{
                 return [reporterTestHelper appReporterForApiKey:apiKey].reporterStorage.stateStorage.profileID;
             };
+            it(@"Should preserve userID before activation" ,^{
+                impl.userProfileID = profileIDBeforeActivation;
+                [[impl.userProfileID should] equal:profileIDBeforeActivation];
+            });
+            it(@"Should preserve userID after activation" ,^{
+                impl.userProfileID = profileIDBeforeActivation;
+                [impl activateWithConfiguration:configuration];
+                [[impl.userProfileID should] equal:profileIDBeforeActivation];
+            });
             it(@"Set only before activation", ^{
                 [impl setUserProfileID:profileIDBeforeActivation];
                 [impl activateWithConfiguration:configuration];
@@ -249,11 +258,31 @@ describe(@"AMAAppMetricaImpl", ^{
                 [impl activateWithConfiguration:configuration];
                 [[resultProfileID() should] equal:profileIDDuringActivation];
             });
+            it(@"Should preserve userID during activation" ,^{
+                [configuration stub:@selector(userProfileID) andReturn:profileIDDuringActivation];
+                [impl activateWithConfiguration:configuration];
+                [[impl.userProfileID should] equal:profileIDDuringActivation];
+            });
             it(@"Set before and during activation", ^{
                 [impl setUserProfileID:profileIDBeforeActivation];
                 [configuration stub:@selector(userProfileID) andReturn:profileIDDuringActivation];
                 [impl activateWithConfiguration:configuration];
                 [[resultProfileID() should] equal:profileIDDuringActivation];
+            });
+            it(@"Should use truncated value after activation" ,^{
+                impl.userProfileID = profileIDBeforeActivation;
+                [impl activateWithConfiguration:configuration];
+                NSString *truncated = @"Profile ID be";
+                [reporterTestHelper appReporterForApiKey:apiKey]
+                    .reporterStorage.stateStorage.profileID = truncated;
+                [[impl.userProfileID should] equal:truncated];
+            });
+            it(@"Should not use truncated value before activation" ,^{
+                impl.userProfileID = profileIDBeforeActivation;
+                NSString *truncated = @"Profile ID be";
+                [reporterTestHelper appReporterForApiKey:apiKey]
+                    .reporterStorage.stateStorage.profileID = truncated;
+                [[impl.userProfileID should] equal:profileIDBeforeActivation];
             });
         });
         context(@"Manual reporter", ^{
@@ -264,18 +293,18 @@ describe(@"AMAAppMetricaImpl", ^{
 
             it(@"Set only before activation", ^{
                 [impl setUserProfileID:profileIDBeforeActivation];
-                [impl manualReporterForConfiguration:[[AMAReporterConfiguration alloc] initWithApiKey:differentApiKey]];
+                [impl manualReporterForConfiguration:[[AMAReporterConfiguration alloc] initWithAPIKey:differentApiKey]];
                 [[resultProfileID() should] beNil];
             });
             it(@"Set only during activation", ^{
-                AMAMutableReporterConfiguration *reporterConfig = [[AMAMutableReporterConfiguration alloc] initWithApiKey:differentApiKey];
+                AMAMutableReporterConfiguration *reporterConfig = [[AMAMutableReporterConfiguration alloc] initWithAPIKey:differentApiKey];
                 reporterConfig.userProfileID = profileIDDuringActivation;
                 [impl manualReporterForConfiguration:reporterConfig];
                 [[resultProfileID() should] equal:profileIDDuringActivation];
             });
             it(@"Set before and during activation", ^{
                 [impl setUserProfileID:profileIDBeforeActivation];
-                AMAMutableReporterConfiguration *reporterConfig = [[AMAMutableReporterConfiguration alloc] initWithApiKey:differentApiKey];
+                AMAMutableReporterConfiguration *reporterConfig = [[AMAMutableReporterConfiguration alloc] initWithAPIKey:differentApiKey];
                 reporterConfig.userProfileID = profileIDDuringActivation;
                 [impl manualReporterForConfiguration:reporterConfig];
                 [[resultProfileID() should] equal:profileIDDuringActivation];
@@ -286,11 +315,11 @@ describe(@"AMAAppMetricaImpl", ^{
     context(@"Starting AppMetrica on internal queue", ^{
         NSString *differentApiKey = @"f3f8bafd-b9c2-47e5-8065-fec0f54b67d2";
         it(@"Should not access storage on current queue", ^{
-            id<AMACancelableExecuting> executor = [AMAManualCurrentQueueExecutor new];
+            AMAManualCurrentQueueExecutor *executor = [AMAManualCurrentQueueExecutor new];
             [reporterTestHelper appReporterForApiKey:differentApiKey main:YES executor:executor inMemory:YES preloadInfo:nil attributionCheckExecutor:nil];
             AMAAppMetricaImpl *impl = [AMAAppMetricaImplTestFactory createNoQueueImplWithReporterHelper:reporterTestHelper];
             [[[AMAMetricaConfiguration sharedInstance] shouldNot] receive:@selector(persistent)];
-            [configuration stub:@selector(apiKey) andReturn:differentApiKey];
+            [configuration stub:@selector(APIKey) andReturn:differentApiKey];
             [impl activateWithConfiguration:configuration];
         });
     });
@@ -309,7 +338,7 @@ describe(@"AMAAppMetricaImpl", ^{
         it(@"Should not set manual reporter", ^{
             NSString *differentApiKey = @"220e8400-e29b-41d4-a716-446655440022";
             [[controller shouldNot] receive:@selector(setMainReporter:)];
-            [appMetricaImpl manualReporterForConfiguration:[[AMAReporterConfiguration alloc] initWithApiKey:differentApiKey]];
+            [appMetricaImpl manualReporterForConfiguration:[[AMAReporterConfiguration alloc] initWithAPIKey:differentApiKey]];
         });
     });
 
@@ -863,7 +892,7 @@ describe(@"AMAAppMetricaImpl", ^{
             it(@"Should setup reporter storage controller with main reporter", ^{
                 for (NSObject<AMAReporterStorageControlling> *controller in controllers) {
                     [[controller should] receive:@selector(setupWithReporterStorage:main:forAPIKey:)
-                                   withArguments:kw_any(), theValue(YES), configuration.apiKey];
+                                   withArguments:kw_any(), theValue(YES), configuration.APIKey];
                 }
                 
                 [appMetricaImpl setExtendedReporterStorageControllers:[NSSet setWithArray:controllers]];
@@ -872,11 +901,11 @@ describe(@"AMAAppMetricaImpl", ^{
             it(@"Should setup reporter storage controller with secondary reporter", ^{
                 for (NSObject<AMAReporterStorageControlling> *controller in controllers) {
                     [[controller should] receive:@selector(setupWithReporterStorage:main:forAPIKey:)
-                                   withArguments:kw_any(), theValue(NO), configuration.apiKey];
+                                   withArguments:kw_any(), theValue(NO), configuration.APIKey];
                 }
                 
                 [appMetricaImpl setExtendedReporterStorageControllers:[NSSet setWithArray:controllers]];
-                [AMAAppMetrica activateReporterWithConfiguration:[[AMAReporterConfiguration alloc] initWithApiKey:apiKey]];
+                [AMAAppMetrica activateReporterWithConfiguration:[[AMAReporterConfiguration alloc] initWithAPIKey:apiKey]];
             });
         });
     });

@@ -1,5 +1,7 @@
 #import <Foundation/Foundation.h>
-#import "AMACompletionBlocks.h"
+
+#import <AppMetricaCore/AppMetricaCore.h> // Needed for AMAIdentifiersCompletionBlock
+
 #import "AMAStartupController.h"
 
 @class AMAAdRevenueInfo;
@@ -7,9 +9,11 @@
 @class AMAECommerce;
 @class AMARevenueInfo;
 @class AMAUserProfile;
+@class AMAReporterConfiguration;
 @protocol AMAAppMetricaExtendedReporting;
 @protocol AMAEventPollingDelegate;
 @protocol AMAAsyncExecuting;
+@protocol AMASyncExecuting;
 @protocol AMAExtendedStartupObserving;
 @protocol AMAHostStateProviding;
 @protocol AMAModuleActivationDelegate;
@@ -23,15 +27,17 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface AMAAppMetricaImpl : NSObject <AMAStartupControllerDelegate>
 
+@property (nonatomic, strong, nullable) NSString *userProfileID;
+
 - (instancetype)init NS_UNAVAILABLE;
 + (instancetype)new NS_UNAVAILABLE;
 
 - (instancetype)initWithHostStateProvider:(nullable id<AMAHostStateProviding>)hostStateProvider
-                                 executor:(id<AMAAsyncExecuting>)executor
+                                 executor:(id<AMAAsyncExecuting, AMASyncExecuting>)executor
                     eventPollingDelegates:(nullable NSArray<Class<AMAEventPollingDelegate>> *)eventPollingDelegates;
 
 @property (nonatomic, copy, readonly) NSString *apiKey;
-@property (nonatomic, strong, readonly) id<AMAAsyncExecuting> executor;
+@property (nonatomic, strong, readonly) id<AMAAsyncExecuting, AMASyncExecuting> executor;
 
 - (void)activateWithConfiguration:(AMAAppMetricaConfiguration *)configuration;
 
@@ -87,7 +93,6 @@ NS_ASSUME_NONNULL_BEGIN
 - (id<AMAAppMetricaExtendedReporting>)manualReporterForConfiguration:(AMAReporterConfiguration *)configuration;
 - (BOOL)isReporterCreatedForAPIKey:(NSString *)apiKey;
 
-- (void)setUserProfileID:(NSString *)userProfileID;
 - (void)setPreloadInfo:(nullable AMAAppMetricaPreloadInfo *)preloadInfo;
 
 + (void)syncSetErrorEnvironmentValue:(NSString *)value forKey:(NSString *)key;

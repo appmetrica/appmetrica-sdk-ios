@@ -37,6 +37,8 @@ describe(@"AMAEventCountDispatchStrategy", ^{
                                                                       executor:manualExecutor
                                                      executionConditionChecker:executionConditionChecker];
         };
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wnonnull"
         void (^postNotifications)(AMAEventCountDispatchStrategy *, NSUInteger) =
         ^(AMAEventCountDispatchStrategy *strategy, NSUInteger notificationsNumber) {
             AMAReporter *reporter = [reporterTestHelper appReporter];
@@ -53,6 +55,7 @@ describe(@"AMAEventCountDispatchStrategy", ^{
             [strategy.executor execute:nil];
 #pragma clang diagnostic pop
         };
+#pragma clang diagnostic pop
         void (^stubConfigurationWithMaxReportsCount)(NSUInteger) = ^(NSUInteger count) {
             [AMAMetricaConfigurationTestUtilities stubConfiguration];
             AMAMetricaConfiguration *config = [AMAMetricaConfiguration sharedInstance];

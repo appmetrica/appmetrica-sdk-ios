@@ -68,7 +68,7 @@
 @property (nonatomic, strong) AMAStartupController *startupController;
 @property (nonatomic, strong) AMADispatchStrategiesContainer *strategiesContainer;
 @property (nonatomic, strong) AMAReportersContainer *reportersContainer;
-@property (nonatomic, strong) id<AMAAsyncExecuting> executor;
+@property (nonatomic, strong) id<AMAAsyncExecuting, AMASyncExecuting> executor;
 @property (nonatomic, strong) id<AMAHostStateProviding> stateProvider;
 
 @property (nonatomic, strong, readonly) AMAPreactivationActionHistory *preactivationActionHistory;
@@ -94,12 +94,12 @@
 
 - (instancetype)init
 {
-    id<AMAAsyncExecuting> executor = [[AMAExecutor alloc] initWithIdentifier:self];
+    AMAExecutor *executor = [[AMAExecutor alloc] initWithIdentifier:self];
     return [self initWithHostStateProvider:nil executor:executor eventPollingDelegates:nil];
 }
 
 - (instancetype)initWithHostStateProvider:(id<AMAHostStateProviding>)hostStateProvider
-                                 executor:(id<AMAAsyncExecuting>)executor
+                                 executor:(id<AMAAsyncExecuting, AMASyncExecuting>)executor
                     eventPollingDelegates:(NSArray<Class<AMAEventPollingDelegate>> *)eventPollingDelegates
 {
     self = [super init];
@@ -154,7 +154,7 @@
 
 - (void)activateWithConfiguration:(AMAAppMetricaConfiguration *)configuration
 {
-    self.apiKey = configuration.apiKey;
+    self.apiKey = configuration.APIKey;
 
     [self migrate];
     AMAReporter *reporter = [self setupReporterWithConfiguration:configuration];
@@ -336,6 +336,18 @@
     }];
 }
 
+- (NSString *)userProfileID
+{
+    return [self.executor syncExecute:^id{
+        if (self.reporter != nil) {
+            return self.reporter.userProfileID;
+        } 
+        else {
+            return self.preactivationActionHistory.userProfileID;
+        }
+    }];
+}
+
 - (void)sendEventsBuffer
 {
     [self execute:^{
@@ -365,10 +377,10 @@
 - (AMAReporter *)reporterForConfiguration:(AMAReporterConfiguration *)configuration
 {
     @synchronized(self) {
-        AMAReporter *reporter = [self.reportersContainer reporterForApiKey:configuration.apiKey];
+        AMAReporter *reporter = [self.reportersContainer reporterForApiKey:configuration.APIKey];
         if (reporter == nil) {
             AMAReporterStorage *reporterStorage =
-                [[AMAReporterStoragesContainer sharedInstance] storageForApiKey:configuration.apiKey];
+                [[AMAReporterStoragesContainer sharedInstance] storageForApiKey:configuration.APIKey];
             reporter = [self createReporterWithStorage:reporterStorage
                                                   main:NO
                                      onStorageRestored:^(AMAEventBuilder *eventBuilder) {

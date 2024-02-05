@@ -18,6 +18,8 @@ NS_ASSUME_NONNULL_BEGIN
 NS_SWIFT_NAME(AppMetricaReporting)
 @protocol AMAAppMetricaReporting  <NSObject>
 
+//MARK: - Event Reporting
+
 /** Reports a custom event.
 
  @param name Short name or description of the event.
@@ -36,7 +38,7 @@ NS_SWIFT_NAME(reportEvent(name:onFailure:));
 - (void)reportEvent:(NSString *)name
          parameters:(nullable NSDictionary *)params
           onFailure:(nullable void (^)(NSError *error))onFailure
-NS_SWIFT_NAME(reportEvent(name:params:onFailure:));
+NS_SWIFT_NAME(reportEvent(name:parameters:onFailure:));
 
 /** Sends information about the user profile.
 
@@ -44,7 +46,8 @@ NS_SWIFT_NAME(reportEvent(name:params:onFailure:));
  @param onFailure Block to be executed if an error occurs while reporting, the error is passed as block argument.
  */
 - (void)reportUserProfile:(AMAUserProfile *)userProfile
-                onFailure:(nullable void (^)(NSError *error))onFailure NS_SWIFT_NAME(report(userProfile:onFailure:));
+                onFailure:(nullable void (^)(NSError *error))onFailure
+NS_SWIFT_NAME(reportUserProfile(_:onFailure:));
 
 /** Sends information about the purchase.
 
@@ -52,43 +55,8 @@ NS_SWIFT_NAME(reportEvent(name:params:onFailure:));
  @param onFailure Block to be executed if an error occurs while reporting, the error is passed as block argument.
  */
 - (void)reportRevenue:(AMARevenueInfo *)revenueInfo
-            onFailure:(nullable void (^)(NSError *error))onFailure NS_SWIFT_NAME(report(revenue:onFailure:));
-
-/** Sets the ID of the user profile.
-
- @warning The value can contain up to 200 characters.
- @param userProfileID The custom user profile ID.
- */
-- (void)setUserProfileID:(nullable NSString *)userProfileID;
-
-/** Resumes last session or creates a new one if it has been expired.
- Should be used when auto tracking of application state is unavailable or is different.
- */
-- (void)resumeSession;
-
-/** Pauses current session.
- All events reported after calling this method and till the session timeout will still join this session.
- Should be used when auto tracking of application state is unavailable or is different.
- */
-- (void)pauseSession;
-
-/** Enables/disables data sending to the AppMetrica server.
-
- @note Disabling this option doesn't affect data sending from the main apiKey.
-
- @param enabled Flag indicating whether the data sending is enabled. By default, the sending is enabled.
- */
-- (void)setDataSendingEnabled:(BOOL)enabled;
-
-/** Sends all stored events from the buffer.
-
- AppMetrica SDK doesn't send events immediately after they occurred. It stores events data in the buffer.
- This method sends all the data from the buffer and flushes it.
- Use the method to force stored events sending after important checkpoints of user scenarios.
-
- @warning Frequent use of the method can lead to increasing outgoing internet traffic and energy consumption.
- */
-- (void)sendEventsBuffer;
+            onFailure:(nullable void (^)(NSError *error))onFailure 
+NS_SWIFT_NAME(reportRevenue(_:onFailure:));
 
 /** Sends information about the E-commerce event.
 
@@ -98,7 +66,8 @@ NS_SWIFT_NAME(reportEvent(name:params:onFailure:));
  @param onFailure Block to be executed if an error occurs while reporting, the error is passed as block argument.
  */
 - (void)reportECommerce:(AMAECommerce *)eCommerce
-              onFailure:(nullable void (^)(NSError *error))onFailure NS_SWIFT_NAME(report(eCommerce:onFailure:));
+              onFailure:(nullable void (^)(NSError *error))onFailure
+NS_SWIFT_NAME(reportECommerce(_:onFailure:));
 
 /**
  * Sends information about ad revenue.
@@ -109,7 +78,10 @@ NS_SWIFT_NAME(reportEvent(name:params:onFailure:));
  *                  the error is passed as block argument.
  */
 - (void)reportAdRevenue:(AMAAdRevenueInfo *)adRevenue
-              onFailure:(nullable void (^)(NSError *error))onFailure NS_SWIFT_NAME(report(adRevenue:onFailure:));
+              onFailure:(nullable void (^)(NSError *error))onFailure
+NS_SWIFT_NAME(reportAdRevenue(_:onFailure:));
+
+//MARK: - Web View Reporting
 
 #if !TARGET_OS_TV
 /**
@@ -145,8 +117,52 @@ NS_SWIFT_NAME(reportEvent(name:params:onFailure:));
  *                  the error is passed as block argument.
  */
 - (void)setupWebViewReporting:(id<AMAJSControlling>)controller
-                    onFailure:(nullable void (^)(NSError *error))onFailure;
+                    onFailure:(nullable void (^)(NSError *error))onFailure
+NS_SWIFT_NAME(setupWebViewReporting(with:onFailure:));
 #endif
+
+//MARK: - Session Management
+
+/** Resumes last session or creates a new one if it has been expired.
+ Should be used when auto tracking of application state is unavailable or is different.
+ */
+- (void)resumeSession;
+
+/** Pauses current session.
+ All events reported after calling this method and till the session timeout will still join this session.
+ Should be used when auto tracking of application state is unavailable or is different.
+ */
+- (void)pauseSession;
+
+//MARK: - User Profile
+
+/** Sets the ID of the user profile.
+
+ @warning The value can contain up to 200 characters.
+ */
+@property (nonatomic, strong, nullable) NSString *userProfileID;
+
+//MARK: - Data Sending and Handling
+
+/** Enables/disables data sending to the AppMetrica server.
+
+ @note Disabling this option doesn't affect data sending from the main APIKey.
+
+ @param enabled Flag indicating whether the data sending is enabled. By default, the sending is enabled.
+ */
+- (void)setDataSendingEnabled:(BOOL)enabled;
+
+/** Sends all stored events from the buffer.
+
+ AppMetrica SDK doesn't send events immediately after they occurred. It stores events data in the buffer.
+ This method sends all the data from the buffer and flushes it.
+ Use the method to force stored events sending after important checkpoints of user scenarios.
+
+ @warning Frequent use of the method can lead to increasing outgoing internet traffic and energy consumption.
+ */
+- (void)sendEventsBuffer;
+
+//MARK: - Environment
 
 /** Setting key - value data to be used as additional information, associated with all future events.
  If value is nil previously set key-value is removed, does nothing if key hasn't been added.
@@ -155,7 +171,7 @@ NS_SWIFT_NAME(reportEvent(name:params:onFailure:));
  @param key The app environment key.
  */
 - (void)setAppEnvironmentValue:(nullable NSString *)value
-                        forKey:(NSString *)key NS_SWIFT_NAME(setAppEnvironment(value:for:));
+                        forKey:(NSString *)key NS_SWIFT_NAME(setAppEnvironment(_:forKey:));
 
 /** Clearing app environment, e.g. removes all key - value data associated with all future events.
  */

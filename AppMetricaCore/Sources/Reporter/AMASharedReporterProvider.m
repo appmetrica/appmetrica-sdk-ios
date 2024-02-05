@@ -21,7 +21,7 @@
 
 - (id<AMAAppMetricaReporting>)reporter
 {
-    return [AMAAppMetrica reporterForApiKey:self.apiKey];
+    return [AMAAppMetrica reporterForAPIKey:self.apiKey];
 }
 
 @end

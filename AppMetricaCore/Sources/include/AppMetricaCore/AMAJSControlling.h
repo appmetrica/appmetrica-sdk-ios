@@ -11,8 +11,11 @@ NS_ASSUME_NONNULL_BEGIN
 NS_SWIFT_NAME(JSReporting)
 @protocol AMAJSReporting <NSObject>
 
-- (void)reportJSEvent:(NSString *)name value:(NSString *)value;
-- (void)reportJSInitEvent:(NSString *)value;
+- (void)reportJSEvent:(NSString *)name value:(NSString *)value
+NS_SWIFT_NAME(reportJSEvent(name:value:));
+
+- (void)reportJSInitEvent:(NSString *)value
+NS_SWIFT_NAME(reportJSInitEvent(value:));
 
 @end
 

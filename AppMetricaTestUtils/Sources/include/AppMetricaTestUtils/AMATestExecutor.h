@@ -4,7 +4,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 NS_SWIFT_NAME(TestDelayedManualExecutor)
-@interface AMATestDelayedManualExecutor : NSObject <AMACancelableExecuting>
+@interface AMATestDelayedManualExecutor : NSObject <AMACancelableExecuting, AMASyncExecuting>
 
 - (NSTimeInterval)delayInterval;
 
@@ -16,7 +16,7 @@ NS_SWIFT_NAME(CurrentQueueExecutor)
 @end
 
 NS_SWIFT_NAME(ManualCurrentQueueExecutor)
-@interface AMAManualCurrentQueueExecutor : NSObject <AMACancelableExecuting>
+@interface AMAManualCurrentQueueExecutor : NSObject <AMACancelableExecuting, AMASyncExecuting>
 
 @property (nonatomic, assign) BOOL executeNonDelayedBlocksImmediately;
 

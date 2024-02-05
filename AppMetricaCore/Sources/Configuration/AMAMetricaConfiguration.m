@@ -181,7 +181,7 @@ NSString *const kAMAMetricaKeychainVendorServiceIdentifier = @"io.appmetrica.ser
 {
     AMAReporterConfiguration *configuration = nil;
     @synchronized (self.reporterConfigurationLock) {
-        if ([self.appConfiguration.apiKey isEqual:apiKey]) {
+        if ([self.appConfiguration.APIKey isEqual:apiKey]) {
             configuration = self.appConfiguration;
         }
         else {
@@ -198,13 +198,13 @@ NSString *const kAMAMetricaKeychainVendorServiceIdentifier = @"io.appmetrica.ser
     }
     @synchronized (self.reporterConfigurationLock) {
         AMAReporterConfiguration *validConfiguration = [self validConfigurationForConfiguration:configuration];
-        if ([self.appConfiguration.apiKey isEqual:configuration.apiKey]) {
+        if ([self.appConfiguration.APIKey isEqual:configuration.APIKey]) {
             self.appConfiguration = [validConfiguration copy];
         }
         else {
             AMALogInfo(@"Update reporter config: old: %@, new: %@, validated: %@",
-                               _apiConfigs[configuration.apiKey], configuration, validConfiguration);
-            _apiConfigs[configuration.apiKey] = [validConfiguration copy];
+                               _apiConfigs[configuration.APIKey], configuration, validConfiguration);
+            _apiConfigs[configuration.APIKey] = [validConfiguration copy];
         }
     }
 }
@@ -214,7 +214,7 @@ NSString *const kAMAMetricaKeychainVendorServiceIdentifier = @"io.appmetrica.ser
     @synchronized (self.reporterConfigurationLock) {
         if (_appConfiguration == nil) {
             AMAMutableReporterConfiguration *newConfiguration =
-                [[AMAMutableReporterConfiguration alloc] initWithoutApiKey];
+                [[AMAMutableReporterConfiguration alloc] initWithoutAPIKey];
             newConfiguration.maxReportsCount = kAMAAutomaticReporterDefaultMaxReportsCount;
             newConfiguration.dispatchPeriod = kAMADefaultDispatchPeriodSeconds;
             newConfiguration.sessionTimeout = kAMASessionValidIntervalInSecondsDefault;
@@ -279,7 +279,7 @@ NSString *const kAMAMetricaKeychainVendorServiceIdentifier = @"io.appmetrica.ser
     }
 
     if (_apiConfigs[apiKey] == nil) {
-        _apiConfigs[apiKey] = [[AMAReporterConfiguration alloc] initWithApiKey:apiKey];
+        _apiConfigs[apiKey] = [[AMAReporterConfiguration alloc] initWithAPIKey:apiKey];
         AMALogInfo(@"Create new empty reporter config: %@", _apiConfigs[apiKey]);
     }
     return [_apiConfigs[apiKey] copy];

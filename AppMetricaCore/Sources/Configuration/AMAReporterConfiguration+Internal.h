@@ -7,7 +7,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, strong, nullable, readonly) NSNumber *dataSendingEnabledState;
 
-- (instancetype)initWithoutApiKey;
+- (instancetype)initWithoutAPIKey;
 
 @end
 
@@ -15,7 +15,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /** Application key used to initialize the configuration.
  */
-@property (nonatomic, copy, nullable) NSString *apiKey;
+@property (nonatomic, copy, nullable) NSString *APIKey;
 
 @end
 

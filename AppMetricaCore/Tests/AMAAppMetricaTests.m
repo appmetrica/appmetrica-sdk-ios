@@ -83,7 +83,7 @@ describe(@"AMAAppMetrica", ^{
         }];
     };
     void (^activate)(void) = ^{
-        [AMAAppMetrica activateWithConfiguration:[[AMAAppMetricaConfiguration alloc] initWithApiKey:apiKey]];
+        [AMAAppMetrica activateWithConfiguration:[[AMAAppMetricaConfiguration alloc] initWithAPIKey:apiKey]];
     };
     void (^stubMetricaStarted)(BOOL) = ^(BOOL started) {
         [[AMAMetricaConfiguration sharedInstance].inMemory stub:@selector(appMetricaStarted)
@@ -104,7 +104,7 @@ describe(@"AMAAppMetrica", ^{
         it(@"Should not activate if APIKey is not valid", ^{
             [[impl shouldNot] receive:@selector(activateWithConfiguration:)];
             
-            [AMAAppMetrica activateWithConfiguration:[[AMAAppMetricaConfiguration alloc] initWithApiKey:@"---"]];
+            [AMAAppMetrica activateWithConfiguration:[[AMAAppMetricaConfiguration alloc] initWithAPIKey:@"---"]];
         });
         it(@"Should not activate if APIKey is not valid", ^{
             stubMetricaStarted(YES);
@@ -123,7 +123,7 @@ describe(@"AMAAppMetrica", ^{
         it(@"Should set location to location manager", ^{
             stubMetrica();
             CLLocation *location = [[CLLocation alloc] initWithLatitude:11.0 longitude:12.0];
-            [AMAAppMetrica setLocation:location];
+            [AMAAppMetrica setCustomLocation:location];
             AMALocationManager *locationManager = [AMALocationManager sharedManager];
             [[theValue([location test_isEqualToLocation:[locationManager currentLocation]]) should] beYes];
         });
@@ -133,7 +133,7 @@ describe(@"AMAAppMetrica", ^{
             [[locationManager should] receive:@selector(setTrackLocationEnabled:)
                                 withArguments:theValue(YES)];
             
-            [AMAAppMetrica setLocationTracking:YES];
+            [AMAAppMetrica setLocationTrackingEnabled:YES];
         });
         
         it(@"Should set accurate location tracking enabled", ^{
@@ -141,7 +141,7 @@ describe(@"AMAAppMetrica", ^{
             [[locationManager should] receive:@selector(setAccurateLocationEnabled:)
                                 withArguments:theValue(YES)];
             
-            [AMAAppMetrica setAccurateLocationTracking:YES];
+            [AMAAppMetrica setAccurateLocationTrackingEnabled:YES];
         });
         
         it(@"Should set allows background location updates", ^{
@@ -185,7 +185,7 @@ describe(@"AMAAppMetrica", ^{
         });
         it(@"Should set max reports count before activateWithApiKey", ^{
             stubMetrica();
-            AMAAppMetricaConfiguration *configuration = [[AMAAppMetricaConfiguration alloc] initWithApiKey:apiKey];
+            AMAAppMetricaConfiguration *configuration = [[AMAAppMetricaConfiguration alloc] initWithAPIKey:apiKey];
             NSUInteger maxReportsCount = 3;
             configuration.maxReportsCount = maxReportsCount;
             [AMAAppMetrica activateWithConfiguration:configuration];
@@ -194,7 +194,7 @@ describe(@"AMAAppMetrica", ^{
         });
         it(@"Should set dispatch period before activateWithApiKey", ^{
             stubMetrica();
-            AMAAppMetricaConfiguration *configuration = [[AMAAppMetricaConfiguration alloc] initWithApiKey:apiKey];
+            AMAAppMetricaConfiguration *configuration = [[AMAAppMetricaConfiguration alloc] initWithAPIKey:apiKey];
             NSUInteger dispatchPeriod = 33;
             configuration.dispatchPeriod = dispatchPeriod;
             [AMAAppMetrica activateWithConfiguration:configuration];
@@ -210,7 +210,7 @@ describe(@"AMAAppMetrica", ^{
             it(@"Should set dispatch period for manual reporter", ^{
                 NSUInteger dispatchPeriod = 33;
                 AMAMutableReporterConfiguration *mutableConfig =
-                [[AMAMutableReporterConfiguration alloc] initWithApiKey:reporterApiKey];
+                [[AMAMutableReporterConfiguration alloc] initWithAPIKey:reporterApiKey];
                 mutableConfig.dispatchPeriod = dispatchPeriod;
                 [AMAAppMetrica activateReporterWithConfiguration:[mutableConfig copy]];
                 
@@ -228,7 +228,7 @@ describe(@"AMAAppMetrica", ^{
             it(@"Should set session timeout for manual reporter", ^{
                 NSUInteger newSessionTimeout = 60;
                 AMAMutableReporterConfiguration *mutableConfig =
-                [[AMAMutableReporterConfiguration alloc] initWithApiKey:reporterApiKey];
+                [[AMAMutableReporterConfiguration alloc] initWithAPIKey:reporterApiKey];
                 mutableConfig.sessionTimeout = newSessionTimeout;
                 [AMAAppMetrica activateReporterWithConfiguration:[mutableConfig copy]];
                 
@@ -241,7 +241,7 @@ describe(@"AMAAppMetrica", ^{
                 NSUInteger expectedSessionTimeout = 10;
                 
                 AMAMutableReporterConfiguration *mutableConfig =
-                [[AMAMutableReporterConfiguration alloc] initWithApiKey:reporterApiKey];
+                [[AMAMutableReporterConfiguration alloc] initWithAPIKey:reporterApiKey];
                 mutableConfig.sessionTimeout = newSessionTimeout;
                 [AMAAppMetrica activateReporterWithConfiguration:[mutableConfig copy]];
                 
@@ -257,7 +257,7 @@ describe(@"AMAAppMetrica", ^{
         beforeEach(^{
             stubMetrica();
             stubMetricaDependencies();
-            configuration = [[AMAAppMetricaConfiguration alloc] initWithApiKey:apiKey];
+            configuration = [[AMAAppMetricaConfiguration alloc] initWithAPIKey:apiKey];
         });
         it(@"Should set userStartupHosts with startupHosts", ^{
             configuration.customHosts = @[@"value1", @"value2"];
@@ -278,13 +278,13 @@ describe(@"AMAAppMetrica", ^{
         });
         it(@"Should not call impl if metrica is not started", ^{
             [[mockedImpl shouldNot] receive:@selector(reportUrl:ofType:isAuto:)];
-            [AMAAppMetrica handleOpenURL:URL];
+            [AMAAppMetrica trackOpeningURL:URL];
         });
         it(@"Should call impl with URL of type \"open\"", ^{
             activate();
             [[mockedImpl should] receive:@selector(reportUrl:ofType:isAuto:)
                            withArguments:URL, @"open", theValue(NO)];
-            [AMAAppMetrica handleOpenURL:URL];
+            [AMAAppMetrica trackOpeningURL:URL];
         });
     });
     context(@"Referral URL handling", ^{
@@ -298,14 +298,14 @@ describe(@"AMAAppMetrica", ^{
         it(@"Should not call impl if metrica is not started", ^{
             [[mockedImpl shouldNot] receive:@selector(reportUrl:ofType:isAuto:)];
             
-            [AMAAppMetrica reportReferralUrl:url];
+            [AMAAppMetrica trackReferralURL:url];
         });
         it(@"Should call impl with URL of type \"referral\"", ^{
             activate();
             [[mockedImpl should] receive:@selector(reportUrl:ofType:isAuto:)
                            withArguments:url, @"referral", theValue(NO)];
             
-            [AMAAppMetrica reportReferralUrl:url];
+            [AMAAppMetrica trackReferralURL:url];
         });
     });
     
@@ -347,7 +347,7 @@ describe(@"AMAAppMetrica", ^{
                 
                 AMAIgnoreAssert(^{
                     AMAAppMetricaConfiguration *configuration =
-                    [[AMAAppMetricaConfiguration alloc] initWithApiKey:@"550e8400-e29b-41d4-a716-446655440001"];
+                    [[AMAAppMetricaConfiguration alloc] initWithAPIKey:@"550e8400-e29b-41d4-a716-446655440001"];
                     [AMAAppMetrica activateWithConfiguration:configuration];
                 });
                 
@@ -356,7 +356,7 @@ describe(@"AMAAppMetrica", ^{
             it(@"Should allow getting manual reporter for main api key", ^{
                 activate();
                 
-                id reporter = [AMAAppMetrica reporterForApiKey:apiKey];
+                id reporter = [AMAAppMetrica reporterForAPIKey:apiKey];
                 [[reporter should] beNonNil];
             });
         });
@@ -778,20 +778,20 @@ describe(@"AMAAppMetrica", ^{
             });
             it(@"Should invoke reporterForApiKey: for reporter", ^{
                 BOOL __block result = NO;
-                [AMAAppMetrica stub:@selector(reporterForApiKey:) withBlock:^id(NSArray *params) {
+                [AMAAppMetrica stub:@selector(reporterForAPIKey:) withBlock:^id(NSArray *params) {
                     result = YES;
                     return nil;
                 }];
                 
-                [AMAAppMetrica reporterForApiKey:apiKey];
+                [AMAAppMetrica reporterForAPIKey:apiKey];
                 [[theValue(result) should] beYes];
             });
             it(@"Should return the same result as reporterForApiKey:", ^{
                 NSObject *returnObject = [NSObject new];
-                [AMAAppMetrica stub:@selector(reporterForApiKey:) andReturn:returnObject];
+                [AMAAppMetrica stub:@selector(reporterForAPIKey:) andReturn:returnObject];
                 
                 BOOL result =
-                [AMAAppMetrica reporterForApiKey:apiKey] == [AMAAppMetrica reporterForApiKey:apiKey];
+                [AMAAppMetrica reporterForAPIKey:apiKey] == [AMAAppMetrica reporterForAPIKey:apiKey];
                 [[theValue(result) should] beYes];
             });
         });
@@ -824,7 +824,7 @@ describe(@"AMAAppMetrica", ^{
                     [[theValue(result) should] equal:theValue(1)];
                 });
                 it(@"Should return nil for uuid", ^{
-                    [[[AMAAppMetrica uuid] should] beNil];
+                    [[[AMAAppMetrica UUID] should] beNil];
                 });
                 it(@"Should return nil for deviceID", ^{
                     [[[AMAAppMetrica deviceID] should] beNil];
@@ -865,7 +865,7 @@ describe(@"AMAAppMetrica", ^{
                     }];
                 });
                 it(@"Should return uuid", ^{
-                    [[[AMAAppMetrica uuid] should] equal:uuid];
+                    [[[AMAAppMetrica UUID] should] equal:uuid];
                 });
                 it(@"Should return deviceID", ^{
                     [[[AMAAppMetrica deviceID] should] equal:deviceID];
@@ -895,7 +895,7 @@ describe(@"AMAAppMetrica", ^{
                     }];
                 });
                 it(@"Should return UUID sync", ^{
-                    [[[AMAAppMetrica uuid] should] equal:uuid];
+                    [[[AMAAppMetrica UUID] should] equal:uuid];
                 });
                 it(@"Should return deviceID sync", ^{
                     [[[AMAAppMetrica deviceID] should] equal:deviceID];
@@ -1091,7 +1091,7 @@ describe(@"AMAAppMetrica", ^{
                 activate();
                 
                 id extendedReporter = [AMAAppMetrica extendedReporterForApiKey:apiKey];
-                id reporter = [AMAAppMetrica reporterForApiKey:apiKey];
+                id reporter = [AMAAppMetrica reporterForAPIKey:apiKey];
                 
                 [[extendedReporter should] beNonNil];
                 [[extendedReporter should] equal:reporter];
@@ -1110,7 +1110,7 @@ describe(@"AMAAppMetrica", ^{
     
                 [[[AMAMetricaConfiguration sharedInstance].inMemory should] receive:@selector(markExternalServicesConfigured)];
                 
-                [AMAAppMetrica activateReporterWithConfiguration:[[AMAReporterConfiguration alloc] initWithApiKey:apiKey]];
+                [AMAAppMetrica activateReporterWithConfiguration:[[AMAReporterConfiguration alloc] initWithAPIKey:apiKey]];
             });
             it(@"Should not setup external services on main activation if already configured", ^{
                 stubMetricaStarted(NO);
@@ -1132,7 +1132,7 @@ describe(@"AMAAppMetrica", ^{
                 [[impl shouldNot] receive:@selector(setExtendedReporterStorageControllers:)];
                 [[adProvider shouldNot] receive:@selector(setupAdProvider:)];
                 
-                [AMAAppMetrica activateReporterWithConfiguration:[[AMAReporterConfiguration alloc] initWithApiKey:apiKey]];
+                [AMAAppMetrica activateReporterWithConfiguration:[[AMAReporterConfiguration alloc] initWithAPIKey:apiKey]];
             });
             context(@"Service Configuration", ^{
                 context(@"Startup observer", ^{
@@ -1161,7 +1161,7 @@ describe(@"AMAAppMetrica", ^{
                         
                         [[impl should] receive:@selector(setExtendedStartupObservers:)];
                         
-                        [AMAAppMetrica activateReporterWithConfiguration:[[AMAReporterConfiguration alloc] initWithApiKey:apiKey]];
+                        [AMAAppMetrica activateReporterWithConfiguration:[[AMAReporterConfiguration alloc] initWithAPIKey:apiKey]];
                         
                         [[spy.argument should] equal:[NSMutableSet setWithObject:startupObserver]];
                     });
@@ -1192,7 +1192,7 @@ describe(@"AMAAppMetrica", ^{
                         
                         [[impl should] receive:@selector(setExtendedReporterStorageControllers:)];
                         
-                        [AMAAppMetrica activateReporterWithConfiguration:[[AMAReporterConfiguration alloc] initWithApiKey:apiKey]];
+                        [AMAAppMetrica activateReporterWithConfiguration:[[AMAReporterConfiguration alloc] initWithAPIKey:apiKey]];
                         
                         [[spy.argument should] equal:[NSMutableSet setWithObject:reporterStorageController]];
                     });
@@ -1214,7 +1214,7 @@ describe(@"AMAAppMetrica", ^{
 
                 [[adProvider should] receive:@selector(setupAdProvider:) withArguments:adController];
 
-                [AMAAppMetrica activateReporterWithConfiguration:[[AMAReporterConfiguration alloc] initWithApiKey:apiKey]];
+                [AMAAppMetrica activateReporterWithConfiguration:[[AMAReporterConfiguration alloc] initWithAPIKey:apiKey]];
             });
             it(@"Should return yes if api key is valid", ^{
                 [AMAIdentifierValidator stub:@selector(isValidUUIDKey:) andReturn:theValue(YES)];
@@ -1224,7 +1224,7 @@ describe(@"AMAAppMetrica", ^{
             it(@"Should return yes if AppMetrica started", ^{
                 stubMetricaStarted(YES);
                 
-                [[theValue([AMAAppMetrica isAppMetricaStarted]) should] beYes];
+                [[theValue([AMAAppMetrica isActivated]) should] beYes];
             });
             it(@"Should return yes if reporter is created for api key", ^{
                 [[AMAMetricaConfiguration sharedInstance].inMemory stub:@selector(appMetricaImplCreated)

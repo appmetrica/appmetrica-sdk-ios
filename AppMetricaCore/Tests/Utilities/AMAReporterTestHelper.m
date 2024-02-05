@@ -139,13 +139,13 @@
                              inMemory:(BOOL)inMemory
                           preloadInfo:(AMAAppMetricaPreloadInfo *)preloadInfo
 {
-    id<AMACancelableExecuting> executor = isAsync ? nil : [AMATestDelayedManualExecutor new];
+    id<AMACancelableExecuting, AMASyncExecuting> executor = isAsync ? nil : [AMATestDelayedManualExecutor new];
     return [self appReporterForApiKey:apiKey main:main executor:executor inMemory:inMemory preloadInfo:preloadInfo attributionCheckExecutor:nil];
 }
 
 - (AMAReporter *)appReporterForApiKey:(NSString *)apiKey
                                  main:(BOOL)main
-                             executor:(id<AMACancelableExecuting>)executor
+                             executor:(id<AMACancelableExecuting, AMASyncExecuting>)executor
                              inMemory:(BOOL)inMemory
                           preloadInfo:(AMAAppMetricaPreloadInfo *)preloadInfo
              attributionCheckExecutor:(id<AMAAsyncExecuting>)attributionCheckExecutor

@@ -838,6 +838,8 @@ describe(@"AMAReporter", ^{
                 NSTimeInterval delayInterval = executor.delayInterval;
                 [[theValue(delayInterval) should] equal:updateSessionInterval withDelta:floatingComparisonDelta];
             });
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wnonnull"
             it(@"Should update session stamp automatically when active", ^{
                 AMAReporter *reporter = createReporterAndStubUpdateInterval();
                 [reporter reportEvent:lastEventName onFailure:nil];
@@ -893,6 +895,7 @@ describe(@"AMAReporter", ^{
 
                 [[theValue(pauteTimeInterval) should] equal:shutdownInterval withDelta:floatingComparisonDelta];
             });
+#pragma clang diagnostic pop
         });
     });
     context(@"Finishes session automatically with correct EVENT_ALIVE offset", ^{
@@ -1110,6 +1113,13 @@ describe(@"AMAReporter", ^{
             AMABinaryEventValue *value = (AMABinaryEventValue *)event.value;
             [[value.data should] equal:serializedData];
         });
+        it(@"Should be nil profileID by default", ^{
+            [[reporter.userProfileID should] beNil];
+        });
+        it(@"Should preserve profileID", ^{
+            reporter.userProfileID = @"new";
+            [[reporter.userProfileID should] equal:@"new"];
+        });
         it(@"Should send PROFILE event on profileID change", ^{
             [reporter setUserProfileID:@"new"];
             events = [eventStorage() amatest_allSavedEventsWithType:AMAEventTypeProfile name:nil];
@@ -1120,6 +1130,11 @@ describe(@"AMAReporter", ^{
             [reporter setUserProfileID:@"profileID"];
             events = [eventStorage() amatest_allSavedEventsWithType:AMAEventTypeProfile name:nil];
             [[theValue(events.count) should] equal:theValue(1)];
+        });
+        it(@"Should not send PROFILE event on profileID read", ^{
+            __unused NSString *profileID = reporter.userProfileID;
+            events = [eventStorage() amatest_allSavedEventsWithType:AMAEventTypeProfile name:nil];
+            [[theValue(events.count) should] beZero];
         });
     });
     context(@"Sends REVENUE events", ^{
@@ -1658,7 +1673,7 @@ describe(@"AMAReporter", ^{
 
     context(@"WebViewReporting", ^{
         it(@"Should init web view reporting", ^{
-            [AMAAppMetrica stub:@selector(isAppMetricaStarted) andReturn:theValue(YES)];
+            [AMAAppMetrica stub:@selector(isActivated) andReturn:theValue(YES)];
             AMAReporter *reporter = [reporterTestHelper appReporterForApiKey:apiKey];
 
             [[jsController should] receive:@selector(setUpWebViewReporting:withReporter:)
@@ -1668,7 +1683,7 @@ describe(@"AMAReporter", ^{
         });
 
         it(@"Should not init web view reporting if metrica not started", ^{
-            [AMAAppMetrica stub:@selector(isAppMetricaStarted) andReturn:theValue(NO)];
+            [AMAAppMetrica stub:@selector(isActivated) andReturn:theValue(NO)];
             AMAReporter *reporter = [reporterTestHelper appReporterForApiKey:apiKey];
 
             [[jsController shouldNot] receive:@selector(setUpWebViewReporting:withReporter:)];

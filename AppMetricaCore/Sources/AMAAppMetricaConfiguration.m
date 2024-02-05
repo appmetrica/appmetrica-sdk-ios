@@ -7,7 +7,7 @@
 
 @interface AMAAppMetricaConfiguration ()
 
-@property (nonatomic, copy, readwrite) NSString *apiKey;
+@property (nonatomic, copy, readwrite) NSString *APIKey;
 @property (nonatomic, strong, nullable) NSNumber *locationTrackingState;
 @property (nonatomic, strong, nullable) NSNumber *dataSendingEnabledState;
 
@@ -15,17 +15,17 @@
 
 @implementation AMAAppMetricaConfiguration
 
-- (instancetype)initWithApiKey:(NSString *)apiKey
+- (instancetype)initWithAPIKey:(NSString *)APIKey
 {
     self = [super init];
     if (self != nil) {
-        BOOL isKeyValid = [AMAIdentifierValidator isValidUUIDKey:apiKey];
+        BOOL isKeyValid = [AMAIdentifierValidator isValidUUIDKey:APIKey];
         if (isKeyValid) {
-            _apiKey = [apiKey copy];
+            _APIKey = [APIKey copy];
             [self setDefaultValues];
         }
         else {
-            [AMAErrorLogger logInvalidApiKeyError:apiKey];
+            [AMAErrorLogger logInvalidApiKeyError:APIKey];
             self = nil;
         }
     }
@@ -40,8 +40,8 @@
     _locationTrackingState = nil;
     _dataSendingEnabledState = nil;
     _accurateLocationTracking = NO;
-    _location = nil;
-    _logs = NO;
+    _customLocation = nil;
+    _logsEnabled = NO;
     _sessionTimeout = kAMASessionValidIntervalInSecondsDefault;
     _dispatchPeriod = kAMADefaultDispatchPeriodSeconds;
     _maxReportsCount = kAMAAutomaticReporterDefaultMaxReportsCount;

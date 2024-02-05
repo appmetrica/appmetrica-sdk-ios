@@ -45,7 +45,7 @@
 
 @property (nonatomic, copy) NSString *apiKey;
 @property (nonatomic, strong) AMAEventBuilder *eventBuilder;
-@property (nonatomic, strong) id<AMACancelableExecuting> executor;
+@property (nonatomic, strong) id<AMACancelableExecuting, AMASyncExecuting> executor;
 @property (nonatomic, strong) id<AMAAsyncExecuting> attributionCheckExecutor;
 @property (nonatomic, assign) BOOL isActive;
 @property (nonatomic, strong) AMAUserProfileUpdatesProcessor *userProfileUpdatesProcessor;
@@ -68,7 +68,7 @@
               internalReporter:(AMAInternalEventsReporter *)internalReporter
       attributionCheckExecutor:(id<AMAAsyncExecuting>)attributionCheckExecutor
 {
-    id<AMACancelableExecuting> executor = [[AMACancelableDelayedExecutor alloc] initWithIdentifier:self];
+    AMACancelableDelayedExecutor *executor = [[AMACancelableDelayedExecutor alloc] initWithIdentifier:self];
 
     AMAAdServicesDataProvider *adServicesDataProvider = nil;
     if (@available(iOS 14.3, *)) {
@@ -97,7 +97,7 @@
                reporterStorage:(AMAReporterStorage *)reporterStorage
                   eventBuilder:(AMAEventBuilder *)eventBuilder
               internalReporter:(AMAInternalEventsReporter *)internalReporter
-                      executor:(id<AMACancelableExecuting>)executor
+                      executor:(id<AMACancelableExecuting, AMASyncExecuting>)executor
       attributionCheckExecutor:(id<AMAAsyncExecuting>)attributionCheckExecutor
            eCommerceSerializer:(AMAECommerceSerializer *)eCommerceSerializer
             eCommerceTruncator:(AMAECommerceTruncator *)eCommerceTruncator
@@ -653,6 +653,13 @@
     }];
 }
 
+- (NSString *)userProfileID
+{
+    return [self.executor syncExecute:^id {
+        return self.reporterStorage.stateStorage.profileID;
+    }];
+}
+
 - (void)reportPermissionsEventWithPermissions:(NSString *)permissions
                                     onFailure:(void (^)(NSError *error))onFailure
 {
@@ -679,7 +686,7 @@
 - (void)setupWebViewReporting:(id<AMAJSControlling>)controller
                     onFailure:(nullable void (^)(NSError *error))onFailure
 {
-    if ([AMAAppMetrica isAppMetricaStarted] == NO) {
+    if ([AMAAppMetrica isActivated] == NO) {
         [AMAErrorLogger logAppMetricaNotStartedErrorWithOnFailure:onFailure];
         return;
     }
@@ -912,7 +919,7 @@
         NSError *error = nil;
         NSString *token = [self.adServices tokenWithError:&error];
 
-        AMAReporter *sdkReporter = (AMAReporter *)[AMAAppMetrica reporterForApiKey:kAMAMetricaLibraryApiKey];
+        AMAReporter *sdkReporter = (AMAReporter *)[AMAAppMetrica reporterForAPIKey:kAMAMetricaLibraryApiKey];
         if (token != nil) {
             initAdditionalParams[@"asaToken"] = token;
             [sdkReporter reportEvent:@"AppleSearchAdsTokenSuccess" onFailure:nil]; //TODO: Move to proper place

@@ -8,11 +8,11 @@ NS_SWIFT_NAME(ReporterConfiguration)
 
 /** Application key used to initialize the configuration.
  */
-@property (nonatomic, copy, nullable, readonly) NSString *apiKey;
+@property (nonatomic, copy, nullable, readonly) NSString *APIKey;
 
 /** A boolean value indicating whether data sending to the AppMetrica server is enabled.
 
- @note Disabling this option doesn't affect data sending from the main apiKey.
+ @note Disabling this option doesn't affect data sending from the main APIKey.
 
  By default, the data sending is enabled.
  */
@@ -33,8 +33,8 @@ NS_SWIFT_NAME(ReporterConfiguration)
  trims it to closest border value.
 
  @note Different apiKeys use different databases and can have different limits of reports count.
- The parameter only affects the configuration created for that apiKey.
- To set the parameter for the main apiKey, see `AMAAppMetricaConfiguration.maxReportsInDatabaseCount`.
+ The parameter only affects the configuration created for that APIKey.
+ To set the parameter for the main APIKey, see `AMAAppMetricaConfiguration.maxReportsInDatabaseCount`.
 
  By default, the parameter value is 1000.
  */
@@ -46,7 +46,7 @@ NS_SWIFT_NAME(ReporterConfiguration)
 
 /** Logging activation status.
  */
-@property (nonatomic, assign, readonly) BOOL logs;
+@property (nonatomic, assign, readonly, getter=areLogsEnabled) BOOL logsEnabled;
 
 /** Sets the ID of the user profile.
 
@@ -56,11 +56,11 @@ NS_SWIFT_NAME(ReporterConfiguration)
 
 /** Initialize configuration with specified Application key.
 
- @param apiKey Application key that is issued during application registration in AppMetrica.
+ @param APIKey Application key that is issued during application registration in AppMetrica.
  Application key must be a hexadecimal string in format xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx.
  The key can be requested or checked at https://appmetrica.io
  */
-- (nullable instancetype)initWithApiKey:(NSString *)apiKey;
+- (nullable instancetype)initWithAPIKey:(NSString *)APIKey;
 
 - (instancetype)init NS_UNAVAILABLE;
 + (instancetype)new NS_UNAVAILABLE;
@@ -72,7 +72,7 @@ NS_SWIFT_NAME(MutableReporterConfiguration)
 
 /** A boolean value indicating whether data sending to the AppMetrica server is enabled.
 
- @note Disabling this option doesn't affect data sending from the main apiKey.
+ @note Disabling this option doesn't affect data sending from the main APIKey.
 
  By default, the data sending is enabled.
  */
@@ -93,8 +93,8 @@ NS_SWIFT_NAME(MutableReporterConfiguration)
  trims it to closest border value.
 
  @note Different apiKeys use different databases and can have different limits of reports count.
- The parameter only affects the configuration created for that apiKey.
- To set the parameter for the main apiKey, see `AMAAppMetricaConfiguration.maxReportsInDatabaseCount`.
+ The parameter only affects the configuration created for that APIKey.
+ To set the parameter for the main APIKey, see `AMAAppMetricaConfiguration.maxReportsInDatabaseCount`.
 
  By default, the parameter value is 1000.
  */
@@ -108,7 +108,7 @@ NS_SWIFT_NAME(MutableReporterConfiguration)
 
  By default logging is disabled.
  */
-@property (nonatomic, assign) BOOL logs;
+@property (nonatomic, assign, getter=areLogsEnabled) BOOL logsEnabled;
 
 /** Sets the ID of the user profile.
 

@@ -34,6 +34,7 @@ NS_SWIFT_NAME(UserProfile)
 
 /** Mutable version of the `AMAUserProfile` class.
  */
+NS_SWIFT_NAME(MutableUserProfile)
 @interface AMAMutableUserProfile : AMAUserProfile
 
 /** Applies single user profile update.

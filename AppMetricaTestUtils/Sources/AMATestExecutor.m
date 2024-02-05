@@ -32,6 +32,11 @@
     }
 }
 
+- (nullable id)syncExecute:(nonnull id  _Nullable (^)(void))block
+{
+    return block();
+}
+
 @end
 
 #pragma mark - current queue
@@ -90,6 +95,11 @@
             }
         }
     }
+}
+
+- (nullable id)syncExecute:(nonnull id  _Nullable (^)(void))block 
+{
+    return block();
 }
 
 - (void)execute

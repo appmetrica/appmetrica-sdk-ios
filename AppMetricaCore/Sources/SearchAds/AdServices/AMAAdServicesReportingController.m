@@ -58,7 +58,7 @@ static NSTimeInterval const kAMAASADefaultEndInterval = 604800.0;
         NSString *token = [self.dataProvider tokenWithError:&error];
         
         if (token != nil) {
-            AMAReporter *reporter = (AMAReporter *)[AMAAppMetrica reporterForApiKey:self.apiKey];
+            AMAReporter *reporter = (AMAReporter *)[AMAAppMetrica reporterForAPIKey:self.apiKey];
             [reporter reportASATokenEventWithParameters:@{ @"asaToken" : token } onFailure:nil];
             [[AMAAppMetrica sharedInternalEventsReporter] reportSearchAdsTokenSuccess];
             [self.reporterStorage markASATokenSentNow];

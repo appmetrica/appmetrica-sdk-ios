@@ -9,6 +9,7 @@
 @protocol AMACancelableExecuting;
 @protocol AMADatabaseProtocol;
 @protocol AMAAsyncExecuting;
+@protocol AMASyncExecuting;
 
 @interface AMAReporterTestHelper : NSObject
 
@@ -41,7 +42,7 @@
                           preloadInfo:(AMAAppMetricaPreloadInfo *)preloadInfo;
 - (AMAReporter *)appReporterForApiKey:(NSString *)apiKey
                                  main:(BOOL)main
-                             executor:(id<AMACancelableExecuting>)executor
+                             executor:(id<AMACancelableExecuting, AMASyncExecuting>)executor
                              inMemory:(BOOL)inMemory
                           preloadInfo:(AMAAppMetricaPreloadInfo *)preloadInfo
              attributionCheckExecutor:(id<AMAAsyncExecuting>)attributionCheckExecutor;
