@@ -42,7 +42,6 @@ let package = Package(
     ],
     products: [
         .library(name: "AppMetricaAnalytics", targets: [AppMetricaTarget.core.name,
-                                                        AppMetricaTarget.coreExtension.name,
                                                         AppMetricaTarget.adSupport.name,
                                                         AppMetricaTarget.webKit.name,
                                                         AppMetricaTarget.crashes.name]),
