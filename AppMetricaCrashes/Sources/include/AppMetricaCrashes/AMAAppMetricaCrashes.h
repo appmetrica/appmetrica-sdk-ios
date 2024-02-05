@@ -145,6 +145,30 @@ NS_SWIFT_NAME(AppMetricaCrashes)
 - (void)requestCrashReportingStateWithCompletionQueue:(dispatch_queue_t)completionQueue
                                       completionBlock:(AMACrashReportingStateCompletionBlock)completionBlock;
 
+/** Enable ANR monitoring with default parameters.
+ 
+ Default parameters:
+ - `watchdog` interval 4 seconds,
+ - `ping` interval 0.1 second.
+ 
+ @note Use this method to enable ANR monitoring only after the activation.
+ Use the applicationNotRespondingDetection property of AMAAppMetricaCrashesConfiguration if you want to enable
+ ANR monitoring at the time of activation.
+ */
+- (void)enableANRMonitoring;
+
+/** Enable ANR monitoring.
+ Use this method to enable ANR monitoring only after the activation.
+ 
+ @param watchdog Time interval the watchdog queue would wait for the main queue response before report ANR.
+ @param ping Time interval the watchdog queue would ping the main queue.
+ 
+ @note Use the `applicationNotRespondingDetection` property of `AMAAppMetricaCrashesConfiguration` if you want to enable
+ ANR monitoring during the activation.
+ @warning A small `ping` value can lead to poor performance.
+ */
+- (void)enableANRMonitoringWithWatchdogInterval:(NSTimeInterval)watchdog pingInterval:(NSTimeInterval)ping;
+
 /** Returns id<AMAAppMetricaCrashReporting> that can send errors to specific API key.
 
  @param apiKey Api key to send events to.

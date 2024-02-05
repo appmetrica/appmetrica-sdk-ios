@@ -210,6 +210,18 @@
     return self.pluginsImpl;
 }
 
+- (void)enableANRMonitoring
+{
+    [self enableANRMonitoringWithWatchdogInterval:4.0 pingInterval:0.1];
+}
+
+- (void)enableANRMonitoringWithWatchdogInterval:(NSTimeInterval)watchdog pingInterval:(NSTimeInterval)ping
+{
+    if (self.isActivated) {
+        [self enableANRWatchdogWithWatchdogInterval:watchdog pingInterval:ping];
+    }
+}
+
 #pragma mark - Internal -
 
 - (void)activate
