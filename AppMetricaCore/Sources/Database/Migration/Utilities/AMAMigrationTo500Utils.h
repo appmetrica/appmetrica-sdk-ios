@@ -34,4 +34,6 @@ extern NSString *const kAMAMigrationDeviceIDHashStorageKey;
 + (void)migrateDeviceIDFromDB:(AMAFMDatabase *)db;
 + (void)migrateUUID;
 
++ (void)migrateCrashReportsIfNeeded;
+
 @end

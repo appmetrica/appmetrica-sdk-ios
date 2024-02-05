@@ -21,7 +21,6 @@
 #import "AMAEventNameHashesStorageFactory+Migration.h"
 #import "AMAReporterDatabaseEncodersFactory+Migration.h"
 #import "AMALocationEncoderFactory+Migration.h"
-
 #import "AMAMetricaPersistentConfiguration.h"
 #import "AMAFallbackKeychain.h"
 #import <AppMetricaPlatform/AppMetricaPlatform.h>
@@ -349,5 +348,40 @@ NSString *const kAMAMigrationDeviceIDHashStorageKey = @"YMMMetricaPersistentConf
     };
 }
 
-@end
+#pragma mark - Crash reports
 
++ (NSString *)crashReportsWithBundleName:(NSString *)bundleName
+{
+    NSArray *cachePaths = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
+    NSString *cachePath = [cachePaths firstObject];
+    NSString *directoryName = [bundleName stringByAppendingString:@".CrashReports"];
+    return [cachePath stringByAppendingPathComponent:directoryName];
+}
+
++ (void)migrateCrashReportsIfNeeded
+{
+    NSString *oldDirectoryPath = [self crashReportsWithBundleName:kAMAMigrationBundle];
+    NSString *newDirectoryPath = [self crashReportsWithBundleName:[AMAPlatformDescription SDKBundleName]];
+    
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+
+    if (![fileManager fileExistsAtPath:oldDirectoryPath]) {
+        AMALogWarn(@"There are no migration crash reports found");
+        return;
+    }
+
+    if ([fileManager fileExistsAtPath:newDirectoryPath]) {
+        AMALogWarn(@"New crash reports directory already exists");
+        return;
+    }
+
+    NSError *error;
+    if (![fileManager moveItemAtPath:oldDirectoryPath toPath:newDirectoryPath error:&error]) {
+        AMALogWarn(@"Failed to move crash reports from %@ to %@: %@", oldDirectoryPath, newDirectoryPath, error);
+    } else {
+        AMALogWarn(@"Successfully moved crash reports from %@ to %@", oldDirectoryPath, newDirectoryPath);
+        [AMAFileUtility deleteFileAtPath:oldDirectoryPath];
+    }
+}
+
+@end

@@ -57,6 +57,12 @@
 #import "AMAStartupParametersConfiguration.h"
 #import "AMADatabaseHelper.h"
 
+@interface AMAMigrationTo500Utils ()
+
++ (NSString *)crashReportsWithBundleName:(NSString *)bundleName;
+
+@end
+
 SPEC_BEGIN(AMADatabaseMigrationTo500Tests)
 
 describe(@"AMADatabaseMigrationTo500Tests", ^{
@@ -129,7 +135,7 @@ describe(@"AMADatabaseMigrationTo500Tests", ^{
                     [storage saveString:adUrl forKey:@"get_ad.host" error:nil];
                 }];
             });
-            
+
             it(@"Should migrate kv table", ^{
                 id<AMADatabaseProtocol> newDB = [AMADatabaseFactory configurationDatabase];
                 [newDB inDatabase:^(AMAFMDatabase *db) {
@@ -260,6 +266,34 @@ describe(@"AMADatabaseMigrationTo500Tests", ^{
                     }];
                 });
             });
+            
+            it(@"Should migrate crash reports directory", ^{
+                NSFileManager *fileManager = [NSFileManager defaultManager];
+                NSString *oldDirPath = [AMAMigrationTo500Utils crashReportsWithBundleName:kAMAMigrationBundle];
+                NSString *newDirPath = [AMAMigrationTo500Utils crashReportsWithBundleName:[AMAPlatformDescription SDKBundleName]];
+                
+                [AMAFileUtility deleteFileAtPath:oldDirPath];
+                [AMAFileUtility deleteFileAtPath:newDirPath];
+                
+                [[theValue([fileManager fileExistsAtPath:newDirPath]) should] beNo];
+                
+                [fileManager createDirectoryAtPath:oldDirPath
+                       withIntermediateDirectories:YES
+                                        attributes:nil
+                                             error:nil];
+                
+                id<AMADatabaseProtocol> newDB = [AMADatabaseFactory configurationDatabase];
+                
+                [newDB inDatabase:^(AMAFMDatabase *db) {
+                    id<AMAKeyValueStoring> storage = [newDB.storageProvider storageForDB:db];
+                    
+                    [[[storage stringForKey:AMAStorageStringKeyDidApplyDataMigrationFor500 error:nil] should] equal:@"1"];
+                }];
+                
+                [[theValue([fileManager fileExistsAtPath:oldDirPath]) should] beNo];
+                [[theValue([fileManager fileExistsAtPath:newDirPath]) should] beYes];
+            });
+            
         });
         
         context(@"Reporter data migration", ^{

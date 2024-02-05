@@ -34,6 +34,8 @@
         }];
         
         [self migrateExtendedStartupParametersIfNeeded:database];
+        
+        [AMAMigrationTo500Utils migrateCrashReportsIfNeeded];
     }
 }
 
