@@ -9,6 +9,7 @@
 #import "AMACrashEventType.h"
 #import "AMAErrorModelFactory.h"
 #import "AMAPluginErrorDetails.h"
+#import "AMAErrorEnvironment.h"
 
 static NSString *const kAppMetricaLibraryAPIKey = @"20799a27-fa80-4b36-b2db-0f8141f24180";
 
@@ -19,7 +20,7 @@ static NSString *const kAppMetricaLibraryAPIKey = @"20799a27-fa80-4b36-b2db-0f81
 @property (nonatomic, strong, readonly) AMAErrorModelFactory *errorModelFactory;
 @property (nonatomic, copy, readonly) NSString *apiKey;
 
-@property (nonatomic, strong) AMAEnvironmentContainer *errorEnvironment;
+@property (nonatomic, strong) AMAErrorEnvironment *errorEnvironment;
 
 @end
 
@@ -27,12 +28,17 @@ static NSString *const kAppMetricaLibraryAPIKey = @"20799a27-fa80-4b36-b2db-0f81
 
 - (instancetype)initWithApiKey:(NSString *)apiKey
 {
+    return [self initWithApiKey:apiKey errorEnvironment:[[AMAErrorEnvironment alloc] init]];
+}
+
+- (instancetype)initWithApiKey:(NSString *)apiKey errorEnvironment:(AMAErrorEnvironment *)errorEnvironment
+{
     self = [super init];
     if (self != nil) {
         _apiKey = apiKey;
         _libraryErrorReporter = [AMAAppMetrica reporterForAPIKey:kAppMetricaLibraryAPIKey];
         _exceptionFormatter = [[AMAExceptionFormatter alloc] init];
-        _errorEnvironment = [[AMAEnvironmentContainer alloc] init];
+        _errorEnvironment = errorEnvironment;
         _errorModelFactory = [AMAErrorModelFactory sharedInstance];
     }
     return self;
@@ -103,7 +109,7 @@ static NSString *const kAppMetricaLibraryAPIKey = @"20799a27-fa80-4b36-b2db-0f81
                                    data:formattedData
                                    name:errorDetails.exceptionClass
                                 gZipped:YES
-                       eventEnvironment:self.errorEnvironment.dictionaryEnvironment
+                       eventEnvironment:self.errorEnvironment.currentEnvironment
                          appEnvironment:nil
                                  extras:nil
                          bytesTruncated:bytesTruncated
@@ -132,7 +138,7 @@ static NSString *const kAppMetricaLibraryAPIKey = @"20799a27-fa80-4b36-b2db-0f81
                                    data:formattedData
                                    name:message
                                 gZipped:YES
-                       eventEnvironment:self.errorEnvironment.dictionaryEnvironment
+                       eventEnvironment:self.errorEnvironment.currentEnvironment
                          appEnvironment:nil
                                  extras:nil
                          bytesTruncated:bytesTruncated
@@ -163,7 +169,7 @@ static NSString *const kAppMetricaLibraryAPIKey = @"20799a27-fa80-4b36-b2db-0f81
                                    data:formattedData
                                    name:message
                                 gZipped:YES
-                       eventEnvironment:self.errorEnvironment.dictionaryEnvironment
+                       eventEnvironment:self.errorEnvironment.currentEnvironment
                          appEnvironment:nil
                                  extras:nil
                          bytesTruncated:bytesTruncated
@@ -264,7 +270,7 @@ static NSString *const kAppMetricaLibraryAPIKey = @"20799a27-fa80-4b36-b2db-0f81
                                    data:formattedData
                                    name:nil
                                 gZipped:YES
-                       eventEnvironment:self.errorEnvironment.dictionaryEnvironment
+                       eventEnvironment:self.errorEnvironment.currentEnvironment
                          appEnvironment:nil
                                  extras:nil
                          bytesTruncated:0

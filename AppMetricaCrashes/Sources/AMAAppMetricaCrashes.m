@@ -126,7 +126,7 @@
 {
     id<AMAAppMetricaCrashReporting> crashReporter = [self.reportersContainer reporterForAPIKey:apiKey];
     if (crashReporter == nil) {
-        crashReporter = [[AMACrashReporter alloc] initWithApiKey:apiKey];
+        crashReporter = [[AMACrashReporter alloc] initWithApiKey:apiKey errorEnvironment:self.errorEnvironment];
         [self.reportersContainer setReporter:crashReporter forAPIKey:apiKey];
     }
     return crashReporter;
@@ -250,7 +250,8 @@
 
 - (void)setupReporterWithConfiguration:(AMAModuleActivationConfiguration *)configuration
 {
-    AMACrashReporter *crashReporter = [[AMACrashReporter alloc] initWithApiKey:configuration.apiKey];
+    AMACrashReporter *crashReporter = [[AMACrashReporter alloc] initWithApiKey:configuration.apiKey
+                                                              errorEnvironment:self.errorEnvironment];
     [self.reportersContainer setReporter:crashReporter forAPIKey:configuration.apiKey];
     self.apiKey = configuration.apiKey;
     

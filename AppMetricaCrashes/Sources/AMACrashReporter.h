@@ -8,11 +8,14 @@ NS_ASSUME_NONNULL_BEGIN
 @protocol AMACrashProcessingReporting;
 @protocol AMAAppMetricaReporting;
 @class AMAEventPollingParameters;
+@class AMAErrorEnvironment;
 
 @interface AMACrashReporter : NSObject <AMATransactionReporter, AMAAppMetricaCrashReporting, AMAAppMetricaPluginReporting>
 
 - (instancetype)init NS_UNAVAILABLE;
 - (instancetype)initWithApiKey:(NSString *)apiKey;
+- (instancetype)initWithApiKey:(NSString *)apiKey
+              errorEnvironment:(AMAErrorEnvironment *)errorEnvironment;
 
 - (void)reportCrashWithParameters:(AMAEventPollingParameters *)parameters;
 - (void)reportANRWithParameters:(AMAEventPollingParameters *)parameters;
