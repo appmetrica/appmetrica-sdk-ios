@@ -193,7 +193,7 @@ message IOSCrashReport {
       }
 
       optional uint64 address = 1; // Address that caused the fault
-      optional bytes reason = 2; // Short description of why the crash occurred
+      optional bytes reason = 2; // Short description of why the crash occurred (https://nda.ya.ru/t/6D_340h374ZCPk)
       required CrashType type = 3; // Type
 
       optional Mach mach = 4; // Mach information is always available for iOS crashes, but may be empty for crashes from plugins

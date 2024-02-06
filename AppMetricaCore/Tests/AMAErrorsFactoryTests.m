@@ -77,38 +77,6 @@ describe(@"AMAErrorsFactory", ^{
             });
         });
 
-        context(@"baBacktraceError:", ^{
-            beforeEach(^{
-                error = [AMAErrorsFactory badBacktraceError];
-            });
-            it(@"Should use correct domain", ^{
-                [[error.domain should] equal:domain];
-            });
-            it(@"Should use correct code", ^{
-                [[theValue(error.code) should] equal:theValue(AMAAppMetricaEventErrorCodeInvalidBacktrace)];
-            });
-            it(@"Should use correct description", ^{
-                NSString *description = @"Backtrace is null or empty";
-                [[error.localizedDescription should] equal:description];
-            });
-        });
-
-        context(@"badIdentifierError:", ^{
-            beforeEach(^{
-                error = [AMAErrorsFactory badIdentifierError:@"BAD_IDENTIFIER"];
-            });
-            it(@"Should use correct domain", ^{
-                [[error.domain should] equal:domain];
-            });
-            it(@"Should use correct code", ^{
-                [[theValue(error.code) should] equal:theValue(1001)];
-            });
-            it(@"Should use correct description", ^{
-                NSString *description = @"Identifier 'BAD_IDENTIFIER' is incorrect";
-                [[error.localizedDescription should] equal:description];
-            });
-        });
-
         context(@"emptyReferrerValueError", ^{
             beforeEach(^{
                 error = [AMAErrorsFactory emptyReferrerValueError];

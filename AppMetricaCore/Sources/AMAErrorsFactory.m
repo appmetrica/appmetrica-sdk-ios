@@ -42,20 +42,6 @@
                                 description:errorMsg];
 }
 
-+ (NSError *)badBacktraceError
-{
-    NSString *errorMsg = @"Backtrace is null or empty";
-    return [AMAErrorUtilities errorWithCode:AMAAppMetricaEventErrorCodeInvalidBacktrace
-                                description:errorMsg];
-}
-
-+ (NSError *)badIdentifierError:(NSString *)name
-{
-    NSString *errorMsg = [NSString stringWithFormat:@"Identifier '%@' is incorrect", name];
-    return [AMAErrorUtilities errorWithCode:AMAAppMetricaEventErrorCodeInvalidName
-                                description:errorMsg];
-}
-
 + (NSError *)emptyReferrerValueError
 {
     return [AMAErrorUtilities errorWithCode:AMAAppMetricaEventErrorCodeInvalidName

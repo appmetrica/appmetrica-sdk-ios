@@ -121,6 +121,17 @@ static NSString *const kAppMetricaLibraryAPIKey = @"20799a27-fa80-4b36-b2db-0f81
           onFailure:(void (^)(NSError *))onFailure
 {
     NSError *potentialError = nil;
+
+    // TODO: https://nda.ya.ru/t/L9eD2ClO74ZR6E
+    NSError *badBacktraceError = [AMAErrorUtilities errorWithCode:AMAAppMetricaEventErrorCodeInvalidBacktrace
+                                                      description:@"Backtrace is null or empty"];
+    
+    if (errorDetails == nil || errorDetails.backtrace.count == 0) {
+        [AMAErrorUtilities fillError:&potentialError withError:badBacktraceError];
+        [AMAFailureDispatcher dispatchError:potentialError withBlock:onFailure];
+        return;
+    }
+    
     NSUInteger bytesTruncated = 0;
     NSData *formattedData = [self.exceptionFormatter formattedErrorErrorDetails:errorDetails
                                                                  bytesTruncated:&bytesTruncated
@@ -151,6 +162,18 @@ static NSString *const kAppMetricaLibraryAPIKey = @"20799a27-fa80-4b36-b2db-0f81
                         onFailure:(void (^)(NSError *))onFailure
 {
     NSError *potentialError = nil;
+    
+    // TODO: https://nda.ya.ru/t/L9eD2ClO74ZR6E
+    NSString *errorMsg = [NSString stringWithFormat:@"Identifier '%@' is incorrect", identifier];
+    NSError *badIdentifierError = [AMAErrorUtilities errorWithCode:AMAAppMetricaEventErrorCodeInvalidName
+                                                       description:errorMsg];
+    
+    if (identifier.length == 0) {
+        [AMAErrorUtilities fillError:&potentialError withError:badIdentifierError];
+        [AMAFailureDispatcher dispatchError:potentialError withBlock:onFailure];
+        return;
+    }
+    
     NSUInteger bytesTruncated = 0;
     NSData *formattedData = [self.exceptionFormatter formattedCustomErrorErrorDetails:errorDetails
                                                                            identifier:identifier

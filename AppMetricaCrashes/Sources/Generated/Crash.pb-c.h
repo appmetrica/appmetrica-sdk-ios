@@ -660,7 +660,7 @@ struct  Ama__IOSCrashReport__Crash__Error
   protobuf_c_boolean has_address;
   uint64_t address;
   /*
-   * Short description of why the crash occurred
+   * Short description of why the crash occurred (https://nda.ya.ru/t/6D_340h374ZCPk)
    */
   protobuf_c_boolean has_reason;
   ProtobufCBinaryData reason;

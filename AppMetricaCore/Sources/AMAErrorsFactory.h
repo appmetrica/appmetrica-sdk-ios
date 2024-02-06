@@ -16,8 +16,6 @@
 //session
 + (NSError *)badEventNameError:(NSString *)name;
 + (NSError *)badErrorMessageError:(NSString *)name;
-+ (NSError *)badBacktraceError;
-+ (NSError *)badIdentifierError:(NSString *)name;
 + (NSError *)emptyDeepLinkUrlOfUnknownTypeError;
 + (NSError *)emptyDeepLinkUrlOfTypeError:(NSString *)type;
 + (NSError *)deepLinkUrlOfUnknownTypeError:(NSString *)url;
