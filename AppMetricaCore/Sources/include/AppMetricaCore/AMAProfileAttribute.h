@@ -194,6 +194,7 @@ NS_SWIFT_NAME(CustomStringAttribute)
 /** The number attribute protocol.
  It enables creating custom number attribute for the profile.
  */
+NS_SWIFT_NAME(CustomNumberAttribute)
 @protocol AMACustomNumberAttribute <NSObject>
 
 /** Updates the number attribute with the specified value.
@@ -222,6 +223,7 @@ NS_SWIFT_NAME(CustomStringAttribute)
 /** The counter attribute protocol.
  It enables creating custom counter for the profile.
  */
+NS_SWIFT_NAME(CustomCounterAttribute)
 @protocol AMACustomCounterAttribute <NSObject>
 /** Updates the counter attribute value with the specified delt a value.
 
@@ -235,6 +237,7 @@ NS_SWIFT_NAME(CustomStringAttribute)
 /** The boolean attribute protocol.
  It enables creating custom boolean attribute for the profile.
  */
+NS_SWIFT_NAME(CustomBoolAttribute)
 @protocol AMACustomBoolAttribute <NSObject>
 
 /** Updates the bool attribute with the specified value.
@@ -265,6 +268,7 @@ NS_SWIFT_NAME(CustomStringAttribute)
  You can use predefined attributes (e.g. name, gender, etc.) or create your own.
  AppMetrica allows you to create up to 100 custom attributes.
  */
+NS_SWIFT_NAME(ProfileAttribute)
 @interface AMAProfileAttribute : NSObject
 
 /** Creates a name attribute.
