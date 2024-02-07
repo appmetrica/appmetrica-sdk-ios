@@ -41,10 +41,6 @@ let package = Package(
         .tvOS(.v11),
     ],
     products: [
-        .library(name: "AppMetricaAnalytics", targets: [AppMetricaTarget.core.name,
-                                                        AppMetricaTarget.adSupport.name,
-                                                        AppMetricaTarget.webKit.name,
-                                                        AppMetricaTarget.crashes.name]),
         .library(name: "AppMetricaCore", targets: [AppMetricaTarget.core.name,
                                                    AppMetricaTarget.coreExtension.name]),
         .library(name: "AppMetricaCrashes", targets: [AppMetricaTarget.crashes.name]),
