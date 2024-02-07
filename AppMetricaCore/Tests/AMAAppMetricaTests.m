@@ -287,27 +287,6 @@ describe(@"AMAAppMetrica", ^{
             [AMAAppMetrica trackOpeningURL:URL];
         });
     });
-    context(@"Referral URL handling", ^{
-        AMAAppMetricaImpl *__block mockedImpl = nil;
-        NSURL *const url = [NSURL URLWithString:@"https://some.url"];
-        beforeEach(^{
-            mockedImpl = [AMAAppMetricaImpl nullMock];
-            stubMetrica();
-            [AMAAppMetrica stub:@selector(sharedImpl) andReturn:mockedImpl];
-        });
-        it(@"Should not call impl if metrica is not started", ^{
-            [[mockedImpl shouldNot] receive:@selector(reportUrl:ofType:isAuto:)];
-            
-            [AMAAppMetrica trackReferralURL:url];
-        });
-        it(@"Should call impl with URL of type \"referral\"", ^{
-            activate();
-            [[mockedImpl should] receive:@selector(reportUrl:ofType:isAuto:)
-                           withArguments:url, @"referral", theValue(NO)];
-            
-            [AMAAppMetrica trackReferralURL:url];
-        });
-    });
     
     context(@"Public", ^{
         beforeEach(^{

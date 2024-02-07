@@ -7,7 +7,6 @@
 #import "AMAStartupParametersConfiguration.h"
 
 NSString *const kAMADLControllerUrlTypeOpen = @"open";
-NSString *const kAMADLControllerUrlTypeReferral = @"referral";
 
 @interface AMADeepLinkController ()
 

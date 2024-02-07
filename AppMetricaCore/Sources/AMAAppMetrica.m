@@ -537,15 +537,6 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
     [[self sharedImpl] reportUrl:URL ofType:kAMADLControllerUrlTypeOpen isAuto:NO];
 }
 
-+ (void)trackReferralURL:(NSURL *)URL
-{
-    if ([self isActivated] == NO) {
-        AMALogWarn(@"Metrica is not started");
-        return;
-    }
-    [[self sharedImpl] reportUrl:URL ofType:kAMADLControllerUrlTypeReferral isAuto:NO];
-}
-
 + (void)setErrorEnvironmentValue:(NSString *)value forKey:(NSString *)key
 {
     @synchronized(self) {

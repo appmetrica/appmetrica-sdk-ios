@@ -5,7 +5,6 @@
 @class AMAReporter;
 
 extern NSString *const kAMADLControllerUrlTypeOpen;
-extern NSString *const kAMADLControllerUrlTypeReferral;
 
 @interface AMADeepLinkController : NSObject
 

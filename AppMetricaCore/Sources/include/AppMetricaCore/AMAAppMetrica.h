@@ -136,7 +136,7 @@ NS_SWIFT_NAME(reportEvent(name:parameters:onFailure:));
  @param onFailure Block to be executed if an error occurs while reporting, the error is passed as block argument.
  */
 + (void)reportUserProfile:(AMAUserProfile *)userProfile
-                onFailure:(nullable void (^)(NSError *error))onFailure 
+                onFailure:(nullable void (^)(NSError *error))onFailure
 NS_SWIFT_NAME(reportUserProfile(_:onFailure:));
 
 /** Sends information about the purchase.
@@ -168,7 +168,7 @@ NS_SWIFT_NAME(reportAdRevenue(_:onFailure:));
  @param onFailure Block to be executed if an error occurs while reporting, the error is passed as block argument.
  */
 + (void)reportECommerce:(AMAECommerce *)eCommerce
-              onFailure:(nullable void (^)(NSError *error))onFailure 
+              onFailure:(nullable void (^)(NSError *error))onFailure
 NS_SWIFT_NAME(reportECommerce(_:onFailure:));
 
 //MARK: - Web View Reporting
@@ -261,7 +261,7 @@ NS_SWIFT_NAME(setupWebViewReporting(with:onFailure:));
 @property (class, nonatomic, getter=isLocationTrackingEnabled) BOOL locationTrackingEnabled;
 
 /** Controls the accuracy of the location tracking used by the internal location manager.
- 
+
  When set to `YES`, the location manager attempts to use the most accurate location data available.
  This property only takes effect if `isLocationTrackingEnabled` is set to `YES` and the location
  has not been manually set using the `customLocation` property.
@@ -298,19 +298,13 @@ NS_SWIFT_NAME(setupWebViewReporting(with:onFailure:));
  */
 + (void)trackOpeningURL:(NSURL *)URL NS_SWIFT_NAME(trackOpeningURL(_:));
 
-/**
- * Sets referral URL for this installation. This might be required to track some specific traffic sources like Facebook.
- * @param URL referral URL value.
- */
-+ (void)trackReferralURL:(NSURL *)URL NS_SWIFT_NAME(trackReferralURL(_:));
-
 //MARK: - Data Sending and Handling
 
 /** Enables/disables data sending to the AppMetrica server.
 
  The `enabled` value can be overridden by the configuration settings during the activation process if it was set before activation.
  After activation, this method's value overrides the configuration's value.
- 
+
  @note Disabling this option also turns off data sending from the reporters that initialized for different APIKey.
 
  @param enabled Flag indicating whether the data sending is enabled. By default, the sending is enabled.
