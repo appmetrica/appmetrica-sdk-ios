@@ -263,7 +263,6 @@
 - (void)setupCrashProcessorWithCrashReporter:(AMACrashReporter *)crashReporter ignoredSignals:(NSArray<NSNumber *> *)ignoredSignals
 {
     [self execute:^{
-        NSArray<NSNumber *> *ignoredCrashSignals = self.internalConfiguration.ignoredCrashSignals;
         self.crashProcessor = [[AMACrashProcessor alloc] initWithIgnoredSignals:ignoredSignals
                                                                      serializer:self.serializer
                                                                   crashReporter:crashReporter
@@ -532,7 +531,7 @@ them while retaining external immutability. Needed for testability. */
 
 #pragma mark - ExtendedCrashProcessors
 
-- (void)addCrashProcessingReporter:(id<AMAExtendedCrashProcessing>)crashProcessor
+- (void)addExtendedCrashProcessor:(id<AMAExtendedCrashProcessing>)crashProcessor
 {
     if (crashProcessor != nil) {
         [self execute:^{

@@ -14,7 +14,7 @@ NS_ASSUME_NONNULL_BEGIN
  * NOTE: to use this extension you must activate AppMetrica first
  * via `[AMAAppMetrica activateWithConfiguration:]`.
  *
- * @note See `AMAAppMetrica#pluginExtension`.
+ * @note See `AMAAppMetricaCrashes#pluginExtension`.
  */
 NS_SWIFT_NAME(AppMetricaPlugins)
 @protocol AMAAppMetricaPlugins <NSObject>
@@ -22,7 +22,7 @@ NS_SWIFT_NAME(AppMetricaPlugins)
 /**
  Sends unhandled error.
  @note See `AMAPluginErrorDetails` for more information.
- 
+
  @param errorDetails Object describing the error.
  @param onFailure Block to be executed if an error occurs while reporting, the error is passed as block argument.
  */

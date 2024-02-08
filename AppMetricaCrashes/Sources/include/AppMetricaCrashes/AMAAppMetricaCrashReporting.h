@@ -4,7 +4,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-/** AppMetricaCrashReporting protocol groups methods that are used by custom reporting errors.
+/** `AMAAppMetricaCrashReporting` protocol groups methods that are used by custom reporting errors.
  */
 
 @protocol AMAAppMetricaPluginReporting;

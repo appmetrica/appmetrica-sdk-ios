@@ -150,6 +150,23 @@ describe(@"AMACrashProcessor", ^{
                 [crashProcessor processError:errorMock];
             });
         });
+        
+        context(@"Process Error with extended processor", ^{
+            let(errorMock, ^{ return [NSError nullMock]; });
+            
+            it(@"Should properly initialize with given extended processors", ^{
+                NSObject *extendedProcessor = [KWMock nullMockForProtocol:@protocol(AMAExtendedCrashProcessing)];
+                AMACrashProcessor *processor = [[AMACrashProcessor alloc] initWithIgnoredSignals:@[ @SIGABRT ]
+                                                                                      serializer:serializer
+                                                                                   crashReporter:crashReporterMock
+                                                                                       formatter:formatterMock
+                                                                              extendedProcessors:@[extendedProcessor]];
+                
+                [[extendedProcessor should] receive:@selector(processError:) withArguments:errorMock];
+                
+                [processor processError:errorMock];
+            });
+        });
     });
 });
 

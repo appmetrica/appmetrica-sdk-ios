@@ -112,20 +112,20 @@ NS_SWIFT_NAME(requestStartupIdentifiers(for:on:completion:));
 
 /** Reports a custom event.
 
- @param message Short name or description of the event.
+ @param name Short name or description of the event.
  @param onFailure Block to be executed if an error occurs while reporting, the error is passed as block argument.
  */
-+ (void)reportEvent:(NSString *)message
++ (void)reportEvent:(NSString *)name
           onFailure:(nullable void (^)(NSError *error))onFailure
 NS_SWIFT_NAME(reportEvent(name:onFailure:));
 
 /** Reports a custom event with additional parameters.
 
- @param message Short name or description of the event.
+ @param name Short name or description of the event.
  @param params Dictionary of name/value pairs that should be sent to the server.
  @param onFailure Block to be executed if an error occurs while reporting, the error is passed as block argument.
  */
-+ (void)reportEvent:(NSString *)message
++ (void)reportEvent:(NSString *)name
          parameters:(nullable NSDictionary *)params
           onFailure:(nullable void (^)(NSError *error))onFailure
 NS_SWIFT_NAME(reportEvent(name:parameters:onFailure:));
@@ -189,7 +189,7 @@ NS_SWIFT_NAME(reportECommerce(_:onFailure:));
  * WKUserContentController *userContentController = [WKUserContentController new];
  * AMAJSController *jsController = [[AMAJSController alloc] initWithUserContentController:userContentController];
  * [AMAAppMetrica setupWebViewReporting:jsController
-                                 onFailure:nil];
+                              onFailure:nil];
  * [userContentController addUserScript:self.scriptWithAppMetrica];
  * webConfiguration.userContentController = userContentController;
  * self.webView = [[WKWebView alloc] initWithFrame:CGRectZero configuration:webConfiguration];

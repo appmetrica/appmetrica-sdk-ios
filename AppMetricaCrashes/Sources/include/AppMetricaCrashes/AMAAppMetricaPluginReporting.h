@@ -6,13 +6,13 @@
 NS_ASSUME_NONNULL_BEGIN
 
 /**
- * `AMAAppMetricaPluginReporting` is an extension of `AMAAppMetricaReporting`.
+ * `AMAAppMetricaPluginReporting` is an extension of `AMAAppMetricaCrashReporting`.
  * Instance of object that implements `AMAAppMetricaPluginReporting` can be obtained via
- * `AMAAppMetricaReporting #pluginExtension` property.
+ * `AMAAppMetricaCrashReporting#pluginExtension` property.
  * For every reporter only one `AMAAppMetricaPluginReporting` instance is created.
  * You can either query it each time you need it, or save the reference by yourself.
  *
- * @note See `AMAAppMetricaReporting #pluginExtension`.
+ * @note See `AMAAppMetricaCrashReporting#pluginExtension`.
  */
 NS_SWIFT_NAME(AppMetricaPluginReporting)
 @protocol AMAAppMetricaPluginReporting <NSObject>

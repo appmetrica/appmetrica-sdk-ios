@@ -18,5 +18,4 @@ Pod::Spec.new do |s|
   s.header_dir = s.name
   s.source_files = "#{s.name}/Sources/**/*.{h,m}"
   s.public_header_files = "#{s.name}/Sources/include/**/*.h"
-
 end

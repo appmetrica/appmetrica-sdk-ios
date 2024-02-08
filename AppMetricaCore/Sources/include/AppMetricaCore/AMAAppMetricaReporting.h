@@ -13,7 +13,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-/** AMAAppMetricaReporting protocol groups methods that are used by custom reporting objects.
+/** `AMAAppMetricaReporting` protocol groups methods that are used by custom reporting objects.
  */
 NS_SWIFT_NAME(AppMetricaReporting)
 @protocol AMAAppMetricaReporting  <NSObject>
@@ -55,7 +55,7 @@ NS_SWIFT_NAME(reportUserProfile(_:onFailure:));
  @param onFailure Block to be executed if an error occurs while reporting, the error is passed as block argument.
  */
 - (void)reportRevenue:(AMARevenueInfo *)revenueInfo
-            onFailure:(nullable void (^)(NSError *error))onFailure 
+            onFailure:(nullable void (^)(NSError *error))onFailure
 NS_SWIFT_NAME(reportRevenue(_:onFailure:));
 
 /** Sends information about the E-commerce event.
@@ -98,8 +98,9 @@ NS_SWIFT_NAME(reportAdRevenue(_:onFailure:));
  * WKWebViewConfiguration *webConfiguration = [WKWebViewConfiguration new];
  * WKUserContentController *userContentController = [WKUserContentController new];
  * AMAJSController *jsController = [[AMAJSController alloc] initWithUserContentController:userContentController];
- * [AMAAppMetrica setupWebViewReporting:jsController
-                                 onFailure:nil];
+ * id<AMAAppMetricaReporting> reporter = [AMAAppMetrica reporterForAPIKey:apiKey];
+ * [reporter setupWebViewReporting:jsController
+                         onFailure:nil];
  * [userContentController addUserScript:self.scriptWithAppMetrica];
  * webConfiguration.userContentController = userContentController;
  * self.webView = [[WKWebView alloc] initWithFrame:CGRectZero configuration:webConfiguration];

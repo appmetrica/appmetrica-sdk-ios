@@ -20,12 +20,4 @@ Pod::Spec.new do |s|
   s.header_dir = s.name
   s.source_files = "#{s.name}/Sources/**/*.{h,m}"
   s.public_header_files = "#{s.name}/Sources/include/**/*.h"
-  
-  s.compiler_flags = '-Wshadow-ivar', '-Werror', '-Wbool-conversion',
-  '-Wconstant-conversion', '-Wdeprecated-objc-isa-usage',
-  '-Werror=incompatible-pointer-types',
-  '-Wreturn-type', '-Wswitch', '-Wparentheses', '-Wsign-compare',
-  '-Wuninitialized', '-Wunused-function', '-Wunused-label', '-Wunused-value',
-  '-Wunused-variable', '-Wconversion', '-Wenum-conversion', '-Wint-conversion',
-  '-Wdocumentation'
 end

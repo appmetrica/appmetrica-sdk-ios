@@ -148,14 +148,23 @@ describe(@"AMACrashReporter", ^{
             [crashReporter reportNSError:error onFailure:nil];
         });
         
-        // TODO: Add arguments check
         context(@"Plugin error reporting", ^{
             NSString *const message = @"message";
+            NSString *const key = @"key";
+            AMAPluginErrorDetails *__block errorDetails = nil;
+            NSData *const formattedData = [NSData data];
+            beforeEach(^{
+                errorDetails = [[AMAPluginErrorDetails alloc] init];
+                [crashReporter setErrorEnvironmentValue:message forKey:key];
+            });
             
             it(@"Should report an Unhandled exception", ^{
+                NSString *exceptionClass = @"NSFooBar";
+                errorDetails.exceptionClass = exceptionClass;
+                
                 [crashReporter stub:@selector(exceptionFormatter) andReturn:exceptionFormatter];
                 [exceptionFormatter stub:@selector(formattedCrashErrorDetails:bytesTruncated:error:) 
-                               andReturn:[NSData data]];
+                               andReturn:formattedData];
                 
                 [[extendedReporter should] receive:@selector(reportBinaryEventWithType:
                                                              data:
@@ -166,16 +175,21 @@ describe(@"AMACrashReporter", ^{
                                                              extras:
                                                              bytesTruncated:
                                                              onFailure:)
-                                     withArguments:theValue(AMACrashEventTypeCrash), kw_any(), kw_any(),
-                 theValue(YES), kw_any(), kw_any(), kw_any(), theValue(0), kw_any(), kw_any()];
+                                     withArguments:theValue(AMACrashEventTypeCrash),
+                                                   formattedData,
+                                                   exceptionClass,
+                                                   theValue(YES),
+                                                   @{ key : message },
+                                                   nil, nil, theValue(0), kw_any()];
                 
-                [crashReporter reportUnhandledException:[AMAPluginErrorDetails nullMock] onFailure:nil];
+                [crashReporter reportUnhandledException:errorDetails onFailure:nil];
             });
             
             it(@"Should report an exception with message", ^{
+                errorDetails.backtrace = @[[[AMAStackTraceElement alloc] init]];
                 [crashReporter stub:@selector(exceptionFormatter) andReturn:exceptionFormatter];
                 [exceptionFormatter stub:@selector(formattedErrorErrorDetails:bytesTruncated:error:)
-                               andReturn:[NSData data]];
+                               andReturn:formattedData];
                 
                 [[extendedReporter should] receive:@selector(reportBinaryEventWithType:
                                                              data:
@@ -186,16 +200,38 @@ describe(@"AMACrashReporter", ^{
                                                              extras:
                                                              bytesTruncated:
                                                              onFailure:)
-                                     withArguments:theValue(AMACrashEventTypeError), kw_any(), message,
-                 theValue(YES), kw_any(), kw_any(), kw_any(), theValue(0), kw_any(), kw_any()];
+                                     withArguments:theValue(AMACrashEventTypeError),
+                                                   formattedData,
+                                                   message,
+                                                   theValue(YES),
+                                                   @{ key : message },
+                                                   nil, nil, theValue(0), kw_any()];
                 
-                [crashReporter reportError:[AMAPluginErrorDetails nullMock] message:message onFailure:nil];
+                [crashReporter reportError:errorDetails message:message onFailure:nil];
+            });
+            
+            it(@"Should not report an exception with message if backtrace is empty", ^{
+                [crashReporter stub:@selector(exceptionFormatter) andReturn:exceptionFormatter];
+                [exceptionFormatter stub:@selector(formattedErrorErrorDetails:bytesTruncated:error:)
+                               andReturn:formattedData];
+                
+                [[extendedReporter shouldNot] receive:@selector(reportBinaryEventWithType:
+                                                                data:
+                                                                name:
+                                                                gZipped:
+                                                                eventEnvironment:
+                                                                appEnvironment:
+                                                                extras:
+                                                                bytesTruncated:
+                                                             onFailure:)];
+                
+                [crashReporter reportError:errorDetails message:message onFailure:nil];
             });
             
             it(@"Should report an error with identifier", ^{
                 [crashReporter stub:@selector(exceptionFormatter) andReturn:exceptionFormatter];
                 [exceptionFormatter stub:@selector(formattedCustomErrorErrorDetails:identifier:bytesTruncated:error:)
-                               andReturn:[NSData data]];
+                               andReturn:formattedData];
                 
                 [[extendedReporter should] receive:@selector(reportBinaryEventWithType:
                                                              data:
@@ -206,12 +242,37 @@ describe(@"AMACrashReporter", ^{
                                                              extras:
                                                              bytesTruncated:
                                                              onFailure:)
-                                     withArguments:theValue(AMACrashEventTypeError), kw_any(), message,
-                 theValue(YES), kw_any(), kw_any(), kw_any(), theValue(0), kw_any(), kw_any()];
+                                     withArguments:theValue(AMACrashEventTypeError), 
+                                                   formattedData,
+                                                   message,
+                                                   theValue(YES),
+                                                   @{ key : message },
+                                                   nil, nil, theValue(0), kw_any()];
                 
+                [crashReporter reportErrorWithIdentifier:@"id"
+                                                 message:message
+                                                 details:errorDetails
+                                               onFailure:nil];;
+            });
+            
+            it(@"Should not report an error with empty identifier", ^{
+                [crashReporter stub:@selector(exceptionFormatter) andReturn:exceptionFormatter];
+                [exceptionFormatter stub:@selector(formattedCustomErrorErrorDetails:identifier:bytesTruncated:error:)
+                               andReturn:formattedData];
+                
+                [[extendedReporter shouldNot] receive:@selector(reportBinaryEventWithType:
+                                                                data:
+                                                                name:
+                                                                gZipped:
+                                                                eventEnvironment:
+                                                                appEnvironment:
+                                                                extras:
+                                                                bytesTruncated:
+                                                                onFailure:)];
+                 
                 [crashReporter reportErrorWithIdentifier:@""
                                                  message:message
-                                                 details:[AMAPluginErrorDetails nullMock]
+                                                 details:errorDetails
                                                onFailure:nil];;
             });
         });

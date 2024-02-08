@@ -5,7 +5,7 @@
 #import "AMAEventTypes.h"
 #import <AppMetrica_FMDB/AppMetrica_FMDB.h>
 
-static NSString *const kAMAFilePathPrefix = @"/Library/Caches/io.appmetrica/";
+static NSString *const kAMAFilePathPrefix = @"/Library/Caches/ru.yandex.mobile.YandexMobileMetrica/";
 
 @implementation AMAConfigurationDatabaseSchemeMigrationTo15
 

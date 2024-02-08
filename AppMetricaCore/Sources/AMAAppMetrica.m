@@ -419,17 +419,17 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
     }
 }
 
-+ (void)reportEvent:(NSString *)message onFailure:(void (^)(NSError *error))onFailure
++ (void)reportEvent:(NSString *)name onFailure:(void (^)(NSError *error))onFailure
 {
-    [[self class] reportEvent:message parameters:nil onFailure:onFailure];
+    [[self class] reportEvent:name parameters:nil onFailure:onFailure];
 }
 
-+ (void)reportEvent:(NSString *)message
++ (void)reportEvent:(NSString *)name
          parameters:(NSDictionary *)params
           onFailure:(void (^)(NSError *error))onFailure
 {
     if ([self isAppMetricaStartedWithLogging:onFailure]) {
-        [[self sharedImpl] reportEvent:[message copy] parameters:[params copy] onFailure:onFailure];
+        [[self sharedImpl] reportEvent:[name copy] parameters:[params copy] onFailure:onFailure];
     }
 }
 
