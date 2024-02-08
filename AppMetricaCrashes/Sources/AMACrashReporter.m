@@ -3,7 +3,6 @@
 #import "AMACrashReporter.h"
 #import <AppMetricaCoreExtension/AppMetricaCoreExtension.h>
 #import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
-#import "AMACrashProcessingReporting.h"
 #import "AMAErrorModel.h"
 #import "AMAExceptionFormatter.h"
 #import "AMACrashEventType.h"

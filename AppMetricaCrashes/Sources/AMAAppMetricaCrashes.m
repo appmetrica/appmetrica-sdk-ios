@@ -11,7 +11,7 @@
 #import "AMACrashLoader.h"
 #import "AMACrashLogger.h"
 #import "AMACrashLogging.h"
-#import "AMACrashProcessingReporting.h"
+#import "AMAExtendedCrashProcessing.h"
 #import "AMACrashProcessor.h"
 #import "AMACrashReporter.h"
 #import "AMACrashReportingStateNotifier.h"
@@ -45,7 +45,7 @@
 @property (nonatomic, strong, readonly) AMADecodedCrashSerializer *serializer;
 @property (nonatomic, strong, readwrite) NSString *apiKey;
 
-@property (nonatomic, strong) NSMutableSet<id<AMACrashProcessingReporting>> *extendedCrashProcessors;
+@property (nonatomic, strong) NSMutableSet<id<AMAExtendedCrashProcessing>> *extendedCrashProcessors;
 
 @property (nonatomic, strong) AMAAppMetricaPluginsImpl *pluginsImpl;
 
@@ -532,7 +532,7 @@ them while retaining external immutability. Needed for testability. */
 
 #pragma mark - ExtendedCrashProcessors
 
-- (void)addCrashProcessingReporter:(id<AMACrashProcessingReporting>)crashProcessor
+- (void)addCrashProcessingReporter:(id<AMAExtendedCrashProcessing>)crashProcessor
 {
     if (crashProcessor != nil) {
         [self execute:^{

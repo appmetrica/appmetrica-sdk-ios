@@ -15,7 +15,6 @@
 @class AMAErrorEnvironment;
 @class AMAErrorModelFactory;
 
-@protocol AMACrashProcessingReporting;
 @protocol AMAAsyncExecuting;
 @protocol AMASyncExecuting;
 

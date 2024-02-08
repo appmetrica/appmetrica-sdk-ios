@@ -1,8 +1,6 @@
 #import "AMACrashLogging.h"
-
 #import <AppMetricaStorageUtils/AppMetricaStorageUtils.h>
 #import <AppMetricaPlatform/AppMetricaPlatform.h>
-
 #import "AMACrashLoader.h"
 #import "AMACrashReportDecoder.h"
 #import "AMACrashSafeTransactor.h"
@@ -109,7 +107,7 @@ NSString *const kAMAApplicationNotRespondingCrashType = @"AMAApplicationNotRespo
 
 - (void)enableSwapOfCxaThrow
 {
-    //TODO: Crashes fixing
+    //TODO: https://nda.ya.ru/t/RWbytzRf74Zqsb
     @synchronized (self) {
         [self.transactor processTransactionWithID:@"KSCrashSwapOfCxaThrow" name:@"SwapOfCxaThrow" transaction:^{
             [self.ksCrashInstance enableSwapOfCxaThrow];

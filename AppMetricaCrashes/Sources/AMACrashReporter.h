@@ -5,7 +5,6 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@protocol AMACrashProcessingReporting;
 @protocol AMAAppMetricaReporting;
 @class AMAEventPollingParameters;
 @class AMAErrorEnvironment;

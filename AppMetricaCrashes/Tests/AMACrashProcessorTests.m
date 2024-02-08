@@ -1,6 +1,6 @@
 #import <Kiwi/Kiwi.h>
 #import "AMACrashProcessor.h"
-#import "AMACrashProcessingReporting.h"
+#import "AMAExtendedCrashProcessing.h"
 #import "AMACrashReportCrash.h"
 #import "AMACrashReportError.h"
 #import "AMACrashReporter.h"

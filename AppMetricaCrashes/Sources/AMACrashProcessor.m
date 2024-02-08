@@ -12,6 +12,7 @@
 #import "AMAInfo.h"
 #import "AMASignal.h"
 #import "AMACrashReporter.h"
+#import "AMAExtendedCrashProcessing.h"
 
 @interface AMACrashProcessor ()
 
@@ -19,7 +20,7 @@
 @property (nonatomic, strong, readonly) AMAExceptionFormatter *formatter;
 @property (nonatomic, strong, readonly) AMACrashReporter *crashReporter;
 
-@property (nonatomic, strong, readonly) NSArray<id<AMACrashProcessingReporting>> *extendedCrashProcessors;
+@property (nonatomic, strong, readonly) NSArray<id<AMAExtendedCrashProcessing>> *extendedCrashProcessors;
 
 @end
 
@@ -28,7 +29,7 @@
 - (instancetype)initWithIgnoredSignals:(NSArray *)ignoredSignals
                             serializer:(AMADecodedCrashSerializer *)serializer
                          crashReporter:(AMACrashReporter *)crashReporter
-                    extendedProcessors:(NSArray<id<AMACrashProcessingReporting>> *)extendedCrashProcessors
+                    extendedProcessors:(NSArray<id<AMAExtendedCrashProcessing>> *)extendedCrashProcessors
 {
     return [self initWithIgnoredSignals:ignoredSignals
                              serializer:serializer
@@ -41,7 +42,7 @@
                             serializer:(AMADecodedCrashSerializer *)serializer
                          crashReporter:(AMACrashReporter *)crashReporter
                              formatter:(AMAExceptionFormatter *)formatter
-                    extendedProcessors:(NSArray<id<AMACrashProcessingReporting>> *)extendedCrashProcessors
+                    extendedProcessors:(NSArray<id<AMAExtendedCrashProcessing>> *)extendedCrashProcessors
 {
     self = [super init];
 
@@ -77,6 +78,8 @@
     }
     
     [self.crashReporter reportCrashWithParameters:parameters];
+    
+    [self processCrashExtended:decodedCrash];
 }
 
 - (void)processANR:(AMADecodedCrash *)decodedCrash withError:(NSError *)error
@@ -101,6 +104,8 @@
 - (void)processError:(NSError *)error
 {
     [self.crashReporter reportNSError:error onFailure:nil];
+    
+    [self processErrorExtended:error];
 }
 
 #pragma mark - Private -
@@ -108,6 +113,22 @@
 - (BOOL)shouldIgnoreCrash:(AMADecodedCrash *)decodedCrash
 {
     return [self.ignoredCrashSignals containsObject:@(decodedCrash.crash.error.signal.signal)];
+}
+
+- (void)processErrorExtended:(NSError *)error
+{
+    for (id<AMAExtendedCrashProcessing> processor in self.extendedCrashProcessors) {
+        [processor processError:error];
+    }
+}
+
+- (void)processCrashExtended:(AMADecodedCrash *)decodedCrash
+{
+    for (id<AMAExtendedCrashProcessing> processor in self.extendedCrashProcessors) {
+        NSError *error = [AMAErrorUtilities internalErrorWithCode:AMAAppMetricaInternalEventErrorCodeProbableUnhandledCrash
+                                                      description:@"Unhandled crash"];
+        [processor processError:error];
+    }
 }
 
 @end
