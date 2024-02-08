@@ -6,8 +6,6 @@
 #import <objc/runtime.h>
 #import "KSDynamicLinker.h"
 
-static NSUInteger const kAMADefaultSymbolSize = 1;
-
 @implementation AMABinaryImageExtractor
 
 #pragma mark - Binary images extraction

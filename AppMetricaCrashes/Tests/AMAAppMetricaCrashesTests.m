@@ -55,7 +55,7 @@ describe(@"AMAAppMetricaCrashes", ^{
         
         crashReporter = [AMACrashReporter nullMock];
         [AMACrashReporter stub:@selector(alloc) andReturn:crashReporter];
-        [crashReporter stub:@selector(initWithApiKey:) andReturn:crashReporter];
+        [crashReporter stub:@selector(initWithApiKey:errorEnvironment:) andReturn:crashReporter];
         
         serializer = [AMADecodedCrashSerializer nullMock];
         crashLoader = [AMACrashLoader nullMock];
@@ -204,7 +204,6 @@ describe(@"AMAAppMetricaCrashes", ^{
                 initialConfig.ignoredCrashSignals = @[ @SIGABRT, @SIGILL, @SIGSEGV ];
                 [[crashProcessor should] receive:@selector(initWithIgnoredSignals:serializer:crashReporter:extendedProcessors:)
                                    withArguments:initialConfig.ignoredCrashSignals, serializer, crashReporter, kw_any()];
-                
                 
                 [crashes setConfiguration:initialConfig];
                 [crashes activate];

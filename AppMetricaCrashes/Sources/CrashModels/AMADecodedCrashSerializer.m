@@ -58,7 +58,11 @@
         }
 
         NSError *validationResult = [validator result];
-        [AMAErrorUtilities fillError:error withError:validationResult];
+        if (error != nil) {
+            NSError *capturedError = *error;
+            [AMAErrorUtilities fillError:&capturedError withError:validationResult];
+            *error = capturedError;
+        }
         
         if (validationResult.code != AMACrashValidatorErrorCodeCritical) {
             Ama__IOSCrashReport report = AMA__IOSCRASH_REPORT__INIT;

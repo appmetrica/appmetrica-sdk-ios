@@ -1,12 +1,9 @@
 #import <Kiwi/Kiwi.h>
-
 #import <AppMetricaProtobufUtils/AppMetricaProtobufUtils.h>
 #import <AppMetricaCoreExtension/AppMetricaCoreExtension.h>
 #import <AppMetricaPlatform/AppMetricaPlatform.h>
-
 #import "AMADecodedCrashSerializer.h"
 #import "AMADecodedCrashSerializer+CustomEventParameters.h"
-
 #import "AMAApplicationStatistics.h"
 #import "AMABacktrace.h"
 #import "AMABacktraceFrame.h"
