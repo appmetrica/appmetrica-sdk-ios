@@ -1051,14 +1051,14 @@
     }];
 }
 
-- (void)clearSessionExtra
+- (void)clearSessionExtras
 {
     [self execute:^{
         if (self.reporter == nil) {
             AMALogAssert(@"reporter should be not null");
         }
 
-        [self.reporter clearSessionExtra];
+        [self.reporter clearSessionExtras];
     }];
 }
 

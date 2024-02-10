@@ -181,9 +181,9 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
     [[self sharedImpl] setSessionExtras:data forKey:key];
 }
 
-+ (void)clearSessionExtra
++ (void)clearSessionExtras
 {
-    [[self sharedImpl] clearSessionExtra];
+    [[self sharedImpl] clearSessionExtras];
 }
 
 + (BOOL)isAPIKeyValid:(NSString *)apiKey

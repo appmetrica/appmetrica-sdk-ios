@@ -927,15 +927,15 @@ describe(@"AMAAppMetricaImpl", ^{
             [appMetricaImpl setSessionExtras:data forKey:key];
         });
         it(@"Should dispatch clear session extras", ^{
-            [[reporterTestHelper.appReporter should] receive:@selector(clearSessionExtra)];
+            [[reporterTestHelper.appReporter should] receive:@selector(clearSessionExtras)];
             
             [appMetricaImpl activateWithConfiguration:configuration];
-            [appMetricaImpl clearSessionExtra];
+            [appMetricaImpl clearSessionExtras];
         });
         
         it(@"Should assert on clear session extras if reporter is nil", ^{
             [[theBlock(^{
-                [appMetricaImpl clearSessionExtra];
+                [appMetricaImpl clearSessionExtras];
             }) should] raise];
         });
     });

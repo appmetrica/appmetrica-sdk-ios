@@ -32,7 +32,7 @@ NS_ASSUME_NONNULL_BEGIN
 // Session Management
 + (void)setSessionExtras:(nullable NSData *)data
                   forKey:(NSString *)key NS_SWIFT_NAME(setSessionExtra(value:for:));
-+ (void)clearSessionExtra;
++ (void)clearSessionExtras;
 
 // Logging Configuration
 + (AMALogConfigurator *)sharedLogConfigurator;
@@ -42,7 +42,7 @@ NS_ASSUME_NONNULL_BEGIN
 NS_SWIFT_NAME(extendedReporter(for:));
 
 /** Reports an event of a specified type to the server. This method is intended for reporting string data.
- 
+
  @param eventType The type of the event. See AMAEventTypes.h file for reserved event types.
  @param name The name of the event, can be nil.
  @param value The string value of the event, can be nil.
@@ -60,7 +60,7 @@ NS_SWIFT_NAME(extendedReporter(for:));
                   onFailure:(nullable void (^)(NSError *error))onFailure;
 
 /** Reports a binary event of a specified type to the server. This method is intended for reporting binary data.
- 
+
  @param eventType The type of the event. See AMAEventTypes.h file for reserved event types.
  @param data The data of the event, cannot be nil.
  @param name The name of the event, can be nil.
@@ -82,7 +82,7 @@ NS_SWIFT_NAME(extendedReporter(for:));
                         onFailure:(nullable void (^)(NSError *error))onFailure;
 
 /** Reports a file event of a specified type to the server. This method is intended for reporting file data.
- 
+
  @param eventType The type of the event. See AMAEventTypes.h file for reserved event types.
  @param data The data of the event, cannot be nil.
  @param fileName The name of file, cannot be nil.

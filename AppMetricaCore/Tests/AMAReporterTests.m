@@ -1784,7 +1784,7 @@ describe(@"AMAReporter", ^{
         it(@"Should clear session extras if reporter is not nil", ^{
             [[extrasContainer should] receive:@selector(clearExtras)];
             
-            [reporter clearSessionExtra];
+            [reporter clearSessionExtras];
         });
     });
     

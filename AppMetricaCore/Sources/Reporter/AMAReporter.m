@@ -424,7 +424,7 @@
     }];
 }
 
-- (void)clearSessionExtra
+- (void)clearSessionExtras
 {
     [self execute:^{
         [self.reporterStorage.stateStorage.extrasContainer clearExtras];

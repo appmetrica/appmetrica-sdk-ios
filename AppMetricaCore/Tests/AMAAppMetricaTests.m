@@ -1233,9 +1233,9 @@ describe(@"AMAAppMetrica", ^{
         });
         
         it(@"Should clear session extras", ^{
-            [[mockedImpl should] receive:@selector(clearSessionExtra)];
+            [[mockedImpl should] receive:@selector(clearSessionExtras)];
             
-            [AMAAppMetrica clearSessionExtra];
+            [AMAAppMetrica clearSessionExtras];
         });
     });
 });

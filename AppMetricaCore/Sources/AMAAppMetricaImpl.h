@@ -100,7 +100,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)clearAppEnvironment;
 
 - (void)setSessionExtras:(nullable NSData *)data forKey:(NSString *)key;
-- (void)clearSessionExtra;
+- (void)clearSessionExtras;
 
 - (void)setErrorEnvironmentValue:(NSString *)value forKey:(NSString *)key;
 - (void)requestStartupIdentifiersWithCompletionQueue:(dispatch_queue_t)queue
