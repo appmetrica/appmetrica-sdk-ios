@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name = "AppMetrica_FMDB"
-  s.version = '5.0.0'
+  s.version = '5.1.0'
   s.summary = "AppMetrica FMDB"
 
   s.homepage = 'https://appmetrica.io'
