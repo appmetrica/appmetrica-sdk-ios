@@ -53,10 +53,8 @@ describe(@"AMALocationRequestParameters", ^{
             @"device_type": @"DEVICE_TYPE",
             @"deviceid": @"DEVICE_ID",
             @"encrypted_request": @"1",
-            @"ifa": ifa,
             @"ifv": @"IFV",
             @"is_rooted": @"0",
-            @"limit_ad_tracking": @"0",
             @"os_api_level": @"9",
             @"os_version": @"OS_VERSION",
             @"request_id": @"42",
@@ -67,19 +65,6 @@ describe(@"AMALocationRequestParameters", ^{
         [AMAPlatformDescription stub:@selector(isDeviceRooted) andReturn:theValue(YES)];
         NSDictionary *parameters = [AMALocationRequestParameters parametersWithRequestIdentifier:identifier];
         [[parameters[@"is_rooted"] should] equal:@"1"];
-    });
-    context(@"LAT", ^{
-        NSDictionary *__block parameters = nil;
-        beforeAll(^{
-            [AMAIdentifiersTestUtilities stubIdfaWithEnabled:NO value:@"IFA"];
-            parameters = [AMALocationRequestParameters parametersWithRequestIdentifier:identifier];
-        });
-        it(@"Should have valid limit_ad_tracking", ^{
-            [[parameters[@"limit_ad_tracking"] should] equal:@"1"];
-        });
-        it(@"Should have valid limit_ad_tracking", ^{
-            [[parameters[@"ifa"] should] beNil];
-        });
     });
 
 });

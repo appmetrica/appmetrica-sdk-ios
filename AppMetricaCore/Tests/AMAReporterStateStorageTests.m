@@ -16,6 +16,7 @@ describe(@"AMAReporterStateStorage", ^{
 
     NSDate *const lastStateSendDate = [NSDate dateWithTimeIntervalSince1970:23];
     NSDate *const lastASATokenSendDate = [NSDate dateWithTimeIntervalSince1970:21];
+    NSDate *const lastPrivacySendDate = [NSDate dateWithTimeIntervalSince1970:24];
 
     NSDate *__block now = nil;
 
@@ -113,6 +114,9 @@ describe(@"AMAReporterStateStorage", ^{
             it(@"Should have empty extras", ^{
                 [[storage.extrasContainer.dictionaryExtras should] beEmpty];
             });
+            it(@"Should have valid last privacy sent date", ^{
+                [[storage.privacyLastSendDate should] equal:[NSDate distantPast]];
+            });
         });
         context(@"Data exists", ^{
             NSNumber *const sessionID = @16;
@@ -163,6 +167,7 @@ describe(@"AMAReporterStateStorage", ^{
 
                 [kvStorage saveDate:lastStateSendDate forKey:@"last_state_send_date" error:nil];
                 [kvStorage saveDate:lastASATokenSendDate forKey:@"last_asa_token_send_date" error:NULL];
+                [kvStorage saveDate:lastPrivacySendDate forKey:@"last_privacy_send_date" error:NULL];
                 [kvStorage saveData:extrasData forKey:@"extras" error:nil];
 
                 [database.storageProvider saveStorage:kvStorage error:nil];
@@ -346,6 +351,16 @@ describe(@"AMAReporterStateStorage", ^{
             });
         });
         context(@"Last ASA token send date", ^{
+            it(@"Should save in memory", ^{
+                [storage markASATokenSentNow];
+                [[storage.lastASATokenSendDate should] equal:now];
+            });
+            it(@"Should save in database", ^{
+                [storage markASATokenSentNow];
+                [[[database.storageProvider.syncStorage dateForKey:@"last_asa_token_send_date" error:nil] should] equal:now];
+            });
+        });
+        context(@"Privacy sent date", ^{
             it(@"Should save in memory", ^{
                 [storage markASATokenSentNow];
                 [[storage.lastASATokenSendDate should] equal:now];

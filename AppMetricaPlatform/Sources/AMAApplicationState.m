@@ -2,23 +2,6 @@
 #import <AppMetricaPlatform/AppMetricaPlatform.h>
 #import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
 
-static NSString *const kAMAAppBuildNumberKey = @"app_build_number";
-static NSString *const kAMAAppDebuggableKey = @"app_debuggable";
-static NSString *const kAMAAppVersionNameKey = @"app_version_name";
-static NSString *const kAMADeviceIDDictKey = @"deviceid";
-static NSString *const kAMAIFAKey = @"ifa";
-static NSString *const kAMAIFVKey = @"ifv";
-static NSString *const kAMAIsRootedKey = @"is_rooted";
-static NSString *const kAMAKitBuildNumberKey = @"analytics_sdk_build_number";
-static NSString *const kAMAKitBuildTypeKey = @"analytics_sdk_build_type";
-static NSString *const kAMAKitVersionKey = @"analytics_sdk_version";
-static NSString *const kAMAKitVersionNameKey = @"analytics_sdk_version_name";
-static NSString *const kAMALATKey = @"limit_ad_tracking";
-static NSString *const kAMALocaleKey = @"locale";
-static NSString *const kAMAOSAPILevelKey = @"os_api_level";
-static NSString *const kAMAOSVersionKey = @"os_version";
-static NSString *const kAMAUUIDDictKey = @"uuid";
-
 @interface AMAApplicationState ()
 
 @property (nonatomic, copy, readwrite) NSString *appVersionName;

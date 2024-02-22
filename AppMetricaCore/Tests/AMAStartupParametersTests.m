@@ -38,6 +38,7 @@ describe(@"AMAStartupParameters", ^{
         expectedParameters = [@{
             @"app_debuggable": @"0",
             @"app_platform": @"iphone",
+            @"atc": @"1",
             @"b": @"1",
             @"device_type": @"phone",
             @"deviceid": @"",

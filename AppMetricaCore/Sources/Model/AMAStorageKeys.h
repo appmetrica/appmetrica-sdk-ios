@@ -1,6 +1,8 @@
 
 #import <Foundation/Foundation.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 extern NSString *const AMAStorageStringKeyASATokenEndReportingInterval;
 extern NSString *const AMAStorageStringKeyASATokenFirstDelay;
 extern NSString *const AMAStorageStringKeyASATokenReportingInterval;
@@ -61,4 +63,10 @@ extern NSString *const AMAStorageStringKeySDKsCustomHosts;
 
 extern NSString *const AMAStorageStringKeyExtendedParameters;
 
+extern NSString *const AMAStorageStringKeyAppleTrackingHosts;
+extern NSString *const AMAStorageStringKeyApplePrivacyResendPeriod;
+extern NSString *const AMAStorageStringKeyAppleRetryPeriods;
+
 extern NSString *const AMAStorageStringKeyDidApplyDataMigrationFor500;
+
+NS_ASSUME_NONNULL_END

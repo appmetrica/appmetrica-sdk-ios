@@ -57,6 +57,9 @@ describe(@"AMAStartupParametersConfiguration", ^{
             @"other.report.hosts",
             @"startup.update.interval",
             @"extended.parameters",
+            @"apple_tracking.collecting.hosts",
+            @"apple_tracking.collecting.resend_period",
+            @"apple_tracking.collecting.retry_period",
         ];
         NSArray *keys = [AMAStartupParametersConfiguration allKeys];
         [[[NSSet setWithArray:keys] should] equal:[NSSet setWithArray:expectedKeys]];
@@ -369,6 +372,20 @@ describe(@"AMAStartupParametersConfiguration", ^{
                 configuration.permissionsCollectingForceSendInterval = value;
             });
         });
+        context(@"applePrivacyResendPeriod", ^{
+            NSString *const key = @"apple_tracking.collecting.resend_period";
+            it(@"Should use valid key", ^{
+                [[storage should] receive:@selector(longLongNumberForKey:error:) withArguments:key, kw_any()];
+                [configuration applePrivacyResendPeriod];
+            });
+            it(@"Should return valid value", ^{
+                [[configuration.applePrivacyResendPeriod should] equal:value];
+            });
+            it(@"Should save valid value", ^{
+                [[storage should] receive:@selector(saveLongLongNumber:forKey:error:) withArguments:value, key, kw_any()];
+                configuration.applePrivacyResendPeriod = value;
+            });
+        });
     });
 
     context(@"Bool values", ^{
@@ -598,6 +615,7 @@ describe(@"AMAStartupParametersConfiguration", ^{
                 });
             });
         });
+        
         context(@"locationHosts", ^{
             NSString *const key = @"location.collecting.hosts";
             it(@"Should use valid key", ^{
@@ -620,6 +638,30 @@ describe(@"AMAStartupParametersConfiguration", ^{
                 });
             });
         });
+        
+        context(@"appleTrackingHosts", ^{
+            NSString *key = @"apple_tracking.collecting.hosts";
+            it(@"Should use valid key", ^{
+                [[storage should] receive:@selector(jsonArrayForKey:error:) withArguments:key, kw_any()];
+                [configuration appleTrackingHosts];
+            });
+            it(@"Should return valid value", ^{
+                [[configuration.appleTrackingHosts should] equal:value];
+            });
+            it(@"Should save valid value", ^{
+                [[storage should] receive:@selector(saveJSONArray:forKey:error:) withArguments:value, key, kw_any()];
+                configuration.appleTrackingHosts = value;
+            });
+            context(@"Non-strings", ^{
+                beforeEach(^{
+                    [storage stub:@selector(jsonArrayForKey:error:) andReturn:nonStringsValue];
+                });
+                it(@"Should return nil", ^{
+                    [[configuration.appleTrackingHosts should] beNil];
+                });
+            });
+        });
+        
         context(@"Attribution deeplink conditions", ^{
             NSArray *deserializedValue = @[ [[AMAPair alloc] initWithKey:@"some key"
                                                                    value:@"some value"] ];
@@ -657,6 +699,37 @@ describe(@"AMAStartupParametersConfiguration", ^{
                 it(@"Serializer should receive nil", ^{
                     [[AMAAttributionSerializer should] receive:@selector(fromJsonArray:) withArguments:nil];
                     [configuration attributionDeeplinkConditions];
+                });
+            });
+        });
+    });
+    
+    context(@"Number Array values", ^{
+        NSArray *const value = @[ @1, @2 ];
+        NSArray *const nonNumberValue = @[ @"foo", @"bar" ];
+        beforeEach(^{
+            [storage stub:@selector(jsonArrayForKey:error:) andReturn:value];
+        });
+        
+        context(@"applePrivacyRetryPeriod", ^{
+            NSString *key = @"apple_tracking.collecting.retry_period";
+            it(@"Should use valid key", ^{
+                [[storage should] receive:@selector(jsonArrayForKey:error:) withArguments:key, kw_any()];
+                [configuration applePrivacyRetryPeriod];
+            });
+            it(@"Should return valid value", ^{
+                [[configuration.applePrivacyRetryPeriod should] equal:value];
+            });
+            it(@"Should save valid value", ^{
+                [[storage should] receive:@selector(saveJSONArray:forKey:error:) withArguments:value, key, kw_any()];
+                configuration.applePrivacyRetryPeriod = value;
+            });
+            context(@"Non-strings", ^{
+                beforeEach(^{
+                    [storage stub:@selector(jsonArrayForKey:error:) andReturn:nonNumberValue];
+                });
+                it(@"Should return nil", ^{
+                    [[configuration.applePrivacyRetryPeriod should] beNil];
                 });
             });
         });

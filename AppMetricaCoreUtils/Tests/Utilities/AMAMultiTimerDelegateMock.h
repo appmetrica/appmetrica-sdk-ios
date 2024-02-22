@@ -5,7 +5,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface AMAMultritimerDelegateMock : NSObject<AMAMultitimerDelegate>
+@interface AMAMultiTimerDelegateMock : NSObject<AMAMultiTimerDelegate>
 
 @property (nonatomic, strong, nullable) XCTestExpectation *fireCalledExpectation;
 @property (nonatomic) BOOL invalidateTimer;

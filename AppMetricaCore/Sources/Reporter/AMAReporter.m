@@ -40,8 +40,11 @@
 #import "AMAAppMetrica+Internal.h"
 #import "AMASessionExpirationHandler.h"
 #import "AMAExtrasContainer.h"
+#import "AMAAdProvider.h"
+#import "AMAPrivacyTimer.h"
+#import "AMAPrivacyTimerStorage.h"
 
-@interface AMAReporter ()
+@interface AMAReporter () <AMAPrivacyTimerDelegate>
 
 @property (nonatomic, copy) NSString *apiKey;
 @property (nonatomic, strong) AMAEventBuilder *eventBuilder;
@@ -56,6 +59,9 @@
 @property (nonatomic, strong, readonly) AMAECommerceTruncator *eCommerceTruncator;
 @property (nonatomic, strong, readonly) AMAAdServicesDataProvider *adServices;
 @property (nonatomic, strong, readonly) AMASessionExpirationHandler *sessionExpirationHandler;
+@property (nonnull, nonatomic, strong, readonly) AMAAdProvider *adProvider;
+@property (nonnull, nonatomic, strong, readonly) AMAPrivacyTimer *privacyTimer;
+@property (nonatomic) BOOL isPrivacyTimerStarted;
 
 @end
 
@@ -79,6 +85,14 @@
         [[AMASessionExpirationHandler alloc] initWithConfiguration:[AMAMetricaConfiguration sharedInstance]
                                                             APIKey:apiKey];
     
+    AMAAdProvider *adProvider = [AMAAdProvider sharedInstance];
+    AMAMetrikaPrivacyTimerStorage *timerStorage =
+        [[AMAMetrikaPrivacyTimerStorage alloc] initWithReporterMetricaConfiguration:[AMAMetricaConfiguration sharedInstance]
+                                                                       stateStorage:reporterStorage.stateStorage];
+    AMAPrivacyTimer *privacyTimer = [[AMAPrivacyTimer alloc] initWithTimerStorage:timerStorage
+                                                                 delegateExecutor:executor
+                                                                       adProvider:adProvider];
+    
     return [self initWithApiKey:apiKey
                            main:main
                 reporterStorage:reporterStorage
@@ -89,7 +103,9 @@
             eCommerceSerializer:[[AMAECommerceSerializer alloc] init]
              eCommerceTruncator:[[AMAECommerceTruncator alloc] init]
                      adServices:adServicesDataProvider
-       sessionExpirationHandler:sessionExpirationHandler];
+       sessionExpirationHandler:sessionExpirationHandler
+                     adProvider:adProvider
+                   privacyTimer:privacyTimer];
 }
 
 - (instancetype)initWithApiKey:(NSString *)apiKey
@@ -103,6 +119,8 @@
             eCommerceTruncator:(AMAECommerceTruncator *)eCommerceTruncator
                     adServices:(AMAAdServicesDataProvider *)adServices
       sessionExpirationHandler:(AMASessionExpirationHandler *)sessionExpirationHandler
+                    adProvider:(AMAAdProvider*)adProvider
+                  privacyTimer:(AMAPrivacyTimer*)privacyTimer
 
 {
     self = [super init];
@@ -120,6 +138,9 @@
         _eCommerceSerializer = eCommerceSerializer;
         _eCommerceTruncator = eCommerceTruncator;
         _sessionExpirationHandler = sessionExpirationHandler;
+        _adProvider = adProvider;
+        _privacyTimer = privacyTimer;
+        privacyTimer.delegate = self;
         
         AMAEventNameHashesStorage *eventHashesStorage = [AMAEventNameHashesStorageFactory storageForApiKey:self.apiKey];
         _occurrenceController = [[AMAEventFirstOccurrenceController alloc] initWithStorage:eventHashesStorage];
@@ -131,6 +152,19 @@
 - (void)start
 {
     [self resumeSession];
+}
+
+- (void)restartPrivacyTimer
+{
+    [self execute:^{
+        if (!self.isPrivacyTimerStarted) {
+            return;
+        }
+        
+        AMALogInfo(@"restart privacy timer execute %@", self.apiKey);
+        [self.privacyTimer stop];
+        [self.privacyTimer start];
+    }];
 }
 
 - (void)setupWithOnStorageRestored:(dispatch_block_t)onStorageRestored
@@ -191,7 +225,14 @@
 
 - (void)resumeSessionWithDate:(NSDate *)date
 {
-    AMALogInfo(@"Resuming session of reporter: %@", self);
+    AMALogInfo(@"Resuming session of reporter: %@", self.apiKey);
+    
+    // only when session started
+    if (!self.isPrivacyTimerStarted) {
+        [self.privacyTimer start];
+        self.isPrivacyTimerStarted = YES;
+    }
+    
     AMASession *currentSession = [self lastSession];
     
     BOOL isSessionBackground = currentSession.type == AMASessionTypeBackground;
@@ -216,6 +257,7 @@
 - (void)pauseSessionWithDate:(NSDate *)date
 {
     AMALogInfo(@"Pausing session of reporter: %@", self);
+    
     [self.executor cancelDelayed];
 
     NSError *error = nil;
@@ -234,7 +276,7 @@
     else {
         [self updateStampOfSession:currentSession withDate:date];
     }
-
+    
     self.isActive = NO;
 }
 
@@ -1047,6 +1089,24 @@
     [self execute:^{
         [self.reporterStorage.stateStorage.appEnvironment clearEnvironment];
     }];
+}
+
+#pragma mark - AMAPrivacyTimerDelegate protocol
+
+- (void)privacyTimerDidFire:(AMAPrivacyTimer *)privacyTimer
+{
+    BOOL needSent = [self.adProvider isAdvertisingTrackingEnabled] && self.privacyTimer.timerStorage.isResendPeriodOutdated;
+    AMALogInfo(@"send privacy event: %@ %d", self.apiKey, needSent);
+    if (needSent) {
+        [self reportEventWithType:AMAEventTypeApplePrivacy
+                             name:nil
+                            value:nil
+                 eventEnvironment:nil
+                   appEnvironment:nil
+                           extras:nil
+                        onFailure:nil];
+        [self.privacyTimer.timerStorage privacyEventSent];
+    }
 }
 
 #pragma mark - Utils

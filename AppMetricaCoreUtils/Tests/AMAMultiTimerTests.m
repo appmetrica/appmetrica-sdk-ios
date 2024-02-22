@@ -1,27 +1,27 @@
 #import <XCTest/XCTest.h>
 #import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
 #import "AMACancellableExecutorMock.h"
-#import "AMAMultritimerDelegateMock.h"
+#import "AMAMultiTimerDelegateMock.h"
 #import "AMAAsyncCancellableExecutorMock.h"
 
-@interface AMAMultitimerTests : XCTestCase
+@interface AMAMultiTimerTests : XCTestCase
 
 @property (nonnull, nonatomic, strong) NSArray<NSNumber *> *delays;
 @property (nonnull, nonatomic, strong) AMACancellableExecutorMock *mockExecutor;
 @property (nonnull, nonatomic, strong) AMAAsyncCancellableExecutorMock *asyncMockExecutor;
 @property (nonnull, nonatomic, strong) AMAMultiTimer *multitimer;
-@property (nonnull, nonatomic, strong) AMAMultritimerDelegateMock *delegateMock;
+@property (nonnull, nonatomic, strong) AMAMultiTimerDelegateMock *delegateMock;
 
 @end
 
-@implementation AMAMultitimerTests
+@implementation AMAMultiTimerTests
 
 - (void)setUp 
 {
     self.delays = @[@(1), @(2), @(3)];
     self.mockExecutor = [[AMACancellableExecutorMock alloc] init];
     self.asyncMockExecutor = [[AMAAsyncCancellableExecutorMock alloc] init];
-    self.delegateMock = [[AMAMultritimerDelegateMock alloc] init];
+    self.delegateMock = [[AMAMultiTimerDelegateMock alloc] init];
     
 }
 

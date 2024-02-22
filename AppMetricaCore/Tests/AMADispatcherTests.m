@@ -282,7 +282,7 @@ describe(@"AMADispatcher", ^{
         context(@"Report controller next request identifier", ^{
             
             it(@"Should return requestIDStorage string", ^{
-                [[[dispatcher reportsControllerNextRequestIdentifier] should]
+                [[[dispatcher reportsControllerNextRequestIdentifierForController:reportsController] should]
                     equal:requestIdentifierStorage.currentMockValue.stringValue];
             });
         });

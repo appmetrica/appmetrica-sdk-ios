@@ -57,6 +57,9 @@
         AMAStorageStringKeySDKsCustomHosts,
         AMAStorageStringKeyStartupUpdateInterval,
         AMAStorageStringKeyExtendedParameters,
+        AMAStorageStringKeyAppleTrackingHosts,
+        AMAStorageStringKeyApplePrivacyResendPeriod,
+        AMAStorageStringKeyAppleRetryPeriods,
     ];
 }
 
@@ -100,6 +103,7 @@ LONG_PROPERTY(permissionsCollectingForceSendInterval, setPermissionsCollectingFo
 LONG_PROPERTY(locationRecordsCountToForceFlush, setLocationRecordsCountToForceFlush, AMAStorageStringKeyLocationRecordsCountToForceFlush);
 LONG_PROPERTY(locationMaxRecordsCountInBatch, setLocationMaxRecordsCountInBatch, AMAStorageStringKeyLocationMaxRecordsCountInBatch);
 LONG_PROPERTY(locationMaxRecordsToStoreLocally, setLocationMaxRecordsToStoreLocally, AMAStorageStringKeyLocationMaxRecordsToStoreLocally);
+LONG_PROPERTY(applePrivacyResendPeriod, setApplePrivacyResendPeriod, AMAStorageStringKeyApplePrivacyResendPeriod);
 
 DOUBLE_PROPERTY(startupUpdateInterval, setStartupUpdateInterval, AMAStorageStringKeyStartupUpdateInterval);
 DOUBLE_PROPERTY(serverTimeOffset, setServerTimeOffset, AMAStorageStringKeyServerTimeOffset);
@@ -125,6 +129,8 @@ ARRAY_PROPERTY(startupHosts, setStartupHosts, AMAStorageStringKeyStartupHosts, [
 ARRAY_PROPERTY(reportHosts, setReportHosts, AMAStorageStringKeyReportHosts, [NSString class]);
 ARRAY_PROPERTY(permissionsCollectingList, setPermissionsCollectingList, AMAStorageStringKeyPermissionsList, [NSString class]);
 ARRAY_PROPERTY(locationHosts, setLocationHosts, AMAStorageStringKeyLocationHosts, [NSString class]);
+ARRAY_PROPERTY(appleTrackingHosts, setAppleTrackingHosts, AMAStorageStringKeyAppleTrackingHosts, [NSString class]);
+ARRAY_PROPERTY(applePrivacyRetryPeriod, setApplePrivacyRetryPeriod, AMAStorageStringKeyAppleRetryPeriods, [NSNumber class]);
 
 BOOL_PROPERTY(permissionsCollectingEnabled, setPermissionsCollectingEnabled, AMAStorageStringKeyPermissionsEnabled);
 BOOL_PROPERTY(extensionsCollectingEnabled, setExtensionsCollectingEnabled, AMAStorageStringKeyExtensionsReportingEnabled);

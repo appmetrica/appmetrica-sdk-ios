@@ -15,103 +15,210 @@
 #import "AMASession.h"
 #import "AMATimeoutRequestsController.h"
 #import "AMAReportHostProviderMock.h"
+#import "AMAReportRequestFactory.h"
+#import "AMAProxyReportsController.h"
 
 SPEC_BEGIN(AMAReportsControllerTests)
 
-describe(@"AMAReportsController", ^{
+NSString *const apiKey = @"API_KEY";
+NSString *const attributionID = @"1";
+NSString *const requestIdentifier = @"23";
+NSString *const firstHost = @"https://appmetrica.com/";
+NSString *const secondHost = @"https://appmetri.ca/";
+NSString *const thirdHost = @"https://appmetrica.io";
+NSArray<NSString *> *const hosts = @[ firstHost, secondHost, thirdHost ];
+NSString *const firstTrackingHost = @"https://tracking.appmetrica.com";
+NSString *const secondTrackingHost = @"https://tracking.appmetri.ca";
+NSString *const thirdTrackingHost = @"https://tracking.appmetrica.io";
+NSArray<NSString *> *const trackingHosts = @[firstTrackingHost, secondTrackingHost, thirdTrackingHost];
+NSData *const responseData = [@"BODY" dataUsingEncoding:NSUTF8StringEncoding];
 
-    NSString *const apiKey = @"API_KEY";
-    NSString *const attributionID = @"1";
-    NSString *const requestIdentifier = @"23";
-    NSString *const firstHost = @"https://appmetrica.com/";
-    NSString *const secondHost = @"https://appmetri.ca/";
-    NSString *const thirdHost = @"https://appmetrica.io";
-    NSArray *const hosts = @[ firstHost, secondHost, thirdHost ];
-    NSData *const responseData = [@"BODY" dataUsingEncoding:NSUTF8StringEncoding];
+AMAReportPayload *__block payload = nil;
+AMAReportPayload *__block secondPayload = nil;
+AMAReportRequestModel *__block firstReportRequestModel = nil;
+AMAReportRequestModel *__block secondReportRequestModel = nil;
+AMAReportRequest *__block reportRequest = nil;
+AMAReportRequest *__block secondReportRequest = nil;
+NSArray *__block reportRequestModels = nil;
+AMAReportEventsBatch __block *firstEventBatch = nil;
+AMAReportEventsBatch __block *secondEventBatch = nil;
 
-    AMAReportPayload *__block payload = nil;
-    AMAReportPayload *__block secondPayload = nil;
-    AMAReportRequestModel *__block firstReportRequestModel = nil;
-    AMAReportRequestModel *__block secondReportRequestModel = nil;
-    AMAReportRequest *__block reportRequest = nil;
-    AMAReportRequest *__block secondReportRequest = nil;
-    NSArray *__block reportRequestModels = nil;
-    AMAReportEventsBatch __block *firstEventBatch = nil;
-    AMAReportEventsBatch __block *secondEventBatch = nil;
+AMAInternalEventsReporter *__block internalEventsReporter = nil;
+AMAHostProviderMock *__block hostProvider = nil;
+AMAHostProviderMock *__block trackingHostProvider = nil;
+AMAReportResponseParser *__block responseParser = nil;
+AMAHTTPRequestsFactoryMock *__block httpRequestsFactory = nil;
+AMAReportPayloadProvider *__block payloadProvider = nil;
+NSObject<AMAReportsControllerDelegate> *__block delegate = nil;
+id<AMAReportsControlling> __block controller = nil;
+AMATimeoutRequestsController *__block timeoutController = nil;
+AMARegularReportRequestFactory *__block requestFactory = nil;
 
-    AMAInternalEventsReporter *__block internalEventsReporter = nil;
-    AMAHostProviderMock *__block hostProvider = nil;
-    AMAReportResponseParser *__block responseParser = nil;
-    AMAHTTPRequestsFactoryMock *__block httpRequestsFactory = nil;
-    AMAReportPayloadProvider *__block payloadProvider = nil;
-    NSObject<AMAReportsControllerDelegate> *__block delegate = nil;
-    AMAReportsController *__block controller = nil;
-    AMATimeoutRequestsController *__block timeoutController = nil;
-
-    beforeEach(^{
-        AMAApplicationState *appstate = [AMAApplicationState new];
-        [AMAApplicationStateManager stub:@selector(applicationState) andReturn:appstate];
-        [AMAApplicationStateManager stub:@selector(stateWithFilledEmptyValues:) andReturn:appstate];
-        
-        NSArray *events = @[
-            [AMAEvent mock],
-            [AMAEvent mock],
-            [AMAEvent mock],
-            [AMAEvent mock],
-            [AMAEvent mock],
-        ];
-
-        firstEventBatch =
-            [[AMAReportEventsBatch alloc] initWithSession:[AMASession mock]
-                                           appEnvironment:@{ @"first": @1 }
-                                                   events:[events subarrayWithRange:NSMakeRange(0, 1)]];
-        secondEventBatch =
-            [[AMAReportEventsBatch alloc] initWithSession:[AMASession mock]
-                                           appEnvironment:@{ @"second": @2 }
-                                                   events:[events subarrayWithRange:NSMakeRange(1, 4)]];
-        firstReportRequestModel = [AMAReportRequestModel reportRequestModelWithApiKey:apiKey
-                                                                        attributionID:attributionID
-                                                                       appEnvironment:@{}
-                                                                             appState:appstate
-                                                                     inMemoryDatabase:NO
-                                                                        eventsBatches:@[ firstEventBatch, secondEventBatch ]];
-
-        payload = [[AMAReportPayload alloc] initWithReportModel:firstReportRequestModel data:[NSData data]];
-        reportRequest = [AMAReportRequestMock reportRequestWithPayload:payload requestIdentifier:requestIdentifier];
-        payloadProvider = [AMAReportPayloadProvider nullMock];
-        [payloadProvider stub:@selector(generatePayloadWithRequestModel:error:) andReturn:payload];
-        reportRequestModels = @[ firstReportRequestModel ];
-
-        secondReportRequestModel = [[AMAReportRequestModel alloc] init];
-        secondPayload = [[AMAReportPayload alloc] initWithReportModel:secondReportRequestModel data:[NSData data]];
-        secondReportRequest = [AMAReportRequestMock reportRequestWithPayload:secondPayload
-                                                           requestIdentifier:requestIdentifier];
-
-        delegate = [KWMock nullMockForProtocol:@protocol(AMAReportsControllerDelegate)];
-        [delegate stub:@selector(reportsControllerNextRequestIdentifier) andReturn:requestIdentifier];
-
-        internalEventsReporter = [AMAInternalEventsReporter nullMock];
-        [AMAAppMetrica stub:@selector(sharedInternalEventsReporter) andReturn:internalEventsReporter];
-
-        responseParser = [AMAReportResponseParser nullMock];
-        AMAReportResponse *response = [[AMAReportResponse alloc] initWithStatus:AMAReportResponseStatusAccepted];
-        [responseParser stub:@selector(responseForData:) andReturn:response withArguments:responseData];
-
-        AMACurrentQueueExecutor *executor = [[AMACurrentQueueExecutor alloc] init];
-        hostProvider = [[AMAHostProviderMock alloc] initWithItems:hosts];
-        httpRequestsFactory = [[AMAHTTPRequestsFactoryMock alloc] init];
+void (^beforeEachReporter)() = ^{
+    AMAApplicationState *appstate = [AMAApplicationState new];
+    [AMAApplicationStateManager stub:@selector(applicationState) andReturn:appstate];
+    [AMAApplicationStateManager stub:@selector(stateWithFilledEmptyValues:) andReturn:appstate];
     
-        timeoutController = [AMATimeoutRequestsController nullMock];
-        [timeoutController stub:@selector(isAllowed) andReturn:theValue(YES)];
-        
-        controller = [[AMAReportsController alloc] initWithExecutor:executor
-                                                       hostProvider:hostProvider
-                                                httpRequestsFactory:httpRequestsFactory
-                                                     responseParser:responseParser
-                                                    payloadProvider:payloadProvider
-                                          timeoutRequestsController:timeoutController];
-        controller.delegate = delegate;
-    });
+    NSArray *events = @[
+        [AMAEvent mock],
+        [AMAEvent mock],
+        [AMAEvent mock],
+        [AMAEvent mock],
+        [AMAEvent mock],
+    ];
+    
+    firstEventBatch =
+        [[AMAReportEventsBatch alloc] initWithSession:[AMASession mock]
+                                       appEnvironment:@{ @"first": @1 }
+                                               events:[events subarrayWithRange:NSMakeRange(0, 1)]];
+    secondEventBatch =
+        [[AMAReportEventsBatch alloc] initWithSession:[AMASession mock]
+                                       appEnvironment:@{ @"second": @2 }
+                                               events:[events subarrayWithRange:NSMakeRange(1, 4)]];
+    firstReportRequestModel = [AMAReportRequestModel reportRequestModelWithApiKey:apiKey
+                                                                    attributionID:attributionID
+                                                                   appEnvironment:@{}
+                                                                         appState:appstate
+                                                                 inMemoryDatabase:NO
+                                                                    eventsBatches:@[ firstEventBatch, secondEventBatch ]];
+
+    payload = [[AMAReportPayload alloc] initWithReportModel:firstReportRequestModel data:[NSData data]];
+    reportRequest = [AMAReportRequestMock reportRequestWithPayload:payload
+                                                 requestIdentifier:requestIdentifier
+                                            requestParamterOptions:AMARequestParametersDefault];
+    payloadProvider = [AMAReportPayloadProvider nullMock];
+    [payloadProvider stub:@selector(generatePayloadWithRequestModel:error:) andReturn:payload];
+    reportRequestModels = @[ firstReportRequestModel ];
+
+    secondReportRequestModel = [[AMAReportRequestModel alloc] init];
+    secondPayload = [[AMAReportPayload alloc] initWithReportModel:secondReportRequestModel data:[NSData data]];
+    secondReportRequest = [AMAReportRequestMock reportRequestWithPayload:secondPayload
+                                                       requestIdentifier:requestIdentifier
+                                                  requestParamterOptions:AMARequestParametersDefault];
+
+    delegate = [KWMock nullMockForProtocol:@protocol(AMAReportsControllerDelegate)];
+    [delegate stub:@selector(reportsControllerNextRequestIdentifier) andReturn:requestIdentifier];
+
+    internalEventsReporter = [AMAInternalEventsReporter nullMock];
+    [AMAAppMetrica stub:@selector(sharedInternalEventsReporter) andReturn:internalEventsReporter];
+
+    responseParser = [AMAReportResponseParser nullMock];
+    AMAReportResponse *response = [[AMAReportResponse alloc] initWithStatus:AMAReportResponseStatusAccepted];
+    [responseParser stub:@selector(responseForData:) andReturn:response withArguments:responseData];
+
+    AMACurrentQueueExecutor *executor = [[AMACurrentQueueExecutor alloc] init];
+    hostProvider = [[AMAHostProviderMock alloc] initWithItems:hosts];
+    httpRequestsFactory = [[AMAHTTPRequestsFactoryMock alloc] init];
+
+    timeoutController = [AMATimeoutRequestsController nullMock];
+    [timeoutController stub:@selector(isAllowed) andReturn:theValue(YES)];
+    
+    requestFactory = [[AMARegularReportRequestFactory alloc] init];
+    
+    controller = [[AMAReportsController alloc] initWithExecutor:executor
+                                                   hostProvider:hostProvider
+                                            httpRequestsFactory:httpRequestsFactory
+                                                 responseParser:responseParser
+                                                payloadProvider:payloadProvider
+                                      timeoutRequestsController:timeoutController
+                                           reportRequestFactory:requestFactory];
+    controller.delegate = delegate;
+};
+
+void (^beforeEachProxyReporter)() = ^{
+    AMAApplicationState *appstate = [AMAApplicationState new];
+    [AMAApplicationStateManager stub:@selector(applicationState) andReturn:appstate];
+    [AMAApplicationStateManager stub:@selector(stateWithFilledEmptyValues:) andReturn:appstate];
+    
+    NSMutableArray *events = @[
+        [AMAEvent mock],
+        [AMAEvent mock],
+        [AMAEvent mock],
+        [AMAEvent mock],
+        [AMAEvent mock],
+    ].mutableCopy;
+    
+    for (AMAEvent *event in events) {
+        [event stub:@selector(type) andReturn:theValue(AMAEventTypeClient)];
+    }
+    
+    AMAEvent *trackingEvent = [AMAEvent mock];
+    [trackingEvent stub:@selector(type) andReturn:theValue(AMAEventTypeApplePrivacy)];
+    [events addObject:trackingEvent];
+
+    firstEventBatch =
+        [[AMAReportEventsBatch alloc] initWithSession:[AMASession mock]
+                                       appEnvironment:@{ @"first": @1 }
+                                               events:[events subarrayWithRange:NSMakeRange(0, 1)]];
+    secondEventBatch =
+        [[AMAReportEventsBatch alloc] initWithSession:[AMASession mock]
+                                       appEnvironment:@{ @"second": @2 }
+                                               events:[events subarrayWithRange:NSMakeRange(1, 4)]];
+    firstReportRequestModel = [AMAReportRequestModel reportRequestModelWithApiKey:apiKey
+                                                                    attributionID:attributionID
+                                                                   appEnvironment:@{}
+                                                                         appState:appstate
+                                                                 inMemoryDatabase:NO
+                                                                    eventsBatches:@[ firstEventBatch, secondEventBatch ]];
+
+    payload = [[AMAReportPayload alloc] initWithReportModel:firstReportRequestModel data:[NSData data]];
+    reportRequest = [AMAReportRequestMock reportRequestWithPayload:payload
+                                                 requestIdentifier:requestIdentifier
+                                            requestParamterOptions:AMARequestParametersDefault];
+    payloadProvider = [AMAReportPayloadProvider nullMock];
+    [payloadProvider stub:@selector(generatePayloadWithRequestModel:error:) andReturn:payload];
+    reportRequestModels = @[ firstReportRequestModel ];
+
+    secondReportRequestModel = [[AMAReportRequestModel alloc] init];
+    secondPayload = [[AMAReportPayload alloc] initWithReportModel:secondReportRequestModel data:[NSData data]];
+    secondReportRequest = [AMAReportRequestMock reportRequestWithPayload:secondPayload
+                                                       requestIdentifier:requestIdentifier
+                                                  requestParamterOptions:AMARequestParametersDefault];
+
+    delegate = [KWMock nullMockForProtocol:@protocol(AMAReportsControllerDelegate)];
+    [delegate stub:@selector(reportsControllerNextRequestIdentifier) andReturn:requestIdentifier];
+
+    internalEventsReporter = [AMAInternalEventsReporter nullMock];
+    [AMAAppMetrica stub:@selector(sharedInternalEventsReporter) andReturn:internalEventsReporter];
+
+    responseParser = [AMAReportResponseParser nullMock];
+    AMAReportResponse *response = [[AMAReportResponse alloc] initWithStatus:AMAReportResponseStatusAccepted];
+    [responseParser stub:@selector(responseForData:) andReturn:response withArguments:responseData];
+
+    AMACurrentQueueExecutor *executor = [[AMACurrentQueueExecutor alloc] init];
+    hostProvider = [[AMAHostProviderMock alloc] initWithItems:hosts];
+    httpRequestsFactory = [[AMAHTTPRequestsFactoryMock alloc] init];
+    
+    trackingHostProvider = [[AMAHostProviderMock alloc] initWithItems:trackingHosts];
+
+    timeoutController = [AMATimeoutRequestsController nullMock];
+    [timeoutController stub:@selector(isAllowed) andReturn:theValue(YES)];
+    
+    requestFactory = [[AMARegularReportRequestFactory alloc] init];
+    
+    AMAReportsController *regularController = [[AMAReportsController alloc] initWithExecutor:executor
+                                                                                hostProvider:hostProvider
+                                                                         httpRequestsFactory:httpRequestsFactory
+                                                                              responseParser:responseParser
+                                                                             payloadProvider:payloadProvider
+                                                                   timeoutRequestsController:timeoutController
+                                                                        reportRequestFactory:requestFactory];
+    
+    AMAReportsController *trackingController = [[AMAReportsController alloc] initWithExecutor:executor
+                                                                                 hostProvider:trackingHostProvider
+                                                                          httpRequestsFactory:httpRequestsFactory
+                                                                               responseParser:responseParser
+                                                                              payloadProvider:payloadProvider
+                                                                    timeoutRequestsController:timeoutController
+                                                                         reportRequestFactory:requestFactory];
+    
+    controller = [[AMAProxyReportsController alloc] initWithExecutor:executor
+                                            regularReportsController:regularController
+                                           trackingReportsController:trackingController];
+    controller.delegate = delegate;
+};
+
+void (^testBlock)() = ^{
 
     context(@"The the first host is correct", ^{
 
@@ -830,7 +937,7 @@ describe(@"AMAReportsController", ^{
     context(@"Multiple requests", ^{
 
         beforeEach(^{
-            [AMAReportRequest stub:@selector(reportRequestWithPayload:requestIdentifier:) withBlock:^id(NSArray *params) {
+            [AMAReportRequest stub:@selector(reportRequestWithPayload:requestIdentifier:requestParamterOptions:) withBlock:^id(NSArray *params) {
                 AMAReportPayload *payload = params[0];
                 if ([payload.model isEqual:firstReportRequestModel]) {
                     return reportRequest;
@@ -1152,12 +1259,30 @@ describe(@"AMAReportsController", ^{
 
     });
     
-    it(@"Should conform to AMAHTTPRequestDelegate", ^{
-        [[controller should] conformToProtocol:@protocol(AMAHTTPRequestDelegate)];
+};
+
+describe(@"AMAReportsControllerTests", ^{
+    
+    context(@"AMARepoterController", ^{
+        beforeEach(beforeEachReporter);
+        testBlock();
+        
+        it(@"Should conform to AMAHTTPRequestDelegate", ^{
+            AMAReportsController *cntrl = (AMAReportsController*)controller;
+            [[cntrl should] conformToProtocol:@protocol(AMAHTTPRequestDelegate)];
+        });
+        it(@"Should conform to AMAReportPayloadProviderDelegate", ^{
+            AMAReportsController *cntrl = (AMAReportsController*)controller;
+            [[cntrl should] conformToProtocol:@protocol(AMAReportPayloadProviderDelegate)];
+        });
     });
-    it(@"Should conform to AMAReportPayloadProviderDelegate", ^{
-        [[controller should] conformToProtocol:@protocol(AMAReportPayloadProviderDelegate)];
+    
+    describe(@"AMAProxyRepoterController", ^{
+        beforeEach(beforeEachProxyReporter);
+        testBlock();
     });
+    
 });
+
 
 SPEC_END

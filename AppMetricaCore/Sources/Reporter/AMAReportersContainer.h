@@ -9,4 +9,6 @@
 
 - (void)setReporter:(AMAReporter *)reporter forApiKey:(NSString *)apiKey;
 
+- (void)restartPrivacyTimer;
+
 @end

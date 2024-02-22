@@ -66,7 +66,8 @@ describe(@"AMAReportRequestTests", ^{
         AMAReportPayloadProvider *provider = [[AMAReportPayloadProvider alloc] init];
         AMAReportPayload *payload = [provider generatePayloadWithRequestModel:requestModel error:nil];
         AMAReportRequest *request = [AMAReportRequest reportRequestWithPayload:payload
-                                                             requestIdentifier:requestIdentifier];
+                                                             requestIdentifier:requestIdentifier
+                                                        requestParamterOptions:AMARequestParametersDefault];
         request.host = host;
         return request;
     };
@@ -148,9 +149,6 @@ describe(@"AMAReportRequestTests", ^{
         it(@"Should add api_key_128 to GET parameters", ^{
             [[GETParameters[@"api_key_128"] should] equal:apiKey];
         });
-        it(@"Should add ifa to GET parameters", ^{
-            [[GETParameters[@"ifa"] should] equal:helper.IFA];
-        });
         it(@"Should add encrypted_request to GET parameters", ^{
             [[GETParameters[@"encrypted_request"] should] equal:@"1"];
         });
@@ -177,7 +175,9 @@ describe(@"AMAReportRequestTests", ^{
                 [requestModels[0] copyWithAppState:AMAApplicationStateManager.applicationState];
             AMAReportPayloadProvider *payloadProvider = [[AMAReportPayloadProvider alloc] init];
             AMAReportPayload *payload = [payloadProvider generatePayloadWithRequestModel:requestModel error:nil];
-            request = [AMAReportRequest reportRequestWithPayload:payload requestIdentifier:@"1"];
+            request = [AMAReportRequest reportRequestWithPayload:payload
+                                               requestIdentifier:@"1"
+                                          requestParamterOptions:AMARequestParametersDefault];
             request.host = host;
         });
 
@@ -216,7 +216,9 @@ describe(@"AMAReportRequestTests", ^{
                 [requestModels[0] copyWithAppState:AMAApplicationStateManager.applicationState];
             AMAReportPayloadProvider *payloadProvider = [[AMAReportPayloadProvider alloc] init];
             AMAReportPayload *payload = [payloadProvider generatePayloadWithRequestModel:requestModel error:nil];
-            AMAReportRequest *request = [AMAReportRequest reportRequestWithPayload:payload requestIdentifier:@"23"];
+            AMAReportRequest *request = [AMAReportRequest reportRequestWithPayload:payload
+                                                                 requestIdentifier:@"23"
+                                                            requestParamterOptions:AMARequestParametersDefault];
             request.host = host;
             GETParameters = [request GETParameters];
             NSURLRequest *URLRequest = [request buildURLRequest];
@@ -521,7 +523,9 @@ describe(@"AMAReportRequestTests", ^{
                     [requestModels[0] copyWithAppState:AMAApplicationStateManager.applicationState];
                 AMAReportPayloadProvider *payloadProvider = [[AMAReportPayloadProvider alloc] init];
                 AMAReportPayload *payload = [payloadProvider generatePayloadWithRequestModel:requestModel error:nil];
-                AMAReportRequest *request = [AMAReportRequest reportRequestWithPayload:payload requestIdentifier:@"1"];
+                AMAReportRequest *request = [AMAReportRequest reportRequestWithPayload:payload
+                                                                     requestIdentifier:@"1"
+                                                                requestParamterOptions:AMARequestParametersDefault];
                 request.host = host;
                 NSURLRequest *URLRequest = [request buildURLRequest];
                 NSString *expectedString = [NSString stringWithFormat:@"uuid=%@", UUID];

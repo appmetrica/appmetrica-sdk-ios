@@ -19,6 +19,7 @@ static NSString *const kAMAKeyLastStateSendDate = @"last_state_send_date";
 static NSString *const kAMAKeyExtras = @"extras";
 
 static NSString *const kAMAKeyLastASATokenSendDate = @"last_asa_token_send_date";
+static NSString *const kAMAKeyLastPrivacySendDate = @"last_privacy_send_date";
 
 @interface AMAReporterStateStorage ()
 
@@ -34,6 +35,7 @@ static NSString *const kAMAKeyLastASATokenSendDate = @"last_asa_token_send_date"
 @property (nonatomic, strong, readwrite) AMAEnvironmentContainer *appEnvironment;
 @property (nonatomic, strong, readwrite) NSDate *lastStateSendDate;
 @property (nonatomic, strong, readwrite) NSDate *lastASATokenSendDate;
+@property (atomic, strong, readwrite) NSDate *privacyLastSendDate;
 @property (nullable, nonatomic, strong, readwrite) AMAExtrasContainer *extrasContainer;
 
 @end
@@ -92,6 +94,7 @@ static NSString *const kAMAKeyLastASATokenSendDate = @"last_asa_token_send_date"
         kAMAKeyLastStateSendDate,
         kAMAKeyLastASATokenSendDate,
         kAMAKeyExtras,
+        kAMAKeyLastPrivacySendDate,
     ]];
 }
 
@@ -142,6 +145,7 @@ static NSString *const kAMAKeyLastASATokenSendDate = @"last_asa_token_send_date"
 
     self.lastStateSendDate = [loadedStorage dateForKey:kAMAKeyLastStateSendDate error:nil] ?: [NSDate distantPast];
     self.lastASATokenSendDate = [loadedStorage dateForKey:kAMAKeyLastASATokenSendDate error:NULL] ?: [NSDate distantPast];
+    self.privacyLastSendDate = [loadedStorage dateForKey:kAMAKeyLastPrivacySendDate error:nil] ?: [NSDate distantPast];
 }
 
 - (void)markFirstEventSent
@@ -223,6 +227,11 @@ static NSString *const kAMAKeyLastASATokenSendDate = @"last_asa_token_send_date"
     }
 }
 
+- (void)markLastPrivacySentNow
+{
+    self.privacyLastSendDate = [self updateToCurrentDateWithKey:kAMAKeyLastPrivacySendDate];
+}
+
 - (NSDate *)updateToCurrentDateWithKey:(NSString *)key
 {
     NSDate *date = self.dateProvider.currentDate;
@@ -291,7 +300,6 @@ static NSString *const kAMAKeyLastASATokenSendDate = @"last_asa_token_send_date"
 
     [self.storageProvider.syncStorage saveData:data forKey:kAMAKeyExtras error:nil];
 }
-
 
 #pragma mark - Migration
 

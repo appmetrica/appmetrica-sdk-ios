@@ -10,6 +10,7 @@
 #import "AMAReportRequestModel.h"
 #import "AMARequestModelSplitter.h"
 #import "AMATimeoutRequestsController.h"
+#import "AMAReportRequestFactory.h"
 
 NSString *const kAMAReportsControllerErrorDomain = @"io.appmetrica.AMAReportController";
 static NSUInteger const kAMATooBigRequestSplitSize = 2;
@@ -22,6 +23,7 @@ static NSUInteger const kAMATooBigRequestSplitSize = 2;
 @property (nonatomic, strong, readonly) AMAReportResponseParser *responseParser;
 @property (nonatomic, strong, readonly) AMAReportPayloadProvider *payloadProvider;
 @property (nonatomic, strong, readonly) AMATimeoutRequestsController *timeoutRequestsController;
+@property (nonatomic, strong, readonly) id<AMAReportRequestFactory> reportRequestFactory;
 
 @property (nonatomic, assign) BOOL inProgress;
 @property (nonatomic, assign) BOOL isRetryAllowed;
@@ -35,18 +37,21 @@ static NSUInteger const kAMATooBigRequestSplitSize = 2;
 
 - (instancetype)initWithExecutor:(id<AMAAsyncExecuting>)executor
        timeoutRequestsController:(AMATimeoutRequestsController *)timeoutRequestsController
+            reportRequestFactory:(id<AMAReportRequestFactory>)reportRequestFactory
 {
     id<AMAResettableIterable> hostProvider = [[AMAReportHostProvider alloc] init];
     AMAHTTPRequestsFactory *requestsFactory = [[AMAHTTPRequestsFactory alloc] init];
     AMAReportResponseParser *responseParser = [[AMAReportResponseParser alloc] init];
     AMAReportPayloadProvider *payloadProvider = [[AMAReportPayloadProvider alloc] init];
+    
     payloadProvider.delegate = self;
     return [self initWithExecutor:executor
                      hostProvider:hostProvider
               httpRequestsFactory:requestsFactory
                    responseParser:responseParser
                   payloadProvider:payloadProvider
-        timeoutRequestsController:timeoutRequestsController];
+        timeoutRequestsController:timeoutRequestsController
+             reportRequestFactory:reportRequestFactory];
 }
 
 - (instancetype)initWithExecutor:(id<AMAAsyncExecuting>)executor
@@ -55,6 +60,7 @@ static NSUInteger const kAMATooBigRequestSplitSize = 2;
                   responseParser:(AMAReportResponseParser *)responseParser
                  payloadProvider:(AMAReportPayloadProvider *)payloadProvider
        timeoutRequestsController:(AMATimeoutRequestsController *)timeoutRequestsController
+            reportRequestFactory:(id<AMAReportRequestFactory>)reportRequestFactory
 {
     self = [super init];
     if (self != nil) {
@@ -65,6 +71,7 @@ static NSUInteger const kAMATooBigRequestSplitSize = 2;
         _payloadProvider = payloadProvider;
         _requestModels = [NSMutableArray array];
         _timeoutRequestsController = timeoutRequestsController;
+        _reportRequestFactory = reportRequestFactory;
     }
     return self;
 }
@@ -115,16 +122,16 @@ static NSUInteger const kAMATooBigRequestSplitSize = 2;
             
             [self.hostProvider reset];
             [self cancelCurrentHTTPRequest];
-            NSString *requestIdentifier = [self.delegate reportsControllerNextRequestIdentifier];
-            AMAReportRequest *request = [AMAReportRequest reportRequestWithPayload:payload
-                                                                 requestIdentifier:requestIdentifier];
+            NSString *requestIdentifier = [self.delegate reportsControllerNextRequestIdentifierForController:self];
+            AMAReportRequest *request = [self.reportRequestFactory reportRequestWithPayload:payload
+                                                                          requestIdentifier:requestIdentifier];
             AMAHTTPRequestor *httpRequestor = [self httpRequestorForReportRequest:request];
             if (httpRequestor != nil) {
                 self.reportRequest = request;
                 self.currentHTTPRequestor = httpRequestor;
                 self.isRetryAllowed = YES;
-                AMALogInfo(@"Sending to apiKey %@ events %@", requestModel.apiKey,
-                                   requestModel.eventsBatches);
+                AMALogInfo(@"Sending to apiKey %@ host %@ events %@", requestModel.apiKey,
+                                   request.host, requestModel.events);
                 [httpRequestor start];
             }
             else {
@@ -179,8 +186,8 @@ static NSUInteger const kAMATooBigRequestSplitSize = 2;
     [payloads enumerateObjectsWithOptions:NSEnumerationReverse usingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
         if (idx == 0) {
             AMAReportPayload *payload = [self.payloadProvider generatePayloadWithRequestModel:obj error:&error];
-            self.reportRequest = [AMAReportRequest reportRequestWithPayload:payload
-                                                          requestIdentifier:self.reportRequest.requestIdentifier];
+            self.reportRequest = [self.reportRequestFactory reportRequestWithPayload:payload
+                                                                   requestIdentifier:self.reportRequest.requestIdentifier];
         }
         else {
             [self.requestModels insertObject:obj atIndex:0];
@@ -197,7 +204,13 @@ static NSUInteger const kAMATooBigRequestSplitSize = 2;
 
 - (AMAHTTPRequestor *)httpRequestorForReportRequest:(AMAReportRequest *)request
 {
-    request.host = self.hostProvider.current;
+    NSString *host = self.hostProvider.current;
+    if ([host length] == 0) {
+        AMALogWarn(@"host provider is empty, don't send request %@", request);
+        return nil;
+    }
+    
+    request.host = host;
     AMAHTTPRequestor *httpRequestor = [self.httpRequestsFactory requestorForRequest:request];
     httpRequestor.delegate = self;
     httpRequestor.delegateExecutor = self.executor;

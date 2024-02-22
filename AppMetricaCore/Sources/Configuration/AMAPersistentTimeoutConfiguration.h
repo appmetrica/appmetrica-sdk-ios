@@ -9,6 +9,7 @@ typedef NSString *AMAHostType;
 extern AMAHostType const AMAStartupHostType;
 extern AMAHostType const AMAReportHostType;
 extern AMAHostType const AMALocationHostType;
+extern AMAHostType const AMATrackingHostType;
 
 @interface AMAPersistentTimeoutConfiguration : NSObject
 

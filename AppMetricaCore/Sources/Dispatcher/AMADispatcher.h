@@ -3,7 +3,7 @@
 
 @protocol AMADispatcherDelegate;
 @protocol AMAAsyncExecuting;
-@class AMAReportsController;
+@protocol AMAReportsControlling;
 @class AMAReporterStorage;
 @class AMATimeoutRequestsController;
 
@@ -17,11 +17,13 @@
 
 - (instancetype)initWithReporterStorage:(AMAReporterStorage *)reporterStorage
                                    main:(BOOL)main
-                      timeoutController:(AMATimeoutRequestsController *)timeoutController;
+                reportTimeoutController:(AMATimeoutRequestsController *)reportTimeoutController
+              trackingTimeoutController:(AMATimeoutRequestsController *)trackingTimeoutController;
+
 - (instancetype)initWithReporterStorage:(AMAReporterStorage *)reporterStorage
                                    main:(BOOL)main
                                executor:(id<AMAAsyncExecuting>)executor
-                      reportsController:(AMAReportsController *)reportsController;
+                      reportsController:(id<AMAReportsControlling>)reportsController;
 
 - (void)cancelPending;
 - (void)performReport;

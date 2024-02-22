@@ -3,6 +3,7 @@
 
 @protocol AMAAsyncExecuting;
 @protocol AMAResettableIterable;
+@protocol AMAReportRequestFactory;
 @class AMAHTTPRequestsFactory;
 @class AMAReportRequest;
 @class AMAReportsController;
@@ -12,6 +13,8 @@
 @class AMAReportPayloadProvider;
 @class AMATimeoutRequestsController;
 @class AMAReportHostProvider;
+
+NS_ASSUME_NONNULL_BEGIN
 
 extern NSErrorDomain const kAMAReportsControllerErrorDomain;
 
@@ -23,37 +26,55 @@ typedef NS_ERROR_ENUM(kAMAReportsControllerErrorDomain, AMAReportsControllerErro
     AMAReportsControllerErrorTimeout,
 };
 
+@protocol AMAReportsControlling;
+
 @protocol AMAReportsControllerDelegate <NSObject>
 
 @required
-- (NSString *)reportsControllerNextRequestIdentifier;
+- (NSString *)reportsControllerNextRequestIdentifierForController:(id<AMAReportsControlling>)controller;
 
-- (void)reportsControllerDidFinishWithSuccess:(AMAReportsController *)controller;
+- (void)reportsControllerDidFinishWithSuccess:(id<AMAReportsControlling>)controller;
 
-- (void)reportsController:(AMAReportsController *)controller didReportRequest:(AMAReportRequestModel *)requestModel;
-- (void)reportsController:(AMAReportsController *)controller
+- (void)reportsController:(id<AMAReportsControlling>)controller didReportRequest:(AMAReportRequestModel *)requestModel;
+- (void)reportsController:(id<AMAReportsControlling>)controller
            didFailRequest:(AMAReportRequestModel *)requestModel
                 withError:(NSError *)error;
 
 @end
 
-@interface AMAReportsController : NSObject
+NS_SWIFT_NAME(ReportsControlling)
+@protocol AMAReportsControlling <NSObject>
 
-@property (nonatomic, weak) id<AMAReportsControllerDelegate> delegate;
+@required
+@property (nullable, nonatomic, weak) id<AMAReportsControllerDelegate> delegate;
+- (void)reportRequestModelsFromArray:(NSArray<AMAReportRequestModel *> *)requestModels;
+- (void)cancelPendingRequests;
+
+@end
+
+
+NS_SWIFT_NAME(ReportsController)
+@interface AMAReportsController : NSObject <AMAReportsControlling>
+
+@property (nullable, nonatomic, weak) id<AMAReportsControllerDelegate> delegate;
 
 - (instancetype)init NS_UNAVAILABLE;
 + (instancetype)new NS_UNAVAILABLE;
 
 - (instancetype)initWithExecutor:(id<AMAAsyncExecuting>)executor
-       timeoutRequestsController:(AMATimeoutRequestsController *)timeoutRequestsController;
+       timeoutRequestsController:(AMATimeoutRequestsController *)timeoutRequestsController
+            reportRequestFactory:(id<AMAReportRequestFactory>)reportRequestFactory;
 - (instancetype)initWithExecutor:(id<AMAAsyncExecuting>)executor
                     hostProvider:(id<AMAResettableIterable>)hostProvider
              httpRequestsFactory:(AMAHTTPRequestsFactory *)httpRequestsFactory
                   responseParser:(AMAReportResponseParser *)responseParser
                  payloadProvider:(AMAReportPayloadProvider *)payloadProvider
-       timeoutRequestsController:(AMATimeoutRequestsController *)timeoutRequestsController;
+       timeoutRequestsController:(AMATimeoutRequestsController *)timeoutRequestsController
+            reportRequestFactory:(id<AMAReportRequestFactory>)reportRequestFactory;
 
 - (void)reportRequestModelsFromArray:(NSArray<AMAReportRequestModel *> *)requestModels;
 - (void)cancelPendingRequests;
 
 @end
+
+NS_ASSUME_NONNULL_END

@@ -4,25 +4,25 @@
 @class AMAMultiTimer;
 @protocol AMACancelableExecuting;
 
-typedef NS_ENUM(NSInteger, AMAMultitimerStatus) {
+typedef NS_ENUM(NSInteger, AMAMultiTimerStatus) {
     AMAMultitimerStatusNotStarted,
     AMAMultitimerStatusStarted,
 };
 
 NS_ASSUME_NONNULL_BEGIN
 
-@protocol AMAMultitimerDelegate <NSObject>
+@protocol AMAMultiTimerDelegate <NSObject>
 - (void)multitimerDidFire:(AMAMultiTimer *)multitimer;
 @end
 
 @interface AMAMultiTimer : NSObject
 
-@property (nonatomic, weak) id<AMAMultitimerDelegate> delegate;
-@property (nonatomic) AMAMultitimerStatus status;
+@property (nonatomic, weak) id<AMAMultiTimerDelegate> delegate;
+@property (nonatomic) AMAMultiTimerStatus status;
 
 - (instancetype)initWithDelays:(NSArray<NSNumber *> *)delays
                       executor:(id<AMACancelableExecuting>)executor
-                      delegate:(nullable id<AMAMultitimerDelegate>)delegate;
+                      delegate:(nullable id<AMAMultiTimerDelegate>)delegate;
 
 - (void)start;
 - (void)invalidate;

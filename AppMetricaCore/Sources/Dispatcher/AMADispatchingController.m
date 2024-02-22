@@ -9,7 +9,8 @@
 
 @interface AMADispatchingController () <AMADispatcherDelegate>
 
-@property (nonatomic, strong, readonly) AMATimeoutRequestsController *timeoutController;
+@property (nonatomic, strong, readonly) AMATimeoutRequestsController *reportTimeoutController;
+@property (nonatomic, strong, readonly) AMATimeoutRequestsController *trackingTimeoutController;
 
 @property (nonatomic, strong, readonly) NSObject *dispatcherLock;
 @property (nonatomic, strong, readonly) NSMutableDictionary<NSString *, AMADispatcher *> *dispatchers;
@@ -28,8 +29,10 @@
 {
     self = [super init];
     if (self != nil) {
-        _timeoutController = [[AMATimeoutRequestsController alloc] initWithHostType:AMAReportHostType
-                                                                      configuration:timeoutConfiguration];
+        _reportTimeoutController = [[AMATimeoutRequestsController alloc] initWithHostType:AMAReportHostType
+                                                                            configuration:timeoutConfiguration];
+        _trackingTimeoutController = [[AMATimeoutRequestsController alloc] initWithHostType:AMATrackingHostType
+                                                                              configuration:timeoutConfiguration];
 
         _dispatcherLock = [NSObject new];
         _dispatchers = [NSMutableDictionary dictionary];
@@ -49,7 +52,8 @@
 {
     AMADispatcher *dispatcher = [[AMADispatcher alloc] initWithReporterStorage:reporterStorage
                                                                           main:main
-                                                             timeoutController:self.timeoutController];
+                                                       reportTimeoutController:self.reportTimeoutController
+                                                     trackingTimeoutController:self.trackingTimeoutController];
     dispatcher.delegate = self;
     @synchronized (self.dispatcherLock) {
         self.dispatchers[reporterStorage.apiKey] = dispatcher;

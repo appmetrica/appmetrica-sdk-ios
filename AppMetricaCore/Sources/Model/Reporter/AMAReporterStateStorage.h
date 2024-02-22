@@ -32,6 +32,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, strong, readonly) NSDate *lastASATokenSendDate;
 
+@property (atomic, strong, readonly) NSDate *privacyLastSendDate;
+
 + (instancetype)new NS_UNAVAILABLE;
 - (instancetype)init NS_UNAVAILABLE;
 
@@ -53,6 +55,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)markASATokenSentNow;
 - (void)incrementOpenID;
+
+- (void)markLastPrivacySentNow;
 
 @end
 

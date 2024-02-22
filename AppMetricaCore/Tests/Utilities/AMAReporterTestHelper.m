@@ -24,6 +24,9 @@
 #import "AMAECommerceTruncator.h"
 #import "AMAAdServicesDataProvider.h"
 #import "AMASessionExpirationHandler.h"
+#import "AMAAdProvider.h"
+#import "AMAPrivacyTimer.h"
+#import "AMAPrivacyTimerStorage.h"
 
 @interface AMAReporterTestHelper ()
 
@@ -170,6 +173,10 @@
                               attributionCheckExecutor:attributionCheckExecutor];
     }
     else {
+        AMAMetrikaPrivacyTimerStorage *privacyStorage = [[AMAMetrikaPrivacyTimerStorage alloc] init];
+        AMAPrivacyTimer *privacyTimer = [[AMAPrivacyTimer alloc] initWithTimerStorage:privacyStorage
+                                                                     delegateExecutor:executor
+                                                                           adProvider:[AMAAdProvider sharedInstance]];
         reporter = [[AMAReporter alloc] initWithApiKey:apiKey
                                                   main:main
                                        reporterStorage:reporterStorage
@@ -180,7 +187,9 @@
                                    eCommerceSerializer:[[AMAECommerceSerializer alloc] init]
                                     eCommerceTruncator:[[AMAECommerceTruncator alloc] init]
                                             adServices:[AMAAdServicesDataProvider nullMock]
-                              sessionExpirationHandler:expirationHandler];
+                              sessionExpirationHandler:expirationHandler
+                                            adProvider:[AMAAdProvider sharedInstance]
+                                          privacyTimer:privacyTimer];
     }
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wundeclared-selector"

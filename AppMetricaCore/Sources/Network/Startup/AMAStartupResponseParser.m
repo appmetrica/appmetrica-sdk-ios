@@ -74,6 +74,7 @@ static NSString *const kAMAStartupResponseURLsKey = @"urls";
         configuration.reportHosts = hosts[kAMAStartupReportHostsKey][kAMAStartupResponseURLsKey];
         configuration.locationHosts = hosts[kAMAStartupLocationHostsKey][kAMAStartupResponseURLsKey];
         configuration.SDKsCustomHosts = [self URLsFromHostsDictionary:hosts exceptKeys:kAMAStartupKnowHostsKeys];
+        configuration.appleTrackingHosts = hosts[@"apple_tracking"][@"urls"];
 
         NSDictionary *statSending = parsedData[@"stat_sending"];
         configuration.statSendingDisabledReportingInterval = statSending[@"disabled_reporting_interval_seconds"];
@@ -142,6 +143,10 @@ static NSString *const kAMAStartupResponseURLsKey = @"urls";
         NSDictionary *permissionsDictionary = [AMAStartupPermissionSerializer permissionsWithArray:permissions];
         configuration.permissionsString =
             [AMAStartupPermissionSerializer JSONStringWithPermissions:permissionsDictionary];
+        
+        NSDictionary *appleTrackingConfig = parsedData[@"apple_tracking_config"];
+        configuration.applePrivacyResendPeriod = appleTrackingConfig[@"event_apple_privacy_resend_period"];
+        configuration.applePrivacyRetryPeriod = appleTrackingConfig[@"event_apple_privacy_retry_periods"];
         
         NSMutableDictionary *extendedParameters = [NSMutableDictionary dictionary];
         NSArray *extendedKeys = @[@"get_ad", @"report_ad"];

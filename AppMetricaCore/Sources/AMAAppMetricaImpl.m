@@ -887,6 +887,7 @@
     [self execute:^{
         [[AMALocationManager sharedManager] updateLocationManagerForCurrentStatus];
         [self.strategiesContainer dispatchMoreIfNeeded];
+        [self.reportersContainer restartPrivacyTimer];
         [self reportPermissionsIfNeeded];
     }];
 }

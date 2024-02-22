@@ -2,6 +2,7 @@
 #import "AMACore.h"
 #import "AMAReportersContainer.h"
 #import "AMAReporter.h"
+#import "AMAStartupController.h"
 
 @interface AMAReportersContainer ()
 
@@ -40,6 +41,13 @@
 
     @synchronized(self) {
         self.reporters[apiKey] = reporter;
+    }
+}
+
+- (void)restartPrivacyTimer
+{
+    for (AMAReporter *repoter in self.reporters.objectEnumerator) {
+        [repoter restartPrivacyTimer];
     }
 }
 

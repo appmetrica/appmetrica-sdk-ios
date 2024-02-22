@@ -6,6 +6,7 @@
 AMAHostType const AMAStartupHostType = @"startup.hosts";
 AMAHostType const AMAReportHostType = @"report.hosts";
 AMAHostType const AMALocationHostType = @"location.collecting.hosts";
+AMAHostType const AMATrackingHostType = @"apple_tracking.hosts";
 
 static NSString *const kDateStorageKey = @"date";
 static NSString *const kCountStorageKey = @"count";

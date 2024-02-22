@@ -11,6 +11,7 @@
     #import "AMAStubHostAppStateProvider.h"
     #import "AMATestAssertionHandler.h"
     #import "AMATestExecutor.h"
+    #import "AMATestExpectationsBag.h"
     #import "AMATestNetwork.h"
     #import "AMATestSafeTransactionRollbackContext.h"
     #import "AMATestTruncator.h"
@@ -18,6 +19,7 @@
     #import "AMATestUtilities.h"
     #import "AMAUserDefaultsMock.h"
     #import "CLLocation+TestUtilities.h"
+    #import "NSObject+Swizzling.h"
 #else
     #import <AppMetricaTestUtils/AMADateProviderMock.h>
     #import <AppMetricaTestUtils/AMAHTTPRequestsFactoryMock.h>
@@ -30,6 +32,7 @@
     #import <AppMetricaTestUtils/AMAStubHostAppStateProvider.h>
     #import <AppMetricaTestUtils/AMATestAssertionHandler.h>
     #import <AppMetricaTestUtils/AMATestExecutor.h>
+    #import <AppMetricaTestUtils/AMATestExpectationsBag.h>
     #import <AppMetricaTestUtils/AMATestNetwork.h>
     #import <AppMetricaTestUtils/AMATestSafeTransactionRollbackContext.h>
     #import <AppMetricaTestUtils/AMATestTruncator.h>
@@ -37,4 +40,5 @@
     #import <AppMetricaTestUtils/AMATestUtilities.h>
     #import <AppMetricaTestUtils/AMAUserDefaultsMock.h>
     #import <AppMetricaTestUtils/CLLocation+TestUtilities.h>
+    #import <AppMetricaTestUtils/NSObject+Swizzling.h>
 #endif

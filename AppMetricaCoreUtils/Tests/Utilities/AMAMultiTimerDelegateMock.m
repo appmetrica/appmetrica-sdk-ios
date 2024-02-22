@@ -1,6 +1,6 @@
-#import "AMAMultritimerDelegateMock.h"
+#import "AMAMultiTimerDelegateMock.h"
 
-@implementation AMAMultritimerDelegateMock
+@implementation AMAMultiTimerDelegateMock
 
 - (void)multitimerDidFire:(AMAMultiTimer *)multitimer
 {

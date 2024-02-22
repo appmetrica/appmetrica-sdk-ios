@@ -47,13 +47,7 @@
     AMAStartupClientIdentifier *identifier = [AMAStartupClientIdentifierFactory startupClientIdentifier];
     parameters[@"uuid"] = identifier.UUID;
     parameters[@"deviceid"] = identifier.deviceID ?: @"";
-    
     parameters[@"ifv"] = identifier.IFV;
-    BOOL isAdvertisingTrackingEnabled = [AMAAdProvider sharedInstance].isAdvertisingTrackingEnabled;
-    parameters[@"limit_ad_tracking"] = isAdvertisingTrackingEnabled ? @"0" : @"1";
-    if (isAdvertisingTrackingEnabled) {
-        parameters[@"ifa"] = [[[AMAAdProvider sharedInstance] advertisingIdentifier] UUIDString];
-    }
 }
 
 + (void)fillSDKParameters:(NSMutableDictionary *)parameters

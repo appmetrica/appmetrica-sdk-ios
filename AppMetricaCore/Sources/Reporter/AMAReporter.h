@@ -16,6 +16,9 @@
 @class AMAAttributionChecker;
 @protocol AMAAsyncExecuting;
 @class AMASessionExpirationHandler;
+@class AMACustomEventParameters;
+@class AMAAdProvider;
+@class AMAPrivacyTimer;
 
 @protocol AMAReporterDelegate <NSObject>
 
@@ -57,12 +60,16 @@
            eCommerceSerializer:(AMAECommerceSerializer *)eCommerceSerializer
             eCommerceTruncator:(AMAECommerceTruncator *)eCommerceTruncator
                     adServices:(AMAAdServicesDataProvider *)adServices
-      sessionExpirationHandler:(AMASessionExpirationHandler *)sessionExpirationHandler;
+      sessionExpirationHandler:(AMASessionExpirationHandler *)sessionExpirationHandler
+                    adProvider:(AMAAdProvider*)adProvider
+                  privacyTimer:(AMAPrivacyTimer*)privateTimer;
 
 - (void)setupWithOnStorageRestored:(dispatch_block_t)onStorageRestored
                    onSetupComplete:(dispatch_block_t)onSetupComplete;
 - (void)shutdown;
 - (void)start;
+
+- (void)restartPrivacyTimer;
 
 - (void)reportFirstEventIfNeeded;
 - (void)reportReferrerEventWithValue:(NSString *)value onFailure:(void (^)(NSError *error))onFailure;

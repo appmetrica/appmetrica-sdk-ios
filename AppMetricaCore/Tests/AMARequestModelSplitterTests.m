@@ -589,6 +589,83 @@ describe(@"AMARequestModelSplitter", ^{
             });
         });
     });
+    
+    context(@"Extract tracking events", ^{
+        NSArray *events = @[
+            [AMAEvent mock],
+            [AMAEvent mock],
+            [AMAEvent mock],
+            [AMAEvent mock],
+            [AMAEvent mock],
+            [AMAEvent mock],
+        ];
+        
+        AMAReportEventsBatch __block *firstEventBatch = nil;
+        AMAReportEventsBatch __block *secondEventBatch = nil;
+
+        beforeEach(^{
+            firstEventBatch =
+                [[AMAReportEventsBatch alloc] initWithSession:[AMASession mock]
+                                               appEnvironment:@{ @"first": @1 }
+                                                       events:[events subarrayWithRange:NSMakeRange(0, 3)]];
+            secondEventBatch =
+                [[AMAReportEventsBatch alloc] initWithSession:[AMASession mock]
+                                               appEnvironment:@{ @"second": @2 }
+                                                       events:[events subarrayWithRange:NSMakeRange(3, 3)]];
+
+            requestModel = [AMAReportRequestModel reportRequestModelWithApiKey:@"Yet another API key"
+                                                                 attributionID:@"My cool attribution ID"
+                                                                appEnvironment:@{ @"foo": @"bar" }
+                                                                      appState:[AMAApplicationState new]
+                                                              inMemoryDatabase:NO
+                                                                 eventsBatches:@[ firstEventBatch, secondEventBatch ]];
+        });
+        
+        context(@"Two event test", ^{
+            NSMutableArray *expectedRegularEvents = [NSMutableArray array];
+            NSMutableArray *expectedTrackingEvents = [NSMutableArray array];
+            
+            for (NSInteger i = 0; i < events.count; i++) {
+                AMAEvent *event = events[i];
+                BOOL isTracking = (i == 2 || i == 3);
+                AMAEventType eventType = isTracking ? AMAEventTypeApplePrivacy : AMAEventTypeClient;
+                [event stub:@selector(type) andReturn:theValue(eventType)];
+                if (isTracking) {
+                    [expectedTrackingEvents addObject:event];
+                }
+                else {
+                    [expectedRegularEvents addObject:event];
+                }
+            }
+            
+            it(@"Should equal regular events", ^{
+                AMAReportRequestModel *trackingModel = [AMARequestModelSplitter extractTrackingRequestModelFromModel:&requestModel];
+                
+                NSMutableArray *regularEvents = [NSMutableArray array];
+                for (AMAReportEventsBatch *batch in requestModel.eventsBatches) {
+                    [regularEvents addObjectsFromArray:batch.events];
+                }
+                
+                [[regularEvents should] equal:expectedRegularEvents];
+            });
+            
+            it(@"Should equal tracking events", ^{
+                AMAReportRequestModel *trackingModel = [AMARequestModelSplitter extractTrackingRequestModelFromModel:&requestModel];
+                
+                
+                NSMutableArray *trackingEvents = [NSMutableArray array];
+                for (AMAReportEventsBatch *batch in trackingModel.eventsBatches) {
+                    [trackingEvents addObjectsFromArray:batch.events];
+                }
+                
+                [[trackingEvents should] equal: expectedTrackingEvents];
+            });
+            
+        });
+        
+        
+        
+    });
 });
 
 SPEC_END

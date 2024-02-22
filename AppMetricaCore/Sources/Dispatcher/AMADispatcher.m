@@ -16,6 +16,7 @@
 #import "AMAReporterStorage.h"
 #import "AMAReporterStateStorage.h"
 #import "AMADatabaseProtocol.h"
+#import "AMAProxyReportsController.h"
 
 NSString *const kAMADispatcherErrorDomain = @"io.appmetrica.AMADispatcher";
 NSString *const kAMADispatcherErrorApiKeyUserInfoKey = @"kAMADispatcherErrorApiKeyUserInfoKey";
@@ -25,7 +26,7 @@ NSString *const kAMADispatcherErrorApiKeyUserInfoKey = @"kAMADispatcherErrorApiK
 @property (nonatomic, assign, readonly) BOOL main;
 @property (nonatomic, strong, readonly) id<AMAAsyncExecuting> executor;
 @property (nonatomic, strong, readonly) AMAReporterStorage *reporterStorage;
-@property (nonatomic, strong, readonly) AMAReportsController *reportsController;
+@property (nonatomic, strong, readonly) id<AMAReportsControlling> reportsController;
 
 @end
 
@@ -33,12 +34,14 @@ NSString *const kAMADispatcherErrorApiKeyUserInfoKey = @"kAMADispatcherErrorApiK
 
 - (instancetype)initWithReporterStorage:(AMAReporterStorage *)reporterStorage
                                    main:(BOOL)main
-                      timeoutController:(AMATimeoutRequestsController *)timeoutController
+                reportTimeoutController:(AMATimeoutRequestsController *)reportTimeoutController
+              trackingTimeoutController:(AMATimeoutRequestsController *)trackingTimeoutController
 {
     id<AMAAsyncExecuting> executor = [[AMAExecutor alloc] initWithIdentifier:self];
 
-    AMAReportsController *reportsController = [[AMAReportsController alloc] initWithExecutor:executor
-                                                                   timeoutRequestsController:timeoutController];
+    AMAProxyReportsController *reportsController = [[AMAProxyReportsController alloc] initWithExecutor:executor
+                                                                       reportTimeoutRequestsController:reportTimeoutController
+                                                                     trackingTimeoutRequestsController:trackingTimeoutController];
 
 
     reportsController.delegate = self;
@@ -51,7 +54,7 @@ NSString *const kAMADispatcherErrorApiKeyUserInfoKey = @"kAMADispatcherErrorApiK
 - (instancetype)initWithReporterStorage:(AMAReporterStorage *)reporterStorage
                                    main:(BOOL)main
                                executor:(id<AMAAsyncExecuting>)executor
-                      reportsController:(AMAReportsController *)reportsController
+                      reportsController:(id<AMAReportsControlling>)reportsController
 {
     self = [super init];
     if (self != nil) {
@@ -180,14 +183,14 @@ NSString *const kAMADispatcherErrorApiKeyUserInfoKey = @"kAMADispatcherErrorApiK
 
 #pragma mark - AMAReportControllerDelegate -
 
-- (NSString *)reportsControllerNextRequestIdentifier
+- (NSString *)reportsControllerNextRequestIdentifierForController:(id<AMAReportsControlling>)controller
 {
     id<AMAKeyValueStoring> storage = self.reporterStorage.keyValueStorageProvider.cachingStorage;
     NSNumber *requestIdentifier = [self.reporterStorage.stateStorage.requestIDStorage valueWithStorage:storage];
     return requestIdentifier.stringValue;
 }
 
-- (void)reportsController:(AMAReportsController *)controller didReportRequest:(AMAReportRequestModel *)requestModel
+- (void)reportsController:(id<AMAReportsControlling>)controller didReportRequest:(AMAReportRequestModel *)requestModel
 {
     for (AMAEvent *event in requestModel.events) {
         [[AMAEventLogger sharedInstanceForApiKey:requestModel.apiKey] logEventSent:event];
@@ -195,14 +198,14 @@ NSString *const kAMADispatcherErrorApiKeyUserInfoKey = @"kAMADispatcherErrorApiK
     [self handleRequestMarkedComplete:requestModel cleanupReason:AMAEventsCleanupReasonTypeSuccessfulReport];
 }
 
-- (void)reportsControllerDidFinishWithSuccess:(AMAReportsController *)controller
+- (void)reportsControllerDidFinishWithSuccess:(id<AMAReportsControlling>)controller
 {
     [self.executor execute:^{
         [self.delegate dispatcherDidPerformReport:self];
     }];
 }
 
-- (void)reportsController:(AMAReportsController *)controller
+- (void)reportsController:(id<AMAReportsControlling>)controller
            didFailRequest:(AMAReportRequestModel *)requestModel
                 withError:(NSError *)innerError
 {

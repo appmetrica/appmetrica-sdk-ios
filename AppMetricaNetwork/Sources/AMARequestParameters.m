@@ -45,7 +45,12 @@ static NSString *const kAMAStorageTypeInmemoryValue = @"inmemory";
 
 - (instancetype)init
 {
-    return [self initWithApiKey:nil attributionID:nil requestID:nil applicationState:nil inMemoryDatabase:NO];
+    return [self initWithApiKey:nil 
+                  attributionID:nil
+                      requestID:nil
+               applicationState:nil
+               inMemoryDatabase:NO
+                        options:AMARequestParametersDefault];
 }
 
 - (instancetype)initWithApiKey:(NSString *)apiKey
@@ -53,6 +58,7 @@ static NSString *const kAMAStorageTypeInmemoryValue = @"inmemory";
                      requestID:(NSString *)requestID
               applicationState:(AMAApplicationState *)appState
               inMemoryDatabase:(BOOL)inMemoryDatabase
+                       options:(AMARequestParametersOptions)options
 {
     self = [super init];
     if (self != nil) {
@@ -72,6 +78,7 @@ static NSString *const kAMAStorageTypeInmemoryValue = @"inmemory";
         _appFramework = [[AMAPlatformDescription appFramework] copy];
         _encryptedRequest = YES;
         _inMemoryDatabase = inMemoryDatabase;
+        _options = options;
     }
     return self;
 }
@@ -118,8 +125,17 @@ static NSString *const kAMAStorageTypeInmemoryValue = @"inmemory";
     parameters[kAMAAppFrameworkKey] = self.appFramework;
     parameters[kAMAEncryptedRequestKey] = self.encryptedRequest ? @"1" : @"0";
     parameters[kAMAStorageTypeKey] = self.inMemoryDatabase ? kAMAStorageTypeInmemoryValue : nil;
-    if (self.appState != nil) {
-        [parameters addEntriesFromDictionary:[self.appState dictionaryRepresentation]];
+    
+    NSDictionary *appStateDictionary = [self.appState dictionaryRepresentation];
+    if (appStateDictionary != nil) {
+        if (self.options & AMARequestParametersAllowIDFA) {
+            [parameters addEntriesFromDictionary:appStateDictionary];
+        }
+        else {
+            NSMutableDictionary *mutableDictionary = appStateDictionary.mutableCopy;
+            [mutableDictionary removeObjectsForKeys:@[kAMAIFAKey, kAMALATKey]];
+            [parameters addEntriesFromDictionary:mutableDictionary];
+        }
     }
     return parameters;
 }

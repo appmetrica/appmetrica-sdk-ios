@@ -20,4 +20,5 @@ typedef NS_ENUM(NSUInteger, AMAEventType) {
     AMAEventTypeWebViewSync = 38,
     AMAEventTypeAttribution = 39,
     AMAEventTypeAdRevenue = 40,
+    AMAEventTypeApplePrivacy = 41,
 };

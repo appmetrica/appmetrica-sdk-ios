@@ -107,6 +107,7 @@
 {
     parameters[@"protocol_version"] = @"2";
     parameters[@"analytics_sdk_version_name"] = [AMAPlatformDescription SDKVersionName];
+    parameters[@"atc"] = @"1";
 }
 
 + (BOOL)isFirstRequest

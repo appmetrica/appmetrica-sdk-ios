@@ -5,7 +5,7 @@
 #import "AMAArrayIterator.h"
 
 @interface AMAMultiTimer () {
-    AMAMultitimerStatus _status;
+    AMAMultiTimerStatus _status;
 }
 
 @property (nonatomic, nullable) id<AMAResettableIterable> iterator;
@@ -19,7 +19,7 @@
 
 - (instancetype)initWithDelays:(NSArray<NSNumber *> *)delays
                       executor:(id<AMACancelableExecuting>)executor
-                      delegate:(nullable id<AMAMultitimerDelegate>)delegate
+                      delegate:(nullable id<AMAMultiTimerDelegate>)delegate
 {
     self = [super init];
     if (self) {
@@ -30,7 +30,7 @@
     return self;
 }
 
-- (AMAMultitimerStatus)status
+- (AMAMultiTimerStatus)status
 {
     @synchronized (self) {
         return _status;
@@ -75,12 +75,12 @@
 
 - (void)scheduleNextDelay
 {
-    NSNumber *internal = [self.iterator current];
-    if (internal != nil) {
+    NSNumber *interval = [self.iterator current];
+    if (interval != nil) {
         _status = AMAMultitimerStatusStarted;
         __weak typeof(self) weakSelf = self;
         [self.iterator next];
-        [self.executor executeAfterDelay:internal.doubleValue block:^{
+        [self.executor executeAfterDelay:interval.doubleValue block:^{
             [weakSelf onTimerFired];
         }];
     }

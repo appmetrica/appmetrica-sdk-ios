@@ -11,17 +11,22 @@
 
 + (instancetype)reportRequestWithPayload:(AMAReportPayload *)reportPayload
                        requestIdentifier:(NSString *)requestIdentifier
+                  requestParamterOptions:(AMARequestParametersOptions)requestParamterOptions
 {
-    return [[AMAReportRequest alloc] initWithPayload:reportPayload requestIdentifier:requestIdentifier];
+    return [[AMAReportRequest alloc] initWithPayload:reportPayload
+                                   requestIdentifier:requestIdentifier
+                              requestParamterOptions:requestParamterOptions];
 }
 
 - (instancetype)initWithPayload:(AMAReportPayload *)reportPayload
               requestIdentifier:(NSString *)requestIdentifier
+         requestParamterOptions:(AMARequestParametersOptions)requestParamterOptions
 {
     self = [super init];
     if (self != nil) {
         _reportPayload = reportPayload;
         _requestIdentifier = [requestIdentifier copy];
+        _requestParamtersOptions = requestParamterOptions;
     }
     return self;
 }
@@ -49,7 +54,8 @@
                                            attributionID:self.reportPayload.model.attributionID
                                                requestID:self.requestIdentifier
                                         applicationState:self.reportPayload.model.appState
-                                        inMemoryDatabase:self.reportPayload.model.inMemoryDatabase];
+                                        inMemoryDatabase:self.reportPayload.model.inMemoryDatabase
+                                                 options:self.requestParamtersOptions];
     return [[requestParameters dictionaryRepresentation] mutableCopy];
 }
 

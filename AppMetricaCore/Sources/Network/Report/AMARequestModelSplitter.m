@@ -3,10 +3,44 @@
 #import "AMARequestModelSplitter.h"
 #import "AMAReportRequestModel.h"
 #import "AMAReportEventsBatch.h"
+#import "AMAEvent.h"
 
 @implementation AMARequestModelSplitter
 
 #pragma mark - Public -
+
++ (AMAReportRequestModel *)extractTrackingRequestModelFromModel:(AMAReportRequestModel * _Nonnull __autoreleasing * _Nonnull)requestModel
+{
+    AMAReportRequestModel *inputModel = *requestModel;
+    if (inputModel.eventsBatches.count == 0) {
+        return nil;
+    }
+    
+    NSArray<AMAReportEventsBatch *> *inputBatches = inputModel.eventsBatches;
+    NSMutableArray<AMAReportEventsBatch *> *regularBatches = [NSMutableArray arrayWithCapacity:inputBatches.count];
+    NSMutableArray<AMAReportEventsBatch *> *trackingBatches = [NSMutableArray array];
+    
+    for (AMAReportEventsBatch *currentBatch in inputBatches) {
+        AMAReportEventsBatch *regularBatch = currentBatch;
+        AMAReportEventsBatch *trackingBatch = [self extractTrackingBatchFrom:&regularBatch];
+        
+        [regularBatches addObject:regularBatch];
+        if (trackingBatch != nil) {
+            [trackingBatches addObject:trackingBatch];
+        }
+    }
+    
+    if (trackingBatches.count == 0) {
+        // nothing changed
+        return nil;
+    }
+    
+    AMAReportRequestModel *regularModel = [self reportRequestModelWithModel:inputModel eventsBatches:regularBatches];
+    AMAReportRequestModel *trackingModel = [self reportRequestModelWithModel:inputModel eventsBatches:trackingBatches];
+    
+    *requestModel = regularModel;
+    return trackingModel;
+}
 
 + (NSArray<AMAReportRequestModel *> *)splitRequestModel:(AMAReportRequestModel *)requestModel
                                                 inParts:(NSUInteger)numberOfParts
@@ -88,5 +122,31 @@
     }
 }
 
++ (AMAReportEventsBatch*)extractTrackingBatchFrom:(AMAReportEventsBatch* __autoreleasing *)inputBatch
+{
+    AMAReportEventsBatch *currentBatch = *inputBatch;
+    NSMutableArray *regularEvents = [NSMutableArray arrayWithCapacity:currentBatch.events.count];
+    NSMutableArray *trackingEvents = [NSMutableArray array];
+    
+    for (AMAEvent *event in currentBatch.events) {
+        if (event.type == AMAEventTypeApplePrivacy) {
+            [trackingEvents addObject:event];
+        }
+        else {
+            [regularEvents addObject:event];
+        }
+    }
+    
+    if (trackingEvents.count == 0) {
+        // nothing changed
+        return nil;
+    }
+    
+    AMAReportEventsBatch *regularBatch = [self eventsBatchWithBatch:currentBatch events:regularEvents];
+    AMAReportEventsBatch *trackingBatch = [self eventsBatchWithBatch:currentBatch events:trackingEvents];
+    
+    *inputBatch = regularBatch;
+    return trackingBatch;
+}
 
 @end

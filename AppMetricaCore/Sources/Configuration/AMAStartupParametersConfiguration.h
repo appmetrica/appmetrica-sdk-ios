@@ -50,6 +50,10 @@
 @property (nonatomic, strong) NSNumber *ASATokenEndReportingInterval;
 @property (nonatomic, strong) NSArray<AMAPair *> *attributionDeeplinkConditions;
 
+@property (nonatomic, copy) NSArray<NSString *> *appleTrackingHosts;
+@property (nonatomic, strong) NSNumber *applePrivacyResendPeriod;
+@property (nonatomic, copy) NSArray<NSNumber *> *applePrivacyRetryPeriod;
+
 @property (nonatomic, copy) NSDictionary<NSString *, NSString *> *extendedParameters;
 
 @property (nonatomic, strong, readonly) id<AMAKeyValueStoring> storage;

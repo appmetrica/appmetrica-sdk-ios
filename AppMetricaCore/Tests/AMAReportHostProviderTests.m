@@ -8,7 +8,6 @@ SPEC_BEGIN(AMAReportHostProviderTests)
 describe(@"AMAReportHostProvider", ^{
     
     AMAMetricaConfiguration *__block configuration = nil;
-    AMAReportHostsChooser *__block hostsChooser = nil;
     AMAReportHostProvider *__block provider = nil;
     NSString *apiKey = @"aaa-bbb-ccc";
 

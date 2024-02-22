@@ -21,7 +21,8 @@ describe(@"AMARequestParameters", ^{
                                                                               attributionID:attributionID
                                                                                   requestID:requestID
                                                                            applicationState:nil
-                                                                           inMemoryDatabase:NO];
+                                                                           inMemoryDatabase:NO
+                                                                                    options:AMARequestParametersDefault];
             parametersDictionary = [parameters dictionaryRepresentation];
         });
         it(@"Should provide device_type tablet in dictionary representation", ^{
@@ -32,7 +33,8 @@ describe(@"AMARequestParameters", ^{
                                            attributionID:attributionID
                                                requestID:requestID
                                         applicationState:nil
-                                        inMemoryDatabase:NO];
+                                        inMemoryDatabase:NO
+                                                 options:AMARequestParametersDefault];
             parametersDictionary = [parameters dictionaryRepresentation];
             [[parametersDictionary[@"device_type"] should] equal:@"tablet"];
         });
@@ -44,7 +46,8 @@ describe(@"AMARequestParameters", ^{
                                            attributionID:attributionID
                                                requestID:requestID
                                         applicationState:nil
-                                        inMemoryDatabase:NO];
+                                        inMemoryDatabase:NO
+                                                 options:AMARequestParametersDefault];
             parametersDictionary = [parameters dictionaryRepresentation];
             [[parametersDictionary[@"device_type"] should] equal:@"phone"];
         });
@@ -94,7 +97,8 @@ describe(@"AMARequestParameters", ^{
                                                                                       attributionID:attributionID
                                                                                           requestID:requestID
                                                                                    applicationState:nil
-                                                                                   inMemoryDatabase:YES];
+                                                                                   inMemoryDatabase:YES
+                                                                                            options:AMARequestParametersDefault];
                     parametersDictionary = [parameters dictionaryRepresentation];
                 });
                 it(@"Should have no storage_type", ^{
@@ -116,13 +120,48 @@ describe(@"AMARequestParameters", ^{
                                                         attributionID:attributionID
                                                             requestID:requestID
                                                      applicationState:appState
-                                                     inMemoryDatabase:NO];
+                                                     inMemoryDatabase:NO
+                                                              options:AMARequestParametersAllowIDFA];
             parametersDictionary = [parameters dictionaryRepresentation];
         });
         context(@"Provides application state in request parameters", ^{
             it(@"Should provide app state keys in request parameters", ^{
                 NSArray *requestParametersKeys = [parametersDictionary allKeys];
                 NSArray *appStateKeys = [[appState dictionaryRepresentation] allKeys];
+                [[requestParametersKeys should] containObjectsInArray:appStateKeys];
+            });
+            it(@"Should provide app state values in request parameters", ^{
+                NSArray *requestParametersValues = [parametersDictionary allValues];
+                NSArray *appStateValues = [[appState dictionaryRepresentation] allValues];
+                [[requestParametersValues should] containObjectsInArray:appStateValues];
+            });
+        });
+    });
+    context(@"Provides parameters without IDFA", ^{
+        NSDictionary * __block parametersDictionary = nil;
+        AMAApplicationState * __block appState = nil;
+        AMARequestParametersTestHelper * __block requestParametersHelper;
+        AMARequestParameters * __block parameters = nil;
+        beforeEach(^{
+            requestParametersHelper = [[AMARequestParametersTestHelper alloc] init];
+            [requestParametersHelper configureStubs];
+            appState = [[AMAApplicationState alloc] init];
+            parameters = [[AMARequestParameters alloc] initWithApiKey:apiKey
+                                                        attributionID:attributionID
+                                                            requestID:requestID
+                                                     applicationState:appState
+                                                     inMemoryDatabase:NO
+                                                              options:AMARequestParametersDefault];
+            parametersDictionary = [parameters dictionaryRepresentation];
+        });
+        context(@"Provides application state in request parameters", ^{
+            it(@"Should provide app state keys in request parameters", ^{
+                NSMutableDictionary *appStateDictionary = appState.dictionaryRepresentation.mutableCopy;
+                [appStateDictionary removeObjectForKey: kAMALATKey];
+                [appStateDictionary removeObjectForKey:kAMAIFAKey];
+                
+                NSArray *requestParametersKeys = [parametersDictionary allKeys];
+                NSArray *appStateKeys = [appStateDictionary allKeys];
                 [[requestParametersKeys should] containObjectsInArray:appStateKeys];
             });
             it(@"Should provide app state values in request parameters", ^{
