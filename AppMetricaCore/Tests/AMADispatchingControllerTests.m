@@ -27,7 +27,10 @@ describe(@"AMADispatchingController", ^{
         delegate = [KWMock nullMockForProtocol:@protocol(AMADispatcherDelegate)];
         storage = [AMAReporterStorage nullMock];
         [storage stub:@selector(apiKey) andReturn:apiKey];
-        dispatcher = [AMADispatcher stubbedNullMockForInit:@selector(initWithReporterStorage:main:timeoutController:)];
+        dispatcher = [AMADispatcher stubbedNullMockForInit:@selector(initWithReporterStorage:
+                                                                     main:
+                                                                     reportTimeoutController:
+                                                                     trackingTimeoutController:)];
         controller = [[AMADispatchingController alloc] initWithTimeoutConfiguration:[KWMock nullMock]];
         controller.proxyDelegate = delegate;
     });
@@ -50,15 +53,19 @@ describe(@"AMADispatchingController", ^{
         it(@"Should create timeout configuration with provided configuration", ^{
             id configMock = [KWMock mock];
             [[timeoutMock should] receive:@selector(initWithHostType:configuration:)
-                            withArguments:kw_any(), configMock];
+                                withCount:2
+                                arguments:kw_any(), configMock];
             controller = [[AMADispatchingController alloc] initWithTimeoutConfiguration:configMock];
         });
     });
          
     context(@"Registration", ^{
         it(@"Should create dispatcher", ^{
-            [[dispatcher should] receive:@selector(initWithReporterStorage:main:timeoutController:)
-                           withArguments:storage, theValue(YES), kw_any()];
+            [[dispatcher should] receive:@selector(initWithReporterStorage:
+                                                   main:
+                                                   reportTimeoutController:
+                                                   trackingTimeoutController:)
+                           withArguments:storage, theValue(YES), kw_any(), kw_any()];
             [controller registerDispatcherWithReporterStorage:storage main:YES];
         });
         it(@"Should set delegate", ^{
@@ -113,7 +120,10 @@ describe(@"AMADispatchingController", ^{
             [storage stub:@selector(apiKey) andReturn:forcedApiKey];
             
             AMADispatcher *forcedDispatcher =
-                [AMADispatcher stubbedNullMockForInit:@selector(initWithReporterStorage:main:timeoutController:)];
+                [AMADispatcher stubbedNullMockForInit:@selector(initWithReporterStorage:
+                                                                main:
+                                                                reportTimeoutController:
+                                                                trackingTimeoutController:)];
             [controller registerDispatcherWithReporterStorage:storage main:YES];
             
             [[forcedDispatcher should] receive:@selector(performReport)];
