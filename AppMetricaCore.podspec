@@ -33,4 +33,6 @@ Pod::Spec.new do |s|
       'AppMetricaCoreExtension/Sources/include/**/*.h',
   ]
   s.public_header_files = "#{s.name}/Sources/include/**/*.h"
+  
+  s.resource_bundles = { s.name => "#{s.name}/Sources/Resources/PrivacyInfo.xcprivacy" }
 end

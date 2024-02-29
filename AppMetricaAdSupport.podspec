@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
   s.name = "AppMetricaAdSupport"
   s.version = '5.1.0'
-  s.summary = "AppMetricaAdSupport provides advertising information"
+  s.summary = "Offers seamless access to advertising identifiers, leveraging AdSupport and AppTrackingTransparency for enhanced ad tracking and analytics."
 
   s.homepage = 'https://appmetrica.io'
   s.license = { :type => 'MIT', :file => 'LICENSE' }
@@ -21,4 +21,6 @@ Pod::Spec.new do |s|
   s.header_dir = s.name
   s.source_files = "#{s.name}/Sources/**/*.{h,m}"
   s.public_header_files = "#{s.name}/Sources/include/**/*.h"
+  
+  s.resource_bundles = { s.name => "#{s.name}/Sources/Resources/PrivacyInfo.xcprivacy" }
 end

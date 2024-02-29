@@ -11,13 +11,15 @@ static NSString *const kAMABuildUIDDateKey = @"date";
 
 @implementation AMABuildUID
 
-- (instancetype)initWithString:(NSString *)buildUIDString
-{
-    NSDate *buildUIDDate = nil;
-    if (buildUIDString != nil) {
-        NSTimeInterval timeIntervalSince1970 = (NSUInteger)[buildUIDString integerValue];
-        buildUIDDate = [NSDate dateWithTimeIntervalSince1970:timeIntervalSince1970];
+- (instancetype)initWithString:(NSString *)buildUIDString {
+    if (buildUIDString == nil) {
+        return nil;
     }
+    NSTimeInterval timeIntervalSince1970 = [buildUIDString doubleValue];
+    if (timeIntervalSince1970 <= 0) {
+        return nil;
+    }
+    NSDate *buildUIDDate = [NSDate dateWithTimeIntervalSince1970:timeIntervalSince1970];
     return [self initWithDate:buildUIDDate];
 }
 
@@ -41,43 +43,28 @@ static NSString *const kAMABuildUIDDateKey = @"date";
 
 + (instancetype)buildUID
 {
-    NSDate *buildDate = [[self class] buildDate];
+    NSDate *buildDate = [[self class] libraryCompilationDate];
     return [[AMABuildUID alloc] initWithDate:buildDate];
-}
-
-+ (NSDate *)buildDate
-{
-    NSDate *buildDate = nil;
-
-    NSBundle *mainBundle = [NSBundle mainBundle];
-    NSString *executablePath = [[mainBundle executablePath] stringByResolvingSymlinksInPath];
-    NSError *error = nil;
-    NSDictionary *fileAttributes = [[NSFileManager defaultManager] attributesOfItemAtPath:executablePath
-                                                                                    error:&error];
-    if (error == nil) {
-        buildDate = [fileAttributes fileModificationDate];
-    }
-
-    if (buildDate == nil) {
-        buildDate = [[self class] libraryCompilationDate];
-    }
-
-    return buildDate;
 }
 
 + (NSDate *)libraryCompilationDate
 {
     NSDate *libraryCompilationDate = nil;
 #ifdef __DATE__
-    NSString *compileDateString = [NSString stringWithUTF8String:__DATE__];
+    NSString *compileDateTimeString;
+#ifdef __TIME__
+    compileDateTimeString = [NSString stringWithFormat:@"%s %s", __DATE__, __TIME__];
+#else /* __TIME__ */
+    compileDateTimeString = [NSString stringWithFormat:@"%s 00:00:00", __DATE__];
+#endif /* __TIME__ */
     NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
-    dateFormatter.dateFormat = @"MMM d yyyy";
+    dateFormatter.dateFormat = @"MMM d yyyy HH:mm:ss";
     dateFormatter.locale = [NSLocale localeWithLocaleIdentifier:@"en_US"];
     dateFormatter.timeZone = [NSTimeZone timeZoneForSecondsFromGMT:0];
-    libraryCompilationDate = [dateFormatter dateFromString:compileDateString];
-#else
+    libraryCompilationDate = [dateFormatter dateFromString:compileDateTimeString];
+#else /* __DATE__ */
     libraryCompilationDate = [NSDate dateWithTimeIntervalSince1970:0];
-#endif
+#endif /* __DATE__ */
     return libraryCompilationDate;
 }
 

@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
   s.name = "AppMetricaAnalytics"
   s.version = '5.1.0'
-  s.summary = "AppMetrica Analytics"
+  s.summary = "Serves as the comprehensive suite for advanced mobile analytics, encompassing core tracking, web interactions, crash reporting, and ad support functionalities, ensuring a holistic analysis and optimization platform for iOS applications."
 
   s.homepage = 'https://appmetrica.io'
   s.license = { :type => 'MIT', :file => 'LICENSE' }

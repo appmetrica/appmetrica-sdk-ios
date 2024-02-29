@@ -30,9 +30,41 @@ enum AppMetricaTarget: String {
     var dependency: Target.Dependency { .target(name: rawValue) }
 }
 
-//MARK: - Target Dependencies -
-let kiwi = Target.Dependency.byName(name: "Kiwi")
-let ksKrash = Target.Dependency.byName(name: "KSCrash")
+enum AppMetricaProduct: String, CaseIterable {
+    case core = "AppMetricaCore"
+    case crashes = "AppMetricaCrashes"
+    case adSupport = "AppMetricaAdSupport"
+    case webKit = "AppMetricaWebKit"
+    
+    static var allProducts: [Product] { allCases.map { $0.product } }
+    
+    var targets: [AppMetricaTarget] {
+        switch self {
+        case .core: [.core, .coreExtension]
+        case .crashes: [.crashes]
+        case .adSupport: [.adSupport]
+        case .webKit: [.webKit]
+        }
+    }
+    
+    var product: Product { .library(name: rawValue, targets: targets.map { $0.name }) }
+}
+
+enum ExternalDependency: String, CaseIterable {
+    case kiwi = "Kiwi"
+    case ksCrash = "KSCrash"
+
+    static var allDependecies: [Package.Dependency] { allCases.map { $0.package } }
+    
+    var dependency: Target.Dependency { .byName(name: rawValue) }
+    
+    var package: Package.Dependency {
+        switch self {
+        case .ksCrash: .package(url: "https://github.com/kstenerud/KSCrash", .upToNextMinor(from: "1.16.1"))
+        case .kiwi: .package(url: "https://github.com/appmetrica/Kiwi", .upToNextMinor(from: "3.0.1-spm"))
+        }
+    }
+}
 
 let package = Package(
     name: "AppMetrica",
@@ -40,19 +72,8 @@ let package = Package(
         .iOS(.v11),
         .tvOS(.v11),
     ],
-    products: [
-        .library(name: "AppMetricaCore", targets: [AppMetricaTarget.core.name,
-                                                   AppMetricaTarget.coreExtension.name]),
-        .library(name: "AppMetricaCrashes", targets: [AppMetricaTarget.crashes.name]),
-        .library(name: "AppMetricaAdSupport", targets: [AppMetricaTarget.adSupport.name]),
-        .library(name: "AppMetricaWebKit", targets: [AppMetricaTarget.webKit.name]),
-    ],
-    dependencies: [
-        // Crash dependencies
-        .package(name: "KSCrash", url: "https://github.com/kstenerud/KSCrash", .upToNextMinor(from: "1.16.1")),
-        // Test dependencies
-        .package(name: "Kiwi", url: "https://github.com/appmetrica/Kiwi", .upToNextMinor(from: "3.0.1-spm")),
-    ],
+    products: AppMetricaProduct.allProducts,
+    dependencies: ExternalDependency.allDependecies,
     targets: [
         //MARK: - AppMetrica SDK -
         .target(
@@ -60,7 +81,6 @@ let package = Package(
             dependencies: [
                 .network, .log, .coreUtils, .hostState, .protobufUtils, .platform, .storageUtils, .encodingUtils, .protobuf, .fmdb
             ],
-            outerDependencies: [],
             searchPaths: [
                 "../../AppMetricaCoreExtension/Sources/include/AppMetricaCoreExtension", "./**"
             ]
@@ -70,7 +90,7 @@ let package = Package(
             dependencies: [
                 .core, .coreExtension, .webKit, .testUtils, .hostState, .protobufUtils, .platform
             ],
-            outerDependencies: [kiwi],
+            externalDependencies: [.kiwi],
             searchPaths: [
                 "../../AppMetricaCoreExtension/Sources/include/AppMetricaCoreExtension", "./**", "../Sources/**"
             ],
@@ -83,13 +103,13 @@ let package = Package(
             dependencies: [
                 .core, .log, .coreExtension, .hostState, .protobufUtils, .platform, .storageUtils, .encodingUtils, .protobuf
             ],
-            outerDependencies: [ksKrash],
+            externalDependencies: [.ksCrash],
             searchPaths: ["./**"]
         ),
         .testTarget(
             target: .crashes,
             dependencies: [.crashes, .testUtils],
-            outerDependencies: [kiwi],
+            externalDependencies: [.kiwi],
             searchPaths: ["../Sources/**", "./Helpers"],
             resources: [.process("Resources")]
         ),
@@ -128,12 +148,17 @@ let package = Package(
         .testTarget(
             target: .coreUtils,
             dependencies: [.coreUtils, .testUtils],
-            outerDependencies: [kiwi],
+            externalDependencies: [.kiwi],
             searchPaths: ["Utilities", "../Sources/include/AppMetricaCoreUtils"]
         ),
         
         //MARK: - AppMetrica TestUtils
-        .target(target: .testUtils, dependencies: [.coreUtils, .network, .storageUtils, .hostState], outerDependencies: [kiwi]),
+        .target(
+            target: .testUtils,
+            dependencies: [.coreUtils, .network, .storageUtils, .hostState],
+            externalDependencies: [.kiwi],
+            includePrivacyManifest: false
+        ),
         
         //MARK: - AppMetrica Network
         .target(
@@ -143,7 +168,7 @@ let package = Package(
         .testTarget(
             target: .network,
             dependencies: [.network, .platform, .coreExtension, .testUtils],
-            outerDependencies: [kiwi],
+            externalDependencies: [.kiwi],
             searchPaths: ["Utilities", "../Sources/include/AppMetricaNetwork"]
         ),
         
@@ -152,7 +177,7 @@ let package = Package(
         .testTarget(
             target: .adSupport,
             dependencies: [.adSupport, .testUtils],
-            outerDependencies: [kiwi],
+            externalDependencies: [.kiwi],
             searchPaths: ["../Sources/**"]
         ),
         
@@ -161,7 +186,7 @@ let package = Package(
         .testTarget(
             target: .webKit,
             dependencies: [.webKit, .testUtils],
-            outerDependencies: [kiwi],
+            externalDependencies: [.kiwi],
             searchPaths: ["../Sources/**"]
         ),
         
@@ -170,7 +195,7 @@ let package = Package(
         .testTarget(
             target: .hostState,
             dependencies: [.hostState, .testUtils],
-            outerDependencies: [kiwi],
+            externalDependencies: [.kiwi],
             searchPaths: ["../Sources/**"]
         ),
         
@@ -179,7 +204,7 @@ let package = Package(
         .testTarget(
             target: .platform,
             dependencies: [.platform, .testUtils],
-            outerDependencies: [kiwi],
+            externalDependencies: [.kiwi],
             searchPaths: ["../Sources/**"]
         ),
         
@@ -188,7 +213,7 @@ let package = Package(
         .testTarget(
             target: .storageUtils,
             dependencies: [.storageUtils, .testUtils],
-            outerDependencies: [kiwi],
+            externalDependencies: [.kiwi],
             searchPaths: ["../Sources/**"]
         ),
         
@@ -197,7 +222,7 @@ let package = Package(
         .testTarget(
             target: .encodingUtils,
             dependencies: [.encodingUtils, .testUtils],
-            outerDependencies: [kiwi],
+            externalDependencies: [.kiwi],
             searchPaths: ["../Sources/**"]
         ),
         
@@ -209,12 +234,19 @@ let package = Package(
 extension Target {
     static func target(target: AppMetricaTarget,
                        dependencies: [AppMetricaTarget] = [],
-                       outerDependencies: [Target.Dependency] = [],
-                       searchPaths: [String] = []) -> Target {
+                       externalDependencies: [ExternalDependency] = [],
+                       searchPaths: [String] = [],
+                       includePrivacyManifest: Bool = true) -> Target {
+        var resources: [Resource] = []
+        if includePrivacyManifest {
+            resources.append(.copy("Resources/PrivacyInfo.xcprivacy"))
+        }
+
         return .target(
             name: target.name,
-            dependencies: combinedDependencies(from: dependencies, outerDependencies: outerDependencies),
+            dependencies: dependencies.map { $0.dependency } + externalDependencies.map { $0.dependency },
             path: target.path,
+            resources: resources,
             cSettings: combinedSettings(from: searchPaths, path: target.path)
         )
     }
@@ -222,13 +254,13 @@ extension Target {
     static func testTarget(target: AppMetricaTarget,
                            dependencies: [AppMetricaTarget] = [],
                            testUtils: [AppMetricaTarget] = [],
-                           outerDependencies: [Target.Dependency] = [],
+                           externalDependencies: [ExternalDependency] = [],
                            searchPaths: [String] = [],
                            resources: [Resource]? = nil) -> Target {
         
         return .testTarget(
             name: target.testsName,
-            dependencies: combinedDependencies(from: dependencies, outerDependencies: outerDependencies),
+            dependencies: dependencies.map { $0.dependency } + externalDependencies.map { $0.dependency },
             path: target.testsPath,
             resources: resources,
             cSettings: combinedSettings(from: searchPaths, path: target.testsPath)
@@ -236,58 +268,54 @@ extension Target {
     }
     
     private static func combinedSettings(from searchPaths: [String], path: String) -> [CSetting] {
-        var cSettings: [CSetting] = []
-        for searchPath in searchPaths {
+        return searchPaths.flatMap { searchPath -> [CSetting] in
             if searchPath.hasSuffix("**") {
-                cSettings += headerSearchPaths(path, relativeSearchPath: String(searchPath.dropLast(2)))
+                return headerSearchPaths(path, relativeSearchPath: String(searchPath.dropLast(2)))
             } else {
-                cSettings.append(.headerSearchPath(searchPath))
+                return [.headerSearchPath(searchPath)]
             }
         }
-        return cSettings
     }
-    
-    private static func combinedDependencies(from dependencies: [AppMetricaTarget],
-                                             outerDependencies: [Target.Dependency]) -> [Target.Dependency] {
-        return dependencies.map { $0.dependency } + outerDependencies
-    }
-    
+
     private static func headerSearchPaths(_ targetPath: String, relativeSearchPath: String = ".") -> [CSetting] {
-        let fileManager = FileManager.default
+        let fullPathURL = buildFullPathURL(targetPath: targetPath, relativeSearchPath: relativeSearchPath)
+        return [.headerSearchPath(relativeSearchPath)] + buildSettings(from: fullPathURL, using: relativeSearchPath)
+    }
+    
+    private static func buildFullPathURL(targetPath: String, relativeSearchPath: String) -> URL {
         let packageDirectoryURL = URL(fileURLWithPath: #file).deletingLastPathComponent()
-        let targetPathURL = packageDirectoryURL.appendingPathComponent(targetPath)
-        let fullPathURL = targetPathURL.appendingPathComponent(relativeSearchPath).resolvingSymlinksInPath()
-        
-        var settings: [CSetting] = []
-        
-        settings.append(.headerSearchPath(relativeSearchPath))
-        
+        return packageDirectoryURL
+            .appendingPathComponent(targetPath)
+            .appendingPathComponent(relativeSearchPath)
+            .resolvingSymlinksInPath()
+    }
+
+    private static func buildSettings(from fullPathURL: URL, using relativeSearchPath: String) -> [CSetting] {
+        let fileManager = FileManager.default
         guard let enumerator = fileManager.enumerator(at: fullPathURL, includingPropertiesForKeys: nil) else {
-            return settings
+            return [.headerSearchPath(relativeSearchPath)]
         }
-        for case let fileOrDirURL as URL in enumerator {
-            var isDir: ObjCBool = false
-            if fileManager.fileExists(atPath: fileOrDirURL.path, isDirectory: &isDir), isDir.boolValue {
-                if let relativePath = relativePath(from: fullPathURL, toDestination: fileOrDirURL) {
+        
+        return enumerator
+            .compactMap { $0 as? URL }
+            .reduce([.headerSearchPath(relativeSearchPath)]) { (settings, fileOrDirURL) in
+                var isDir: ObjCBool = false
+                if fileManager.fileExists(atPath: fileOrDirURL.path, isDirectory: &isDir), isDir.boolValue,
+                   let relativePath = relativePath(from: fullPathURL, toDestination: fileOrDirURL) {
                     let combinedPath = [relativeSearchPath, relativePath]
                         .joined(separator: "/")
                         .replacingOccurrences(of: "//", with: "/")
-                    settings.append(.headerSearchPath(combinedPath))
+                    return settings + [.headerSearchPath(combinedPath)]
                 }
+                return settings
             }
-        }
-        
-        return settings
     }
 
     private static func relativePath(from base: URL, toDestination dest: URL) -> String? {
         let destComponents = dest.pathComponents
         let baseComponents = base.pathComponents
-        
         let commonCount = zip(destComponents, baseComponents).prefix(while: { $0.0 == $0.1 }).count
-
         let downwardPaths = destComponents[commonCount...]
-
-        return downwardPaths.joined(separator: "/")
+        return downwardPaths.isEmpty ? nil : downwardPaths.joined(separator: "/")
     }
 }

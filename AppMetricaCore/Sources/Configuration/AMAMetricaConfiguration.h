@@ -3,7 +3,6 @@
 
 @class AMAReporterConfiguration;
 @class AMAInstantFeaturesConfiguration;
-@class AMABuildUID;
 @class AMAStartupParametersConfiguration;
 @class AMAMetricaPersistentConfiguration;
 @class AMAMetricaInMemoryConfiguration;

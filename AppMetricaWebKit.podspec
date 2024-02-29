@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
   s.name = "AppMetricaWebKit"
   s.version = '5.1.0'
-  s.summary = "Provides an interface to handle and report JavaScript events"
+  s.summary = "Enriches web analytics by providing a robust interface for capturing and reporting JavaScript events directly to AppMetrica, enabling detailed insights into web interactions within native apps."
 
   s.homepage = 'https://appmetrica.io'
   s.license = { :type => 'MIT', :file => 'LICENSE' }
@@ -22,4 +22,6 @@ Pod::Spec.new do |s|
   s.header_dir = s.name
   s.source_files = "#{s.name}/Sources/**/*.{h,m}"
   s.public_header_files = "#{s.name}/Sources/include/**/*.h"
+  
+  s.resource_bundles = { s.name => "#{s.name}/Sources/Resources/PrivacyInfo.xcprivacy" }
 end

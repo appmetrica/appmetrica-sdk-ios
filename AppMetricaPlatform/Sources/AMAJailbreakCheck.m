@@ -75,12 +75,6 @@
         motzart += 2;
     }
     
-    // Symbolic Link Check
-    if ([self symbolicLinkCheck] != NOTJAIL) {
-        // Jailbroken
-        motzart += 2;
-    }
-    
     // FilesExist Integrity Check
     if ([self filesExistCheck] != NOTJAIL) {
         // Jailbroken
@@ -175,29 +169,6 @@
     }
     @catch (NSException *exception) {
         // Error, return false
-        return NOTJAIL;
-    }
-}
-
-// Symbolic Link available
-+ (int)symbolicLinkCheck {
-    @try {
-        // See if the Applications folder is a symbolic link
-        struct stat s;
-        if (lstat("/Applications", &s) != 0) {
-            if (s.st_mode & S_IFLNK) {
-                // Device is jailbroken
-                return AMA_KFSymbolic;
-            } else
-                // Not jailbroken
-                return NOTJAIL;
-        } else {
-            // Not jailbroken
-            return NOTJAIL;
-        }
-    }
-    @catch (NSException *exception) {
-        // Not Jailbroken
         return NOTJAIL;
     }
 }

@@ -1,5 +1,3 @@
-
-#import <sys/stat.h>
 #import "AMAEventsCountStorageTrimmer.h"
 #import "AMADatabaseProtocol.h"
 #import "AMADatabaseConstants.h"
