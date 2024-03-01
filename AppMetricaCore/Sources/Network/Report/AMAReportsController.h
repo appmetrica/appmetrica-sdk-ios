@@ -35,7 +35,8 @@ typedef NS_ERROR_ENUM(kAMAReportsControllerErrorDomain, AMAReportsControllerErro
 
 - (void)reportsControllerDidFinishWithSuccess:(id<AMAReportsControlling>)controller;
 
-- (void)reportsController:(id<AMAReportsControlling>)controller didReportRequest:(AMAReportRequestModel *)requestModel;
+- (void)reportsController:(id<AMAReportsControlling>)controller
+         didReportRequest:(AMAReportRequestModel *)requestModel;
 - (void)reportsController:(id<AMAReportsControlling>)controller
            didFailRequest:(AMAReportRequestModel *)requestModel
                 withError:(NSError *)error;

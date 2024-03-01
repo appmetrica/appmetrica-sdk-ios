@@ -67,7 +67,7 @@ describe(@"AMAReportRequestTests", ^{
         AMAReportPayload *payload = [provider generatePayloadWithRequestModel:requestModel error:nil];
         AMAReportRequest *request = [AMAReportRequest reportRequestWithPayload:payload
                                                              requestIdentifier:requestIdentifier
-                                                        requestParamterOptions:AMARequestParametersDefault];
+                                                      requestParametersOptions:AMARequestParametersDefault];
         request.host = host;
         return request;
     };
@@ -177,7 +177,7 @@ describe(@"AMAReportRequestTests", ^{
             AMAReportPayload *payload = [payloadProvider generatePayloadWithRequestModel:requestModel error:nil];
             request = [AMAReportRequest reportRequestWithPayload:payload
                                                requestIdentifier:@"1"
-                                          requestParamterOptions:AMARequestParametersDefault];
+                                        requestParametersOptions:AMARequestParametersDefault];
             request.host = host;
         });
 
@@ -218,7 +218,7 @@ describe(@"AMAReportRequestTests", ^{
             AMAReportPayload *payload = [payloadProvider generatePayloadWithRequestModel:requestModel error:nil];
             AMAReportRequest *request = [AMAReportRequest reportRequestWithPayload:payload
                                                                  requestIdentifier:@"23"
-                                                            requestParamterOptions:AMARequestParametersDefault];
+                                                          requestParametersOptions:AMARequestParametersDefault];
             request.host = host;
             GETParameters = [request GETParameters];
             NSURLRequest *URLRequest = [request buildURLRequest];
@@ -525,7 +525,7 @@ describe(@"AMAReportRequestTests", ^{
                 AMAReportPayload *payload = [payloadProvider generatePayloadWithRequestModel:requestModel error:nil];
                 AMAReportRequest *request = [AMAReportRequest reportRequestWithPayload:payload
                                                                      requestIdentifier:@"1"
-                                                                requestParamterOptions:AMARequestParametersDefault];
+                                                              requestParametersOptions:AMARequestParametersDefault];
                 request.host = host;
                 NSURLRequest *URLRequest = [request buildURLRequest];
                 NSString *expectedString = [NSString stringWithFormat:@"uuid=%@", UUID];

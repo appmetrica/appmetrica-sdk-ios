@@ -44,7 +44,6 @@ static NSUInteger const kAMATooBigRequestSplitSize = 2;
     AMAReportResponseParser *responseParser = [[AMAReportResponseParser alloc] init];
     AMAReportPayloadProvider *payloadProvider = [[AMAReportPayloadProvider alloc] init];
     
-    payloadProvider.delegate = self;
     return [self initWithExecutor:executor
                      hostProvider:hostProvider
               httpRequestsFactory:requestsFactory
@@ -69,6 +68,7 @@ static NSUInteger const kAMATooBigRequestSplitSize = 2;
         _httpRequestsFactory = httpRequestsFactory;
         _responseParser = responseParser;
         _payloadProvider = payloadProvider;
+        _payloadProvider.delegate = self;
         _requestModels = [NSMutableArray array];
         _timeoutRequestsController = timeoutRequestsController;
         _reportRequestFactory = reportRequestFactory;
@@ -206,7 +206,7 @@ static NSUInteger const kAMATooBigRequestSplitSize = 2;
 {
     NSString *host = self.hostProvider.current;
     if ([host length] == 0) {
-        AMALogWarn(@"host provider is empty, don't send request %@", request);
+        AMALogWarn(@"Host is empty, failed to perform request: %@", request);
         return nil;
     }
     

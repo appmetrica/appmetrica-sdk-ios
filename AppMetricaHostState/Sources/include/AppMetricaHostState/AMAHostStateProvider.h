@@ -9,7 +9,12 @@ typedef NS_ENUM(NSInteger, AMAHostAppState) {
     AMAHostAppStateUnknown = -1,
 } NS_SWIFT_NAME(HostAppState);
 
-@protocol AMAHostStateProviderDelegate;
+NS_SWIFT_NAME(HostStateProviderDelegate)
+@protocol AMAHostStateProviderDelegate <NSObject>
+
+- (void)hostStateDidChange:(AMAHostAppState)hostState;
+
+@end
 
 NS_SWIFT_NAME(HostStateProviding)
 @protocol AMAHostStateProviding <NSObject>
@@ -24,13 +29,6 @@ NS_SWIFT_NAME(HostStateProviding)
 
 NS_SWIFT_NAME(HostStateProvider)
 @interface AMAHostStateProvider : NSObject<AMAHostStateProviding>
-
-@end
-
-NS_SWIFT_NAME(HostStateProviderDelegate)
-@protocol AMAHostStateProviderDelegate <NSObject>
-
-- (void)hostStateDidChange:(AMAHostAppState)hostState;
 
 @end
 

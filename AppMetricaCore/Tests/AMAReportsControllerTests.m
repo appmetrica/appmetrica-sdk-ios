@@ -85,7 +85,7 @@ void (^beforeEachReporter)() = ^{
     payload = [[AMAReportPayload alloc] initWithReportModel:firstReportRequestModel data:[NSData data]];
     reportRequest = [AMAReportRequestMock reportRequestWithPayload:payload
                                                  requestIdentifier:requestIdentifier
-                                            requestParamterOptions:AMARequestParametersDefault];
+                                          requestParametersOptions:AMARequestParametersDefault];
     payloadProvider = [AMAReportPayloadProvider nullMock];
     [payloadProvider stub:@selector(generatePayloadWithRequestModel:error:) andReturn:payload];
     reportRequestModels = @[ firstReportRequestModel ];
@@ -94,10 +94,10 @@ void (^beforeEachReporter)() = ^{
     secondPayload = [[AMAReportPayload alloc] initWithReportModel:secondReportRequestModel data:[NSData data]];
     secondReportRequest = [AMAReportRequestMock reportRequestWithPayload:secondPayload
                                                        requestIdentifier:requestIdentifier
-                                                  requestParamterOptions:AMARequestParametersDefault];
+                                                requestParametersOptions:AMARequestParametersDefault];
 
     delegate = [KWMock nullMockForProtocol:@protocol(AMAReportsControllerDelegate)];
-    [delegate stub:@selector(reportsControllerNextRequestIdentifier) andReturn:requestIdentifier];
+    [delegate stub:@selector(reportsControllerNextRequestIdentifierForController:) andReturn:requestIdentifier];
 
     internalEventsReporter = [AMAInternalEventsReporter nullMock];
     [AMAAppMetrica stub:@selector(sharedInternalEventsReporter) andReturn:internalEventsReporter];
@@ -164,7 +164,7 @@ void (^beforeEachProxyReporter)() = ^{
     payload = [[AMAReportPayload alloc] initWithReportModel:firstReportRequestModel data:[NSData data]];
     reportRequest = [AMAReportRequestMock reportRequestWithPayload:payload
                                                  requestIdentifier:requestIdentifier
-                                            requestParamterOptions:AMARequestParametersDefault];
+                                          requestParametersOptions:AMARequestParametersDefault];
     payloadProvider = [AMAReportPayloadProvider nullMock];
     [payloadProvider stub:@selector(generatePayloadWithRequestModel:error:) andReturn:payload];
     reportRequestModels = @[ firstReportRequestModel ];
@@ -173,10 +173,10 @@ void (^beforeEachProxyReporter)() = ^{
     secondPayload = [[AMAReportPayload alloc] initWithReportModel:secondReportRequestModel data:[NSData data]];
     secondReportRequest = [AMAReportRequestMock reportRequestWithPayload:secondPayload
                                                        requestIdentifier:requestIdentifier
-                                                  requestParamterOptions:AMARequestParametersDefault];
+                                                requestParametersOptions:AMARequestParametersDefault];
 
     delegate = [KWMock nullMockForProtocol:@protocol(AMAReportsControllerDelegate)];
-    [delegate stub:@selector(reportsControllerNextRequestIdentifier) andReturn:requestIdentifier];
+    [delegate stub:@selector(reportsControllerNextRequestIdentifierForController:) andReturn:requestIdentifier];
 
     internalEventsReporter = [AMAInternalEventsReporter nullMock];
     [AMAAppMetrica stub:@selector(sharedInternalEventsReporter) andReturn:internalEventsReporter];
@@ -937,7 +937,7 @@ void (^testBlock)() = ^{
     context(@"Multiple requests", ^{
 
         beforeEach(^{
-            [AMAReportRequest stub:@selector(reportRequestWithPayload:requestIdentifier:requestParamterOptions:) withBlock:^id(NSArray *params) {
+            [AMAReportRequest stub:@selector(reportRequestWithPayload:requestIdentifier:requestParametersOptions:) withBlock:^id(NSArray *params) {
                 AMAReportPayload *payload = params[0];
                 if ([payload.model isEqual:firstReportRequestModel]) {
                     return reportRequest;
@@ -1263,7 +1263,7 @@ void (^testBlock)() = ^{
 
 describe(@"AMAReportsControllerTests", ^{
     
-    context(@"AMARepoterController", ^{
+    context(@"AMAReporterController", ^{
         beforeEach(beforeEachReporter);
         testBlock();
         
@@ -1274,6 +1274,30 @@ describe(@"AMAReportsControllerTests", ^{
         it(@"Should conform to AMAReportPayloadProviderDelegate", ^{
             AMAReportsController *cntrl = (AMAReportsController*)controller;
             [[cntrl should] conformToProtocol:@protocol(AMAReportPayloadProviderDelegate)];
+        });
+        
+        context(@"Init", ^{
+            it(@"Should set payload provider delegate with designed init", ^{
+                id executor = [KWMock nullMockForProtocol:@protocol(AMAAsyncExecuting)];
+                AMAReportPayloadProvider *payloadProvider = [[AMAReportPayloadProvider alloc] init];
+                AMAReportsController *cntrl = [[AMAReportsController alloc] initWithExecutor:executor
+                                                                                hostProvider:hostProvider
+                                                                         httpRequestsFactory:httpRequestsFactory
+                                                                              responseParser:responseParser
+                                                                             payloadProvider:payloadProvider
+                                                                   timeoutRequestsController:timeoutController
+                                                                        reportRequestFactory:requestFactory];
+                [[(NSObject *)payloadProvider.delegate should] equal:cntrl];
+            });
+            
+            it(@"Should set payload provider delegate with convenience init", ^{
+                id executor = [KWMock nullMockForProtocol:@protocol(AMAAsyncExecuting)];
+                AMAReportPayloadProvider *payloadProvider = [AMAReportPayloadProvider stubbedNullMockForDefaultInit];
+                [[payloadProvider should] receive:@selector(setDelegate:)];
+                AMAReportsController *cntrl = [[AMAReportsController alloc] initWithExecutor:executor
+                                                                   timeoutRequestsController:timeoutController
+                                                                        reportRequestFactory:requestFactory];
+            });
         });
     });
     

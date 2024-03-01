@@ -9,7 +9,7 @@
 {
     return [AMAReportRequest reportRequestWithPayload:reportPayload
                                     requestIdentifier:requestIdentifier
-                               requestParamterOptions:AMARequestParametersDefault];
+                             requestParametersOptions:AMARequestParametersDefault];
 }
 
 @end
@@ -23,7 +23,7 @@
 {
     return [AMAReportRequest reportRequestWithPayload:reportPayload
                                     requestIdentifier:requestIdentifier
-                               requestParamterOptions:AMARequestParametersTracking];
+                             requestParametersOptions:AMARequestParametersTracking];
 }
 
 @end

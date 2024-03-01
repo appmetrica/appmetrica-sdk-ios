@@ -71,7 +71,7 @@ trackingTimeoutRequestsController:(AMATimeoutRequestsController *)trackingTimeou
        trackingReportsController:(id<AMAReportsControlling>)trackingReportsController
 {
     self = [super init];
-    if (self) {
+    if (self != nil) {
         _regularController = regularReportsController;
         _trackingController = trackingReportsController;
     }
@@ -133,7 +133,9 @@ trackingTimeoutRequestsController:(AMATimeoutRequestsController *)trackingTimeou
     _trackingController.delegate = self;
 }
 
-- (void)reportsController:(nonnull id<AMAReportsControlling>)controller didFailRequest:(nonnull AMAReportRequestModel *)requestModel withError:(nonnull NSError *)error 
+- (void)reportsController:(nonnull id<AMAReportsControlling>)controller 
+           didFailRequest:(nonnull AMAReportRequestModel *)requestModel
+                withError:(nonnull NSError *)error
 {
     [self.delegate reportsController:self didFailRequest:requestModel withError:error];
 }
@@ -164,8 +166,7 @@ trackingTimeoutRequestsController:(AMATimeoutRequestsController *)trackingTimeou
 
 - (nonnull NSString *)reportsControllerNextRequestIdentifierForController:(nonnull id<AMAReportsControlling>)controller 
 {
-    NSString *requestIdentifier = [self.delegate reportsControllerNextRequestIdentifierForController:self];
-    return requestIdentifier;
+    return [self.delegate reportsControllerNextRequestIdentifierForController:self];
 }
 
 @end

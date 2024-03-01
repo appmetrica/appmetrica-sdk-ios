@@ -34,7 +34,7 @@ NSString *const kAMAReportPayloadProviderErrorDomain = @"io.appmetrica.AMAReport
     return self;
 }
 
-#pragma mark - Private -
+#pragma mark - Public -
 
 - (AMAReportPayload *)generatePayloadWithRequestModel:(AMAReportRequestModel *)requestModel error:(NSError **)error
 {

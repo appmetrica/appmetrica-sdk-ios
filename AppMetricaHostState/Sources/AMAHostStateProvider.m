@@ -24,7 +24,7 @@ static id<AMAHostStateControlling> hostStateController = nil;
 - (instancetype)init
 {
     self = [super init];
-    if (self) {
+    if (self != nil) {
         _hostStateController = hostStateController;
         
         [_hostStateController addAMAObserver:self];
