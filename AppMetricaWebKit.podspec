@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
   s.name = "AppMetricaWebKit"
   s.version = '5.2.0'
-  s.summary = "Enriches web analytics by providing a robust interface for capturing and reporting JavaScript events directly to AppMetrica, enabling detailed insights into web interactions within native apps."
+  s.summary = "Enriches web analytics by providing a robust interface for capturing and reporting JavaScript events directly to AppMetrica."
 
   s.homepage = 'https://appmetrica.io'
   s.license = { :type => 'MIT', :file => 'LICENSE' }

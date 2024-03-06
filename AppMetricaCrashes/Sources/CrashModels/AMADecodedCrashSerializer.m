@@ -37,6 +37,7 @@
 - (NSData *)dataForCrash:(AMADecodedCrash *)decodedCrash error:(NSError **)error
 {
     NSData *__block data = nil;
+    NSError *__block capturedError = nil;
     AMADecodedCrashValidator *validator = [[AMADecodedCrashValidator alloc] init];
 
     [AMAAllocationsTrackerProvider track:^(id<AMAAllocationsTracking> tracker) {
@@ -56,15 +57,10 @@
                                                       imagesCount:&imagesCount
                                                         validator:validator];
         }
-
-        NSError *validationResult = [validator result];
-        if (error != nil) {
-            NSError *capturedError = *error;
-            [AMAErrorUtilities fillError:&capturedError withError:validationResult];
-            *error = capturedError;
-        }
         
-        if (validationResult.code != AMACrashValidatorErrorCodeCritical) {
+        capturedError = [validator result];
+        
+        if (capturedError.code != AMACrashValidatorErrorCodeCritical) {
             Ama__IOSCrashReport report = AMA__IOSCRASH_REPORT__INIT;
             report.info = info;
             report.binary_images = binaryImages;
@@ -77,19 +73,21 @@
             ama__ioscrash_report__pack(&report, buffer);
             data = [NSData dataWithBytesNoCopy:buffer length:size];
             
-            if (validationResult.code == AMACrashValidatorErrorCodeSuspicious) {
+            if (capturedError.code == AMACrashValidatorErrorCodeSuspicious) {
                 AMALogError(@"There were suspicious errors while AMADecodedCrash: %@ serialization.\n"
                                     "Error details: %@",
-                                    decodedCrash, validationResult);
+                                    decodedCrash, capturedError);
             }
         }
         else {
             AMALogError(@"An error occurred while AMADecodedCrash: %@ serialization.\n"
                                 "Error details: %@.\n"
                                 "Trying to report the error to AppMetrica",
-                                decodedCrash, validationResult);
+                                decodedCrash, capturedError);
         }
     }];
+    
+    [AMAErrorUtilities fillError:error withError:capturedError];
 
     return data;
 }
