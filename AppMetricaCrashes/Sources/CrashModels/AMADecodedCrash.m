@@ -4,6 +4,7 @@
 #import "AMACrashReportCrash.h"
 #import "AMAThread.h"
 #import "AMACrashLogging.h"
+#import "AMABuildUID.h"
 #import <AppMetricaPlatform/AppMetricaPlatform.h>
 
 @implementation AMADecodedCrash

@@ -17,6 +17,7 @@
 
 @protocol AMAAsyncExecuting;
 @protocol AMASyncExecuting;
+@protocol AMAHostStateProviding;
 
 @interface AMAAppMetricaCrashes() <AMACrashLoaderDelegate,
                          AMAANRWatchdogDelegate,
@@ -31,7 +32,7 @@
 - (instancetype)initWithExecutor:(id<AMAAsyncExecuting, AMASyncExecuting>)executor
                      crashLoader:(AMACrashLoader *)crashLoader
                    stateNotifier:(AMACrashReportingStateNotifier *)stateNotifier
-               hostStateProvider:(AMAHostStateProvider *)hostStateProvider
+               hostStateProvider:(id<AMAHostStateProviding>)hostStateProvider
                       serializer:(AMADecodedCrashSerializer *)serializer
                    configuration:(AMAAppMetricaCrashesConfiguration *)configuration NS_DESIGNATED_INITIALIZER;
 

@@ -1,5 +1,5 @@
 
-#import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
+#import "AMABuildUID.h"
 
 static NSString *const kAMABuildUIDDateKey = @"date";
 

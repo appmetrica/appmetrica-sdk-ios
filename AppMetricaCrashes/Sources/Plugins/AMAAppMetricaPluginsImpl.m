@@ -3,6 +3,7 @@
 #import "AMACrashReporter.h"
 #import <AppMetricaCore/AppMetricaCore.h>
 #import "AMAAppMetricaCrashes+Private.h"
+#import "AMACrashErrorsFactory.h"
 
 @interface AMAAppMetricaPluginsImpl ()
 
@@ -23,6 +24,7 @@
                        onFailure:(nullable void (^)(NSError *error))onFailure
 {
     if (self.crashReporter == nil) {
+        [AMAFailureDispatcher dispatchError:[AMACrashErrorsFactory crashReporterNotReadyError] withBlock:onFailure];
         return;
     }
     
@@ -34,6 +36,7 @@
           onFailure:(nullable void (^)(NSError *error))onFailure
 {
     if (self.crashReporter == nil) {
+        [AMAFailureDispatcher dispatchError:[AMACrashErrorsFactory crashReporterNotReadyError] withBlock:onFailure];
         return;
     }
     
@@ -48,6 +51,7 @@
                         onFailure:(nullable void (^)(NSError *error))onFailure
 {
     if (self.crashReporter == nil) {
+        [AMAFailureDispatcher dispatchError:[AMACrashErrorsFactory crashReporterNotReadyError] withBlock:onFailure];
         return;
     }
     

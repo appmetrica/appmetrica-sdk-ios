@@ -22,4 +22,10 @@
                                         description:[NSString stringWithFormat:@"Crash report version unsupported: <%@>", version]];
 }
 
++ (NSError *)crashReporterNotReadyError
+{
+    return [AMAErrorUtilities internalErrorWithCode:AMAAppMetricaInternalEventErrorCodeInternalInconsistency
+                                        description:@"Crash reporter is not configured"];
+}
+
 @end

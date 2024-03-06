@@ -3,7 +3,6 @@
     #import "AMAArrayIterator.h"
     #import "AMABlockTimer.h"
     #import "AMABroadcasting.h"
-    #import "AMABuildUID.h"
     #import "AMABytesStringTruncator.h"
     #import "AMACollectionUtilities.h"
     #import "AMADataEncoding.h"
@@ -41,7 +40,6 @@
     #import <AppMetricaCoreUtils/AMAArrayIterator.h>
     #import <AppMetricaCoreUtils/AMABlockTimer.h>
     #import <AppMetricaCoreUtils/AMABroadcasting.h>
-    #import <AppMetricaCoreUtils/AMABuildUID.h>
     #import <AppMetricaCoreUtils/AMABytesStringTruncator.h>
     #import <AppMetricaCoreUtils/AMACollectionUtilities.h>
     #import <AppMetricaCoreUtils/AMADataEncoding.h>

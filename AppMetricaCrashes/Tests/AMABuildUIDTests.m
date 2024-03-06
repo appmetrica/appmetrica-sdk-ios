@@ -1,6 +1,6 @@
 
 #import <Kiwi/Kiwi.h>
-#import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
+#import "AMABuildUID.h"
 
 SPEC_BEGIN(AMABuildUIDTests)
 

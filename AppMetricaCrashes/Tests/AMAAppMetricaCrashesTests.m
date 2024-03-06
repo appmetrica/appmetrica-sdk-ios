@@ -21,6 +21,8 @@
 @interface AMAAppMetricaCrashes () <AMAModuleActivationDelegate>
 @property (nonatomic, strong) AMAErrorEnvironment *errorEnvironment;
 @property (nonatomic, strong) AMAEnvironmentContainer *appEnvironment;
+
+- (void)handlePluginInitFinished;
 @end
 
 SPEC_BEGIN(AMAAppMetricaCrashesTests)
@@ -30,7 +32,6 @@ describe(@"AMAAppMetricaCrashes", ^{
 
     let(amaReporting, ^{ return [KWMock nullMockForProtocol:@protocol(AMAAppMetricaReporting)]; });
     let(crashProcessors, ^{ return [NSMutableArray array]; });
-    let(hostStateProvider, ^{ return [KWMock nullMockForClass:[AMAHostStateProvider class]]; });
     
     AMACurrentQueueExecutor *__block executor = nil;
     AMACrashProcessor *__block crashProcessor = nil;
@@ -41,8 +42,11 @@ describe(@"AMAAppMetricaCrashes", ^{
     AMADecodedCrashSerializer *__block serializer = nil;
     AMAAppMetricaCrashes *__block crashes = nil;
     
+    AMAStubHostAppStateProvider *__block hostStateProvider = nil;
+    
     beforeEach(^{
         executor = [AMACurrentQueueExecutor new];
+        hostStateProvider = [[AMAStubHostAppStateProvider alloc] init];
         
         // TODO: replace with factory
         crashProcessor = [AMACrashProcessor nullMock];
@@ -552,6 +556,23 @@ describe(@"AMAAppMetricaCrashes", ^{
             [[stateNotifier should] receive:@selector(notifyWithEnabled:crashedLastLaunch:) withArguments:theValue(YES), @YES];
             
             [crashes requestCrashReportingStateWithCompletionQueue:sampleQueue completionBlock:sampleBlock];
+        });
+    });
+    
+    context(@"Handle plugin init finished", ^{
+        it(@"Should force update to foreground if started", ^{
+            [AMAAppMetrica stub:@selector(isActivated) andReturn:theValue(YES)];
+            
+            [crashes handlePluginInitFinished];
+            
+            [[theValue(hostStateProvider.forcedUpdateToForeground) should] beYes];
+        });
+        it(@"Should force update to foreground if not started", ^{
+            [AMAAppMetrica stub:@selector(isActivated) andReturn:theValue(NO)];
+            
+            [crashes handlePluginInitFinished];
+            
+            [[theValue(hostStateProvider.forcedUpdateToForeground) should] beNo];
         });
     });
 });

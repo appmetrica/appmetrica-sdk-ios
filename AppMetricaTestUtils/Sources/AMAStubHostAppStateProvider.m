@@ -17,6 +17,7 @@
     if (self) {
         _hostState = AMAHostAppStateBackground;
         _hostStateDelegates = [NSHashTable weakObjectsHashTable];
+        _forcedUpdateToForeground = NO;
     }
 
     return self;
@@ -45,6 +46,7 @@
 
 - (void)forceUpdateToForeground
 {
+    self.forcedUpdateToForeground = YES;
 }
 
 @end

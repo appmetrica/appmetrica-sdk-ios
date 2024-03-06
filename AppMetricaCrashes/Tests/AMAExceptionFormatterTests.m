@@ -34,6 +34,7 @@
 #import "AMAStack.h"
 #import "AMAErrorModelFactory.h"
 #import "AMACrashObjectsFactory.h"
+#import "AMABuildUID.h"
 
 static NSException *nsExceptionMock(NSString *name, NSString *reason, NSDictionary *userInfo, NSNumber *frame)
 {

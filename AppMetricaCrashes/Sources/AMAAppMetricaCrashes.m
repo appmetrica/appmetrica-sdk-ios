@@ -28,6 +28,7 @@
 #import "AMACrashReportError.h"
 #import "AMASignal.h"
 #import "AMAAppMetricaPluginsImpl.h"
+#import "AMABuildUID.h"
 
 @interface AMAAppMetricaCrashes ()
 
@@ -41,7 +42,7 @@
 
 @property (nonatomic, strong) AMACrashReportersContainer *reportersContainer;
 
-@property (nonatomic, strong, readonly) AMAHostStateProvider *hostStateProvider;
+@property (nonatomic, strong, readonly) id<AMAHostStateProviding> hostStateProvider;
 @property (nonatomic, strong, readonly) AMADecodedCrashSerializer *serializer;
 @property (nonatomic, strong, readwrite) NSString *apiKey;
 
@@ -97,7 +98,7 @@
 - (instancetype)initWithExecutor:(id<AMAAsyncExecuting, AMASyncExecuting>)executor
                      crashLoader:(AMACrashLoader *)crashLoader
                    stateNotifier:(AMACrashReportingStateNotifier *)stateNotifier
-               hostStateProvider:(AMAHostStateProvider *)hostStateProvider
+               hostStateProvider:(id<AMAHostStateProviding>)hostStateProvider
                       serializer:(AMADecodedCrashSerializer *)serializer
                    configuration:(AMAAppMetricaCrashesConfiguration *)configuration
 {
@@ -109,7 +110,7 @@
         _reportersContainer = [[AMACrashReportersContainer alloc] init];
         _crashLoader = crashLoader;
         _stateNotifier = stateNotifier;
-        _hostStateProvider = [[AMAHostStateProvider alloc] init];
+        _hostStateProvider = hostStateProvider;
         _hostStateProvider.delegate = self;
         _extendedCrashProcessors = [NSMutableSet new];
         _serializer = serializer;
@@ -322,11 +323,11 @@ them while retaining external immutability. Needed for testability. */
 }
 
 #pragma mark - Private -
-
 - (void)handlePluginInitFinished
 {
-    AMAHostStateProvider *hostStateProvider = [[AMAHostStateProvider alloc] init];
-    [hostStateProvider forceUpdateToForeground];
+    if (AMAAppMetrica.isActivated) {
+        [self.hostStateProvider forceUpdateToForeground];
+    }
 }
 
 #pragma mark - Activation

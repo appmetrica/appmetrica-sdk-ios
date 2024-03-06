@@ -2,7 +2,7 @@
 #import <Kiwi/Kiwi.h>
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
 #import <AppMetricaPlatform/AppMetricaPlatform.h>
-
+#import "AMABuildUID.h"
 #import "AMACrashReportDecoder.h"
 #import "KSCrashReportFields.h"
 #import "AMADecodedCrash.h"

@@ -31,6 +31,7 @@
 #import "AMAVirtualMachineError.h"
 #import "AMAVirtualMachineInfo.h"
 #import "Crash.pb-c.h"
+#import "AMABuildUID.h"
 
 SPEC_BEGIN(AMADecodedCrashSerializerTests)
 

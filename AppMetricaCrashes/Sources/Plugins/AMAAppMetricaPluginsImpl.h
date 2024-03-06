@@ -2,10 +2,10 @@
 #import <Foundation/Foundation.h>
 #import "AMAAppMetricaPlugins.h"
 
-@protocol AMAAppMetricaCrashReporting;
+@protocol AMAAppMetricaPluginReporting;
 
 @interface AMAAppMetricaPluginsImpl : NSObject <AMAAppMetricaPlugins>
 
-- (void)setupCrashReporter:(id<AMAAppMetricaCrashReporting>)crashReporter;
+- (void)setupCrashReporter:(id<AMAAppMetricaPluginReporting>)crashReporter;
 
 @end

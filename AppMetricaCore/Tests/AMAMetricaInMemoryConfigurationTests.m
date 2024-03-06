@@ -52,11 +52,6 @@ describe(@"AMAMetricaInMemoryConfiguration", ^{
     it(@"Should have enabled sessions auto tracking", ^{
         [[theValue(configuration.sessionsAutoTracking) should] beYes];
     });
-    it(@"Should have lazy loaded app build UID", ^{
-        AMABuildUID *buildUID = [AMABuildUID nullMock];
-        [AMABuildUID stub:@selector(buildUID) andReturn:buildUID];
-        [[configuration.appBuildUID should] equal:buildUID];
-    });
     context(@"Started flag", ^{
         it(@"Should be NO", ^{
             [[theValue(configuration.appMetricaStarted) should] beNo];

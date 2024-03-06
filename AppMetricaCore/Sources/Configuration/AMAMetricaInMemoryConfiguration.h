@@ -1,8 +1,6 @@
 
 #import <Foundation/Foundation.h>
 
-@class AMABuildUID;
-
 NS_ASSUME_NONNULL_BEGIN
 
 extern NSString *const kAMAMetricaLibraryApiKey;
@@ -27,8 +25,6 @@ extern BOOL const kAMADefaultAppOpenTrackingEnabled;
 @property (atomic, copy) NSString *appVersion;
 @property (atomic, assign) uint32_t appBuildNumber;
 @property (atomic, copy) NSString *appBuildNumberString;
-/// Unused
-@property (atomic, copy, readonly) AMABuildUID *appBuildUID;
 
 @property (atomic, assign) NSUInteger batchSize;
 @property (atomic, assign) double trimEventsPercent;

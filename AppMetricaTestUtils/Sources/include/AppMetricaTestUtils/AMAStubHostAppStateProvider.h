@@ -7,4 +7,6 @@ NS_SWIFT_NAME(StubHostAppStateProvider)
 
 @property (nonatomic, assign) AMAHostAppState hostState;
 
+@property (nonatomic, assign) BOOL forcedUpdateToForeground;
+
 @end

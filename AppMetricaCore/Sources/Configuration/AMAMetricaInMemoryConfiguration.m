@@ -36,7 +36,6 @@ NSString *const kAMAMetricaLibraryApiKey = @"20799a27-fa80-4b36-b2db-0f8141f2418
 
 @implementation AMAMetricaInMemoryConfiguration
 
-@synthesize appBuildUID = _appBuildUID;
 @synthesize additionalStartupHosts = _additionalStartupHosts;
 
 - (instancetype)init
@@ -68,18 +67,6 @@ NSString *const kAMAMetricaLibraryApiKey = @"20799a27-fa80-4b36-b2db-0f8141f2418
     @synchronized (self) {
         [self.orderedStartupHosts addObjectsFromArray:hosts];
     }
-}
-
-- (AMABuildUID *)appBuildUID
-{
-    if (_appBuildUID == nil) {
-        @synchronized (self) {
-            if (_appBuildUID == nil) {
-                _appBuildUID = [AMABuildUID buildUID];
-            }
-        }
-    }
-    return _appBuildUID;
 }
 
 - (void)markAppMetricaStarted

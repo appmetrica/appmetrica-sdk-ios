@@ -1,7 +1,6 @@
 #import <Kiwi/Kiwi.h>
-
+#import "AMABuildUID.h"
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
-
 #import "AMACrashSafeTransactor.h"
 
 SPEC_BEGIN(AMACrashSafeTransactorTests)

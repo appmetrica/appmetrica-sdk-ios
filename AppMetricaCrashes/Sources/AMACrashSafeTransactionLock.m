@@ -1,5 +1,5 @@
 #import "AMACrashSafeTransactionLock.h"
-
+#import "AMABuildUID.h"
 #import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
 
 static NSString *const kAMATransactionBuildUIDKey = @"buildUID";
