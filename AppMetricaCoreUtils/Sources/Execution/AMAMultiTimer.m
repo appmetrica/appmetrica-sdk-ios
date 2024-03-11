@@ -1,8 +1,5 @@
 
-#import "AMAMultiTimer.h"
-#import "AMAExecuting.h"
-#import "AMAIterable.h"
-#import "AMAArrayIterator.h"
+#import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
 
 @interface AMAMultiTimer () {
     AMAMultiTimerStatus _status;
