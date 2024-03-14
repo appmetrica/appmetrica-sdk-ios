@@ -15,8 +15,8 @@ Pod::Spec.new do |s|
 
   s.frameworks = 'Foundation'
 
-  s.dependency 'AppMetricaLog', '~> 5.2'
-  s.dependency 'AppMetricaCoreUtils', '~> 5.2'
+  s.dependency 'AppMetricaLog', '= 5.2.0'
+  s.dependency 'AppMetricaCoreUtils', '= 5.2.0'
 
   s.header_dir = s.name
   s.source_files = "#{s.name}/Sources/**/*.{h,m}"

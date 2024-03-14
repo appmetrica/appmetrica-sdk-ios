@@ -16,16 +16,16 @@ Pod::Spec.new do |s|
   s.frameworks = 'UIKit', 'Foundation', 'CoreLocation', 'CoreGraphics', 'SystemConfiguration'
   s.libraries = 'z', 'sqlite3', 'c++'
 
-  s.dependency 'AppMetricaLog', '~> 5.2'
-  s.dependency 'AppMetricaNetwork', '~> 5.2'
-  s.dependency 'AppMetricaCoreUtils', '~> 5.2'
-  s.dependency 'AppMetricaHostState', '~> 5.2'
-  s.dependency 'AppMetricaProtobufUtils', '~> 5.2'
-  s.dependency 'AppMetricaPlatform', '~> 5.2'
-  s.dependency 'AppMetricaStorageUtils', '~> 5.2'
-  s.dependency 'AppMetricaEncodingUtils', '~> 5.2'
-  s.dependency 'AppMetrica_Protobuf', '~> 5.2'
-  s.dependency 'AppMetrica_FMDB', '~> 5.2'
+  s.dependency 'AppMetricaLog', '= 5.2.0'
+  s.dependency 'AppMetricaNetwork', '= 5.2.0'
+  s.dependency 'AppMetricaCoreUtils', '= 5.2.0'
+  s.dependency 'AppMetricaHostState', '= 5.2.0'
+  s.dependency 'AppMetricaProtobufUtils', '= 5.2.0'
+  s.dependency 'AppMetricaPlatform', '= 5.2.0'
+  s.dependency 'AppMetricaStorageUtils', '= 5.2.0'
+  s.dependency 'AppMetricaEncodingUtils', '= 5.2.0'
+  s.dependency 'AppMetrica_Protobuf', '= 5.2.0'
+  s.dependency 'AppMetrica_FMDB', '= 5.2.0'
   
   s.header_dir = s.name
   s.source_files = [

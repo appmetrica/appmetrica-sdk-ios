@@ -13,8 +13,8 @@ Pod::Spec.new do |s|
 
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES' }
   
-  s.dependency 'AppMetricaCore', '~> 5.2'
-  s.dependency 'AppMetricaAdSupport', '~> 5.2'
-  s.dependency 'AppMetricaWebKit', '~> 5.2'
-  s.dependency 'AppMetricaCrashes', '~> 5.2'
+  s.dependency 'AppMetricaCore', '= 5.2.0'
+  s.dependency 'AppMetricaAdSupport', '= 5.2.0'
+  s.dependency 'AppMetricaWebKit', '= 5.2.0'
+  s.dependency 'AppMetricaCrashes', '= 5.2.0'
 end

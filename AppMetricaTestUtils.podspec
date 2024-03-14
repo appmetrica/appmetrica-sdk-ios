@@ -16,10 +16,10 @@ Pod::Spec.new do |s|
   
   #TODO: https://nda.ya.ru/t/MqweN1VA6niXzF
   s.dependency 'Kiwi', '~> 3.0.0'
-  s.dependency 'AppMetricaCoreUtils', '~> 5.2'
-  s.dependency 'AppMetricaStorageUtils', '~> 5.2'
-  s.dependency 'AppMetricaNetwork', '~> 5.2'
-  s.dependency 'AppMetricaHostState', '~> 5.2'
+  s.dependency 'AppMetricaCoreUtils', '= 5.2.0'
+  s.dependency 'AppMetricaStorageUtils', '= 5.2.0'
+  s.dependency 'AppMetricaNetwork', '= 5.2.0'
+  s.dependency 'AppMetricaHostState', '= 5.2.0'
   
   s.header_dir = s.name
   s.source_files = "#{s.name}/Sources/**/*.{h,m}"
