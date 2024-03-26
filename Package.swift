@@ -1,4 +1,4 @@
-// swift-tools-version:5.3
+// swift-tools-version:5.7
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
@@ -82,7 +82,7 @@ let package = Package(
                 .network, .log, .coreUtils, .hostState, .protobufUtils, .platform, .storageUtils, .encodingUtils, .protobuf, .fmdb
             ],
             searchPaths: [
-                "../../AppMetricaCoreExtension/Sources/include/AppMetricaCoreExtension", "./**"
+                "../../AppMetricaCoreExtension/Sources/include/AppMetricaCoreExtension"
             ]
         ),
         .testTarget(
@@ -92,7 +92,7 @@ let package = Package(
             ],
             externalDependencies: [.kiwi],
             searchPaths: [
-                "../../AppMetricaCoreExtension/Sources/include/AppMetricaCoreExtension", "./**", "../Sources/**"
+                "../../AppMetricaCoreExtension/Sources/include/AppMetricaCoreExtension"
             ],
             resources: [.process("Resources")]
         ),
@@ -103,30 +103,26 @@ let package = Package(
             dependencies: [
                 .core, .log, .coreExtension, .hostState, .protobufUtils, .platform, .storageUtils, .encodingUtils, .protobuf
             ],
-            externalDependencies: [.ksCrash],
-            searchPaths: ["./**"]
+            externalDependencies: [.ksCrash]
         ),
         .testTarget(
             target: .crashes,
             dependencies: [.crashes, .testUtils],
             externalDependencies: [.kiwi],
-            searchPaths: ["../Sources/**", "./Helpers"],
             resources: [.process("Resources")]
         ),
         
         //MARK: - AppMetrica CoreExtension
         .target(
             target: .coreExtension,
-            dependencies: [.core, .storageUtils],
-            searchPaths: ["./**"]
+            dependencies: [.core, .storageUtils]
         ),
         
         //MARK: - AppMetrica Log
         .target(target: .log),
         .testTarget(
             target: .log,
-            dependencies: [.log],
-            searchPaths: ["../Sources"]
+            dependencies: [.log]
         ),
         
         //MARK: - AppMetrica Protobuf
@@ -142,14 +138,13 @@ let package = Package(
         //MARK: - AppMetrica CoreUtils
         .target(
             target: .coreUtils,
-            dependencies: [.log],
-            searchPaths: ["./**"]
+            dependencies: [.log]
         ),
         .testTarget(
             target: .coreUtils,
             dependencies: [.coreUtils, .testUtils],
             externalDependencies: [.kiwi],
-            searchPaths: ["Utilities", "../Sources/include/AppMetricaCoreUtils"]
+            searchPaths: ["../Sources/include/AppMetricaCoreUtils"]
         ),
         
         //MARK: - AppMetrica TestUtils
@@ -169,7 +164,7 @@ let package = Package(
             target: .network,
             dependencies: [.network, .platform, .coreExtension, .testUtils],
             externalDependencies: [.kiwi],
-            searchPaths: ["Utilities", "../Sources/include/AppMetricaNetwork"]
+            searchPaths: ["../Sources/include/AppMetricaNetwork"]
         ),
         
         //MARK: - AppMetrica AdSupport
@@ -177,8 +172,7 @@ let package = Package(
         .testTarget(
             target: .adSupport,
             dependencies: [.adSupport, .testUtils],
-            externalDependencies: [.kiwi],
-            searchPaths: ["../Sources/**"]
+            externalDependencies: [.kiwi]
         ),
         
         //MARK: - AppMetrica WebKit
@@ -186,8 +180,7 @@ let package = Package(
         .testTarget(
             target: .webKit,
             dependencies: [.webKit, .testUtils],
-            externalDependencies: [.kiwi],
-            searchPaths: ["../Sources/**"]
+            externalDependencies: [.kiwi]
         ),
         
         //MARK: - AppMetrica HostState
@@ -195,8 +188,7 @@ let package = Package(
         .testTarget(
             target: .hostState,
             dependencies: [.hostState, .testUtils],
-            externalDependencies: [.kiwi],
-            searchPaths: ["../Sources/**"]
+            externalDependencies: [.kiwi]
         ),
         
         //MARK: - AppMetrica Platform
@@ -204,8 +196,7 @@ let package = Package(
         .testTarget(
             target: .platform,
             dependencies: [.platform, .testUtils],
-            externalDependencies: [.kiwi],
-            searchPaths: ["../Sources/**"]
+            externalDependencies: [.kiwi]
         ),
         
         //MARK: - AppMetrica StorageUtils
@@ -213,8 +204,7 @@ let package = Package(
         .testTarget(
             target: .storageUtils,
             dependencies: [.storageUtils, .testUtils],
-            externalDependencies: [.kiwi],
-            searchPaths: ["../Sources/**"]
+            externalDependencies: [.kiwi]
         ),
         
         //MARK: - AppMetrica EncodingUtils
@@ -222,14 +212,15 @@ let package = Package(
         .testTarget(
             target: .encodingUtils,
             dependencies: [.encodingUtils, .testUtils],
-            externalDependencies: [.kiwi],
-            searchPaths: ["../Sources/**"]
+            externalDependencies: [.kiwi]
         ),
         
         //MARK: - AppMetrica FMDB
         .target(target: .fmdb),
     ]
 )
+
+//MARK: - Helpers
 
 extension Target {
     static func target(target: AppMetricaTarget,
@@ -241,13 +232,15 @@ extension Target {
         if includePrivacyManifest {
             resources.append(.copy("Resources/PrivacyInfo.xcprivacy"))
         }
+        
+        let resultSearchPath: Set<String> = target.headerPaths.union(searchPaths)
 
         return .target(
             name: target.name,
             dependencies: dependencies.map { $0.dependency } + externalDependencies.map { $0.dependency },
             path: target.path,
             resources: resources,
-            cSettings: combinedSettings(from: searchPaths, path: target.path)
+            cSettings: resultSearchPath.sorted().map { .headerSearchPath($0) }
         )
     }
     
@@ -258,64 +251,163 @@ extension Target {
                            searchPaths: [String] = [],
                            resources: [Resource]? = nil) -> Target {
         
+        let resultSearchPath: Set<String> = target.testsHeaderPaths.union(searchPaths)
+        
         return .testTarget(
             name: target.testsName,
             dependencies: dependencies.map { $0.dependency } + externalDependencies.map { $0.dependency },
             path: target.testsPath,
             resources: resources,
-            cSettings: combinedSettings(from: searchPaths, path: target.testsPath)
+            cSettings: resultSearchPath.sorted().map { .headerSearchPath($0) }
         )
     }
     
-    private static func combinedSettings(from searchPaths: [String], path: String) -> [CSetting] {
-        return searchPaths.flatMap { searchPath -> [CSetting] in
-            if searchPath.hasSuffix("**") {
-                return headerSearchPaths(path, relativeSearchPath: String(searchPath.dropLast(2)))
-            } else {
-                return [.headerSearchPath(searchPath)]
-            }
-        }
-    }
+}
 
-    private static func headerSearchPaths(_ targetPath: String, relativeSearchPath: String = ".") -> [CSetting] {
-        let fullPathURL = buildFullPathURL(targetPath: targetPath, relativeSearchPath: relativeSearchPath)
-        return [.headerSearchPath(relativeSearchPath)] + buildSettings(from: fullPathURL, using: relativeSearchPath)
+//MARK: - Header paths
+
+extension AppMetricaTarget {
+    
+    var headerPaths: Set<String> {
+        let commonPaths: Set<String> = [
+            ".",
+            "include",
+            "include/\(name)"
+        ]
+        
+        return commonPaths.union(additionalHeaderPaths)
     }
     
-    private static func buildFullPathURL(targetPath: String, relativeSearchPath: String) -> URL {
-        let packageDirectoryURL = URL(fileURLWithPath: #file).deletingLastPathComponent()
-        return packageDirectoryURL
-            .appendingPathComponent(targetPath)
-            .appendingPathComponent(relativeSearchPath)
-            .resolvingSymlinksInPath()
-    }
-
-    private static func buildSettings(from fullPathURL: URL, using relativeSearchPath: String) -> [CSetting] {
-        let fileManager = FileManager.default
-        guard let enumerator = fileManager.enumerator(at: fullPathURL, includingPropertiesForKeys: nil) else {
-            return [.headerSearchPath(relativeSearchPath)]
-        }
+    var testsHeaderPaths: Set<String> {
+        let commonPaths: Set<String> = [
+            "."
+        ]
         
-        return enumerator
-            .compactMap { $0 as? URL }
-            .reduce([.headerSearchPath(relativeSearchPath)]) { (settings, fileOrDirURL) in
-                var isDir: ObjCBool = false
-                if fileManager.fileExists(atPath: fileOrDirURL.path, isDirectory: &isDir), isDir.boolValue,
-                   let relativePath = relativePath(from: fullPathURL, toDestination: fileOrDirURL) {
-                    let combinedPath = [relativeSearchPath, relativePath]
-                        .joined(separator: "/")
-                        .replacingOccurrences(of: "//", with: "/")
-                    return settings + [.headerSearchPath(combinedPath)]
-                }
-                return settings
-            }
+        let moduleHeaderPaths = headerPaths.map { "../Sources/\($0)" }
+        
+        return commonPaths.union(testAdditionalHeaderPaths).union(moduleHeaderPaths)
     }
+    
+}
 
-    private static func relativePath(from base: URL, toDestination dest: URL) -> String? {
-        let destComponents = dest.pathComponents
-        let baseComponents = base.pathComponents
-        let commonCount = zip(destComponents, baseComponents).prefix(while: { $0.0 == $0.1 }).count
-        let downwardPaths = destComponents[commonCount...]
-        return downwardPaths.isEmpty ? nil : downwardPaths.joined(separator: "/")
+extension AppMetricaTarget {
+    
+    var additionalHeaderPaths: [String] {
+        switch self {
+        case .core:
+            return [
+                ".",
+                "./AdRevenue",
+                "./AdRevenue/Formatting",
+                "./AdRevenue/Model",
+                "./AdRevenue/Serialization",
+                "./AdRevenue/Validation",
+                "./Attribution",
+                "./Configuration",
+                "./Core",
+                "./Database",
+                "./Database/IntegrityManager",
+                "./Database/KeyValueStorage",
+                "./Database/KeyValueStorage/Converters",
+                "./Database/KeyValueStorage/DataProviders",
+                "./Database/Migration",
+                "./Database/Migration/ApiKey",
+                "./Database/Migration/Library",
+                "./Database/Migration/Scheme",
+                "./Database/Migration/Utilities",
+                "./Database/Scheme",
+                "./Database/Trimming",
+                "./DeepLink",
+                "./Dispatcher",
+                "./ECommerce",
+                "./ExtensionsReport",
+                "./Generated",
+                "./Limiters",
+                "./Location",
+                "./Logging",
+                "./Model",
+                "./Model/Event",
+                "./Model/Event/Value",
+                "./Model/Reporter",
+                "./Model/Reporter/Serialization",
+                "./Model/Session",
+                "./Model/Truncation",
+                "./Network",
+                "./Network/File",
+                "./Network/Report",
+                "./Network/Startup",
+                "./Permissions",
+                "./Profiles",
+                "./Profiles/Attributes",
+                "./Profiles/Attributes/Complex",
+                "./Profiles/Models",
+                "./Profiles/Truncation",
+                "./Profiles/Updates",
+                "./Profiles/Updates/Factory",
+                "./Profiles/Validation",
+                "./Reporter",
+                "./Reporter/FirstOccurrence",
+                "./Revenue",
+                "./Revenue/AutoIAP",
+                "./Revenue/AutoIAP/Models",
+                "./SearchAds",
+                "./SearchAds/AdServices",
+                "./StartupPermissions",
+                "./Strategies",
+                "./include",
+                "./include/AppMetricaCore",
+                "./Privacy",
+                "./Resources",
+            ]
+        case .coreUtils:
+            return [
+                ".",
+                "./Execution",
+                "./Truncation",
+                "./Utilities",
+                "./include",
+                "./include/AppMetricaCoreUtils",
+                "./Resources",
+            ]
+        case .crashes:
+            return [
+                ".",
+                "./CrashModels",
+                "./CrashModels/Crash",
+                "./CrashModels/Crash/Error",
+                "./CrashModels/Crash/Thread",
+                "./CrashModels/System",
+                "./Error",
+                "./Generated",
+                "./LibraryCrashes",
+                "./include",
+                "./include/AppMetricaCrashes",
+                "./Plugins",
+                "./Resources",
+            ]
+        case .adSupport, .coreExtension, .encodingUtils, .fmdb, .hostState, .log, .network, .platform, .protobuf, .protobufUtils, .storageUtils, .webKit, .testUtils:
+            return []
+        }
     }
+    
+    var testAdditionalHeaderPaths: [String] {
+        switch self {
+        case .core:
+            return [
+                "Resources",
+                "Utilities",
+            ]
+        case .coreUtils, .encodingUtils, .network:
+            return [
+                "Utilities",
+            ]
+        case .platform, .protobufUtils, .log:
+            return [
+                "Mocks",
+            ]
+        case .crashes, .coreExtension, .adSupport, .webKit, .testUtils, .hostState, .storageUtils, .protobuf, .fmdb:
+            return []
+        }
+    }
+    
 }
