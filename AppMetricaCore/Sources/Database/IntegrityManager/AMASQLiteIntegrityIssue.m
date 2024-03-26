@@ -1,6 +1,8 @@
 
 #import "AMASQLiteIntegrityIssue.h"
 
+NSString *const kAMAFMDBErrorDomain = @"AMAFMDatabase";
+
 @implementation AMASQLiteIntegrityIssue
 
 - (instancetype)initWithType:(AMASQLiteIntegrityIssueType)issueType

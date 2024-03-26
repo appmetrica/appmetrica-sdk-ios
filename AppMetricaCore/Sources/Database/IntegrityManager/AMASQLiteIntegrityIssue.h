@@ -11,6 +11,8 @@ typedef NS_ENUM(NSUInteger, AMASQLiteIntegrityIssueType) {
     AMASQLiteIntegrityIssueTypeBrokenPages,
 };
 
+extern NSString *const kAMAFMDBErrorDomain;
+
 @interface AMASQLiteIntegrityIssue : NSObject
 
 @property (nonatomic, assign, readonly) AMASQLiteIntegrityIssueType issueType;

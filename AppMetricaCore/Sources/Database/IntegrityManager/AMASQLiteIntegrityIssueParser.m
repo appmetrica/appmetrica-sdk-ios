@@ -45,7 +45,7 @@ static NSString *const indexIssuePattern =
 {
     AMASQLiteIntegrityIssueType issueType = AMASQLiteIntegrityIssueTypeOther;
 
-    if ([error.domain isEqual:@"AMAFMDatabase"]) {
+    if ([error.domain isEqual:kAMAFMDBErrorDomain]) {
         issueType = AMASQLiteIntegrityIssueTypeOtherFMDBError;
         switch (error.code) {
             case SQLITE_FULL:

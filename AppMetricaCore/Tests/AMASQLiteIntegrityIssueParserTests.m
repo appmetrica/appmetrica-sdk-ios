@@ -39,9 +39,9 @@ describe(@"AMASQLiteIntegrityIssueParser", ^{
                 [[parse().fullDescription should] equal:description];
             });
         });
-        context(@"Unknown AppMetrica_FMDB error", ^{
+        context(@"Unknown FMDB error", ^{
             beforeEach(^{
-                error = [NSError errorWithDomain:@"AMAFMDatabase"
+                error = [NSError errorWithDomain:kAMAFMDBErrorDomain
                                             code:10
                                         userInfo:@{ NSLocalizedDescriptionKey: description }];
             });
@@ -60,7 +60,7 @@ describe(@"AMASQLiteIntegrityIssueParser", ^{
         });
         context(@"SQLITE_FULL", ^{
             beforeEach(^{
-                error = [NSError errorWithDomain:@"AMAFMDatabase"
+                error = [NSError errorWithDomain:kAMAFMDBErrorDomain
                                             code:13
                                         userInfo:@{ NSLocalizedDescriptionKey: description }];
             });
@@ -79,7 +79,7 @@ describe(@"AMASQLiteIntegrityIssueParser", ^{
         });
         context(@"SQLITE_CORRUPT", ^{
             beforeEach(^{
-                error = [NSError errorWithDomain:@"AMAFMDatabase"
+                error = [NSError errorWithDomain:kAMAFMDBErrorDomain
                                             code:11
                                         userInfo:@{ NSLocalizedDescriptionKey: description }];
             });
@@ -98,7 +98,7 @@ describe(@"AMASQLiteIntegrityIssueParser", ^{
         });
         context(@"SQLITE_NOTADB", ^{
             beforeEach(^{
-                error = [NSError errorWithDomain:@"AMAFMDatabase"
+                error = [NSError errorWithDomain:kAMAFMDBErrorDomain
                                             code:26
                                         userInfo:@{ NSLocalizedDescriptionKey: description }];
             });

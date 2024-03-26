@@ -4,6 +4,7 @@
 #import "AMADatabaseIntegrityQueries.h"
 #import <sqlite3.h>
 #import <AppMetrica_FMDB/AppMetrica_FMDB.h>
+#import "AMASQLiteIntegrityIssue.h"
 
 SPEC_BEGIN(AMADatabaseIntegrityQueriesTests)
 
@@ -35,7 +36,7 @@ describe(@"AMADatabaseIntegrityQueries", ^{
     });
 
     __auto_type dbError = ^NSError *(NSInteger code, NSString *description) {
-        return [NSError errorWithDomain:@"AMAFMDatabase"
+        return [NSError errorWithDomain:kAMAFMDBErrorDomain
                                    code:code
                                userInfo:@{ NSLocalizedDescriptionKey: description }];
     };

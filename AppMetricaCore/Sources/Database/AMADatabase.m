@@ -228,23 +228,23 @@
 #pragma mark - AMADatabaseIntegrityManagerDelegate -
 
 - (id)contextForIntegrityManager:(AMADatabaseIntegrityManager *)manager
-            thatWillDropDatabase:(AMAFMDatabaseQueue *)databaase
+            thatWillDropDatabase:(AMAFMDatabaseQueue *)database
 {
     id<AMAKeyValueStoring> __block savedStorage = nil;
-    [databaase inDatabase:^(AMAFMDatabase *db) {
+    [database inDatabase:^(AMAFMDatabase *db) {
         savedStorage = [self criticalValuesStorageForDB:db];
     }];
     return savedStorage;
 }
 
 - (void)integrityManager:(AMADatabaseIntegrityManager *)manager
-    didCreateNewDatabase:(AMAFMDatabaseQueue *)databaase
+    didCreateNewDatabase:(AMAFMDatabaseQueue *)database
                  context:(id<AMAKeyValueStoring>)context
 {
     if (context == nil) {
         return;
     }
-    [databaase inDatabase:^(AMAFMDatabase *db) {
+    [database inDatabase:^(AMAFMDatabase *db) {
         [self restoreCriticalValuesFromStorage:context inDB:db];
     }];
 }

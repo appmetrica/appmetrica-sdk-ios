@@ -3,6 +3,7 @@
 #import "AMADatabaseIntegrityQueries.h"
 #import <AppMetrica_FMDB/AppMetrica_FMDB.h>
 #import <sqlite3.h>
+#import "AMASQLiteIntegrityIssue.h"
 
 @implementation AMADatabaseIntegrityQueries
 
@@ -64,7 +65,7 @@
             result = (returnCode == SQLITE_DONE);
             if (result == NO) {
                 NSString *errorMessage = [[NSString alloc] initWithUTF8String:sqlite3_errstr(returnCode)];
-                internalError = [NSError errorWithDomain:@"AMAFMDatabase"
+                internalError = [NSError errorWithDomain:kAMAFMDBErrorDomain
                                                     code:returnCode
                                                 userInfo:@{ NSLocalizedDescriptionKey: errorMessage ?: @"" }];
             }
