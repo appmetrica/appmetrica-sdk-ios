@@ -137,12 +137,14 @@ describe(@"AMADatabaseMigrationTo500Tests", ^{
             });
 
             it(@"Should migrate kv table", ^{
+                NSString *version = @"0.1.2.3.4";
+                [AMAPlatformDescription stub:@selector(SDKVersionName) andReturn:version];
                 id<AMADatabaseProtocol> newDB = [AMADatabaseFactory configurationDatabase];
                 [newDB inDatabase:^(AMAFMDatabase *db) {
                     id<AMAKeyValueStoring> storage = [newDB.storageProvider storageForDB:db];
 
                     [[[storage stringForKey:key error:nil] should] equal:value];
-                    [[[storage stringForKey:@"library.version" error:nil] should] equal:@"5.0.0"];
+                    [[[storage stringForKey:kAMADatabaseKeyLibraryVersion error:nil] should] equal:version];
                     [[[storage stringForKey:AMAStorageStringKeyDidApplyDataMigrationFor500 error:nil] should] equal:@"1"];
 
                     // Should reset startup update date
