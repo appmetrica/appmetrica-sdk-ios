@@ -1700,5 +1700,6 @@
   "LICENSE":"mobile/metrika/ios/appmetrica-sdk/public/LICENSE",
   "Package.resolved":"mobile/metrika/ios/appmetrica-sdk/public/Package.resolved",
   "Package.swift":"mobile/metrika/ios/appmetrica-sdk/public/Package.swift",
-  "README.md":"mobile/metrika/ios/appmetrica-sdk/public/README.md"
+  "README.md":"mobile/metrika/ios/appmetrica-sdk/public/README.md",
+  "THIRD PARTY LICENSES":"mobile/metrika/ios/appmetrica-sdk/public/THIRD PARTY LICENSES"
 }
