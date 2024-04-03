@@ -9,6 +9,7 @@
 @interface AMAPlatformDescription (Tests)
 
 + (AMAAppBuildType)currentAppBuildType;
++ (BOOL)deviceTypeIsIPad;
 
 @end
 
@@ -235,14 +236,15 @@ describe(@"AMAPlatformDescription", ^{
                 [[[AMAPlatformDescription appIdentifierPrefix] should] equal:prefix];
             });
             
-            it(@"Should return DeviceDescription appPlatformIsIPad", ^{
-                [AMADeviceDescription stub:@selector(appPlatformIsIPad) andReturn:theValue(YES)];
+            it(@"Should return DeviceDescription appPlatform", ^{
+                NSString *platform = @"platform";
+                [AMADeviceDescription stub:@selector(appPlatform) andReturn:platform];
                 
-                [[theValue([AMAPlatformDescription appPlatformIsIPad]) should] beYes];
+                [[[AMAPlatformDescription appPlatform] should] equal:platform];
                 
-                [AMADeviceDescription stub:@selector(appPlatformIsIPad) andReturn:theValue(NO)];
+                [AMADeviceDescription stub:@selector(appPlatform) andReturn:platform];
                 
-                [[theValue([AMAPlatformDescription appPlatformIsIPad]) should] beNo];
+                [[[AMAPlatformDescription appPlatform] should] equal:platform];
             });
         });
     });
@@ -314,27 +316,25 @@ describe(@"AMAPlatformDescription", ^{
             [[[AMAPlatformDescription scalefactor] should] equal:scalefactor];
         });
         
-        it(@"Should return DeviceDescription is Ipad status", ^{
-            [AMADeviceDescription stub:@selector(deviceTypeIsIPad) andReturn:theValue(YES)];
-
-            [[theValue([AMAPlatformDescription deviceTypeIsIPad]) should] beYes];
-            
-            [AMADeviceDescription stub:@selector(deviceTypeIsIPad) andReturn:theValue(NO)];
-
-            [[theValue([AMAPlatformDescription deviceTypeIsIPad]) should] beNo];
-        });
-        
-        it(@"Should return tablet if device type is ipad", ^{
+#if TARGET_OS_TV
+        it(@"Should return device type tv if target os is TV", ^{
             [AMAPlatformDescription stub:@selector(deviceTypeIsIPad) andReturn:theValue(YES)];
             
-            [[[AMAPlatformDescription deviceType] should] equal:@"tablet"];
+            [[[AMAPlatformDescription deviceType] should] equal:kAMADeviceTypeTV];
+        });
+#else
+        it(@"Should return device type if device type is ipad", ^{
+            [AMAPlatformDescription stub:@selector(deviceTypeIsIPad) andReturn:theValue(YES)];
+            
+            [[[AMAPlatformDescription deviceType] should] equal:kAMADeviceTypeTablet];
         });
         
         it(@"Should return phone if device type is ipad", ^{
             [AMAPlatformDescription stub:@selector(deviceTypeIsIPad) andReturn:theValue(NO)];
             
-            [[[AMAPlatformDescription deviceType] should] equal:@"phone"];
+            [[[AMAPlatformDescription deviceType] should] equal:kAMADeviceTypePhone];
         });
+#endif
     });
 });
 

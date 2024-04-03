@@ -84,8 +84,6 @@ describe(@"AMAReporter", ^{
 
     AMAReporterTestHelper *__block reporterTestHelper = nil;
 
-    AMAJSController *__block jsController = nil;
-
     void (^executeWithStubbedDate)(NSDate *, dispatch_block_t) = ^(NSDate *date, void (^block)(void)) {
         NSDate *expiredDate = date;
         if (expiredDate == nil) {
@@ -108,8 +106,6 @@ describe(@"AMAReporter", ^{
         [AMAFailureDispatcherTestHelper stubFailureDispatcher];
 
         reporterTestHelper = [[AMAReporterTestHelper alloc] init];
-
-        jsController = [AMAJSController stubbedNullMockForInit:@selector(initWithUserContentController:)];
     });
     context(@"Starts and ends foreground sessions", ^{
         it(@"Should start new session", ^{
@@ -964,6 +960,7 @@ describe(@"AMAReporter", ^{
         });
     });
 
+#if !TARGET_OS_TV
     context(@"Sends JS client event", ^{
         AMAReporter * __block reporter = nil;
         beforeEach(^{
@@ -995,6 +992,7 @@ describe(@"AMAReporter", ^{
             [[stringEventValue.value should] equal:value];
         });
     });
+#endif
     context(@"Sends REFERRER events", ^{
         it(@"Should create EVENT_REFERRER", ^{
             AMAReporter *reporter = [reporterTestHelper appReporterForApiKey:apiKey];
@@ -1671,7 +1669,14 @@ describe(@"AMAReporter", ^{
         });
     });
 
+#if !TARGET_OS_TV
     context(@"WebViewReporting", ^{
+        AMAJSController *__block jsController = nil;
+        
+        beforeEach(^{
+            jsController = [AMAJSController stubbedNullMockForInit:@selector(initWithUserContentController:)];
+        });
+        
         it(@"Should init web view reporting", ^{
             [AMAAppMetrica stub:@selector(isActivated) andReturn:theValue(YES)];
             AMAReporter *reporter = [reporterTestHelper appReporterForApiKey:apiKey];
@@ -1691,6 +1696,7 @@ describe(@"AMAReporter", ^{
             [reporter setupWebViewReporting:jsController onFailure:nil];
         });
     });
+#endif
     
     context(@"Reporting custom events", ^{
         let(error, ^NSError *{ return nil; });
@@ -1799,9 +1805,11 @@ describe(@"AMAReporter", ^{
         it(@"Should conform to AMAAppMetricaExtendedReporting", ^{
             [[(NSObject *)reporter should] conformToProtocol:@protocol(AMAAppMetricaExtendedReporting)];
         });
+#if !TARGET_OS_TV
         it(@"Should conform to AMAJSReporting", ^{
             [[(NSObject *)reporter should] conformToProtocol:@protocol(AMAJSReporting)];
         });
+#endif
     });
 });
 

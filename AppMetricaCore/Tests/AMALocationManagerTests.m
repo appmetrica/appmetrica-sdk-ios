@@ -16,6 +16,7 @@ describe(@"AMALocationManager", ^{
         CLLocationManager *__block systemLocationManager = nil;
         NSObject<CLLocationManagerDelegate> *__block delegate = nil;
         BOOL __block systemAllowsBackgroundLocationUpdates = NO;
+        SEL __block startUpdatingLocationSelector = @selector(startUpdatingLocation);
 
         __auto_type setAuthorizationStatus = ^(CLAuthorizationStatus status, BOOL notifyDelegate) {
             [CLLocationManager stub:@selector(authorizationStatus) andReturn:theValue(status)];
@@ -52,6 +53,9 @@ describe(@"AMALocationManager", ^{
         AMALocationCollectingConfiguration *__block configurationMock = nil;
     
         beforeEach(^{
+#if TARGET_OS_TV
+            startUpdatingLocationSelector = @selector(requestLocation);
+#endif
             stubLocationManager = [CLLocationManager nullMock];
             systemLocationManager = nil;
             delegate = nil;
@@ -102,7 +106,7 @@ describe(@"AMALocationManager", ^{
             stubSystemLocationManager();
             [[AMALocationManager sharedManager] start];
             setAuthorizationStatus(kCLAuthorizationStatusDenied, YES);
-            [[systemLocationManager should] receive:@selector(startUpdatingLocation)];
+            [[systemLocationManager should] receive:startUpdatingLocationSelector];
             setAuthorizationStatus(kCLAuthorizationStatusAuthorizedWhenInUse, YES);
         });
         it(@"Should create location manager when location permission are granted", ^{
@@ -120,14 +124,18 @@ describe(@"AMALocationManager", ^{
             [[delegate shouldNot] beNil];
         });
         it(@"Should start CLLocationManager on main thread if started from background thread", ^{
+            NSUInteger executionCount = 2;
+#if TARGET_OS_IOS
+            executionCount = 3;
+#endif
             stubSystemLocationManager();
             setAuthorizationStatus(kCLAuthorizationStatusAuthorizedAlways, YES);
-            [[mainQueueExecutor should] receive:@selector(execute:) withCount:3];
+            [[mainQueueExecutor should] receive:@selector(execute:) withCount:executionCount];
             [[AMALocationManager sharedManager] start];
         });
         it(@"Should receive correct block if started from background thread", ^{
             stubSystemLocationManagerWithBlock(^(CLLocationManager *manager) {
-                [[manager should] receive:@selector(startUpdatingLocation)];
+                [[manager should] receive:startUpdatingLocationSelector];
             });
             [mainQueueExecutor stub:@selector(execute:) withBlock:^id(NSArray *params) {
                 dispatch_block_t block = params[0];
@@ -138,8 +146,12 @@ describe(@"AMALocationManager", ^{
             setAuthorizationStatus(kCLAuthorizationStatusAuthorizedAlways, YES);
         });
         it(@"Should stop CLLocationManager on main thread if started from background thread", ^{
+            NSUInteger executionCount = 2;
+#if TARGET_OS_IOS
+            executionCount = 3;
+#endif
             stubSystemLocationManager();
-            [[mainQueueExecutor should] receive:@selector(execute:) withCount:3];
+            [[mainQueueExecutor should] receive:@selector(execute:) withCount:executionCount];
             [[AMALocationManager sharedManager] start];
         });
         it(@"Should receive correct block if stopped from background thread", ^{
@@ -172,7 +184,7 @@ describe(@"AMALocationManager", ^{
         it(@"Should start location updates after location restriction is changed from startup", ^{
             [startupPermissionController stub:@selector(isLocationCollectingGranted) andReturn:theValue(NO)];
             stubSystemLocationManagerWithBlock(^(CLLocationManager *locationManager) {
-                [[locationManager should] receive:@selector(startUpdatingLocation)];
+                [[locationManager should] receive:startUpdatingLocationSelector];
             });
             [[AMALocationManager sharedManager] start];
             [startupPermissionController stub:@selector(isLocationCollectingGranted) andReturn:theValue(YES)];
@@ -181,8 +193,8 @@ describe(@"AMALocationManager", ^{
             [[AMALocationManager sharedManager] updateLocationManagerForCurrentStatus];
             [[systemLocationManager shouldNot] beNil];
         });
+#if TARGET_OS_IOS
         context(@"Visits", ^{
-            
             beforeEach(^{
                 [configurationMock stub:@selector(visitsCollectingEnabled) andReturn:theValue(YES)];
             });
@@ -217,6 +229,7 @@ describe(@"AMALocationManager", ^{
                 [[AMALocationManager sharedManager] start];
             });
         });
+#endif
         context(@"All permissions", ^{
             CLLocation *const customLocation = [[CLLocation alloc] initWithLatitude:23 longitude:42];
             beforeEach(^{
@@ -233,14 +246,14 @@ describe(@"AMALocationManager", ^{
             it(@"Should not start if custom location is set", ^{
                 [[AMALocationManager sharedManager] setLocation:customLocation];
                 stubSystemLocationManagerWithBlock(^(CLLocationManager *locationManager) {
-                    [[locationManager shouldNot] receive:@selector(startUpdatingLocation)];
+                    [[locationManager shouldNot] receive:startUpdatingLocationSelector];
                 });
                 [[AMALocationManager sharedManager] start];
             });
             it(@"Should not start if location collecting disabled", ^{
                 [[AMALocationManager sharedManager] setTrackLocationEnabled:NO];
                 stubSystemLocationManagerWithBlock(^(CLLocationManager *locationManager) {
-                    [[locationManager shouldNot] receive:@selector(startUpdatingLocation)];
+                    [[locationManager shouldNot] receive:startUpdatingLocationSelector];
                 });
                 [[AMALocationManager sharedManager] start];
             });
@@ -255,6 +268,7 @@ describe(@"AMALocationManager", ^{
                 [[AMALocationManager sharedManager] setTrackLocationEnabled:NO];
             });
         });
+#if !TARGET_OS_TV
         context(@"Allow background updates", ^{
             BOOL hasProperAPILevel = [CLLocationManager instancesRespondToSelector:@selector(setAllowsBackgroundLocationUpdates:)];
             beforeEach(^{
@@ -368,6 +382,7 @@ describe(@"AMALocationManager", ^{
                 });
             });
         });
+#endif
     });
     it(@"Should conform to CLLocationManagerDelegate", ^{
         [[[AMALocationManager sharedManager] should] conformToProtocol:@protocol(CLLocationManagerDelegate)];

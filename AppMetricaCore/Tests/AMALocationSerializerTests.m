@@ -312,6 +312,7 @@ describe(@"AMALocationSerializer", ^{
             it(@"Should have valid precision", ^{
                 [[theValue(locationMessage->precision) should] equal:theValue((int)location.location.horizontalAccuracy)];
             });
+#if !TARGET_OS_TV
             it(@"Should have precision", ^{
                 [[theValue(locationMessage->has_direction) should] beYes];
             });
@@ -324,6 +325,7 @@ describe(@"AMALocationSerializer", ^{
             it(@"Should have valid precision", ^{
                 [[theValue(locationMessage->speed) should] equal:theValue((int)location.location.speed)];
             });
+#endif
             it(@"Should have provider", ^{
                 [[theValue(locationMessage->has_provider) should] beYes];
             });
@@ -435,12 +437,14 @@ describe(@"AMALocationSerializer", ^{
             it(@"Should have valid precision", ^{
                 [[theValue((int)location.location.horizontalAccuracy) should] equal:theValue((int)expectedLocation.location.horizontalAccuracy)];
             });
+#if !TARGET_OS_TV
             it(@"Should have valid precision", ^{
                 [[theValue((int)location.location.course) should] equal:theValue((int)expectedLocation.location.course)];
             });
             it(@"Should have valid precision", ^{
                 [[theValue((int)location.location.speed) should] equal:theValue((int)expectedLocation.location.speed)];
             });
+#endif
             it(@"Should have valid provider", ^{
                 [[theValue(location.provider) should] equal:theValue(AMALocationProviderUnknown)];
             });

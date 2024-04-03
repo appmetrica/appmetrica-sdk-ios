@@ -47,9 +47,18 @@
     return isRooted;
 }
 
-+ (BOOL)appPlatformIsIPad
++ (NSString *)appPlatform
 {
-    return ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad);
+    switch ([[UIDevice currentDevice] userInterfaceIdiom]) {
+        case UIUserInterfaceIdiomPhone:
+            return @"iphone";
+        case UIUserInterfaceIdiomPad:
+            return @"ipad";
+        case UIUserInterfaceIdiomTV:
+            return @"tv";
+        default:
+            return @"iphone";
+    }
 }
 
 + (BOOL)deviceTypeIsIPad

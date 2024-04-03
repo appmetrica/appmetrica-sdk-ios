@@ -2,6 +2,7 @@
 #import <Kiwi/Kiwi.h>
 #import <AppMetricaWebKit/AppMetricaWebKit.h>
 #import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
+#if !TARGET_OS_TV
 
 SPEC_BEGIN(AMAJSControllerTests)
 
@@ -158,3 +159,5 @@ describe(@"AMAJSController", ^{
 });
 
 SPEC_END
+
+#endif

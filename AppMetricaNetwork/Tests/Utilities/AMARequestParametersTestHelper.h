@@ -3,7 +3,7 @@
 
 @interface AMARequestParametersTestHelper : NSObject
 
-@property (nonatomic, assign) BOOL isIPad;
+@property (nonatomic, copy) NSString *deviceType;
 @property (nonatomic, copy) NSString *appPlatform;
 @property (nonatomic, copy) NSString *manufacturer;
 @property (nonatomic, copy) NSString *model;

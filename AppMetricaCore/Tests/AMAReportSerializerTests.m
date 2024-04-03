@@ -446,6 +446,8 @@ describe(@"AMAReportSerializer", ^{
                                 [[theValue(eventData->location->precision) should] equal:location.horizontalAccuracy
                                                                                withDelta:EPSILON];
                             });
+                            
+#if !TARGET_OS_TV
                             it(@"Should have timestamp", ^{
                                 [[theValue(eventData->location->has_direction) should] beYes];
                             });
@@ -458,6 +460,8 @@ describe(@"AMAReportSerializer", ^{
                             it(@"Should have valid speed", ^{
                                 [[theValue(eventData->location->speed) should] equal:location.speed withDelta:EPSILON];
                             });
+#endif
+                            
                             it(@"Should have timestamp", ^{
                                 [[theValue(eventData->location->has_timestamp) should] beYes];
                             });

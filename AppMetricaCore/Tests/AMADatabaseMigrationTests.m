@@ -869,12 +869,21 @@ describe(@"AMADatabaseMigrationTests", ^{
                                         it(@"Should have valid altitude", ^{
                                             [[theValue(location.altitude) should] equal:23.15 withDelta:0.01];
                                         });
+#if TARGET_OS_TV
+                                        it(@"Should have invalid direction for tv", ^{
+                                            [[theValue(location.course) should] equal:theValue(-1)];
+                                        });
+                                        it(@"Should have invalid speed for tv", ^{
+                                            [[theValue(location.speed) should] equal:theValue(-1)];
+                                        });
+#else
                                         it(@"Should have valid direction", ^{
                                             [[theValue(location.course) should] equal:241.62 withDelta:0.01];
                                         });
                                         it(@"Should have valid speed", ^{
                                             [[theValue(location.speed) should] equal:4.14 withDelta:0.01];
                                         });
+#endif
                                         it(@"Should have valid horizontal accuracy", ^{
                                             [[theValue(location.horizontalAccuracy) should] equal:30.0 withDelta:0.1];
                                         });

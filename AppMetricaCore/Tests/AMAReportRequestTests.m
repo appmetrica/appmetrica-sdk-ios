@@ -73,15 +73,15 @@ describe(@"AMAReportRequestTests", ^{
     };
 
     context(@"Sets correct GET parameters", ^{
+        NSString *const deviceType = @"device";
         void (^stubPlatformDescription)(void) = ^{
             [AMAPlatformDescription stub:@selector(appID) andReturn:appID];
-            [AMAPlatformDescription stub:@selector(deviceTypeIsIPad) andReturn:theValue(NO)];
+            [AMAPlatformDescription stub:@selector(deviceType) andReturn:deviceType];
         };
         NSDictionary * __block GETParameters = nil;
         AMAAppStateManagerTestHelper * __block helper = nil;
 
         beforeEach(^{
-            //stub for deviceTypeIsIPad gets removed somehow, until figured out has to stub each time
             stubPlatformDescription();
             helper = [[AMAAppStateManagerTestHelper alloc] init];
             [helper stubApplicationState];
@@ -93,7 +93,7 @@ describe(@"AMAReportRequestTests", ^{
             [[GETParameters[@"app_platform"] should] equal:[AMAPlatformDescription OSName]];
         });
         it(@"Should add device_type to GET parameters", ^{
-            [[GETParameters[@"device_type"] should] equal:@"phone"];
+            [[GETParameters[@"device_type"] should] equal:deviceType];
         });
         it(@"Should add manufacturer to GET parameters", ^{
             [[GETParameters[@"manufacturer"] should] equal:[AMAPlatformDescription manufacturer]];
@@ -116,9 +116,11 @@ describe(@"AMAReportRequestTests", ^{
         it(@"Should add scalefactor to GET parameters", ^{
             [[GETParameters[@"scalefactor"] should] equal:[AMAPlatformDescription scalefactor]];
         });
+#if !TARGET_OS_TV
         it(@"Should add screen_dpi to GET parameters", ^{
             [[GETParameters[@"screen_dpi"] should] equal:[AMAPlatformDescription screenDPI]];
         });
+#endif
         it(@"Should add is_rooted to GET parameters", ^{
             [[GETParameters[@"is_rooted"] should] equal:(helper.isRooted ? @"1" : @"0")];
         });
@@ -455,12 +457,14 @@ describe(@"AMAReportRequestTests", ^{
                 [[theValue(event->location->direction) should] equal:0.0f withDelta:delta];
             });
 
+#if !TARGET_OS_TV
             it(@"Should send speed", ^{
                 generatePayloadWithBlock(generatePayloadBlock);
                 Ama__ReportMessage__Session__Event *event = message->sessions[0]->events[eventIndex];
 
                 [[theValue(event->location->speed) should] equal:locatonFix.speed withDelta:delta];
             });
+#endif
 
         });
         context(@"Send request parameters", ^{

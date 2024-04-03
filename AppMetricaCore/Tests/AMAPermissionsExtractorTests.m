@@ -229,7 +229,7 @@ describe(@"AMAPermissionsExtractor", ^{
     });
 
     context(@"ATTStatus", ^{
-        if (@available(iOS 14.0, *)) {
+        if (@available(iOS 14.0, tvOS 14.0, *)) {
             context(@"Authorized", ^{
                 beforeEach(^{
                     [[AMAAdProvider sharedInstance] stub:@selector(ATTStatus)

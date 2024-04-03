@@ -20,7 +20,7 @@ describe(@"AMAAdProvider", ^{
         });
         
         it(@"Should return AuthorizationStatusNotDetermined on ATTStatus", ^{
-            if (@available(iOS 14.0, *)) {
+            if (@available(iOS 14.0, tvOS 14.0, *)) {
                 [[theValue([[AMAAdProvider sharedInstance] ATTStatus]) should]
                  equal:theValue(AMATrackingManagerAuthorizationStatusNotDetermined)];
             }
@@ -46,7 +46,7 @@ describe(@"AMAAdProvider", ^{
         });
         
         it(@"Should call AMAAdController on ATTStatus", ^{
-            if (@available(iOS 14.0, *)) {
+            if (@available(iOS 14.0, tvOS 14.0, *)) {
                 NSUInteger statusValue = arc4random_uniform(4);
                 [externalProvider stub:@selector(ATTStatus) andReturn:theValue(statusValue)];
                 

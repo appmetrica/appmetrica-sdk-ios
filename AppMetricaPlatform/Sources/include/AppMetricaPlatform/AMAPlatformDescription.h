@@ -34,7 +34,7 @@ NS_SWIFT_NAME(PlatformDescription)
 + (NSString *)appBuildNumber;
 + (NSString *)appID;
 + (NSString *)appIdentifierPrefix;
-+ (BOOL)appPlatformIsIPad;
++ (NSString *)appPlatform;
 + (NSString *)appFramework;
 + (BOOL)appDebuggable;
 + (BOOL)isDebuggerAttached;
@@ -55,7 +55,6 @@ NS_SWIFT_NAME(PlatformDescription)
 + (NSString *)screenWidth;
 + (NSString *)screenHeight;
 + (NSString *)scalefactor;
-+ (BOOL)deviceTypeIsIPad;
 + (NSString *)deviceType;
 
 - (instancetype)init NS_UNAVAILABLE;

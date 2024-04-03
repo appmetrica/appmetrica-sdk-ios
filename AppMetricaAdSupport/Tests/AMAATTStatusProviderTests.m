@@ -12,7 +12,7 @@ describe(@"AMAATTStatusProvider", ^{
         return [[AMAATTStatusProvider alloc] init];
     });
 
-    if (@available(iOS 14.0, *)) {
+    if (@available(iOS 14.0, tvOS 14.0, *)) {
         it(@"Should return ATTStatus", ^{
             NSUInteger statusValue = arc4random_uniform(4);
 

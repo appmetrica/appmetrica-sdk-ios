@@ -6,7 +6,7 @@
 + (NSString *)appIdentifierPrefix;
 
 + (BOOL)isDeviceRooted;
-+ (BOOL)appPlatformIsIPad;
++ (NSString *)appPlatform;
 
 + (BOOL)deviceTypeIsIPad;
 

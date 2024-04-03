@@ -428,16 +428,6 @@ static NSNumber *AMAStorageUnsignedLongLongFromString(NSString *string)
     event.location = [self locationForResultSet:rs];
 
     NSError *error = nil;
-    if ([rs columnIsNull:@"user_info"] == NO) {
-        NSString *userInfoString = [rs stringForColumn:@"user_info"];
-        NSDictionary *userInfo = [AMAJSONSerialization dictionaryWithJSONString:userInfoString error:&error];
-
-        if (userInfo != nil) {
-//            event.userInfo = [AMAUserInfo objectWithDictionaryRepresentation:userInfo];
-        }
-    }
-
-    error = nil;
     NSString *appEnvironmentString = [rs stringForColumn:@"app_environment"];
     event.appEnvironment = [AMAJSONSerialization dictionaryWithJSONString:appEnvironmentString error:&error];
 

@@ -74,7 +74,6 @@ describe(@"AMAAppMetricaImpl", ^{
     AMAAppOpenWatcher *__block appOpenWatcher = nil;
     AMAAdServicesReportingController *__block adServicesReportingController = nil;
     AMAAutoPurchasesWatcher *__block autoPurchasesWatcher = nil;
-    AMAJSController *__block jsController = nil;
     AMADispatchingController *__block dispatchingController = nil;
     AMADeepLinkController *__block deeplinkController = nil;
     AMAInternalEventsReporter *__block internalEventsReporter = nil;
@@ -99,7 +98,6 @@ describe(@"AMAAppMetricaImpl", ^{
         deeplinkController = [AMADeepLinkController stubbedNullMockForInit:@selector(initWithReporter:executor:)];
         adServicesReportingController = [AMAAdServicesReportingController stubbedNullMockForInit:@selector(initWithApiKey:
                                                                                                            reporterStateStorage:)];
-        jsController = [AMAJSController stubbedNullMockForInit:@selector(initWithUserContentController:)];
         dispatchingController = [AMADispatchingController stubbedNullMockForInit:@selector(initWithTimeoutConfiguration:)];
         internalEventsReporter = [AMAInternalEventsReporter nullMock];
 
@@ -415,7 +413,14 @@ describe(@"AMAAppMetricaImpl", ^{
         });
     });
 
+#if !TARGET_OS_TV
     context(@"Init web view reporting", ^{
+        AMAJSController *__block jsController = nil;
+        
+        beforeEach(^{
+            jsController = [AMAJSController stubbedNullMockForInit:@selector(initWithUserContentController:)];
+        });
+        
         it(@"Should init web view reporting", ^{
             WKUserContentController *controller = [WKUserContentController nullMock];
             [appMetricaImpl activateWithConfiguration:configuration];
@@ -426,7 +431,8 @@ describe(@"AMAAppMetricaImpl", ^{
             [appMetricaImpl setupWebViewReporting:jsController];
         });
     });
-
+#endif
+    
     context(@"Sends string events with custom EventType", ^{
         NSUInteger const eventType = 1234;
         it(@"Should dispatch reporter with correct event type", ^{

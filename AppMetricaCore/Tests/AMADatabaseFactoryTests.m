@@ -56,6 +56,26 @@ describe(@"AMADatabaseFactory", ^{
     AMADatabaseObjectProviderBlock const objectProvider = ^id (AMAFMResultSet *rs, NSUInteger columdIdx) {
         return nil;
     };
+    
+#if TARGET_OS_TV
+    void (^testValidDataStorageTVOS)(NSString *, NSObject *(^)(void)) = ^(NSString *suiteName,
+                                                                          NSObject *(^createDatabaseBlock)(void)) {
+        it(@"Should create valid data storage for tvOS", ^{
+            NSUserDefaults *defaultsAlloced = [NSUserDefaults nullMock];
+            NSUserDefaults *defaults = [NSUserDefaults nullMock];
+            [NSUserDefaults stub:@selector(alloc) andReturn:defaultsAlloced];
+            [defaultsAlloced stub:@selector(initWithSuiteName:)
+                        andReturn:defaults
+                    withArguments:suiteName];
+            
+            NSObject *provider = [AMAUserDefaultsKVSDataProvider stubbedNullMockForInit:@selector(initWithUserDefaults:)];
+            
+            KWCaptureSpy *spy = [provider captureArgument:@selector(initWithUserDefaults:) atIndex:0];
+            createDatabaseBlock();
+            [[spy.argument should] equal:defaults];
+        });
+    };
+#endif
 
     SEL const migrationManagerInitSelector = @selector(initWithCurrentSchemeVersion:
                                                        schemeMigrations:
@@ -224,7 +244,10 @@ describe(@"AMADatabaseFactory", ^{
             });
         });
 
-        it(@"Should create valid data storage", ^{
+#if TARGET_OS_TV
+        testValidDataStorageTVOS([@"io.appmetrica." stringByAppendingString:@"storage.bak"], createDatabase);
+#else
+        it(@"Should create valid data storage for iOS", ^{
             NSString *expectedPath = [applicationSupportDirectoryPath stringByAppendingPathComponent:@"storage.bak"];
             AMADiskFileStorageOptions expectedOptions =
                 AMADiskFileStorageOptionNoBackup | AMADiskFileStorageOptionCreateDirectory;
@@ -247,6 +270,7 @@ describe(@"AMADatabaseFactory", ^{
                                         withArguments:@"kv", stringConverter, objectProvider, JSONDataProvider];
             createDatabase();
         });
+#endif
 
         it(@"Should set key value storage provider database", ^{
             [[keyValueStorageProvider should] receive:@selector(setDatabase:) withArguments:database];
@@ -324,8 +348,12 @@ describe(@"AMADatabaseFactory", ^{
                 [[libraryMigrations should] beEmpty];
             });
         });
-
-        it(@"Should create valid data storage", ^{
+        
+#if TARGET_OS_TV
+        testValidDataStorageTVOS([@"io.appmetrica." stringByAppendingString:[apiKey stringByAppendingString:@".bak"]],
+                                 createDatabase);
+#else
+        it(@"Should create valid data storage for iOS", ^{
             NSString *expectedPath = [persistentPathForApiKey stringByAppendingPathComponent:@"data.bak"];
             AMADiskFileStorageOptions expectedOptions =
                 AMADiskFileStorageOptionNoBackup | AMADiskFileStorageOptionCreateDirectory;
@@ -354,6 +382,7 @@ describe(@"AMADatabaseFactory", ^{
                                         withArguments:@"kv", binaryConverter, objectProvider, proxyDataProvider];
             createDatabase();
         });
+#endif
 
         it(@"Should set key value storage provider database", ^{
             [[keyValueStorageProvider should] receive:@selector(setDatabase:) withArguments:database];
@@ -440,7 +469,11 @@ describe(@"AMADatabaseFactory", ^{
             });
         });
 
-        it(@"Should create valid data storage", ^{
+#if TARGET_OS_TV
+        testValidDataStorageTVOS([@"io.appmetrica." stringByAppendingString:@"l_data.bak"],
+                                 createDatabase);
+#else
+        it(@"Should create valid data storage for iOS", ^{
             NSString *expectedPath = [applicationSupportDirectoryPath stringByAppendingPathComponent:@"l_data.bak"];
             AMADiskFileStorageOptions expectedOptions =
                 AMADiskFileStorageOptionNoBackup | AMADiskFileStorageOptionCreateDirectory;
@@ -463,6 +496,7 @@ describe(@"AMADatabaseFactory", ^{
                                         withArguments:@"kv", stringConverter, objectProvider, JSONDataProvider];
             createDatabase();
         });
+#endif
 
         it(@"Should set key value storage provider database", ^{
             [[keyValueStorageProvider should] receive:@selector(setDatabase:) withArguments:database];

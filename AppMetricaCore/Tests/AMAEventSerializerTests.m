@@ -355,12 +355,14 @@ describe(@"AMAEventSerializer", ^{
                     [[theValue(eventData->location->vertical_accuracy) should] equal:location.verticalAccuracy
                                                                            withDelta:EPSILON];
                 });
+#if !TARGET_OS_TV
                 it(@"Should have valid altitude", ^{
                     [[theValue(eventData->location->direction) should] equal:location.course withDelta:EPSILON];
                 });
                 it(@"Should have valid altitude", ^{
                     [[theValue(eventData->location->speed) should] equal:location.speed withDelta:EPSILON];
                 });
+#endif
                 it(@"Should have valid timestamp", ^{
                     NSTimeInterval interval = location.timestamp.timeIntervalSinceReferenceDate;
                     [[theValue(eventData->location->timestamp) should] equal:interval withDelta:EPSILON];
@@ -798,12 +800,14 @@ describe(@"AMAEventSerializer", ^{
                             [[theValue(event.location.verticalAccuracy) should] equal:location.verticalAccuracy
                                                                             withDelta:EPSILON];
                         });
+#if !TARGET_OS_TV
                         it(@"Should have valid altitude", ^{
                             [[theValue(event.location.course) should] equal:location.course withDelta:EPSILON];
                         });
                         it(@"Should have valid altitude", ^{
                             [[theValue(event.location.speed) should] equal:location.speed withDelta:EPSILON];
                         });
+#endif
                         it(@"Should have valid timestamp", ^{
                             [[event.location.timestamp should] equal:location.timestamp];
                         });

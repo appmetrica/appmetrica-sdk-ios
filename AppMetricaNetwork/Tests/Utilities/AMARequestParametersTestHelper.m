@@ -9,7 +9,7 @@
 {
     self = [super init];
     if (self != nil) {
-        _isIPad = NO;
+        _deviceType = @"phone";
         _appPlatform = @"iOS";
         _manufacturer = @"Apple";
         _model = @"x86-64";
@@ -26,7 +26,7 @@
 
 - (void)configureStubs
 {
-    [AMAPlatformDescription stub:@selector(deviceTypeIsIPad) andReturn:theValue(self.isIPad)];
+    [AMAPlatformDescription stub:@selector(deviceType) andReturn:self.deviceType];
     [AMAPlatformDescription stub:@selector(OSName) andReturn:self.appPlatform];
     [AMAPlatformDescription stub:@selector(manufacturer) andReturn:self.manufacturer];
     [AMAPlatformDescription stub:@selector(model) andReturn:self.model];

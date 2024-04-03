@@ -10,6 +10,7 @@ describe(@"AMARequestParameters", ^{
     NSString *const apiKey = @"550e8400-e29b-41d4-a716-446655440000";
     NSString *const attributionID = @"1";
     NSString *const requestID = @"23";
+    NSString *const device = @"device";
     
     context(@"Provides immutable parameters in dictionary", ^{
         NSDictionary * __block parametersDictionary = nil;
@@ -25,8 +26,8 @@ describe(@"AMARequestParameters", ^{
                                                                                     options:AMARequestParametersDefault];
             parametersDictionary = [parameters dictionaryRepresentation];
         });
-        it(@"Should provide device_type tablet in dictionary representation", ^{
-            requestParametersHelper.isIPad = YES;
+        it(@"Should provide device_type in dictionary representation", ^{
+            requestParametersHelper.deviceType = device;
             [requestParametersHelper configureStubs];
             AMARequestParameters *parameters =
             [[AMARequestParameters alloc] initWithApiKey:apiKey
@@ -36,20 +37,7 @@ describe(@"AMARequestParameters", ^{
                                         inMemoryDatabase:NO
                                                  options:AMARequestParametersDefault];
             parametersDictionary = [parameters dictionaryRepresentation];
-            [[parametersDictionary[@"device_type"] should] equal:@"tablet"];
-        });
-        it(@"Should provide device_type phone in dictionary representation", ^{
-            requestParametersHelper.isIPad = NO;
-            [requestParametersHelper configureStubs];
-            AMARequestParameters *parameters =
-            [[AMARequestParameters alloc] initWithApiKey:apiKey
-                                           attributionID:attributionID
-                                               requestID:requestID
-                                        applicationState:nil
-                                        inMemoryDatabase:NO
-                                                 options:AMARequestParametersDefault];
-            parametersDictionary = [parameters dictionaryRepresentation];
-            [[parametersDictionary[@"device_type"] should] equal:@"phone"];
+            [[parametersDictionary[@"device_type"] should] equal:device];
         });
         it(@"Should provide app_platform in dictionary representation", ^{
             [[parametersDictionary[@"app_platform"] should] equal:requestParametersHelper.appPlatform];

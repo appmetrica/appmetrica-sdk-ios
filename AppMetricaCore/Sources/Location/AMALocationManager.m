@@ -482,7 +482,6 @@
     [self updateLocationManagerForCurrentStatus];
 }
 
-
 - (void)locationManager:(CLLocationManager *)manager didUpdateLocations:(NSArray *)locations
 {
     AMALogInfo(@"Location updated with %@", locations.lastObject);

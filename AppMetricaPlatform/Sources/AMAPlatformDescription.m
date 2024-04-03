@@ -88,9 +88,9 @@ NSString *const kAMADeviceTypeWatch = @"watch";
     return [AMADeviceDescription appIdentifierPrefix];
 }
 
-+ (BOOL)appPlatformIsIPad
++ (NSString *)appPlatform
 {
-    return [AMADeviceDescription appPlatformIsIPad];
+    return [AMADeviceDescription appPlatform];
 }
 
 + (NSString *)appFramework

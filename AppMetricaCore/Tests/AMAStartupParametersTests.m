@@ -16,8 +16,6 @@ describe(@"AMAStartupParameters", ^{
 
     beforeEach(^{
         [AMAPlatformDescription stub:@selector(appID)];
-        [AMAPlatformDescription stub:@selector(appPlatformIsIPad) andReturn:theValue(NO)];
-        [AMAPlatformDescription stub:@selector(deviceTypeIsIPad) andReturn:theValue(NO)];
         [AMAPlatformDescription stub:@selector(appDebuggable) andReturn:theValue(NO)];
         [AMAPlatformDescription stub:@selector(manufacturer)];
         [AMAPlatformDescription stub:@selector(model)];
@@ -34,13 +32,20 @@ describe(@"AMAStartupParameters", ^{
         [AMAStartupClientIdentifierFactory stub:@selector(startupClientIdentifier) andReturn:startupIdentifier];
 
         [AMAMetricaConfigurationTestUtilities stubConfigurationWithNullMock];
+        
+        NSString *appPlatform = @"iphone";
+        NSString *deviceType = @"phone";
+#if TARGET_OS_TV
+        appPlatform = @"tv";
+        deviceType = @"tv";
+#endif
 
         expectedParameters = [@{
             @"app_debuggable": @"0",
-            @"app_platform": @"iphone",
+            @"app_platform": appPlatform,
             @"atc": @"1",
             @"b": @"1",
-            @"device_type": @"phone",
+            @"device_type": deviceType,
             @"deviceid": @"",
             @"features": @"ea,exc,s,sc,pc,vc,dlch",
             @"protocol_version": @"2",
@@ -66,11 +71,6 @@ describe(@"AMAStartupParameters", ^{
     });
 
     it(@"Should return minimal parameters", ^{
-        [[[AMAStartupParameters parameters] should] equal:expectedParameters];
-    });
-    it(@"Should fill app_platform with ipad", ^{
-        [AMAPlatformDescription stub:@selector(appPlatformIsIPad) andReturn:theValue(YES)];
-        expectedParameters[@"app_platform"] = @"ipad";
         [[[AMAStartupParameters parameters] should] equal:expectedParameters];
     });
     it(@"Should fill app_debuggable with 1", ^{
@@ -130,11 +130,6 @@ describe(@"AMAStartupParameters", ^{
         NSNumber *scaleFactor = @3.2;
         [AMAPlatformDescription stub:@selector(scalefactor) andReturn:scaleFactor];
         expectedParameters[@"scalefactor"] = scaleFactor;
-        [[[AMAStartupParameters parameters] should] equal:expectedParameters];
-    });
-    it(@"Should fill device_type with tablet", ^{
-        [AMAPlatformDescription stub:@selector(deviceTypeIsIPad) andReturn:theValue(YES)];
-        expectedParameters[@"device_type"] = @"tablet";
         [[[AMAStartupParameters parameters] should] equal:expectedParameters];
     });
     it(@"Should fill identifiers", ^{

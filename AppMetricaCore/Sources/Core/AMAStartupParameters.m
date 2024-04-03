@@ -26,7 +26,7 @@
 
 + (void)fillAppParameters:(NSMutableDictionary *)parameters
 {
-    parameters[@"app_platform"] = [AMAPlatformDescription appPlatformIsIPad] ? @"ipad" : @"iphone";
+    parameters[@"app_platform"] = [AMAPlatformDescription appPlatform];
     parameters[@"app_debuggable"] = [AMAPlatformDescription appDebuggable] ? @"1" : @"0";
     parameters[@"app_id"] = [AMAPlatformDescription appID];
     parameters[@"locale"] = [AMAPlatformLocaleState fullLocaleIdentifier];

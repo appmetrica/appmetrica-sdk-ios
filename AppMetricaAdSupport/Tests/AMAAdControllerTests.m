@@ -48,7 +48,7 @@ describe(@"AMAAdController", ^{
         });
         
         it(@"Should call AMAATTStatusProvider on ATTStatus", ^{
-            if (@available(iOS 14.0, *)) {
+            if (@available(iOS 14.0, tvOS 14.0, *)) {
                 NSUInteger statusValue = arc4random_uniform(3);
                 [attProvider stub:@selector(ATTStatus) andReturn:theValue((AMATrackingManagerAuthorizationStatus)statusValue)];
                 

@@ -724,6 +724,7 @@ describe(@"AMAAppMetrica", ^{
                 [AMAAppMetrica reportEvent:message parameters:parameters onFailure:nil];
             });
         });
+#if !TARGET_OS_TV
         context(@"Init web view reporting", ^{
             AMAJSController *__block jsController = nil;
             
@@ -750,6 +751,7 @@ describe(@"AMAAppMetrica", ^{
                                               onFailure:nil];
             });
         });
+#endif
         context(@"Public reporter", ^{
             NSString * __block apiKey = nil;
             beforeAll(^{

@@ -7,6 +7,7 @@
 #import "AMAPlainStorageTrimmer.h"
 #import "AMAReporterNotifications.h"
 #import "AMAEventsCountStorageTrimmer.h"
+#import <UIKit/UIKit.h>
 
 @interface AMAStorageTrimManager ()
 
@@ -73,8 +74,8 @@
     [self.listener subscribeObject:database
                     toNotification:UIApplicationDidReceiveMemoryWarningNotification
                       withCallback:^(NSNotification *notification) {
-                          [trimmer trimDatabase:weakDatabase];
-                      }];
+        [trimmer trimDatabase:weakDatabase];
+    }];
 }
 
 - (void)subscribeDatabaseToEventsCountTrim:(id<AMADatabaseProtocol>)database
@@ -88,14 +89,14 @@
     [self.listener subscribeObject:database
                     toNotification:kAMAReporterDidAddEventNotification
                       withCallback:^(NSNotification *notification) {
-                          NSString *apiKey = notification.userInfo[kAMAReporterDidAddEventNotificationUserInfoKeyApiKey];
-                          if (apiKey == nil || [apiKey isEqual:expectedApiKey] == NO) {
-                              return;
-                          }
-                          AMALogInfo(@"Check event count trimming for '%@'. Notification: %@", apiKey, notification);
-                          [trimmer handleEventAdding];
-                          [trimmer trimDatabase:weakDatabase];
-                      }];
+        NSString *apiKey = notification.userInfo[kAMAReporterDidAddEventNotificationUserInfoKeyApiKey];
+        if (apiKey == nil || [apiKey isEqual:expectedApiKey] == NO) {
+            return;
+        }
+        AMALogInfo(@"Check event count trimming for '%@'. Notification: %@", apiKey, notification);
+        [trimmer handleEventAdding];
+        [trimmer trimDatabase:weakDatabase];
+    }];
 }
 
 @end

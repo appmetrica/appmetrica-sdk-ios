@@ -1,6 +1,7 @@
 
 #import <Kiwi/Kiwi.h>
 #import "AMASearchAdsRequester.h"
+#if !TARGET_OS_TV
 #import <iAd/ADClient.h>
 
 SPEC_BEGIN(AMASearchAdsRequesterTests)
@@ -190,3 +191,5 @@ describe(@"AMASearchAdsRequester", ^{
 });
 
 SPEC_END
+
+#endif
