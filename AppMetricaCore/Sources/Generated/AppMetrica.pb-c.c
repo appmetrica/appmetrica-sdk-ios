@@ -542,7 +542,7 @@ const ProtobufCMessageDescriptor ama__report_message__session__event__extras_ent
   (ProtobufCMessageInit) ama__report_message__session__event__extras_entry__init,
   NULL,NULL,NULL    /* reserved[123] */
 };
-static const ProtobufCEnumValue ama__report_message__session__event__event_type__enum_values_by_number[20] =
+static const ProtobufCEnumValue ama__report_message__session__event__event_type__enum_values_by_number[21] =
 {
   { "EVENT_INIT", "AMA__REPORT_MESSAGE__SESSION__EVENT__EVENT_TYPE__EVENT_INIT", 1 },
   { "EVENT_START", "AMA__REPORT_MESSAGE__SESSION__EVENT__EVENT_TYPE__EVENT_START", 2 },
@@ -564,14 +564,16 @@ static const ProtobufCEnumValue ama__report_message__session__event__event_type_
   { "EVENT_ASA_TOKEN", "AMA__REPORT_MESSAGE__SESSION__EVENT__EVENT_TYPE__EVENT_ASA_TOKEN", 37 },
   { "EVENT_WEBVIEW_SYNC", "AMA__REPORT_MESSAGE__SESSION__EVENT__EVENT_TYPE__EVENT_WEBVIEW_SYNC", 38 },
   { "EVENT_AD_REVENUE", "AMA__REPORT_MESSAGE__SESSION__EVENT__EVENT_TYPE__EVENT_AD_REVENUE", 40 },
+  { "EVENT_APPLE_PRIVACY", "AMA__REPORT_MESSAGE__SESSION__EVENT__EVENT_TYPE__EVENT_APPLE_PRIVACY", 41 },
 };
 static const ProtobufCIntRange ama__report_message__session__event__event_type__value_ranges[] = {
-{1, 0},{13, 7},{16, 8},{20, 10},{25, 12},{29, 15},{35, 16},{37, 17},{40, 19},{0, 20}
+{1, 0},{13, 7},{16, 8},{20, 10},{25, 12},{29, 15},{35, 16},{37, 17},{40, 19},{0, 21}
 };
-static const ProtobufCEnumValueIndex ama__report_message__session__event__event_type__enum_values_by_name[20] =
+static const ProtobufCEnumValueIndex ama__report_message__session__event__event_type__enum_values_by_name[21] =
 {
   { "EVENT_AD_REVENUE", 19 },
   { "EVENT_ALIVE", 6 },
+  { "EVENT_APPLE_PRIVACY", 20 },
   { "EVENT_ASA_TOKEN", 17 },
   { "EVENT_CLEANUP", 15 },
   { "EVENT_CLIENT", 3 },
@@ -598,9 +600,9 @@ const ProtobufCEnumDescriptor ama__report_message__session__event__event_type__d
   "EventType",
   "Ama__ReportMessage__Session__Event__EventType",
   "ama",
-  20,
+  21,
   ama__report_message__session__event__event_type__enum_values_by_number,
-  20,
+  21,
   ama__report_message__session__event__event_type__enum_values_by_name,
   9,
   ama__report_message__session__event__event_type__value_ranges,
