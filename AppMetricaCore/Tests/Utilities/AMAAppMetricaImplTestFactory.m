@@ -26,12 +26,10 @@
 
 - (instancetype)initWithHostStateProvider:(nullable id<AMAHostStateProviding>)hostStateProvider
                                  executor:(id<AMAAsyncExecuting, AMASyncExecuting>)executor
-                    eventPollingDelegates:(nullable NSArray<Class<AMAEventPollingDelegate>> *)eventPollingDelegates
                        reporterTestHelper:(AMAReporterTestHelper *)reporterTestHelper
 {
     self = [super initWithHostStateProvider:hostStateProvider 
-                                   executor:executor
-                      eventPollingDelegates:eventPollingDelegates];
+                                   executor:executor];
     if (self != nil) {
         _reporterTestHelper = reporterTestHelper;
     }
@@ -125,12 +123,10 @@
 
 + (AMAAppMetricaImpl *)createCurrentQueueImplWithReporterHelper:(AMAReporterTestHelper *)reporterTestHelper
                                               hostStateProvider:(id<AMAHostStateProviding>)hostStateProvider
-                                          eventPollingDelegates:(NSArray<Class<AMAEventPollingDelegate>> *)eventPollingDelegates
 {
     AMACurrentQueueExecutor *executor = [AMACurrentQueueExecutor new];
     AMAAppMetricaImpl *impl = [[AMAAppMetricaImplStub alloc] initWithHostStateProvider:hostStateProvider
                                                                               executor:executor
-                                                                 eventPollingDelegates:eventPollingDelegates
                                                                     reporterTestHelper:reporterTestHelper];
     return impl;
 }
@@ -140,8 +136,7 @@
     AMAStubHostAppStateProvider *hostStateProvider = [AMAStubHostAppStateProvider new];
     hostStateProvider.hostState = AMAHostAppStateBackground;
     return [self createCurrentQueueImplWithReporterHelper:reporterTestHelper
-                                        hostStateProvider:hostStateProvider
-                                    eventPollingDelegates:nil];
+                                        hostStateProvider:hostStateProvider];
 }
 
 + (AMAAppMetricaImpl *)createNoQueueImplWithReporterHelper:(AMAReporterTestHelper *)reporterTestHelper
@@ -152,17 +147,8 @@
     
     AMAAppMetricaImpl *impl = [[AMAAppMetricaImplStub alloc] initWithHostStateProvider:hostStateProvider
                                                                               executor:executor
-                                                                 eventPollingDelegates:nil
                                                                     reporterTestHelper:reporterTestHelper];
     return impl;
-}
-
-+ (AMAAppMetricaImpl *)createCurrentQueueImplWithReporterHelper:(AMAReporterTestHelper *)reporterTestHelper
-                                              hostStateProvider:(id<AMAHostStateProviding>)hostStateProvider
-{
-    return [self createCurrentQueueImplWithReporterHelper:reporterTestHelper
-                                        hostStateProvider:hostStateProvider
-                                    eventPollingDelegates:nil];
 }
 
 @end

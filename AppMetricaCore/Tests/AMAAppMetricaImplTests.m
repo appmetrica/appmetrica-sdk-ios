@@ -182,13 +182,11 @@ describe(@"AMAAppMetricaImpl", ^{
     context(@"Event polling", ^{
         let(impl, ^{
             return [AMAAppMetricaImplTestFactory createCurrentQueueImplWithReporterHelper:reporterTestHelper
-                                                                        hostStateProvider:hostStateProvider
-                                                                    eventPollingDelegates:@[
-                                                                                    AMAEventPollingDelegateMock.class
-                                                                                          ]];
+                                                                        hostStateProvider:hostStateProvider];
         });
 
         beforeEach(^{
+            [impl setEventPollingDelegates:[NSSet setWithArray:@[AMAEventPollingDelegateMock.class]]];
             AMAEventPollingDelegateMock.mockedEvents = @[];
             [AMAAppMetrica stub:@selector(sharedImpl) andReturn:appMetricaImpl];
         });
@@ -911,6 +909,33 @@ describe(@"AMAAppMetricaImpl", ^{
                 }
                 
                 [appMetricaImpl setExtendedReporterStorageControllers:[NSSet setWithArray:controllers]];
+                [AMAAppMetrica activateReporterWithConfiguration:[[AMAReporterConfiguration alloc] initWithAPIKey:apiKey]];
+            });
+        });
+        context(@"Event polling delegate", ^{
+            NSArray *__block delegates = nil;
+            beforeEach(^{
+                delegates = @[[KWMock nullMockForProtocol:@protocol(AMAEventPollingDelegate)],
+                              [KWMock nullMockForProtocol:@protocol(AMAEventPollingDelegate)]];
+            });
+            it(@"Should setup event polling delegate with main reporter", ^{
+                for (NSObject<AMAEventPollingDelegate> *delegate in delegates) {
+                    [[delegate should] receive:@selector(eventsForPreviousSession)];
+                    
+                    [[delegate should] receive:@selector(setupAppEnvironment:)];
+                }
+                
+                [appMetricaImpl setEventPollingDelegates:[NSSet setWithArray:delegates]];
+                [appMetricaImpl activateWithConfiguration:configuration];
+            });
+            it(@"Should NOT setup event polling delegate with secondary reporter", ^{
+                for (NSObject<AMAEventPollingDelegate> *delegate in delegates) {
+                    [[delegate shouldNot] receive:@selector(eventsForPreviousSession)];
+                    
+                    [[delegate shouldNot] receive:@selector(setupAppEnvironment:)];
+                }
+                
+                [appMetricaImpl setEventPollingDelegates:[NSSet setWithArray:delegates]];
                 [AMAAppMetrica activateReporterWithConfiguration:[[AMAReporterConfiguration alloc] initWithAPIKey:apiKey]];
             });
         });

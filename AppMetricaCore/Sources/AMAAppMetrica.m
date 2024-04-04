@@ -172,6 +172,9 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
         if (adProvider != nil) {
             [[AMAAdProvider sharedInstance] setupAdProvider:adProvider];
         }
+        if (eventPollingDelegates != nil) {
+            [[self sharedImpl] setEventPollingDelegates:eventPollingDelegates];
+        }
         [[AMAMetricaConfiguration sharedInstance].inMemory markExternalServicesConfigured];
     }
 }
@@ -720,13 +723,8 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         @autoreleasepool {
-            NSArray *localEventPollingDelegates = nil;
-            @synchronized (self) {
-                localEventPollingDelegates = eventPollingDelegates.allObjects;
-            }
             appMetricaImpl = [[AMAAppMetricaImpl alloc] initWithHostStateProvider:self.sharedHostStateProvider
-                                                                         executor:self.sharedExecutor
-                                                            eventPollingDelegates:localEventPollingDelegates];
+                                                                         executor:self.sharedExecutor];
 
             [[AMAMetricaConfiguration sharedInstance].inMemory markAppMetricaImplCreated];
 
@@ -794,7 +792,6 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
 {
     return eventPollingDelegates.allObjects;
 }
-
 
 + (BOOL)isAppMetricaStartedWithLogging:(void (^)(NSError *))onFailure {
     if ([self isActivated] == NO) {

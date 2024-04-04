@@ -33,8 +33,7 @@ NS_ASSUME_NONNULL_BEGIN
 + (instancetype)new NS_UNAVAILABLE;
 
 - (instancetype)initWithHostStateProvider:(nullable id<AMAHostStateProviding>)hostStateProvider
-                                 executor:(id<AMAAsyncExecuting, AMASyncExecuting>)executor
-                    eventPollingDelegates:(nullable NSArray<Class<AMAEventPollingDelegate>> *)eventPollingDelegates;
+                                 executor:(id<AMAAsyncExecuting, AMASyncExecuting>)executor;
 
 @property (nonatomic, copy, readonly) NSString *apiKey;
 @property (nonatomic, strong, readonly) id<AMAAsyncExecuting, AMASyncExecuting> executor;
@@ -117,6 +116,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)setExtendedStartupObservers:(NSSet<id<AMAExtendedStartupObserving>> *)observers;
 - (void)setExtendedReporterStorageControllers:(NSSet<id<AMAReporterStorageControlling>> *)controllers;
+- (void)setEventPollingDelegates:(NSSet<Class<AMAEventPollingDelegate>> *)delegates;
 
 @end
 

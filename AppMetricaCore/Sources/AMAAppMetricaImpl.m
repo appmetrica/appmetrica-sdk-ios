@@ -86,7 +86,7 @@
 
 @property (nonatomic, strong) NSHashTable *extendedStartupCompletionObservers;
 @property (nonatomic, strong) NSHashTable *extendedReporterStorageControllersTable;
-@property (nonatomic, strong) NSArray<Class<AMAEventPollingDelegate>> *eventPollingDelegates;
+@property (nonatomic, strong) NSHashTable *eventPollingDelegatesTable;
 
 @end
 
@@ -95,12 +95,11 @@
 - (instancetype)init
 {
     AMAExecutor *executor = [[AMAExecutor alloc] initWithIdentifier:self];
-    return [self initWithHostStateProvider:nil executor:executor eventPollingDelegates:nil];
+    return [self initWithHostStateProvider:nil executor:executor];
 }
 
 - (instancetype)initWithHostStateProvider:(id<AMAHostStateProviding>)hostStateProvider
                                  executor:(id<AMAAsyncExecuting, AMASyncExecuting>)executor
-                    eventPollingDelegates:(NSArray<Class<AMAEventPollingDelegate>> *)eventPollingDelegates
 {
     self = [super init];
     if (self != nil) {
@@ -112,6 +111,7 @@
         _startupCompletionObservers = [NSHashTable weakObjectsHashTable];
         _extendedStartupCompletionObservers = [NSHashTable weakObjectsHashTable];
         _extendedReporterStorageControllersTable = [NSHashTable weakObjectsHashTable];
+        _eventPollingDelegatesTable = [NSHashTable weakObjectsHashTable];
         _extensionsReportController = [[AMAExtensionsReportController alloc] init];
         _permissionsController = [[AMAPermissionsController alloc] init];
         _appOpenWatcher = [[AMAAppOpenWatcher alloc] init];
@@ -122,7 +122,6 @@
             [AMAMetricaConfiguration sharedInstance].persistent.timeoutConfiguration;
         _dispatchingController = [[AMADispatchingController alloc] initWithTimeoutConfiguration:configuration];
         _dispatchingController.proxyDelegate = self;
-        _eventPollingDelegates = eventPollingDelegates;
 
         [[AMASKAdNetworkRequestor sharedInstance] registerForAdNetworkAttribution];
 
@@ -687,13 +686,7 @@
 - (void)applyEventsFromPollingDelegatesWithStorage:(AMAReporterStorage *)reporterStorage
                                       eventBuilder:(AMAEventBuilder *)eventBuilder
 {
-    NSArray<AMAEvent *> *events = [AMACollectionUtilities flatMapArray:self.eventPollingDelegates
-                                                             withBlock:^NSArray *(Class<AMAEventPollingDelegate> delegate) {
-        return [AMACollectionUtilities mapArray:[delegate eventsForPreviousSession]
-                                      withBlock:^id(AMAEventPollingParameters *params) {
-            return [eventBuilder eventWithPollingParameters:params error:NULL];
-        }];
-    }];
+    NSArray<AMAEvent *> *events = [self pollingEvents:eventBuilder];
     
     if (events.count > 0) {
         AMASession *session = [reporterStorage.sessionStorage lastSessionWithError:NULL];
@@ -704,15 +697,6 @@
             }
         }
     }
-}
-
-- (void)setupAppEnvironmentPollingDelegatesWithStorage:(AMAReporterStorage *)reporterStorage
-{
-    [self execute:^{
-        for (id<AMAEventPollingDelegate> delegate in self.eventPollingDelegates) {
-            [delegate setupAppEnvironment:reporterStorage.stateStorage.appEnvironment];
-        }
-    }];
 }
 
 - (void)applyDeferredAppEnvironmentUpdatesWithStorage:(AMAReporterStorage *)reporterStorage
@@ -1024,6 +1008,42 @@
         for (id<AMAReporterStorageControlling> controller in self.extendedReporterStorageControllersTable) {
             [controller setupWithReporterStorage:storageProvider main:main forAPIKey:apiKey];
         }
+    }];
+}
+
+#pragma mark - Event polling -
+
+- (void)setEventPollingDelegates:(NSSet<Class<AMAEventPollingDelegate>> *)delegates
+{
+    AMALogInfo(@"Register event polling delegates: %@", delegates);
+    [self execute:^{
+        if (delegates != nil) {
+            for (Class<AMAReporterStorageControlling> delegate in delegates) {
+                [self.eventPollingDelegatesTable addObject:delegate];
+            }
+        }
+    }];
+}
+
+- (void)setupAppEnvironmentPollingDelegatesWithStorage:(AMAReporterStorage *)reporterStorage
+{
+    [self execute:^{
+        AMALogInfo(@"Setup app environment for extended event polling %lu delegates",
+                   (unsigned long)self.eventPollingDelegatesTable.count);
+        for (id<AMAEventPollingDelegate> delegate in self.eventPollingDelegatesTable) {
+            [delegate setupAppEnvironment:reporterStorage.stateStorage.appEnvironment];
+        }
+    }];
+}
+
+- (NSArray<AMAEvent *> *)pollingEvents:(AMAEventBuilder *)eventBuilder
+{
+    return [AMACollectionUtilities flatMapArray:self.eventPollingDelegatesTable.allObjects
+                                      withBlock:^NSArray *(Class<AMAEventPollingDelegate> delegate) {
+        return [AMACollectionUtilities mapArray:[delegate eventsForPreviousSession]
+                                      withBlock:^id(AMAEventPollingParameters *params) {
+            return [eventBuilder eventWithPollingParameters:params error:NULL];
+        }];
     }];
 }
 
