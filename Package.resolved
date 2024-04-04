@@ -1,25 +1,23 @@
 {
-  "object": {
-    "pins": [
-      {
-        "package": "Kiwi",
-        "repositoryURL": "https://github.com/appmetrica/Kiwi",
-        "state": {
-          "branch": null,
-          "revision": "a265276ad551a65c9b2e3762b0363e007b16f10e",
-          "version": "3.0.1-spm"
-        }
-      },
-      {
-        "package": "KSCrash",
-        "repositoryURL": "https://github.com/kstenerud/KSCrash",
-        "state": {
-          "branch": null,
-          "revision": "58f456709deb44ba4bbf4333ffff734b16704ccc",
-          "version": "1.16.1"
-        }
+  "pins" : [
+    {
+      "identity" : "kiwi",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/appmetrica/Kiwi",
+      "state" : {
+        "revision" : "a265276ad551a65c9b2e3762b0363e007b16f10e",
+        "version" : "3.0.1-spm"
       }
-    ]
-  },
-  "version": 1
+    },
+    {
+      "identity" : "kscrash",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/kstenerud/KSCrash",
+      "state" : {
+        "revision" : "8e29ada12998c47b1ca595bb21d47a27f4e57b22",
+        "version" : "1.17.0"
+      }
+    }
+  ],
+  "version" : 2
 }

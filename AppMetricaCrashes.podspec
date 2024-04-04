@@ -25,7 +25,7 @@ Pod::Spec.new do |s|
   s.dependency 'AppMetricaStorageUtils', '= 5.2.0'
   s.dependency 'AppMetricaEncodingUtils', '= 5.2.0'
 
-  s.dependency 'KSCrash/Recording', '= 1.16.1'
+  s.dependency 'KSCrash/Recording', '= 1.17.0'
   s.dependency 'KSCrash/Recording/Tools'
   
   s.header_dir = s.name
