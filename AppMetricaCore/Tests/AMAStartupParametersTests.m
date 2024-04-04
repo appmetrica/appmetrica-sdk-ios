@@ -66,7 +66,8 @@ describe(@"AMAStartupParameters", ^{
             @"scm": @"1",
             @"srm": @"1",
             @"senm": @"1",
-            @"su": @"1"
+            @"su": @"1",
+            @"exta" : @"1",
         } mutableCopy];
     });
 

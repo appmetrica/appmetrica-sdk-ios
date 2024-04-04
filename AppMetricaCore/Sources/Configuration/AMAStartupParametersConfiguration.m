@@ -6,6 +6,39 @@
 #import "AMAPair.h"
 #import "AMAAttributionSerializer.h"
 
+#define PROPERTY_FOR_TYPE(returnType, getter, setter, key, storageGetter, storageSetter, setOnce) \
+- (returnType *)getter { \
+    return [self.storage storageGetter:key error:NULL]; \
+} \
+- (void)setter:(returnType *)value { \
+    if (setOnce && self.getter != nil) return; \
+    [self.storage storageSetter:value forKey:key error:NULL]; \
+}
+
+#define BOOL_PROPERTY(getter, setter, key) \
+- (BOOL)getter { \
+    return [self.storage boolNumberForKey:key error:NULL].boolValue; \
+} \
+- (void)setter:(BOOL)value { \
+    [self.storage saveBoolNumber:@(value) forKey:key error:nil]; \
+}
+
+#define ARRAY_PROPERTY(getter, setter, key, valueType) \
+- (NSArray *)getter { \
+    return [self jsonArrayForKey:key valueClass:valueType]; \
+} \
+- (void)setter:(NSArray *)value { \
+    [self.storage saveJSONArray:value forKey:key error:NULL]; \
+}
+
+#define DATE_PROPERTY(getter, setter, key) PROPERTY_FOR_TYPE(NSDate, getter, setter, key, dateForKey, saveDate, NO)
+#define STRING_PROPERTY(getter, setter, key) PROPERTY_FOR_TYPE(NSString, getter, setter, key, stringForKey, saveString, NO)
+#define NS_NUMBER_BOOL_PROPERTY(getter, setter, key) PROPERTY_FOR_TYPE(NSNumber, getter, setter, key, boolNumberForKey, saveBoolNumber, NO)
+#define NS_NUMBER_DOUBLE_PROPERTY(getter, setter, key) PROPERTY_FOR_TYPE(NSNumber, getter, setter, key, doubleNumberForKey, saveDoubleNumber, NO)
+#define NS_NUMBER_LONG_PROPERTY(getter, setter, key) PROPERTY_FOR_TYPE(NSNumber, getter, setter, key, longLongNumberForKey, saveLongLongNumber, NO)
+
+#define STRING_SET_ONCE_PROPERTY(getter, setter, key) PROPERTY_FOR_TYPE(NSString, getter, setter, key, stringForKey, saveString, YES)
+
 @implementation AMAStartupParametersConfiguration
 
 - (instancetype)initWithStorage:(id<AMAKeyValueStoring>)storage
@@ -60,83 +93,96 @@
         AMAStorageStringKeyAppleTrackingHosts,
         AMAStorageStringKeyApplePrivacyResendPeriod,
         AMAStorageStringKeyAppleRetryPeriods,
+        AMAStorageStringKeyExternalAttributionCollectingIntervalSeconds,
     ];
 }
 
-#pragma mark - Properties
+#pragma mark - Generated Properties
 
-#define PROPERTY_FOR_TYPE(returnType, getter, setter, key, storageGetter, storageSetter, setOnce) \
-- (returnType *)getter { \
-    return [self.storage storageGetter:key error:NULL]; \
-} \
-- (void)setter:(returnType *)value { \
-    if (setOnce && self.getter != nil) return; \
-    [self.storage storageSetter:value forKey:key error:NULL]; \
-}
+NS_NUMBER_BOOL_PROPERTY(locationPausesLocationUpdatesAutomatically,
+                        setLocationPausesLocationUpdatesAutomatically,
+                        AMAStorageStringKeyLocationPausesLocationUpdatesAutomatically);
 
-#define BOOL_PROPERTY(getter, setter, key) \
-- (BOOL)getter { \
-    return [self.storage boolNumberForKey:key error:NULL].boolValue; \
-} \
-- (void)setter:(BOOL)value { \
-    [self.storage saveBoolNumber:@(value) forKey:key error:nil]; \
-}
+NS_NUMBER_LONG_PROPERTY(retryPolicyMaxIntervalSeconds,
+                        setRetryPolicyMaxIntervalSeconds, AMAStorageStringKeyRetryPolicyMaxIntervalSeconds);
+NS_NUMBER_LONG_PROPERTY(retryPolicyExponentialMultiplier,
+                        setRetryPolicyExponentialMultiplier, AMAStorageStringKeyRetryPolicyExponentialMultiplier);
+NS_NUMBER_LONG_PROPERTY(permissionsCollectingForceSendInterval,
+                        setPermissionsCollectingForceSendInterval, AMAStorageStringKeyPermissionsForceSendInterval);
+NS_NUMBER_LONG_PROPERTY(locationRecordsCountToForceFlush,
+                        setLocationRecordsCountToForceFlush, AMAStorageStringKeyLocationRecordsCountToForceFlush);
+NS_NUMBER_LONG_PROPERTY(locationMaxRecordsCountInBatch,
+                        setLocationMaxRecordsCountInBatch, AMAStorageStringKeyLocationMaxRecordsCountInBatch);
+NS_NUMBER_LONG_PROPERTY(locationMaxRecordsToStoreLocally,
+                        setLocationMaxRecordsToStoreLocally, AMAStorageStringKeyLocationMaxRecordsToStoreLocally);
+NS_NUMBER_LONG_PROPERTY(applePrivacyResendPeriod,
+                        setApplePrivacyResendPeriod, AMAStorageStringKeyApplePrivacyResendPeriod);
 
-#define ARRAY_PROPERTY(getter, setter, key, valueType) \
-- (NSArray *)getter { \
-    return [self jsonArrayForKey:key valueClass:valueType]; \
-} \
-- (void)setter:(NSArray *)value { \
-    [self.storage saveJSONArray:value forKey:key error:NULL]; \
-}
+NS_NUMBER_DOUBLE_PROPERTY(externalAttributionCollectingInterval,
+                          setExternalAttributionCollectingInterval,
+                          AMAStorageStringKeyExternalAttributionCollectingIntervalSeconds);
+NS_NUMBER_DOUBLE_PROPERTY(startupUpdateInterval,
+                          setStartupUpdateInterval, AMAStorageStringKeyStartupUpdateInterval);
+NS_NUMBER_DOUBLE_PROPERTY(serverTimeOffset,
+                          setServerTimeOffset, AMAStorageStringKeyServerTimeOffset);
+NS_NUMBER_DOUBLE_PROPERTY(statSendingDisabledReportingInterval,
+                          setStatSendingDisabledReportingInterval, 
+                          AMAStorageStringKeyStatSendingDisabledReportingInterval);
+NS_NUMBER_DOUBLE_PROPERTY(extensionsCollectingInterval,
+                          setExtensionsCollectingInterval, AMAStorageStringKeyExtensionsReportingInterval);
+NS_NUMBER_DOUBLE_PROPERTY(extensionsCollectingLaunchDelay,
+                          setExtensionsCollectingLaunchDelay, AMAStorageStringKeyExtensionsReportingLaunchDelay);
+NS_NUMBER_DOUBLE_PROPERTY(locationMinUpdateInterval,
+                          setLocationMinUpdateInterval, AMAStorageStringKeyLocationMinUpdateInterval);
+NS_NUMBER_DOUBLE_PROPERTY(locationMinUpdateDistance,
+                          setLocationMinUpdateDistance, AMAStorageStringKeyLocationMinUpdateDistance);
+NS_NUMBER_DOUBLE_PROPERTY(locationMaxAgeToForceFlush,
+                          setLocationMaxAgeToForceFlush, AMAStorageStringKeyLocationMaxAgeToForceFlush);
+NS_NUMBER_DOUBLE_PROPERTY(locationDefaultDesiredAccuracy,
+                          setLocationDefaultDesiredAccuracy, AMAStorageStringKeyLocationDefaultDesiredAccuracy);
+NS_NUMBER_DOUBLE_PROPERTY(locationDefaultDistanceFilter,
+                          setLocationDefaultDistanceFilter, AMAStorageStringKeyLocationDefaultDistanceFilter);
+NS_NUMBER_DOUBLE_PROPERTY(locationAccurateDesiredAccuracy,
+                          setLocationAccurateDesiredAccuracy, AMAStorageStringKeyLocationAccurateDesiredAccuracy);
+NS_NUMBER_DOUBLE_PROPERTY(locationAccurateDistanceFilter,
+                          setLocationAccurateDistanceFilter, AMAStorageStringKeyLocationAccurateDistanceFilter);
+NS_NUMBER_DOUBLE_PROPERTY(ASATokenFirstDelay,
+                          setASATokenFirstDelay, AMAStorageStringKeyASATokenFirstDelay);
+NS_NUMBER_DOUBLE_PROPERTY(ASATokenReportingInterval,
+                          setASATokenReportingInterval, AMAStorageStringKeyASATokenReportingInterval);
+NS_NUMBER_DOUBLE_PROPERTY(ASATokenEndReportingInterval,
+                          setASATokenEndReportingInterval, AMAStorageStringKeyASATokenEndReportingInterval);
 
-#define DATE_PROPERTY(getter, setter, key) PROPERTY_FOR_TYPE(NSDate, getter, setter, key, dateForKey, saveDate, NO)
-#define STRING_PROPERTY(getter, setter, key) PROPERTY_FOR_TYPE(NSString, getter, setter, key, stringForKey, saveString, NO)
-#define DOUBLE_PROPERTY(getter, setter, key) PROPERTY_FOR_TYPE(NSNumber, getter, setter, key, doubleNumberForKey, saveDoubleNumber, NO)
-#define LONG_PROPERTY(getter, setter, key) PROPERTY_FOR_TYPE(NSNumber, getter, setter, key, longLongNumberForKey, saveLongLongNumber, NO)
+STRING_SET_ONCE_PROPERTY(initialCountry,
+                         setInitialCountry, AMAStorageStringKeyInitialCountry);
+STRING_PROPERTY(permissionsString,
+                setPermissionsString, AMAStorageStringKeyStartupPermissions);
+STRING_PROPERTY(redirectHost,
+                setRedirectHost, AMAStorageStringKeyRedirectHost);
 
-#define STRING_SET_ONCE_PROPERTY(getter, setter, key) PROPERTY_FOR_TYPE(NSString, getter, setter, key, stringForKey, saveString, YES)
+ARRAY_PROPERTY(startupHosts,
+               setStartupHosts, AMAStorageStringKeyStartupHosts, [NSString class]);
+ARRAY_PROPERTY(reportHosts,
+               setReportHosts, AMAStorageStringKeyReportHosts, [NSString class]);
+ARRAY_PROPERTY(permissionsCollectingList,
+               setPermissionsCollectingList, AMAStorageStringKeyPermissionsList, [NSString class]);
+ARRAY_PROPERTY(locationHosts,
+               setLocationHosts, AMAStorageStringKeyLocationHosts, [NSString class]);
+ARRAY_PROPERTY(appleTrackingHosts,
+               setAppleTrackingHosts, AMAStorageStringKeyAppleTrackingHosts, [NSString class]);
+ARRAY_PROPERTY(applePrivacyRetryPeriod,
+               setApplePrivacyRetryPeriod, AMAStorageStringKeyAppleRetryPeriods, [NSNumber class]);
 
-LONG_PROPERTY(retryPolicyMaxIntervalSeconds, setRetryPolicyMaxIntervalSeconds, AMAStorageStringKeyRetryPolicyMaxIntervalSeconds);
-LONG_PROPERTY(retryPolicyExponentialMultiplier, setRetryPolicyExponentialMultiplier, AMAStorageStringKeyRetryPolicyExponentialMultiplier);
-LONG_PROPERTY(permissionsCollectingForceSendInterval, setPermissionsCollectingForceSendInterval, AMAStorageStringKeyPermissionsForceSendInterval);
-LONG_PROPERTY(locationRecordsCountToForceFlush, setLocationRecordsCountToForceFlush, AMAStorageStringKeyLocationRecordsCountToForceFlush);
-LONG_PROPERTY(locationMaxRecordsCountInBatch, setLocationMaxRecordsCountInBatch, AMAStorageStringKeyLocationMaxRecordsCountInBatch);
-LONG_PROPERTY(locationMaxRecordsToStoreLocally, setLocationMaxRecordsToStoreLocally, AMAStorageStringKeyLocationMaxRecordsToStoreLocally);
-LONG_PROPERTY(applePrivacyResendPeriod, setApplePrivacyResendPeriod, AMAStorageStringKeyApplePrivacyResendPeriod);
+BOOL_PROPERTY(permissionsCollectingEnabled,
+              setPermissionsCollectingEnabled, AMAStorageStringKeyPermissionsEnabled);
+BOOL_PROPERTY(extensionsCollectingEnabled,
+              setExtensionsCollectingEnabled, AMAStorageStringKeyExtensionsReportingEnabled);
+BOOL_PROPERTY(locationCollectingEnabled,
+              setLocationCollectingEnabled, AMAStorageStringKeyLocationCollectingEnabled);
+BOOL_PROPERTY(locationVisitsCollectingEnabled,
+              setLocationVisitsCollectingEnabled, AMAStorageStringKeyLocationVisitsCollectingEnabled);
 
-DOUBLE_PROPERTY(startupUpdateInterval, setStartupUpdateInterval, AMAStorageStringKeyStartupUpdateInterval);
-DOUBLE_PROPERTY(serverTimeOffset, setServerTimeOffset, AMAStorageStringKeyServerTimeOffset);
-DOUBLE_PROPERTY(statSendingDisabledReportingInterval, setStatSendingDisabledReportingInterval, AMAStorageStringKeyStatSendingDisabledReportingInterval);
-DOUBLE_PROPERTY(extensionsCollectingInterval, setExtensionsCollectingInterval, AMAStorageStringKeyExtensionsReportingInterval);
-DOUBLE_PROPERTY(extensionsCollectingLaunchDelay, setExtensionsCollectingLaunchDelay, AMAStorageStringKeyExtensionsReportingLaunchDelay);
-DOUBLE_PROPERTY(locationMinUpdateInterval, setLocationMinUpdateInterval, AMAStorageStringKeyLocationMinUpdateInterval);
-DOUBLE_PROPERTY(locationMinUpdateDistance, setLocationMinUpdateDistance, AMAStorageStringKeyLocationMinUpdateDistance);
-DOUBLE_PROPERTY(locationMaxAgeToForceFlush, setLocationMaxAgeToForceFlush, AMAStorageStringKeyLocationMaxAgeToForceFlush);
-DOUBLE_PROPERTY(locationDefaultDesiredAccuracy, setLocationDefaultDesiredAccuracy, AMAStorageStringKeyLocationDefaultDesiredAccuracy);
-DOUBLE_PROPERTY(locationDefaultDistanceFilter, setLocationDefaultDistanceFilter, AMAStorageStringKeyLocationDefaultDistanceFilter);
-DOUBLE_PROPERTY(locationAccurateDesiredAccuracy, setLocationAccurateDesiredAccuracy, AMAStorageStringKeyLocationAccurateDesiredAccuracy);
-DOUBLE_PROPERTY(locationAccurateDistanceFilter, setLocationAccurateDistanceFilter, AMAStorageStringKeyLocationAccurateDistanceFilter);
-DOUBLE_PROPERTY(ASATokenFirstDelay, setASATokenFirstDelay, AMAStorageStringKeyASATokenFirstDelay);
-DOUBLE_PROPERTY(ASATokenReportingInterval, setASATokenReportingInterval, AMAStorageStringKeyASATokenReportingInterval);
-DOUBLE_PROPERTY(ASATokenEndReportingInterval, setASATokenEndReportingInterval, AMAStorageStringKeyASATokenEndReportingInterval);
-
-STRING_SET_ONCE_PROPERTY(initialCountry, setInitialCountry, AMAStorageStringKeyInitialCountry);
-STRING_PROPERTY(permissionsString, setPermissionsString, AMAStorageStringKeyStartupPermissions);
-STRING_PROPERTY(redirectHost, setRedirectHost, AMAStorageStringKeyRedirectHost);
-
-ARRAY_PROPERTY(startupHosts, setStartupHosts, AMAStorageStringKeyStartupHosts, [NSString class]);
-ARRAY_PROPERTY(reportHosts, setReportHosts, AMAStorageStringKeyReportHosts, [NSString class]);
-ARRAY_PROPERTY(permissionsCollectingList, setPermissionsCollectingList, AMAStorageStringKeyPermissionsList, [NSString class]);
-ARRAY_PROPERTY(locationHosts, setLocationHosts, AMAStorageStringKeyLocationHosts, [NSString class]);
-ARRAY_PROPERTY(appleTrackingHosts, setAppleTrackingHosts, AMAStorageStringKeyAppleTrackingHosts, [NSString class]);
-ARRAY_PROPERTY(applePrivacyRetryPeriod, setApplePrivacyRetryPeriod, AMAStorageStringKeyAppleRetryPeriods, [NSNumber class]);
-
-BOOL_PROPERTY(permissionsCollectingEnabled, setPermissionsCollectingEnabled, AMAStorageStringKeyPermissionsEnabled);
-BOOL_PROPERTY(extensionsCollectingEnabled, setExtensionsCollectingEnabled, AMAStorageStringKeyExtensionsReportingEnabled);
-BOOL_PROPERTY(locationCollectingEnabled, setLocationCollectingEnabled, AMAStorageStringKeyLocationCollectingEnabled);
-BOOL_PROPERTY(locationVisitsCollectingEnabled, setLocationVisitsCollectingEnabled, AMAStorageStringKeyLocationVisitsCollectingEnabled);
-
+#pragma mark - Custom Processing Properties
 
 - (NSArray<AMAPair *> *)attributionDeeplinkConditions
 {
@@ -149,16 +195,6 @@ BOOL_PROPERTY(locationVisitsCollectingEnabled, setLocationVisitsCollectingEnable
 {
     NSArray *jsonArray = [AMAAttributionSerializer toJsonArray:value];
     [self.storage saveJSONArray:jsonArray forKey:AMAStorageStringKeyAttributionDeeplinkConditions error:NULL];
-}
-
-- (NSNumber *)locationPausesLocationUpdatesAutomatically
-{
-    return [self.storage boolNumberForKey:AMAStorageStringKeyLocationPausesLocationUpdatesAutomatically error:NULL];
-}
-
-- (void)setLocationPausesLocationUpdatesAutomatically:(NSNumber *)value
-{
-    [self.storage saveBoolNumber:value forKey:AMAStorageStringKeyLocationPausesLocationUpdatesAutomatically error:NULL];
 }
 
 - (NSDictionary<NSString *,NSArray<NSString *> *> *)SDKsCustomHosts

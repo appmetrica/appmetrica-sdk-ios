@@ -60,6 +60,7 @@ describe(@"AMAStartupParametersConfiguration", ^{
             @"apple_tracking.collecting.hosts",
             @"apple_tracking.collecting.resend_period",
             @"apple_tracking.collecting.retry_period",
+            @"external_attribution.collecting_interval_seconds",
         ];
         NSArray *keys = [AMAStartupParametersConfiguration allKeys];
         [[[NSSet setWithArray:keys] should] equal:[NSSet setWithArray:expectedKeys]];
@@ -278,6 +279,20 @@ describe(@"AMAStartupParametersConfiguration", ^{
             it(@"Should save valid value", ^{
                 [[storage should] receive:@selector(saveDoubleNumber:forKey:error:) withArguments:value, key, kw_any()];
                 configuration.startupUpdateInterval = value;
+            });
+        });
+        context(@"externalAttributionCollectingInterval", ^{
+            NSString *const key = @"external_attribution.collecting_interval_seconds";
+            it(@"Should use valid key", ^{
+                [[storage should] receive:@selector(doubleNumberForKey:error:) withArguments:key, kw_any()];
+                [configuration externalAttributionCollectingInterval];
+            });
+            it(@"Should return valid value", ^{
+                [[configuration.externalAttributionCollectingInterval should] equal:value];
+            });
+            it(@"Should save valid value", ^{
+                [[storage should] receive:@selector(saveDoubleNumber:forKey:error:) withArguments:value, key, kw_any()];
+                configuration.externalAttributionCollectingInterval = value;
             });
         });
     });

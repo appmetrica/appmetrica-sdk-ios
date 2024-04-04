@@ -5,7 +5,7 @@
 
 @interface AMAStartupRequest ()
 
-@property (nonatomic, copy) NSMutableDictionary *additionalParameters;
+@property (nonatomic, strong) NSMutableDictionary *additionalParameters;
 
 @end
 

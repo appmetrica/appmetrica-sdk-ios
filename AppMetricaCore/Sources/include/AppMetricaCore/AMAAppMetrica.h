@@ -22,6 +22,15 @@ extern AMAStartupKey const kAMAUUIDKey NS_SWIFT_NAME(uuidKey);
 extern AMAStartupKey const kAMADeviceIDKey;
 extern AMAStartupKey const kAMADeviceIDHashKey;
 
+typedef NSString *AMAAttributionSource NS_TYPED_EXTENSIBLE_ENUM NS_SWIFT_NAME(AttributionSource);
+
+extern AMAAttributionSource const kAMAAttributionSourceAppsflyer;
+extern AMAAttributionSource const kAMAAttributionSourceAdjust;
+extern AMAAttributionSource const kAMAAttributionSourceKochava;
+extern AMAAttributionSource const kAMAAttributionSourceTenjin;
+extern AMAAttributionSource const kAMAAttributionSourceAirbridge;
+
+
 /** Identifiers callback block
 
  @param identifiers  Contains any combination of following identifiers on success:
@@ -170,6 +179,22 @@ NS_SWIFT_NAME(reportAdRevenue(_:onFailure:));
 + (void)reportECommerce:(AMAECommerce *)eCommerce
               onFailure:(nullable void (^)(NSError *error))onFailure
 NS_SWIFT_NAME(reportECommerce(_:onFailure:));
+
+/** Sends information about the external attribution.
+
+ This method is used to report attribution from other SDKs.
+ Possible sources include Appsflyer, Adjust, Kochava, Tenjin, Airbridge.
+
+ @note The `attribution` dictionary should be JSON-convertible. If it is not, the `onFailure` block will be called with an error.
+
+ @param attribution The dictionary containing the attribution data.
+ @param source The source of the attribution data.
+ @param onFailure Block to be executed if an error occurs during reporting. The error is passed as a block argument.
+ */
++ (void)reportExternalAttribution:(NSDictionary *)attribution
+                           source:(AMAAttributionSource)source
+                        onFailure:(nullable void (^)(NSError *error))onFailure
+NS_SWIFT_NAME(reportExternalAttribution(_:from:onFailure:));
 
 //MARK: - Web View Reporting
 

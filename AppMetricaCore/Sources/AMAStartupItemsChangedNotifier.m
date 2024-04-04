@@ -7,10 +7,6 @@
 #import "AMAStartupParametersConfiguration.h"
 #import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
 
-NSString *const kAMAUUIDKey = @"appmetrica_uuid";
-NSString *const kAMADeviceIDKey = @"appmetrica_deviceID";
-NSString *const kAMADeviceIDHashKey = @"appmetrica_deviceIDHash";
-
 NSString *const kAMARequestIdentifiersOptionCallbackModeKey = @"request_mode_key";
 
 NSString *const kAMARequestIdentifiersOptionCallbackOnSuccess = @"callback_on_success";

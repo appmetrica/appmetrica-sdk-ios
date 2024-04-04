@@ -752,6 +752,33 @@ describe(@"AMAAppMetrica", ^{
             });
         });
 #endif
+        context(@"External attribution", ^{
+            NSDictionary *const data = @{@"a": @"b"};
+            AMAAttributionSource const source = kAMAAttributionSourceAppsflyer;
+
+            beforeEach(^{
+                stubMetricaStarted(YES);
+            });
+
+            it(@"Should report", ^{
+                [[impl should] receive:@selector(reportExternalAttribution:source:onFailure:)
+                         withArguments:data, source, kw_any()];
+
+                [AMAAppMetrica reportExternalAttribution:data
+                                                  source:source
+                                               onFailure:nil];
+            });
+
+            it(@"Should not report if metrica is not started", ^{
+                stubMetricaStarted(NO);
+
+                [[impl shouldNot] receive:@selector(reportExternalAttribution:source:onFailure:)];
+
+                [AMAAppMetrica reportExternalAttribution:data
+                                                  source:source
+                                               onFailure:nil];
+            });
+        });
         context(@"Public reporter", ^{
             NSString * __block apiKey = nil;
             beforeAll(^{

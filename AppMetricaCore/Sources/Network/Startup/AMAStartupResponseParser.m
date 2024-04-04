@@ -148,6 +148,9 @@ static NSString *const kAMAStartupResponseURLsKey = @"urls";
         configuration.applePrivacyResendPeriod = appleTrackingConfig[@"event_apple_privacy_resend_period"];
         configuration.applePrivacyRetryPeriod = appleTrackingConfig[@"event_apple_privacy_retry_periods"];
         
+        NSDictionary *externalAttribution = parsedData[@"external_attribution"];
+        configuration.externalAttributionCollectingInterval = externalAttribution[@"collecting_interval_seconds"];
+        
         NSMutableDictionary *extendedParameters = [NSMutableDictionary dictionary];
         NSArray *extendedKeys = @[@"get_ad", @"report_ad"];
         for (NSString *key in extendedKeys) {

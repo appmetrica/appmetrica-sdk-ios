@@ -19,6 +19,7 @@
 @class AMACustomEventParameters;
 @class AMAAdProvider;
 @class AMAPrivacyTimer;
+@class AMAExternalAttributionSerializer;
 
 @protocol AMAReporterDelegate <NSObject>
 
@@ -60,9 +61,10 @@
            eCommerceSerializer:(AMAECommerceSerializer *)eCommerceSerializer
             eCommerceTruncator:(AMAECommerceTruncator *)eCommerceTruncator
                     adServices:(AMAAdServicesDataProvider *)adServices
+ externalAttributionSerializer:(AMAExternalAttributionSerializer *)externalAttributionSerializer
       sessionExpirationHandler:(AMASessionExpirationHandler *)sessionExpirationHandler
-                    adProvider:(AMAAdProvider*)adProvider
-                  privacyTimer:(AMAPrivacyTimer*)privateTimer;
+                    adProvider:(AMAAdProvider *)adProvider
+                  privacyTimer:(AMAPrivacyTimer *)privacyTimer;
 
 - (void)setupWithOnStorageRestored:(dispatch_block_t)onStorageRestored
                    onSetupComplete:(dispatch_block_t)onSetupComplete;
@@ -81,5 +83,8 @@
 - (void)reportASATokenEventWithParameters:(NSDictionary *)parameters onFailure:(void (^)(NSError *error))onFailure;
 - (void)reportAutoRevenue:(AMARevenueInfoModel *)revenueInfoModel onFailure:(void (^)(NSError *))onFailure;
 - (void)reportAttributionEventWithName:(NSString *)name value:(NSDictionary *)value;
+- (void)reportExternalAttribution:(NSDictionary *)attribution
+                           source:(AMAAttributionSource)source
+                        onFailure:(void (^)(NSError *error))onFailure;
 
 @end

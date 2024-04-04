@@ -1,16 +1,19 @@
-
 #import <UIKit/UIKit.h>
+
 #import <Kiwi/Kiwi.h>
+
 #import <AppMetricaStorageUtils/AppMetricaStorageUtils.h>
-#import "AMAMetricaPersistentConfiguration.h"
-#import "AMAMetricaInMemoryConfiguration.h"
-#import "AMAMockDatabase.h"
+
+#import "AMAAttributionModelConfiguration.h"
+#import "AMAEnvironmentContainer.h"
+#import "AMAExternalAttributionConfiguration.h"
 #import "AMAKeychain.h"
 #import "AMAKeychainBridgeMock.h"
-#import "AMAEnvironmentContainer.h"
+#import "AMAMetricaInMemoryConfiguration.h"
+#import "AMAMetricaPersistentConfiguration.h"
+#import "AMAMockDatabase.h"
 #import "AMAStartupPermission.h"
 #import "AMAStorageKeys.h"
-#import "AMAAttributionModelConfiguration.h"
 
 SPEC_BEGIN(AMAMetricaPersistentConfigurationTests)
 
@@ -429,6 +432,47 @@ describe(@"AMAMetricaPersistentConfiguration", ^{
         it(@"Should save valid value", ^{
             [[storage should] receive:@selector(saveBoolNumber:forKey:error:) withArguments:value, key, kw_any()];
             configuration.hadFirstStartup = value.boolValue;
+        });
+    });
+    
+    context(@"externalAttributionConfigurations", ^{
+        NSDictionary *dict = @{
+            kAMAAttributionSourceTenjin : [[AMAExternalAttributionConfiguration alloc]
+                                           initWithSource:kAMAAttributionSourceTenjin
+                                           timestamp:[NSDate dateWithTimeIntervalSinceNow:-100]
+                                           contentsHash:@"HASH1"],
+            kAMAAttributionSourceKochava : [[AMAExternalAttributionConfiguration alloc]
+                                            initWithSource:kAMAAttributionSourceKochava
+                                            timestamp:[NSDate dateWithTimeIntervalSinceNow:-200]
+                                            contentsHash:@"HASH2"]
+        };
+        NSString *const key = @"external_attribution.confugiration";
+        it(@"Should use valid key", ^{
+            AMAMetricaPersistentConfiguration *config = createConfig();
+            [[storage should] receive:@selector(jsonDictionaryForKey:error:) withArguments:key, kw_any()];
+            [config externalAttributionConfigurations];
+        });
+        it(@"Should be nil by default", ^{
+            AMAMetricaPersistentConfiguration *config = createConfig();
+            [[[config externalAttributionConfigurations] should] beNil];
+        });
+        it(@"Should save in memory", ^{
+            AMAMetricaPersistentConfiguration *config = createConfig();
+            [config setExternalAttributionConfigurations:dict];
+            [[[config externalAttributionConfigurations] should] equal:dict];
+        });
+        it(@"Should save in database", ^{
+            AMAMetricaPersistentConfiguration *config = createConfig();
+            [config setExternalAttributionConfigurations:dict];
+            AMAMetricaPersistentConfiguration *anotherConfig = createConfig();
+            [[[anotherConfig externalAttributionConfigurations] should] equal:dict];
+        });
+        it(@"Should save nil", ^{
+            AMAMetricaPersistentConfiguration *config = createConfig();
+            [config setExternalAttributionConfigurations:dict];
+            [config setExternalAttributionConfigurations:nil];
+            AMAMetricaPersistentConfiguration *anotherConfig = createConfig();
+            [[[anotherConfig externalAttributionConfigurations] should] beNil];
         });
     });
 });

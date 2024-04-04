@@ -1,12 +1,15 @@
-
 #import "AMACore.h"
+
+#import <UIKit/UIKit.h>
+
 #import <AppMetricaStorageUtils/AppMetricaStorageUtils.h>
+
 #import "AMAMetricaPersistentConfiguration.h"
 #import "AMAStorageKeys.h"
 #import "AMAKeychainStoring.h"
 #import "AMAPersistentTimeoutConfiguration.h"
 #import "AMAAttributionModelConfiguration.h"
-#import <UIKit/UIKit.h>
+#import "AMAExternalAttributionConfiguration.h"
 
 NSString *const kAMADeviceIDStorageKey = @"AMAMetricaPersistentConfigurationDeviceIDStorageKey";
 NSString *const kAMADeviceIDHashStorageKey = @"AMAMetricaPersistentConfigurationDeviceIDHashStorageKey";
@@ -209,6 +212,40 @@ LONG_PROPERTY(conversionValue, setConversionValue, AMAStorageStringKeyConversion
 - (void)setAttributionModelConfiguration:(AMAAttributionModelConfiguration *)attributionModel
 {
     [self.storage saveJSONDictionary:[attributionModel JSON] forKey:AMAStorageStringKeyAttributionModel error:NULL];
+}
+
+- (AMAExternalAttributionConfigurationMap *)externalAttributionConfigurations
+{
+    NSDictionary *allConfigurationsJSON =
+        [self.storage jsonDictionaryForKey:AMAStorageStringKeyExternalAttributionConfiguration error:NULL];
+    
+    if (allConfigurationsJSON.count == 0) {
+        return nil;
+    }
+
+    NSDictionary *configurations =
+        [AMACollectionUtilities compactMapValuesOfDictionary:allConfigurationsJSON
+                                                   withBlock:^id(AMAAttributionSource key, NSDictionary *json) {
+        AMAExternalAttributionConfiguration *attribution = [[AMAExternalAttributionConfiguration alloc] initWithJSON:json];
+        return attribution;
+    }];
+    
+    return configurations;
+}
+
+- (void)setExternalAttributionConfigurations:(AMAExternalAttributionConfigurationMap *)configurations
+{
+    NSDictionary *allConfigurationsJSON =
+        [AMACollectionUtilities compactMapValuesOfDictionary:configurations
+                                                   withBlock:^id(AMAAttributionSource key, AMAExternalAttributionConfiguration *attribution) {
+        return [attribution JSON];
+    }];
+
+    allConfigurationsJSON = allConfigurationsJSON.count == 0 ? nil : allConfigurationsJSON;
+
+    [self.storage saveJSONDictionary:allConfigurationsJSON
+                              forKey:AMAStorageStringKeyExternalAttributionConfiguration
+                               error:NULL];
 }
 
 @end

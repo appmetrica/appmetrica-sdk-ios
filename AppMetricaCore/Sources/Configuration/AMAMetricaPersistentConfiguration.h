@@ -1,5 +1,6 @@
-
 #import <Foundation/Foundation.h>
+
+#import <AppMetricaCore/AppMetricaCore.h>
 
 @protocol AMAKeyValueStoring;
 @protocol AMAKeychainStoring;
@@ -7,9 +8,12 @@
 @class AMAPersistentTimeoutConfiguration;
 @class AMAMetricaInMemoryConfiguration;
 @class AMAAttributionModelConfiguration;
+@class AMAExternalAttributionConfiguration;
 
 extern NSString *const kAMADeviceIDStorageKey;
 extern NSString *const kAMADeviceIDHashStorageKey;
+
+typedef NSDictionary<AMAAttributionSource, AMAExternalAttributionConfiguration *> AMAExternalAttributionConfigurationMap;
 
 @interface AMAMetricaPersistentConfiguration : NSObject
 
@@ -21,6 +25,7 @@ extern NSString *const kAMADeviceIDHashStorageKey;
 @property (nonatomic, copy) NSString *deviceID;
 @property (nonatomic, copy) NSString *deviceIDHash;
 @property (nonatomic, strong) AMAAttributionModelConfiguration *attributionModelConfiguration;
+@property (nonatomic, strong) AMAExternalAttributionConfigurationMap *externalAttributionConfigurations;
 
 @property (nonatomic, strong) NSDate *extensionsLastReportDate;
 

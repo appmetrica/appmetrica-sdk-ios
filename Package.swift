@@ -2,7 +2,6 @@
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
-import Foundation
 
 enum AppMetricaTarget: String {
     case core = "AppMetricaCore"
@@ -321,6 +320,7 @@ extension AppMetricaTarget {
                 "./Dispatcher",
                 "./ECommerce",
                 "./ExtensionsReport",
+                "./ExternalAttribution",
                 "./Generated",
                 "./Limiters",
                 "./Location",
@@ -394,6 +394,7 @@ extension AppMetricaTarget {
         switch self {
         case .core:
             return [
+                "Mocks",
                 "Resources",
                 "Utilities",
             ]

@@ -177,6 +177,9 @@ describe(@"AMAStartupResponseParser", ^{
                     "}"
                 "]"
             "},"
+            "\"external_attribution\": {"
+                "\"collecting_interval_seconds\": 864000"
+            "},"
             "\"startup_update\" : {"
                 "\"interval_seconds\" : 100500"
             "}"
@@ -386,6 +389,12 @@ describe(@"AMAStartupResponseParser", ^{
                     [[parsedConfiguration.attributionDeeplinkConditions[2].value should] equal:@""];
                     [[parsedConfiguration.attributionDeeplinkConditions[3].key should] equal:@"some key 6"];
                     [[parsedConfiguration.attributionDeeplinkConditions[3].value should] beNil];
+                });
+            });
+            
+            context(@"External attribution", ^{
+                it(@"Should parse intercal", ^{
+                    [[parsedConfiguration.externalAttributionCollectingInterval should] equal:@864000];
                 });
             });
             

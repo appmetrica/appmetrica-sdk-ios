@@ -96,6 +96,7 @@
         @"senm": @"1",
         // skad convesion value end
         @"su": @"1",
+        @"exta" : @"1",
         @"features": [features componentsJoinedByString:@","],
     }];
     if (self.isFirstRequest) {

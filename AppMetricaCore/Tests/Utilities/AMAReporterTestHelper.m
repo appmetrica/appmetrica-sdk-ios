@@ -27,6 +27,7 @@
 #import "AMAAdProvider.h"
 #import "AMAPrivacyTimer.h"
 #import "AMAPrivacyTimerStorage.h"
+#import "AMAExternalAttributionSerializer.h"
 
 @interface AMAReporterTestHelper ()
 
@@ -187,6 +188,7 @@
                                    eCommerceSerializer:[[AMAECommerceSerializer alloc] init]
                                     eCommerceTruncator:[[AMAECommerceTruncator alloc] init]
                                             adServices:[AMAAdServicesDataProvider nullMock]
+                         externalAttributionSerializer:[AMAExternalAttributionSerializer nullMock]
                               sessionExpirationHandler:expirationHandler
                                             adProvider:[AMAAdProvider sharedInstance]
                                           privacyTimer:privacyTimer];

@@ -21,4 +21,5 @@ typedef NS_ENUM(NSUInteger, AMAEventType) {
     AMAEventTypeAttribution = 39,
     AMAEventTypeAdRevenue = 40,
     AMAEventTypeApplePrivacy = 41,
+    AMAEventTypeExternalAttribution = 42,
 };

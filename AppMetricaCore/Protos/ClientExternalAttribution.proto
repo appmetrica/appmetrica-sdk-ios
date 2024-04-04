@@ -1,0 +1,16 @@
+syntax = "proto2";
+package ama;
+
+message ClientExternalAttribution {
+    enum AttributionType {
+        UNKNOWN = 0;
+        APPSFLYER = 1;
+        ADJUST = 2;
+        KOCHAVA = 3;
+        TENJIN = 4;
+        AIRBRIDGE = 5;
+    }
+
+    optional AttributionType attribution_type = 1 [default = UNKNOWN];
+    optional bytes value = 2; // json
+}

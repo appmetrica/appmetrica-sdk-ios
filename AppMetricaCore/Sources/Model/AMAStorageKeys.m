@@ -58,3 +58,5 @@ NSString *const AMAStorageStringKeyAppleTrackingHosts = @"apple_tracking.collect
 NSString *const AMAStorageStringKeyApplePrivacyResendPeriod = @"apple_tracking.collecting.resend_period";
 NSString *const AMAStorageStringKeyAppleRetryPeriods = @"apple_tracking.collecting.retry_period";
 NSString *const AMAStorageStringKeyDidApplyDataMigrationFor500 = @"5.0.0.migration.applied";
+NSString *const AMAStorageStringKeyExternalAttributionCollectingIntervalSeconds = @"external_attribution.collecting_interval_seconds";
+NSString *const AMAStorageStringKeyExternalAttributionConfiguration = @"external_attribution.confugiration";

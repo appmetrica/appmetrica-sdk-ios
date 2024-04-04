@@ -86,6 +86,7 @@ message ReportMessage {
                 reserved 39;
                 EVENT_AD_REVENUE = 40;
                 EVENT_APPLE_PRIVACY = 41;
+                EVENT_CLIENT_EXTERNAL_ATTRIBUTION = 42;
             }
             required uint32 type = 3;
             optional string name = 4;

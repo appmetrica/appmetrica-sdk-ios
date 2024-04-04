@@ -432,16 +432,6 @@ describe(@"AMAEventBuilder", ^{
                 });
             });
         });
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
         context(@"EVENT_ALIVE", ^{
             context(@"Event fields", ^{
                 beforeEach(^{
@@ -556,6 +546,43 @@ describe(@"AMAEventBuilder", ^{
                 NSString *passedValue = valueSpy.argument;
                 NSDictionary *dictionary = [AMAJSONSerialization dictionaryWithJSONString:passedValue error:nil];
                 [[dictionary should] equal:value];
+            });
+        });
+        context(@"EVENT_CLIENT_EXTERNAL_ATTRIBUTION", ^{
+            NSData *const data = [@"SOME_DATA" dataUsingEncoding:NSUTF8StringEncoding];
+            context(@"Event fields", ^{
+                beforeEach(^{
+                    valueSpy = [valueFactory captureArgument:@selector(binaryEventValue:gZipped:bytesTruncated:) atIndex:0];
+                    event = [builder eventExternalAttribution:data];
+                });
+                it(@"Should construct event with empty name", ^{
+                    [[event.name should] beEmpty];
+                });
+                it(@"Should construct event with valid data", ^{
+                    [[valueSpy.argument should] equal:data];
+                });
+                it(@"Should construct event with valid type", ^{
+                    [[theValue(event.type) should] equal:theValue(AMAEventTypeExternalAttribution)];
+                });
+                it(@"Should have valid value", ^{
+                    [[((NSObject *)event.value) should] equal:binaryValue];
+                });
+            });
+            it(@"Should be passed to composer", ^{
+                [[eventComposerProvider should] receive:@selector(composerForType:)
+                                          withArguments:theValue(AMAEventTypeExternalAttribution)];
+                [[eventComposer should] receive:@selector(compose:)];
+                [builder eventExternalAttribution:data];
+            });
+            context(@"When data is nil", ^{
+                it(@"Should not be passed to composer", ^{
+                    [[eventComposerProvider shouldNot] receive:@selector(composerForType:)];
+                    [[eventComposer shouldNot] receive:@selector(compose:)];
+                    [builder eventExternalAttribution:nil];
+                });
+                it(@"Should return nil", ^{
+                    [[builder eventExternalAttribution:nil] shouldBeNil];
+                });
             });
         });
     });

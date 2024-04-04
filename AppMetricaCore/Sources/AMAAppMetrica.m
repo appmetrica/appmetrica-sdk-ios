@@ -29,6 +29,16 @@
 #import "AMAUUIDProvider.h"
 #import "AMAUserProfile.h"
 
+NSString *const kAMAUUIDKey = @"appmetrica_uuid";
+NSString *const kAMADeviceIDKey = @"appmetrica_deviceID";
+NSString *const kAMADeviceIDHashKey = @"appmetrica_deviceIDHash";
+
+NSString *const kAMAAttributionSourceAppsflyer = @"appsflyer";
+NSString *const kAMAAttributionSourceAdjust = @"adjust";
+NSString *const kAMAAttributionSourceKochava = @"kochava";
+NSString *const kAMAAttributionSourceTenjin = @"tenjin";
+NSString *const kAMAAttributionSourceAirbridge = @"airbridge";
+
 static NSMutableSet<Class<AMAModuleActivationDelegate>> *activationDelegates = nil;
 static NSMutableSet<Class<AMAEventFlushableDelegate>> *eventFlushableDelegates = nil;
 static NSMutableSet<Class<AMAEventPollingDelegate>> *eventPollingDelegates = nil;
@@ -454,6 +464,15 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
 {
     if ([self isAppMetricaStartedWithLogging:onFailure]) {
         [[self sharedImpl] reportECommerce:eCommerce onFailure:onFailure];
+    }
+}
+
++ (void)reportExternalAttribution:(NSDictionary *)attribution
+                           source:(AMAAttributionSource)source
+                        onFailure:(nullable void (^)(NSError *error))onFailure
+{
+    if ([self isAppMetricaStartedWithLogging:onFailure]) {
+        [[self sharedImpl] reportExternalAttribution:attribution source:source onFailure:onFailure];
     }
 }
 

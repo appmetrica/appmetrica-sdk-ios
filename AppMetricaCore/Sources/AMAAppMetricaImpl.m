@@ -54,6 +54,7 @@
 #import "AMAStartupStorageProvider.h"
 #import "AMATimeoutRequestsController.h"
 #import "AMAUserProfileLogger.h"
+#import "AMAExternalAttributionController.h"
 
 @interface AMAAppMetricaImpl () <AMADispatcherDelegate,
                                  AMADispatchStrategyDelegate,
@@ -79,6 +80,7 @@
 @property (nonatomic, strong) AMAPermissionsController *permissionsController;
 @property (nonatomic, strong, readonly) AMAAppOpenWatcher *appOpenWatcher;
 @property (atomic, strong) AMADeepLinkController *deeplinkController;
+@property (atomic, strong) AMAExternalAttributionController *externalAttributionController;
 @property (nonatomic, strong, readonly) AMAAutoPurchasesWatcher *autoPurchasesWatcher;
 @property (nonatomic, copy) AMAAppMetricaPreloadInfo *preloadInfo;
 
@@ -151,6 +153,12 @@
     }
 }
 
+- (void)setupExternalAttributionControllerWithReporter:(AMAReporter *)reporter
+{
+    self.externalAttributionController = [[AMAExternalAttributionController alloc] initWithReporter:reporter];
+    [self addStartupCompletionObserver:self.externalAttributionController];
+}
+
 - (void)activateWithConfiguration:(AMAAppMetricaConfiguration *)configuration
 {
     self.apiKey = configuration.APIKey;
@@ -158,6 +166,7 @@
     [self migrate];
     AMAReporter *reporter = [self setupReporterWithConfiguration:configuration];
     self.deeplinkController = [[AMADeepLinkController alloc] initWithReporter:reporter executor:self.executor];
+    [self setupExternalAttributionControllerWithReporter:reporter];
     if (configuration.appOpenTrackingEnabled) {
         [self.appOpenWatcher startWatchingWithDeeplinkController:self.deeplinkController];
     }
@@ -305,6 +314,15 @@
         [self reportEventWithBlock:^{
             [self.reporter reportECommerce:eCommerce onFailure:onFailure];
         } onFailure:onFailure];
+    }];
+}
+
+- (void)reportExternalAttribution:(NSDictionary *)attribution
+                           source:(AMAAttributionSource)source
+                        onFailure:(void (^)(NSError *))onFailure
+{
+    [self execute:^{
+        [self.externalAttributionController processAttributionData:attribution source:source onFailure:onFailure];
     }];
 }
 

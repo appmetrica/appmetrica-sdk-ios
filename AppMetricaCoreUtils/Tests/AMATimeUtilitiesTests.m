@@ -50,4 +50,22 @@
     XCTAssertEqual(result, 0, @"Should return 0 if result is negative");
 }
 
+- (void)testUnixTimestampNumberFromDate
+{
+    NSDate *now = [NSDate date];
+    NSNumber *timestampNumber = [AMATimeUtilities unixTimestampNumberFromDate:now];
+    NSTimeInterval expectedTimestamp = [now timeIntervalSince1970];
+    XCTAssertEqualWithAccuracy([timestampNumber doubleValue], expectedTimestamp,
+                               0.001, @"The unix timestamp number from date should match the expected value.");
+}
+
+- (void)testDateFromUnixTimestampNumber
+{
+    NSNumber *timestampNumber = @(1609459200); // Example Unix timestamp for January 1, 2021, 00:00:00 GMT
+    NSDate *expectedDate = [NSDate dateWithTimeIntervalSince1970:[timestampNumber doubleValue]];
+    NSDate *resultDate = [AMATimeUtilities dateFromUnixTimestampNumber:timestampNumber];
+    XCTAssertEqualWithAccuracy([resultDate timeIntervalSince1970], [expectedDate timeIntervalSince1970],
+                               0.001, @"The date from unix timestamp number should match the expected date.");
+}
+
 @end

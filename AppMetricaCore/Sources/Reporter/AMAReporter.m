@@ -1,5 +1,7 @@
-#import <AppMetricaPlatform/AppMetricaPlatform.h>
 #import "AMAReporter.h"
+
+#import <AppMetricaPlatform/AppMetricaPlatform.h>
+
 #import "AMAReporterNotifications.h"
 #import "AMASession.h"
 #import "AMAMetricaConfiguration.h"
@@ -43,6 +45,7 @@
 #import "AMAAdProvider.h"
 #import "AMAPrivacyTimer.h"
 #import "AMAPrivacyTimerStorage.h"
+#import "AMAExternalAttributionSerializer.h"
 
 @interface AMAReporter () <AMAPrivacyTimerDelegate>
 
@@ -59,6 +62,7 @@
 @property (nonatomic, strong, readonly) AMAECommerceTruncator *eCommerceTruncator;
 @property (nonatomic, strong, readonly) AMAAdServicesDataProvider *adServices;
 @property (nonatomic, strong, readonly) AMASessionExpirationHandler *sessionExpirationHandler;
+@property (nonatomic, strong, readonly) AMAExternalAttributionSerializer *externalAttributionSerializer;
 @property (nonnull, nonatomic, strong, readonly) AMAAdProvider *adProvider;
 @property (nonnull, nonatomic, strong, readonly) AMAPrivacyTimer *privacyTimer;
 @property (nonatomic) BOOL isPrivacyTimerStarted;
@@ -103,6 +107,7 @@
             eCommerceSerializer:[[AMAECommerceSerializer alloc] init]
              eCommerceTruncator:[[AMAECommerceTruncator alloc] init]
                      adServices:adServicesDataProvider
+  externalAttributionSerializer:[[AMAExternalAttributionSerializer alloc] init]
        sessionExpirationHandler:sessionExpirationHandler
                      adProvider:adProvider
                    privacyTimer:privacyTimer];
@@ -118,9 +123,10 @@
            eCommerceSerializer:(AMAECommerceSerializer *)eCommerceSerializer
             eCommerceTruncator:(AMAECommerceTruncator *)eCommerceTruncator
                     adServices:(AMAAdServicesDataProvider *)adServices
+ externalAttributionSerializer:(AMAExternalAttributionSerializer *)externalAttributionSerializer
       sessionExpirationHandler:(AMASessionExpirationHandler *)sessionExpirationHandler
-                    adProvider:(AMAAdProvider*)adProvider
-                  privacyTimer:(AMAPrivacyTimer*)privacyTimer
+                    adProvider:(AMAAdProvider *)adProvider
+                  privacyTimer:(AMAPrivacyTimer *)privacyTimer
 
 {
     self = [super init];
@@ -138,6 +144,7 @@
         _eCommerceSerializer = eCommerceSerializer;
         _eCommerceTruncator = eCommerceTruncator;
         _sessionExpirationHandler = sessionExpirationHandler;
+        _externalAttributionSerializer = externalAttributionSerializer;
         _adProvider = adProvider;
         _privacyTimer = privacyTimer;
         privacyTimer.delegate = self;
@@ -736,6 +743,21 @@
 }
 #endif
 
+- (void)reportExternalAttribution:(NSDictionary *)attribution
+                           source:(AMAAttributionSource)source
+                        onFailure:(nullable void (^)(NSError *))onFailure 
+{
+    if (AMAAppMetrica.isActivated == NO) {
+        [AMAErrorLogger logAppMetricaNotStartedErrorWithOnFailure:onFailure];
+        return;
+    }
+    [self reportCommonEventWithBlock:^AMAEvent *(NSError **error) {
+        NSData *serialized = [self.externalAttributionSerializer serializeExternalAttribution:attribution
+                                                                                       source:source
+                                                                                        error:error];
+        return [self.eventBuilder eventExternalAttribution:serialized];
+    } onFailure:onFailure];
+}
 
 #pragma mark - Execution -
 

@@ -3,7 +3,6 @@
 
 @protocol AMAKeyValueStoring;
 @class AMAPair;
-@class AMAAttributionModelConfiguration;
 
 @interface AMAStartupParametersConfiguration : NSObject
 
@@ -49,6 +48,8 @@
 @property (nonatomic, strong) NSNumber *ASATokenReportingInterval;
 @property (nonatomic, strong) NSNumber *ASATokenEndReportingInterval;
 @property (nonatomic, strong) NSArray<AMAPair *> *attributionDeeplinkConditions;
+
+@property (nonatomic, strong) NSNumber *externalAttributionCollectingInterval;
 
 @property (nonatomic, copy) NSArray<NSString *> *appleTrackingHosts;
 @property (nonatomic, strong) NSNumber *applePrivacyResendPeriod;

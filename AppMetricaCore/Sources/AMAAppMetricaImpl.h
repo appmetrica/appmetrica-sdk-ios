@@ -80,6 +80,9 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)reportRevenue:(AMARevenueInfo *)revenueInfo onFailure:(nullable void (^)(NSError *error))onFailure;
 - (void)reportAdRevenue:(AMAAdRevenueInfo *)adRevenueInfo onFailure:(nullable void (^)(NSError *error))onFailure;
 - (void)reportECommerce:(AMAECommerce *)eCommerce onFailure:(nullable void (^)(NSError *))onFailure;
+- (void)reportExternalAttribution:(NSDictionary *)attribution
+                           source:(AMAAttributionSource)source
+                        onFailure:(nullable void (^)(NSError *error))onFailure;
 
 - (void)sendEventsBuffer;
 - (void)pauseSession;

@@ -434,6 +434,17 @@
     return event;
 }
 
+- (AMAEvent *)eventExternalAttribution:(NSData *)data
+{
+    if (data == nil) {
+        AMALogWarn(@"Ignoring external attribution event: value is empty.");
+        return nil;
+    }
+    AMAEvent *event = [self eventOfType:AMAEventTypeExternalAttribution];
+    [self fillEvent:event withBinaryValue:data gZipped:NO];
+    return event;
+}
+
 #pragma mark - Private -
 
 - (void)fillEvent:(AMAEvent *)event withName:(NSString *)name

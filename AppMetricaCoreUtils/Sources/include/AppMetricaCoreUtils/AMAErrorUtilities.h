@@ -13,6 +13,7 @@ typedef NS_ERROR_ENUM(kAMAAppMetricaErrorDomain, AMAAppMetricaEventErrorCode) {
     AMAAppMetricaEventErrorCodeEmptyUserProfile = 1003,
     AMAAppMetricaEventErrorCodeInvalidBacktrace = 1004,
     AMAAppMetricaEventErrorCodeInvalidAdRevenueInfo = 1005,
+    AMAAppMetricaEventErrorCodeInvalidExternalAttributionContents = 1006,
 } NS_SWIFT_NAME(AppMetricaEventErrorCode);
 
 typedef NS_ERROR_ENUM(kAMAAppMetricaInternalErrorDomain, AMAAppMetricaInternalEventErrorCode) {

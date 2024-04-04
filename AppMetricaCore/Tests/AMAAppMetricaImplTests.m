@@ -31,6 +31,7 @@
 #import "AMAEventStorage+TestUtilities.h"
 #import "AMAExtensionsReportController.h"
 #import "AMAExtrasContainer.h"
+#import "AMAExternalAttributionController.h"
 #import "AMAInternalEventsReporter.h"
 #import "AMALocationManager.h"
 #import "AMAMetricaConfigurationTestUtilities.h"
@@ -78,6 +79,7 @@ describe(@"AMAAppMetricaImpl", ^{
     AMADeepLinkController *__block deeplinkController = nil;
     AMAInternalEventsReporter *__block internalEventsReporter = nil;
     AMAStartupItemsChangedNotifier *__block startupNotifier = nil;
+    AMAExternalAttributionController *__block externalAttributionController = nil;
 
     beforeEach(^{
         [AMALocationManager stub:@selector(sharedManager)];
@@ -109,6 +111,7 @@ describe(@"AMAAppMetricaImpl", ^{
         reporterTestHelper = [[AMAReporterTestHelper alloc] init];
         eventStorage = [reporterTestHelper appReporterForApiKey:apiKey].reporterStorage.eventStorage;
         startupNotifier = [AMAStartupItemsChangedNotifier stubbedNullMockForDefaultInit];
+        externalAttributionController = [AMAExternalAttributionController stubbedNullMockForInit:@selector(initWithReporter:)];
         appMetricaImpl =
             [AMAAppMetricaImplTestFactory createCurrentQueueImplWithReporterHelper:reporterTestHelper
                                                                  hostStateProvider:hostStateProvider];
@@ -414,11 +417,11 @@ describe(@"AMAAppMetricaImpl", ^{
 #if !TARGET_OS_TV
     context(@"Init web view reporting", ^{
         AMAJSController *__block jsController = nil;
-        
+
         beforeEach(^{
             jsController = [AMAJSController stubbedNullMockForInit:@selector(initWithUserContentController:)];
         });
-        
+
         it(@"Should init web view reporting", ^{
             WKUserContentController *controller = [WKUserContentController nullMock];
             [appMetricaImpl activateWithConfiguration:configuration];
@@ -430,7 +433,19 @@ describe(@"AMAAppMetricaImpl", ^{
         });
     });
 #endif
-    
+
+    context(@"External attribution", ^{
+        it(@"Should report to controller", ^{
+            NSDictionary *const data = @{@"A": @"B"};
+            AMAAttributionSource const source = kAMAAttributionSourceAppsflyer;
+            __auto_type block = ^(NSError *error) {};
+            [appMetricaImpl activateWithConfiguration:configuration];
+            [[externalAttributionController should] receive:@selector(processAttributionData:source:onFailure:)
+                                              withArguments:data, source, kw_any()];
+            [appMetricaImpl reportExternalAttribution:data source:source onFailure:block];
+        });
+    });
+
     context(@"Sends string events with custom EventType", ^{
         NSUInteger const eventType = 1234;
         it(@"Should dispatch reporter with correct event type", ^{

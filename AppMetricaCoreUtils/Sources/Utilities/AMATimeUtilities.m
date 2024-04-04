@@ -13,6 +13,16 @@
     return [NSString stringWithFormat:@"%llu", (uint64_t)[date timeIntervalSince1970]];
 }
 
++ (NSNumber *)unixTimestampNumberFromDate:(NSDate *)date
+{
+    return @([date timeIntervalSince1970]);
+}
+
++ (NSDate *)dateFromUnixTimestampNumber:(NSNumber *)timestamp
+{
+    return [NSDate dateWithTimeIntervalSince1970:[timestamp doubleValue]];
+}
+
 + (NSTimeInterval)timeSinceFirstStartupUpdate:(NSDate *)firstStartupUpdateDate
                         lastStartupUpdateDate:(NSDate *)lastStartupUpdateDate
                          lastServerTimeOffset:(NSNumber *)lastServerTimeOffset
