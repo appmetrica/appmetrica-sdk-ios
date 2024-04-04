@@ -4,6 +4,8 @@
 #import "AMAMultiTimerDelegateMock.h"
 #import "AMAAsyncCancellableExecutorMock.h"
 
+static const NSTimeInterval defaultTimeout = 20;
+
 @interface AMAMultiTimerTests : XCTestCase
 
 @property (nonnull, nonatomic, strong) NSArray<NSNumber *> *delays;
@@ -41,7 +43,7 @@
     [self.multitimer start];
     XCTAssertEqualObjects(self.mockExecutor.receivedDelays, self.delays);
     
-    [self waitForExpectations:@[self.delegateMock.fireCalledExpectation]];
+    [self waitForExpectations:@[self.delegateMock.fireCalledExpectation] timeout:defaultTimeout];
     XCTAssertEqual(self.multitimer.status, AMAMultitimerStatusNotStarted);
 }
 
@@ -59,7 +61,7 @@
     [self.multitimer start];
     XCTAssertEqualObjects(self.mockExecutor.receivedDelays, @[self.delays.firstObject]);
     
-    [self waitForExpectations:@[self.delegateMock.fireCalledExpectation]];
+    [self waitForExpectations:@[self.delegateMock.fireCalledExpectation] timeout:defaultTimeout];
     XCTAssertEqual(self.multitimer.status, AMAMultitimerStatusNotStarted);
 }
 
@@ -75,7 +77,7 @@
     
     [self.multitimer start];
     XCTAssertEqual(self.multitimer.status, AMAMultitimerStatusStarted);
-    [self waitForExpectations:expectations];
+    [self waitForExpectations:expectations timeout:0];
     [expectations removeAllObjects];
     
     
@@ -85,7 +87,7 @@
     self.asyncMockExecutor.executeExpectation = [self expectationWithDescription:@"Second execute"];
     [expectations addObject:self.asyncMockExecutor.executeExpectation];
     
-    [self waitForExpectations:expectations];
+    [self waitForExpectations:expectations timeout:defaultTimeout];
     XCTAssertEqual(self.multitimer.status, AMAMultitimerStatusStarted);
     [expectations removeAllObjects];
     
@@ -96,7 +98,7 @@
     self.asyncMockExecutor.executeExpectation = [self expectationWithDescription:@"Third execute"];
     [expectations addObject:self.asyncMockExecutor.executeExpectation];
     
-    [self waitForExpectations:expectations];
+    [self waitForExpectations:expectations timeout:defaultTimeout];
     XCTAssertEqual(self.multitimer.status, AMAMultitimerStatusStarted);
     [expectations removeAllObjects];
     
@@ -104,7 +106,7 @@
     self.delegateMock.fireCalledExpectation = [self expectationWithDescription:@"Fire should be called"];
     [expectations addObject:self.delegateMock.fireCalledExpectation];
     
-    [self waitForExpectations:expectations];
+    [self waitForExpectations:expectations timeout:defaultTimeout];
     XCTAssertEqual(self.multitimer.status, AMAMultitimerStatusNotStarted);
 }
 
@@ -123,7 +125,7 @@
     [expectations addObject:self.asyncMockExecutor.executeExpectation];
     
     [self.multitimer start];
-    [self waitForExpectations:expectations];
+    [self waitForExpectations:expectations timeout:defaultTimeout];
     XCTAssertEqual(self.multitimer.status, AMAMultitimerStatusStarted);
     [expectations removeAllObjects];
     

@@ -11,6 +11,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)initWithTestCase:(XCTestCase*)testCase;
 + (instancetype)expectationBagWithTestCase:(XCTestCase*)testCase;
 
+@property (nonatomic) NSTimeInterval defaultTimeout;
+
 @property (readonly, nonnull) NSArray<XCTestExpectation *> *expectations;
 - (XCTestExpectation*)expectationWithDescription:(NSString*)description;
 - (XCTestExpectation*)expectationWithDescription:(NSString*)description inverted:(BOOL)inverted;

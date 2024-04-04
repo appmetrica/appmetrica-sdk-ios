@@ -39,10 +39,10 @@ enum AppMetricaProduct: String, CaseIterable {
     
     var targets: [AppMetricaTarget] {
         switch self {
-        case .core: [.core, .coreExtension]
-        case .crashes: [.crashes]
-        case .adSupport: [.adSupport]
-        case .webKit: [.webKit]
+        case .core: return [.core, .coreExtension]
+        case .crashes: return [.crashes]
+        case .adSupport: return [.adSupport]
+        case .webKit: return [.webKit]
         }
     }
     
@@ -59,8 +59,8 @@ enum ExternalDependency: String, CaseIterable {
     
     var package: Package.Dependency {
         switch self {
-        case .ksCrash: .package(url: "https://github.com/kstenerud/KSCrash", .upToNextMinor(from: "1.16.1"))
-        case .kiwi: .package(url: "https://github.com/appmetrica/Kiwi", .upToNextMinor(from: "3.0.1-spm"))
+        case .ksCrash: return .package(url: "https://github.com/kstenerud/KSCrash", exact: "1.16.1")
+        case .kiwi: return .package(url: "https://github.com/appmetrica/Kiwi", exact: "3.0.1-spm")
         }
     }
 }

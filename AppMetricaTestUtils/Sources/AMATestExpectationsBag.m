@@ -16,6 +16,7 @@
     if (self) {
         _expectations = [NSMutableArray array];
         self.testCase = testCase;
+        _defaultTimeout = 60;
     }
     return self;
 }
@@ -54,7 +55,7 @@
 
 - (void)waitForExpectations
 {
-    [self.testCase waitForExpectations:_expectations];
+    [self.testCase waitForExpectations:_expectations timeout:self.defaultTimeout];
     [_expectations removeAllObjects];
 }
 
