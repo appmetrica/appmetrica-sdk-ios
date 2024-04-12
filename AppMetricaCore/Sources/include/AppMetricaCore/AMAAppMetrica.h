@@ -29,6 +29,7 @@ extern AMAAttributionSource const kAMAAttributionSourceAdjust;
 extern AMAAttributionSource const kAMAAttributionSourceKochava;
 extern AMAAttributionSource const kAMAAttributionSourceTenjin;
 extern AMAAttributionSource const kAMAAttributionSourceAirbridge;
+extern AMAAttributionSource const kAMAAttributionSourceSingular;
 
 
 /** Identifiers callback block
@@ -183,7 +184,7 @@ NS_SWIFT_NAME(reportECommerce(_:onFailure:));
 /** Sends information about the external attribution.
 
  This method is used to report attribution from other SDKs.
- Possible sources include Appsflyer, Adjust, Kochava, Tenjin, Airbridge.
+ Possible sources include Appsflyer, Adjust, Kochava, Tenjin, Airbridge, Singular.
 
  @note The `attribution` dictionary should be JSON-convertible. If it is not, the `onFailure` block will be called with an error.
 

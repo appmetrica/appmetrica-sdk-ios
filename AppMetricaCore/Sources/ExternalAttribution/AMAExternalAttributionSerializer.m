@@ -55,6 +55,9 @@
     else if ([source isEqualToString:kAMAAttributionSourceAirbridge]) {
         return AMA__CLIENT_EXTERNAL_ATTRIBUTION__ATTRIBUTION_TYPE__AIRBRIDGE;
     }
+    else if ([source isEqualToString:kAMAAttributionSourceSingular]) {
+        return AMA__CLIENT_EXTERNAL_ATTRIBUTION__ATTRIBUTION_TYPE__SINGULAR;
+    }
     else {
         return AMA__CLIENT_EXTERNAL_ATTRIBUTION__ATTRIBUTION_TYPE__UNKNOWN;
     }

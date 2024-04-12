@@ -9,6 +9,7 @@ message ClientExternalAttribution {
         KOCHAVA = 3;
         TENJIN = 4;
         AIRBRIDGE = 5;
+        SINGULAR = 6;
     }
 
     optional AttributionType attribution_type = 1 [default = UNKNOWN];

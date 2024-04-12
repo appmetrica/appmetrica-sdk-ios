@@ -38,6 +38,7 @@ NSString *const kAMAAttributionSourceAdjust = @"adjust";
 NSString *const kAMAAttributionSourceKochava = @"kochava";
 NSString *const kAMAAttributionSourceTenjin = @"tenjin";
 NSString *const kAMAAttributionSourceAirbridge = @"airbridge";
+NSString *const kAMAAttributionSourceSingular = @"singular";
 
 static NSMutableSet<Class<AMAModuleActivationDelegate>> *activationDelegates = nil;
 static NSMutableSet<Class<AMAEventFlushableDelegate>> *eventFlushableDelegates = nil;

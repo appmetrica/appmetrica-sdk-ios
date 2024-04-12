@@ -52,7 +52,7 @@ void   ama__client_external_attribution__free_unpacked
   assert(message->base.descriptor == &ama__client_external_attribution__descriptor);
   protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
 }
-static const ProtobufCEnumValue ama__client_external_attribution__attribution_type__enum_values_by_number[6] =
+static const ProtobufCEnumValue ama__client_external_attribution__attribution_type__enum_values_by_number[7] =
 {
   { "UNKNOWN", "AMA__CLIENT_EXTERNAL_ATTRIBUTION__ATTRIBUTION_TYPE__UNKNOWN", 0 },
   { "APPSFLYER", "AMA__CLIENT_EXTERNAL_ATTRIBUTION__ATTRIBUTION_TYPE__APPSFLYER", 1 },
@@ -60,16 +60,18 @@ static const ProtobufCEnumValue ama__client_external_attribution__attribution_ty
   { "KOCHAVA", "AMA__CLIENT_EXTERNAL_ATTRIBUTION__ATTRIBUTION_TYPE__KOCHAVA", 3 },
   { "TENJIN", "AMA__CLIENT_EXTERNAL_ATTRIBUTION__ATTRIBUTION_TYPE__TENJIN", 4 },
   { "AIRBRIDGE", "AMA__CLIENT_EXTERNAL_ATTRIBUTION__ATTRIBUTION_TYPE__AIRBRIDGE", 5 },
+  { "SINGULAR", "AMA__CLIENT_EXTERNAL_ATTRIBUTION__ATTRIBUTION_TYPE__SINGULAR", 6 },
 };
 static const ProtobufCIntRange ama__client_external_attribution__attribution_type__value_ranges[] = {
-{0, 0},{0, 6}
+{0, 0},{0, 7}
 };
-static const ProtobufCEnumValueIndex ama__client_external_attribution__attribution_type__enum_values_by_name[6] =
+static const ProtobufCEnumValueIndex ama__client_external_attribution__attribution_type__enum_values_by_name[7] =
 {
   { "ADJUST", 2 },
   { "AIRBRIDGE", 5 },
   { "APPSFLYER", 1 },
   { "KOCHAVA", 3 },
+  { "SINGULAR", 6 },
   { "TENJIN", 4 },
   { "UNKNOWN", 0 },
 };
@@ -80,9 +82,9 @@ const ProtobufCEnumDescriptor ama__client_external_attribution__attribution_type
   "AttributionType",
   "Ama__ClientExternalAttribution__AttributionType",
   "ama",
-  6,
+  7,
   ama__client_external_attribution__attribution_type__enum_values_by_number,
-  6,
+  7,
   ama__client_external_attribution__attribution_type__enum_values_by_name,
   1,
   ama__client_external_attribution__attribution_type__value_ranges,
