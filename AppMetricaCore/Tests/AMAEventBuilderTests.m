@@ -912,10 +912,11 @@ describe(@"AMAEventBuilder", ^{
             });
             
             it(@"Should merge session extras with event extras for non reserved event types", ^{
+                NSArray *reservedEventTypes = @[@1, @12, @13];
                 NSInteger randomEventType;
                 do {
                     randomEventType = arc4random_uniform(41) + 1;
-                } while (randomEventType == 12);
+                } while ([reservedEventTypes containsObject:@(randomEventType)] == YES);
                 
                 event = [builder eventWithType:randomEventType
                                           name:@"name"
