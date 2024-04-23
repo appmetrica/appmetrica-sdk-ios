@@ -17,7 +17,6 @@
 
 @implementation AMATrackingReportRequestFactory
 
-
 - (nonnull AMAReportRequest *)reportRequestWithPayload:(nonnull AMAReportPayload *)reportPayload
                                      requestIdentifier:(nonnull NSString *)requestIdentifier
 {

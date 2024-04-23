@@ -3,6 +3,7 @@
 #define AMA_RELEASE 0
 #endif
 
+//TODO: https://nda.ya.ru/t/l-kNX_kW75Z8zh
 #if AMA_RELEASE
 
 #define AMA_ALLOW_DESCRIPTIONS 0

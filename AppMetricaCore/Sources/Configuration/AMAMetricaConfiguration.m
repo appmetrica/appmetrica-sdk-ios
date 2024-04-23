@@ -172,7 +172,7 @@ NSString *const kAMAMetricaKeychainVendorServiceIdentifier = @"io.appmetrica.ser
     @synchronized (self.reporterConfigurationLock) {
         AMAReporterConfiguration *validConfiguration = [self validConfigurationForConfiguration:appConfiguration];
         AMALogBacktrace(@"Update app config '%@': old: %@, new: %@, validated: %@",
-                                appConfiguration.apiKey, _appConfiguration, appConfiguration, validConfiguration);
+                                appConfiguration.APIKey, _appConfiguration, appConfiguration, validConfiguration);
         _appConfiguration = [validConfiguration copy];
     }
 }
