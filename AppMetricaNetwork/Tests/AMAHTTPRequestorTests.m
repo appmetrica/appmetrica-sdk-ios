@@ -25,13 +25,6 @@ describe(@"AMAHTTPRequestor", ^{
         requestor = [[AMAHTTPRequestor alloc] initWithRequest:request sessionProvider:sessionProvider];
         requestor.delegate = delegate;
     });
-
-    it(@"Should assert starting cancelled request", ^{
-        [[theBlock(^{
-            [requestor cancel];
-            [requestor start];
-        }) should] raise];
-    });
     it(@"Should not start cancelled request", ^{
         [[NSAssertionHandler currentHandler] stub:@selector(handleFailureInMethod:object:file:lineNumber:description:)];
         [[sessionProvider shouldNot] receive:@selector(session)];
@@ -60,11 +53,6 @@ describe(@"AMAHTTPRequestor", ^{
             [[currentTask.request should] equal:urlRequest];
         });
         context(@"Second start", ^{
-            it(@"Should raise assert", ^{
-                [[theBlock(^{
-                    [requestor start];
-                }) should] raise];
-            });
             it(@"Should not create second task", ^{
                 [[NSAssertionHandler currentHandler] stub:@selector(handleFailureInMethod:object:file:lineNumber:description:)];
                 [requestor start];

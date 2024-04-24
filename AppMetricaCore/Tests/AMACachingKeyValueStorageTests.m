@@ -159,11 +159,6 @@ describe(@"AMACachingKeyValueStorage", ^{
             beforeEach(^{
                 [storage saveData:[@"DATA" dataUsingEncoding:NSUTF8StringEncoding] forKey:key error:nil];
             });
-            it(@"Should assert", ^{
-                [[theBlock(^{
-                    [storage stringForKey:key error:nil];
-                }) should] raise];
-            });
             it(@"Should return nil in production", ^{
                 [[NSAssertionHandler currentHandler] stub:@selector(handleFailureInMethod:object:file:lineNumber:description:)];
                 [[[storage stringForKey:key error:nil] should] beNil];

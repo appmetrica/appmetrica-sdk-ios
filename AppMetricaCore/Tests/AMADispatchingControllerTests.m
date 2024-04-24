@@ -106,13 +106,6 @@ describe(@"AMADispatchingController", ^{
             [controller start];
             [controller performReportForApiKey:apiKey forced:NO];
         });
-        it(@"Should assert for unexistant API-key", ^{
-            [[dispatcher shouldNot] receive:@selector(performReport)];
-            [controller start];
-            [[theBlock(^{
-                [controller performReportForApiKey:@"DIFFERENT_API_KEY" forced:NO];
-            }) should] raise];
-        });
         it(@"Should perform forced report first", ^{
             NSString *forcedApiKey = @"FORCED_API_KEY";
             
@@ -144,9 +137,8 @@ describe(@"AMADispatchingController", ^{
         });
         it(@"Should put unexistent API-key back to queue", ^{
             [controller start];
-            [[theBlock(^{
-                [controller performReportForApiKey:apiKey forced:NO];
-            }) should] raise];
+            [controller performReportForApiKey:apiKey forced:NO];
+            
             [controller registerDispatcherWithReporterStorage:storage main:NO];
             [[dispatcher should] receive:@selector(performReport)];
             [controller dispatcherWillFinishDispatching:dispatcher];

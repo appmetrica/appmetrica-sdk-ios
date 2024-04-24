@@ -9,7 +9,6 @@ static NSString *const kAMACrashDetectingNotEnabled = @"%@ Crash reporting is no
 + (void)logCrashDetectingNotEnabled:(NSString *)reason
 {
     AMALogError(kAMACrashDetectingNotEnabled, reason);
-    NSAssert(false, kAMACrashDetectingNotEnabled, reason);
 }
 
 @end

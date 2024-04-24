@@ -1,5 +1,6 @@
 
 #import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
+#import "AMACoreUtilsLogging.h"
 
 @interface AMABlockTimer () <AMATimerDelegate>
 
@@ -17,7 +18,9 @@
 
 - (id)initWithTimeout:(NSTimeInterval)timeout callbackQueue:(dispatch_queue_t)queue block:(AMABlockTimerBlock)block
 {
-    NSAssert(block != nil, @"Block can't be nil");
+    if (block == nil) {
+        AMALogAssert(@"Block can't be nil");
+    }
     self = [super init];
     if (self != nil) {
         _timer = [[AMATimer alloc] initWithTimeout:timeout callbackQueue:queue];

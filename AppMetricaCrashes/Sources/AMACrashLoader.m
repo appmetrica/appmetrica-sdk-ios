@@ -315,7 +315,9 @@ NSString *const kAMAApplicationNotRespondingCrashType = @"AMAApplicationNotRespo
 #ifdef DEBUG
     NSArray *reports = [[AMAKSCrash sharedInstance] reportIDs];
     BOOL isAvailable = [reports containsObject:reportID];
-    NSAssert(!isAvailable, @"FAILED TO REMOVE REPORT: %@", reportID);
+    if ([reports containsObject:reportID] == NO) {
+        AMALogAssert(@"FAILED TO REMOVE REPORT: %@", reportID);
+    }
 #endif
 }
 

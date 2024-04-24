@@ -176,7 +176,8 @@ describe(@"AMACrashReportDecoder", ^{
             it(@"Should raise if version is unsupported", ^{
                 [decoder stub:@selector(supportedVersionsConstaints) andReturn:@[ @"3.0.0" ]];
                 report[@KSCrashField_Version] = @"3.3.0";
-                [[theBlock(^{ decodedCrash(root); }) should] raise];
+                [[delegateMock should] receive:@selector(crashReportDecoder:didDecodeCrash:withError:)];
+                decodedCrash(root);
             });
         });
         

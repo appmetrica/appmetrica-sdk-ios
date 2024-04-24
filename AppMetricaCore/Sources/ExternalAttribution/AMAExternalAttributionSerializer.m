@@ -22,13 +22,13 @@
         
         NSError *localError = nil;
         NSData *attributionData = [AMAJSONSerialization dataWithJSONObject:data error:&localError];
-        message.has_value = [AMAProtobufUtilities fillBinaryData:&message.value withData:attributionData tracker:tracker];
         
-        if (localError != nil) {
-            strongError = localError;
+        strongError = localError;
+        
+        if (attributionData != nil) {
+            message.has_value = [AMAProtobufUtilities fillBinaryData:&message.value withData:attributionData tracker:tracker];
+            serializedData = [self serializeProtobufMessage:&message];
         }
-        
-        serializedData = [self serializeProtobufMessage:&message];
     }];
     
     if (error != NULL && strongError != nil) {

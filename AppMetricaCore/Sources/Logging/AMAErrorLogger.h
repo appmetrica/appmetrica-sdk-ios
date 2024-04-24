@@ -11,9 +11,7 @@
 + (void)logMetricaAlreadyStartedError;
 + (void)logMetricaActivationWithAlreadyPresentedKeyError;
 + (void)logMetricaActivationWithAutomaticSessionsTracking;
-+ (void)logMetricaInternalInconsistencyError;
 
-+ (void)logInvalidTrackUrlSchemeError;
 + (void)logInvalidCustomAppVersionError;
 + (void)logInvalidCustomAppBuildNumberError;
 

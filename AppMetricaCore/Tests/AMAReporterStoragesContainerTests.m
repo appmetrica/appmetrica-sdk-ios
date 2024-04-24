@@ -106,13 +106,6 @@ describe(@"AMAReporterStoragesContainer", ^{
             migrateApiKeyAfter(@"OTHER_API_KEY", delta);
             [[expectFutureValue(theValue(complete)) shouldNotEventuallyBeforeTimingOutAfter(timeout)] beYes];
         });
-        it(@"Should assert on apiKey migration completion after global migrated", ^{
-            stubForcedMigrationWait(0);
-            [container waitMigrationForApiKey:apiKey];
-            [[theBlock(^{
-                [container completeMigrationForApiKey:apiKey];
-            }) should] raise];
-        });
     });
 
 });

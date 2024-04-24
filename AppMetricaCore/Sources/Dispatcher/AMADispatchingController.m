@@ -125,7 +125,7 @@
 
             if (dispatcher == nil) {
                 [self.priorityQueue push:apiKey prioritized:isForced];
-                NSAssert(NO, @"Dispatcher was not found for api-key: %@", apiKey);
+                AMALogAssert(@"Dispatcher was not found for api-key: %@", apiKey);
             }
             count++;
         }

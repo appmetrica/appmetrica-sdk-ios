@@ -47,8 +47,11 @@
             self.isActive = NO;
             return;
         }
-        NSAssert(self.isActive == NO, @"The timer has already been set!", nil);
-
+        if (self.isActive) {
+            AMALogAssert(@"The timer has already been set!");
+            return;
+        }
+        
         __weak typeof (self) weakSelf = self;
         self.isActive = YES;
         [self.executor executeAfterDelay:timeoutInterval block:^{

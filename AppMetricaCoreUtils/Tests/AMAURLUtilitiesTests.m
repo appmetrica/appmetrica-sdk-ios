@@ -29,9 +29,7 @@ describe(@"AMAURLUtilities", ^{
                 [[result should] beNil];
             });
             it(@"Should assert empty base URL", ^{
-                [[theBlock(^{
-                    [AMAURLUtilities URLWithBaseURLString:@"" pathComponents:@[] httpGetParameters:@{}];
-                }) should] raise];
+                [[[AMAURLUtilities URLWithBaseURLString:@"" pathComponents:@[] httpGetParameters:@{}] should] beNil];
             });
         });
 

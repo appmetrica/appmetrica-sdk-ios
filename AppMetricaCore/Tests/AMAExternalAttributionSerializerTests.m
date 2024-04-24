@@ -89,18 +89,6 @@
     ama__client_external_attribution__free_unpacked(message, NULL);
 }
 
-#ifdef DEBUG
-- (void)testErrorHandlingForInvalidJSON
-{
-    NSDictionary *invalidData = @{@"invalid": [NSDate date]};
-    XCTAssertThrowsSpecificNamed([self.serializer serializeExternalAttribution:invalidData
-                                                                        source:kAMAAttributionSourceAppsflyer
-                                                                         error:nil],
-                                 NSException,
-                                 NSInternalInconsistencyException,
-                                 @"Attempting to serialize invalid JSON should trigger an assertion failure.");
-}
-#else
 - (void)testErrorHandlingForInvalidJSON
 {
     NSDictionary *invalidData = @{@"invalid": [NSDate date]};
@@ -108,9 +96,9 @@
     NSData *serializedData = [self.serializer serializeExternalAttribution:invalidData
                                                                     source:kAMAAttributionSourceAppsflyer
                                                                      error:&error];
+    
     XCTAssertNil(serializedData, @"Serialized data should be nil for invalid input.");
     XCTAssertNotNil(error, @"Error should be populated for invalid data input.");
 }
-#endif
 
 @end

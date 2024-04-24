@@ -31,10 +31,6 @@
     
     XCTAssertNil(invalid, @"Should return nil if failed to deserialize data from json");
     
-#ifdef DEBUG
-    XCTAssertThrows([AMAJSONSerialization stringWithJSONObject:@"abc" error:nil], @"Should throw");
-#endif
-    
     AMATestAssertionHandler *handler = [AMATestAssertionHandler new];
     [handler beginAssertIgnoring];
 
@@ -62,11 +58,7 @@
     NSData *invalidEmpty = [AMAJSONSerialization dataWithJSONObject:nil error:nil];
 
     XCTAssertNil(invalidEmpty, @"Should return nil if json object is nil");
-    
-#ifdef DEBUG
-    XCTAssertThrows([AMAJSONSerialization dataWithJSONObject:@1 error:nil], @"Should throw assert if json is invalid");
-#endif
-    
+
     AMATestAssertionHandler *handler = [AMATestAssertionHandler new];
     [handler beginAssertIgnoring];
     

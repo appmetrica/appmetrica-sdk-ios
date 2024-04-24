@@ -15,8 +15,9 @@
 #define AMALogWarnChannel(channel, format, ...) AMALOG_MESSAGE(channel, AMALogLevelWarning, NO, format, ##__VA_ARGS__)
 #define AMALogErrorChannel(channel, format, ...) AMALOG_MESSAGE(channel, AMALogLevelError, NO, format, ##__VA_ARGS__)
 #define AMALogNotifyChannel(channel, format, ...) AMALOG_MESSAGE(channel, AMALogLevelNotify, NO, format, ##__VA_ARGS__)
+
+// TODO: https://nda.ya.ru/t/e4dab4vU75axJE
 #define AMALogAssertChannel(channel, format, ...) do { \
-                                                      NSAssert(NO, format, ##__VA_ARGS__); \
                                                       AMALogErrorChannel(channel, format, ##__VA_ARGS__); \
                                                   } while (0)
 /**

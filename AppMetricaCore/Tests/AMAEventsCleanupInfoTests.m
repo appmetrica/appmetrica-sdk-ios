@@ -198,16 +198,6 @@ describe(@"AMAEventsCleanupInfo", ^{
             info.actualDeletedNumber = 6;
         });
 
-        it(@"Should assert on shouldReport", ^{
-            [[theBlock(^{
-                [info shouldReport];
-            }) should] raise];
-        });
-        it(@"Should assert on cleanupReport", ^{
-            [[theBlock(^{
-                [info cleanupReport];
-            }) should] raise];
-        });
         context(@"Stub assertions", ^{
             beforeEach(^{
                 [AMATestUtilities stubAssertions];

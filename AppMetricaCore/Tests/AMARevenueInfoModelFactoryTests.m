@@ -186,10 +186,6 @@ describe(@"AMARevenueInfoModelFactory", ^{
         
         context(@"Undefined", ^{
             
-            it(@"Should riase exception", ^{
-                [[theBlock(^{ createModel(AMATransactionStateUndefined); }) should] raise];
-            });
-            
             context(@"Production", ^{
                
                 beforeEach(^{

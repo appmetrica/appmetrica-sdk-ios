@@ -957,13 +957,6 @@ describe(@"AMAAppMetricaImpl", ^{
     });
     context(@"Session extras", ^{
         NSString *const key = @"key";
-        it(@"Should assert on set session extras if reporter is nil", ^{
-            NSData *data = [NSData data];
-            
-            [[theBlock(^{
-                [appMetricaImpl setSessionExtras:data forKey:key];
-            }) should] raise];
-        });
         it(@"Should dispatch set session extras", ^{
             NSData *data = [NSData data];
             
@@ -977,12 +970,6 @@ describe(@"AMAAppMetricaImpl", ^{
             
             [appMetricaImpl activateWithConfiguration:configuration];
             [appMetricaImpl clearSessionExtras];
-        });
-        
-        it(@"Should assert on clear session extras if reporter is nil", ^{
-            [[theBlock(^{
-                [appMetricaImpl clearSessionExtras];
-            }) should] raise];
         });
     });
     context(@"Error environment value", ^{

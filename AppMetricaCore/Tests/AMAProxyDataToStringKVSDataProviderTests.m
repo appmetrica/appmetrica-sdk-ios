@@ -37,13 +37,6 @@ describe(@"AMAProxyDataToStringKVSDataProvider", ^{
             [[[dataProvider objectForKey:@"a" error:NULL] should] equal:kAMAHello];
         });
         
-        it(@"Should assert if the value is not NSString", ^{
-            dict[@"a"] = [NSData data];
-            [[theBlock(^{
-                [dataProvider objectForKey:@"a" error:NULL];
-            }) should] raise];
-        });
-        
         it(@"Should not assert if the value is NSNull", ^{
             [inMemoryProvider stub:@selector(objectForKey:error:) andReturn:NSNull.null];
             [[theBlock(^{
@@ -65,14 +58,6 @@ describe(@"AMAProxyDataToStringKVSDataProvider", ^{
             
             [[[dataProvider objectsForKeys:@[ @"a", @"b" ] error:NULL] should] equal:@{ @"a" : kAMAHello,
                                                                                         @"b" : kAMAWorld, }];
-        });
-        
-        it(@"Should assert if one of the values is not NSString", ^{
-            dict[@"a"] = [NSData data];
-            dict[@"b"] = kAMAWorld64;
-            [[theBlock(^{
-                [dataProvider objectsForKeys:@[ @"a", @"b" ] error:NULL];
-            }) should] raise];
         });
         
         it(@"Should not assert if the value is NSNull", ^{
@@ -104,12 +89,6 @@ describe(@"AMAProxyDataToStringKVSDataProvider", ^{
             [[[inMemoryProvider objectForKey:@"a" error:NULL] should] equal:kAMAHello64];
         });
         
-        it(@"Should assert if saved value is not NSData", ^{
-            [[theBlock(^{
-                [dataProvider saveObject:@"Hello" forKey:@"a" error:NULL];
-            }) should] raise];
-        });
-        
         it(@"Should not assert if the value is NSNull", ^{
             [[theBlock(^{
                 [dataProvider saveObject:NSNull.null forKey:@"a" error:NULL];
@@ -130,12 +109,6 @@ describe(@"AMAProxyDataToStringKVSDataProvider", ^{
                 @"a" : kAMAHello64,
                 @"b" : kAMAWorld64,
             }];
-        });
-        
-        it(@"Should assert if one of saved values is not NSData", ^{
-            [[theBlock(^{
-                [dataProvider saveObjectsDictionary:@{ @"a" : kAMAHello, @"b" : @"World",  } error:NULL];
-            }) should] raise];
         });
         
         it(@"Should not assert if the value is NSNull", ^{

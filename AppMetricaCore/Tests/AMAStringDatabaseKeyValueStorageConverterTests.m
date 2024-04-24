@@ -90,17 +90,17 @@ describe(@"AMAStringDatabaseKeyValueStorageConverter", ^{
             [[theValue([converter unsignedLongLongForObject:object]) should] equal:theValue(value)];
         });
         context(@"Invalid string", ^{
-            it(@"Should raise for nil", ^{
-                [[theBlock(^{ [converter unsignedLongLongForObject:nil]; }) should] raise];
+            it(@"Should return 0 for nil", ^{
+                [[theValue([converter unsignedLongLongForObject:nil]) should] beZero];
             });
-            it(@"Should raise for empty string", ^{
-                [[theBlock(^{ [converter unsignedLongLongForObject:@""]; }) should] raise];
+            it(@"Should return 0 for empty string", ^{
+                [[theValue([converter unsignedLongLongForObject:@""]) should] beZero];
             });
-            it(@"Should raise for non-number string", ^{
-                [[theBlock(^{ [converter unsignedLongLongForObject:@"NOT-A-NUMBER"]; }) should] raise];
+            it(@"Should return 0 for non-number string", ^{
+                [[theValue([converter unsignedLongLongForObject:@"NOT-A-NUMBER"]) should] beZero];
             });
-            it(@"Should raise for numbers bigger than ULLONG_MAX", ^{
-                [[theBlock(^{ [converter unsignedLongLongForObject:@"18446744073709551616"]; }) should] raise];
+            it(@"Should return 0 for numbers bigger than ULLONG_MAX", ^{
+                [[theValue([converter unsignedLongLongForObject:@"18446744073709551616"]) should] beZero];
             });
         });
     });

@@ -203,11 +203,6 @@ describe(@"AMAEventSerializer", ^{
                     beforeEach(^{
                         event.value = [KWMock nullMockForProtocol:@protocol(AMAEventValueProtocol)];
                     });
-                    it(@"Should assert", ^{
-                        [[theBlock(^{
-                            fillEventData();
-                        }) should] raise];
-                    });
                     it(@"Should have empty value type", ^{
                         [AMATestUtilities stubAssertions];
                         fillEventData();
