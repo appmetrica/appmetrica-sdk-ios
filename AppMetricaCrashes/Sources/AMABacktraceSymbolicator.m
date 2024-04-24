@@ -4,8 +4,7 @@
 #import "AMABacktrace.h"
 #import "AMABacktraceFrame.h"
 #import "AMABinaryImageExtractor.h"
-#import "KSSymbolicator.h"
-#import "KSDynamicLinker.h"
+#import "AMAKSCrashImports.h"
 
 @interface AMABacktraceSymbolicator ()
 

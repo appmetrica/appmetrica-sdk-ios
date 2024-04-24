@@ -2,9 +2,9 @@
 #import "AMACrashLogging.h"
 #import "AMABinaryImageExtractor.h"
 #import "AMABinaryImage.h"
+#import "AMAKSCrashImports.h"
 #import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
 #import <objc/runtime.h>
-#import "KSDynamicLinker.h"
 
 @implementation AMABinaryImageExtractor
 

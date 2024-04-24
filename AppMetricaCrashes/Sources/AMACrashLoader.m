@@ -6,7 +6,7 @@
 #import "AMACrashSafeTransactor.h"
 #import "AMADecodedCrash.h"
 #import "AMAKSCrash.h"
-#import "KSCrash.h"
+#import "AMAKSCrashImports.h"
 
 static NSString *const kAMALoadingCrashReportsTransactionKey = @"KSCrashLoadingReports";
 NSString *const kAMAApplicationNotRespondingCrashType = @"AMAApplicationNotRespondingCrashType";

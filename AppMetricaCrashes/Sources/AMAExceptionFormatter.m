@@ -25,8 +25,8 @@
 #import "AMAVirtualMachineCrash.h"
 #import "AMAVirtualMachineError.h"
 #import "AMAVirtualMachineInfo.h"
+#import "AMAKSCrashImports.h"
 #import <mach/exception.h>
-#import "KSCrash.h"
 
 static NSString *const kAMAKSCrashReporterVersion = @"3.2.0";
 

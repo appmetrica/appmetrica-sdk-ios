@@ -1,8 +1,8 @@
 
 #import "AMACrashLogging.h"
 #import "AMAKSCrash.h"
+#import "AMAKSCrashImports.h"
 #import <objc/runtime.h>
-#import "KSCrash.h"
 #import <AppMetricaPlatform/AppMetricaPlatform.h>
 
 static NSString *const kAMAAppMetricaCrashReportsDirectoryNamePostfix = @".CrashReports";

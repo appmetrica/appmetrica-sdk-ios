@@ -23,8 +23,8 @@
 #import "AMAStack.h"
 #import "AMAVersionMatcher.h"
 #import "AMACrashErrorsFactory.h"
-#import "KSCrashReportFields.h"
 #import "AMABuildUID.h"
+#import "AMAKSCrashImports.h"
 #import <AppMetricaPlatform/AppMetricaPlatform.h>
 
 NSString *const kAMASysInfoSystemName = @"systemName";

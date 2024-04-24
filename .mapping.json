@@ -1286,6 +1286,7 @@
   "AppMetricaCrashes/Sources/AMAExceptionFormatting.h":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCrashes/Sources/AMAExceptionFormatting.h",
   "AppMetricaCrashes/Sources/AMAKSCrash.h":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCrashes/Sources/AMAKSCrash.h",
   "AppMetricaCrashes/Sources/AMAKSCrash.m":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCrashes/Sources/AMAKSCrash.m",
+  "AppMetricaCrashes/Sources/AMAKSCrashImports.h":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCrashes/Sources/AMAKSCrashImports.h",
   "AppMetricaCrashes/Sources/AMAUnhandledCrashDetector.h":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCrashes/Sources/AMAUnhandledCrashDetector.h",
   "AppMetricaCrashes/Sources/AMAUnhandledCrashDetector.m":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCrashes/Sources/AMAUnhandledCrashDetector.m",
   "AppMetricaCrashes/Sources/AMAVersionMatcher.h":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCrashes/Sources/AMAVersionMatcher.h",
