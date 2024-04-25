@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name = "AppMetricaProtobufUtils"
-  s.version = '5.3.0'
+  s.version = '5.4.0'
   s.summary = "An adaptable module providing utilities for efficiently processing protobuf structures"
   
   s.homepage = 'https://appmetrica.io'
@@ -15,7 +15,7 @@ Pod::Spec.new do |s|
   
   s.frameworks = 'Foundation'
   
-  s.dependency 'AppMetrica_Protobuf', '= 5.3.0'
+  s.dependency 'AppMetrica_Protobuf', '= 5.4.0'
   
   s.header_dir = s.name
   s.source_files = "#{s.name}/Sources/**/*.{h,m}"
