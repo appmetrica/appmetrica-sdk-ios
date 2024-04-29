@@ -3,7 +3,7 @@
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
 #import "AMADatabaseIntegrityQueries.h"
 #import <sqlite3.h>
-#import <AppMetrica_FMDB/AppMetrica_FMDB.h>
+#import <AppMetricaFMDB/AppMetricaFMDB.h>
 #import "AMASQLiteIntegrityIssue.h"
 
 SPEC_BEGIN(AMADatabaseIntegrityQueriesTests)

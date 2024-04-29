@@ -4,7 +4,7 @@
 #ifndef PROTOBUF_C_EventData_2eproto__INCLUDED
 #define PROTOBUF_C_EventData_2eproto__INCLUDED
 
-#include <AppMetrica_Protobuf/AppMetrica_Protobuf.h>
+#include <AppMetricaProtobuf/AppMetricaProtobuf.h>
 
 PROTOBUF_C__BEGIN_DECLS
 

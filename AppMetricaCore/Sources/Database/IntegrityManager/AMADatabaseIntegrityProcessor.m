@@ -6,7 +6,7 @@
 #import "AMADatabaseIntegrityReport.h"
 #import "AMASQLiteIntegrityIssueParser.h"
 #import "AMASQLiteIntegrityIssue.h"
-#import <AppMetrica_FMDB/AppMetrica_FMDB.h>
+#import <AppMetricaFMDB/AppMetricaFMDB.h>
 
 NSString *const kAMADatabaseIntegrityStepInitial = @"initial";
 NSString *const kAMADatabaseIntegrityStepReindex = @"reindex";

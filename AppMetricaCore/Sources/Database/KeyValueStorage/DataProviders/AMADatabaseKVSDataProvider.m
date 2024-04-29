@@ -2,7 +2,7 @@
 #import "AMACore.h"
 #import "AMADatabaseKVSDataProvider.h"
 #import "AMADatabaseConstants.h"
-#import <AppMetrica_FMDB/AppMetrica_FMDB.h>
+#import <AppMetricaFMDB/AppMetricaFMDB.h>
 
 @interface AMADatabaseKVSDataProvider ()
 

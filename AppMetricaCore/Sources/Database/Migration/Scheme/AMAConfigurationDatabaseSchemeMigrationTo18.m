@@ -1,7 +1,7 @@
 
 #import "AMAConfigurationDatabaseSchemeMigrationTo18.h"
 #import "AMAMigrationUtils.h"
-#import <AppMetrica_FMDB/AppMetrica_FMDB.h>
+#import <AppMetricaFMDB/AppMetricaFMDB.h>
 
 @implementation AMAConfigurationDatabaseSchemeMigrationTo18
 

@@ -6,7 +6,7 @@
 //  Copyright 2005 Flying Meat Inc.. All rights reserved.
 //
 
-#import <AppMetrica_FMDB/AppMetrica_FMDB.h>
+#import <AppMetricaFMDB/AppMetricaFMDB.h>
 #import "TargetConditionals.h"
 
 #if FMDB_SQLITE_STANDALONE

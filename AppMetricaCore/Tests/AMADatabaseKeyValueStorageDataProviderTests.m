@@ -4,7 +4,7 @@
 #import "AMAMockDatabase.h"
 #import "AMADatabaseConstants.h"
 #import "AMADatabaseKVSDataProvider.h"
-#import <AppMetrica_FMDB/AppMetrica_FMDB.h>
+#import <AppMetricaFMDB/AppMetricaFMDB.h>
 
 typedef void(^AMAWithProviderBlock)(AMADatabaseKVSDataProvider *provider, AMAFMDatabase *db);
 

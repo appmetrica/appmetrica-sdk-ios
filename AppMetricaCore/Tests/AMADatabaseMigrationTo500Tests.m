@@ -26,7 +26,7 @@
 #import "AMAFileEventValue.h"
 #import "AMAEnvironmentContainer.h"
 #import <AppMetricaPlatform/AppMetricaPlatform.h>
-#import <AppMetrica_FMDB/AppMetrica_FMDB.h>
+#import <AppMetricaFMDB/AppMetricaFMDB.h>
 #import "AMAMigrationTo500Utils.h"
 #import "AMATableDescriptionProvider.h"
 #import "AMAKeyValueStorageProvidersFactory.h"

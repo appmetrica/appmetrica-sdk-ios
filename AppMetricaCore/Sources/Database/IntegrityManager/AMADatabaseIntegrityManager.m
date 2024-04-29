@@ -4,7 +4,7 @@
 #import "AMADatabaseIntegrityProcessor.h"
 #import "AMADatabaseIntegrityReport.h"
 #import "AMADatabaseQueueProvider.h"
-#import <AppMetrica_FMDB/AppMetrica_FMDB.h>
+#import <AppMetricaFMDB/AppMetricaFMDB.h>
 
 @interface AMADatabaseIntegrityManager ()
 

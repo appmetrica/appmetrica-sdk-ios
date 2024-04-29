@@ -19,8 +19,8 @@ enum AppMetricaTarget: String {
     case storageUtils = "AppMetricaStorageUtils"
     case encodingUtils = "AppMetricaEncodingUtils"
     
-    case protobuf = "AppMetrica_Protobuf"
-    case fmdb = "AppMetrica_FMDB"
+    case protobuf = "AppMetricaProtobuf"
+    case fmdb = "AppMetricaFMDB"
     
     var name: String { rawValue }
     var testsName: String { rawValue + "Tests" }

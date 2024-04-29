@@ -1,7 +1,7 @@
 
 #import "AMACore.h"
 #import "AMAConfigurationDatabaseSchemeMigrationTo12.h"
-#import <AppMetrica_FMDB/AppMetrica_FMDB.h>
+#import <AppMetricaFMDB/AppMetricaFMDB.h>
 #import "AMAStorageKeys.h"
 
 @implementation AMAConfigurationDatabaseSchemeMigrationTo12

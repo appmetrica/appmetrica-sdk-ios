@@ -7,7 +7,7 @@
 #import "AMAMockDatabase.h"
 #import "AMAStringDatabaseKeyValueStorageConverter.h"
 #import "AMAInMemoryKeyValueStorageDataProvider.h"
-#import <AppMetrica_FMDB/AppMetrica_FMDB.h>
+#import <AppMetricaFMDB/AppMetricaFMDB.h>
 
 SPEC_BEGIN(AMADatabaseKeyValueStorageProviderTests)
 

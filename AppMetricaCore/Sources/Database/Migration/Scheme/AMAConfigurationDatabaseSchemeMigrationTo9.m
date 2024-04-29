@@ -1,6 +1,6 @@
 
 #import "AMAConfigurationDatabaseSchemeMigrationTo9.h"
-#import <AppMetrica_FMDB/AppMetrica_FMDB.h>
+#import <AppMetricaFMDB/AppMetricaFMDB.h>
 
 @implementation AMAConfigurationDatabaseSchemeMigrationTo9
 

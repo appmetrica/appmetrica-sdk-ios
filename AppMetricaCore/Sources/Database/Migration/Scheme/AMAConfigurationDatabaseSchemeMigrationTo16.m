@@ -2,7 +2,7 @@
 #import "AMACore.h"
 #import "AMAConfigurationDatabaseSchemeMigrationTo16.h"
 #import "AMAMigrationUtils.h"
-#import <AppMetrica_FMDB/AppMetrica_FMDB.h>
+#import <AppMetricaFMDB/AppMetricaFMDB.h>
 
 @implementation AMAConfigurationDatabaseSchemeMigrationTo16
 

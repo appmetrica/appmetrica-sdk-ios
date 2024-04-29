@@ -12,10 +12,10 @@
 NS_ASSUME_NONNULL_BEGIN
 
 /** Category of additions for @c FMDatabase  class.
- 
+
  See also
 
- - @c FMDatabase 
+ - @c FMDatabase
  */
 
 @interface AMAFMDatabase (FMDatabaseAdditions)
@@ -25,11 +25,11 @@ NS_ASSUME_NONNULL_BEGIN
 ///----------------------------------------
 
 /** Return @c int  value for query
- 
+
  @param query The SQL query to be performed, followed by a list of parameters that will be bound to the `?` placeholders in the SQL query.
 
  @return @c int  value.
- 
+
  @note This is not available from Swift.
  */
 
@@ -40,7 +40,7 @@ NS_ASSUME_NONNULL_BEGIN
  @param query The SQL query to be performed, followed by a list of parameters that will be bound to the `?` placeholders in the SQL query.
 
  @return @c long  value.
- 
+
  @note This is not available from Swift.
  */
 
@@ -51,7 +51,7 @@ NS_ASSUME_NONNULL_BEGIN
  @param query The SQL query to be performed, followed by a list of parameters that will be bound to the `?` placeholders in the SQL query.
 
  @return `BOOL` value.
- 
+
  @note This is not available from Swift.
  */
 
@@ -62,7 +62,7 @@ NS_ASSUME_NONNULL_BEGIN
  @param query The SQL query to be performed, followed by a list of parameters that will be bound to the `?` placeholders in the SQL query.
 
  @return `double` value.
- 
+
  @note This is not available from Swift.
  */
 
@@ -73,7 +73,7 @@ NS_ASSUME_NONNULL_BEGIN
  @param query The SQL query to be performed, followed by a list of parameters that will be bound to the `?` placeholders in the SQL query.
 
  @return @c NSString  value.
- 
+
  @note This is not available from Swift.
  */
 
@@ -84,7 +84,7 @@ NS_ASSUME_NONNULL_BEGIN
  @param query The SQL query to be performed, followed by a list of parameters that will be bound to the `?` placeholders in the SQL query.
 
  @return @c NSData  value.
- 
+
  @note This is not available from Swift.
  */
 
@@ -95,7 +95,7 @@ NS_ASSUME_NONNULL_BEGIN
  @param query The SQL query to be performed, followed by a list of parameters that will be bound to the `?` placeholders in the SQL query.
 
  @return @c NSDate  value.
- 
+
  @note This is not available from Swift.
  */
 
@@ -121,9 +121,9 @@ NS_ASSUME_NONNULL_BEGIN
 - (BOOL)tableExists:(NSString*)tableName;
 
 /** The schema of the database.
- 
+
  This will be the schema for the entire database. For each entity, each row of the result set will include the following fields:
- 
+
  - `type` - The type of entity (e.g. table, index, view, or trigger)
  - `name` - The name of the object
  - `tbl_name` - The name of the table to which the object references
@@ -131,7 +131,7 @@ NS_ASSUME_NONNULL_BEGIN
  - `sql` - The SQL that created the entity
 
  @return `FMResultSet` of schema; @c nil  on error.
- 
+
  @see [SQLite File Format](https://sqlite.org/fileformat.html)
  */
 
@@ -140,11 +140,11 @@ NS_ASSUME_NONNULL_BEGIN
 /** The schema of the database.
 
  This will be the schema for a particular table as report by SQLite `PRAGMA`, for example:
- 
+
     PRAGMA table_info('employees')
- 
+
  This will report:
- 
+
  - `cid` - The column ID number
  - `name` - The name of the column
  - `type` - The data type specified for the column
@@ -153,20 +153,20 @@ NS_ASSUME_NONNULL_BEGIN
  - `pk` - Whether the field is part of the primary key of the table
 
  @param tableName The name of the table for whom the schema will be returned.
- 
+
  @return `FMResultSet` of schema; @c nil  on error.
- 
+
  @see [table_info](https://sqlite.org/pragma.html#pragma_table_info)
  */
 
 - (AMAFMResultSet * _Nullable)getTableSchema:(NSString*)tableName;
 
 /** Test to see if particular column exists for particular table in database
- 
+
  @param columnName The name of the column.
- 
+
  @param tableName The name of the table.
- 
+
  @return @c YES if column exists in table in question; @c NO otherwise.
  */
 
@@ -179,9 +179,9 @@ NS_ASSUME_NONNULL_BEGIN
  @param tableName The name of the table.
 
  @return @c YES if column exists in table in question; @c NO otherwise.
- 
+
  @see columnExists:inTableWithName:
- 
+
  @warning Deprecated - use `<columnExists:inTableWithName:>` instead.
  */
 
@@ -189,15 +189,15 @@ NS_ASSUME_NONNULL_BEGIN
 
 
 /** Validate SQL statement
- 
+
  This validates SQL statement by performing `sqlite3_prepare_v2`, but not returning the results, but instead immediately calling `sqlite3_finalize`.
- 
+
  @param sql The SQL statement being validated.
- 
+
  @param error This is a pointer to a @c NSError  object that will receive the autoreleased @c NSError  object if there was any error. If this is @c nil , no @c NSError  result will be returned.
- 
+
  @return @c YES if validation succeeded without incident; @c NO otherwise.
- 
+
  */
 
 - (BOOL)validateSQL:(NSString*)sql error:(NSError * _Nullable __autoreleasing *)error;
@@ -208,9 +208,9 @@ NS_ASSUME_NONNULL_BEGIN
 ///-----------------------------------
 
 /** Retrieve application ID
- 
+
  @return The `uint32_t` numeric value of the application ID.
- 
+
  @see setApplicationID:
  */
 
@@ -232,7 +232,7 @@ NS_ASSUME_NONNULL_BEGIN
 ///-----------------------------------
 
 /** Retrieve user version
- 
+
  @see setUserVersion:
  */
 

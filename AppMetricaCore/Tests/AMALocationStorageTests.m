@@ -8,7 +8,7 @@
 #import "AMALocation.h"
 #import "AMAMockDatabase.h"
 #import "AMAVisit.h"
-#import <AppMetrica_FMDB/AppMetrica_FMDB.h>
+#import <AppMetricaFMDB/AppMetricaFMDB.h>
 
 SPEC_BEGIN(AMALocationStorageTests)
 
