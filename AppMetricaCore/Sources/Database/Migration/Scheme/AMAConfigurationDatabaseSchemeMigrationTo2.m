@@ -1,6 +1,6 @@
 
 #import "AMAConfigurationDatabaseSchemeMigrationTo2.h"
-#import <AppMetrica_FMDB/AppMetrica_FMDB.h>
+#import <AppMetricaFMDB/AppMetricaFMDB.h>
 #import "AMASession.h"
 
 @implementation AMAConfigurationDatabaseSchemeMigrationTo2

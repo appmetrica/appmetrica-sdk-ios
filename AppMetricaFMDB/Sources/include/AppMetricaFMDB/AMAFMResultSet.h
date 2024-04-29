@@ -28,10 +28,10 @@ typedef NS_ENUM(int, AMASqliteValueType) {
 };
 
 /** Represents the results of executing a query on an @c FMDatabase .
- 
+
  See also
- 
- - @c FMDatabase 
+
+ - @c FMDatabase
  */
 
 @interface AMAFMResultSet : NSObject
@@ -67,24 +67,24 @@ typedef NS_ENUM(int, AMASqliteValueType) {
 ///---------------------------------------
 
 /** Retrieve next row for result set.
- 
+
  You must always invoke `next` or `nextWithError` before attempting to access the values returned in a query, even if you're only expecting one.
 
  @return @c YES if row successfully retrieved; @c NO if end of result set reached
- 
+
  @see hasAnotherRow
  */
 
 - (BOOL)next;
 
 /** Retrieve next row for result set.
- 
+
   You must always invoke `next` or `nextWithError` before attempting to access the values returned in a query, even if you're only expecting one.
- 
+
  @param outErr A 'NSError' object to receive any error object (if any).
- 
+
  @return 'YES' if row successfully retrieved; 'NO' if end of result set reached
- 
+
  @see hasAnotherRow
  */
 
@@ -115,7 +115,7 @@ typedef NS_ENUM(int, AMASqliteValueType) {
  @return 'YES' if there is another row; 'NO' if not.
 
  @see next
- 
+
  @warning The `hasAnotherRow` method must follow a call to `<next>`. If the previous database interaction was something other than a call to `next`, then this method may return @c NO, whether there is another row of data or not.
  */
 
@@ -126,7 +126,7 @@ typedef NS_ENUM(int, AMASqliteValueType) {
 ///---------------------------------------------
 
 /** How many columns in result set
- 
+
  @return Integer value of the number of columns.
  */
 
@@ -245,7 +245,7 @@ typedef NS_ENUM(int, AMASqliteValueType) {
  @param columnName @c NSString  value of the name of the column.
 
  @return `double` value of the result set's column.
- 
+
  */
 
 - (double)doubleForColumn:(NSString*)columnName;
@@ -255,7 +255,7 @@ typedef NS_ENUM(int, AMASqliteValueType) {
  @param columnIdx Zero-based index for column.
 
  @return `double` value of the result set's column.
- 
+
  */
 
 - (double)doubleForColumnIndex:(int)columnIdx;
@@ -265,7 +265,7 @@ typedef NS_ENUM(int, AMASqliteValueType) {
  @param columnName @c NSString  value of the name of the column.
 
  @return String value of the result set's column.
- 
+
  */
 
 - (NSString * _Nullable)stringForColumn:(NSString*)columnName;
@@ -293,19 +293,19 @@ typedef NS_ENUM(int, AMASqliteValueType) {
  @param columnIdx Zero-based index for column.
 
  @return Date value of the result set's column.
- 
+
  */
 
 - (NSDate * _Nullable)dateForColumnIndex:(int)columnIdx;
 
 /** Result set @c NSData  value for column.
- 
+
  This is useful when storing binary data in table (such as image or the like).
 
  @param columnName @c NSString  value of the name of the column.
 
  @return Data value of the result set's column.
- 
+
  */
 
 - (NSData * _Nullable)dataForColumn:(NSString*)columnName;
@@ -389,7 +389,7 @@ typedef NS_ENUM(int, AMASqliteValueType) {
 - (id _Nullable)objectForColumnIndex:(int)columnIdx;
 
 /** Result set object for column.
- 
+
  This method allows the use of the "boxed" syntax supported in Modern Objective-C. For example, by defining this method, the following syntax is now supported:
 
 @code
@@ -397,13 +397,13 @@ id result = rs[@"employee_name"];
 @endcode
 
  This simplified syntax is equivalent to calling:
- 
+
 @code
 id result = [rs objectForKeyedSubscript:@"employee_name"];
 @endcode
 
  which is, it turns out, equivalent to calling:
- 
+
 @code
 id result = [rs objectForColumnName:@"employee_name"];
 @endcode
@@ -451,7 +451,7 @@ id result = [rs objectForColumnName:0];
  @warning If you are going to use this data after you iterate over the next row, or after you close the
 result set, make sure to make a copy of the data first (or just use `<dataForColumn:>`/`<dataForColumnIndex:>`)
 If you don't, you're going to be in a world of hurt when you try and use the data.
- 
+
  */
 
 - (NSData * _Nullable)dataNoCopyForColumn:(NSString *)columnName NS_RETURNS_NOT_RETAINED;
@@ -471,7 +471,7 @@ If you don't, you're going to be in a world of hurt when you try and use the dat
 - (NSData * _Nullable)dataNoCopyForColumnIndex:(int)columnIdx NS_RETURNS_NOT_RETAINED;
 
 /** Is the column @c NULL ?
- 
+
  @param columnIdx Zero-based index for column.
 
  @return @c YES if column is @c NULL ; @c NO if not @c NULL .
@@ -489,18 +489,18 @@ If you don't, you're going to be in a world of hurt when you try and use the dat
 - (BOOL)columnIsNull:(NSString*)columnName;
 
 
-/** Returns a dictionary of the row results mapped to case sensitive keys of the column names. 
- 
+/** Returns a dictionary of the row results mapped to case sensitive keys of the column names.
+
  @warning The keys to the dictionary are case sensitive of the column names.
  */
 
 @property (nonatomic, readonly, nullable) NSDictionary *resultDictionary;
- 
+
 /** Returns a dictionary of the row results
- 
+
  @see resultDictionary
- 
- @warning **Deprecated**: Please use `<resultDictionary>` instead.  Also, beware that `<resultDictionary>` is case sensitive! 
+
+ @warning **Deprecated**: Please use `<resultDictionary>` instead.  Also, beware that `<resultDictionary>` is case sensitive!
  */
 
 - (NSDictionary * _Nullable)resultDict __deprecated_msg("Use resultDictionary instead");
@@ -510,7 +510,7 @@ If you don't, you're going to be in a world of hurt when you try and use the dat
 ///-----------------------------
 
 /** Performs `setValue` to yield support for key value observing.
- 
+
  @param object The object for which the values will be set. This is the key-value-coding compliant object that you might, for example, observe.
 
  */

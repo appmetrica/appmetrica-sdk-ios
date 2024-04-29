@@ -4,7 +4,7 @@
 #import "AMAReporterDataMigrationTo500.h"
 #import "AMADatabaseProtocol.h"
 #import "AMADatabaseConstants.h"
-#import <AppMetrica_FMDB/AppMetrica_FMDB.h>
+#import <AppMetricaFMDB/AppMetricaFMDB.h>
 #import "AMATableDescriptionProvider.h"
 #import "AMAMigrationTo500Utils.h"
 

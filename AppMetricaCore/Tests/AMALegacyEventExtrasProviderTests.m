@@ -1,7 +1,7 @@
 
 #import <Kiwi/Kiwi.h>
 #import "AMALegacyEventExtrasProvider.h"
-#import <AppMetrica_FMDB/AppMetrica_FMDB.h>
+#import <AppMetricaFMDB/AppMetricaFMDB.h>
 #import <AppMetricaProtobufUtils/AppMetricaProtobufUtils.h>
 #import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
 #import "AMAMigrationTo500Utils.h"

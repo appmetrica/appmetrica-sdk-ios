@@ -1,6 +1,6 @@
 
 #import <Foundation/Foundation.h>
-#import <AppMetrica_Protobuf/AppMetrica_Protobuf.h>
+#import <AppMetricaProtobuf/AppMetricaProtobuf.h>
 #import "AMAOptionalBool.h"
 #import "AMAEventSource.h"
 #import "EventData.pb-c.h"

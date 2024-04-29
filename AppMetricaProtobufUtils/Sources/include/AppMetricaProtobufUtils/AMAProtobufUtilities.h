@@ -1,5 +1,5 @@
 #import <Foundation/Foundation.h>
-#import <AppMetrica_Protobuf/AppMetrica_Protobuf.h>
+#import <AppMetricaProtobuf/AppMetricaProtobuf.h>
 
 NS_ASSUME_NONNULL_BEGIN
 

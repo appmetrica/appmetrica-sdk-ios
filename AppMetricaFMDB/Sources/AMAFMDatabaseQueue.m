@@ -6,7 +6,7 @@
 //  Copyright 2011 Flying Meat Inc. All rights reserved.
 //
 
-#import <AppMetrica_FMDB/AppMetrica_FMDB.h>
+#import <AppMetricaFMDB/AppMetricaFMDB.h>
 
 #if FMDB_SQLITE_STANDALONE
 #import <sqlite3/sqlite3.h>

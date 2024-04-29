@@ -2,7 +2,7 @@
 #import "AMALegacyEventExtrasProvider.h"
 #import "LegacyEventExtras.pb-c.h"
 #import <AppMetricaProtobufUtils/AppMetricaProtobufUtils.h>
-#import <AppMetrica_FMDB/AppMetrica_FMDB.h>
+#import <AppMetricaFMDB/AppMetricaFMDB.h>
 #import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
 
 @implementation AMALegacyEventExtrasProvider

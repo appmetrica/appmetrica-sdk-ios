@@ -6,7 +6,7 @@
 #import "AMAAppMetrica+Internal.h"
 #import "AMAInternalEventsReporter.h"
 #import <AppMetricaPlatform/AppMetricaPlatform.h>
-#import <AppMetrica_FMDB/AppMetrica_FMDB.h>
+#import <AppMetricaFMDB/AppMetricaFMDB.h>
 
 SPEC_BEGIN(AMADatabaseQueueProviderTests)
 

@@ -4,7 +4,7 @@
 #import "AMAStorageKeys.h"
 #import "AMADatabaseProtocol.h"
 #import "AMADatabaseConstants.h"
-#import <AppMetrica_FMDB/AppMetrica_FMDB.h>
+#import <AppMetricaFMDB/AppMetricaFMDB.h>
 #import "AMADatabaseHelper.h"
 #import "AMAReporterStoragesContainer.h"
 #import "AMAReporterStorage.h"

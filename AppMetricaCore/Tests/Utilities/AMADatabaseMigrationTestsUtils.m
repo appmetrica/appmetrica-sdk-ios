@@ -1,7 +1,7 @@
 
 #import "AMADatabaseMigrationTestsUtils.h"
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
-#import <AppMetrica_FMDB/AppMetrica_FMDB.h>
+#import <AppMetricaFMDB/AppMetricaFMDB.h>
 #import <sqlite3.h>
 #import "AMATableSchemeController.h"
 #import <Kiwi/Kiwi.h>

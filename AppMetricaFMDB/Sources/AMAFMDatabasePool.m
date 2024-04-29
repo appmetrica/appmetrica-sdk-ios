@@ -12,7 +12,7 @@
 #import <sqlite3.h>
 #endif
 
-#import <AppMetrica_FMDB/AppMetrica_FMDB.h>
+#import <AppMetricaFMDB/AppMetricaFMDB.h>
 
 typedef NS_ENUM(NSInteger, FMDBTransaction) {
     FMDBTransactionExclusive,

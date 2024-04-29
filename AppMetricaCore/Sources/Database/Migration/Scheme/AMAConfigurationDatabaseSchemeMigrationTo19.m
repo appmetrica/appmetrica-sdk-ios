@@ -12,7 +12,7 @@
 #import "AMAFileEventValue.h"
 #import "AMABinaryEventValue.h"
 #import "AMAStringEventValue.h"
-#import <AppMetrica_FMDB/AppMetrica_FMDB.h>
+#import <AppMetricaFMDB/AppMetricaFMDB.h>
 #import <CoreLocation/CoreLocation.h>
 
 static NSUInteger const kAMAAPIKeyStringLength = 36;

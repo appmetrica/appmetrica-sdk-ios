@@ -3,7 +3,7 @@
 #import "AMADataMigrationTo500.h"
 #import "AMADatabaseConstants.h"
 #import "AMAStorageKeys.h"
-#import <AppMetrica_FMDB/AppMetrica_FMDB.h>
+#import <AppMetricaFMDB/AppMetricaFMDB.h>
 #import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
 #import "AMAMigrationTo500Utils.h"
 #import "AMADatabaseProtocol.h"

@@ -3,7 +3,7 @@
 #import "AMAConfigurationDatabaseSchemeMigrationTo15.h"
 #import "AMAMigrationUtils.h"
 #import "AMAEventTypes.h"
-#import <AppMetrica_FMDB/AppMetrica_FMDB.h>
+#import <AppMetricaFMDB/AppMetricaFMDB.h>
 
 static NSString *const kAMAFilePathPrefix = @"/Library/Caches/ru.yandex.mobile.YandexMobileMetrica/";
 

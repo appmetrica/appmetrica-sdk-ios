@@ -4,7 +4,7 @@
 #import "AMADatabaseConstants.h"
 #import "AMASession.h"
 #import "AMASessionSerializer.h"
-#import <AppMetrica_FMDB/AppMetrica_FMDB.h>
+#import <AppMetricaFMDB/AppMetricaFMDB.h>
 
 @interface AMASessionStorage ()
 

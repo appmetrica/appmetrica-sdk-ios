@@ -53,7 +53,7 @@
 #import "AMAEnvironmentContainer.h"
 #import <CoreLocation/CoreLocation.h>
 #import <AppMetricaPlatform/AppMetricaPlatform.h>
-#import <AppMetrica_FMDB/AppMetrica_FMDB.h>
+#import <AppMetricaFMDB/AppMetricaFMDB.h>
 #import "AMADatabaseMigrationTestsUtils.h"
 
 SPEC_BEGIN(AMADatabaseMigrationTests)

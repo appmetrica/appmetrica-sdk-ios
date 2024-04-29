@@ -2,7 +2,7 @@
 #import <AppMetricaPlatform/AppMetricaPlatform.h>
 #import "AMACore.h"
 #import <sqlite3.h>
-#import <AppMetrica_FMDB/AppMetrica_FMDB.h>
+#import <AppMetricaFMDB/AppMetricaFMDB.h>
 #import "AMADatabaseQueueProvider.h"
 
 @interface AMADatabaseQueueProvider ()

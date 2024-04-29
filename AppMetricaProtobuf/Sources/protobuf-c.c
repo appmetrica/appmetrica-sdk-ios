@@ -48,7 +48,7 @@
 #include <stdlib.h>    /* for malloc, free */
 #include <string.h>    /* for strcmp, strlen, memcpy, memmove, memset */
 
-#include <AppMetrica_Protobuf/AppMetrica_Protobuf.h>
+#include <AppMetricaProtobuf/AppMetricaProtobuf.h>
 
 #define TRUE                1
 #define FALSE                0
@@ -1622,7 +1622,7 @@ required_field_pack_to_buffer(const ProtobufCFieldDescriptor *field,
     }
     case PROTOBUF_C_TYPE_MESSAGE: {
         const ProtobufCMessage *msg = *(ProtobufCMessage * const *) member;
-        
+
         scratch[0] |= PROTOBUF_C_WIRE_TYPE_LENGTH_PREFIXED;
         if (msg == NULL) {
             rv += uint32_pack(0, scratch + rv);

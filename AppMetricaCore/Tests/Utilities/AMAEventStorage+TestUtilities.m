@@ -7,7 +7,7 @@
 #import "AMAEventSerializer.h"
 #import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
 #import "AMAEvent.h"
-#import <AppMetrica_FMDB/AppMetrica_FMDB.h>
+#import <AppMetricaFMDB/AppMetricaFMDB.h>
 
 @implementation AMAEventStorage (TestUtilities)
 

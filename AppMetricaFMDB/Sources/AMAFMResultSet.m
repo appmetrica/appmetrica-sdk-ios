@@ -1,5 +1,5 @@
 
-#import <AppMetrica_FMDB/AppMetrica_FMDB.h>
+#import <AppMetricaFMDB/AppMetricaFMDB.h>
 #import <unistd.h>
 
 #if FMDB_SQLITE_STANDALONE
