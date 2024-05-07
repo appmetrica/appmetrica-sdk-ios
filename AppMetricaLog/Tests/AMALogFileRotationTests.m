@@ -3,6 +3,7 @@
 #import "AMALogFileRotation.h"
 #import "AMALogFile.h"
 
+#ifdef AMA_ENABLE_FILE_LOG
 @interface AMALogFileRotationTests : XCTestCase
 
 @end
@@ -102,3 +103,5 @@
 }
 
 @end
+
+#endif //AMA_ENABLE_FILE_LOG

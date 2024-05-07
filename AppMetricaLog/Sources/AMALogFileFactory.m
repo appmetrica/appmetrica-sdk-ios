@@ -2,6 +2,7 @@
 #import "AMALogFileFactory.h"
 #import "AMALogFile.h"
 
+#ifdef AMA_ENABLE_FILE_LOG
 static NSString *const kAMALogFileSerialNumberSeparator = @"-";
 static NSString *const kAMALogFileExtension = @"log";
 
@@ -70,3 +71,5 @@ static NSString *const kAMALogFileExtension = @"log";
 
 
 @end
+
+#endif // AMA_ENABLE_FILE_LOG

@@ -15,10 +15,12 @@
 static const AMALogLevel AMALogControllerDefaultLogLevelMask = AMALogLevelError | AMALogLevelNotify;
 static const AMALogLevel AMALogControllerEnabledLogLevelMask = AMALogLevelInfo | AMALogLevelWarning | AMALogLevelError | AMALogLevelNotify;
 
+#ifdef AMA_ENABLE_FILE_LOG
 static NSString *const AMALogControllerLogsDirectory = @"io.appmetrica.logs";
 static NSString *const AMALogControllerLogPrefix = @"io_appmetrica";
 
 static const NSUInteger AMALogControllerMaxAllowedLogFilesCount = 20;
+#endif
 
 @interface AMALogConfigurator ()
 
@@ -143,8 +145,10 @@ static const NSUInteger AMALogControllerMaxAllowedLogFilesCount = 20;
     if (shouldAddTTYLog) {
         [outputs addObject:[self ttyOutputWithChannel:channel]];
     }
+#ifdef AMA_ENABLE_FILE_LOG
     AMALogOutput *output = [self fileOutputWithChannel:channel];
     [outputs addObject:output];
+#endif // AMA_ENABLE_FILE_LOG
 
     for (AMALogOutput *output in outputs) {
         [self.log addOutput:output];
@@ -185,6 +189,7 @@ static const NSUInteger AMALogControllerMaxAllowedLogFilesCount = 20;
     return [self outputForChannel:channel format:format middleware:self.ttyMiddleware];
 }
 
+#ifdef AMA_ENABLE_FILE_LOG
 - (AMALogOutput *)fileOutputWithChannel:(AMALogChannel)channel
 {
     NSArray *fileFormat = @[
@@ -195,6 +200,7 @@ static const NSUInteger AMALogControllerMaxAllowedLogFilesCount = 20;
     ];
     return [self outputForChannel:channel format:fileFormat middleware:self.fileMiddleware];
 }
+#endif // AMA_ENABLE_FILE_LOG
 
 #pragma mark - Middleware
 
@@ -237,6 +243,7 @@ static const NSUInteger AMALogControllerMaxAllowedLogFilesCount = 20;
     return middleware;
 }
 
+#ifdef AMA_ENABLE_FILE_LOG
 - (id<AMALogMiddleware>)fileMiddleware
 {
     @synchronized (self) {
@@ -270,5 +277,6 @@ static const NSUInteger AMALogControllerMaxAllowedLogFilesCount = 20;
 
     return _logsDirectory;
 }
+#endif // AMA_ENABLE_FILE_LOG
 
 @end

@@ -4,6 +4,7 @@
 #import "AMALogFile.h"
 #import "AMALogFileFactory.h"
 
+#ifdef AMA_ENABLE_FILE_LOG
 @interface AMALogFileManager ()
 
 @property (nonatomic, copy) NSString *logsDirectoryPath;
@@ -127,3 +128,5 @@
 }
 
 @end
+
+#endif //AMA_ENABLE_FILE_LOG

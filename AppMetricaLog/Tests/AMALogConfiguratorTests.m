@@ -91,7 +91,7 @@ static NSString *const kAMATestChannel = @"TestChannel";
         XCTAssertTrue(contains);
     }
 }
-
+#ifdef AMA_ENABLE_FILE_LOG
 - (void)testFileLogAvailability
 {
     [self.configurator setupLogWithChannel:kAMATestChannel];
@@ -110,6 +110,7 @@ static NSString *const kAMATestChannel = @"TestChannel";
                                                                   @(AMALogFormatPartBacktrace)]];
     XCTAssertTrue(contains);
 }
+#endif //AMA_ENABLE_FILE_LOG
 
 /* We don't test TTY output as it is depends on execution condition
 - (void)testTTYLogAvailability
