@@ -46,7 +46,11 @@
 
 - (void)restartPrivacyTimer
 {
-    for (AMAReporter *repoter in self.reporters.objectEnumerator) {
+    NSDictionary *reporters = nil;
+    @synchronized (self) {
+        reporters = [self.reporters copy];
+    }
+    for (AMAReporter *repoter in reporters.objectEnumerator) {
         [repoter restartPrivacyTimer];
     }
 }
