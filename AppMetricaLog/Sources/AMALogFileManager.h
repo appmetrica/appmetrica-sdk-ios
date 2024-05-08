@@ -1,6 +1,7 @@
 
 #import <Foundation/Foundation.h>
 
+#ifdef AMA_ENABLE_FILE_LOG
 @class AMALogFile;
 @class AMALogFileFactory;
 
@@ -19,3 +20,5 @@
 - (NSFileHandle *)fileHandleForLogFile:(AMALogFile *)logFile;
 
 @end
+
+#endif //AMA_ENABLE_FILE_LOG

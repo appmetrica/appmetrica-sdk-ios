@@ -2,6 +2,7 @@
 #import <XCTest/XCTest.h>
 #import "AMAFileLogMiddleware.h"
 
+#ifdef AMA_ENABLE_FILE_LOG
 static const NSUInteger maxBufferLength = 1024;
 
 @interface AMAFileLogMiddlewareTests : XCTestCase {
@@ -100,3 +101,5 @@ static const NSUInteger maxBufferLength = 1024;
 }
 
 @end
+
+#endif //AMA_ENABLE_FILE_LOG

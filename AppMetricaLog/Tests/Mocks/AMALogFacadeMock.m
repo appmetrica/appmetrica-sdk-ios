@@ -82,9 +82,11 @@
     return [self outputsWithMiddlewareClass:AMAASLLogMiddleware.class];
 }
 
+#ifdef AMA_ENABLE_FILE_LOG
 - (NSArray<AMALogOutput *> *)fileOutputs
 {
     return [self outputsWithMiddlewareClass:AMAFileLogMiddleware.class];
 }
+#endif // AMA_ENABLE_FILE_LOG
 
 @end

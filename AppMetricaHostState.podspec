@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name = "AppMetricaHostState"
-  s.version = '5.3.1'
+  s.version = '5.3.2'
   s.summary = "AppMetricaHostState facilitates accessing the state of the host application for other modules"
 
   s.homepage = 'https://appmetrica.io'
@@ -15,8 +15,8 @@ Pod::Spec.new do |s|
 
   s.frameworks = 'Foundation', 'UIKit'
 
-  s.dependency 'AppMetricaLog', '= 5.3.1'
-  s.dependency 'AppMetricaCoreUtils', '= 5.3.1'
+  s.dependency 'AppMetricaLog', '= 5.3.2'
+  s.dependency 'AppMetricaCoreUtils', '= 5.3.2'
   
   s.header_dir = s.name
   s.source_files = "#{s.name}/Sources/**/*.{h,m}"

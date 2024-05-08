@@ -1,6 +1,8 @@
 
 #import <Foundation/Foundation.h>
 
+#ifdef AMA_ENABLE_FILE_LOG
+
 @interface AMALogFileRotation : NSObject
 
 @property (nonatomic, copy, readonly) NSArray *filesToRemove;
@@ -13,3 +15,5 @@
                      nextSerialNumber:(NSNumber *)serialNumber;
 
 @end
+
+#endif //AMA_ENABLE_FILE_LOG

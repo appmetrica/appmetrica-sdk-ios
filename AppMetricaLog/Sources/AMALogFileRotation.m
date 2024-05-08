@@ -2,6 +2,8 @@
 #import "AMALogFileRotation.h"
 #import "AMALogFile.h"
 
+#ifdef AMA_ENABLE_FILE_LOG
+
 @interface AMALogFileRotation ()
 
 @property (nonatomic, copy, readwrite) NSArray *filesToRemove;
@@ -73,3 +75,5 @@
 }
 
 @end
+
+#endif //AMA_ENABLE_FILE_LOG

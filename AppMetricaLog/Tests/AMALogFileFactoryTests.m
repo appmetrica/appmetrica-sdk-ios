@@ -3,6 +3,8 @@
 #import "AMALogFileFactory.h"
 #import "AMALogFile.h"
 
+#ifdef AMA_ENABLE_FILE_LOG
+
 @interface AMALogFileFactoryTests : XCTestCase
 
 @property (nonatomic, strong) AMALogFileFactory *factory;
@@ -54,3 +56,5 @@
 }
 
 @end
+
+#endif // AMA_ENABLE_FILE_LOG
