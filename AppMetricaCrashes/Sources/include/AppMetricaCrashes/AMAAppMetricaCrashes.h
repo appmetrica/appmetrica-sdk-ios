@@ -9,6 +9,11 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+typedef NSString *AMACrashReportingStateKey NS_TYPED_EXTENSIBLE_ENUM NS_SWIFT_NAME(CrashReportingStateKey);
+
+extern AMACrashReportingStateKey const kAMACrashReportingStateEnabledKey NS_SWIFT_NAME(enabledKey);
+extern AMACrashReportingStateKey const kAMACrashReportingStateCrashedLastLaunchKey NS_SWIFT_NAME(crashedLastLaunchKey);
+
 /// Type definition for the crash reporting state callback block.
 ///
 /// The 'state' parameter is a dictionary that can contain any combination of the following keys:
@@ -16,7 +21,7 @@ NS_ASSUME_NONNULL_BEGIN
 /// - kAMACrashReportingStateCrashedLastLaunchKey: An NSNumber containing a boolean value indicating if the app crashed during the last launch.
 ///
 /// Use this block type with methods that require crash reporting state completion callbacks.
-typedef void(^AMACrashReportingStateCompletionBlock)(NSDictionary * _Nullable state)
+typedef void(^AMACrashReportingStateCompletionBlock)(NSDictionary<AMACrashReportingStateKey, id> * _Nullable state)
     NS_SWIFT_UNAVAILABLE("Use Swift closures.");
 
 @protocol AMAErrorRepresentable;
@@ -146,11 +151,11 @@ NS_SWIFT_NAME(AppMetricaCrashes)
                                       completionBlock:(AMACrashReportingStateCompletionBlock)completionBlock;
 
 /** Enable ANR monitoring with default parameters.
- 
+
  Default parameters:
  - `watchdog` interval 4 seconds,
  - `ping` interval 0.1 second.
- 
+
  @note Use this method to enable ANR monitoring only after the activation.
  Use the applicationNotRespondingDetection property of AMAAppMetricaCrashesConfiguration if you want to enable
  ANR monitoring at the time of activation.
@@ -159,10 +164,10 @@ NS_SWIFT_NAME(AppMetricaCrashes)
 
 /** Enable ANR monitoring.
  Use this method to enable ANR monitoring only after the activation.
- 
+
  @param watchdog Time interval the watchdog queue would wait for the main queue response before report ANR.
  @param ping Time interval the watchdog queue would ping the main queue.
- 
+
  @note Use the `applicationNotRespondingDetection` property of `AMAAppMetricaCrashesConfiguration` if you want to enable
  ANR monitoring during the activation.
  @warning A small `ping` value can lead to poor performance.

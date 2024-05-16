@@ -5,9 +5,6 @@
 #import "AMACrashLogging.h"
 #import "AMAAppMetricaCrashes.h"
 
-extern NSString *const kAMACrashReportingStateEnabledKey;
-extern NSString *const kAMACrashReportingStateCrashedLastLaunchKey;
-
 @interface AMACrashReportingStateNotifier : NSObject
 
 - (void)addObserverWithCompletionQueue:(dispatch_queue_t)completionQueue
