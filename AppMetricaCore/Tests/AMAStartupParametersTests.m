@@ -36,7 +36,7 @@ describe(@"AMAStartupParameters", ^{
         NSString *appPlatform = @"iphone";
         NSString *deviceType = @"phone";
 #if TARGET_OS_TV
-        appPlatform = @"tv";
+        appPlatform = @"iphone";
         deviceType = @"tv";
 #endif
 

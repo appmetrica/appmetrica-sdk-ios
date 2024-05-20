@@ -87,6 +87,20 @@ describe(@"AMADeviceDescription", ^{
             
             [[[AMADeviceDescription OSVersion] should] equal:version];
         });
+        
+        it(@"Should return ipad if current idiom is ipad", ^{
+            [[UIDevice currentDevice] stub:@selector(userInterfaceIdiom)
+                                 andReturn:theValue(UIUserInterfaceIdiomPad)];
+            
+            [[[AMADeviceDescription appPlatform] should] equal:@"ipad"];
+        });
+        
+        it(@"Should return iphone if current idiom is not ipad", ^{
+            [[UIDevice currentDevice] stub:@selector(userInterfaceIdiom)
+                                 andReturn:theValue(UIUserInterfaceIdiomTV)];
+            
+            [[[AMADeviceDescription appPlatform] should] equal:@"iphone"];
+        });
     });
 });
 

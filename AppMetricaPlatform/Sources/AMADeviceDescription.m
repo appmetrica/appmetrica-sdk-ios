@@ -50,12 +50,8 @@
 + (NSString *)appPlatform
 {
     switch ([[UIDevice currentDevice] userInterfaceIdiom]) {
-        case UIUserInterfaceIdiomPhone:
-            return @"iphone";
         case UIUserInterfaceIdiomPad:
             return @"ipad";
-        case UIUserInterfaceIdiomTV:
-            return @"tv";
         default:
             return @"iphone";
     }
