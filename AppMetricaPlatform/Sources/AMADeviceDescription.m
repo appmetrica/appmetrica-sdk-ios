@@ -61,11 +61,6 @@
     }
 }
 
-+ (BOOL)deviceTypeIsIPad
-{
-    return [self isDeviceModelOfType:@"ipad"];
-}
-
 #pragma mark - Screen
 
 + (NSString *)screenDPI
@@ -136,13 +131,13 @@
     return systemVersion;
 }
 
-#pragma mark - Private
-
 + (BOOL)isDeviceModelOfType:(NSString *)type
 {
     NSString *model = [[[UIDevice currentDevice] model] lowercaseString];
     return ([model rangeOfString:[type lowercaseString]].location != NSNotFound);
 }
+
+#pragma mark - Private
 
 //FIXME: mainScreen deprecated
 + (CGFloat)screenScale

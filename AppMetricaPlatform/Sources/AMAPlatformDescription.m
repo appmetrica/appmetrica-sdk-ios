@@ -220,11 +220,6 @@ NSString *const kAMADeviceTypeWatch = @"watch";
     return [AMADeviceDescription scalefactor];
 }
 
-+ (BOOL)deviceTypeIsIPad
-{
-    return [AMADeviceDescription deviceTypeIsIPad];
-}
-
 + (NSString *)deviceType
 {
 #if TARGET_OS_TV
@@ -232,8 +227,14 @@ NSString *const kAMADeviceTypeWatch = @"watch";
 #elif TARGET_OS_WATCH
     return kAMADeviceTypeWatch;
 #else
-    return [self deviceTypeIsIPad] ? kAMADeviceTypeTablet : kAMADeviceTypePhone;
+    return [AMADeviceDescription isDeviceModelOfType:@"ipad"] ? kAMADeviceTypeTablet : kAMADeviceTypePhone;
 #endif
+}
+
++ (BOOL)deviceTypeIsSimulator
+{
+    return [AMADeviceDescription isDeviceModelOfType:@"simulator"] ||
+           [NSProcessInfo processInfo].environment[@"SIMULATOR_DEVICE_NAME"] != nil;
 }
 
 #pragma mark - AppVersionProvider

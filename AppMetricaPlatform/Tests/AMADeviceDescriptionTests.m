@@ -50,16 +50,11 @@ describe(@"AMADeviceDescription", ^{
             });
         });
         
-        it(@"Should return true if device type is ipad", ^{
-            [[UIDevice currentDevice] stub:@selector(model) andReturn:@"ipad"];
+        it(@"Should return true if current device contains device model", ^{
+            NSString *deviceModel = @"AC-130";
+            [[UIDevice currentDevice] stub:@selector(model) andReturn:[NSString stringWithFormat:@"%@H", deviceModel]];
             
-            [[theValue([AMADeviceDescription deviceTypeIsIPad]) should] beYes];
-        });
-        
-        it(@"Should return false if device type is not ipad", ^{
-            [[UIDevice currentDevice] stub:@selector(model) andReturn:@"iphone"];
-            
-            [[theValue([AMADeviceDescription deviceTypeIsIPad]) should] beNo];
+            [[theValue([AMADeviceDescription isDeviceModelOfType:deviceModel]) should] beYes];
         });
         
         it(@"Should return UIScreen width", ^{

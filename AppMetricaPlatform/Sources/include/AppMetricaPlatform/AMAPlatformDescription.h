@@ -57,6 +57,8 @@ NS_SWIFT_NAME(PlatformDescription)
 + (NSString *)scalefactor;
 + (NSString *)deviceType;
 
++ (BOOL)deviceTypeIsSimulator;
+
 - (instancetype)init NS_UNAVAILABLE;
 + (instancetype)new NS_UNAVAILABLE;
 

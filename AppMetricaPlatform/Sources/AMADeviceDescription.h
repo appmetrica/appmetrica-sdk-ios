@@ -8,8 +8,6 @@
 + (BOOL)isDeviceRooted;
 + (NSString *)appPlatform;
 
-+ (BOOL)deviceTypeIsIPad;
-
 + (NSString *)screenDPI;
 + (NSString *)screenWidth;
 + (NSString *)screenHeight;
@@ -19,5 +17,7 @@
 + (NSString *)model;
 
 + (NSString *)OSVersion;
+
++ (BOOL)isDeviceModelOfType:(NSString *)type;
 
 @end

@@ -9,7 +9,6 @@
 @interface AMAPlatformDescription (Tests)
 
 + (AMAAppBuildType)currentAppBuildType;
-+ (BOOL)deviceTypeIsIPad;
 
 @end
 
@@ -318,23 +317,29 @@ describe(@"AMAPlatformDescription", ^{
         
 #if TARGET_OS_TV
         it(@"Should return device type tv if target os is TV", ^{
-            [AMAPlatformDescription stub:@selector(deviceTypeIsIPad) andReturn:theValue(YES)];
+            [AMADeviceDescription stub:@selector(isDeviceModelOfType:) andReturn:theValue(YES) withArguments:@"tv"];
             
             [[[AMAPlatformDescription deviceType] should] equal:kAMADeviceTypeTV];
         });
 #else
-        it(@"Should return device type if device type is ipad", ^{
-            [AMAPlatformDescription stub:@selector(deviceTypeIsIPad) andReturn:theValue(YES)];
+        it(@"Should return tablet if device type is ipad", ^{
+            [AMADeviceDescription stub:@selector(isDeviceModelOfType:) andReturn:theValue(YES) withArguments:@"ipad"];
             
             [[[AMAPlatformDescription deviceType] should] equal:kAMADeviceTypeTablet];
         });
         
-        it(@"Should return phone if device type is ipad", ^{
-            [AMAPlatformDescription stub:@selector(deviceTypeIsIPad) andReturn:theValue(NO)];
+        it(@"Should return phone if device type phone", ^{
+            [AMADeviceDescription stub:@selector(isDeviceModelOfType:) andReturn:theValue(YES) withArguments:@"iphone"];
             
             [[[AMAPlatformDescription deviceType] should] equal:kAMADeviceTypePhone];
         });
 #endif
+        
+        it(@"Should return true if simulator", ^{
+            [AMADeviceDescription stub:@selector(isDeviceModelOfType:) andReturn:theValue(YES) withArguments:@"simulator"];
+            
+            [[theValue([AMAPlatformDescription deviceTypeIsSimulator]) should] beYes];
+        });
     });
 });
 
