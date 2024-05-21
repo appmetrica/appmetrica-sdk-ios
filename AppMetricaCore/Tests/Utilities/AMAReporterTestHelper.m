@@ -28,6 +28,9 @@
 #import "AMAPrivacyTimer.h"
 #import "AMAPrivacyTimerStorage.h"
 #import "AMAExternalAttributionSerializer.h"
+#import "AMAPrivacyTimerStorageMock.h"
+#import "AMAPrivacyTimerMock.h"
+#import "AMAReporter+TestUtilities.h"
 
 @interface AMAReporterTestHelper ()
 
@@ -35,6 +38,9 @@
 @property (nonatomic, strong, readonly) NSMutableDictionary<NSString *, AMAReporter *> *reporters;
 @property (nonatomic, strong, readonly) NSMutableDictionary<NSString *, NSObject<AMADatabaseProtocol> *> *databases;
 @property (nonatomic, strong, readonly) NSMutableDictionary<NSString *, AMAReporterStorage *> *reporterStorages;
+@property (nonatomic, strong, readonly) NSMutableDictionary<NSString *, AMAPrivacyTimer *> *privacyTimers;
+@property (nonatomic, strong, readonly) NSMutableDictionary<NSString *, AMAPrivacyTimerStorageMock *> *privacyTimerStorages;
+@property (nonatomic, strong, readonly) NSMutableDictionary<NSString *, AMAAdProvider *> *adProviders;
 
 @end
 
@@ -48,6 +54,9 @@
         _reporters = [NSMutableDictionary dictionary];
         _databases = [NSMutableDictionary dictionary];
         _reporterStorages = [NSMutableDictionary dictionary];
+        _adProviders = [NSMutableDictionary dictionary];
+        _privacyTimerStorages = [NSMutableDictionary dictionary];
+        _privacyTimers = [NSMutableDictionary dictionary];
         
         __weak __typeof(self) weakSelf = self;
         [_storagesContainer stub:@selector(storageForApiKey:) withBlock:^id(NSArray *params) {
@@ -164,6 +173,15 @@
     AMASessionExpirationHandler *expirationHandler =
         [[AMASessionExpirationHandler alloc] initWithConfiguration:[AMAMetricaConfiguration sharedInstance]
                                                             APIKey:apiKey];
+    
+    AMAAdProvider *adProvider = [self adProviderForApiKey:apiKey];
+    AMAPrivacyTimerStorageMock *privacyStorage = [self privacyTimerStorageMockForApiKey:apiKey];
+    AMAPrivacyTimerMock *privacyTimer = [[AMAPrivacyTimerMock alloc] initWithTimerStorage:privacyStorage
+                                                                         delegateExecutor:executor
+                                                                               adProvider:adProvider];
+    privacyTimer.disableFire = YES;
+    
+    _privacyTimers[apiKey] = privacyTimer;
     AMAReporter *reporter = nil;
     if (executor == nil) {
         reporter = [[AMAReporter alloc] initWithApiKey:apiKey
@@ -171,13 +189,11 @@
                                        reporterStorage:reporterStorage
                                           eventBuilder:builder
                                       internalReporter:[AMAInternalEventsReporter nullMock]
-                              attributionCheckExecutor:attributionCheckExecutor];
+                              attributionCheckExecutor:attributionCheckExecutor
+                                          privacyTimer:privacyTimer];
     }
     else {
-        AMAMetrikaPrivacyTimerStorage *privacyStorage = [[AMAMetrikaPrivacyTimerStorage alloc] init];
-        AMAPrivacyTimer *privacyTimer = [[AMAPrivacyTimer alloc] initWithTimerStorage:privacyStorage
-                                                                     delegateExecutor:executor
-                                                                           adProvider:[AMAAdProvider sharedInstance]];
+        
         reporter = [[AMAReporter alloc] initWithApiKey:apiKey
                                                   main:main
                                        reporterStorage:reporterStorage
@@ -190,7 +206,7 @@
                                             adServices:[AMAAdServicesDataProvider nullMock]
                          externalAttributionSerializer:[AMAExternalAttributionSerializer nullMock]
                               sessionExpirationHandler:expirationHandler
-                                            adProvider:[AMAAdProvider sharedInstance]
+                                            adProvider:adProvider
                                           privacyTimer:privacyTimer];
     }
 #pragma clang diagnostic push
@@ -201,6 +217,24 @@
     self.reporters[apiKey] = reporter;
     [reporterStorage restoreState];
     return reporter;
+}
+
+- (AMAPrivacyTimerStorageMock *)privacyTimerStorageMockForApiKey:(NSString *)apiKey 
+{
+    AMAPrivacyTimerStorageMock *storage = self.privacyTimerStorages[apiKey];
+    if (storage != nil)
+    {
+        return storage;
+    }
+    
+    storage = [[AMAPrivacyTimerStorageMock alloc] init];
+    _privacyTimerStorages[apiKey] = storage;
+    return storage;
+}
+
+- (AMAPrivacyTimer *)privacyTimerForApiKey:(NSString *)apiKey 
+{
+    return self.privacyTimers[apiKey];
 }
 
 - (AMAReporterStorage *)reporterStorageForApiKey:(NSString *)apiKey inMemory:(BOOL)inMemory
@@ -238,6 +272,17 @@
     self.databases[apiKey] = database;
     [[AMAMetricaConfiguration sharedInstance] stub:@selector(ensureMigrated)];
     return reporterStorage;
+}
+
+- (AMAAdProvider *)adProviderForApiKey:(NSString*)apiKey
+{
+    AMAAdProvider *provider = self.adProviders[apiKey];
+    if (provider != nil) {
+        return provider;
+    }
+    provider = [AMAAdProvider nullMock];
+    _adProviders[apiKey] = provider;
+    return provider;
 }
 
 - (NSObject<AMADatabaseProtocol> *)databaseForApiKey:(NSString *)apiKey

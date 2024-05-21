@@ -79,23 +79,24 @@
       attributionCheckExecutor:(id<AMAAsyncExecuting>)attributionCheckExecutor
 {
     AMACancelableDelayedExecutor *executor = [[AMACancelableDelayedExecutor alloc] initWithIdentifier:self];
-
-    AMAAdServicesDataProvider *adServicesDataProvider = nil;
-    if (@available(iOS 14.3, *)) {
-        adServicesDataProvider = [[AMAAdServicesDataProvider alloc] init];
-    }
+    
+    AMAAdProvider *adProvider = [AMAAdProvider sharedInstance];
     
     AMASessionExpirationHandler *sessionExpirationHandler =
         [[AMASessionExpirationHandler alloc] initWithConfiguration:[AMAMetricaConfiguration sharedInstance]
                                                             APIKey:apiKey];
     
-    AMAAdProvider *adProvider = [AMAAdProvider sharedInstance];
     AMAMetrikaPrivacyTimerStorage *timerStorage =
         [[AMAMetrikaPrivacyTimerStorage alloc] initWithReporterMetricaConfiguration:[AMAMetricaConfiguration sharedInstance]
                                                                        stateStorage:reporterStorage.stateStorage];
     AMAPrivacyTimer *privacyTimer = [[AMAPrivacyTimer alloc] initWithTimerStorage:timerStorage
                                                                  delegateExecutor:executor
                                                                        adProvider:adProvider];
+    
+    AMAAdServicesDataProvider *adServicesDataProvider = nil;
+    if (@available(iOS 14.3, *)) {
+        adServicesDataProvider = [[AMAAdServicesDataProvider alloc] init];
+    }
     
     return [self initWithApiKey:apiKey
                            main:main

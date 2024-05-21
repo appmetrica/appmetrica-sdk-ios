@@ -1106,6 +1106,8 @@
   "AppMetricaCore/Tests/Utilities/AMAReportHostProviderMock.m":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCore/Tests/Utilities/AMAReportHostProviderMock.m",
   "AppMetricaCore/Tests/Utilities/AMAReportRequestMock.h":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCore/Tests/Utilities/AMAReportRequestMock.h",
   "AppMetricaCore/Tests/Utilities/AMAReportRequestMock.m":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCore/Tests/Utilities/AMAReportRequestMock.m",
+  "AppMetricaCore/Tests/Utilities/AMAReporter+TestUtilities.h":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCore/Tests/Utilities/AMAReporter+TestUtilities.h",
+  "AppMetricaCore/Tests/Utilities/AMAReporter+TestUtilities.m":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCore/Tests/Utilities/AMAReporter+TestUtilities.m",
   "AppMetricaCore/Tests/Utilities/AMAReporterTestHelper.h":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCore/Tests/Utilities/AMAReporterTestHelper.h",
   "AppMetricaCore/Tests/Utilities/AMAReporterTestHelper.m":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCore/Tests/Utilities/AMAReporterTestHelper.m",
   "AppMetricaCore/Tests/Utilities/AMARevenueInfoMutableModel.h":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCore/Tests/Utilities/AMARevenueInfoMutableModel.h",

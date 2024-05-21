@@ -6,6 +6,9 @@
 @class AMAReporter;
 @class AMAEventBuilder;
 @class AMAAppMetricaPreloadInfo;
+@class AMAPrivacyTimerStorageMock;
+@class AMAPrivacyTimer;
+@class AMAAdProvider;
 @protocol AMACancelableExecuting;
 @protocol AMADatabaseProtocol;
 @protocol AMAAsyncExecuting;
@@ -48,6 +51,9 @@
              attributionCheckExecutor:(id<AMAAsyncExecuting>)attributionCheckExecutor;
 
 - (NSObject<AMADatabaseProtocol> *)databaseForApiKey:(NSString *)apiKey;
+- (AMAPrivacyTimerStorageMock *)privacyTimerStorageMockForApiKey:(NSString *)apiKey;
+- (AMAPrivacyTimer *)privacyTimerForApiKey:(NSString *)apiKey;
+- (AMAAdProvider *)adProviderForApiKey:(NSString*)apiKey;
 
 - (void)initReporterAndSendEventWithParameters:(NSDictionary *)parameters;
 - (void)initReporterAndSendEventWithParameters:(NSDictionary *)parameters async:(BOOL)isAsync;

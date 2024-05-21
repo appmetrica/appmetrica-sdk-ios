@@ -53,6 +53,11 @@
 #import "AMAEventFirstOccurrenceController.h"
 #import "AMAEventValueFactory.h"
 #import "AMAExtrasContainer.h"
+#import "AMAPrivacyTimer.h"
+#import "AMAPrivacyTimerStorage.h"
+#import "AMAAdProvider.h"
+#import "AMAPrivacyTimerStorageMock.h"
+#import "AMAIdentifiersTestUtilities.h"
 
 @interface AMAReporterStorage (Test)
 
@@ -1811,6 +1816,38 @@ describe(@"AMAReporter", ^{
         });
 #endif
     });
+
+    context(@"Privacy manifest", ^{
+        NSUUID *newIDFA = [NSUUID UUID];
+        
+        __block id reporter = nil;
+        __block AMAPrivacyTimerStorageMock *privacyStorageMock;
+        
+        beforeEach(^{
+            reporter = [reporterTestHelper appReporterForApiKey:apiKey];
+            privacyStorageMock = [reporterTestHelper privacyTimerStorageMockForApiKey:apiKey];
+            
+            AMAAdProvider *provider = [reporterTestHelper adProviderForApiKey:apiKey];
+            [provider stub:@selector(isAdvertisingTrackingEnabled) andReturn:theValue(YES)];
+            [AMAIdentifiersTestUtilities stubIdfaWithEnabled:YES value:newIDFA.UUIDString];
+            
+            id<AMADatabaseProtocol> db = [reporterTestHelper databaseForApiKey:apiKey];
+            privacyStorageMock.isResendPeriodOutdated = YES;
+            
+            
+            [reporter resumeSession];
+            [reporter privacyTimerDidFire:[reporterTestHelper privacyTimerForApiKey:apiKey]];
+        });
+        
+        it(@"Should fire event if tracking is enabled", ^{
+            [[[eventStorage() amatest_savedEventWithType:AMAEventTypeApplePrivacy] should] beNonNil];
+        });
+        
+        it(@"Should update IDFA if tracking enabled", ^{
+            [[[sessionStorage() lastSessionWithError:nil].appState.IFA should] equal:newIDFA.UUIDString];
+        });
+    });
+    
 });
 
 SPEC_END

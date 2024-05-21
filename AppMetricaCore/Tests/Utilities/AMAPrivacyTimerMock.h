@@ -8,6 +8,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, strong, nullable) NSLock *onTimerLock;
 @property (nonatomic, strong, nullable) XCTestExpectation *onTimerExpectation;
+@property (nonatomic) BOOL disableFire;
 
 @end
 

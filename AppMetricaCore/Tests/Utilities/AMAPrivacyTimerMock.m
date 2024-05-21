@@ -5,11 +5,20 @@
 @interface AMAPrivacyTimer (Private)
 
 - (void)multitimerDidFire:(AMAMultitimer *)multitimer;
+- (void)fireEvent;
 
 @end
 
 
 @implementation AMAPrivacyTimerMock
+
+- (void)fireEvent
+{
+    if (self.disableFire) {
+        return;
+    }
+    [super fireEvent];
+}
 
 - (void)multitimerDidFire:(AMAMultitimer *)multitimer
 {
