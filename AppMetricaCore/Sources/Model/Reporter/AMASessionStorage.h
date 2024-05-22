@@ -31,6 +31,7 @@
 
 - (BOOL)saveSessionAsLastSession:(AMASession *)session error:(NSError **)error;
 - (BOOL)updateSession:(AMASession *)session pauseTime:(NSDate *)pauseTime error:(NSError **)error;
+- (BOOL)updateSession:(AMASession *)session appState:(AMAApplicationState *)appState error:(NSError **)error;
 - (BOOL)finishSession:(AMASession *)session atDate:(NSDate *)date error:(NSError **)error;
 
 @end

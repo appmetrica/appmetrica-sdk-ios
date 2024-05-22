@@ -57,7 +57,7 @@
     dictionary[kAMACommonTableFieldDataEncryptionType] = @(self.encryptionType);
 
     NSError *internalError = nil;
-    dictionary[kAMACommonTableFieldData] = [self.encoder encodeData:[self dataForSession:session] error:&internalError];
+    dictionary[kAMACommonTableFieldData] = [self commonDataForSession:session error:&internalError];
 
     if (internalError != nil) {
         AMALogError(@"Failed to serialize session: %@", internalError);
@@ -65,6 +65,11 @@
         [AMAErrorUtilities fillError:error withError:internalError];
     }
     return [dictionary copy];
+}
+
+- (NSData *)commonDataForSession:(AMASession *)session error:(NSError **)error
+{
+    return [self.encoder encodeData:[self dataForSession:session] error:error];
 }
 
 - (NSNumber *)numberForDate:(NSDate *)date

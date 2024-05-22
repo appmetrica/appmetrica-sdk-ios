@@ -148,6 +148,24 @@
     }];
 }
 
+- (BOOL)updateSession:(AMASession *)session appState:(AMAApplicationState *)appState error:(NSError **)error
+{
+    NSError *internalError = nil;
+    session.appState = appState;
+    NSData *data = [self.serializer commonDataForSession:session error:&internalError];
+    
+    if (data == nil || internalError != nil) {
+        AMALogError(@"Failed to serialize session data: %@", internalError);
+        if (error != nil) {
+            *error = internalError;
+        }
+        return NO;
+    }
+    
+    NSDictionary *updateDictionary = @{ kAMACommonTableFieldData: data };
+    return [self updateSessionFields:updateDictionary forSession:session error:error onSuccess:nil];
+}
+
 - (BOOL)finishSession:(AMASession *)session atDate:(NSDate *)date error:(NSError **)error
 {
     NSDate *pauseTime = date ?: session.pauseTime;

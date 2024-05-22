@@ -13,6 +13,7 @@
 #import "AMADatabaseHelper.h"
 #import "AMAEnvironmentContainer.h"
 #import "AMAAppStateManagerTestHelper.h"
+#import "AMAApplicationStateManager.h"
 #import "AMAMetricaConfigurationTestUtilities.h"
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
 
@@ -481,6 +482,25 @@ describe(@"AMASessionStorage", ^{
                     });
                     it(@"Should have valid app state", ^{
                         [[session.appState should] equal:appState];
+                    });
+                });
+                context(@"App state", ^{
+                    NSString *newIDFA = @"3264429A-3997-4786-AC2A-1790482363BC";
+                    AMAMutableApplicationState *newState = [[AMAApplicationStateManager applicationState] mutableCopy];
+                    newState.IFA = newIDFA;
+                    
+                    beforeEach(^{
+                        NSError *error = nil;
+                        BOOL result = [storage updateSession:session appState:newState error:&error];
+                        [[error should] beNil];
+                        [[theValue(result) should] equal:theValue(YES)];
+                        
+                        session = [storage lastSessionWithError:nil];
+                    });
+                    
+                    it(@"should update IDFA", ^{
+                        [[session.appState should] equal:newState];
+                        [[session.appState.IFA should] equal:newIDFA];
                     });
                 });
             });
