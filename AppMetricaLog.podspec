@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name = "AppMetricaLog"
-  s.version = '5.4.0'
+  s.version = '5.5.0'
   s.summary = "AppMetricaLog offers modules the capability to log messages at various levels"
 
   s.homepage = 'https://appmetrica.io'
