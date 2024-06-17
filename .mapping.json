@@ -1419,6 +1419,7 @@
   "AppMetricaCrashes/Tests/Resources/CrashSamples/anr_error.plist":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCrashes/Tests/Resources/CrashSamples/anr_error.plist",
   "AppMetricaCrashes/Tests/Resources/MetricaSample-CrashReport-D7601862-E68B-4EB1-B875-B404F1ED9060.json":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCrashes/Tests/Resources/MetricaSample-CrashReport-D7601862-E68B-4EB1-B875-B404F1ED9060.json",
   "AppMetricaCrashes/Tests/Resources/MetricaSample-CrashState.json":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCrashes/Tests/Resources/MetricaSample-CrashState.json",
+  "AppMetricaCrashes/helper":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCrashes/helper",
   "AppMetricaEncodingUtils.podspec":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaEncodingUtils.podspec",
   "AppMetricaEncodingUtils/Sources/AMAAESCrypter.m":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaEncodingUtils/Sources/AMAAESCrypter.m",
   "AppMetricaEncodingUtils/Sources/AMAAESUtility.m":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaEncodingUtils/Sources/AMAAESUtility.m",

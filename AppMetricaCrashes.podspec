@@ -31,6 +31,7 @@ Pod::Spec.new do |s|
   s.header_dir = s.name
   s.source_files = "#{s.name}/Sources/**/*.{h,m,c}"
   s.public_header_files = "#{s.name}/Sources/include/**/*.h"
+  s.preserve_paths = "#{s.name}/helper"
   
   s.resource_bundles = { s.name => "#{s.name}/Sources/Resources/PrivacyInfo.xcprivacy" }
 end
