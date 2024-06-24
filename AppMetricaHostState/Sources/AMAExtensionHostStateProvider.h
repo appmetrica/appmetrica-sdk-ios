@@ -5,6 +5,4 @@
 
 @interface AMAExtensionHostStateProvider : AMAHostStatePublisher<AMAHostStateControlling>
 
-- (instancetype)initWithNotificationCenter:(NSNotificationCenter *)center NS_DESIGNATED_INITIALIZER;
-
 @end
