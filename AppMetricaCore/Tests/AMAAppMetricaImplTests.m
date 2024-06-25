@@ -181,6 +181,15 @@ describe(@"AMAAppMetricaImpl", ^{
             [impl activateWithConfiguration:configuration];
             [[appEnvironment().dictionaryEnvironment should] haveCountOf:0];
         });
+        
+        it(@"Should set configuration app environment", ^{
+            NSDictionary *appEnvDict = @{ @"key1" : @"value1", @"key2" : @"value2" };
+            AMAAppMetricaConfiguration *configuration = [[AMAAppMetricaConfiguration alloc] initWithAPIKey:apiKey];
+            configuration.appEnvironment = appEnvDict;
+            
+            [impl activateWithConfiguration:configuration];
+            [[appEnvironment().dictionaryEnvironment should] equal:appEnvDict];
+        });
     });
     context(@"Event polling", ^{
         let(impl, ^{

@@ -49,6 +49,7 @@
     _allowsBackgroundLocationUpdates = NO;
     _revenueAutoTrackingEnabled = kAMADefaultRevenueAutoTrackingEnabled;
     _appOpenTrackingEnabled = kAMADefaultAppOpenTrackingEnabled;
+    _appEnvironment = nil;
 }
 
 #pragma mark - Properties

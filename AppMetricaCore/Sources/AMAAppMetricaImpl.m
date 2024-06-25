@@ -173,6 +173,9 @@
     if (configuration.revenueAutoTrackingEnabled) {
         [self.autoPurchasesWatcher startWatchingWithReporter:reporter];
     }
+    if (configuration.appEnvironment != nil) {
+        [self applyAppEnvironment:configuration.appEnvironment];
+    }
     [self logMetricaStart];
 }
 
@@ -1066,6 +1069,15 @@
 }
 
 #pragma mark - Environment -
+
+- (void)applyAppEnvironment:(NSDictionary<NSString *, NSString *> *)appEnvironment
+{
+    @synchronized (self) {
+        [appEnvironment enumerateKeysAndObjectsUsingBlock:^(NSString *key, NSString *value, BOOL *stop) {
+            [self setAppEnvironmentValue:value forKey:key];
+        }];
+    }
+}
 
 - (void)setAppEnvironmentValue:(NSString *)value forKey:(NSString *)key
 {

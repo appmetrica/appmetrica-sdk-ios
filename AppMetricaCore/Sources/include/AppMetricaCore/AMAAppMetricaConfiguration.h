@@ -92,7 +92,7 @@ NS_SWIFT_NAME(AppMetricaConfiguration)
 @property (nonatomic, assign) BOOL allowsBackgroundLocationUpdates;
 
 /** Enable/disable accurate location retrieval for internal location manager.
- 
+
  Disabled by default.
  Has effect only when locationTrackingEnabled is 'YES', and location is not set manually.
  */
@@ -177,6 +177,13 @@ NS_SWIFT_NAME(AppMetricaConfiguration)
 /** Set/get proxy urls for AppMetrica to use for startup requests.
  */
 @property (nonatomic, copy, nullable) NSArray *customHosts;
+
+/** Application environment to be set during initialization.
+
+ Setting key - value data to be used as additional information, associated with all events from the moment of activation.
+ If value is nil, previously set key-value is removed. Does nothing if key hasn't been added.
+ */
+@property (nonatomic, copy, nullable) NSDictionary<NSString *, NSString *> *appEnvironment;
 
 @end
 

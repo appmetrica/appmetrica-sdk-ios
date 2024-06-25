@@ -351,6 +351,7 @@ NS_SWIFT_NAME(setupWebViewReporting(with:onFailure:));
 
 /** Setting key - value data to be used as additional information, associated with all future events.
  If value is nil, previously set key-value is removed. Does nothing if key hasn't been added.
+ To ensure that data is associated with all events from the moment of activation, specify the appEnvironment property within AMAAppMetricaConfiguration.
 
  @param value The app environment value.
  @param key The app environment key.
