@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name = "AppMetricaCoreExtension"
-  s.version = '5.6.0'
+  s.version = '5.7.0'
   s.summary = "Extended AppMetrica Core APIs. Not for public use."
 
   s.homepage = 'https://appmetrica.io'
@@ -15,8 +15,8 @@ Pod::Spec.new do |s|
 
   s.frameworks = 'Foundation'
 
-  s.dependency 'AppMetricaCore', '= 5.6.0'
-  s.dependency 'AppMetricaStorageUtils', '= 5.6.0'
+  s.dependency 'AppMetricaCore', '= 5.7.0'
+  s.dependency 'AppMetricaStorageUtils', '= 5.7.0'
   
   s.header_dir = s.name
   s.source_files = "#{s.name}/Sources/**/*.{h,m}"
