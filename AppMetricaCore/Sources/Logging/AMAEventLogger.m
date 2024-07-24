@@ -46,8 +46,11 @@ static NSUInteger const kAMAEventLogAPIKeyRequiredLength = 36;
             return @"Application not responding (protobuf)";
         case AMAEventTypeClient:
             return @"Client";
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
         case AMAEventTypeReferrer:
             return @"Referrer";
+#pragma clang diagnostic pop
         case AMAEventTypeProtobufError:
             return @"Error";
         case AMAEventTypeAlive:

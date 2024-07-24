@@ -119,19 +119,6 @@
     return event;
 }
 
-- (AMAEvent *)eventReferrerWithValue:(NSString *)value
-                               error:(NSError **)outError
-{
-    if (value.length == 0) {
-        [AMAErrorUtilities fillError:outError
-                          withError:[AMAErrorsFactory emptyReferrerValueError]];
-        return nil;
-    }
-    AMAEvent *event = [self eventOfType:AMAEventTypeReferrer];
-    [self fillEvent:event withStringValue:value];
-    return event;
-}
-
 - (AMAEvent *)eventASATokenWithParameters:(NSDictionary *)parameters error:(NSError **)error
 {
     NSError *internalError = nil;

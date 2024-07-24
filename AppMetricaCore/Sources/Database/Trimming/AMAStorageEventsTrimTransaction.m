@@ -29,7 +29,6 @@
             @(AMAEventTypeInit),
             @(AMAEventTypeUpdate),
             @(AMAEventTypeFirst),
-            @(AMAEventTypeReferrer),
         ],
         @1: @[
             @(AMAEventTypeCleanup),

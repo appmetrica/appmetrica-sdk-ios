@@ -75,12 +75,15 @@ describe(@"AMAReporterStateStorage", ^{
             it(@"Should have valid update event sent", ^{
                 [[theValue(storage.updateEventSent) should] beNo];
             });
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
             it(@"Should have valid referrer event sent", ^{
                 [[theValue(storage.referrerEventSent) should] beNo];
             });
             it(@"Should have valid empty referrer event sent", ^{
                 [[theValue(storage.emptyReferrerEventSent) should] beNo];
             });
+#pragma clang diagnostic pop
             it(@"Should have valid session ID", ^{
                 NSNumber *number = [storage.sessionIDStorage valueWithStorage:database.storageProvider.syncStorage];
                 [[number should] equal:@9999999999];
@@ -183,12 +186,15 @@ describe(@"AMAReporterStateStorage", ^{
             it(@"Should have valid update event sent", ^{
                 [[theValue(storage.updateEventSent) should] beYes];
             });
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
             it(@"Should have valid referrer event sent", ^{
                 [[theValue(storage.referrerEventSent) should] beYes];
             });
             it(@"Should have valid empty referrer event sent", ^{
                 [[theValue(storage.emptyReferrerEventSent) should] beYes];
             });
+#pragma clang diagnostic pop
             it(@"Should have valid session ID", ^{
                 NSNumber *number = [storage.sessionIDStorage valueWithStorage:database.storageProvider.syncStorage];
                 [[number should] equal:sessionID];
@@ -284,6 +290,8 @@ describe(@"AMAReporterStateStorage", ^{
                     [storage markUpdateEventSent];
                 });
             });
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
             context(@"Referrer", ^{
                 it(@"Should initially be NO", ^{
                     [[theValue(storage.referrerEventSent) should] beNo];
@@ -320,6 +328,7 @@ describe(@"AMAReporterStateStorage", ^{
                     [storage markEmptyReferrerEventSent];
                 });
             });
+#pragma clang diagnostic pop
         });
         context(@"App environment", ^{
             it(@"Should save in database", ^{

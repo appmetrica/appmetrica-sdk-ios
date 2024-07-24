@@ -77,22 +77,6 @@ describe(@"AMAErrorsFactory", ^{
             });
         });
 
-        context(@"emptyReferrerValueError", ^{
-            beforeEach(^{
-                error = [AMAErrorsFactory emptyReferrerValueError];
-            });
-            it(@"Should use correct domain", ^{
-                [[error.domain should] equal:domain];
-            });
-            it(@"Should use correct code", ^{
-                [[theValue(error.code) should] equal:theValue(1001)];
-            });
-            it(@"Should use correct description", ^{
-                NSString *description = @"Empty referrer value";
-                [[error.localizedDescription should] equal:description];
-            });
-        });
-
         context(@"deepLinkUrlOfUnknownTypeError:", ^{
             beforeEach(^{
                 error = [AMAErrorsFactory deepLinkUrlOfUnknownTypeError:@"scheme://"];

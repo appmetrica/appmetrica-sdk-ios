@@ -74,7 +74,6 @@
 - (void)restartPrivacyTimer;
 
 - (void)reportFirstEventIfNeeded;
-- (void)reportReferrerEventWithValue:(NSString *)value onFailure:(void (^)(NSError *error))onFailure;
 - (void)reportOpenEvent:(NSDictionary *)parameters
           reattribution:(BOOL)reattribution
               onFailure:(void (^)(NSError *error))onFailure;

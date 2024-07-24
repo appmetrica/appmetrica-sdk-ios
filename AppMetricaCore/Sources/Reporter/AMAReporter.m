@@ -508,26 +508,6 @@
     }];
 }
 
-- (void)reportReferrerEventWithValue:(NSString *)value onFailure:(void (^)(NSError *))onFailure
-{
-    [self stampedExecute:^(NSDate *date) {
-        if (self.reporterStorage.stateStorage.referrerEventSent) {
-            return;
-        }
-
-        NSError *error = nil;
-        AMAEvent *event = [self.eventBuilder eventReferrerWithValue:value
-                                                              error:&error];
-        if (event == nil) {
-            [AMAFailureDispatcher dispatchError:error withBlock:onFailure];
-            AMALogWarn(@"Failed to report referrer event; Event reporting failed with error %@", error);
-            return;
-        }
-
-        [self reportEvent:event createdAt:date onFailure:onFailure];
-    }];
-}
-
 - (void)reportOpenEvent:(NSDictionary *)parameters
           reattribution:(BOOL)reattribution
               onFailure:(void (^)(NSError *error))onFailure
@@ -1046,9 +1026,6 @@
             break;
         case AMAEventTypeFirst:
             [self.reporterStorage.stateStorage markFirstEventSent];
-            break;
-        case AMAEventTypeReferrer:
-            [self.reporterStorage.stateStorage markReferrerEventSent];
             break;
     }
     [self notifyEventAdded:event];

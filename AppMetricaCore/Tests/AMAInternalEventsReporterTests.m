@@ -46,14 +46,7 @@ describe(@"AMAInternalEventsReporter", ^{
         });
     });
 
-    
     context(@"Search Ads", ^{
-        it(@"Should report search ads attempt", ^{
-            [[reporterMock should] receive:@selector(reportEvent:parameters:onFailure:)
-                             withArguments:@"AppleSearchAdsAttempt", nil, kw_any()];
-            
-            [reporter reportSearchAdsAttempt];
-        });
         it(@"Should report search ads token success", ^{
             [[reporterMock should] receive:@selector(reportEvent:parameters:onFailure:)
                              withArguments:@"AppleSearchAdsTokenSuccess", nil, kw_any()];
@@ -61,34 +54,6 @@ describe(@"AMAInternalEventsReporter", ^{
             [reporter reportSearchAdsTokenSuccess];
         });
     });
-    
-    context(@"Search Ads Completion", ^{
-        NSString *const completionType = @"COMPLETION_TYPE";
-
-        it(@"Should report without type", ^{
-            NSDictionary *expectedParameters = @{ @"type": @"null" };
-            [[reporterMock should] receive:@selector(reportEvent:parameters:onFailure:)
-                             withArguments:@"AppleSearchAdsCompletion", expectedParameters, kw_any()];
-            [NSAssertionHandler stub:@selector(currentHandler)];
-            [reporter reportSearchAdsCompletionWithType:nil parameters:nil];
-        });
-
-        it(@"Should report without parameters", ^{
-            NSDictionary *expectedParameters = @{ @"type": completionType };
-            [[reporterMock should] receive:@selector(reportEvent:parameters:onFailure:)
-                             withArguments:@"AppleSearchAdsCompletion", expectedParameters, kw_any()];
-            [reporter reportSearchAdsCompletionWithType:completionType parameters:nil];
-        });
-
-        it(@"Should report with parameters", ^{
-            NSDictionary *completionParameters = @{ @"foo": @"bar" };
-            NSDictionary *expectedParameters = @{ @"type": @{ completionType: completionParameters } };
-            [[reporterMock should] receive:@selector(reportEvent:parameters:onFailure:)
-                             withArguments:@"AppleSearchAdsCompletion", expectedParameters, kw_any()];
-            [reporter reportSearchAdsCompletionWithType:completionType parameters:completionParameters];
-        });
-    });
-    
     
     context(@"Extensions List", ^{
         it(@"Should report", ^{

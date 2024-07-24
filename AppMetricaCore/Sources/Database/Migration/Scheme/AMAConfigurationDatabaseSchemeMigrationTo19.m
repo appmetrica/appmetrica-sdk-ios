@@ -207,12 +207,15 @@ static NSNumber *AMAStorageUnsignedLongLongFromString(NSString *string)
     if ([self metaSessionValueForKey:@"session_update_event_sent" apiKey:apiKey keyValues:keyValues]) {
         [state markUpdateEventSent];
     }
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
     if ([self metaSessionValueForKey:@"session_referrer_event_sent" apiKey:apiKey keyValues:keyValues]) {
         [state markReferrerEventSent];
     }
     if ([self metaSessionValueForKey:@"session_referrer_is_empty" apiKey:apiKey keyValues:keyValues]) {
         [state markEmptyReferrerEventSent];
     }
+#pragma clang diagnostic pop
 }
 
 - (BOOL)metaSessionValueForKey:(NSString *)key apiKey:(NSString *)apiKey keyValues:(NSDictionary *)keyValues

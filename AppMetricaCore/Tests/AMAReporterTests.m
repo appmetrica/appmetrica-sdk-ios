@@ -998,30 +998,6 @@ describe(@"AMAReporter", ^{
         });
     });
 #endif
-    context(@"Sends REFERRER events", ^{
-        it(@"Should create EVENT_REFERRER", ^{
-            AMAReporter *reporter = [reporterTestHelper appReporterForApiKey:apiKey];
-            [reporter reportReferrerEventWithValue:@"bar" onFailure:nil];
-            NSArray *eventsReferrer = [eventStorage() amatest_allSavedEventsWithType:AMAEventTypeReferrer name:nil];
-            [[eventsReferrer should] haveCountOfAtLeast:1];
-        });
-        it(@"Should not create additional EVENT_REFERRER", ^{
-            AMAReporter *reporter = [reporterTestHelper appReporterForApiKey:apiKey];
-            [reporter reportReferrerEventWithValue:@"bar" onFailure:nil];
-            [reporter reportReferrerEventWithValue:@"foo" onFailure:nil];
-            NSArray *eventsReferrer = [eventStorage() amatest_allSavedEventsWithType:AMAEventTypeReferrer name:nil];
-            [[eventsReferrer should] haveCountOfAtMost:1];
-        });
-        it(@"Should not create additional EVENT_REFERRER after restart", ^{
-            AMAReporter *reporter = [reporterTestHelper appReporterForApiKey:apiKey];
-            [reporter reportReferrerEventWithValue:@"bar" onFailure:nil];
-            [reporter shutdown];
-            [reporter start];
-            [reporter reportReferrerEventWithValue:@"foo" onFailure:nil];
-            NSArray *eventsReferrer = [eventStorage() amatest_allSavedEventsWithType:AMAEventTypeReferrer name:nil];
-            [[eventsReferrer should] haveCountOfAtMost:1];
-        });
-    });
     context(@"Sends ASA_TOKEN events", ^{
         it(@"Should create EVENT_ASA_TOKEN", ^{
             AMAReporter *reporter = [reporterTestHelper appReporterForApiKey:apiKey];

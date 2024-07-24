@@ -46,7 +46,6 @@
 #import "AMAReporterStoragesContainer.h"
 #import "AMAReportersContainer.h"
 #import "AMASKAdNetworkRequestor.h"
-#import "AMASearchAdsController.h"
 #import "AMASelfReportExecutionConditionChecker.h"
 #import "AMASessionStorage.h"
 #import "AMAStartupCompletionObserving.h"
@@ -74,7 +73,6 @@
 
 @property (nonatomic, strong, readonly) AMAPreactivationActionHistory *preactivationActionHistory;
 @property (nonatomic, strong) AMAStartupItemsChangedNotifier *startupItemsNotifier;
-@property (nonatomic, strong) AMASearchAdsController *searchAdsController;
 @property (nonatomic, strong) AMAAdServicesReportingController *adServicesController;
 @property (nonatomic, strong) AMAExtensionsReportController *extensionsReportController;
 @property (nonatomic, strong) AMAPermissionsController *permissionsController;
@@ -566,13 +564,6 @@
     }];
 }
 
-- (void)triggerSearchAdsRequest
-{
-    [self execute:^{
-        [self.searchAdsController trigger];
-    }];
-}
-
 - (void)triggerASATokenReporting
 {
     [self execute:^{
@@ -644,7 +635,6 @@
     [self startLocationManager];
     [self reportDatabaseInconsistencyStateIfNeeded];
     [self notifyOnStartupCompleted];
-    [self triggerSearchAdsRequest];
     [self reportPermissionsIfNeeded];
 }
 
@@ -758,11 +748,6 @@
 
 - (void)postSetupMainReporterWithStorage:(AMAReporterStorage *)reporterStorage
 {
-    self.searchAdsController = [[AMASearchAdsController alloc] initWithApiKey:self.apiKey
-                                                                     executor:self.executor
-                                                         reporterStateStorage:reporterStorage.stateStorage];
-    [self triggerSearchAdsRequest];
-
     if (@available(iOS 14.3, *)) {
         self.adServicesController = [[AMAAdServicesReportingController alloc] initWithApiKey:self.apiKey
                                                                         reporterStateStorage:reporterStorage.stateStorage];

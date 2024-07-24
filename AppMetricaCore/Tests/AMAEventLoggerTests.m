@@ -154,10 +154,13 @@ describe(@"AMAEventLogger", ^{
                 logEventSentWithType(AMAEventTypeStart);
                 [[logSpy.messages should] equal:@[ message(textForEventWithTypeName(@"Start")) ]];
             });
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
             it(@"Should log referrer event", ^{
                 logEventSentWithType(AMAEventTypeReferrer);
                 [[logSpy.messages should] equal:@[ message(textForEventWithTypeName(@"Referrer")) ]];
             });
+#pragma clang diagnostic pop
             it(@"Should alive event", ^{
                 logEventSentWithType(AMAEventTypeAlive);
                 [[logSpy.messages should] equal:@[ message(textForEventWithTypeName(@"Alive")) ]];
@@ -282,10 +285,13 @@ describe(@"AMAEventLogger", ^{
                 logEventSentWithType(AMAEventTypeStart);
                 [[logSpy.messages should] equal:@[ message(textForEventWithTypeName(@"Start")) ]];
             });
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
             it(@"Should log referrer event", ^{
                 logEventSentWithType(AMAEventTypeReferrer);
                 [[logSpy.messages should] equal:@[ message(textForEventWithTypeName(@"Referrer")) ]];
             });
+#pragma clang diagnostic pop
             it(@"Should alive event", ^{
                 logEventSentWithType(AMAEventTypeAlive);
                 [[logSpy.messages should] equal:@[ message(textForEventWithTypeName(@"Alive")) ]];

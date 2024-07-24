@@ -33,9 +33,6 @@
 - (AMAEvent *)eventWithPollingParameters:(AMAEventPollingParameters *)parameters
                                    error:(NSError **)error;
 
-- (AMAEvent *)eventReferrerWithValue:(NSString *)value
-                               error:(NSError **)error;
-
 - (AMAEvent *)eventASATokenWithParameters:(NSDictionary *)parameters error:(NSError **)error;
 
 - (AMAEvent *)eventOpen:(NSDictionary *)parameters

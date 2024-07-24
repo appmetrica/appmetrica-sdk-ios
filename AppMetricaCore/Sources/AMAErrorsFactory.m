@@ -42,12 +42,6 @@
                                 description:errorMsg];
 }
 
-+ (NSError *)emptyReferrerValueError
-{
-    return [AMAErrorUtilities errorWithCode:AMAAppMetricaEventErrorCodeInvalidName
-                                description:@"Empty referrer value"];
-}
-
 + (NSError *)deepLinkUrlOfUnknownTypeError:(NSString *)url
 {
     NSString *description = [NSString stringWithFormat:@"URL value '%@' of unknown type", url];

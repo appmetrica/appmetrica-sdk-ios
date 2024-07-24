@@ -16,7 +16,6 @@
         @(AMAEventTypeInit),
         @(AMAEventTypeUpdate),
         @(AMAEventTypeStart),
-        @(AMAEventTypeReferrer),
     ];
 }
 

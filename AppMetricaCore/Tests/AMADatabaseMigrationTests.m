@@ -1017,9 +1017,12 @@ describe(@"AMADatabaseMigrationTests", ^{
                         it(@"Should have first event sent", ^{
                             [[theValue(stateStorage.firstEventSent) should] beYes];
                         });
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
                         it(@"Should have empty referrer event sent", ^{
                             [[theValue(stateStorage.emptyReferrerEventSent) should] beYes];
                         });
+#pragma clang diagnostic pop
                         it(@"Should have valid app environment", ^{
                             [[stateStorage.appEnvironment.dictionaryEnvironment should] equal:@{@"foo": @"bar"}];
                         });

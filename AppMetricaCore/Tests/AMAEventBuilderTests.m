@@ -175,30 +175,6 @@ describe(@"AMAEventBuilder", ^{
                                     error:nil];
             });
         });
-        context(@"EVENT_REFERRER", ^{
-            NSString *const referrer = @"foobar";
-            context(@"Value", ^{
-                beforeEach(^{
-                    valueSpy = [valueFactory captureArgument:@selector(stringEventValue:bytesTruncated:) atIndex:0];
-                    event = [builder eventReferrerWithValue:referrer error:nil];
-                });
-                it(@"Should contain valid value", ^{
-                    [[valueSpy.argument should] equal:referrer];
-                });
-                it(@"Shouldn't construct EVENT_REFERRER with empty value", ^{
-                    event = [builder eventReferrerWithValue:@"" error:nil];
-                    [[event should] beNil];
-                });
-                it(@"Should have valid value", ^{
-                    [[((NSObject *)event.value) should] equal:stringValue];
-                });
-            });
-            it(@"Should be passed to composer", ^{
-                [[eventComposerProvider should] receive:@selector(composerForType:) withArguments:theValue(AMAEventTypeReferrer)];
-                [[eventComposer should] receive:@selector(compose:)];
-                [builder eventReferrerWithValue:referrer error:nil];
-            });
-        });
         context(@"EVENT_ASA_TOKEN", ^{
             context(@"Value", ^{
                 beforeEach(^{

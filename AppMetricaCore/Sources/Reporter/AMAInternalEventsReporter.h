@@ -19,9 +19,7 @@
 
 - (void)reportSchemaInconsistencyWithDescription:(NSString *)inconsistencyDescription;
 
-- (void)reportSearchAdsAttempt;
 - (void)reportSearchAdsTokenSuccess;
-- (void)reportSearchAdsCompletionWithType:(NSString *)callbackType parameters:(NSDictionary *)parameters;
 
 - (void)reportEventFileNotFoundForEventWithType:(NSUInteger)eventType;
 

@@ -58,7 +58,6 @@ describe(@"AMAUrgentEventCountDispatchStrategy", ^{
             @(AMAEventTypeUpdate),
             @(AMAEventTypeFirst),
             @(AMAEventTypeStart),
-            @(AMAEventTypeReferrer),
         ]];
     });
 #pragma clang diagnostic push
@@ -98,14 +97,6 @@ describe(@"AMAUrgentEventCountDispatchStrategy", ^{
         [[strategy should] receive:@selector(updateEventsCount)];
         [strategy start];
         postNotificationWithEventType(AMAEventTypeStart, strategy);
-        [strategy.executor execute:^{}];
-    });
-
-    it(@"Should react on notification for EVENT_REFERRER", ^{
-        AMAUrgentEventCountDispatchStrategy *strategy = mockEnv(0);
-        [[strategy should] receive:@selector(updateEventsCount)];
-        [strategy start];
-        postNotificationWithEventType(AMAEventTypeReferrer, strategy);
         [strategy.executor execute:^{}];
     });
 #pragma clang diagnostic pop

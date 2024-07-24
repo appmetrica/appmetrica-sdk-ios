@@ -8,12 +8,7 @@
 static NSString *const kAMASchemaInconsistencyEventName = @"SchemaInconsistencyDetected";
 static NSString *const kAMASchemaInconsistencyEventParametersDescriptionKey = @"schema: ";
 
-static NSString *const kAMASearchAdsAttemptEventName = @"AppleSearchAdsAttempt";
 static NSString *const kAMASearchAdsTokenSuccessEventName = @"AppleSearchAdsTokenSuccess";
-
-static NSString *const kAMASearchAdsCompletionEventName = @"AppleSearchAdsCompletion";
-static NSString *const kAMASearchAdsCompletionEventParametersTypeKey = @"type";
-static NSString *const kAMASearchAdsCompletionEventParametersTypeAbsentValue = @"null";
 
 @interface AMAInternalEventsReporter ()
 
@@ -65,28 +60,9 @@ static NSString *const kAMASearchAdsCompletionEventParametersTypeAbsentValue = @
     [self reportEvent:kAMASchemaInconsistencyEventName parameters:parameters];
 }
 
-- (void)reportSearchAdsAttempt
-{
-    [self reportEvent:kAMASearchAdsAttemptEventName parameters:nil];
-}
-
 - (void)reportSearchAdsTokenSuccess
 {
     [self reportEvent:kAMASearchAdsTokenSuccessEventName parameters:nil];
-}
-
-- (void)reportSearchAdsCompletionWithType:(NSString *)completionType parameters:(NSDictionary *)parameters
-{
-    NSParameterAssert(completionType);
-    NSString *completionTypeKey = completionType ?: kAMASearchAdsCompletionEventParametersTypeAbsentValue;
-    NSDictionary *eventParameters = nil;
-    if (parameters == nil) {
-        eventParameters = @{ kAMASearchAdsCompletionEventParametersTypeKey: completionTypeKey };
-    }
-    else {
-        eventParameters = @{ kAMASearchAdsCompletionEventParametersTypeKey: @{ completionTypeKey: parameters } };
-    }
-    [self reportEvent:kAMASearchAdsCompletionEventName parameters:eventParameters];
 }
 
 - (void)reportExtensionsReportWithParameters:(NSDictionary *)parameters

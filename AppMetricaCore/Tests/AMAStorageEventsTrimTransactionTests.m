@@ -87,7 +87,6 @@ describe(@"AMAStorageEventsTrimTransaction", ^{
                     @(AMAEventTypeInit),
                     @(AMAEventTypeUpdate),
                     @(AMAEventTypeFirst),
-                    @(AMAEventTypeReferrer),
                 ],
             }];
         });

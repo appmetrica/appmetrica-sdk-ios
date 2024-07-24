@@ -19,7 +19,6 @@
 + (NSError *)emptyDeepLinkUrlOfUnknownTypeError;
 + (NSError *)emptyDeepLinkUrlOfTypeError:(NSString *)type;
 + (NSError *)deepLinkUrlOfUnknownTypeError:(NSString *)url;
-+ (NSError *)emptyReferrerValueError;
 + (NSError *)eventTypeReservedError:(NSUInteger)eventType;
 
 //impl
