@@ -80,29 +80,40 @@ static NSUInteger const kAMAEventLogAPIKeyRequiredLength = 36;
                                    eventOid:(NSNumber *)eventOid
                                  sessionOid:(NSNumber *)sessionOid
                              sequenceNumber:(NSNumber *)sequenceNumber
+                                 parameters:(NSDictionary *)parameters
 {
-    return [NSString stringWithFormat:@"eventOid %@, "
-                                       "sessionOid %@, "
-                                       "sequenceNumber %@, "
-                                       "name '%@'",
-            eventOid, sessionOid, sequenceNumber, name];
+    NSMutableString *description = [NSMutableString stringWithFormat:@"eventOid %@, "
+                                                                      "sessionOid %@, "
+                                                                      "sequenceNumber %@, "
+                                                                      "name '%@'",
+                                     eventOid, sessionOid, sequenceNumber, name];
+    
+    if (parameters != nil) {
+        [description appendFormat:@", parameters %@", parameters];
+    }
+    return description;
 }
 
-- (void)logAction:(NSString *)action eventType:(AMAEventType)eventType eventName:(NSString *)eventName
+- (void)logAction:(NSString *)action 
+        eventType:(AMAEventType)eventType
+        eventName:(NSString *)eventName
+       parameters:(NSDictionary *)parameters
 {
     NSString *description = [self eventDescriptionWithEventName:eventName
                                                        eventOid:nil
                                                      sessionOid:nil
-                                                 sequenceNumber:nil];
+                                                 sequenceNumber:nil
+                                                     parameters:parameters];
     [self logAction:action eventType:eventType description:description];
 }
 
-- (void)logAction:(NSString *)action event:(AMAEvent *)event
+- (void)logAction:(NSString *)action event:(AMAEvent *)event parameters:(NSDictionary *)parameters
 {
     NSString *description = [self eventDescriptionWithEventName:event.name
                                                        eventOid:event.oid
                                                      sessionOid:event.sessionOid
-                                                 sequenceNumber:@(event.sequenceNumber)];
+                                                 sequenceNumber:@(event.sequenceNumber)
+                                                     parameters:parameters];
     [self logAction:action eventType:event.type description:description];
 }
 
@@ -130,54 +141,56 @@ static NSUInteger const kAMAEventLogAPIKeyRequiredLength = 36;
     AMALogInfo(@"%@", message);
 }
 
-- (void)logEventReceivedWithName:(NSString *)name type:(AMAEventType)type
+- (void)logEventReceivedWithName:(NSString *)name 
+                            type:(AMAEventType)type
+                      parameters:(NSDictionary *)parameters
 {
-    [self logAction:@"received" eventType:type eventName:name];
+    [self logAction:@"received" eventType:type eventName:name parameters:parameters];
 }
 
-- (void)logClientEventReceivedWithName:(NSString *)name
+- (void)logClientEventReceivedWithName:(NSString *)name parameters:(NSDictionary *)parameters
 {
-    [self logEventReceivedWithName:name type:AMAEventTypeClient];
+    [self logEventReceivedWithName:name type:AMAEventTypeClient parameters:parameters];
 }
 
 - (void)logProfileEventReceived
 {
-    [self logEventReceivedWithName:nil type:AMAEventTypeProfile];
+    [self logEventReceivedWithName:nil type:AMAEventTypeProfile parameters:nil];
 }
 
 - (void)logRevenueEventReceived
 {
-    [self logEventReceivedWithName:nil type:AMAEventTypeRevenue];
+    [self logEventReceivedWithName:nil type:AMAEventTypeRevenue parameters:nil];
 }
 
 - (void)logECommerceEventReceived
 {
-    [self logEventReceivedWithName:nil type:AMAEventTypeECommerce];
+    [self logEventReceivedWithName:nil type:AMAEventTypeECommerce parameters:nil];
 }
 
 - (void)logAdRevenueEventReceived
 {
-    [self logEventReceivedWithName:nil type:AMAEventTypeAdRevenue];
+    [self logEventReceivedWithName:nil type:AMAEventTypeAdRevenue parameters:nil];
 }
 
 - (void)logEventBuilt:(AMAEvent *)event
 {
-    [self logAction:@"built" event:event];
+    [self logAction:@"built" event:event parameters:nil];
 }
 
 - (void)logEventSaved:(AMAEvent *)event
 {
-    [self logAction:@"saved to db" event:event];
+    [self logAction:@"saved to db" event:event parameters:nil];
 }
 
 - (void)logEventPurged:(AMAEvent *)event
 {
-    [self logAction:@"removed from db" event:event];
+    [self logAction:@"removed from db" event:event parameters:nil];
 }
 
 - (void)logEventSent:(AMAEvent *)event
 {
-    [self logAction:@"sent" event:event];
+    [self logAction:@"sent" event:event parameters:nil];
 }
 
 + (instancetype)sharedInstanceForApiKey:(NSString *)apiKey

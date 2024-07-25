@@ -48,14 +48,16 @@ describe(@"AMAEventLogger", ^{
     NSString *(^textWithApiKeySuffix)(NSString *) = ^(NSString *text) {
         return [NSString stringWithFormat:@"%@ (apiKey: d9b4296b-xxxx-xxxx-xxxx-xxxxxxxxc4cc).", text];
     };
-
+    
     context(@"Log enabled", ^{
         beforeEach(^{
             [reporterConfiguration stub:@selector(logsEnabled) andReturn:theValue(YES)];
         });
-        NSString *(^suffixWithNullMetainfo)(NSString *, NSString *) = ^(NSString *prefix, NSString *eventName) {
+        NSString *(^suffixWithNullMetainfo)(NSString *, NSString *, NSString *) = ^(NSString *prefix,
+                                                                                    NSString *eventName,
+                                                                                    NSString *extraArguments) {
             NSString *text = [NSString stringWithFormat:@"%@ eventOid (null), sessionOid (null), "
-                                "sequenceNumber (null), name '%@'.", prefix, eventName];
+                              "sequenceNumber (null), name '%@'%@.", prefix, eventName, extraArguments ?: @""];
             return textWithApiKeySuffix(text);
         };
         NSString *(^suffixWithPopulatedlMetainfo)(NSString *, NSString *) = ^(NSString *prefix, NSString *eventName) {
@@ -65,29 +67,32 @@ describe(@"AMAEventLogger", ^{
         };
         context(@"Client event received", ^{
             it(@"Should log", ^{
-                [logger logClientEventReceivedWithName:eventName];
-                NSString *expectedText = suffixWithNullMetainfo(@"Client event is received:", @"EVENT_NAME");
+                NSDictionary *params = @{ @"foo" : @"bar" };
+                [logger logClientEventReceivedWithName:eventName parameters:params];
+                NSString *expectedText = suffixWithNullMetainfo(@"Client event is received:", 
+                                                                @"EVENT_NAME",
+                                                                [NSString stringWithFormat:@", parameters %@", params]);
                 [[logSpy.messages should] equal:@[ message(expectedText) ]];
             });
         });
         context(@"Profile event received", ^{
             it(@"Should log", ^{
                 [logger logProfileEventReceived];
-                NSString *expectedText = suffixWithNullMetainfo(@"Profile event is received:", nil);
+                NSString *expectedText = suffixWithNullMetainfo(@"Profile event is received:", nil, nil);
                 [[logSpy.messages should] equal:@[ message(expectedText) ]];
             });
         });
         context(@"Revenue event received", ^{
             it(@"Should log", ^{
                 [logger logRevenueEventReceived];
-                NSString *expectedText = suffixWithNullMetainfo(@"Revenue event is received:", nil);
+                NSString *expectedText = suffixWithNullMetainfo(@"Revenue event is received:", nil, nil);
                 [[logSpy.messages should] equal:@[ message(expectedText) ]];
             });
         });
         context(@"AdRevenue event received", ^{
             it(@"Should log", ^{
                 [logger logAdRevenueEventReceived];
-                NSString *expectedText = suffixWithNullMetainfo(@"AdRevenue event is received:", nil);
+                NSString *expectedText = suffixWithNullMetainfo(@"AdRevenue event is received:", nil, nil);
                 [[logSpy.messages should] equal:@[ message(expectedText) ]];
             });
         });
@@ -206,27 +211,32 @@ describe(@"AMAEventLogger", ^{
             return textWithApiKeySuffix(text);
         };
         context(@"Received", ^{
-            NSString *(^textForEventWithTypeName)(NSString *, NSString *) = ^(NSString *typeName, NSString *eventName) {
+            NSString *(^textForEventWithTypeName)(NSString *, NSString *, NSString *) = ^(NSString *typeName,
+                                                                                          NSString *eventName,
+                                                                                          NSString *extraArguments) {
                 NSString *text =
                     [NSString stringWithFormat:@"%@ event is received: eventOid (null), sessionOid (null), "
-                                                "sequenceNumber (null), name '%@'.", typeName, eventName];
+                                                "sequenceNumber (null), name '%@'%@.", typeName, eventName, extraArguments ?: @""];
                 return textWithApiKeySuffix(text);
             };
             it(@"Should log client event", ^{
-                [logger logClientEventReceivedWithName:eventName];
-                [[logSpy.messages should] equal:@[ message(textForEventWithTypeName(@"Client", eventName)) ]];
+                NSDictionary *params = @{ @"foo" : @"bar" };
+                [logger logClientEventReceivedWithName:eventName parameters:params];
+                [[logSpy.messages should] equal:@[ message(textForEventWithTypeName(@"Client", 
+                                                   eventName,
+                                                   [NSString stringWithFormat:@", parameters %@", params])) ]];
             });
             it(@"Should log profile event", ^{
                 [logger logProfileEventReceived];
-                [[logSpy.messages should] equal:@[ message(textForEventWithTypeName(@"Profile", nil)) ]];
+                [[logSpy.messages should] equal:@[ message(textForEventWithTypeName(@"Profile", nil, nil)) ]];
             });
             it(@"Should log revenue event", ^{
                 [logger logRevenueEventReceived];
-                [[logSpy.messages should] equal:@[ message(textForEventWithTypeName(@"Revenue", nil)) ]];
+                [[logSpy.messages should] equal:@[ message(textForEventWithTypeName(@"Revenue", nil, nil)) ]];
             });
             it(@"Should log adRevenue event", ^{
                 [logger logAdRevenueEventReceived];
-                [[logSpy.messages should] equal:@[ message(textForEventWithTypeName(@"AdRevenue", nil)) ]];
+                [[logSpy.messages should] equal:@[ message(textForEventWithTypeName(@"AdRevenue", nil, nil)) ]];
             });
         });
         context(@"Event built", ^{

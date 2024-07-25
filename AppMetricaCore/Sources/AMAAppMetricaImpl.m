@@ -186,9 +186,8 @@
     buildType = @"Release";
 #endif
     NSString *versionName = [AMAPlatformDescription SDKVersionName];
-    unsigned long buildNumber = (unsigned long)[AMAPlatformDescription SDKBuildNumber];
 
-    AMALogNotify(@"AppMetrica activated with apiKey:%@ \nVersion:%@, %@ build %lu", self.apiKey, versionName, buildType, buildNumber);
+    AMALogNotify(@"AppMetrica activated with apiKey:%@ \nVersion:%@, %@", self.apiKey, versionName, buildType);
 }
 
 - (void)dealloc

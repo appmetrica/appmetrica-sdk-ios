@@ -11,7 +11,7 @@
 
 - (instancetype)initWithApiKey:(NSString *)apiKey;
 
-- (void)logClientEventReceivedWithName:(NSString *)name;
+- (void)logClientEventReceivedWithName:(NSString *)name parameters:(NSDictionary *)parameters;
 - (void)logProfileEventReceived;
 - (void)logRevenueEventReceived;
 - (void)logECommerceEventReceived;

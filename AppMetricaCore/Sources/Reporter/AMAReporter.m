@@ -377,7 +377,7 @@
     [self.attributionChecker checkClientEventAttribution:eventName];
     eventName = [eventName copy];
     params = [params copy];
-    [[self logger] logClientEventReceivedWithName:eventName];
+    [[self logger] logClientEventReceivedWithName:eventName parameters:params];
     [self reportCommonEventWithBlock:^AMAEvent *(NSError **error) {
         AMAOptionalBool firstOccurrence = [self.occurrenceController isEventNameFirstOccurred:eventName];
         return [self.eventBuilder clientEventNamed:eventName
