@@ -16,6 +16,11 @@
         @(AMAEventTypeInit),
         @(AMAEventTypeUpdate),
         @(AMAEventTypeStart),
+        @(AMAEventTypeExternalAttribution),
+        @(AMAEventTypeAdRevenue),
+        @(AMAEventTypeECommerce),
+        @(AMAEventTypeRevenue),
+        @(AMAEventTypeApplePrivacy),
     ];
 }
 

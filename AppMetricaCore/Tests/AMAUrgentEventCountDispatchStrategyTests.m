@@ -54,10 +54,15 @@ describe(@"AMAUrgentEventCountDispatchStrategy", ^{
     it(@"Should return valid event types", ^{
         AMAUrgentEventCountDispatchStrategy *strategy = mockEnv(0);
         [[[strategy includedEventTypes] should] containObjectsInArray:@[
+            @(AMAEventTypeFirst),
             @(AMAEventTypeInit),
             @(AMAEventTypeUpdate),
-            @(AMAEventTypeFirst),
             @(AMAEventTypeStart),
+            @(AMAEventTypeExternalAttribution),
+            @(AMAEventTypeAdRevenue),
+            @(AMAEventTypeECommerce),
+            @(AMAEventTypeRevenue),
+            @(AMAEventTypeApplePrivacy),
         ]];
     });
 #pragma clang diagnostic push
@@ -97,6 +102,46 @@ describe(@"AMAUrgentEventCountDispatchStrategy", ^{
         [[strategy should] receive:@selector(updateEventsCount)];
         [strategy start];
         postNotificationWithEventType(AMAEventTypeStart, strategy);
+        [strategy.executor execute:^{}];
+    });
+    
+    it(@"Should react on notification for EVENT_EXTERNAL_ATTRIBUTION", ^{
+        AMAUrgentEventCountDispatchStrategy *strategy = mockEnv(0);
+        [[strategy should] receive:@selector(updateEventsCount)];
+        [strategy start];
+        postNotificationWithEventType(AMAEventTypeExternalAttribution, strategy);
+        [strategy.executor execute:^{}];
+    });
+    
+    it(@"Should react on notification for EVENT_AD_REVENUE", ^{
+        AMAUrgentEventCountDispatchStrategy *strategy = mockEnv(0);
+        [[strategy should] receive:@selector(updateEventsCount)];
+        [strategy start];
+        postNotificationWithEventType(AMAEventTypeAdRevenue, strategy);
+        [strategy.executor execute:^{}];
+    });
+    
+    it(@"Should react on notification for EVENT_E_COMMERCE", ^{
+        AMAUrgentEventCountDispatchStrategy *strategy = mockEnv(0);
+        [[strategy should] receive:@selector(updateEventsCount)];
+        [strategy start];
+        postNotificationWithEventType(AMAEventTypeECommerce, strategy);
+        [strategy.executor execute:^{}];
+    });
+    
+    it(@"Should react on notification for EVENT_REVENUE", ^{
+        AMAUrgentEventCountDispatchStrategy *strategy = mockEnv(0);
+        [[strategy should] receive:@selector(updateEventsCount)];
+        [strategy start];
+        postNotificationWithEventType(AMAEventTypeRevenue, strategy);
+        [strategy.executor execute:^{}];
+    });
+    
+    it(@"Should react on notification for EVENT_APPLE_PRIVACY", ^{
+        AMAUrgentEventCountDispatchStrategy *strategy = mockEnv(0);
+        [[strategy should] receive:@selector(updateEventsCount)];
+        [strategy start];
+        postNotificationWithEventType(AMAEventTypeApplePrivacy, strategy);
         [strategy.executor execute:^{}];
     });
 #pragma clang diagnostic pop
