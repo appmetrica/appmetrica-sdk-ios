@@ -38,7 +38,7 @@
     NSString *invalidWithError = [AMAJSONSerialization stringWithJSONObject:@"abc" error:&error];
 
     XCTAssertNil(invalidWithError, @"Should return nil if failed to serialize");
-    XCTAssertEqualObjects(error.domain, kAMAAppMetricaErrorDomain, @"Should fill error domain");
+    XCTAssertEqualObjects(error.domain, kAMAAppMetricaInternalErrorDomain, @"Should fill error domain");
     XCTAssertEqual(error.code, AMAAppMetricaInternalEventJsonSerializationError, @"Should fill error code");
     XCTAssertEqualObjects(error.localizedDescription,
                           @"Passed dictionary is not a valid serializable JSON object: {\n    \"Wrong JSON object\" = abc;\n}",
@@ -66,7 +66,7 @@
     NSData *invalidWithError = [AMAJSONSerialization dataWithJSONObject:@"abc" error:&error];
     
     XCTAssertNil(invalidWithError, @"Should return nil if failed to serialize");
-    XCTAssertEqualObjects(error.domain, kAMAAppMetricaErrorDomain, @"Should fill error domain");
+    XCTAssertEqualObjects(error.domain, kAMAAppMetricaInternalErrorDomain, @"Should fill error domain");
     XCTAssertEqual(error.code, AMAAppMetricaInternalEventJsonSerializationError, @"Should fill error code");
     XCTAssertEqualObjects(error.localizedDescription,
                           @"Passed dictionary is not a valid serializable JSON object: {\n    \"Wrong JSON object\" = abc;\n}",

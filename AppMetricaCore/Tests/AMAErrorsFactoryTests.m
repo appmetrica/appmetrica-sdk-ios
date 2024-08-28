@@ -11,6 +11,7 @@ describe(@"AMAErrorsFactory", ^{
     context(@"Constructed errors", ^{
 
         NSString *const domain = @"io.appmetrica";
+        NSString *const internalDomain = @"AppMetricaInternalErrorDomain";
         NSError *__block error = nil;
 
         context(@"appMetricaNotStartedError", ^{
@@ -41,6 +42,22 @@ describe(@"AMAErrorsFactory", ^{
             });
             it(@"Should use correct description", ^{
                 NSString *description = @"Session is not loaded";
+                [[error.localizedDescription should] equal:description];
+            });
+        });
+        
+        context(@"internalInconsistencyError", ^{
+            beforeEach(^{
+                error = [AMAErrorsFactory internalInconsistencyError];
+            });
+            it(@"Should use correct domain", ^{
+                [[error.domain should] equal:internalDomain];
+            });
+            it(@"Should use correct code", ^{
+                [[theValue(error.code) should] equal:theValue(2003)];
+            });
+            it(@"Should use correct description", ^{
+                NSString *description = @"Database inconsistency error";
                 [[error.localizedDescription should] equal:description];
             });
         });

@@ -22,8 +22,8 @@
 
 + (NSError *)internalInconsistencyError
 {
-    return [AMAErrorUtilities errorWithCode:AMAAppMetricaInternalEventErrorCodeInternalInconsistency
-                                description:@"Database inconsistency error"];
+    return [AMAErrorUtilities internalErrorWithCode:AMAAppMetricaInternalEventErrorCodeInternalInconsistency
+                                        description:@"Database inconsistency error"];
 }
 
 #pragma mark - Session's errors
