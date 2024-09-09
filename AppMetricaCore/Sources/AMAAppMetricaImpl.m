@@ -54,6 +54,8 @@
 #import "AMATimeoutRequestsController.h"
 #import "AMAUserProfileLogger.h"
 #import "AMAExternalAttributionController.h"
+#import "AMAAppMetricaConfigurationManager.h"
+#import "AMAFirstActivationDetector.h"
 
 @interface AMAAppMetricaImpl () <AMADispatcherDelegate,
                                  AMADispatchStrategyDelegate,
@@ -64,7 +66,7 @@
 @property (nonatomic, copy, readwrite) NSString *apiKey;
 
 @property (nonatomic, strong) AMADispatchingController *dispatchingController;
-@property (nonatomic, strong) AMAReporter *reporter;
+@property (nonatomic, strong) AMAReporter *mainReporter;
 @property (nonatomic, strong) AMAStartupController *startupController;
 @property (nonatomic, strong) AMADispatchStrategiesContainer *strategiesContainer;
 @property (nonatomic, strong) AMAReportersContainer *reportersContainer;
@@ -80,7 +82,6 @@
 @property (atomic, strong) AMADeepLinkController *deeplinkController;
 @property (atomic, strong) AMAExternalAttributionController *externalAttributionController;
 @property (nonatomic, strong, readonly) AMAAutoPurchasesWatcher *autoPurchasesWatcher;
-@property (nonatomic, copy) AMAAppMetricaPreloadInfo *preloadInfo;
 
 @property (nonatomic, strong) NSHashTable *startupCompletionObservers;
 
@@ -118,11 +119,15 @@
         // auto in app reporting executor should be the same as usual events reporting executor for conversion value flow to work
         _autoPurchasesWatcher = [[AMAAutoPurchasesWatcher alloc] initWithExecutor:executor];
 
-        AMAPersistentTimeoutConfiguration *configuration =
-            [AMAMetricaConfiguration sharedInstance].persistent.timeoutConfiguration;
+        AMAMetricaPersistentConfiguration *persistent = [AMAMetricaConfiguration sharedInstance].persistent;
+        AMAPersistentTimeoutConfiguration *configuration = persistent.timeoutConfiguration;
         _dispatchingController = [[AMADispatchingController alloc] initWithTimeoutConfiguration:configuration];
         _dispatchingController.proxyDelegate = self;
-
+        
+        _configurationManager =
+            [[AMAAppMetricaConfigurationManager alloc] initWithExecutor:executor
+                                                    strategiesContainer:_strategiesContainer];
+        
         [[AMASKAdNetworkRequestor sharedInstance] registerForAdNetworkAttribution];
 
         [self initializeStartupController];
@@ -146,7 +151,7 @@
 {
     if ([AMAMetricaConfiguration sharedInstance].inMemory.sessionsAutoTracking) {
         [self execute:^{
-            [self.reporter start];
+            [self.mainReporter start];
         }];
     }
 }
@@ -159,10 +164,63 @@
 
 - (void)activateWithConfiguration:(AMAAppMetricaConfiguration *)configuration
 {
+    [self.configurationManager updateMainConfiguration:configuration];
+    
     self.apiKey = configuration.APIKey;
 
     [self migrate];
-    AMAReporter *reporter = [self setupReporterWithConfiguration:configuration];
+    
+    AMAReporter *reporter = [self setupMainReporterWithConfiguration:configuration];
+    [self activateCommonComponents:configuration reporter:reporter];
+    
+    [[AMAMetricaConfiguration sharedInstance].inMemory markAppMetricaStarted];
+    [self logMetricaStart:configuration.APIKey];
+}
+
+- (void)scheduleAnonymousActivationIfNeeded
+{
+    if ([AMAFirstActivationDetector isFirstLibraryReporterActivation] == NO &&
+        [AMAFirstActivationDetector isFirstMainReporterActivation] == YES) {
+        AMADelayedExecutor *delayedExecutor = [[AMADelayedExecutor alloc] init];
+        
+        __weak typeof(self) weakSelf = self;
+        [delayedExecutor executeAfterDelay:0.1 block:^{
+            __strong typeof(self) strongSelf = weakSelf;
+            if (strongSelf.apiKey == nil) {
+                [strongSelf activateAnonymously];
+            }
+        }];
+    }
+    else {
+        [self activateAnonymously];
+    }
+}
+
+- (void)activateAnonymously
+{
+    AMAAppMetricaConfiguration *configuration = [self.configurationManager anonymousConfiguration];
+    [self.configurationManager updateMainConfiguration:configuration];
+
+    self.apiKey = configuration.APIKey;
+
+    [self migrate];
+    
+    AMAReporter *reporter = [self setupMainReporterWithConfiguration:configuration];
+    [self activateCommonComponents:configuration reporter:reporter];
+    
+    [[AMAMetricaConfiguration sharedInstance].inMemory markAppMetricaStartedAnonymously];
+    [self logMetricaStart:nil];
+}
+
+- (void)activateReporterWithConfiguration:(AMAReporterConfiguration *)configuration
+{
+    [self.configurationManager updateReporterConfiguration:configuration];
+    [self manualReporterForConfiguration:configuration];
+}
+
+- (void)activateCommonComponents:(AMAAppMetricaConfiguration *)configuration
+                        reporter:(AMAReporter *)reporter
+{
     self.deeplinkController = [[AMADeepLinkController alloc] initWithReporter:reporter executor:self.executor];
     [self setupExternalAttributionControllerWithReporter:reporter];
     if (configuration.appOpenTrackingEnabled) {
@@ -174,10 +232,9 @@
     if (configuration.appEnvironment != nil) {
         [self applyAppEnvironment:configuration.appEnvironment];
     }
-    [self logMetricaStart];
 }
 
-- (void)logMetricaStart
+- (void)logMetricaStart:(NSString *)apiKey
 {
     NSString *buildType = nil;
 #ifdef DEBUG
@@ -186,8 +243,13 @@
     buildType = @"Release";
 #endif
     NSString *versionName = [AMAPlatformDescription SDKVersionName];
-
-    AMALogNotify(@"AppMetrica activated with apiKey:%@ \nVersion:%@, %@", self.apiKey, versionName, buildType);
+    
+    if (apiKey == nil) {
+        AMALogNotify(@"AppMetrica activated anonymously \nVersion:%@, %@", versionName, buildType);
+    }
+    else {
+        AMALogNotify(@"AppMetrica activated with apiKey:%@ \nVersion:%@, %@", self.apiKey, versionName, buildType);
+    }
 }
 
 - (void)dealloc
@@ -199,7 +261,7 @@
 {
     [self execute:^{
         [self reportEventWithBlock:^{
-            [self.reporter reportEvent:eventName parameters:params onFailure:onFailure];
+            [self.mainReporter reportEvent:eventName parameters:params onFailure:onFailure];
         } onFailure:onFailure];
     }];
 }
@@ -214,13 +276,13 @@
 {
     [self execute:^{
         [self reportEventWithBlock:^{
-            [self.reporter reportEventWithType:eventType
-                                          name:name
-                                         value:value
-                              eventEnvironment:eventEnvironment
-                                appEnvironment:appEnvironment
-                                        extras:extras
-                                     onFailure:onFailure];
+            [self.mainReporter reportEventWithType:eventType
+                                              name:name
+                                             value:value
+                                  eventEnvironment:eventEnvironment
+                                    appEnvironment:appEnvironment
+                                            extras:extras
+                                         onFailure:onFailure];
         } onFailure:onFailure];
     }];
 }
@@ -237,15 +299,15 @@
 {
     [self execute:^{
         [self reportEventWithBlock:^{
-            [self.reporter reportBinaryEventWithType:eventType
-                                                data:data
-                                                name:name
-                                             gZipped:gZipped
-                                    eventEnvironment:eventEnvironment
-                                      appEnvironment:appEnvironment
-                                              extras:extras
-                                      bytesTruncated:bytesTruncated
-                                           onFailure:onFailure];
+            [self.mainReporter reportBinaryEventWithType:eventType
+                                                    data:data
+                                                    name:name
+                                                 gZipped:gZipped
+                                        eventEnvironment:eventEnvironment
+                                          appEnvironment:appEnvironment
+                                                  extras:extras
+                                          bytesTruncated:bytesTruncated
+                                               onFailure:onFailure];
         } onFailure:onFailure];
     }];
 }
@@ -263,16 +325,16 @@
 {
     [self execute:^{
         [self reportEventWithBlock:^{
-            [self.reporter reportFileEventWithType:eventType
-                                              data:data
-                                          fileName:fileName
-                                           gZipped:gZipped
-                                         encrypted:encrypted
-                                         truncated:truncated
-                                  eventEnvironment:eventEnvironment
-                                    appEnvironment:appEnvironment
-                                            extras:extras
-                                         onFailure:onFailure];
+            [self.mainReporter reportFileEventWithType:eventType
+                                                  data:data
+                                              fileName:fileName
+                                               gZipped:gZipped
+                                             encrypted:encrypted
+                                             truncated:truncated
+                                      eventEnvironment:eventEnvironment
+                                        appEnvironment:appEnvironment
+                                                extras:extras
+                                             onFailure:onFailure];
         } onFailure:onFailure];
     }];
 }
@@ -280,7 +342,7 @@
 - (void)reportEventWithBlock:(dispatch_block_t)reportEvent
                    onFailure:(nullable void (^)(NSError *error))onFailure
 {
-    if (self.reporter == nil) {
+    if (self.mainReporter == nil) {
         [AMAFailureDispatcher dispatchError:[AMAErrorsFactory reporterNotReadyError] withBlock:onFailure];
     }
     else {
@@ -294,7 +356,7 @@
 {
     [self execute:^{
         [self reportEventWithBlock:^{
-            [self.reporter reportUserProfile:userProfile onFailure:onFailure];
+            [self.mainReporter reportUserProfile:userProfile onFailure:onFailure];
         } onFailure:onFailure];
     }];
 }
@@ -303,7 +365,7 @@
 {
     [self execute:^{
         [self reportEventWithBlock:^{
-            [self.reporter reportRevenue:revenueInfo onFailure:onFailure];
+            [self.mainReporter reportRevenue:revenueInfo onFailure:onFailure];
         } onFailure:onFailure];
     }];
 }
@@ -312,7 +374,7 @@
 {
     [self execute:^{
         [self reportEventWithBlock:^{
-            [self.reporter reportECommerce:eCommerce onFailure:onFailure];
+            [self.mainReporter reportECommerce:eCommerce onFailure:onFailure];
         } onFailure:onFailure];
     }];
 }
@@ -330,7 +392,7 @@
 {
     [self execute:^{
         [self reportEventWithBlock:^{
-            [self.reporter reportAdRevenue:adRevenueInfo onFailure:onFailure];
+            [self.mainReporter reportAdRevenue:adRevenueInfo onFailure:onFailure];
         } onFailure:onFailure];
     }];
 }
@@ -338,15 +400,15 @@
 #if !TARGET_OS_TV
 - (void)setupWebViewReporting:(id<AMAJSControlling>)controller
 {
-    [controller setUpWebViewReporting:self.executor withReporter:self.reporter];
+    [controller setUpWebViewReporting:self.executor withReporter:self.mainReporter];
 }
 #endif
 
 - (void)setUserProfileID:(NSString *)userProfileID
 {
     [self execute:^{
-        if (self.reporter != nil) {
-            [self.reporter setUserProfileID:userProfileID];
+        if (self.mainReporter != nil) {
+            [self.mainReporter setUserProfileID:userProfileID];
         } else {
             self.preactivationActionHistory.userProfileID = userProfileID.copy;
         }
@@ -356,9 +418,9 @@
 - (NSString *)userProfileID
 {
     return [self.executor syncExecute:^id{
-        if (self.reporter != nil) {
-            return self.reporter.userProfileID;
-        } 
+        if (self.mainReporter != nil) {
+            return self.mainReporter.userProfileID;
+        }
         else {
             return self.preactivationActionHistory.userProfileID;
         }
@@ -368,21 +430,21 @@
 - (void)sendEventsBuffer
 {
     [self execute:^{
-        [self.reporter sendEventsBuffer];
+        [self.mainReporter sendEventsBuffer];
     }];
 }
 
 - (void)pauseSession
 {
     [self execute:^{
-        [self.reporter pauseSession];
+        [self.mainReporter pauseSession];
     }];
 }
 
 - (void)resumeSession
 {
     [self execute:^{
-        [self.reporter resumeSession];
+        [self.mainReporter resumeSession];
     }];
 }
 
@@ -395,15 +457,16 @@
 {
     @synchronized(self) {
         AMAReporter *reporter = [self.reportersContainer reporterForApiKey:configuration.APIKey];
+        
         if (reporter == nil) {
             AMAReporterStorage *reporterStorage =
                 [[AMAReporterStoragesContainer sharedInstance] storageForApiKey:configuration.APIKey];
             reporter = [self createReporterWithStorage:reporterStorage
                                                   main:NO
                                      onStorageRestored:^(AMAEventBuilder *eventBuilder) {
-                                         [self applyUserProfileIDWithStorage:reporterStorage
-                                                               userProfileID:configuration.userProfileID];
-                                     }
+                [self applyUserProfileIDWithStorage:reporterStorage
+                                      userProfileID:configuration.userProfileID];
+            }
                                        onSetupComplete:nil];
         }
         return reporter;
@@ -427,7 +490,7 @@
     reporter.delegate = self;
 
     __weak __typeof(self) weakSelf = self;
-    [reporter setupWithOnStorageRestored:^ {
+    [reporter setupWithOnStorageRestored:^{
         if (onStorageRestored != nil) {
             onStorageRestored(eventBuilder);
         }
@@ -476,7 +539,7 @@
                                                                     delegate:self
                                                    executionConditionChecker:executionConditionChecker];
     [self updateStrategiesContainer:strategies];
-    
+
     id<AMAKeyValueStorageProviding> reporterStorageProvider = (id<AMAKeyValueStorageProviding>)reporterStorage.keyValueStorageProvider;
     [self setupReporterWithExtendedReporterStorage:reporterStorageProvider main:main apiKey:apiKey];
 }
@@ -492,7 +555,7 @@
 {
     AMAAppMetricaPreloadInfo *info = nil;
     if ([apiKey isEqual:self.apiKey]) {
-        info = self.preloadInfo;
+        info = [self.configurationManager preloadInfo];
     }
     return [[AMAEventBuilder alloc] initWithStateStorage:reporterStateStorage preloadInfo:info];
 }
@@ -506,15 +569,6 @@
 {
     @synchronized (self) {
         return [self.reportersContainer reporterForApiKey:apiKey] != nil;
-    }
-}
-
-- (void)setPreloadInfo:(AMAAppMetricaPreloadInfo *)preloadInfo
-{
-    _preloadInfo = preloadInfo;
-
-    if (preloadInfo != nil) {
-        AMALogInfo(@"Set custom preload info %@", preloadInfo);
     }
 }
 
@@ -582,7 +636,8 @@
     [self execute:^{
         NSString *permissionsJSON = [self.permissionsController updateIfNeeded];
         if (permissionsJSON != nil) {
-            [self.reporter reportPermissionsEventWithPermissions:permissionsJSON onFailure:^(NSError *error) {
+            [self.mainReporter reportPermissionsEventWithPermissions:permissionsJSON
+                                                           onFailure:^(NSError *error) {
                 AMALogError(@"Can't send permissions: %@", permissionsJSON);
             }];
         }
@@ -602,14 +657,6 @@
             [[AMAStartupController alloc] initWithTimeoutRequestsController:timeoutController];
         self.startupController.delegate = self;
         self.startupController.extendedDelegate = self;
-    }];
-}
-
-// TODO: Observe configuration changes instead of calling this method on every configuration change
-- (void)handleConfigurationUpdate
-{
-    [self execute:^{
-        [self.strategiesContainer handleConfigurationUpdate];
     }];
 }
 
@@ -649,31 +696,44 @@
 {
 }
 
-#pragma mark - start working
+#pragma mark - Main reporter setup -
 
-- (AMAReporter *)setupReporterWithConfiguration:(AMAAppMetricaConfiguration *)configuration
+- (AMAReporter *)setupMainReporterWithConfiguration:(AMAAppMetricaConfiguration *)configuration
 {
     @synchronized (self) {
-        AMAReporter *reporter = self.reporter;
+        AMAReporter *reporter = self.mainReporter;
+        NSString *apiKey = configuration.APIKey;
         if (reporter != nil) {
-            AMALogAssert(@"Reporter setup is expected to be called only once");
-            return reporter;
+            if ([reporter.apiKey isEqual:apiKey]) {
+                AMALogAssert(@"Reporter setup is expected to be called only once");
+                return reporter;
+            }
+            else {
+                AMALogNotify(@"Updating anonymous reporter APIkey to normal: %@", apiKey);
+                [reporter updateAPIKey:apiKey];
+                [self.reportersContainer setReporter:reporter forApiKey:apiKey];
+                AMAReporterStorage *mainStorage = [[AMAReporterStoragesContainer sharedInstance] mainStorageForApiKey:apiKey];
+                [self postSetupReporterWithStorage:mainStorage
+                                              main:YES
+                         executionConditionChecker:[self getExecutionConditionCheckerForApiKey:apiKey main:YES]];
+                return reporter;
+            }
         }
-
+        
         reporter = [self.reportersContainer reporterForApiKey:self.apiKey];
         if (reporter != nil) {
             AMALogAssert(@"Synchronization error in AppMetrica class. "
                                  "Main reporter can't have other reporters' API key.");
-            self.reporter = reporter;
+            self.mainReporter = reporter;
             return reporter;
         }
-
+        
         AMAReporterStorage *reporterStorage =
-            [[AMAReporterStoragesContainer sharedInstance] storageForApiKey:self.apiKey];
+            [[AMAReporterStoragesContainer sharedInstance] mainStorageForApiKey:self.apiKey];
         __weak __typeof(self) weakSelf = self;
         reporter = [self createReporterWithStorage:reporterStorage
                                               main:YES
-                                 onStorageRestored:^(AMAEventBuilder *eventBuilder){
+                                 onStorageRestored:^(AMAEventBuilder *eventBuilder) {
             // called on reporter.executor queue
             [weakSelf applyDeferredAppEnvironmentUpdatesWithStorage:reporterStorage];
             [weakSelf applyEventsFromPollingDelegatesWithStorage:reporterStorage eventBuilder:eventBuilder];
@@ -685,13 +745,14 @@
         }];
 
         [self execute:^{
-            self.reporter = reporter;
+            self.mainReporter = reporter;
             [AMAAttributionController sharedInstance].mainReporter = reporter;
             [self triggerSessionStartIfNeeded];
         }];
         return reporter;
     }
 }
+
 // FIXME: (glinnik) manupulating storage in impl. Logic similar to Reporter. Move there later
 - (void)applyEventsFromPollingDelegatesWithStorage:(AMAReporterStorage *)reporterStorage
                                       eventBuilder:(AMAEventBuilder *)eventBuilder
@@ -734,7 +795,6 @@
 - (void)applyUserProfileIDWithStorage:(AMAReporterStorage *)storage
                         userProfileID:(NSString *)userProfileID
 {
-
     if (userProfileID != nil) {
         NSString *truncatedProfileID =
             [[AMATruncatorsFactory profileIDTruncator] truncatedString:userProfileID
@@ -761,7 +821,7 @@
         ([self.stateProvider hostState] == AMAHostAppStateForeground && configuration.inMemory.sessionsAutoTracking)
         || configuration.inMemory.handleActivationAsSessionStart;
     if (shouldStartSession) {
-        [self.reporter start];
+        [self.mainReporter start];
     }
 }
 
@@ -811,7 +871,7 @@
 {
     if ([AMAMetricaConfiguration sharedInstance].inMemory.sessionsAutoTracking) {
         [self execute:^{
-            [self.reporter shutdown];
+            [self.mainReporter shutdown];
         }];
     }
 }
@@ -1070,7 +1130,7 @@
             [self.preactivationActionHistory.appEnvironment trackAddValue:value forKey:key];
         }
         else {
-            [self.reporter setAppEnvironmentValue:value forKey:key];
+            [self.mainReporter setAppEnvironmentValue:value forKey:key];
         }
     }
 }
@@ -1078,22 +1138,22 @@
 - (void)setSessionExtras:(nullable NSData *)data forKey:(nonnull NSString *)key
 {
     [self execute:^{
-        if (self.reporter == nil) {
+        if (self.mainReporter == nil) {
             AMALogAssert(@"reporter should be not null");
         }
         
-        [self.reporter setSessionExtras:data forKey:key];
+        [self.mainReporter setSessionExtras:data forKey:key];
     }];
 }
 
 - (void)clearSessionExtras
 {
     [self execute:^{
-        if (self.reporter == nil) {
+        if (self.mainReporter == nil) {
             AMALogAssert(@"reporter should be not null");
         }
 
-        [self.reporter clearSessionExtras];
+        [self.mainReporter clearSessionExtras];
     }];
 }
 
@@ -1140,8 +1200,8 @@
 - (void)clearAppEnvironment
 {
     [self execute:^{
-        if (self.reporter != nil) {
-            [self.reporter clearAppEnvironment];
+        if (self.mainReporter != nil) {
+            [self.mainReporter clearAppEnvironment];
         } else {
             [self.preactivationActionHistory.appEnvironment trackClearEnvironment];
         }

@@ -30,15 +30,19 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)init NS_UNAVAILABLE;
 
 - (instancetype)initWithApiKey:(NSString *)apiKey
-              eventEnvironment:(AMAEnvironmentContainer *)eventEnvironment;
+              eventEnvironment:(AMAEnvironmentContainer *)eventEnvironment
+                          main:(BOOL)main;
 - (instancetype)initWithApiKey:(NSString *)apiKey
               eventEnvironment:(AMAEnvironmentContainer *)eventEnvironment
                  eventsCleaner:(AMAEventsCleaner *)eventsCleaner
-                      database:(id<AMADatabaseProtocol>)database;
+                      database:(id<AMADatabaseProtocol>)database
+                          main:(BOOL)main;
 
 - (void)storageInDatabase:(void (^)(id<AMAKeyValueStoring> storage))block;
 
 - (void)restoreState;
+
+- (void)updateAPIKey:(NSString *)apiKey;
 
 @end
 

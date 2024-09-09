@@ -1,15 +1,13 @@
 #import "AMACore.h"
-
 #import <UIKit/UIKit.h>
-
 #import <AppMetricaStorageUtils/AppMetricaStorageUtils.h>
-
 #import "AMAMetricaPersistentConfiguration.h"
 #import "AMAStorageKeys.h"
 #import "AMAKeychainStoring.h"
 #import "AMAPersistentTimeoutConfiguration.h"
 #import "AMAAttributionModelConfiguration.h"
 #import "AMAExternalAttributionConfiguration.h"
+#import "AMAAppMetricaConfiguration+JSONSerializable.h"
 
 NSString *const kAMADeviceIDStorageKey = @"AMAMetricaPersistentConfigurationDeviceIDStorageKey";
 NSString *const kAMADeviceIDHashStorageKey = @"AMAMetricaPersistentConfigurationDeviceIDHashStorageKey";
@@ -246,6 +244,31 @@ LONG_PROPERTY(conversionValue, setConversionValue, AMAStorageStringKeyConversion
     [self.storage saveJSONDictionary:allConfigurationsJSON
                               forKey:AMAStorageStringKeyExternalAttributionConfiguration
                                error:NULL];
+}
+
+- (AMAAppMetricaConfiguration *)appMetricaClientConfiguration
+{
+    NSDictionary *json = [self.storage jsonDictionaryForKey:AMAStorageStringKeyAppMetricaClientConfiguration error:NULL];
+    return [[AMAAppMetricaConfiguration alloc] initWithJSON:json];
+}
+
+- (void)setAppMetricaClientConfiguration:(AMAAppMetricaConfiguration *)appMetricaClientConfiguration
+{
+    [self.storage saveJSONDictionary:[appMetricaClientConfiguration JSON]
+                              forKey:AMAStorageStringKeyAppMetricaClientConfiguration
+                               error:NULL];
+}
+
+- (NSString *)recentMainApiKey
+{
+    return [self.storage stringForKey:AMAStorageStringKeyRecentMainApiKey error:NULL];
+}
+
+- (void)setRecentMainApiKey:(NSString *)recentMainApiKey
+{
+    [self.storage saveString:recentMainApiKey
+                      forKey:AMAStorageStringKeyRecentMainApiKey
+                       error:NULL];
 }
 
 @end

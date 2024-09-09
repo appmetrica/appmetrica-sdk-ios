@@ -74,6 +74,8 @@ static NSUInteger const kAMAReporterDatabaseSchemaVersion = 2;
 //~ - add `visit` table. No migration needed, because new tables are created automatically
 static NSUInteger const kAMALocationDatabaseSchemaVersion = 2;
 
+NSString *const kAMAMainReporterDBPath = @"main";
+
 @implementation AMADatabaseFactory
 
 + (id<AMADatabaseProtocol>)configurationDatabase
@@ -157,9 +159,11 @@ static NSUInteger const kAMALocationDatabaseSchemaVersion = 2;
 }
 
 + (id<AMADatabaseProtocol>)reporterDatabaseForApiKey:(NSString *)apiKey
+                                                main:(BOOL)main
                                        eventsCleaner:(AMAEventsCleaner *)eventsCleaner
 {
-    NSString *basePath = [AMAFileUtility persistentPathForApiKey:apiKey];
+    NSString *dirPath = main ? kAMAMainReporterDBPath : apiKey;
+    NSString *basePath = [AMAFileUtility persistentPathForApiKey:dirPath];
     NSString *databasePath = [basePath stringByAppendingPathComponent:@"data.sqlite"];
     AMATableSchemeController *tableSchemeController = [[AMATableSchemeController alloc] initWithTableSchemes:@{
         kAMAEventTableName: [AMATableDescriptionProvider eventsTableMetaInfo],
@@ -189,7 +193,7 @@ static NSUInteger const kAMALocationDatabaseSchemaVersion = 2;
 
     id<AMAKeyValueStorageDataProviding> backingDataProvider =
 #if TARGET_OS_TV
-        [self backingDataProviderWithSuiteNamePostfix:[apiKey stringByAppendingString:@".bak"]];
+        [self backingDataProviderWithSuiteNamePostfix:[dirPath stringByAppendingString:@".bak"]];
 #else
         [self backingDataProviderWithPath:[basePath stringByAppendingPathComponent:@"data.bak"]];
     backingDataProvider =

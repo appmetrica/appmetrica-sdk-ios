@@ -60,3 +60,5 @@ NSString *const AMAStorageStringKeyAppleRetryPeriods = @"apple_tracking.collecti
 NSString *const AMAStorageStringKeyDidApplyDataMigrationFor500 = @"5.0.0.migration.applied";
 NSString *const AMAStorageStringKeyExternalAttributionCollectingIntervalSeconds = @"external_attribution.collecting_interval_seconds";
 NSString *const AMAStorageStringKeyExternalAttributionConfiguration = @"external_attribution.confugiration";
+NSString *const AMAStorageStringKeyAppMetricaClientConfiguration = @"appmetrica.client.confugiration";
+NSString *const AMAStorageStringKeyRecentMainApiKey = @"recent.main.api.key";

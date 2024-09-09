@@ -13,7 +13,7 @@
 
 @interface AMAAppMetricaImpl () <AMADispatcherDelegate, AMADispatchStrategyDelegate>
 
-@property (nonatomic, strong) AMAReporter *reporter;
+@property (nonatomic, strong) AMAReporter *mainReporter;
 @property (nonatomic, strong) AMADispatchingController *dispatchingController;
 @property (nonatomic, strong) AMADispatchStrategiesContainer *strategiesContainer;
 

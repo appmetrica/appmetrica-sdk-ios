@@ -182,7 +182,7 @@ NSString *const kAMAApplicationNotRespondingCrashType = @"AMAApplicationNotRespo
     if (decoder != nil) {
         __block NSDictionary *crashReport = nil;
 
-        AMACrashSafeTransactorRollbackBlock rollback = ^NSString *(id context){
+        AMACrashSafeTransactorRollbackBlock rollback = ^NSString *(id context) {
             [[self class] purgeAllRawCrashReports];
             success = NO;
             return nil;

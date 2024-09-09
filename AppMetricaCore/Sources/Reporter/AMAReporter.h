@@ -71,6 +71,8 @@
 - (void)shutdown;
 - (void)start;
 
+- (void)updateAPIKey:(NSString *)apiKey;
+
 - (void)restartPrivacyTimer;
 
 - (void)reportFirstEventIfNeeded;

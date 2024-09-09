@@ -118,7 +118,7 @@ NSString *const kAMAMigrationDeviceIDHashStorageKey = @"YMMMetricaPersistentConf
 + (void)migrateReporterEventHashes:(NSString *)migrationPath apiKey:(NSString *)apiKey
 {
     AMAEventNameHashesStorage *migrationStorage = [AMAEventNameHashesStorageFactory migrationStorageForPath:migrationPath];
-    AMAEventNameHashesStorage *currentStorage = [AMAEventNameHashesStorageFactory storageForApiKey:apiKey];
+    AMAEventNameHashesStorage *currentStorage = [AMAEventNameHashesStorageFactory storageForApiKey:apiKey main:NO];
     AMAEventNameHashesCollection *oldCollection = [migrationStorage loadCollection];
     BOOL result = [currentStorage saveCollection:oldCollection];
     if (result == NO) {

@@ -112,6 +112,15 @@ describe(@"AMAReporter", ^{
 
         reporterTestHelper = [[AMAReporterTestHelper alloc] init];
     });
+    context(@"ApiKey update", ^{
+        it(@"Should update apiKey", ^{
+            NSString *const apiKey = @"API_KEY";
+            AMAReporter *reporter = [reporterTestHelper appReporterForApiKey:apiKey];
+            [reporter updateAPIKey:@"API_KEY"];
+            
+            [[reporter.apiKey should] equal:apiKey];
+        });
+    });
     context(@"Starts and ends foreground sessions", ^{
         it(@"Should start new session", ^{
             AMAReporter *reporter = [reporterTestHelper appReporterForApiKey:apiKey];

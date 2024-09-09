@@ -60,7 +60,10 @@
         
         __weak __typeof(self) weakSelf = self;
         [_storagesContainer stub:@selector(storageForApiKey:) withBlock:^id(NSArray *params) {
-            return [weakSelf reporterStorageForApiKey:params[0] inMemory:YES];
+            return [weakSelf reporterStorageForApiKey:params[0] inMemory:YES main:NO];
+        }];
+        [_storagesContainer stub:@selector(mainStorageForApiKey:) withBlock:^id(NSArray *params) {
+            return [weakSelf reporterStorageForApiKey:params[0] inMemory:YES main:YES];
         }];
         [AMAReporterStoragesContainer stub:@selector(sharedInstance) andReturn:_storagesContainer];
     }
@@ -120,6 +123,11 @@
     return [self appReporterForApiKey:apiKey main:NO async:NO];
 }
 
+- (AMAReporter *)mainAppReporterForApiKey:(NSString *)apiKey
+{
+    return [self appReporterForApiKey:apiKey main:YES async:NO];
+}
+
 - (AMAReporter *)appReporterForApiKey:(NSString *)apiKey attributionCheckExecutor:(id<AMAAsyncExecuting>)attributionCheckExecutor
 {
     id executor = [KWMock nullMockForProtocol:@protocol(AMACancelableExecuting)];
@@ -167,7 +175,7 @@
         return self.reporters[apiKey];
     }
 
-    AMAReporterStorage *reporterStorage = [self reporterStorageForApiKey:apiKey inMemory:inMemory];
+    AMAReporterStorage *reporterStorage = [self reporterStorageForApiKey:apiKey inMemory:inMemory main:main];
     AMAEventBuilder *builder =
         [[AMAEventBuilder alloc] initWithStateStorage:reporterStorage.stateStorage preloadInfo:preloadInfo];
     AMASessionExpirationHandler *expirationHandler =
@@ -237,7 +245,7 @@
     return self.privacyTimers[apiKey];
 }
 
-- (AMAReporterStorage *)reporterStorageForApiKey:(NSString *)apiKey inMemory:(BOOL)inMemory
+- (AMAReporterStorage *)reporterStorageForApiKey:(NSString *)apiKey inMemory:(BOOL)inMemory main:(BOOL)main
 {
     if (self.reporterStorages[apiKey] != nil) {
         return self.reporterStorages[apiKey];
@@ -260,14 +268,16 @@
                                                         error:nil];
         [AMAFileUtility stub:@selector(persistentPathForApiKey:) andReturn:persistentDirectory];
         database = (NSObject<AMADatabaseProtocol> *)[AMADatabaseFactory reporterDatabaseForApiKey:apiKey
+                                                                                             main:main
                                                                                     eventsCleaner:eventsCleaner];
         [AMAFileUtility clearStubs];
     }
     AMAReporterStorage *reporterStorage = [[AMAReporterStorage alloc] initWithApiKey:apiKey
                                                                     eventEnvironment:eventEnvironment
                                                                        eventsCleaner:eventsCleaner
-                                                                            database:database];
-
+                                                                            database:database
+                                                                                main:main];
+    
     self.reporterStorages[apiKey] = reporterStorage;
     self.databases[apiKey] = database;
     [[AMAMetricaConfiguration sharedInstance] stub:@selector(ensureMigrated)];

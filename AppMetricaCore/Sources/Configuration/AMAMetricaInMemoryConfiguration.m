@@ -27,6 +27,7 @@ NSString *const kAMAMetricaLibraryApiKey = @"20799a27-fa80-4b36-b2db-0f8141f2418
 @interface AMAMetricaInMemoryConfiguration ()
 
 @property (atomic, assign, readwrite) BOOL appMetricaStarted;
+@property (atomic, assign, readwrite) BOOL appMetricaStartedAnonymously;
 @property (atomic, assign, readwrite) BOOL appMetricaImplCreated;
 @property (atomic, assign, readwrite) BOOL externalServicesConfigured;
 
@@ -82,6 +83,11 @@ NSString *const kAMAMetricaLibraryApiKey = @"20799a27-fa80-4b36-b2db-0f8141f2418
 - (void)markExternalServicesConfigured
 {
     self.externalServicesConfigured = YES;
+}
+
+- (void)markAppMetricaStartedAnonymously
+{
+    self.appMetricaStartedAnonymously = YES;
 }
 
 @end

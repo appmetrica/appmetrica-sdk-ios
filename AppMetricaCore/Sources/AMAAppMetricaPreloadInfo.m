@@ -1,8 +1,12 @@
 
 #import "AMACore.h"
 #import "AMAAppMetricaPreloadInfo.h"
+#import "AMAJSONSerializable.h"
 
-@interface AMAAppMetricaPreloadInfo ()
+NSString *const kAMATrackingID = @"tracking.id";
+NSString *const kAMAAdditionalInfo = @"additional.info";
+
+@interface AMAAppMetricaPreloadInfo () <AMAJSONSerializable>
 
 @property (nonatomic, copy, readwrite) NSString *trackingID;
 @property (atomic, strong, readwrite) NSDictionary *additionalInfo;
@@ -58,5 +62,43 @@
     return description;
 }
 #endif
+
+#pragma mark - AMAJSONSerializable
+
+- (NSDictionary *)JSON
+{
+    NSMutableDictionary *json = [[NSMutableDictionary alloc] init];
+    json[kAMATrackingID] = self.trackingID;
+    if (self.additionalInfo != nil) {
+        json[kAMAAdditionalInfo] = self.additionalInfo;
+    }
+    
+    return [json copy];
+}
+
+- (instancetype)initWithJSON:(NSDictionary *)json 
+{
+    if (json == nil || [json isKindOfClass:[NSDictionary class]] == NO) {
+        return nil;
+    }
+    
+    NSString *trackingID = json[kAMATrackingID];
+    if (trackingID == nil || [trackingID isKindOfClass:[NSString class]] == NO) {
+        return nil;
+    }
+
+    AMAAppMetricaPreloadInfo *preloadInfo = [[AMAAppMetricaPreloadInfo alloc] initWithTrackingIdentifier:trackingID];
+    
+    NSDictionary *additionalInfo = json[kAMAAdditionalInfo];
+    if (additionalInfo != nil && [additionalInfo isKindOfClass:[NSDictionary class]]) {
+        [additionalInfo enumerateKeysAndObjectsUsingBlock:^(NSString *key, NSString *info, BOOL *stop) {
+            if ([info isKindOfClass:[NSString class]] && [key isKindOfClass:[NSString class]]) {
+                [preloadInfo setAdditionalInfo:info forKey:key];
+            }
+        }];
+    }
+    
+    return preloadInfo;
+}
 
 @end

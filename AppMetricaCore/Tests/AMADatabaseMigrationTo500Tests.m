@@ -347,6 +347,7 @@ describe(@"AMADatabaseMigrationTo500Tests", ^{
                 }];
 
                 id<AMADatabaseProtocol> newDB = [AMADatabaseFactory reporterDatabaseForApiKey:apiKey
+                                                                                         main:NO
                                                                                 eventsCleaner:eventsCleaner];
 
                 [newDB inDatabase:^(AMAFMDatabase *db) {
@@ -373,13 +374,14 @@ describe(@"AMADatabaseMigrationTo500Tests", ^{
 
                 // After migration
                 id<AMADatabaseProtocol> newDB = [AMADatabaseFactory reporterDatabaseForApiKey:apiKey
+                                                                                         main:NO
                                                                                 eventsCleaner:eventsCleaner];
                 [newDB inDatabase:^(AMAFMDatabase *db) {
                     id<AMAKeyValueStoring> storage = [newDB.storageProvider storageForDB:db];
                     [[theValue([storage boolNumberForKey:AMAStorageStringKeyDidApplyDataMigrationFor500 error:nil].boolValue) should] beYes];
                 }];
 
-                AMAEventNameHashesStorage *currentStorage = [AMAEventNameHashesStorageFactory storageForApiKey:apiKey];
+                AMAEventNameHashesStorage *currentStorage = [AMAEventNameHashesStorageFactory storageForApiKey:apiKey main:NO];
                 AMAEventNameHashesCollection *loadedCollection = [currentStorage loadCollection];
 
                 [[loadedCollection.currentVersion should] equal:eventHashesCollection.currentVersion];
@@ -395,7 +397,8 @@ describe(@"AMADatabaseMigrationTo500Tests", ^{
                 return [[AMAReporterStorage alloc] initWithApiKey:apiKey
                                                  eventEnvironment:eventEnvironment
                                                     eventsCleaner:eventsCleaner
-                                                         database:database];
+                                                         database:database
+                                                             main:NO];
             };
 
             __auto_type testMigrationEventsAndSessions = ^() {
@@ -454,6 +457,7 @@ describe(@"AMADatabaseMigrationTo500Tests", ^{
                     [[(NSObject *)reporter should] receive:@selector(setSessionExtras:forKey:) withArguments:legacyExtrasValue, @"ai"];
 
                     id<AMADatabaseProtocol> newDB = [AMADatabaseFactory reporterDatabaseForApiKey:apiKey
+                                                                                             main:NO
                                                                                     eventsCleaner:eventsCleaner];
                     AMAReporterStorage *newReporterStorage = buildReporterStorage(newDB, apiKey);
 

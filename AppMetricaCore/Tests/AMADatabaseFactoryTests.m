@@ -58,8 +58,8 @@ describe(@"AMADatabaseFactory", ^{
     };
     
 #if TARGET_OS_TV
-    void (^testValidDataStorageTVOS)(NSString *, NSObject *(^)(void)) = ^(NSString *suiteName,
-                                                                          NSObject *(^createDatabaseBlock)(void)) {
+    void (^testValidDataStorageTVOS)(NSString *, void (^)(void)) = ^(NSString *suiteName,
+                                                                     void(^createDatabaseBlock)(void)) {
         it(@"Should create valid data storage for tvOS", ^{
             NSUserDefaults *defaultsAlloced = [NSUserDefaults nullMock];
             NSUserDefaults *defaults = [NSUserDefaults nullMock];
@@ -245,7 +245,9 @@ describe(@"AMADatabaseFactory", ^{
         });
 
 #if TARGET_OS_TV
-        testValidDataStorageTVOS([@"io.appmetrica." stringByAppendingString:@"storage.bak"], createDatabase);
+        testValidDataStorageTVOS([@"io.appmetrica." stringByAppendingString:@"storage.bak"], ^{
+            createDatabase();
+        });
 #else
         it(@"Should create valid data storage for iOS", ^{
             NSString *expectedPath = [applicationSupportDirectoryPath stringByAppendingPathComponent:@"storage.bak"];
@@ -295,122 +297,140 @@ describe(@"AMADatabaseFactory", ^{
 
     context(@"Reporter database", ^{
         NSString *const apiKey = @"API_KEY";
-
-        NSObject *(^createDatabase)(void) = ^{
-            return (NSObject *)[AMADatabaseFactory reporterDatabaseForApiKey:apiKey eventsCleaner:eventsCleaner];
+        
+        NSObject *(^createDatabase)(BOOL) = ^NSObject *(BOOL main) {
+            return (NSObject *)[AMADatabaseFactory reporterDatabaseForApiKey:apiKey main:main eventsCleaner:eventsCleaner];
         };
-
-        it(@"Should create valid table scheme controller", ^{
-            NSDictionary *scheme = @{
-                @"events": [AMATableDescriptionProvider eventsTableMetaInfo],
-                @"sessions": [AMATableDescriptionProvider sessionsTableMetaInfo],
-                @"kv": [AMATableDescriptionProvider binaryKVTableMetaInfo],
-            };
-            [[tableSchemeController should] receive:@selector(initWithTableSchemes:) withArguments:scheme];
-            createDatabase();
-        });
-
-        context(@"Migration manager", ^{
-            NSUInteger __block currentSchemeVersion = 0;
-            NSArray *__block schemeMigrations = nil;
-            NSArray *__block apiKeyMigrations = nil;
-            NSArray *__block dataMigrations = nil;
-            NSArray *__block libraryMigrations = nil;
-            beforeAll(^{
-                [migrationManager stub:migrationManagerInitSelector withBlock:^id(NSArray *params) {
-                    currentSchemeVersion = [params[0] unsignedIntegerValue];
-                    schemeMigrations = params[1];
-                    apiKeyMigrations = params[2];
-                    dataMigrations = params[3];
-                    libraryMigrations = params[4];
-                    return migrationManager;
-                }];
-                createDatabase();
+        
+        void (^testReporterDatabase)(BOOL, NSObject *(^)(BOOL)) = ^(BOOL main, NSObject *(^createDatabaseBlock)(BOOL)) {
+            
+            it(@"Should create valid table scheme controller", ^{
+                NSDictionary *scheme = @{
+                    @"events": [AMATableDescriptionProvider eventsTableMetaInfo],
+                    @"sessions": [AMATableDescriptionProvider sessionsTableMetaInfo],
+                    @"kv": [AMATableDescriptionProvider binaryKVTableMetaInfo],
+                };
+                [[tableSchemeController should] receive:@selector(initWithTableSchemes:) withArguments:scheme];
+                createDatabaseBlock(main);
             });
-            it(@"Should have valid version", ^{
-                [[theValue(currentSchemeVersion) should] equal:theValue(2)];
-            });
-            context(@"Scheme migrations", ^{
-                it(@"Should have valid migrations count", ^{
-                    [[schemeMigrations should] haveCountOf:1];
+            
+            context(@"Migration manager", ^{
+                NSUInteger __block currentSchemeVersion = 0;
+                NSArray *__block schemeMigrations = nil;
+                NSArray *__block apiKeyMigrations = nil;
+                NSArray *__block dataMigrations = nil;
+                NSArray *__block libraryMigrations = nil;
+                beforeAll(^{
+                    [migrationManager stub:migrationManagerInitSelector withBlock:^id(NSArray *params) {
+                        currentSchemeVersion = [params[0] unsignedIntegerValue];
+                        schemeMigrations = params[1];
+                        apiKeyMigrations = params[2];
+                        dataMigrations = params[3];
+                        libraryMigrations = params[4];
+                        return migrationManager;
+                    }];
+                    createDatabaseBlock(main);
                 });
-                it(@"Should have migration to 2", ^{
-                    [[schemeMigrations[0] should] beKindOfClass:[AMAReporterDatabaseSchemeMigrationTo2 class]];
+                it(@"Should have valid version", ^{
+                    [[theValue(currentSchemeVersion) should] equal:theValue(2)];
+                });
+                context(@"Scheme migrations", ^{
+                    it(@"Should have valid migrations count", ^{
+                        [[schemeMigrations should] haveCountOf:1];
+                    });
+                    it(@"Should have migration to 2", ^{
+                        [[schemeMigrations[0] should] beKindOfClass:[AMAReporterDatabaseSchemeMigrationTo2 class]];
+                    });
+                });
+                it(@"Should not have API key migrations", ^{
+                    [[apiKeyMigrations should] beEmpty];
+                });
+                it(@"Should not have data migrations", ^{
+                    [[dataMigrations[0] should] beKindOfClass:[AMAReporterDataMigrationTo500 class]];
+                });
+                it(@"Should not have library migrations", ^{
+                    [[libraryMigrations should] beEmpty];
                 });
             });
-            it(@"Should not have API key migrations", ^{
-                [[apiKeyMigrations should] beEmpty];
+            
+#if TARGET_OS_TV
+            if (main) {
+                testValidDataStorageTVOS([@"io.appmetrica." stringByAppendingString:[apiKey stringByAppendingString:@".bak"]],
+                                         ^{createDatabaseBlock(NO);});
+            }
+            else {
+                testValidDataStorageTVOS([@"io.appmetrica." stringByAppendingString:[kAMAMainReporterDBPath stringByAppendingString:@".bak"]],
+                                         ^{createDatabaseBlock(YES);});
+            }
+#else
+            it(@"Should create valid data storage for iOS", ^{
+                NSString *expectedPath = [persistentPathForApiKey stringByAppendingPathComponent:@"data.bak"];
+                AMADiskFileStorageOptions expectedOptions =
+                AMADiskFileStorageOptionNoBackup | AMADiskFileStorageOptionCreateDirectory;
+                [[diskFileStorage should] receive:@selector(initWithPath:options:)
+                                    withArguments:expectedPath, theValue(expectedOptions)];
+                createDatabaseBlock(main);
             });
-            it(@"Should not have data migrations", ^{
-                [[dataMigrations[0] should] beKindOfClass:[AMAReporterDataMigrationTo500 class]];
+            
+            it(@"Should create valid backing provider", ^{
+                [[JSONDataProvider should] receive:@selector(initWithFileStorage:) withArguments:diskFileStorage];
+                createDatabaseBlock(main);
             });
-            it(@"Should not have library migrations", ^{
-                [[libraryMigrations should] beEmpty];
+            
+            it(@"Should create valid proxy backing provider", ^{
+                [[proxyDataProvider should] receive:@selector(initWithUnderlyingDataProvider:)
+                                      withArguments:JSONDataProvider];
+                createDatabaseBlock(main);
             });
+            
+            it(@"Should create valid key value storage provider", ^{
+                [AMADatabaseObjectProvider stub:@selector(blockForDataBlobs) andReturn:objectProvider];
+                [[keyValueStorageProvider should] receive:@selector(initWithTableName:
+                                                                    converter:
+                                                                    objectProvider:
+                                                                    backingKVSDataProvider:)
+                                            withArguments:@"kv", binaryConverter, objectProvider, proxyDataProvider];
+                createDatabaseBlock(main);
+            });
+#endif
+            
+            it(@"Should set key value storage provider database", ^{
+                [[keyValueStorageProvider should] receive:@selector(setDatabase:) withArguments:database];
+                createDatabaseBlock(main);
+            });
+            
+            it(@"Should fetch path for valid api key", ^{
+                NSString *path = main ? kAMAMainReporterDBPath : apiKey;
+                [[AMAFileUtility should] receive:@selector(persistentPathForApiKey:) withArguments:path];
+                createDatabaseBlock(main);
+            });
+            
+            it(@"Should create valid trim manager", ^{
+                [[trimManager should] receive:@selector(initWithApiKey:eventsCleaner:)
+                                withArguments:apiKey, eventsCleaner];
+                createDatabaseBlock(main);
+            });
+            
+            it(@"Should create database with valid parameters", ^{
+                NSString *databasePath = [persistentPathForApiKey stringByAppendingPathComponent:@"data.sqlite"];
+                NSArray *criticalKeys = @[];
+                [[database should] receive:databaseInitSelector
+                             withArguments:tableSchemeController, databasePath, migrationManager,
+                 trimManager, keyValueStorageProvider, criticalKeys];
+                createDatabaseBlock(main);
+            });
+            
+            it(@"Should return database", ^{
+                [[createDatabaseBlock(main) should] equal:database];
+            });
+        };
+        
+        context(@"Test reporter database", ^{
+            testReporterDatabase(NO, createDatabase);
         });
         
-#if TARGET_OS_TV
-        testValidDataStorageTVOS([@"io.appmetrica." stringByAppendingString:[apiKey stringByAppendingString:@".bak"]],
-                                 createDatabase);
-#else
-        it(@"Should create valid data storage for iOS", ^{
-            NSString *expectedPath = [persistentPathForApiKey stringByAppendingPathComponent:@"data.bak"];
-            AMADiskFileStorageOptions expectedOptions =
-                AMADiskFileStorageOptionNoBackup | AMADiskFileStorageOptionCreateDirectory;
-            [[diskFileStorage should] receive:@selector(initWithPath:options:)
-                                withArguments:expectedPath, theValue(expectedOptions)];
-            createDatabase();
-        });
-
-        it(@"Should create valid backing provider", ^{
-            [[JSONDataProvider should] receive:@selector(initWithFileStorage:) withArguments:diskFileStorage];
-            createDatabase();
-        });
-
-        it(@"Should create valid proxy backing provider", ^{
-            [[proxyDataProvider should] receive:@selector(initWithUnderlyingDataProvider:)
-                                  withArguments:JSONDataProvider];
-            createDatabase();
-        });
-
-        it(@"Should create valid key value storage provider", ^{
-            [AMADatabaseObjectProvider stub:@selector(blockForDataBlobs) andReturn:objectProvider];
-            [[keyValueStorageProvider should] receive:@selector(initWithTableName:
-                                                                converter:
-                                                                objectProvider:
-                                                                backingKVSDataProvider:)
-                                        withArguments:@"kv", binaryConverter, objectProvider, proxyDataProvider];
-            createDatabase();
-        });
-#endif
-
-        it(@"Should set key value storage provider database", ^{
-            [[keyValueStorageProvider should] receive:@selector(setDatabase:) withArguments:database];
-            createDatabase();
-        });
-
-        it(@"Should fetch path for valid api key", ^{
-            [[AMAFileUtility should] receive:@selector(persistentPathForApiKey:) withArguments:apiKey];
-            createDatabase();
-        });
-
-        it(@"Should create valid trim manager", ^{
-            [[trimManager should] receive:@selector(initWithApiKey:eventsCleaner:)
-                            withArguments:apiKey, eventsCleaner];
-            createDatabase();
-        });
-
-        it(@"Should create database with valid parameters", ^{
-            NSString *databasePath = [persistentPathForApiKey stringByAppendingPathComponent:@"data.sqlite"];
-            NSArray *criticalKeys = @[];
-            [[database should] receive:databaseInitSelector
-                         withArguments:tableSchemeController, databasePath, migrationManager,
-                                       trimManager, keyValueStorageProvider, criticalKeys];
-            createDatabase();
-        });
-
-        it(@"Should return database", ^{
-            [[createDatabase() should] equal:database];
+        context(@"Test main reporter database", ^{
+            testReporterDatabase(YES, createDatabase);
         });
     });
 
@@ -471,7 +491,7 @@ describe(@"AMADatabaseFactory", ^{
 
 #if TARGET_OS_TV
         testValidDataStorageTVOS([@"io.appmetrica." stringByAppendingString:@"l_data.bak"],
-                                 createDatabase);
+                                 ^{createDatabase();});
 #else
         it(@"Should create valid data storage for iOS", ^{
             NSString *expectedPath = [applicationSupportDirectoryPath stringByAppendingPathComponent:@"l_data.bak"];

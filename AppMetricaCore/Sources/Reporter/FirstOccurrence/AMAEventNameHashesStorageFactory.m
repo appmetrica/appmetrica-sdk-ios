@@ -2,14 +2,16 @@
 #import "AMACore.h"
 #import "AMAEventNameHashesStorageFactory.h"
 #import "AMAEventNameHashesStorage.h"
+#import "AMADatabaseFactory.h"
 
 static NSString *const kAMAFileName = @"event_hashes.bin";
 
 @implementation AMAEventNameHashesStorageFactory
 
-+ (AMAEventNameHashesStorage *)storageForApiKey:(NSString *)apiKey
++ (AMAEventNameHashesStorage *)storageForApiKey:(NSString *)apiKey main:(BOOL)main
 {
-    NSString *filePath = [[AMAFileUtility persistentPathForApiKey:apiKey] stringByAppendingPathComponent:kAMAFileName];
+    NSString *dirPath = main ? kAMAMainReporterDBPath : apiKey;
+    NSString *filePath = [[AMAFileUtility persistentPathForApiKey:dirPath] stringByAppendingPathComponent:kAMAFileName];
     return [self storageForPath:filePath];
 }
 

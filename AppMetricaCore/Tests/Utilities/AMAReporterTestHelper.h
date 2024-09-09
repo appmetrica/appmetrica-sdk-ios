@@ -30,6 +30,7 @@
 
 - (AMAReporter *)appReporter;
 - (AMAReporter *)appReporterForApiKey:(NSString *)apiKey;
+- (AMAReporter *)mainAppReporterForApiKey:(NSString *)apiKey;
 - (AMAReporter *)appReporterForApiKey:(NSString *)apiKey attributionCheckExecutor:(id<AMAAsyncExecuting>)attributionCheckExecutor;
 - (AMAReporter *)appReporterForApiKey:(NSString *)apiKey
                                  main:(BOOL)main

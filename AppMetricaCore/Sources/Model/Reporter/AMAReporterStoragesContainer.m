@@ -6,9 +6,10 @@
 
 @interface AMAReporterStoragesContainer ()
 
-@property (nonatomic, strong, readonly) NSCondition *condition;
+@property (nonatomic, strong, readonly) NSCondition *storageCondition;
 @property (nonatomic, strong, readonly) id<AMAAsyncExecuting> executor;
 @property (nonatomic, strong, readonly) NSMutableDictionary *storages;
+@property (nonatomic, strong, readwrite) AMAReporterStorage *mainReporterStorage;
 @property (nonatomic, strong, readonly) NSMutableSet *migratedKeys;
 @property (nonatomic, assign) BOOL migrated;
 @property (nonatomic, assign) BOOL forcedMigration;
@@ -22,25 +23,46 @@
     self = [super init];
     if (self != nil) {
         _eventEnvironment = [[AMAEnvironmentContainer alloc] init];
-        _condition = [[NSCondition alloc] init];
+        _storageCondition = [[NSCondition alloc] init];
         _executor = [[AMAExecutor alloc] initWithIdentifier:self];
         _storages = [NSMutableDictionary dictionary];
         _migratedKeys = [NSMutableSet set];
         _migrated = NO;
+        _mainReporterStorage = nil;
     }
     return self;
 }
 
+- (AMAReporterStorage *)mainStorageForApiKey:(NSString *)apiKey
+{
+    AMAReporterStorage *reporterStorage = self.mainReporterStorage;
+    if (reporterStorage == nil) {
+        reporterStorage = [[AMAReporterStorage alloc] initWithApiKey:apiKey
+                                                    eventEnvironment:self.eventEnvironment
+                                                                main:YES];
+        self.mainReporterStorage = reporterStorage;
+    }
+    else if ([reporterStorage.apiKey isEqual:apiKey] == NO) {
+        [reporterStorage updateAPIKey:apiKey];
+    }
+    return reporterStorage;
+}
+
 - (AMAReporterStorage *)storageForApiKey:(NSString *)apiKey
 {
-    [self.condition lock];
+    [self.storageCondition lock];
+    if (self.mainReporterStorage && [self.mainReporterStorage.apiKey isEqual:apiKey]) {
+        [self.storageCondition unlock];
+        return self.mainReporterStorage;
+    }
     AMAReporterStorage *storage = self.storages[apiKey];
     if (storage == nil) {
         storage = [[AMAReporterStorage alloc] initWithApiKey:apiKey
-                                            eventEnvironment:self.eventEnvironment];
+                                            eventEnvironment:self.eventEnvironment
+                                                        main:NO];
         self.storages[apiKey] = storage;
     }
-    [self.condition unlock];
+    [self.storageCondition unlock];
     return storage;
 }
 
@@ -50,10 +72,10 @@
         AMALogAssert(@"Somebody did complete migration for %@, but over all migration is already complete.", apiKey);
         return;
     }
-    [self.condition lock];
+    [self.storageCondition lock];
     [self.migratedKeys addObject:apiKey];
-    [self.condition broadcast];
-    [self.condition unlock];
+    [self.storageCondition broadcast];
+    [self.storageCondition unlock];
 }
 
 - (void)waitMigrationForApiKey:(NSString *)apiKey
@@ -62,11 +84,11 @@
         return;
     }
     [self forceMigration];
-    [self.condition lock];
+    [self.storageCondition lock];
     while (self.migrated == NO && [self.migratedKeys containsObject:apiKey] == NO) {
-        [self.condition wait];
+        [self.storageCondition wait];
     }
-    [self.condition unlock];
+    [self.storageCondition unlock];
 }
 
 - (void)forceMigration
@@ -87,10 +109,10 @@
     if (self.migrated) {
         return;
     }
-    [self.condition lock];
+    [self.storageCondition lock];
     self.migrated = YES;
-    [self.condition broadcast];
-    [self.condition unlock];
+    [self.storageCondition broadcast];
+    [self.storageCondition unlock];
 }
 
 + (instancetype)sharedInstance

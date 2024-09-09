@@ -43,7 +43,7 @@ describe(@"AMAReporterStorage", ^{
         [AMAReporterStoragesContainer stub:@selector(sharedInstance) andReturn:storagesContainer];
         eventEnvironment = [AMAEnvironmentContainer nullMock];
         database = [KWMock nullMockForProtocol:@protocol(AMADatabaseProtocol)];
-        [AMADatabaseFactory stub:@selector(reporterDatabaseForApiKey:eventsCleaner:) andReturn:database];
+        [AMADatabaseFactory stub:@selector(reporterDatabaseForApiKey:main:eventsCleaner:) andReturn:database];
         storageProvider = [KWMock nullMockForProtocol:@protocol(AMADatabaseKeyValueStorageProviding)];
         [database stub:@selector(storageProvider) andReturn:storageProvider];
 
@@ -60,7 +60,7 @@ describe(@"AMAReporterStorage", ^{
     });
 
     void (^createStorage)(void) = ^{
-        storage = [[AMAReporterStorage alloc] initWithApiKey:apiKey eventEnvironment:eventEnvironment];
+        storage = [[AMAReporterStorage alloc] initWithApiKey:apiKey eventEnvironment:eventEnvironment main:YES];
     };
 
     it(@"Should create valid reporter provider", ^{
@@ -74,8 +74,8 @@ describe(@"AMAReporterStorage", ^{
     });
 
     it(@"Should create valid database", ^{
-        [[AMADatabaseFactory should] receive:@selector(reporterDatabaseForApiKey:eventsCleaner:)
-                               withArguments:apiKey, eventsCleaner];
+        [[AMADatabaseFactory should] receive:@selector(reporterDatabaseForApiKey:main:eventsCleaner:)
+                               withArguments:apiKey, theValue(YES), eventsCleaner];
         createStorage();
     });
     it(@"Should create valid state storage", ^{
@@ -93,15 +93,23 @@ describe(@"AMAReporterStorage", ^{
                            withArguments:database, sessionSerializer, stateStorage];
         createStorage();
     });
-    it(@"Should create valid report request provider", ^{
+    it(@"Should return valid report request provider", ^{
         [[reportRequestProvider should] receive:@selector(initWithApiKey:database:eventSerializer:sessionSerializer:)
                                   withArguments:apiKey, database, eventSerializer, sessionSerializer];
         createStorage();
+        __unused id _ = storage.reportRequestProvider;
     });
     it(@"Should create valid session cleaner", ^{
         [[sessionCleaner should] receive:@selector(initWithDatabase:eventsCleaner:apiKey:)
                            withArguments:database, eventsCleaner, apiKey];
         createStorage();
+    });
+    
+    it(@"Should update api key", ^{
+        NSString *const newApiKey = @"NEW_API_KEY";
+        createStorage();
+        [storage updateAPIKey:newApiKey];
+        [[storage.apiKey should] equal:newApiKey];
     });
 
     context(@"Created storage", ^{

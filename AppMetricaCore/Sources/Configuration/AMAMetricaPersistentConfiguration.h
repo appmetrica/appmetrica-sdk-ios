@@ -9,6 +9,7 @@
 @class AMAMetricaInMemoryConfiguration;
 @class AMAAttributionModelConfiguration;
 @class AMAExternalAttributionConfiguration;
+@class AMAAppMetricaConfiguration;
 
 extern NSString *const kAMADeviceIDStorageKey;
 extern NSString *const kAMADeviceIDHashStorageKey;
@@ -39,6 +40,9 @@ typedef NSDictionary<AMAAttributionSource, AMAExternalAttributionConfiguration *
 @property (nonatomic, strong) NSDictionary<NSString *, NSNumber *> *eventCountsByKey;
 @property (nonatomic, strong) NSDecimalNumber *eventSum;
 @property (nonatomic, copy) NSArray<NSString *> *revenueTransactionIds;
+@property (nonatomic, copy) NSString *recentMainApiKey;
+
+@property (nonatomic, strong) AMAAppMetricaConfiguration *appMetricaClientConfiguration;
 
 - (instancetype)init NS_UNAVAILABLE;
 + (instancetype)new NS_UNAVAILABLE;

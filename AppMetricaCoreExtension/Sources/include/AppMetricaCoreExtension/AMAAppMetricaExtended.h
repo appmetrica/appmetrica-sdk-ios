@@ -37,6 +37,9 @@ NS_ASSUME_NONNULL_BEGIN
 // Logging Configuration
 + (AMALogConfigurator *)sharedLogConfigurator;
 
+// Anonymous activation
++ (void)activate;
+
 // Reporting
 + (nullable id<AMAAppMetricaExtendedReporting>)extendedReporterForApiKey:(NSString *)apiKey
 NS_SWIFT_NAME(extendedReporter(for:));

@@ -29,14 +29,20 @@ describe(@"AMAEventNameHashesStorageFactory", ^{
         AMADiskFileStorageOptions options = AMADiskFileStorageOptionNoBackup | AMADiskFileStorageOptionCreateDirectory;
         [[fileStorage should] receive:@selector(initWithPath:options:)
                         withArguments:@"/base/path/API_KEY/event_hashes.bin", theValue(options)];
-        [AMAEventNameHashesStorageFactory storageForApiKey:apiKey];
+        [AMAEventNameHashesStorageFactory storageForApiKey:apiKey main:NO];
     });
     it(@"Should create storage", ^{
         [[storage should] receive:@selector(initWithFileStorage:) withArguments:fileStorage];
-        [AMAEventNameHashesStorageFactory storageForApiKey:apiKey];
+        [AMAEventNameHashesStorageFactory storageForApiKey:apiKey main:NO];
     });
     it(@"Should return storage", ^{
-        [[[AMAEventNameHashesStorageFactory storageForApiKey:apiKey] should] equal:storage];
+        [[[AMAEventNameHashesStorageFactory storageForApiKey:apiKey main:NO] should] equal:storage];
+    });
+    it(@"Should create main storage reporter", ^{
+        AMADiskFileStorageOptions options = AMADiskFileStorageOptionNoBackup | AMADiskFileStorageOptionCreateDirectory;
+        [[fileStorage should] receive:@selector(initWithPath:options:)
+                        withArguments:@"/base/path/main/event_hashes.bin", theValue(options)];
+        [[[AMAEventNameHashesStorageFactory storageForApiKey:apiKey main:YES] should] equal:storage];
     });
 
 });

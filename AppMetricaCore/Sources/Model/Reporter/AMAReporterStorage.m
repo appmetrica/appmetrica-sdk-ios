@@ -18,6 +18,7 @@
 @property (nonatomic, strong, readonly) id<AMADatabaseProtocol> database;
 @property (nonatomic, strong, readonly) AMAEventSerializer *eventSerializer;
 @property (nonatomic, strong, readonly) AMASessionSerializer *sessionSerializer;
+@property (nonatomic, copy, readwrite) NSString *apiKey;
 
 @end
 
@@ -25,20 +26,25 @@
 
 - (instancetype)initWithApiKey:(NSString *)apiKey
               eventEnvironment:(AMAEnvironmentContainer *)eventEnvironment
+                          main:(BOOL)main
 {
     AMASharedReporterProvider *reporterProvider = [[AMASharedReporterProvider alloc] initWithApiKey:apiKey];
     AMAEventsCleaner *eventsCleaner = [[AMAEventsCleaner alloc] initWithReporterProvider:reporterProvider];
+    
     return [self initWithApiKey:apiKey
                eventEnvironment:eventEnvironment
                   eventsCleaner:eventsCleaner
                        database:[AMADatabaseFactory reporterDatabaseForApiKey:apiKey
-                                                                eventsCleaner:eventsCleaner]];
+                                                                         main:main
+                                                                eventsCleaner:eventsCleaner]
+                           main:main];
 }
 
 - (instancetype)initWithApiKey:(NSString *)apiKey
               eventEnvironment:(AMAEnvironmentContainer *)eventEnvironment
                  eventsCleaner:(AMAEventsCleaner *)eventsCleaner
                       database:(id<AMADatabaseProtocol>)database
+                          main:(BOOL)main
 {
     self = [super init];
     if (self != nil) {
@@ -54,10 +60,6 @@
                                                          stateStorage:_stateStorage];
         _eventStorage = [[AMAEventStorage alloc] initWithDatabase:database
                                                   eventSerializer:_eventSerializer];
-        _reportRequestProvider = [[AMAReportRequestProvider alloc] initWithApiKey:apiKey
-                                                                         database:database
-                                                                  eventSerializer:_eventSerializer
-                                                                sessionSerializer:_sessionSerializer];
         _sessionsCleaner = [[AMASessionsCleaner alloc] initWithDatabase:database
                                                           eventsCleaner:eventsCleaner
                                                                  apiKey:apiKey];
@@ -83,6 +85,21 @@
 {
     [[AMAReporterStoragesContainer sharedInstance] waitMigrationForApiKey:self.apiKey];
     [self.stateStorage restoreState];
+}
+
+- (void)updateAPIKey:(NSString *)apiKey
+{
+    @synchronized (self) {
+        self.apiKey = apiKey;
+    }
+}
+
+- (AMAReportRequestProvider *)reportRequestProvider
+{
+    return [[AMAReportRequestProvider alloc] initWithApiKey:self.apiKey
+                                                   database:self.database
+                                            eventSerializer:self.eventSerializer
+                                          sessionSerializer:self.sessionSerializer];
 }
 
 @end

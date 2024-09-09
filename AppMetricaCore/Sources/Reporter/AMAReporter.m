@@ -150,7 +150,7 @@
         _privacyTimer = privacyTimer;
         privacyTimer.delegate = self;
         
-        AMAEventNameHashesStorage *eventHashesStorage = [AMAEventNameHashesStorageFactory storageForApiKey:self.apiKey];
+        AMAEventNameHashesStorage *eventHashesStorage = [AMAEventNameHashesStorageFactory storageForApiKey:self.apiKey main:main];
         _occurrenceController = [[AMAEventFirstOccurrenceController alloc] initWithStorage:eventHashesStorage];
         _adServices = adServices;
     }
@@ -195,6 +195,13 @@
 - (void)shutdown
 {
     [self pauseSession];
+}
+
+- (void)updateAPIKey:(NSString *)apiKey
+{
+    @synchronized (self) {
+        self.apiKey = apiKey;
+    }
 }
 
 - (void)setAttributionChecker:(AMAAttributionChecker *)attributionChecker

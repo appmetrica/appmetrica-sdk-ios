@@ -1,9 +1,7 @@
 #import <UIKit/UIKit.h>
-
 #import <Kiwi/Kiwi.h>
-
 #import <AppMetricaStorageUtils/AppMetricaStorageUtils.h>
-
+#import <AppMetricaTestUtils/AppMetricaTestUtils.h>
 #import "AMAAttributionModelConfiguration.h"
 #import "AMAEnvironmentContainer.h"
 #import "AMAExternalAttributionConfiguration.h"
@@ -435,6 +433,28 @@ describe(@"AMAMetricaPersistentConfiguration", ^{
         });
     });
     
+    context(@"recentMainApiKey", ^{
+        NSString *const value = @"API_KEY";
+        NSString *const key = @"recent.main.api.key";
+        AMAMetricaPersistentConfiguration *__block configuration = nil;
+        beforeEach(^{
+            [storage stub:@selector(stringForKey:error:) andReturn:value];
+            configuration = createConfig();
+        });
+        
+        it(@"Should use valid key", ^{
+            [[storage should] receive:@selector(stringForKey:error:) withArguments:key, kw_any()];
+            [configuration recentMainApiKey];
+        });
+        it(@"Should return valid value", ^{
+            [[configuration.recentMainApiKey should] equal:value];
+        });
+        it(@"Should save valid value", ^{
+            [[storage should] receive:@selector(saveString:forKey:error:) withArguments:value, key, kw_any()];
+            configuration.recentMainApiKey = value;
+        });
+    });
+    
     context(@"externalAttributionConfigurations", ^{
         NSDictionary *dict = @{
             kAMAAttributionSourceTenjin : [[AMAExternalAttributionConfiguration alloc]
@@ -473,6 +493,32 @@ describe(@"AMAMetricaPersistentConfiguration", ^{
             [config setExternalAttributionConfigurations:nil];
             AMAMetricaPersistentConfiguration *anotherConfig = createConfig();
             [[[anotherConfig externalAttributionConfigurations] should] beNil];
+        });
+    });
+    
+    context(@"appMetricaClientConfiguration", ^{
+        NSDictionary *const json = @{ @"foo" : @"bar" };
+        NSString *const key = @"appmetrica.client.confugiration";
+        AMAAppMetricaConfiguration *__block mockConfiguration = nil;
+        AMAMetricaPersistentConfiguration *__block configuration = nil;
+        beforeEach(^{
+            [storage stub:@selector(jsonDictionaryForKey:error:) andReturn:json];
+            configuration = createConfig();
+            mockConfiguration = [AMAAppMetricaConfiguration nullMock];
+        });
+        
+        it(@"Should use valid key", ^{
+            [[storage should] receive:@selector(jsonDictionaryForKey:error:) withArguments:key, kw_any()];
+            [configuration appMetricaClientConfiguration];
+        });
+        it(@"Should return config with json", ^{
+            AMAAppMetricaConfiguration *mockConfiguration = [AMAAppMetricaConfiguration stubbedNullMockForInit:@selector(initWithJSON:)];
+            [[configuration.appMetricaClientConfiguration should] equal:mockConfiguration];
+        });
+        it(@"Should save valid config", ^{
+            [mockConfiguration stub:@selector(JSON) andReturn:json];
+            [[storage should] receive:@selector(saveJSONDictionary:forKey:error:) withArguments:json, key, kw_any()];
+            configuration.appMetricaClientConfiguration = mockConfiguration;
         });
     });
 });

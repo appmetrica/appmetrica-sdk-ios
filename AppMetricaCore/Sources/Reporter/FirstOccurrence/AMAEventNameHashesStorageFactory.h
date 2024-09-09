@@ -8,6 +8,6 @@
 - (instancetype)init NS_UNAVAILABLE;
 + (instancetype)new NS_UNAVAILABLE;
 
-+ (AMAEventNameHashesStorage *)storageForApiKey:(NSString *)apiKey;
++ (AMAEventNameHashesStorage *)storageForApiKey:(NSString *)apiKey main:(BOOL)main;
 
 @end

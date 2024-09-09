@@ -12,6 +12,8 @@ NS_ASSUME_NONNULL_BEGIN
 + (AMAAppMetricaImpl *)sharedImpl;
 + (id<AMAHostStateProviding>)sharedHostStateProvider;
 + (AMAInternalEventsReporter *)sharedInternalEventsReporter;
++ (void)setLogs:(BOOL)enabled;
++ (BOOL)isActivatedAsMain;
 
 @end
 

@@ -10,6 +10,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, strong, readonly) AMAEnvironmentContainer *eventEnvironment;
 
+- (AMAReporterStorage *)mainStorageForApiKey:(NSString *)apiKey;
 - (AMAReporterStorage *)storageForApiKey:(NSString *)apiKey;
 
 - (void)completeMigrationForApiKey:(NSString *)apiKey;

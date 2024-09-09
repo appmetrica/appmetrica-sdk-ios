@@ -22,12 +22,14 @@
 #if !TARGET_OS_TV
 @protocol AMAJSControlling;
 #endif
+@class AMAAppMetricaConfigurationManager;
 
 NS_ASSUME_NONNULL_BEGIN
 
 @interface AMAAppMetricaImpl : NSObject <AMAStartupControllerDelegate>
 
 @property (nonatomic, strong, nullable) NSString *userProfileID;
+@property (nonatomic, strong) AMAAppMetricaConfigurationManager *configurationManager;
 
 - (instancetype)init NS_UNAVAILABLE;
 + (instancetype)new NS_UNAVAILABLE;
@@ -39,6 +41,9 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong, readonly) id<AMAAsyncExecuting, AMASyncExecuting> executor;
 
 - (void)activateWithConfiguration:(AMAAppMetricaConfiguration *)configuration;
+- (void)activateAnonymously;
+- (void)scheduleAnonymousActivationIfNeeded;
+- (void)activateReporterWithConfiguration:(AMAReporterConfiguration *)configuration;
 
 - (void)addStartupCompletionObserver:(id<AMAStartupCompletionObserving>)observer;
 - (void)removeStartupCompletionObserver:(id<AMAStartupCompletionObserving>)observer;
@@ -88,14 +93,10 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)pauseSession;
 - (void)resumeSession;
 
-- (void)handleConfigurationUpdate;
-
 - (void)startDispatcher;
 
 - (id<AMAAppMetricaExtendedReporting>)manualReporterForConfiguration:(AMAReporterConfiguration *)configuration;
 - (BOOL)isReporterCreatedForAPIKey:(NSString *)apiKey;
-
-- (void)setPreloadInfo:(nullable AMAAppMetricaPreloadInfo *)preloadInfo;
 
 + (void)syncSetErrorEnvironmentValue:(NSString *)value forKey:(NSString *)key;
 - (void)setAppEnvironmentValue:(NSString *)value forKey:(NSString *)key;

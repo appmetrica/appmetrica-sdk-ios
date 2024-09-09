@@ -55,10 +55,14 @@ describe(@"AMAMetricaInMemoryConfiguration", ^{
     context(@"Started flag", ^{
         it(@"Should be NO", ^{
             [[theValue(configuration.appMetricaStarted) should] beNo];
+            [[theValue(configuration.appMetricaStartedAnonymously) should] beNo];
         });
-        it(@"Should be YES after marked", ^{
+        it(@"Should be YES after main marked", ^{
             [configuration markAppMetricaStarted];
             [[theValue(configuration.appMetricaStarted) should] beYes];
+        });it(@"Should be YES after anonymous marked", ^{
+            [configuration markAppMetricaStartedAnonymously];
+            [[theValue(configuration.appMetricaStartedAnonymously) should] beYes];
         });
     });
     context(@"Impl created flag", ^{

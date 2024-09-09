@@ -161,7 +161,7 @@ describe(@"AMAMetricaSessions", ^{
                                                                     object:nil];
 
                 AMASession *session =
-                    [[AMAAppMetrica sharedImpl].reporter.reporterStorage.sessionStorage lastGeneralSessionWithError:nil];
+                    [[AMAAppMetrica sharedImpl].mainReporter.reporterStorage.sessionStorage lastGeneralSessionWithError:nil];
                 [[session should] beNil];
             });
             it(@"Should not start new session after receiving notification before start and then starting Impl", ^{
