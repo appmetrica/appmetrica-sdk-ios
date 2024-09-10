@@ -1,11 +1,10 @@
 
 #import <Foundation/Foundation.h>
 
-@class KSCrash;
+@class KSCrashReportStoreConfiguration;
 
 @interface AMAKSCrash : NSObject
 
-+ (KSCrash *)sharedInstance;
-+ (NSString *)crashesPath;
+@property (class, readonly) NSString *crashesPath;
 
 @end

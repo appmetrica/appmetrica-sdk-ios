@@ -10,7 +10,6 @@
 #import "AMACrashSafeTransactor.h"
 #import "AMAAppMetricaCrashes.h"
 #import "AMADecodedCrash.h"
-#import "AMAKSCrash.h"
 #import "AMAUnhandledCrashDetector.h"
 
 @interface AMACrashLoader ()
@@ -39,7 +38,7 @@
 
 + (void)resetCrashContext
 {
-    [[AMAKSCrash sharedInstance] setUserInfo:nil];
+    [[KSCrash sharedInstance] setUserInfo:nil];
 }
 
 @end
@@ -76,54 +75,77 @@ describe(@"AMACrashLoader", ^{
     });
     
     context(@"Crash context", ^{
+        __block KSCrash *mockKSCrash;
+
         beforeEach(^{
-            [AMACrashLoader resetCrashContext];
+            mockKSCrash = [KSCrash mock];
+            [KSCrash stub:@selector(sharedInstance) andReturn:mockKSCrash];
         });
+
         NSDictionary *context = @{ @"a" : @"b" };
+
         it(@"Should set context", ^{
+            [mockKSCrash stub:@selector(userInfo)];
+            [[mockKSCrash should] receive:@selector(setUserInfo:) withArguments:context];
             [AMACrashLoader addCrashContext:context];
+
+            [mockKSCrash stub:@selector(userInfo) andReturn:context];
             NSDictionary *crashContext = [AMACrashLoader crashContext];
             [[crashContext should] equal:context];
         });
+
         it(@"Should set context to KSCrash userInfo", ^{
+            [mockKSCrash stub:@selector(userInfo)];
+            [mockKSCrash stub:@selector(setUserInfo:)];
+            [[mockKSCrash should] receive:@selector(setUserInfo:) withArguments:context];
             [AMACrashLoader addCrashContext:context];
-            [[[[AMAKSCrash sharedInstance] userInfo] should] equal:context];
         });
+
         it(@"Should return KSCrash userInfo as crash context", ^{
-            [[AMAKSCrash sharedInstance] setUserInfo:context];
+            [mockKSCrash stub:@selector(userInfo) andReturn:context];
             [[[AMACrashLoader crashContext] should] equal:context];
         });
+
         it(@"Should not overwrite userInfo, but append context data", ^{
             NSDictionary *userInfo = @{ @"a" : @"b" };
             NSDictionary *crashContext = @{ @"c" : @"d" };
-            [[AMAKSCrash sharedInstance] setUserInfo:userInfo];
-            [AMACrashLoader addCrashContext:crashContext];
+            [mockKSCrash stub:@selector(userInfo) andReturn:userInfo];
+
             NSMutableDictionary *resultDictionary = [userInfo mutableCopy];
             [resultDictionary addEntriesFromDictionary:crashContext];
-            [[[[AMAKSCrash sharedInstance] userInfo] should] equal:resultDictionary];
+
+            [[mockKSCrash should] receive:@selector(setUserInfo:) withArguments:resultDictionary];
+
+            [AMACrashLoader addCrashContext:crashContext];
         });
+
         it(@"Should not modify context if nil is passed", ^{
-            NSDictionary *userInfo = @{ @"a" : @"b" };
-            [[AMAKSCrash sharedInstance] setUserInfo:userInfo];
+            [[mockKSCrash shouldNot] receive:@selector(setUserInfo:)];
             [AMACrashLoader addCrashContext:nil];
-            [[[[AMAKSCrash sharedInstance] userInfo] should] equal:userInfo];
         });
+
         it(@"Should overwrite with new values", ^{
             NSDictionary *userInfo = @{ @"a" : @"b", @"c" : @"d" };
             NSDictionary *crashContext = @{ @"c" : @"g" };
-            [[AMAKSCrash sharedInstance] setUserInfo:userInfo];
-            [AMACrashLoader addCrashContext:crashContext];
+            [mockKSCrash stub:@selector(userInfo) andReturn:userInfo];
+
             NSDictionary *resultDictionary = @{ @"a" : @"b", @"c" : @"g" };
-            [[[[AMAKSCrash sharedInstance] userInfo] should] equal:resultDictionary];
+
+            [[mockKSCrash should] receive:@selector(setUserInfo:) withArguments:resultDictionary];
+
+            [AMACrashLoader addCrashContext:crashContext];
         });
     });
     context(@"Synchronous Load Crash Reports", ^{
         let(unhandledCrashDetector, ^{ return [AMAUnhandledCrashDetector nullMock]; });
         let(crashLoaderDelegate, ^{ return [KWMock nullMockForProtocol:@protocol(AMACrashLoaderDelegate)]; });
         let(crashReports, ^{ return @[ [AMADecodedCrash nullMock], [AMADecodedCrash nullMock] ]; });
+        let(reportStore, ^{ return [KSCrashReportStore nullMock]; });
         let(ksCrash, ^{
             KSCrash *mock = [KSCrash nullMock];
-            [AMAKSCrash stub:@selector(sharedInstance) andReturn:mock];
+            [mock stub:@selector(reportStore) andReturn:reportStore];
+            [KSCrash stub:@selector(sharedInstance) andReturn:mock];
+
             return mock;
         });
         let(crashLoader, ^{
@@ -137,7 +159,7 @@ describe(@"AMACrashLoader", ^{
         NSArray *const crashIDs = @[crashID];
       
         it(@"Should return decoded crash reports", ^{
-            [ksCrash stub:@selector(reportIDs) andReturn:crashIDs];
+            [reportStore stub:@selector(reportIDs) andReturn:crashIDs];
             AMACrashReportDecoder *decoder = [AMACrashReportDecoder nullMock];
             [AMACrashReportDecoder stub:@selector(alloc) andReturn:decoder];
             [decoder stub:@selector(initWithCrashID:) andReturn:decoder];
@@ -179,22 +201,26 @@ describe(@"AMACrashLoader", ^{
         });
         
         it(@"Should purge successfully processed reports", ^{
-            [ksCrash stub:@selector(reportIDs)andReturn:crashIDs times:@1 afterThatReturn:@[]]; // Simulating deletion
-            [[ksCrash should] receive:@selector(deleteReportWithID:) withArguments:crashID];
-            
+            [reportStore stub:@selector(reportIDs)andReturn:crashIDs times:@1 afterThatReturn:@[]]; // Simulating deletion
+            [[reportStore should] receive:@selector(deleteReportWithID:)
+                            withArguments:theValue(crashID.integerValue)];
+
             [crashLoader syncLoadCrashReports];
         });
     });
     context(@"Load crash reports", ^{
         KSCrash __block *ksCrash;
+        KSCrashReportStore __block *reportStore;
         AMAUnhandledCrashDetector __block *unhandledCrashDetector;
         AMACrashLoader __block *crashLoader;
         id __block crashLoaderDelegate;
         NSNumber *crashID = @23;
         
         beforeEach(^{
+            reportStore = [KSCrashReportStore nullMock];
             ksCrash = [KSCrash nullMock];
-            [AMAKSCrash stub:@selector(sharedInstance) andReturn:ksCrash];
+            [KSCrash stub:@selector(sharedInstance) andReturn:ksCrash];
+            [ksCrash stub:@selector(reportStore) andReturn:reportStore];
             unhandledCrashDetector = [AMAUnhandledCrashDetector nullMock];
             crashLoader = [[AMACrashLoader alloc] initWithUnhandledCrashDetector:unhandledCrashDetector
                                                                       transactor:transactor];
@@ -203,22 +229,23 @@ describe(@"AMACrashLoader", ^{
             crashLoader.isUnhandledCrashDetectingEnabled = YES;
         });
 
-        it(@"Should not use KSCrash sharedInstance", ^{
-            [[KSCrash shouldNot] receive:@selector(sharedInstance)];
-            [crashLoader loadCrashReports];
-        });
 
         it(@"Should set correct required monitoring in KSCrash", ^{
-            [[ksCrash should] receive:@selector(install)];
-            [[ksCrash should] receive:@selector(setMonitoring:) withArguments:theValue(KSCrashMonitorTypeRequired)];
+            KWCaptureSpy *configSpy = [ksCrash captureArgument:@selector(installWithConfiguration:error:) atIndex:0];
+
+            [ksCrash stub:@selector(installWithConfiguration:error:) andReturn:theValue(YES)];
+
+            [[ksCrash should] receive:@selector(installWithConfiguration:error:)];
+            
             [crashLoader enableRequiredMonitoring];
+
+            KSCrashConfiguration *capturedConfig = configSpy.argument;
+            [[theValue(capturedConfig.monitors) should] equal:theValue(KSCrashMonitorTypeRequired)];
+
+            [[theValue(capturedConfig.enableMemoryIntrospection) should] equal:theValue(NO)];
+            [[theValue(capturedConfig.enableQueueNameSearch) should] equal:theValue(NO)];
         });
 
-        it(@"Should enable cxa_throw swap", ^{
-            [[ksCrash should] receive:@selector(enableSwapOfCxaThrow)];
-            [crashLoader enableSwapOfCxaThrow];
-        });
-    
         context(@"Crashed last launch", ^{
             context(@"Disabled", ^{
                 beforeEach(^{
@@ -262,7 +289,7 @@ describe(@"AMACrashLoader", ^{
             
             it(@"Should decode ANR crash report", ^{
                 NSNumber *expectedCrashID = @123;
-                [ksCrash stub:@selector(reportIDs) andReturn:@[ expectedCrashID ]];
+                [reportStore stub:@selector(reportIDs) andReturn:@[ expectedCrashID ]];
                 AMACrashReportDecoder *decoder = [AMACrashReportDecoder nullMock];
                 [AMACrashReportDecoder stub:@selector(alloc) andReturn:decoder];
                 [[decoder should] receive:@selector(initWithCrashID:) withArguments:expectedCrashID];
@@ -300,7 +327,8 @@ describe(@"AMACrashLoader", ^{
                 
                 it(@"Should purge crash report", ^{
                     [decoder stub:@selector(crashID) andReturn:crashID];
-                    [[ksCrash should] receive:@selector(deleteReportWithID:) withArguments:crashID];
+                    [[reportStore should] receive:@selector(deleteReportWithID:)
+                                    withArguments:theValue(crashID.integerValue)];
                     [(id<AMACrashReportDecoderDelegate>)crashLoader crashReportDecoder:decoder
                                                                           didDecodeANR:crash
                                                                              withError:nil];
@@ -407,7 +435,8 @@ describe(@"AMACrashLoader", ^{
 
             it(@"Should purge crash report", ^{
                 [decoder stub:@selector(crashID) andReturn:crashID];
-                [[ksCrash should] receive:@selector(deleteReportWithID:) withArguments:crashID];
+                [[reportStore should] receive:@selector(deleteReportWithID:)
+                                withArguments:theValue(crashID.integerValue)];
                 [(id<AMACrashReportDecoderDelegate>)crashLoader crashReportDecoder:decoder
                                                                     didDecodeCrash:crash
                                                                          withError:nil];
@@ -422,9 +451,9 @@ describe(@"AMACrashLoader", ^{
                 [handler beginAssertIgnoring];
 
                 [ksCrash stub:@selector(crashedLastLaunch) andReturn:theValue(YES)];
-                [ksCrash stub:@selector(deleteReportWithID:) withArguments:crashID];
-                [ksCrash stub:@selector(reportIDs) andReturn:@[ crashID ]];
-                [ksCrash stub:@selector(reportWithID:) andReturn:nil];
+                [reportStore stub:@selector(deleteReportWithID:) withArguments:crashID];
+                [reportStore stub:@selector(reportIDs) andReturn:@[ crashID ]];
+                [reportStore stub:@selector(reportForID:) andReturn:nil];
             });
 
             afterEach(^{
@@ -442,7 +471,8 @@ describe(@"AMACrashLoader", ^{
             });
 
             it(@"Should purge crash report", ^{
-                [[ksCrash should] receive:@selector(deleteReportWithID:) withArguments:crashID];
+                [[reportStore should] receive:@selector(deleteReportWithID:)
+                                withArguments:theValue(crashID.integerValue)];
                 [crashLoader loadCrashReports];
             });
         });
@@ -481,13 +511,13 @@ describe(@"AMACrashLoader", ^{
 
                 it(@"Should load crash IDs within transaction", ^{
                     [crashLoader loadCrashReports];
-                    [[ksCrash should] receive:@selector(reportIDs)];
+                    [[reportStore should] receive:@selector(reportIDs)];
                     transaction();
                 });
 
                 it(@"Should remove crashes within rollback", ^{
                     [crashLoader loadCrashReports];
-                    [[ksCrash should] receive:@selector(deleteAllReports)];
+                    [[reportStore should] receive:@selector(deleteAllReports)];
                     rollback(@"context");
                 });
 
@@ -502,18 +532,18 @@ describe(@"AMACrashLoader", ^{
                 NSArray *const reportIDs = @[ crashID ];
 
                 beforeEach(^{
-                    [ksCrash stub:@selector(reportWithID:)];
+                    [ksCrash stub:@selector(reportForID:)];
                     [ksCrash stub:@selector(deleteReportWithID:)];
                 });
 
                 it(@"Should remove crashes within rollback", ^{
                     [crashLoader handleCrashReports:reportIDs];
-                    [[ksCrash should] receive:@selector(deleteAllReports)];
+                    [[reportStore should] receive:@selector(deleteAllReports)];
                     rollback(@"context");
                 });
 
                 it(@"Should not call crash loading outside of transaction", ^{
-                    [[ksCrash shouldNot] receive:@selector(reportWithID:)];
+                    [[ksCrash shouldNot] receive:@selector(reportForID:)];
                     [crashLoader handleCrashReports:reportIDs];
                 });
             });

@@ -17,8 +17,6 @@ NSString *const kAMAApplicationNotRespondingCrashType = @"AMAApplicationNotRespo
 @property (nonatomic, strong) AMAUnhandledCrashDetector *unhandledCrashDetector;
 @property (nonatomic, strong, readonly) AMACrashSafeTransactor *transactor;
 
-@property (nonatomic, strong, readonly) KSCrash *ksCrashInstance;
-
 @property (nonatomic, assign) BOOL enabled;
 
 @property (nonatomic, strong) NSMutableArray *syncLoadedCrashes;
@@ -26,8 +24,6 @@ NSString *const kAMAApplicationNotRespondingCrashType = @"AMAApplicationNotRespo
 @end
 
 @implementation AMACrashLoader
-
-@synthesize ksCrashInstance = _ksCrashInstance;
 
 - (instancetype)initWithUnhandledCrashDetector:(AMAUnhandledCrashDetector *)unhandledCrashDetector
                                     transactor:(AMACrashSafeTransactor *)transactor
@@ -48,17 +44,9 @@ NSString *const kAMAApplicationNotRespondingCrashType = @"AMAApplicationNotRespo
     _decoders = nil;
 }
 
-- (KSCrash *)ksCrashInstance
-{
-    if (_ksCrashInstance == nil) {
-        _ksCrashInstance = [AMAKSCrash sharedInstance];
-    }
-    return _ksCrashInstance;
-}
-
 - (NSNumber *)crashedLastLaunch
 {
-    return self.enabled ? @(self.ksCrashInstance.crashedLastLaunch) : nil;
+    return self.enabled ? @(KSCrash.sharedInstance.crashedLastLaunch) : nil;
 }
 
 - (void)enableCrashLoader
@@ -84,10 +72,7 @@ NSString *const kAMAApplicationNotRespondingCrashType = @"AMAApplicationNotRespo
 
 - (void)enableRequiredMonitoring
 {
-    static dispatch_once_t pred;
-    dispatch_once(&pred, ^{
-        [self installKSCrashWithMonitoring:KSCrashMonitorTypeRequired];
-    });
+    [self installKSCrashWithMonitoring:KSCrashMonitorTypeRequired];
 }
 
 - (void)installKSCrashWithMonitoring:(KSCrashMonitorType)monitoring
@@ -97,21 +82,24 @@ NSString *const kAMAApplicationNotRespondingCrashType = @"AMAApplicationNotRespo
         monitoring &= KSCrashMonitorTypeDebuggerSafe;
     }
 
-    self.ksCrashInstance.monitoring = monitoring;
+    KSCrashConfiguration *config = [KSCrashConfiguration new];
+    config.installPath = AMAKSCrash.crashesPath;
+    config.enableMemoryIntrospection = NO; // hot fix on arm64
+    config.enableQueueNameSearch = NO;
+    config.enableSwapCxaThrow = NO;
+    config.monitors = monitoring;
 
-    BOOL handlerInstalled = [self.ksCrashInstance install];
+    NSError *installationError = nil;
+    BOOL handlerInstalled = [[KSCrash sharedInstance] installWithConfiguration:config error:&installationError];
+
     if (handlerInstalled == NO) {
-        AMALogInfo(@"Could not enable crash reporter");
-    }
-}
-
-- (void)enableSwapOfCxaThrow
-{
-    //TODO: https://nda.ya.ru/t/RWbytzRf74Zqsb
-    @synchronized (self) {
-        [self.transactor processTransactionWithID:@"KSCrashSwapOfCxaThrow" name:@"SwapOfCxaThrow" transaction:^{
-            [self.ksCrashInstance enableSwapOfCxaThrow];
-        }];
+        AMALogError(@"Could not enable crash reporter. Error: %@", installationError.localizedDescription);
+        if (installationError.localizedFailureReason) {
+            AMALogError(@"Failure reason: %@", installationError.localizedFailureReason);
+        }
+    } 
+    else {
+        AMALogInfo(@"Crash reporter successfully installed with monitoring type: %lu", (unsigned long)monitoring);
     }
 }
 
@@ -122,12 +110,7 @@ NSString *const kAMAApplicationNotRespondingCrashType = @"AMAApplicationNotRespo
 
 - (void)loadCrashReports
 {
-    if (self.ksCrashInstance == nil) {
-        AMALogWarn(@"Crash reporter is nil");
-        return;
-    }
-
-    if (self.ksCrashInstance.crashedLastLaunch == NO && self.isUnhandledCrashDetectingEnabled) {
+    if (KSCrash.sharedInstance.crashedLastLaunch == NO && self.isUnhandledCrashDetectingEnabled) {
         AMALogInfo(@"No launch crashes detected. Trying to detect unhandled crashes");
         [self.unhandledCrashDetector checkUnhandledCrash:^(AMAUnhandledCrashType crashType) {
             [self.delegate crashLoader:self didDetectProbableUnhandledCrash:crashType];
@@ -136,9 +119,8 @@ NSString *const kAMAApplicationNotRespondingCrashType = @"AMAApplicationNotRespo
 
     NSArray *__block reportIDs = nil;
     NSString *transactionID = kAMALoadingCrashReportsTransactionKey;
-    __weak __typeof(self) weakSelf = self;
     [self.transactor processTransactionWithID:transactionID name:@"ReportIDs" transaction:^{
-        reportIDs = [weakSelf.ksCrashInstance reportIDs];
+        reportIDs = KSCrash.sharedInstance.reportStore.reportIDs;
     } rollback:^NSString *(id context){
         [[self class] purgeAllRawCrashReports];
         return nil;
@@ -180,7 +162,7 @@ NSString *const kAMAApplicationNotRespondingCrashType = @"AMAApplicationNotRespo
     AMACrashReportDecoder *decoder = [self crashReportDecoderForReportWithID:reportID];
 
     if (decoder != nil) {
-        __block NSDictionary *crashReport = nil;
+        __block KSCrashReportDictionary *crashReport = nil;
 
         AMACrashSafeTransactorRollbackBlock rollback = ^NSString *(id context) {
             [[self class] purgeAllRawCrashReports];
@@ -189,9 +171,8 @@ NSString *const kAMAApplicationNotRespondingCrashType = @"AMAApplicationNotRespo
         };
 
         NSString *transactionID = kAMALoadingCrashReportsTransactionKey;
-        __weak __typeof(self) weakSelf = self;
         [self.transactor processTransactionWithID:transactionID name:@"ReportWithID" transaction:^{
-            crashReport = [weakSelf.ksCrashInstance reportWithID:reportID];
+            crashReport = [KSCrash.sharedInstance.reportStore reportForID:reportID.longLongValue];
         } rollback:rollback];
 
         if (success) {
@@ -199,7 +180,7 @@ NSString *const kAMAApplicationNotRespondingCrashType = @"AMAApplicationNotRespo
                                                         name:@"DecodeReport"
                                              rollbackContext:[reportID stringValue]
                                                  transaction:^{
-                [decoder decode:crashReport];
+                [decoder decode:crashReport.value];
             } rollback:rollback];
         }
     }
@@ -218,7 +199,7 @@ NSString *const kAMAApplicationNotRespondingCrashType = @"AMAApplicationNotRespo
 
 + (void)purgeAllRawCrashReports
 {
-    [[AMAKSCrash sharedInstance] deleteAllReports];
+    [KSCrash.sharedInstance.reportStore deleteAllReports];
 }
 
 + (void)purgeCrashesDirectory
@@ -228,30 +209,38 @@ NSString *const kAMAApplicationNotRespondingCrashType = @"AMAApplicationNotRespo
 
 + (void)addCrashContext:(NSDictionary *)crashContext
 {
+    if (crashContext.count == 0) {
+        return;
+    }
+
     NSDictionary *existingContext = [self crashContext];
-    NSDictionary *newContext = crashContext;
+    NSDictionary *newContext = nil;
+
     if (existingContext != nil) {
         NSMutableDictionary *currentContext = [existingContext mutableCopy];
         [currentContext addEntriesFromDictionary:crashContext];
         newContext = [currentContext copy];
+    } else {
+        newContext = [crashContext copy];
     }
-    [[AMAKSCrash sharedInstance] setUserInfo:newContext];
+
+    KSCrash.sharedInstance.userInfo = newContext;
 }
 
 + (NSDictionary *)crashContext
 {
-    return [[AMAKSCrash sharedInstance] userInfo];
+    return KSCrash.sharedInstance.userInfo;
 }
 
 - (void)reportANR
 {
-    [[AMAKSCrash sharedInstance] reportUserException:kAMAApplicationNotRespondingCrashType
-                                              reason:@"The main thread was unresponsive for too long"
-                                            language:@"ObjC"
-                                          lineOfCode:nil
-                                          stackTrace:nil
-                                       logAllThreads:YES
-                                    terminateProgram:NO];
+    [[KSCrash sharedInstance] reportUserException:kAMAApplicationNotRespondingCrashType
+                                           reason:@"The main thread was unresponsive for too long"
+                                         language:@"ObjC"
+                                       lineOfCode:nil
+                                       stackTrace:nil
+                                    logAllThreads:YES
+                                 terminateProgram:NO];
     [self loadCrashReports];
 }
 
@@ -310,11 +299,10 @@ NSString *const kAMAApplicationNotRespondingCrashType = @"AMAApplicationNotRespo
 + (void)purgeRawCrashReport:(NSNumber *)reportID
 {
     AMALogInfo(@"Will purge report with ID: %@", reportID);
-    [[AMAKSCrash sharedInstance] deleteReportWithID:reportID];
+    [KSCrash.sharedInstance.reportStore deleteReportWithID:reportID.integerValue];
 
 #ifdef DEBUG
-    NSArray *reports = [[AMAKSCrash sharedInstance] reportIDs];
-    BOOL isAvailable = [reports containsObject:reportID];
+    NSArray *reports = KSCrash.sharedInstance.reportStore.reportIDs;
     if ([reports containsObject:reportID] == NO) {
         AMALogAssert(@"FAILED TO REMOVE REPORT: %@", reportID);
     }

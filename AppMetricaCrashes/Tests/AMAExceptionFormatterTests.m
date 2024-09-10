@@ -27,7 +27,6 @@
 #import "AMAVirtualMachineInfo.h"
 #import "AMACrashReportDecoder.h"
 #import "AMASystem.h"
-#import "AMAKSCrash.h"
 #import "AMACppException.h"
 #import "AMAVirtualMachineCrash.h"
 #import "AMARegistersContainer.h"
@@ -70,8 +69,8 @@ describe(@"AMAExceptionFormatter", ^{
                                                              serializer:serializer
                                                            symbolicator:symbolicator
                                                                 decoder:decoder];
-        AMAKSCrash *ksCrash = [AMAKSCrash nullMock];
-        [AMAKSCrash stub:@selector(sharedInstance) andReturn:ksCrash];
+        KSCrash *ksCrash = [KSCrash nullMock];
+        [KSCrash stub:@selector(sharedInstance) andReturn:ksCrash];
         NSDictionary *systemDict = @{ @"key" : @"value" };
         [ksCrash stub:@selector(systemInfo) andReturn:systemDict];
         [decoder stub:@selector(systemInfoForDictionary:) andReturn:systemInfo withArguments:systemDict];

@@ -1403,7 +1403,6 @@
   "AppMetricaCrashes/Tests/AMAErrorEnvironmentTests.m":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCrashes/Tests/AMAErrorEnvironmentTests.m",
   "AppMetricaCrashes/Tests/AMAErrorModelFactoryTests.m":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCrashes/Tests/AMAErrorModelFactoryTests.m",
   "AppMetricaCrashes/Tests/AMAExceptionFormatterTests.m":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCrashes/Tests/AMAExceptionFormatterTests.m",
-  "AppMetricaCrashes/Tests/AMAKSCrashTests.m":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCrashes/Tests/AMAKSCrashTests.m",
   "AppMetricaCrashes/Tests/AMAUnhandledCrashDetectorTests.m":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCrashes/Tests/AMAUnhandledCrashDetectorTests.m",
   "AppMetricaCrashes/Tests/AMAVersionMatcherTests.m":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCrashes/Tests/AMAVersionMatcherTests.m",
   "AppMetricaCrashes/Tests/Helpers/AMAAppMetricaCrashes+Test.h":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCrashes/Tests/Helpers/AMAAppMetricaCrashes+Test.h",

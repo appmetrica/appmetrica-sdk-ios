@@ -256,7 +256,7 @@ static NSString *const kAMAKSCrashReporterVersion = @"3.2.0";
                                            timestamp:[self.dateProvider currentDate]
                                   virtualMachineInfo:virtualMachineInfo];
 
-    NSDictionary *systemInfo = [[AMAKSCrash sharedInstance] systemInfo];
+    NSDictionary *systemInfo = KSCrash.sharedInstance.systemInfo;
     AMASystem *system = [self.decoder systemInfoForDictionary:systemInfo];
 
     NSArray *threads = nil;

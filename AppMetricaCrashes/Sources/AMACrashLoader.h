@@ -22,7 +22,6 @@ extern NSString *const kAMAApplicationNotRespondingCrashType;
 
 - (void)enableCrashLoader;
 - (void)enableRequiredMonitoring;
-- (void)enableSwapOfCxaThrow;
 - (void)loadCrashReports;
 - (NSArray<AMADecodedCrash *> *)syncLoadCrashReports;
 

@@ -14,8 +14,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/kstenerud/KSCrash",
       "state" : {
-        "revision" : "c9b13a7ec3483c5f8c274551d5cf2feb5723c8c5",
-        "version" : "1.17.4"
+        "revision" : "90a0c1a139ca833281423b1d2260ebf9ae188e63",
+        "version" : "2.0.0-rc.1"
       }
     }
   ],
