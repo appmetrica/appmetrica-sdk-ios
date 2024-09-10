@@ -62,3 +62,4 @@ NSString *const AMAStorageStringKeyExternalAttributionCollectingIntervalSeconds 
 NSString *const AMAStorageStringKeyExternalAttributionConfiguration = @"external_attribution.confugiration";
 NSString *const AMAStorageStringKeyAppMetricaClientConfiguration = @"appmetrica.client.confugiration";
 NSString *const AMAStorageStringKeyRecentMainApiKey = @"recent.main.api.key";
+NSString *const AMAStorageStringKeyDidApplyDataMigrationFor580 = @"5.8.0.migration.applied";

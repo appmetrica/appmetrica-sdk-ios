@@ -318,6 +318,8 @@
   "AppMetricaCore/Sources/Database/Migration/Scheme/AMAConfigurationDatabaseSchemeMigrationTo9.m":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCore/Sources/Database/Migration/Scheme/AMAConfigurationDatabaseSchemeMigrationTo9.m",
   "AppMetricaCore/Sources/Database/Migration/Scheme/AMADataMigrationTo500.h":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCore/Sources/Database/Migration/Scheme/AMADataMigrationTo500.h",
   "AppMetricaCore/Sources/Database/Migration/Scheme/AMADataMigrationTo500.m":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCore/Sources/Database/Migration/Scheme/AMADataMigrationTo500.m",
+  "AppMetricaCore/Sources/Database/Migration/Scheme/AMADataMigrationTo580.h":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCore/Sources/Database/Migration/Scheme/AMADataMigrationTo580.h",
+  "AppMetricaCore/Sources/Database/Migration/Scheme/AMADataMigrationTo580.m":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCore/Sources/Database/Migration/Scheme/AMADataMigrationTo580.m",
   "AppMetricaCore/Sources/Database/Migration/Scheme/AMALocationDataMigrationTo500.h":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCore/Sources/Database/Migration/Scheme/AMALocationDataMigrationTo500.h",
   "AppMetricaCore/Sources/Database/Migration/Scheme/AMALocationDataMigrationTo500.m":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCore/Sources/Database/Migration/Scheme/AMALocationDataMigrationTo500.m",
   "AppMetricaCore/Sources/Database/Migration/Scheme/AMALocationDatabaseSchemeMigrationTo2.h":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCore/Sources/Database/Migration/Scheme/AMALocationDatabaseSchemeMigrationTo2.h",

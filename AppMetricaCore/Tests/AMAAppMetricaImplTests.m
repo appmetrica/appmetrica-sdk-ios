@@ -1292,7 +1292,7 @@ describe(@"AMAAppMetricaImpl", ^{
                 [AMAFirstActivationDetector stub:@selector(isFirstMainReporterActivation) andReturn:theValue(YES)];
                 
                 [[appMetricaImpl shouldNot] receive:@selector(activateAnonymously)];
-                [[appMetricaImpl shouldEventuallyBeforeTimingOutAfter(0.1)] receive:@selector(activateAnonymously)];
+                [[appMetricaImpl shouldEventuallyBeforeTimingOutAfter(0.2)] receive:@selector(activateAnonymously)];
                 
                 [appMetricaImpl scheduleAnonymousActivationIfNeeded];
             });

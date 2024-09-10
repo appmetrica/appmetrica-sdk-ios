@@ -155,6 +155,20 @@ describe(@"AMADatabaseMigrationTo500Tests", ^{
                 }];
             });
             
+            it(@"Should reset startup update date during migration to 5.8.0", ^{
+                [AMADataMigrationTo500 stubbedNullMockForDefaultInit];
+                id<AMADatabaseProtocol> newDB = [AMADatabaseFactory configurationDatabase];
+                [newDB inDatabase:^(AMAFMDatabase *db) {
+                    id<AMAKeyValueStoring> storage = [newDB.storageProvider storageForDB:db];
+
+                    [[[storage stringForKey:AMAStorageStringKeyDidApplyDataMigrationFor580 error:nil] should] equal:@"1"];
+                    [[[storage stringForKey:AMAStorageStringKeyDidApplyDataMigrationFor500 error:nil] should] beNil];
+
+                    // Should reset startup update date
+                    [[[storage dateForKey:AMAStorageStringKeyStartupUpdatedAt error:nil] should] equal:[NSDate distantPast]];
+                }];
+            });
+            
             it(@"Should migrate uuid", ^{
                 NSString *const uuid = @"768a11f6f9f4422fa5ec19eb0d8e074a";
                 AMAInstantFeaturesConfiguration *migrationConfiguration = [AMAInstantFeaturesConfiguration migrationInstance];

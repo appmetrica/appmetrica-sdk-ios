@@ -71,6 +71,7 @@ extern NSString *const AMAStorageStringKeyApplePrivacyResendPeriod;
 extern NSString *const AMAStorageStringKeyAppleRetryPeriods;
 
 extern NSString *const AMAStorageStringKeyDidApplyDataMigrationFor500;
+extern NSString *const AMAStorageStringKeyDidApplyDataMigrationFor580;
 
 extern NSString *const AMAStorageStringKeyAppMetricaClientConfiguration;
 extern NSString *const AMAStorageStringKeyRecentMainApiKey;
