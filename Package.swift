@@ -18,6 +18,7 @@ enum AppMetricaTarget: String {
     case protobufUtils = "AppMetricaProtobufUtils"
     case storageUtils = "AppMetricaStorageUtils"
     case encodingUtils = "AppMetricaEncodingUtils"
+    case libraryAdapter = "AppMetricaLibraryAdapter"
 
     case protobuf = "AppMetricaProtobuf"
     case fmdb = "AppMetricaFMDB"
@@ -34,6 +35,7 @@ enum AppMetricaProduct: String, CaseIterable {
     case crashes = "AppMetricaCrashes"
     case adSupport = "AppMetricaAdSupport"
     case webKit = "AppMetricaWebKit"
+    case libraryAdapter = "AppMetricaLibraryAdapter"
 
     static var allProducts: [Product] { allCases.map { $0.product } }
 
@@ -43,6 +45,7 @@ enum AppMetricaProduct: String, CaseIterable {
         case .crashes: return [.crashes]
         case .adSupport: return [.adSupport]
         case .webKit: return [.webKit]
+        case .libraryAdapter: return [.libraryAdapter]
         }
     }
 
@@ -102,7 +105,8 @@ let package = Package(
         .target(
             target: .core,
             dependencies: [
-                .network, .log, .coreUtils, .hostState, .protobufUtils, .platform, .storageUtils, .encodingUtils, .protobuf, .fmdb
+                .network, .log, .coreUtils, .hostState, .protobufUtils, .platform, .storageUtils,
+                .encodingUtils, .protobuf, .fmdb,
             ],
             searchPaths: [
                 "../../AppMetricaCoreExtension/Sources/include/AppMetricaCoreExtension"
@@ -111,7 +115,7 @@ let package = Package(
         .testTarget(
             target: .core,
             dependencies: [
-                .core, .coreExtension, .webKit, .testUtils, .hostState, .protobufUtils, .platform
+                .core, .coreExtension, .webKit, .testUtils, .hostState, .protobufUtils, .platform,
             ],
             externalDependencies: [.kiwi],
             searchPaths: [
@@ -124,7 +128,8 @@ let package = Package(
         .target(
             target: .crashes,
             dependencies: [
-                .core, .log, .coreExtension, .hostState, .protobufUtils, .platform, .storageUtils, .encodingUtils, .protobuf
+                .core, .log, .coreExtension, .hostState, .protobufUtils, .platform, .storageUtils,
+                .encodingUtils, .protobuf,
             ],
             externalDependencies: [.ksCrashRecording]
         ),
@@ -237,7 +242,11 @@ let package = Package(
             dependencies: [.encodingUtils, .testUtils],
             externalDependencies: [.kiwi]
         ),
-
+        
+        //MARK: - AppMetricaLibraryAdapter
+        .target(target: .libraryAdapter, dependencies: [.core, .coreExtension]),
+        .testTarget(target: .libraryAdapter, dependencies: [.libraryAdapter]),
+        
         //MARK: - AppMetrica FMDB
         .target(target: .fmdb),
     ]
@@ -255,9 +264,9 @@ extension Target {
         if includePrivacyManifest {
             resources.append(.copy("Resources/PrivacyInfo.xcprivacy"))
         }
-
+        
         let resultSearchPath: Set<String> = target.headerPaths.union(searchPaths)
-
+        
         return .target(
             name: target.name,
             dependencies: dependencies.map { $0.dependency } + externalDependencies.map { $0.dependency },
@@ -266,16 +275,16 @@ extension Target {
             cSettings: resultSearchPath.sorted().map { .headerSearchPath($0) }
         )
     }
-
+    
     static func testTarget(target: AppMetricaTarget,
                            dependencies: [AppMetricaTarget] = [],
                            testUtils: [AppMetricaTarget] = [],
                            externalDependencies: [ExternalPackage.ExternalDependency] = [],
                            searchPaths: [String] = [],
                            resources: [Resource]? = nil) -> Target {
-
+        
         let resultSearchPath: Set<String> = target.testsHeaderPaths.union(searchPaths)
-
+        
         return .testTarget(
             name: target.testsName,
             dependencies: dependencies.map { $0.dependency } + externalDependencies.map { $0.dependency },
@@ -408,7 +417,8 @@ extension AppMetricaTarget {
                 "./Plugins",
                 "./Resources",
             ]
-        case .adSupport, .coreExtension, .encodingUtils, .fmdb, .hostState, .log, .network, .platform, .protobuf, .protobufUtils, .storageUtils, .webKit, .testUtils:
+        case .adSupport, .coreExtension, .encodingUtils, .fmdb, .hostState, .log, .network, .platform,
+                .protobuf, .protobufUtils, .storageUtils, .webKit, .testUtils, .libraryAdapter:
             return []
         }
     }
@@ -429,7 +439,8 @@ extension AppMetricaTarget {
             return [
                 "Mocks",
             ]
-        case .crashes, .coreExtension, .adSupport, .webKit, .testUtils, .hostState, .storageUtils, .protobuf, .fmdb:
+        case .crashes, .coreExtension, .adSupport, .webKit, .testUtils, .hostState, .storageUtils,
+                .protobuf, .fmdb, .libraryAdapter:
             return []
         }
     }

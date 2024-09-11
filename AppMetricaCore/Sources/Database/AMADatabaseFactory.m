@@ -39,6 +39,7 @@
 #import "AMAReporterDataMigrationTo500.h"
 #import "AMALocationDataMigrationTo500.h"
 #import "AMADataMigrationTo580.h"
+#import "AMAReporterDataMigrationTo580.h"
 
 #import "AMALocationDatabaseSchemeMigrationTo2.h"
 
@@ -179,6 +180,7 @@ NSString *const kAMAMainReporterDBPath = @"main";
     ];
     NSArray *dataMigrations = @[
         [[AMAReporterDataMigrationTo500 alloc] initWithApiKey:apiKey],
+        [[AMAReporterDataMigrationTo580 alloc] initWithApiKey:apiKey main:main],
     ];
     NSArray *libraryMigrations = @[
     ];

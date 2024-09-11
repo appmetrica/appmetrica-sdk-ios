@@ -313,6 +313,8 @@ describe(@"AMADatabaseMigrationTo500Tests", ^{
         });
         
         context(@"Reporter data migration", ^{
+            NSString *const key = @"foo";
+            NSString *const value = @"bar";
             id<AMADatabaseProtocol> __block migrationDatabase = nil;
             NSString *const apiKey = [AMAReporterTestHelper defaultApiKey];
 
@@ -351,9 +353,6 @@ describe(@"AMADatabaseMigrationTo500Tests", ^{
             });
 
             it(@"Should migrate kv table", ^{
-                NSString *const key = @"foo";
-                NSString *const value = @"bar";
-
                 [migrationDatabase inDatabase:^(AMAFMDatabase *db) {
                     id<AMAKeyValueStoring> storage = [migrationDatabase.storageProvider storageForDB:db];
 
@@ -403,8 +402,7 @@ describe(@"AMADatabaseMigrationTo500Tests", ^{
                 [[theValue(loadedCollection.handleNewEventsAsUnknown) should] equal:theValue(eventHashesCollection.handleNewEventsAsUnknown)];
                 [[loadedCollection.eventNameHashes should] equal:eventHashesCollection.eventNameHashes];
             });
-
-
+            
             AMAReporterStorage *(^buildReporterStorage)(id<AMADatabaseProtocol>, NSString *) = ^(id<AMADatabaseProtocol> database, NSString *apiKey) {
                 AMAEnvironmentContainer *eventEnvironment = [[AMAEnvironmentContainer alloc] init];
 
@@ -414,7 +412,173 @@ describe(@"AMADatabaseMigrationTo500Tests", ^{
                                                          database:database
                                                              main:NO];
             };
+            
+            context(@"5.8.0 Migration", ^{
+                it(@"Should migrate key value table for main reporter", ^{
+                    id<AMADatabaseProtocol> prevDB = [AMADatabaseFactory reporterDatabaseForApiKey:apiKey main:NO eventsCleaner:eventsCleaner];
+                    [prevDB inDatabase:^(AMAFMDatabase *db) {
+                        id<AMAKeyValueStoring> storage = [prevDB.storageProvider storageForDB:db];
+                        
+                        [storage saveString:value forKey:key error:nil];
+                    }];
+                    
+                    // After migration
+                    id<AMADatabaseProtocol> newDB = [AMADatabaseFactory reporterDatabaseForApiKey:apiKey main:YES eventsCleaner:eventsCleaner];
+                    [newDB inDatabase:^(AMAFMDatabase *db) {
+                        id<AMAKeyValueStoring> storage = [newDB.storageProvider storageForDB:db];
+                        
+                        [[[storage stringForKey:key error:nil] should] equal:value];
+                    }];
+                });
+                
+                it(@"Should migrate event hashes for main reporter", ^{
+                    [AMAReporterDataMigrationTo500 stubbedNullMockForInit:@selector(initWithApiKey:)];
+                    id<AMADatabaseProtocol> prevDB = [AMADatabaseFactory reporterDatabaseForApiKey:apiKey main:NO eventsCleaner:eventsCleaner];
+                    [prevDB inDatabase:^(AMAFMDatabase *db) {
+                        id<AMAKeyValueStoring> storage = [prevDB.storageProvider storageForDB:db];
+                        
+                        [storage saveString:value forKey:key error:nil];
+                    }];
+                    
+                    NSMutableSet *eventNameHashes = [NSMutableSet set];
+                    [eventNameHashes addObjectsFromArray:@[@13, @4, @8293]];
+                    
+                    AMAEventNameHashesStorage *migrationStorage = [AMAEventNameHashesStorageFactory storageForApiKey:apiKey main:NO];
+                    
+                    AMAEventNameHashesCollection *eventHashesCollection = [[AMAEventNameHashesCollection alloc] initWithCurrentVersion:@"2.3.4"
+                                                                                                         hashesCountFromCurrentVersion:9
+                                                                                                              handleNewEventsAsUnknown:YES
+                                                                                                                       eventNameHashes:eventNameHashes];
+                    [migrationStorage saveCollection:eventHashesCollection];
+                    
+                    // After migration
+                    id<AMADatabaseProtocol> newDB = [AMADatabaseFactory reporterDatabaseForApiKey:apiKey
+                                                                                             main:YES
+                                                                                    eventsCleaner:eventsCleaner];
+                    [newDB inDatabase:^(AMAFMDatabase *db) {
+                        id<AMAKeyValueStoring> storage = [newDB.storageProvider storageForDB:db];
+                        [[theValue([storage boolNumberForKey:AMAStorageStringKeyDidApplyDataMigrationFor580 error:nil].boolValue) should] beYes];
+                    }];
+                    
+                    AMAEventNameHashesStorage *currentStorage = [AMAEventNameHashesStorageFactory storageForApiKey:apiKey main:YES];
+                    AMAEventNameHashesCollection *loadedCollection = [currentStorage loadCollection];
+                    
+                    [[loadedCollection.currentVersion should] equal:eventHashesCollection.currentVersion];
+                    [[theValue(loadedCollection.hashesCountFromCurrentVersion) should] equal:theValue(eventHashesCollection.hashesCountFromCurrentVersion)];
+                    [[theValue(loadedCollection.handleNewEventsAsUnknown) should] equal:theValue(eventHashesCollection.handleNewEventsAsUnknown)];
+                    [[loadedCollection.eventNameHashes should] equal:eventHashesCollection.eventNameHashes];
+                });
+                
+                it(@"Should migrate events and sessions", ^{
+                    NSDictionary *const extras = @{ @"extras" : [@"value" dataUsingEncoding:NSUTF8StringEncoding] };
+                    NSDictionary *const legacyExtras = @{@"user_id":@"user id",
+                                                         @"type":@"user type",
+                                                         @"options":@{@"key":@"value"}};
 
+                    NSDictionary *const params = @{ @"foo" : @"bar" };
+                    
+                    [AMAReporterDataMigrationTo500 stubbedNullMockForInit:@selector(initWithApiKey:)];
+                    id<AMADatabaseProtocol> prevDB = [AMADatabaseFactory reporterDatabaseForApiKey:apiKey main:NO eventsCleaner:eventsCleaner];
+                    [prevDB inDatabase:^(AMAFMDatabase *db) {
+                        id<AMAKeyValueStoring> storage = [prevDB.storageProvider storageForDB:db];
+                        
+                        [storage saveString:value forKey:key error:nil];
+                    }];
+
+                    AMAReporterStorage *migrationStorage = buildReporterStorage(prevDB, apiKey);
+
+                    AMAEventBuilder *eventBuilder = [[AMAEventBuilder alloc] initWithStateStorage:migrationStorage.stateStorage
+                                                                                      preloadInfo:nil];
+
+                    AMASessionSerializer *migrationSessionSerializer = [[AMASessionSerializer alloc] init];
+                    [migrationStorage.sessionStorage stub:@selector(serializer) andReturn:migrationSessionSerializer];
+                    NSDate *creationDate = [NSDate date];
+                    AMASession *sessionToMigrate = [migrationStorage.sessionStorage newGeneralSessionCreatedAt:creationDate error:nil];
+
+                    AMAEvent *eventToMigrate = [eventBuilder eventWithType:99
+                                                                      name:@"eventName"
+                                                                     value:@"eventValue"
+                                                          eventEnvironment:params
+                                                            appEnvironment:params
+                                                                    extras:extras
+                                                                     error:nil];
+                    eventToMigrate.createdAt = creationDate;
+                    eventToMigrate.timeSinceSession = [creationDate timeIntervalSinceDate:sessionToMigrate.startDate.deviceDate];
+                    eventToMigrate.sessionOid = sessionToMigrate.oid;
+                    eventToMigrate.location = [[CLLocation alloc] initWithLatitude:22.0 longitude:33.0];
+                    eventToMigrate.appEnvironment = params;
+                    eventToMigrate.profileID = @"profileID";
+
+
+                    AMAEventSerializer *migrationEventSerializer = [[AMAEventSerializer alloc] init];
+                    [migrationStorage.eventStorage stub:@selector(eventSerializer) andReturn:migrationEventSerializer];
+
+                    [migrationStorage.eventStorage addEvent:eventToMigrate toSession:sessionToMigrate error:nil];
+
+                    // After migration
+                    id<AMADatabaseProtocol> newDB = [AMADatabaseFactory reporterDatabaseForApiKey:apiKey
+                                                                                             main:YES
+                                                                                    eventsCleaner:eventsCleaner];
+                    AMAReporterStorage *newReporterStorage = buildReporterStorage(newDB, apiKey);
+
+
+                    AMAEvent *migratedEvent = [[newReporterStorage.eventStorage allEvents] firstObject];
+
+                    [[theValue(migratedEvent.type) should] equal:theValue(eventToMigrate.type)];
+                    [[migratedEvent.oid should] equal:eventToMigrate.oid];
+                    [[theValue(migratedEvent.sequenceNumber) should] equal:theValue(eventToMigrate.sequenceNumber)];
+                    [[theValue(migratedEvent.globalNumber) should] equal:theValue(eventToMigrate.globalNumber)];
+                    [[theValue(migratedEvent.numberOfType) should] equal:theValue(eventToMigrate.numberOfType)];
+                    [[migratedEvent.name should] equal:eventToMigrate.name];
+                    [[migratedEvent.eventEnvironment should] equal:eventToMigrate.eventEnvironment];
+                    [[[migratedEvent.value dataWithError:nil] should] equal:[eventToMigrate.value dataWithError:nil]];
+                    [[migratedEvent.sessionOid should] equal:eventToMigrate.sessionOid];
+                    [[migratedEvent.createdAt should] equal:eventToMigrate.createdAt];
+                    [[theValue(migratedEvent.timeSinceSession) should] equal:theValue(eventToMigrate.timeSinceSession)];
+                    [[theValue(migratedEvent.location.coordinate.latitude) should] equal:theValue(eventToMigrate.location.coordinate.latitude)];
+                    [[theValue(migratedEvent.location.coordinate.longitude) should] equal:theValue(eventToMigrate.location.coordinate.longitude)];
+                    [[theValue(migratedEvent.locationEnabled) should] equal:theValue(eventToMigrate.locationEnabled)];
+                    [[theValue(migratedEvent.firstOccurrence) should] equal:theValue(eventToMigrate.firstOccurrence)];
+                    [[migratedEvent.appEnvironment should] equal:eventToMigrate.appEnvironment];
+                    [[migratedEvent.profileID should] equal:eventToMigrate.profileID];
+                    [[theValue(migratedEvent.source) should] equal:theValue(eventToMigrate.source)];
+                    [[theValue(migratedEvent.attributionIDChanged) should] equal:theValue(eventToMigrate.attributionIDChanged)];
+                    [[migratedEvent.openID should] equal:eventToMigrate.openID];
+
+                    [[migratedEvent.extras should] equal:eventToMigrate.extras];
+
+
+                    AMASession *migratedSession = [newReporterStorage.sessionStorage lastSessionWithError:nil];
+
+                    [[migratedSession.oid should] equal:sessionToMigrate.oid];
+                    [[migratedSession.startDate should] equal:sessionToMigrate.startDate];
+                    [[migratedSession.lastEventTime should] equal:sessionToMigrate.lastEventTime];
+                    [[migratedSession.pauseTime should] equal:sessionToMigrate.pauseTime];
+                    [[migratedSession.sessionID should] equal:sessionToMigrate.sessionID];
+                    [[migratedSession.attributionID should] equal:sessionToMigrate.attributionID];
+                    [[theValue(migratedSession.type) should] equal:theValue(sessionToMigrate.type)];
+
+
+                    [newDB inDatabase:^(AMAFMDatabase *db) {
+                        [AMADatabaseHelper deleteFirstRowsWithCount:1
+                                                             filter:nil
+                                                              order:nil
+                                                        valuesArray:nil
+                                                          tableName:kAMASessionTableName
+                                                                 db:db
+                                                              error:nil];
+
+                        [AMADatabaseHelper deleteFirstRowsWithCount:1
+                                                             filter:nil
+                                                              order:nil
+                                                        valuesArray:nil
+                                                          tableName:kAMAEventTableName
+                                                                 db:db
+                                                              error:nil];
+                    }];
+                });
+            });
+            
             __auto_type testMigrationEventsAndSessions = ^() {
                 it(@"Should migrate events and sessions", ^{
                     NSDictionary *const extras = @{ @"extras" : [@"value" dataUsingEncoding:NSUTF8StringEncoding] };

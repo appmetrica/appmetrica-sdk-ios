@@ -29,7 +29,7 @@
 - (instancetype)initWithTableName:(NSString *)tableName
                         converter:(id<AMAKeyValueStorageConverting>)converter
                    objectProvider:(AMADatabaseObjectProviderBlock)objectProvider
-           backingKVSDataProvider:(id<AMAKeyValueStorageDataProviding>)backingDataProvider;
+           backingKVSDataProvider:(id<AMAKeyValueStorageDataProviding>)backingDataProvider
 {
     self = [super init];
     if (self != nil) {

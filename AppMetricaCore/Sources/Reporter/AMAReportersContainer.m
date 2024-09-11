@@ -50,8 +50,8 @@
     @synchronized (self) {
         reporters = [self.reporters copy];
     }
-    for (AMAReporter *repoter in reporters.objectEnumerator) {
-        [repoter restartPrivacyTimer];
+    for (AMAReporter *reporter in reporters.objectEnumerator) {
+        [reporter restartPrivacyTimer];
     }
 }
 

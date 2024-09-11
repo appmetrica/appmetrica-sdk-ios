@@ -384,6 +384,34 @@
                ReferencedContainer = "container:">
             </BuildableReference>
          </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "AppMetricaLibraryAdapter"
+               BuildableName = "AppMetricaLibraryAdapter"
+               BlueprintName = "AppMetricaLibraryAdapter"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "AppMetricaLibraryAdapterTests"
+               BuildableName = "AppMetricaLibraryAdapterTests"
+               BlueprintName = "AppMetricaLibraryAdapterTests"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </BuildActionEntry>
       </BuildActionEntries>
    </BuildAction>
    <TestAction
@@ -510,6 +538,16 @@
                BlueprintIdentifier = "AppMetricaWebKitTests"
                BuildableName = "AppMetricaWebKitTests"
                BlueprintName = "AppMetricaWebKitTests"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "AppMetricaLibraryAdapterTests"
+               BuildableName = "AppMetricaLibraryAdapterTests"
+               BlueprintName = "AppMetricaLibraryAdapterTests"
                ReferencedContainer = "container:">
             </BuildableReference>
          </TestableReference>
