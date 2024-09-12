@@ -8,6 +8,7 @@
 #import "AMATableDescriptionProvider.h"
 #import "AMAMigrationTo580Utils.h"
 #import "AMADatabaseFactory.h"
+#import "AMAEventNameHashesStorageFactory.h"
 
 @interface AMAReporterDataMigrationTo580 ()
 
@@ -35,17 +36,30 @@
 
 - (void)applyMigrationToDatabase:(id<AMADatabaseProtocol>)database
 {
+    @synchronized (self) {
+        if (self.main) {
+            [self migrateReporterIfNeeded:database];
+            [self migrateEventHashesIfNeeded:database];
+            [self migrateBackupIfNeeded];
+        }
+    }
+}
+
+- (void)migrateReporterIfNeeded:(id<AMADatabaseProtocol>)database
+{
     NSString *reporterPath = [[AMAFileUtility persistentPathForApiKey:self.apiKey]
                               stringByAppendingPathComponent:@"data.sqlite"];
-    @synchronized (self) {
-        if ([AMAFileUtility fileExistsAtPath:reporterPath] == NO) {
-            return;
-        }
-        if (self.main) {
-            [self migrateReporterData:reporterPath database:database];
-            [AMAMigrationTo580Utils migrateReporterEventHashes:self.apiKey];
-            [self copyReporterBackup];
-        }
+    if ([AMAFileUtility fileExistsAtPath:reporterPath]) {
+        [self migrateReporterData:reporterPath database:database];
+    }
+}
+
+- (void)migrateEventHashesIfNeeded:(id<AMADatabaseProtocol>)database
+{
+    NSString *migrationEventHashesPath = [[AMAFileUtility persistentPathForApiKey:self.apiKey]
+                                          stringByAppendingPathComponent:kAMAEventHashesFileName];
+    if ([AMAFileUtility fileExistsAtPath:migrationEventHashesPath]) {
+        [AMAMigrationTo580Utils migrateReporterEventHashes:self.apiKey];
     }
 }
 
@@ -79,20 +93,21 @@
     [sourceDB close];
 }
 
-- (void)copyReporterBackup
+- (void)migrateBackupIfNeeded
 {
-    NSString *reporterBackPath = [[AMAFileUtility persistentPathForApiKey:self.apiKey] stringByAppendingPathComponent:@"data.bak"];
-    NSString *newDirPath = [[AMAFileUtility persistentPathForApiKey:kAMAMainReporterDBPath] stringByAppendingPathComponent:@"data.bak"];
+    NSString *reporterBackPath = [[AMAFileUtility persistentPathForApiKey:self.apiKey] 
+                                  stringByAppendingPathComponent:@"data.bak"];
+    NSString *newDirPath = [[AMAFileUtility persistentPathForApiKey:kAMAMainReporterDBPath]
+                            stringByAppendingPathComponent:@"data.bak"];
+
+    if (![AMAFileUtility fileExistsAtPath:reporterBackPath]) {
+        return;
+    }
+    if ([AMAFileUtility fileExistsAtPath:newDirPath]) {
+        return;
+    }
     
     NSFileManager *fileManager = [NSFileManager defaultManager];
-
-    if (![fileManager fileExistsAtPath:reporterBackPath]) {
-        return;
-    }
-    if ([fileManager fileExistsAtPath:newDirPath]) {
-        return;
-    }
-
     NSError *error;
     if (![fileManager copyItemAtPath:reporterBackPath toPath:newDirPath error:&error]) {
         AMALogWarn(@"Failed to copy reporter backup from %@ to %@: %@", reporterBackPath, newDirPath, error);

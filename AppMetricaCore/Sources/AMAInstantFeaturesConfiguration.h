@@ -4,6 +4,8 @@
 @class AMAInstantFeaturesConfiguration;
 @class AMAJSONFileKVSDataProvider;
 
+extern NSString *const kAMAInstantFileName;
+
 @interface AMAInstantFeaturesConfiguration : NSObject
 
 @property (nonatomic, copy) NSString *UUID;
