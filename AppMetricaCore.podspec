@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name = "AppMetricaCore"
-  s.version = '5.8.0'
+  s.version = '5.9.0'
   s.summary = "Powerful and flexible module offering a wide range of tracking and analytics tools for your application"
 
   s.homepage = 'https://appmetrica.io'
@@ -16,16 +16,16 @@ Pod::Spec.new do |s|
   s.frameworks = 'UIKit', 'Foundation', 'CoreLocation', 'CoreGraphics', 'SystemConfiguration'
   s.libraries = 'z', 'sqlite3', 'c++'
 
-  s.dependency 'AppMetricaLog', '= 5.8.0'
-  s.dependency 'AppMetricaNetwork', '= 5.8.0'
-  s.dependency 'AppMetricaCoreUtils', '= 5.8.0'
-  s.dependency 'AppMetricaHostState', '= 5.8.0'
-  s.dependency 'AppMetricaProtobufUtils', '= 5.8.0'
-  s.dependency 'AppMetricaPlatform', '= 5.8.0'
-  s.dependency 'AppMetricaStorageUtils', '= 5.8.0'
-  s.dependency 'AppMetricaEncodingUtils', '= 5.8.0'
-  s.dependency 'AppMetricaProtobuf', '= 5.8.0'
-  s.dependency 'AppMetricaFMDB', '= 5.8.0'
+  s.dependency 'AppMetricaLog', '= 5.9.0'
+  s.dependency 'AppMetricaNetwork', '= 5.9.0'
+  s.dependency 'AppMetricaCoreUtils', '= 5.9.0'
+  s.dependency 'AppMetricaHostState', '= 5.9.0'
+  s.dependency 'AppMetricaProtobufUtils', '= 5.9.0'
+  s.dependency 'AppMetricaPlatform', '= 5.9.0'
+  s.dependency 'AppMetricaStorageUtils', '= 5.9.0'
+  s.dependency 'AppMetricaEncodingUtils', '= 5.9.0'
+  s.dependency 'AppMetricaProtobuf', '= 5.9.0'
+  s.dependency 'AppMetricaFMDB', '= 5.9.0'
   
   s.header_dir = s.name
   s.source_files = [

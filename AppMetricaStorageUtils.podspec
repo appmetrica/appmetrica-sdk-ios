@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name = "AppMetricaStorageUtils"
-  s.version = '5.8.0'
+  s.version = '5.9.0'
   s.summary = "Key value and database utils"
 
   s.homepage = 'https://appmetrica.io'
@@ -15,8 +15,8 @@ Pod::Spec.new do |s|
 
   s.frameworks = 'Foundation'
 
-  s.dependency 'AppMetricaLog', '= 5.8.0'
-  s.dependency 'AppMetricaCoreUtils', '= 5.8.0'
+  s.dependency 'AppMetricaLog', '= 5.9.0'
+  s.dependency 'AppMetricaCoreUtils', '= 5.9.0'
 
   s.header_dir = s.name
   s.source_files = "#{s.name}/Sources/**/*.{h,m}"
