@@ -9,6 +9,7 @@
 #import "AMADatabaseProtocol.h"
 #import "AMATableDescriptionProvider.h"
 #import "AMAMigrationUtils.h"
+#import "AMAInstantFeaturesConfiguration.h"
 
 @implementation AMADataMigrationTo500
 
@@ -24,21 +25,28 @@
     @synchronized (self) {
         if ([AMAFileUtility fileExistsAtPath:oldDBPath]) {
             [self migrateData:oldDBPath database:database];
+            
+            // Reset startup update date
+            [database inDatabase:^(AMAFMDatabase *db) {
+                [AMAMigrationUtils resetStartupUpdatedAtToDistantPastInDatabase:database db:db];
+            }];
+            [self migrateExtendedStartupParametersIfNeeded:database];
         }
         
-        [AMAMigrationTo500Utils migrateUUID];
-        
-        // Reset startup update date
-        [database inDatabase:^(AMAFMDatabase *db) {
-            [AMAMigrationUtils resetStartupUpdatedAtToDistantPastInDatabase:database db:db];
-        }];
-        
-        [self migrateExtendedStartupParametersIfNeeded:database];
+        [self migrateInstantIfNeeded:database];
         
         [AMAMigrationTo500Utils migrateCrashReportsIfNeeded];
     }
 }
 
+- (void)migrateInstantIfNeeded:(id<AMADatabaseProtocol>)database
+{
+    NSString *instantMigrationPath = [[AMAMigrationTo500Utils migrationPath] stringByAppendingPathComponent:kAMAInstantFileName];
+    if ([AMAFileUtility fileExistsAtPath:instantMigrationPath]) {
+        [AMAMigrationTo500Utils migrateUUID];
+    }
+}
+    
 - (void)migrateData:(NSString *)sourceDBPath
            database:(id<AMADatabaseProtocol>)database
 {

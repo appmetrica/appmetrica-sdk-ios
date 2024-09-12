@@ -6,7 +6,7 @@
 #import "AMACore.h"
 #import "AMAMigrationTo500Utils.h"
 
-static NSString *const kAMAInstantFileName = @"instant.json";
+NSString *const kAMAInstantFileName = @"instant.json";
 
 @interface AMAInstantFeaturesConfiguration ()
 

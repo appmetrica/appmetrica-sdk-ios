@@ -3,6 +3,8 @@
 
 @class AMAEventNameHashesStorage;
 
+extern NSString *const kAMAEventHashesFileName;
+
 @interface AMAEventNameHashesStorageFactory : NSObject
 
 - (instancetype)init NS_UNAVAILABLE;

@@ -38,8 +38,8 @@
     @synchronized (self) {
         if ([AMAFileUtility fileExistsAtPath:oldDBPath]) {
             [self migrateReporterData:oldDBPath database:database];
+            [AMAMigrationTo500Utils migrateReporterEventHashes:oldDirPath apiKey:self.apiKey];
         }
-        [AMAMigrationTo500Utils migrateReporterEventHashes:oldDirPath apiKey:self.apiKey];
     }
 }
 
