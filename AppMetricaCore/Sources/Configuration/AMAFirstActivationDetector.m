@@ -5,19 +5,26 @@
 #import "AMAMetricaInMemoryConfiguration.h"
 #import "AMADatabaseFactory.h"
 
+@interface AMAFirstActivationDetector ()
+
+@property (nonatomic, assign, readonly) BOOL isFirstLibraryReporterActivation;
+@property (nonatomic, assign, readonly) BOOL isFirstMainReporterActivation;
+
+@end
+
 @implementation AMAFirstActivationDetector
 
-+ (BOOL)isFirstLibraryReporterActivation
+- (instancetype)init
 {
-    return [self isReporterUnavailable:kAMAMetricaLibraryApiKey];
+    self = [super init];
+    if (self != nil) {
+        _isFirstLibraryReporterActivation = [self isReporterUnavailable:kAMAMetricaLibraryApiKey];
+        _isFirstMainReporterActivation = [self isReporterUnavailable:kAMAMainReporterDBPath];
+    }
+    return self;
 }
 
-+ (BOOL)isFirstMainReporterActivation
-{
-    return [self isReporterUnavailable:kAMAMainReporterDBPath];
-}
-
-+ (BOOL)isReporterUnavailable:(NSString *)path
+- (BOOL)isReporterUnavailable:(NSString *)path
 {
     NSString *libraryReporterMigrationPath = [[AMAMigrationTo500Utils migrationPath] stringByAppendingPathComponent:path];
     NSString *libraryReporterPath = [AMAFileUtility persistentPathForApiKey:path];

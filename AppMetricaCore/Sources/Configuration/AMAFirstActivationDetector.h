@@ -3,7 +3,7 @@
 
 @interface AMAFirstActivationDetector : NSObject
 
-+ (BOOL)isFirstLibraryReporterActivation;
-+ (BOOL)isFirstMainReporterActivation;
+- (BOOL)isFirstLibraryReporterActivation;
+- (BOOL)isFirstMainReporterActivation;
 
 @end

@@ -11,6 +11,7 @@
 @protocol AMAAsyncExecuting;
 @protocol AMASyncExecuting;
 @class AppMetricaConfigForAnonymousActivationProvider;
+@class AMAFirstActivationDetector;
 
 @interface AMAAppMetricaConfigurationManager : NSObject
 
@@ -20,7 +21,8 @@
 + (instancetype)new NS_UNAVAILABLE;
 
 - (instancetype)initWithExecutor:(id<AMAAsyncExecuting, AMASyncExecuting>)executor
-             strategiesContainer:(AMADispatchStrategiesContainer *)strategiesContainer;
+             strategiesContainer:(AMADispatchStrategiesContainer *)strategiesContainer
+         firstActivationDetector:(AMAFirstActivationDetector *)firstActivationDetector;
 
 - (instancetype)initWithExecutor:(id<AMAAsyncExecuting, AMASyncExecuting>)executor
              strategiesContainer:(AMADispatchStrategiesContainer *)strategiesContainer

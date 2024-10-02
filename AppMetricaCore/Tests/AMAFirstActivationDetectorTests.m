@@ -17,6 +17,10 @@ describe(@"AMAFirstActivationDetector", ^{
         return [basePath stringByAppendingPathComponent:@"data.sqlite"];
     };
     
+    AMAFirstActivationDetector *(^buildActivationDetector)(void) = ^AMAFirstActivationDetector *(void) {
+        return [[AMAFirstActivationDetector alloc] init];
+    };
+    
     context(@"isFirstLibraryReporterActivation", ^{
         NSString *const persistentPathForApiKey = [persistentPath stringByAppendingPathComponent:kAMAMetricaLibraryApiKey];
         NSString *const migrationPathForApiKey = [migrationPath stringByAppendingPathComponent:kAMAMetricaLibraryApiKey];
@@ -33,7 +37,7 @@ describe(@"AMAFirstActivationDetector", ^{
                        andReturn:theValue(NO)
                    withArguments:dbFilePath(persistentPathForApiKey)];
             
-            BOOL result = [AMAFirstActivationDetector isFirstLibraryReporterActivation];
+            BOOL result = [buildActivationDetector() isFirstLibraryReporterActivation];
             [[theValue(result) should] beYes];
         });
         
@@ -49,7 +53,7 @@ describe(@"AMAFirstActivationDetector", ^{
                        andReturn:theValue(YES)
                    withArguments:dbFilePath(persistentPathForApiKey)];
 
-            BOOL result = [AMAFirstActivationDetector isFirstLibraryReporterActivation];
+            BOOL result = [buildActivationDetector() isFirstLibraryReporterActivation];
             [[theValue(result) should] beNo];
         });
     });
@@ -70,7 +74,7 @@ describe(@"AMAFirstActivationDetector", ^{
                        andReturn:theValue(NO)
                    withArguments:dbFilePath(persistentPathForApiKey)];
             
-            BOOL result = [AMAFirstActivationDetector isFirstMainReporterActivation];
+            BOOL result = [buildActivationDetector() isFirstMainReporterActivation];
             [[theValue(result) should] beYes];
         });
         
@@ -86,7 +90,7 @@ describe(@"AMAFirstActivationDetector", ^{
                        andReturn:theValue(YES)
                    withArguments:dbFilePath(persistentPathForApiKey)];
 
-            BOOL result = [AMAFirstActivationDetector isFirstMainReporterActivation];
+            BOOL result = [buildActivationDetector() isFirstMainReporterActivation];
             [[theValue(result) should] beNo];
         });
     });
