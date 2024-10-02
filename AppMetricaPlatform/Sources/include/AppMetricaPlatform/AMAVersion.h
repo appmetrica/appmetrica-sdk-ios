@@ -4,7 +4,7 @@
 
 #define AMA_VERSION_MAJOR 5
 #define AMA_VERSION_MINOR 8
-#define AMA_VERSION_PATCH 0
+#define AMA_VERSION_PATCH 1
 
 // This line is uncommented in pre-releases.
 // #define AMA_VERSION_PRERELEASE_ID "rc.1"
