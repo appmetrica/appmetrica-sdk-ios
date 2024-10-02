@@ -87,6 +87,7 @@ describe(@"AMAAppMetricaImpl", ^{
     AMAInternalEventsReporter *__block internalEventsReporter = nil;
     AMAStartupItemsChangedNotifier *__block startupNotifier = nil;
     AMAExternalAttributionController *__block externalAttributionController = nil;
+    AMAFirstActivationDetector *__block firstActivationDetector = nil;
 
     beforeEach(^{
         [AMALocationManager stub:@selector(sharedManager)];
@@ -109,6 +110,7 @@ describe(@"AMAAppMetricaImpl", ^{
                                                                                                            reporterStateStorage:)];
         dispatchingController = [AMADispatchingController stubbedNullMockForInit:@selector(initWithTimeoutConfiguration:)];
         internalEventsReporter = [AMAInternalEventsReporter nullMock];
+        firstActivationDetector = [AMAFirstActivationDetector stubbedNullMockForDefaultInit];
 
         hostStateProvider = [AMAStubHostAppStateProvider new];
         hostStateProvider.hostState = AMAHostAppStateBackground;
@@ -1288,8 +1290,8 @@ describe(@"AMAAppMetricaImpl", ^{
     context(@"Anonymous activation", ^{
         context(@"Scheduling activation", ^{
             it(@"Should schedule anonymous activation if both conditions are met", ^{
-                [AMAFirstActivationDetector stub:@selector(isFirstLibraryReporterActivation) andReturn:theValue(NO)];
-                [AMAFirstActivationDetector stub:@selector(isFirstMainReporterActivation) andReturn:theValue(YES)];
+                [firstActivationDetector stub:@selector(isFirstLibraryReporterActivation) andReturn:theValue(NO)];
+                [firstActivationDetector stub:@selector(isFirstMainReporterActivation) andReturn:theValue(YES)];
                 
                 [[appMetricaImpl shouldNot] receive:@selector(activateAnonymously)];
                 [[appMetricaImpl shouldEventuallyBeforeTimingOutAfter(0.2)] receive:@selector(activateAnonymously)];
@@ -1297,16 +1299,16 @@ describe(@"AMAAppMetricaImpl", ^{
                 [appMetricaImpl scheduleAnonymousActivationIfNeeded];
             });
             it(@"Should activate anonymously immediately if main activation has occurred", ^{
-                [AMAFirstActivationDetector stub:@selector(isFirstLibraryReporterActivation) andReturn:theValue(NO)];
-                [AMAFirstActivationDetector stub:@selector(isFirstMainReporterActivation) andReturn:theValue(NO)];
+                [firstActivationDetector stub:@selector(isFirstLibraryReporterActivation) andReturn:theValue(NO)];
+                [firstActivationDetector stub:@selector(isFirstMainReporterActivation) andReturn:theValue(NO)];
                 
                 [[appMetricaImpl should] receive:@selector(activateAnonymously)];
                 
                 [appMetricaImpl scheduleAnonymousActivationIfNeeded];
             });
             it(@"Should activate anonymously immediately if no any activation occured before", ^{
-                [AMAFirstActivationDetector stub:@selector(isFirstLibraryReporterActivation) andReturn:theValue(YES)];
-                [AMAFirstActivationDetector stub:@selector(isFirstMainReporterActivation) andReturn:theValue(YES)];
+                [firstActivationDetector stub:@selector(isFirstLibraryReporterActivation) andReturn:theValue(YES)];
+                [firstActivationDetector stub:@selector(isFirstMainReporterActivation) andReturn:theValue(YES)];
                 
                 [[appMetricaImpl should] receive:@selector(activateAnonymously)];
                 

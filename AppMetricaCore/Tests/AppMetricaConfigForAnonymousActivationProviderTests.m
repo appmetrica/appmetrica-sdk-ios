@@ -13,13 +13,16 @@ describe(@"AppMetricaConfigForAnonymousActivationProvider", ^{
     AppMetricaConfigForAnonymousActivationProvider *__block provider = nil;
     AMAMetricaPersistentConfiguration *__block persistentMock = nil;
     AppMetricaDefaultAnonymousConfigProvider *__block defaultProvider = nil;
+    AMAFirstActivationDetector *__block firstActivationDetector = nil;
 
     beforeEach(^{
         persistentMock = [AMAMetricaPersistentConfiguration nullMock];
         defaultProvider = [[AppMetricaDefaultAnonymousConfigProvider alloc] init];
+        firstActivationDetector = [[AMAFirstActivationDetector alloc] init];
         
         provider = [[AppMetricaConfigForAnonymousActivationProvider alloc] initWithStorage:persistentMock
-                                                                           defaultProvider:defaultProvider];
+                                                                           defaultProvider:defaultProvider
+                                                                   firstActivationDetector:firstActivationDetector];
     });
     
     context(@"With stored configuration", ^{
@@ -38,7 +41,7 @@ describe(@"AppMetricaConfigForAnonymousActivationProvider", ^{
         
         context(@"with first activation", ^{
             it(@"should set handleFirstActivationAsUpdate to YES", ^{
-                [AMAFirstActivationDetector stub:@selector(isFirstLibraryReporterActivation) andReturn:theValue(NO)];
+                [firstActivationDetector stub:@selector(isFirstLibraryReporterActivation) andReturn:theValue(NO)];
                 
                 [[theValue([provider configuration].handleFirstActivationAsUpdate) should] beYes];
             });
@@ -46,7 +49,7 @@ describe(@"AppMetricaConfigForAnonymousActivationProvider", ^{
         
         context(@"with next activation", ^{
             it(@"should not change handleFirstActivationAsUpdate", ^{
-                [AMAFirstActivationDetector stub:@selector(isFirstLibraryReporterActivation) andReturn:theValue(YES)];
+                [firstActivationDetector stub:@selector(isFirstLibraryReporterActivation) andReturn:theValue(YES)];
                 
                 [[theValue([provider configuration].handleFirstActivationAsUpdate) should] beNo];
             });

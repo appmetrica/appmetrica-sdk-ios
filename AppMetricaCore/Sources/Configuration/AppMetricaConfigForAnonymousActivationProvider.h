@@ -4,6 +4,7 @@
 @class AppMetricaDefaultAnonymousConfigProvider;
 @class AMAMetricaPersistentConfiguration;
 @class AMAAppMetricaConfiguration;
+@class AMAFirstActivationDetector;
 
 @interface AppMetricaConfigForAnonymousActivationProvider : NSObject
 
@@ -12,7 +13,8 @@
 
 - (instancetype)initWithStorage:(AMAMetricaPersistentConfiguration *)persistent;
 - (instancetype)initWithStorage:(AMAMetricaPersistentConfiguration *)persistent
-                defaultProvider:(AppMetricaDefaultAnonymousConfigProvider *)defaultProvider;
+                defaultProvider:(AppMetricaDefaultAnonymousConfigProvider *)defaultProvider
+        firstActivationDetector:(AMAFirstActivationDetector *)firstActivationDetector;
 
 - (AMAAppMetricaConfiguration *)configuration;
 

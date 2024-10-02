@@ -82,6 +82,7 @@
 @property (atomic, strong) AMADeepLinkController *deeplinkController;
 @property (atomic, strong) AMAExternalAttributionController *externalAttributionController;
 @property (nonatomic, strong, readonly) AMAAutoPurchasesWatcher *autoPurchasesWatcher;
+@property (nonatomic, strong, readonly) AMAFirstActivationDetector *firstActivationDetector;
 
 @property (nonatomic, strong) NSHashTable *startupCompletionObservers;
 
@@ -124,9 +125,10 @@
         _dispatchingController = [[AMADispatchingController alloc] initWithTimeoutConfiguration:configuration];
         _dispatchingController.proxyDelegate = self;
         
-        _configurationManager =
-            [[AMAAppMetricaConfigurationManager alloc] initWithExecutor:executor
-                                                    strategiesContainer:_strategiesContainer];
+        _firstActivationDetector = [[AMAFirstActivationDetector alloc] init];
+        _configurationManager = [[AMAAppMetricaConfigurationManager alloc] initWithExecutor:executor
+                                                                        strategiesContainer:_strategiesContainer
+                                                                    firstActivationDetector:_firstActivationDetector];
         
         [[AMASKAdNetworkRequestor sharedInstance] registerForAdNetworkAttribution];
 
@@ -179,8 +181,8 @@
 
 - (void)scheduleAnonymousActivationIfNeeded
 {
-    if ([AMAFirstActivationDetector isFirstLibraryReporterActivation] == NO &&
-        [AMAFirstActivationDetector isFirstMainReporterActivation] == YES) {
+    if ([self.firstActivationDetector isFirstLibraryReporterActivation] == NO &&
+        [self.firstActivationDetector isFirstMainReporterActivation] == YES) {
         AMADelayedExecutor *delayedExecutor = [[AMADelayedExecutor alloc] init];
         
         __weak typeof(self) weakSelf = self;

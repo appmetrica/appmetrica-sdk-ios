@@ -14,7 +14,7 @@
 #import "AMAErrorLogger.h"
 #import "AMADispatchStrategiesContainer.h"
 #import "AMADatabaseQueueProvider.h"
-
+#import "AppMetricaDefaultAnonymousConfigProvider.h"
 
 @interface AMAAppMetricaConfigurationManager ()
 
@@ -31,14 +31,19 @@
 
 - (instancetype)initWithExecutor:(id<AMAAsyncExecuting,AMASyncExecuting>)executor
              strategiesContainer:(AMADispatchStrategiesContainer *)strategiesContainer
+         firstActivationDetector:(AMAFirstActivationDetector *)firstActivationDetector
 {
     AMAMetricaConfiguration *metricaConfiguration = [AMAMetricaConfiguration sharedInstance];
+    AppMetricaConfigForAnonymousActivationProvider *anonymousConfigProvider =
+        [[AppMetricaConfigForAnonymousActivationProvider alloc] initWithStorage:metricaConfiguration.persistent
+                                                                defaultProvider:[[AppMetricaDefaultAnonymousConfigProvider alloc] init]
+                                                        firstActivationDetector:firstActivationDetector];
     return [self initWithExecutor:executor
               strategiesContainer:strategiesContainer
              metricaConfiguration:metricaConfiguration
                   locationManager:[AMALocationManager sharedManager]
             restrictionController:[AMADataSendingRestrictionController sharedInstance]
-          anonymousConfigProvider:[[AppMetricaConfigForAnonymousActivationProvider alloc] initWithStorage:metricaConfiguration.persistent]];
+          anonymousConfigProvider:anonymousConfigProvider];
 }
 
 - (instancetype)initWithExecutor:(id<AMAAsyncExecuting,AMASyncExecuting>)executor
