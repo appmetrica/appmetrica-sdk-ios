@@ -102,26 +102,26 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
 
 + (void)willActivateDelegates:(AMAAppMetricaConfiguration *)configuration
 {
-    @synchronized(self) {
+    [[self sharedExecutor] execute:^{
         __auto_type moduleConfig = [[AMAModuleActivationConfiguration alloc] initWithApiKey:configuration.APIKey
                                                                                  appVersion:configuration.appVersion
                                                                              appBuildNumber:configuration.appBuildNumber];
         for (Class<AMAModuleActivationDelegate> delegate in activationDelegates) {
             [delegate willActivateWithConfiguration:moduleConfig];
         }
-    }
+    }];
 }
 
 + (void)didActivateDelegates:(AMAAppMetricaConfiguration *)configuration
 {
-    @synchronized(self) {
+    [[self sharedExecutor] execute:^{
         __auto_type moduleConfig = [[AMAModuleActivationConfiguration alloc] initWithApiKey:configuration.APIKey
                                                                                  appVersion:configuration.appVersion
                                                                              appBuildNumber:configuration.appBuildNumber];
         for (Class<AMAModuleActivationDelegate> delegate in activationDelegates) {
             [delegate didActivateWithConfiguration:moduleConfig];
         }
-    }
+    }];
 }
 
 + (void)registerExternalService:(AMAServiceConfiguration *)configuration

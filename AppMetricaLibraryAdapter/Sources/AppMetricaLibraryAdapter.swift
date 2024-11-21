@@ -14,15 +14,6 @@ public final class AppMetricaLibraryAdapter: NSObject {
     @objc(sharedInstance)
     public static let shared = AppMetricaLibraryAdapter()
 
-    /// Errors that can occur during `AppMetricaLibraryAdapter` operations.
-    @objc(AMAAppMetricaLibraryAdapterError)
-    public enum AdapterError: Int, Swift.Error {
-        /// Indicates that the provided JSON is invalid.
-        case invalidJson = 1
-        /// Indicates that JSON encoding to string failed.
-        case jsonEncodingToStringFailed = 2
-    }
-
     private let appMetrica: AppMetrica.Type
     private static let systemEventName = "appmetrica_system_event_42"
 

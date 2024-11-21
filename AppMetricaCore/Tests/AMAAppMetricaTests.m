@@ -1069,6 +1069,34 @@ describe(@"AMAAppMetrica", ^{
                 
                 activate();
             });
+            it(@"Should activate delegate for anonymous activation on shared executor", ^{
+                [AMAAppMetrica stub:@selector(sharedExecutor) andReturn:nil];
+                
+                id activationDelegate = [KWMock nullMock];
+                
+                [AMAAppMetrica addActivationDelegate:activationDelegate];
+                
+                [[activationConfiguration shouldNot] receive:@selector(initWithApiKey:appVersion:appBuildNumber:)
+                                                   withCount:2
+                                                   arguments:anonymousApiKey, kw_any(), kw_any()];
+                
+                [[activationDelegate shouldNot] receive:@selector(didActivateWithConfiguration:) withArguments:activationConfiguration];
+                [[activationDelegate shouldNot] receive:@selector(willActivateWithConfiguration:) withArguments:activationConfiguration];
+                
+                activateAnonymously();
+            });
+            it(@"Should register activation delegate on shared executor", ^{
+                [AMAAppMetrica stub:@selector(sharedExecutor) andReturn:nil];
+                
+                id activationDelegate = [KWMock nullMock];
+    
+                [AMAAppMetrica addActivationDelegate:activationDelegate];
+    
+                [[activationDelegate shouldNot] receive:@selector(didActivateWithConfiguration:) withArguments:activationConfiguration];
+                [[activationDelegate shouldNot] receive:@selector(willActivateWithConfiguration:) withArguments:activationConfiguration];
+                
+                activate();
+            });
             it(@"Should not add activation delegate if metrica is activated", ^{
                 [handler beginAssertIgnoring];
                 
