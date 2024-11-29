@@ -173,7 +173,7 @@ static NSUInteger const kAMAMaxCartItemsBytesInOrder = 200 * 1024;
         orderCartItem->item = [self serializeCartItem:cartItem tracker:tracker];
 
         NSUInteger cartItemSize =
-            (NSUInteger)protobuf_c_message_get_packed_size((const ProtobufCMessage *)(orderCartItem));
+            (NSUInteger)ama_protobuf_c_message_get_packed_size((const ProtobufCMessage *)(orderCartItem));
         if (totalSize + cartItemSize > kAMAMaxCartItemsBytesInOrder) {
             orderMessage->n_items = itemIndex;
             NSData *data = [self dataForMessage:eventMessage];

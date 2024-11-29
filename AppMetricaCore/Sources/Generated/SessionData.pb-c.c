@@ -23,21 +23,21 @@ size_t ama__session_data__get_packed_size
                      (const Ama__SessionData *message)
 {
   assert(message->base.descriptor == &ama__session_data__descriptor);
-  return protobuf_c_message_get_packed_size ((const ProtobufCMessage*)(message));
+  return ama_protobuf_c_message_get_packed_size ((const ProtobufCMessage*)(message));
 }
 size_t ama__session_data__pack
                      (const Ama__SessionData *message,
                       uint8_t       *out)
 {
   assert(message->base.descriptor == &ama__session_data__descriptor);
-  return protobuf_c_message_pack ((const ProtobufCMessage*)message, out);
+  return ama_protobuf_c_message_pack ((const ProtobufCMessage*)message, out);
 }
 size_t ama__session_data__pack_to_buffer
                      (const Ama__SessionData *message,
                       ProtobufCBuffer *buffer)
 {
   assert(message->base.descriptor == &ama__session_data__descriptor);
-  return protobuf_c_message_pack_to_buffer ((const ProtobufCMessage*)message, buffer);
+  return ama_protobuf_c_message_pack_to_buffer ((const ProtobufCMessage*)message, buffer);
 }
 Ama__SessionData *
        ama__session_data__unpack
@@ -46,7 +46,7 @@ Ama__SessionData *
                       const uint8_t       *data)
 {
   return (Ama__SessionData *)
-     protobuf_c_message_unpack (&ama__session_data__descriptor,
+     ama_protobuf_c_message_unpack (&ama__session_data__descriptor,
                                 allocator, len, data);
 }
 void   ama__session_data__free_unpacked
@@ -56,7 +56,7 @@ void   ama__session_data__free_unpacked
   if(!message)
     return;
   assert(message->base.descriptor == &ama__session_data__descriptor);
-  protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
+  ama_protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
 }
 static const ProtobufCFieldDescriptor ama__session_data__app_state__field_descriptors[16] =
 {

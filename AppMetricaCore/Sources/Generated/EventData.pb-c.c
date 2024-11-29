@@ -35,21 +35,21 @@ size_t ama__event_data__get_packed_size
                      (const Ama__EventData *message)
 {
   assert(message->base.descriptor == &ama__event_data__descriptor);
-  return protobuf_c_message_get_packed_size ((const ProtobufCMessage*)(message));
+  return ama_protobuf_c_message_get_packed_size ((const ProtobufCMessage*)(message));
 }
 size_t ama__event_data__pack
                      (const Ama__EventData *message,
                       uint8_t       *out)
 {
   assert(message->base.descriptor == &ama__event_data__descriptor);
-  return protobuf_c_message_pack ((const ProtobufCMessage*)message, out);
+  return ama_protobuf_c_message_pack ((const ProtobufCMessage*)message, out);
 }
 size_t ama__event_data__pack_to_buffer
                      (const Ama__EventData *message,
                       ProtobufCBuffer *buffer)
 {
   assert(message->base.descriptor == &ama__event_data__descriptor);
-  return protobuf_c_message_pack_to_buffer ((const ProtobufCMessage*)message, buffer);
+  return ama_protobuf_c_message_pack_to_buffer ((const ProtobufCMessage*)message, buffer);
 }
 Ama__EventData *
        ama__event_data__unpack
@@ -58,7 +58,7 @@ Ama__EventData *
                       const uint8_t       *data)
 {
   return (Ama__EventData *)
-     protobuf_c_message_unpack (&ama__event_data__descriptor,
+     ama_protobuf_c_message_unpack (&ama__event_data__descriptor,
                                 allocator, len, data);
 }
 void   ama__event_data__free_unpacked
@@ -68,7 +68,7 @@ void   ama__event_data__free_unpacked
   if(!message)
     return;
   assert(message->base.descriptor == &ama__event_data__descriptor);
-  protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
+  ama_protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
 }
 static const ProtobufCEnumValue ama__event_data__payload__encryption_type__enum_values_by_number[4] =
 {
@@ -433,7 +433,7 @@ const ProtobufCEnumDescriptor ama__event_data__event_source__descriptor =
   NULL,NULL,NULL,NULL   /* reserved[1234] */
 };
 static const Ama__EventData__EventSource ama__event_data__source__default_value = AMA__EVENT_DATA__EVENT_SOURCE__NATIVE;
-static const protobuf_c_boolean ama__event_data__attribution_id_changed__default_value = 0;
+static const ama_protobuf_c_boolean ama__event_data__attribution_id_changed__default_value = 0;
 static const uint64_t ama__event_data__open_id__default_value = 1ull;
 static const ProtobufCFieldDescriptor ama__event_data__field_descriptors[14] =
 {

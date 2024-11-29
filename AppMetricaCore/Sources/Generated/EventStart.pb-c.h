@@ -31,7 +31,7 @@ struct  AmaStartEvent__Value__BinaryImage
 };
 #define AMA_START_EVENT__VALUE__BINARY_IMAGE__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama_start_event__value__binary_image__descriptor) \
-, {0,NULL} }
+    , {0,NULL} }
 
 
 struct  AmaStartEvent__Value
@@ -40,7 +40,7 @@ struct  AmaStartEvent__Value
   /*
    * Android only field.
    */
-  protobuf_c_boolean has_build_id;
+  ama_protobuf_c_boolean has_build_id;
   ProtobufCBinaryData build_id;
   /*
    * iOS only field.
@@ -50,7 +50,7 @@ struct  AmaStartEvent__Value
 };
 #define AMA_START_EVENT__VALUE__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama_start_event__value__descriptor) \
-, 0, {0,NULL}, 0,NULL }
+    , 0, {0,NULL}, 0,NULL }
 
 
 /* AmaStartEvent__Value__BinaryImage methods */

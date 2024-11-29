@@ -48,17 +48,17 @@ typedef enum _Ama__EventData__EventSource {
 struct  Ama__EventData__Payload
 {
   ProtobufCMessage base;
-  protobuf_c_boolean has_name;
+  ama_protobuf_c_boolean has_name;
   ProtobufCBinaryData name;
   Ama__EventData__Payload__ValueType value_type;
-  protobuf_c_boolean has_value_data;
+  ama_protobuf_c_boolean has_value_data;
   ProtobufCBinaryData value_data;
   Ama__EventData__Payload__EncryptionType encryption_type;
   uint32_t bytes_truncated;
 };
 #define AMA__EVENT_DATA__PAYLOAD__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__event_data__payload__descriptor) \
-, 0, {0,NULL}, AMA__EVENT_DATA__PAYLOAD__VALUE_TYPE__EMPTY, 0, {0,NULL}, AMA__EVENT_DATA__PAYLOAD__ENCRYPTION_TYPE__NONE, 0 }
+    , 0, {0,NULL}, AMA__EVENT_DATA__PAYLOAD__VALUE_TYPE__EMPTY, 0, {0,NULL}, AMA__EVENT_DATA__PAYLOAD__ENCRYPTION_TYPE__NONE, 0 }
 
 
 struct  Ama__EventData__Location
@@ -67,7 +67,7 @@ struct  Ama__EventData__Location
   double latitude;
   double longitude;
   double altitude;
-  protobuf_c_boolean has_timestamp;
+  ama_protobuf_c_boolean has_timestamp;
   double timestamp;
   double horizontal_accuracy;
   double vertical_accuracy;
@@ -76,7 +76,7 @@ struct  Ama__EventData__Location
 };
 #define AMA__EVENT_DATA__LOCATION__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__event_data__location__descriptor) \
-, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
+    , 0, 0, 0, 0, 0, 0, 0, 0, 0 }
 
 
 struct  Ama__EventData__ExtraEntry
@@ -87,7 +87,7 @@ struct  Ama__EventData__ExtraEntry
 };
 #define AMA__EVENT_DATA__EXTRA_ENTRY__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__event_data__extra_entry__descriptor) \
-, {0,NULL}, {0,NULL} }
+    , {0,NULL}, {0,NULL} }
 
 
 struct  Ama__EventData
@@ -97,35 +97,35 @@ struct  Ama__EventData
   double time_offset;
   uint32_t global_number;
   uint32_t number_of_type;
-  protobuf_c_boolean has_first_occurrence;
-  protobuf_c_boolean first_occurrence;
+  ama_protobuf_c_boolean has_first_occurrence;
+  ama_protobuf_c_boolean first_occurrence;
   Ama__EventData__Location *location;
-  protobuf_c_boolean has_location_enabled;
-  protobuf_c_boolean location_enabled;
-  protobuf_c_boolean has_user_profile_id;
+  ama_protobuf_c_boolean has_location_enabled;
+  ama_protobuf_c_boolean location_enabled;
+  ama_protobuf_c_boolean has_user_profile_id;
   ProtobufCBinaryData user_profile_id;
   /*
    * JSON-string with one-level dictionary
    */
-  protobuf_c_boolean has_app_environment;
+  ama_protobuf_c_boolean has_app_environment;
   ProtobufCBinaryData app_environment;
   /*
    * JSON-string with one-level dictionary
    */
-  protobuf_c_boolean has_event_environment;
+  ama_protobuf_c_boolean has_event_environment;
   ProtobufCBinaryData event_environment;
-  protobuf_c_boolean has_source;
+  ama_protobuf_c_boolean has_source;
   Ama__EventData__EventSource source;
-  protobuf_c_boolean has_attribution_id_changed;
-  protobuf_c_boolean attribution_id_changed;
-  protobuf_c_boolean has_open_id;
+  ama_protobuf_c_boolean has_attribution_id_changed;
+  ama_protobuf_c_boolean attribution_id_changed;
+  ama_protobuf_c_boolean has_open_id;
   uint64_t open_id;
   size_t n_extras;
   Ama__EventData__ExtraEntry **extras;
 };
 #define AMA__EVENT_DATA__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__event_data__descriptor) \
-, NULL, 0, 0, 0, 0, 0, NULL, 0, 0, 0, {0,NULL}, 0, {0,NULL}, 0, {0,NULL}, 0, AMA__EVENT_DATA__EVENT_SOURCE__NATIVE, 0, 0, 0, 1ull, 0,NULL }
+    , NULL, 0, 0, 0, 0, 0, NULL, 0, 0, 0, {0,NULL}, 0, {0,NULL}, 0, {0,NULL}, 0, AMA__EVENT_DATA__EVENT_SOURCE__NATIVE, 0, 0, 0, 1ull, 0,NULL }
 
 
 /* Ama__EventData__Payload methods */

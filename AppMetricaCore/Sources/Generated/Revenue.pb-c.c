@@ -47,21 +47,21 @@ size_t ama__revenue__get_packed_size
                      (const Ama__Revenue *message)
 {
   assert(message->base.descriptor == &ama__revenue__descriptor);
-  return protobuf_c_message_get_packed_size ((const ProtobufCMessage*)(message));
+  return ama_protobuf_c_message_get_packed_size ((const ProtobufCMessage*)(message));
 }
 size_t ama__revenue__pack
                      (const Ama__Revenue *message,
                       uint8_t       *out)
 {
   assert(message->base.descriptor == &ama__revenue__descriptor);
-  return protobuf_c_message_pack ((const ProtobufCMessage*)message, out);
+  return ama_protobuf_c_message_pack ((const ProtobufCMessage*)message, out);
 }
 size_t ama__revenue__pack_to_buffer
                      (const Ama__Revenue *message,
                       ProtobufCBuffer *buffer)
 {
   assert(message->base.descriptor == &ama__revenue__descriptor);
-  return protobuf_c_message_pack_to_buffer ((const ProtobufCMessage*)message, buffer);
+  return ama_protobuf_c_message_pack_to_buffer ((const ProtobufCMessage*)message, buffer);
 }
 Ama__Revenue *
        ama__revenue__unpack
@@ -70,7 +70,7 @@ Ama__Revenue *
                       const uint8_t       *data)
 {
   return (Ama__Revenue *)
-     protobuf_c_message_unpack (&ama__revenue__descriptor,
+     ama_protobuf_c_message_unpack (&ama__revenue__descriptor,
                                 allocator, len, data);
 }
 void   ama__revenue__free_unpacked
@@ -80,7 +80,7 @@ void   ama__revenue__free_unpacked
   if(!message)
     return;
   assert(message->base.descriptor == &ama__revenue__descriptor);
-  protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
+  ama_protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
 }
 static const ProtobufCFieldDescriptor ama__revenue__receipt__field_descriptors[2] =
 {
@@ -540,7 +540,7 @@ const ProtobufCEnumDescriptor ama__revenue__in_app_type__descriptor =
   NULL,NULL,NULL,NULL   /* reserved[1234] */
 };
 static const uint32_t ama__revenue__quantity__default_value = 1u;
-static const protobuf_c_boolean ama__revenue__auto_collected__default_value = 0;
+static const ama_protobuf_c_boolean ama__revenue__auto_collected__default_value = 0;
 static const Ama__Revenue__InAppType ama__revenue__in_app_type__default_value = AMA__REVENUE__IN_APP_TYPE__PURCHASE;
 static const ProtobufCFieldDescriptor ama__revenue__field_descriptors[10] =
 {

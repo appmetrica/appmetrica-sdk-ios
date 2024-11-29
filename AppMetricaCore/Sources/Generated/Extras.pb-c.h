@@ -32,7 +32,7 @@ struct  Ama__Extras__ExtraEntry
 };
 #define AMA__EXTRAS__EXTRA_ENTRY__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__extras__extra_entry__descriptor) \
-, {0,NULL}, {0,NULL} }
+    , {0,NULL}, {0,NULL} }
 
 
 struct  Ama__Extras
@@ -43,7 +43,7 @@ struct  Ama__Extras
 };
 #define AMA__EXTRAS__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__extras__descriptor) \
-, 0,NULL }
+    , 0,NULL }
 
 
 /* Ama__Extras__ExtraEntry methods */

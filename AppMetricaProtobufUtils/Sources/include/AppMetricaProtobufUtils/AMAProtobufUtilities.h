@@ -20,12 +20,12 @@ NS_SWIFT_NAME(ProtobufUtilities)
                tracker:(id<AMAAllocationsTracking>)tracker;
 
 + (NSString *)stringForBinaryData:(nullable const ProtobufCBinaryData *)binaryData;
-+ (NSString *)stringForBinaryData:(nullable const ProtobufCBinaryData *)binaryData has:(protobuf_c_boolean)has;
++ (NSString *)stringForBinaryData:(nullable const ProtobufCBinaryData *)binaryData has:(ama_protobuf_c_boolean)has;
 
 + (NSData *)dataForBinaryData:(nullable const ProtobufCBinaryData *)binaryData;
-+ (NSData *)dataForBinaryData:(nullable const ProtobufCBinaryData *)binaryData has:(protobuf_c_boolean)has;
++ (NSData *)dataForBinaryData:(nullable const ProtobufCBinaryData *)binaryData has:(ama_protobuf_c_boolean)has;
 
-+ (BOOL)boolForProto:(protobuf_c_boolean)value;
++ (BOOL)boolForProto:(ama_protobuf_c_boolean)value;
 
 - (instancetype)init NS_UNAVAILABLE;
 + (instancetype)new NS_UNAVAILABLE;

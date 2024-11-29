@@ -13,8 +13,8 @@ NS_ASSUME_NONNULL_BEGIN
 + (instancetype)new NS_UNAVAILABLE;
 - (instancetype)init NS_UNAVAILABLE;
 
-+ (BOOL)fillBoolValue:(protobuf_c_boolean *)value withOptionalBool:(AMAOptionalBool)optionalBool;
-+ (AMAOptionalBool)optionalBoolForBoolValue:(protobuf_c_boolean)value hasValue:(protobuf_c_boolean)hasValue;
++ (BOOL)fillBoolValue:(ama_protobuf_c_boolean *)value withOptionalBool:(AMAOptionalBool)optionalBool;
++ (AMAOptionalBool)optionalBoolForBoolValue:(ama_protobuf_c_boolean)value hasValue:(ama_protobuf_c_boolean)hasValue;
 + (Ama__EventData__EventSource)eventSourceToServerProto:(AMAEventSource)model;
 + (AMAEventSource)eventSourceToModel:(Ama__EventData__EventSource)proto;
 + (Ama__ReportMessage__Session__Event__EventSource)eventSourceToLocalProto:(AMAEventSource)model;

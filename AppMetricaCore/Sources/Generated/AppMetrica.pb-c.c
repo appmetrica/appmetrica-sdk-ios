@@ -17,21 +17,21 @@ size_t ama__request_parameters__get_packed_size
                      (const Ama__RequestParameters *message)
 {
   assert(message->base.descriptor == &ama__request_parameters__descriptor);
-  return protobuf_c_message_get_packed_size ((const ProtobufCMessage*)(message));
+  return ama_protobuf_c_message_get_packed_size ((const ProtobufCMessage*)(message));
 }
 size_t ama__request_parameters__pack
                      (const Ama__RequestParameters *message,
                       uint8_t       *out)
 {
   assert(message->base.descriptor == &ama__request_parameters__descriptor);
-  return protobuf_c_message_pack ((const ProtobufCMessage*)message, out);
+  return ama_protobuf_c_message_pack ((const ProtobufCMessage*)message, out);
 }
 size_t ama__request_parameters__pack_to_buffer
                      (const Ama__RequestParameters *message,
                       ProtobufCBuffer *buffer)
 {
   assert(message->base.descriptor == &ama__request_parameters__descriptor);
-  return protobuf_c_message_pack_to_buffer ((const ProtobufCMessage*)message, buffer);
+  return ama_protobuf_c_message_pack_to_buffer ((const ProtobufCMessage*)message, buffer);
 }
 Ama__RequestParameters *
        ama__request_parameters__unpack
@@ -40,7 +40,7 @@ Ama__RequestParameters *
                       const uint8_t       *data)
 {
   return (Ama__RequestParameters *)
-     protobuf_c_message_unpack (&ama__request_parameters__descriptor,
+     ama_protobuf_c_message_unpack (&ama__request_parameters__descriptor,
                                 allocator, len, data);
 }
 void   ama__request_parameters__free_unpacked
@@ -50,7 +50,7 @@ void   ama__request_parameters__free_unpacked
   if(!message)
     return;
   assert(message->base.descriptor == &ama__request_parameters__descriptor);
-  protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
+  ama_protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
 }
 void   ama__time__init
                      (Ama__Time         *message)
@@ -62,21 +62,21 @@ size_t ama__time__get_packed_size
                      (const Ama__Time *message)
 {
   assert(message->base.descriptor == &ama__time__descriptor);
-  return protobuf_c_message_get_packed_size ((const ProtobufCMessage*)(message));
+  return ama_protobuf_c_message_get_packed_size ((const ProtobufCMessage*)(message));
 }
 size_t ama__time__pack
                      (const Ama__Time *message,
                       uint8_t       *out)
 {
   assert(message->base.descriptor == &ama__time__descriptor);
-  return protobuf_c_message_pack ((const ProtobufCMessage*)message, out);
+  return ama_protobuf_c_message_pack ((const ProtobufCMessage*)message, out);
 }
 size_t ama__time__pack_to_buffer
                      (const Ama__Time *message,
                       ProtobufCBuffer *buffer)
 {
   assert(message->base.descriptor == &ama__time__descriptor);
-  return protobuf_c_message_pack_to_buffer ((const ProtobufCMessage*)message, buffer);
+  return ama_protobuf_c_message_pack_to_buffer ((const ProtobufCMessage*)message, buffer);
 }
 Ama__Time *
        ama__time__unpack
@@ -85,7 +85,7 @@ Ama__Time *
                       const uint8_t       *data)
 {
   return (Ama__Time *)
-     protobuf_c_message_unpack (&ama__time__descriptor,
+     ama_protobuf_c_message_unpack (&ama__time__descriptor,
                                 allocator, len, data);
 }
 void   ama__time__free_unpacked
@@ -95,7 +95,7 @@ void   ama__time__free_unpacked
   if(!message)
     return;
   assert(message->base.descriptor == &ama__time__descriptor);
-  protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
+  ama_protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
 }
 void   ama__report_message__location__init
                      (Ama__ReportMessage__Location         *message)
@@ -143,21 +143,21 @@ size_t ama__report_message__get_packed_size
                      (const Ama__ReportMessage *message)
 {
   assert(message->base.descriptor == &ama__report_message__descriptor);
-  return protobuf_c_message_get_packed_size ((const ProtobufCMessage*)(message));
+  return ama_protobuf_c_message_get_packed_size ((const ProtobufCMessage*)(message));
 }
 size_t ama__report_message__pack
                      (const Ama__ReportMessage *message,
                       uint8_t       *out)
 {
   assert(message->base.descriptor == &ama__report_message__descriptor);
-  return protobuf_c_message_pack ((const ProtobufCMessage*)message, out);
+  return ama_protobuf_c_message_pack ((const ProtobufCMessage*)message, out);
 }
 size_t ama__report_message__pack_to_buffer
                      (const Ama__ReportMessage *message,
                       ProtobufCBuffer *buffer)
 {
   assert(message->base.descriptor == &ama__report_message__descriptor);
-  return protobuf_c_message_pack_to_buffer ((const ProtobufCMessage*)message, buffer);
+  return ama_protobuf_c_message_pack_to_buffer ((const ProtobufCMessage*)message, buffer);
 }
 Ama__ReportMessage *
        ama__report_message__unpack
@@ -166,7 +166,7 @@ Ama__ReportMessage *
                       const uint8_t       *data)
 {
   return (Ama__ReportMessage *)
-     protobuf_c_message_unpack (&ama__report_message__descriptor,
+     ama_protobuf_c_message_unpack (&ama__report_message__descriptor,
                                 allocator, len, data);
 }
 void   ama__report_message__free_unpacked
@@ -176,7 +176,7 @@ void   ama__report_message__free_unpacked
   if(!message)
     return;
   assert(message->base.descriptor == &ama__report_message__descriptor);
-  protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
+  ama_protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
 }
 static const ProtobufCFieldDescriptor ama__request_parameters__field_descriptors[2] =
 {
@@ -672,7 +672,7 @@ static const Ama__ReportMessage__Session__Event__EncodingType ama__report_messag
 static const Ama__ReportMessage__OptionalBool ama__report_message__session__event__location_tracking_enabled__default_value = AMA__REPORT_MESSAGE__OPTIONAL_BOOL__OPTIONAL_BOOL_UNDEFINED;
 static const Ama__ReportMessage__OptionalBool ama__report_message__session__event__first_occurrence__default_value = AMA__REPORT_MESSAGE__OPTIONAL_BOOL__OPTIONAL_BOOL_UNDEFINED;
 static const Ama__ReportMessage__Session__Event__EventSource ama__report_message__session__event__source__default_value = AMA__REPORT_MESSAGE__SESSION__EVENT__EVENT_SOURCE__NATIVE;
-static const protobuf_c_boolean ama__report_message__session__event__attribution_id_changed__default_value = 0;
+static const ama_protobuf_c_boolean ama__report_message__session__event__attribution_id_changed__default_value = 0;
 static const uint64_t ama__report_message__session__event__open_id__default_value = 1ull;
 static const ProtobufCFieldDescriptor ama__report_message__session__event__field_descriptors[18] =
 {

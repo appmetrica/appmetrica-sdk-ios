@@ -452,7 +452,7 @@
 }
 
 - (NSDictionary *)dictionaryForJSONData:(ProtobufCBinaryData *)data
-                                    has:(protobuf_c_boolean)hasValue
+                                    has:(ama_protobuf_c_boolean)hasValue
 {
     NSDictionary *result = nil;
     NSString *jsonString = [AMAProtobufUtilities stringForBinaryData:data has:hasValue];

@@ -17,21 +17,21 @@ size_t ama__client_external_attribution__get_packed_size
                      (const Ama__ClientExternalAttribution *message)
 {
   assert(message->base.descriptor == &ama__client_external_attribution__descriptor);
-  return protobuf_c_message_get_packed_size ((const ProtobufCMessage*)(message));
+  return ama_protobuf_c_message_get_packed_size ((const ProtobufCMessage*)(message));
 }
 size_t ama__client_external_attribution__pack
                      (const Ama__ClientExternalAttribution *message,
                       uint8_t       *out)
 {
   assert(message->base.descriptor == &ama__client_external_attribution__descriptor);
-  return protobuf_c_message_pack ((const ProtobufCMessage*)message, out);
+  return ama_protobuf_c_message_pack ((const ProtobufCMessage*)message, out);
 }
 size_t ama__client_external_attribution__pack_to_buffer
                      (const Ama__ClientExternalAttribution *message,
                       ProtobufCBuffer *buffer)
 {
   assert(message->base.descriptor == &ama__client_external_attribution__descriptor);
-  return protobuf_c_message_pack_to_buffer ((const ProtobufCMessage*)message, buffer);
+  return ama_protobuf_c_message_pack_to_buffer ((const ProtobufCMessage*)message, buffer);
 }
 Ama__ClientExternalAttribution *
        ama__client_external_attribution__unpack
@@ -40,7 +40,7 @@ Ama__ClientExternalAttribution *
                       const uint8_t       *data)
 {
   return (Ama__ClientExternalAttribution *)
-     protobuf_c_message_unpack (&ama__client_external_attribution__descriptor,
+     ama_protobuf_c_message_unpack (&ama__client_external_attribution__descriptor,
                                 allocator, len, data);
 }
 void   ama__client_external_attribution__free_unpacked
@@ -50,7 +50,7 @@ void   ama__client_external_attribution__free_unpacked
   if(!message)
     return;
   assert(message->base.descriptor == &ama__client_external_attribution__descriptor);
-  protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
+  ama_protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
 }
 static const ProtobufCEnumValue ama__client_external_attribution__attribution_type__enum_values_by_number[7] =
 {

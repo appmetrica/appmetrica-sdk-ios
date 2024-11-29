@@ -32,7 +32,7 @@ struct  Ama__LegacyEventExtras
 };
 #define AMA__LEGACY_EVENT_EXTRAS__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__legacy_event_extras__descriptor) \
-, NULL, NULL, NULL }
+    , NULL, NULL, NULL }
 
 
 /* Ama__LegacyEventExtras methods */

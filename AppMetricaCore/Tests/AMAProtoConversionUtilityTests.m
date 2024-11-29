@@ -5,7 +5,7 @@ SPEC_BEGIN(AMAProtoConversionUtilityTests)
 
 describe(@"AMAProtoConversionUtility", ^{
     
-    __block protobuf_c_boolean testValue;
+    __block ama_protobuf_c_boolean testValue;
     __block AMAOptionalBool testOptionalBool;
     __block AMAEventSource testEventSource;
     __block Ama__EventData__EventSource testProtoEventSource;
@@ -77,21 +77,21 @@ describe(@"AMAProtoConversionUtility", ^{
     
     context(@"when getting optional bool for bool value", ^{
         it(@"should return undefined for false hasValue", ^{
-            protobuf_c_boolean hasValue = false;
+            ama_protobuf_c_boolean hasValue = false;
             AMAOptionalBool result = [AMAProtoConversionUtility optionalBoolForBoolValue:testValue hasValue:hasValue];
             [[theValue(result) should] equal:theValue(AMAOptionalBoolUndefined)];
         });
         
         it(@"should return true for true value and true hasValue", ^{
             testValue = true;
-            protobuf_c_boolean hasValue = true;
+            ama_protobuf_c_boolean hasValue = true;
             AMAOptionalBool result = [AMAProtoConversionUtility optionalBoolForBoolValue:testValue hasValue:hasValue];
             [[theValue(result) should] equal:theValue(AMAOptionalBoolTrue)];
         });
         
         it(@"should return false for false value and true hasValue", ^{
             testValue = false;
-            protobuf_c_boolean hasValue = true;
+            ama_protobuf_c_boolean hasValue = true;
             AMAOptionalBool result = [AMAProtoConversionUtility optionalBoolForBoolValue:testValue hasValue:hasValue];
             [[theValue(result) should] equal:theValue(AMAOptionalBoolFalse)];
         });

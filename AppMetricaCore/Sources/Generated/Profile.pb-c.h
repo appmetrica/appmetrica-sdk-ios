@@ -39,17 +39,17 @@ struct  Ama__Profile__AttributeMetaInfo
   /*
    * If set to true, all following attribute changes will be ignored.
    */
-  protobuf_c_boolean has_set_if_undefined;
-  protobuf_c_boolean set_if_undefined;
+  ama_protobuf_c_boolean has_set_if_undefined;
+  ama_protobuf_c_boolean set_if_undefined;
   /*
    * If set to true, the attribute will be reset if possible.
    */
-  protobuf_c_boolean has_reset;
-  protobuf_c_boolean reset;
+  ama_protobuf_c_boolean has_reset;
+  ama_protobuf_c_boolean reset;
 };
 #define AMA__PROFILE__ATTRIBUTE_META_INFO__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__profile__attribute_meta_info__descriptor) \
-, 0, 0, 0, 0 }
+    , 0, 0, 0, 0 }
 
 
 struct  Ama__Profile__AttributeValue
@@ -58,27 +58,27 @@ struct  Ama__Profile__AttributeValue
   /*
    * required for Type.STRING
    */
-  protobuf_c_boolean has_string_value;
+  ama_protobuf_c_boolean has_string_value;
   ProtobufCBinaryData string_value;
   /*
    * required for Type.NUMBER
    */
-  protobuf_c_boolean has_number_value;
+  ama_protobuf_c_boolean has_number_value;
   double number_value;
   /*
    * required for Type.COUNTER
    */
-  protobuf_c_boolean has_counter_modification;
+  ama_protobuf_c_boolean has_counter_modification;
   double counter_modification;
   /*
    * required for Type.BOOL
    */
-  protobuf_c_boolean has_bool_value;
-  protobuf_c_boolean bool_value;
+  ama_protobuf_c_boolean has_bool_value;
+  ama_protobuf_c_boolean bool_value;
 };
 #define AMA__PROFILE__ATTRIBUTE_VALUE__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__profile__attribute_value__descriptor) \
-, 0, {0,NULL}, 0, 0, 0, 0, 0, 0 }
+    , 0, {0,NULL}, 0, 0, 0, 0, 0, 0 }
 
 
 struct  Ama__Profile__Attribute
@@ -94,7 +94,7 @@ struct  Ama__Profile__Attribute
 };
 #define AMA__PROFILE__ATTRIBUTE__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__profile__attribute__descriptor) \
-, {0,NULL}, AMA__PROFILE__ATTRIBUTE__TYPE__STRING, NULL, NULL }
+    , {0,NULL}, AMA__PROFILE__ATTRIBUTE__TYPE__STRING, NULL, NULL }
 
 
 struct  Ama__Profile
@@ -108,7 +108,7 @@ struct  Ama__Profile
 };
 #define AMA__PROFILE__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__profile__descriptor) \
-, 0,NULL }
+    , 0,NULL }
 
 
 /* Ama__Profile__AttributeMetaInfo methods */

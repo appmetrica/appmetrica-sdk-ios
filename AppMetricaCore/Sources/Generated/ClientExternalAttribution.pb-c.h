@@ -36,12 +36,12 @@ typedef enum _Ama__ClientExternalAttribution__AttributionType {
 struct  Ama__ClientExternalAttribution
 {
   ProtobufCMessage base;
-  protobuf_c_boolean has_attribution_type;
+  ama_protobuf_c_boolean has_attribution_type;
   Ama__ClientExternalAttribution__AttributionType attribution_type;
   /*
    * json
    */
-  protobuf_c_boolean has_value;
+  ama_protobuf_c_boolean has_value;
   ProtobufCBinaryData value;
 };
 #define AMA__CLIENT_EXTERNAL_ATTRIBUTION__INIT \

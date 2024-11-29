@@ -87,7 +87,7 @@ struct  Ama__RequestParameters
 };
 #define AMA__REQUEST_PARAMETERS__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__request_parameters__descriptor) \
-, NULL, NULL }
+    , NULL, NULL }
 
 
 struct  Ama__Time
@@ -98,7 +98,7 @@ struct  Ama__Time
 };
 #define AMA__TIME__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__time__descriptor) \
-, 0, 0 }
+    , 0, 0 }
 
 
 struct  Ama__ReportMessage__Location
@@ -106,20 +106,20 @@ struct  Ama__ReportMessage__Location
   ProtobufCMessage base;
   double lat;
   double lon;
-  protobuf_c_boolean has_timestamp;
+  ama_protobuf_c_boolean has_timestamp;
   uint64_t timestamp;
-  protobuf_c_boolean has_precision;
+  ama_protobuf_c_boolean has_precision;
   uint32_t precision;
-  protobuf_c_boolean has_direction;
+  ama_protobuf_c_boolean has_direction;
   uint32_t direction;
-  protobuf_c_boolean has_speed;
+  ama_protobuf_c_boolean has_speed;
   uint32_t speed;
-  protobuf_c_boolean has_altitude;
+  ama_protobuf_c_boolean has_altitude;
   int32_t altitude;
 };
 #define AMA__REPORT_MESSAGE__LOCATION__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__report_message__location__descriptor) \
-, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
+    , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
 
 
 struct  Ama__ReportMessage__Session__SessionDesc
@@ -127,25 +127,25 @@ struct  Ama__ReportMessage__Session__SessionDesc
   ProtobufCMessage base;
   Ama__Time *start_time;
   char *locale;
-  protobuf_c_boolean has_session_type;
+  ama_protobuf_c_boolean has_session_type;
   Ama__ReportMessage__Session__SessionDesc__SessionType session_type;
 };
 #define AMA__REPORT_MESSAGE__SESSION__SESSION_DESC__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__report_message__session__session_desc__descriptor) \
-, NULL, NULL, 0, AMA__REPORT_MESSAGE__SESSION__SESSION_DESC__SESSION_TYPE__SESSION_FOREGROUND }
+    , NULL, NULL, 0, AMA__REPORT_MESSAGE__SESSION__SESSION_DESC__SESSION_TYPE__SESSION_FOREGROUND }
 
 
 struct  Ama__ReportMessage__Session__Event__ExtrasEntry
 {
   ProtobufCMessage base;
-  protobuf_c_boolean has_key;
+  ama_protobuf_c_boolean has_key;
   ProtobufCBinaryData key;
-  protobuf_c_boolean has_value;
+  ama_protobuf_c_boolean has_value;
   ProtobufCBinaryData value;
 };
 #define AMA__REPORT_MESSAGE__SESSION__EVENT__EXTRAS_ENTRY__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__report_message__session__event__extras_entry__descriptor) \
-, 0, {0,NULL}, 0, {0,NULL} }
+    , 0, {0,NULL}, 0, {0,NULL} }
 
 
 struct  Ama__ReportMessage__Session__Event
@@ -155,36 +155,36 @@ struct  Ama__ReportMessage__Session__Event
   uint64_t time;
   uint32_t type;
   char *name;
-  protobuf_c_boolean has_value;
+  ama_protobuf_c_boolean has_value;
   ProtobufCBinaryData value;
   Ama__ReportMessage__Location *location;
   char *environment;
-  protobuf_c_boolean has_bytes_truncated;
+  ama_protobuf_c_boolean has_bytes_truncated;
   uint32_t bytes_truncated;
-  protobuf_c_boolean has_encoding_type;
+  ama_protobuf_c_boolean has_encoding_type;
   Ama__ReportMessage__Session__Event__EncodingType encoding_type;
-  protobuf_c_boolean has_location_tracking_enabled;
+  ama_protobuf_c_boolean has_location_tracking_enabled;
   Ama__ReportMessage__OptionalBool location_tracking_enabled;
-  protobuf_c_boolean has_profile_id;
+  ama_protobuf_c_boolean has_profile_id;
   ProtobufCBinaryData profile_id;
-  protobuf_c_boolean has_first_occurrence;
+  ama_protobuf_c_boolean has_first_occurrence;
   Ama__ReportMessage__OptionalBool first_occurrence;
-  protobuf_c_boolean has_global_number;
+  ama_protobuf_c_boolean has_global_number;
   uint64_t global_number;
-  protobuf_c_boolean has_number_of_type;
+  ama_protobuf_c_boolean has_number_of_type;
   uint64_t number_of_type;
-  protobuf_c_boolean has_source;
+  ama_protobuf_c_boolean has_source;
   Ama__ReportMessage__Session__Event__EventSource source;
-  protobuf_c_boolean has_attribution_id_changed;
-  protobuf_c_boolean attribution_id_changed;
-  protobuf_c_boolean has_open_id;
+  ama_protobuf_c_boolean has_attribution_id_changed;
+  ama_protobuf_c_boolean attribution_id_changed;
+  ama_protobuf_c_boolean has_open_id;
   uint64_t open_id;
   size_t n_extras;
   Ama__ReportMessage__Session__Event__ExtrasEntry **extras;
 };
 #define AMA__REPORT_MESSAGE__SESSION__EVENT__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__report_message__session__event__descriptor) \
-, 0, 0, 0, NULL, 0, {0,NULL}, NULL, NULL, 0, 0, 0, AMA__REPORT_MESSAGE__SESSION__EVENT__ENCODING_TYPE__NONE, 0, AMA__REPORT_MESSAGE__OPTIONAL_BOOL__OPTIONAL_BOOL_UNDEFINED, 0, {0,NULL}, 0, AMA__REPORT_MESSAGE__OPTIONAL_BOOL__OPTIONAL_BOOL_UNDEFINED, 0, 0, 0, 0, 0, AMA__REPORT_MESSAGE__SESSION__EVENT__EVENT_SOURCE__NATIVE, 0, 0, 0, 1ull, 0,NULL }
+    , 0, 0, 0, NULL, 0, {0,NULL}, NULL, NULL, 0, 0, 0, AMA__REPORT_MESSAGE__SESSION__EVENT__ENCODING_TYPE__NONE, 0, AMA__REPORT_MESSAGE__OPTIONAL_BOOL__OPTIONAL_BOOL_UNDEFINED, 0, {0,NULL}, 0, AMA__REPORT_MESSAGE__OPTIONAL_BOOL__OPTIONAL_BOOL_UNDEFINED, 0, 0, 0, 0, 0, AMA__REPORT_MESSAGE__SESSION__EVENT__EVENT_SOURCE__NATIVE, 0, 0, 0, 1ull, 0,NULL }
 
 
 struct  Ama__ReportMessage__Session
@@ -197,7 +197,7 @@ struct  Ama__ReportMessage__Session
 };
 #define AMA__REPORT_MESSAGE__SESSION__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__report_message__session__descriptor) \
-, 0, NULL, 0,NULL }
+    , 0, NULL, 0,NULL }
 
 
 struct  Ama__ReportMessage__EnvironmentVariable
@@ -208,7 +208,7 @@ struct  Ama__ReportMessage__EnvironmentVariable
 };
 #define AMA__REPORT_MESSAGE__ENVIRONMENT_VARIABLE__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__report_message__environment_variable__descriptor) \
-, NULL, NULL }
+    , NULL, NULL }
 
 
 struct  Ama__ReportMessage
@@ -222,7 +222,7 @@ struct  Ama__ReportMessage
 };
 #define AMA__REPORT_MESSAGE__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__report_message__descriptor) \
-, 0,NULL, NULL, 0,NULL }
+    , 0,NULL, NULL, 0,NULL }
 
 
 /* Ama__RequestParameters methods */

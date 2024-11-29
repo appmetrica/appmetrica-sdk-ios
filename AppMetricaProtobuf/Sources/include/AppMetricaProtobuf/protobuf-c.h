@@ -177,20 +177,20 @@ size_t foo__bar__baz_bah__pack_to_buffer
  * \page pack Packing and unpacking messages
  *
  * To pack a message, first compute the packed size of the message with
- * protobuf_c_message_get_packed_size(), then allocate a buffer of at least
- * that size, then call protobuf_c_message_pack().
+ * ama_protobuf_c_message_get_packed_size(), then allocate a buffer of at least
+ * that size, then call ama_protobuf_c_message_pack().
  *
  * Alternatively, a message can be serialized without calculating the final size
- * first. Use the protobuf_c_message_pack_to_buffer() function and provide a
+ * first. Use the ama_protobuf_c_message_pack_to_buffer() function and provide a
  * ProtobufCBuffer object which implements an "append" method that consumes
  * data.
  *
- * To unpack a message, call the protobuf_c_message_unpack() function. The
+ * To unpack a message, call the ama_protobuf_c_message_unpack() function. The
  * result can be cast to an object of the type that matches the descriptor for
  * the message.
  *
  * The result of unpacking a message should be freed with
- * protobuf_c_message_free_unpacked().
+ * ama_protobuf_c_message_free_unpacked().
  */
 
 #ifndef PROTOBUF_C_H
@@ -239,9 +239,9 @@ PROTOBUF_C__BEGIN_DECLS
 
 /* Empty string used for initializers */
 #if defined(_WIN32) && defined(PROTOBUF_C_USE_SHARED_LIB)
-static const char protobuf_c_empty_string[] = "";
+static const char ama_protobuf_c_empty_string[] = "";
 #else
-extern const char protobuf_c_empty_string[];
+extern const char ama_protobuf_c_empty_string[];
 #endif
 
 /**
@@ -376,7 +376,7 @@ typedef struct ProtobufCService ProtobufCService;
 typedef struct ProtobufCServiceDescriptor ProtobufCServiceDescriptor;
 
 /** Boolean type. */
-typedef int protobuf_c_boolean;
+typedef int ama_protobuf_c_boolean;
 
 typedef void (*ProtobufCClosure)(const ProtobufCMessage *, void *closure_data);
 typedef void (*ProtobufCMessageInit)(ProtobufCMessage *);
@@ -410,7 +410,7 @@ struct ProtobufCBinaryData {
 
 /**
  * Structure for defining a virtual append-only buffer. Used by
- * protobuf_c_message_pack_to_buffer() to abstract the consumption of serialized
+ * ama_protobuf_c_message_pack_to_buffer() to abstract the consumption of serialized
  * bytes.
  *
  * `ProtobufCBuffer` "subclasses" may be defined on the stack. For example, to
@@ -439,7 +439,7 @@ my_buffer_file_append(ProtobufCBuffer *buffer,
 BufferAppendToFile tmp = {0};
 tmp.base.append = my_buffer_file_append;
 tmp.fp = fp;
-protobuf_c_message_pack_to_buffer(&message, &tmp);
+ama_protobuf_c_message_pack_to_buffer(&message, &tmp);
 ...
 ~~~
  */
@@ -464,7 +464,7 @@ ProtobufCBufferSimple simple = PROTOBUF_C_BUFFER_SIMPLE_INIT(pad);
 ProtobufCBuffer *buffer = (ProtobufCBuffer *) &simple;
 ~~~
  *
- * `buffer` can now be used with `protobuf_c_message_pack_to_buffer()`. Once a
+ * `buffer` can now be used with `ama_protobuf_c_message_pack_to_buffer()`. Once a
  * message has been serialized to a `ProtobufCBufferSimple` object, the
  * serialized data bytes can be accessed from the `.data` field.
  *
@@ -488,7 +488,7 @@ struct ProtobufCBufferSimple {
     /** Data bytes. */
     uint8_t            *data;
     /** Whether `data` must be freed. */
-    protobuf_c_boolean    must_free_data;
+    ama_protobuf_c_boolean    must_free_data;
     /** Allocator to use. May be NULL to indicate the system allocator. */
     ProtobufCAllocator    *allocator;
 };
@@ -646,9 +646,9 @@ struct ProtobufCIntRange {
  * If the object is allocated from the stack, you can't really have a memory
  * leak.
  *
- * This means that calls to functions like protobuf_c_message_unpack() which
+ * This means that calls to functions like ama_protobuf_c_message_unpack() which
  * return a `ProtobufCMessage` must be paired with a call to a free function,
- * like protobuf_c_message_free_unpacked().
+ * like ama_protobuf_c_message_free_unpacked().
  */
 struct ProtobufCMessage {
     /** The descriptor for this message type. */
@@ -777,7 +777,7 @@ struct ProtobufCServiceDescriptor {
  */
 PROTOBUF_C__API
 const char *
-protobuf_c_version(void);
+ama_protobuf_c_version(void);
 
 /**
  * Get the version of the protobuf-c library. Note that this is the version of
@@ -788,17 +788,17 @@ protobuf_c_version(void);
  */
 PROTOBUF_C__API
 uint32_t
-protobuf_c_version_number(void);
+ama_protobuf_c_version_number(void);
 
 /**
  * The version of the protobuf-c headers, represented as a string using the same
- * format as protobuf_c_version().
+ * format as ama_protobuf_c_version().
  */
 #define PROTOBUF_C_VERSION        "1.4.1"
 
 /**
  * The version of the protobuf-c headers, represented as an integer using the
- * same format as protobuf_c_version_number().
+ * same format as ama_protobuf_c_version_number().
  */
 #define PROTOBUF_C_VERSION_NUMBER    1004001
 
@@ -823,7 +823,7 @@ protobuf_c_version_number(void);
  */
 PROTOBUF_C__API
 const ProtobufCEnumValue *
-protobuf_c_enum_descriptor_get_value_by_name(
+ama_protobuf_c_enum_descriptor_get_value_by_name(
     const ProtobufCEnumDescriptor *desc,
     const char *name);
 
@@ -844,7 +844,7 @@ protobuf_c_enum_descriptor_get_value_by_name(
  */
 PROTOBUF_C__API
 const ProtobufCEnumValue *
-protobuf_c_enum_descriptor_get_value(
+ama_protobuf_c_enum_descriptor_get_value(
     const ProtobufCEnumDescriptor *desc,
     int value);
 
@@ -863,7 +863,7 @@ protobuf_c_enum_descriptor_get_value(
  */
 PROTOBUF_C__API
 const ProtobufCFieldDescriptor *
-protobuf_c_message_descriptor_get_field_by_name(
+ama_protobuf_c_message_descriptor_get_field_by_name(
     const ProtobufCMessageDescriptor *desc,
     const char *name);
 
@@ -882,7 +882,7 @@ protobuf_c_message_descriptor_get_field_by_name(
  */
 PROTOBUF_C__API
 const ProtobufCFieldDescriptor *
-protobuf_c_message_descriptor_get_field(
+ama_protobuf_c_message_descriptor_get_field(
     const ProtobufCMessageDescriptor *desc,
     unsigned value);
 
@@ -896,7 +896,7 @@ protobuf_c_message_descriptor_get_field(
  */
 PROTOBUF_C__API
 size_t
-protobuf_c_message_get_packed_size(const ProtobufCMessage *message);
+ama_protobuf_c_message_get_packed_size(const ProtobufCMessage *message);
 
 /**
  * Serialise a message from its in-memory representation.
@@ -909,14 +909,14 @@ protobuf_c_message_get_packed_size(const ProtobufCMessage *message);
  * \param[out] out
  *      Buffer to store the bytes of the serialised message. This buffer must
  *      have enough space to store the packed message. Use
- *      protobuf_c_message_get_packed_size() to determine the number of bytes
+ *      ama_protobuf_c_message_get_packed_size() to determine the number of bytes
  *      required.
  * \return
  *      Number of bytes stored in `out`.
  */
 PROTOBUF_C__API
 size_t
-protobuf_c_message_pack(const ProtobufCMessage *message, uint8_t *out);
+ama_protobuf_c_message_pack(const ProtobufCMessage *message, uint8_t *out);
 
 /**
  * Serialise a message from its in-memory representation to a virtual buffer.
@@ -933,7 +933,7 @@ protobuf_c_message_pack(const ProtobufCMessage *message, uint8_t *out);
  */
 PROTOBUF_C__API
 size_t
-protobuf_c_message_pack_to_buffer(
+ama_protobuf_c_message_pack_to_buffer(
     const ProtobufCMessage *message,
     ProtobufCBuffer *buffer);
 
@@ -956,7 +956,7 @@ protobuf_c_message_pack_to_buffer(
  */
 PROTOBUF_C__API
 ProtobufCMessage *
-protobuf_c_message_unpack(
+ama_protobuf_c_message_unpack(
     const ProtobufCMessageDescriptor *descriptor,
     ProtobufCAllocator *allocator,
     size_t len,
@@ -966,7 +966,7 @@ protobuf_c_message_unpack(
  * Free an unpacked message object.
  *
  * This function should be used to deallocate the memory used by a call to
- * protobuf_c_message_unpack().
+ * ama_protobuf_c_message_unpack().
  *
  * \param message
  *      The message object to free. May be NULL.
@@ -976,7 +976,7 @@ protobuf_c_message_unpack(
  */
 PROTOBUF_C__API
 void
-protobuf_c_message_free_unpacked(
+ama_protobuf_c_message_free_unpacked(
     ProtobufCMessage *message,
     ProtobufCAllocator *allocator);
 
@@ -992,8 +992,8 @@ protobuf_c_message_free_unpacked(
  *      Message is invalid.
  */
 PROTOBUF_C__API
-protobuf_c_boolean
-protobuf_c_message_check(const ProtobufCMessage *);
+ama_protobuf_c_boolean
+ama_protobuf_c_message_check(const ProtobufCMessage *);
 
 /** Message initialiser. */
 #define PROTOBUF_C_MESSAGE_INIT(descriptor) { descriptor, 0, NULL }
@@ -1008,7 +1008,7 @@ protobuf_c_message_check(const ProtobufCMessage *);
  */
 PROTOBUF_C__API
 void
-protobuf_c_message_init(
+ama_protobuf_c_message_init(
     const ProtobufCMessageDescriptor *descriptor,
     void *message);
 
@@ -1020,7 +1020,7 @@ protobuf_c_message_init(
  */
 PROTOBUF_C__API
 void
-protobuf_c_service_destroy(ProtobufCService *service);
+ama_protobuf_c_service_destroy(ProtobufCService *service);
 
 /**
  * Look up a `ProtobufCMethodDescriptor` by name.
@@ -1037,7 +1037,7 @@ protobuf_c_service_destroy(ProtobufCService *service);
  */
 PROTOBUF_C__API
 const ProtobufCMethodDescriptor *
-protobuf_c_service_descriptor_get_method_by_name(
+ama_protobuf_c_service_descriptor_get_method_by_name(
     const ProtobufCServiceDescriptor *desc,
     const char *name);
 
@@ -1046,7 +1046,7 @@ protobuf_c_service_descriptor_get_method_by_name(
  */
 #define PROTOBUF_C_BUFFER_SIMPLE_INIT(array_of_bytes)                   \
 {                                                                       \
-    { protobuf_c_buffer_simple_append },                            \
+    { ama_protobuf_c_buffer_simple_append },                            \
     sizeof(array_of_bytes),                                         \
     0,                                                              \
     (array_of_bytes),                                               \
@@ -1082,21 +1082,21 @@ do {                                                                    \
  */
 PROTOBUF_C__API
 void
-protobuf_c_buffer_simple_append(
+ama_protobuf_c_buffer_simple_append(
     ProtobufCBuffer *buffer,
     size_t len,
     const unsigned char *data);
 
 PROTOBUF_C__API
 void
-protobuf_c_service_generated_init(
+ama_protobuf_c_service_generated_init(
     ProtobufCService *service,
     const ProtobufCServiceDescriptor *descriptor,
     ProtobufCServiceDestroy destroy);
 
 PROTOBUF_C__API
 void
-protobuf_c_service_invoke_internal(
+ama_protobuf_c_service_invoke_internal(
     ProtobufCService *service,
     unsigned method_index,
     const ProtobufCMessage *input,

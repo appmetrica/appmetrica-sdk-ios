@@ -17,21 +17,21 @@ size_t ama__event_name_hashes_collection__get_packed_size
                      (const Ama__EventNameHashesCollection *message)
 {
   assert(message->base.descriptor == &ama__event_name_hashes_collection__descriptor);
-  return protobuf_c_message_get_packed_size ((const ProtobufCMessage*)(message));
+  return ama_protobuf_c_message_get_packed_size ((const ProtobufCMessage*)(message));
 }
 size_t ama__event_name_hashes_collection__pack
                      (const Ama__EventNameHashesCollection *message,
                       uint8_t       *out)
 {
   assert(message->base.descriptor == &ama__event_name_hashes_collection__descriptor);
-  return protobuf_c_message_pack ((const ProtobufCMessage*)message, out);
+  return ama_protobuf_c_message_pack ((const ProtobufCMessage*)message, out);
 }
 size_t ama__event_name_hashes_collection__pack_to_buffer
                      (const Ama__EventNameHashesCollection *message,
                       ProtobufCBuffer *buffer)
 {
   assert(message->base.descriptor == &ama__event_name_hashes_collection__descriptor);
-  return protobuf_c_message_pack_to_buffer ((const ProtobufCMessage*)message, buffer);
+  return ama_protobuf_c_message_pack_to_buffer ((const ProtobufCMessage*)message, buffer);
 }
 Ama__EventNameHashesCollection *
        ama__event_name_hashes_collection__unpack
@@ -40,7 +40,7 @@ Ama__EventNameHashesCollection *
                       const uint8_t       *data)
 {
   return (Ama__EventNameHashesCollection *)
-     protobuf_c_message_unpack (&ama__event_name_hashes_collection__descriptor,
+     ama_protobuf_c_message_unpack (&ama__event_name_hashes_collection__descriptor,
                                 allocator, len, data);
 }
 void   ama__event_name_hashes_collection__free_unpacked
@@ -50,7 +50,7 @@ void   ama__event_name_hashes_collection__free_unpacked
   if(!message)
     return;
   assert(message->base.descriptor == &ama__event_name_hashes_collection__descriptor);
-  protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
+  ama_protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
 }
 static const ProtobufCFieldDescriptor ama__event_name_hashes_collection__field_descriptors[4] =
 {

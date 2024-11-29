@@ -161,21 +161,21 @@ size_t ama__ioscrash_report__get_packed_size
                      (const Ama__IOSCrashReport *message)
 {
   assert(message->base.descriptor == &ama__ioscrash_report__descriptor);
-  return protobuf_c_message_get_packed_size ((const ProtobufCMessage*)(message));
+  return ama_protobuf_c_message_get_packed_size ((const ProtobufCMessage*)(message));
 }
 size_t ama__ioscrash_report__pack
                      (const Ama__IOSCrashReport *message,
                       uint8_t       *out)
 {
   assert(message->base.descriptor == &ama__ioscrash_report__descriptor);
-  return protobuf_c_message_pack ((const ProtobufCMessage*)message, out);
+  return ama_protobuf_c_message_pack ((const ProtobufCMessage*)message, out);
 }
 size_t ama__ioscrash_report__pack_to_buffer
                      (const Ama__IOSCrashReport *message,
                       ProtobufCBuffer *buffer)
 {
   assert(message->base.descriptor == &ama__ioscrash_report__descriptor);
-  return protobuf_c_message_pack_to_buffer ((const ProtobufCMessage*)message, buffer);
+  return ama_protobuf_c_message_pack_to_buffer ((const ProtobufCMessage*)message, buffer);
 }
 Ama__IOSCrashReport *
        ama__ioscrash_report__unpack
@@ -184,7 +184,7 @@ Ama__IOSCrashReport *
                       const uint8_t       *data)
 {
   return (Ama__IOSCrashReport *)
-     protobuf_c_message_unpack (&ama__ioscrash_report__descriptor,
+     ama_protobuf_c_message_unpack (&ama__ioscrash_report__descriptor,
                                 allocator, len, data);
 }
 void   ama__ioscrash_report__free_unpacked
@@ -194,7 +194,7 @@ void   ama__ioscrash_report__free_unpacked
   if(!message)
     return;
   assert(message->base.descriptor == &ama__ioscrash_report__descriptor);
-  protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
+  ama_protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
 }
 static const ProtobufCFieldDescriptor ama__ioscrash_report__bytes_pair__field_descriptors[2] =
 {

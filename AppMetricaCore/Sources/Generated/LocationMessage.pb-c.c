@@ -29,21 +29,21 @@ size_t ama__location_message__get_packed_size
                      (const Ama__LocationMessage *message)
 {
   assert(message->base.descriptor == &ama__location_message__descriptor);
-  return protobuf_c_message_get_packed_size ((const ProtobufCMessage*)(message));
+  return ama_protobuf_c_message_get_packed_size ((const ProtobufCMessage*)(message));
 }
 size_t ama__location_message__pack
                      (const Ama__LocationMessage *message,
                       uint8_t       *out)
 {
   assert(message->base.descriptor == &ama__location_message__descriptor);
-  return protobuf_c_message_pack ((const ProtobufCMessage*)message, out);
+  return ama_protobuf_c_message_pack ((const ProtobufCMessage*)message, out);
 }
 size_t ama__location_message__pack_to_buffer
                      (const Ama__LocationMessage *message,
                       ProtobufCBuffer *buffer)
 {
   assert(message->base.descriptor == &ama__location_message__descriptor);
-  return protobuf_c_message_pack_to_buffer ((const ProtobufCMessage*)message, buffer);
+  return ama_protobuf_c_message_pack_to_buffer ((const ProtobufCMessage*)message, buffer);
 }
 Ama__LocationMessage *
        ama__location_message__unpack
@@ -52,7 +52,7 @@ Ama__LocationMessage *
                       const uint8_t       *data)
 {
   return (Ama__LocationMessage *)
-     protobuf_c_message_unpack (&ama__location_message__descriptor,
+     ama_protobuf_c_message_unpack (&ama__location_message__descriptor,
                                 allocator, len, data);
 }
 void   ama__location_message__free_unpacked
@@ -62,7 +62,7 @@ void   ama__location_message__free_unpacked
   if(!message)
     return;
   assert(message->base.descriptor == &ama__location_message__descriptor);
-  protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
+  ama_protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
 }
 static const Ama__LocationProvider ama__location_message__location__provider__default_value = AMA__LOCATION_PROVIDER__PROVIDER_UNKNOWN;
 static const ProtobufCFieldDescriptor ama__location_message__location__field_descriptors[10] =

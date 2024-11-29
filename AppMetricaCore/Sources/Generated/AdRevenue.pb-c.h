@@ -40,51 +40,51 @@ struct  Ama__AdRevenue__Decimal
   /*
    * Decimal value mantissa(signed)
    */
-  protobuf_c_boolean has_mantissa;
+  ama_protobuf_c_boolean has_mantissa;
   int64_t mantissa;
   /*
    * Decimal value exponent(aka scale)
    */
-  protobuf_c_boolean has_exponent;
+  ama_protobuf_c_boolean has_exponent;
   int32_t exponent;
 };
 #define AMA__AD_REVENUE__DECIMAL__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__ad_revenue__decimal__descriptor) \
-, 0, 0ll, 0, 0 }
+    , 0, 0ll, 0, 0 }
 
 
 struct  Ama__AdRevenue
 {
   ProtobufCMessage base;
-  protobuf_c_boolean has_data_source;
+  ama_protobuf_c_boolean has_data_source;
   ProtobufCBinaryData data_source;
   Ama__AdRevenue__Decimal *ad_revenue;
-  protobuf_c_boolean has_currency;
+  ama_protobuf_c_boolean has_currency;
   ProtobufCBinaryData currency;
-  protobuf_c_boolean has_ad_type;
+  ama_protobuf_c_boolean has_ad_type;
   Ama__AdRevenue__AdType ad_type;
-  protobuf_c_boolean has_ad_network;
+  ama_protobuf_c_boolean has_ad_network;
   ProtobufCBinaryData ad_network;
-  protobuf_c_boolean has_ad_unit_id;
+  ama_protobuf_c_boolean has_ad_unit_id;
   ProtobufCBinaryData ad_unit_id;
-  protobuf_c_boolean has_ad_unit_name;
+  ama_protobuf_c_boolean has_ad_unit_name;
   ProtobufCBinaryData ad_unit_name;
-  protobuf_c_boolean has_ad_placement_id;
+  ama_protobuf_c_boolean has_ad_placement_id;
   ProtobufCBinaryData ad_placement_id;
-  protobuf_c_boolean has_ad_placement_name;
+  ama_protobuf_c_boolean has_ad_placement_name;
   ProtobufCBinaryData ad_placement_name;
-  protobuf_c_boolean has_precision;
+  ama_protobuf_c_boolean has_precision;
   ProtobufCBinaryData precision;
   /*
    * in JSON format
    */
-  protobuf_c_boolean has_payload;
+  ama_protobuf_c_boolean has_payload;
   ProtobufCBinaryData payload;
 };
 extern uint8_t ama__ad_revenue__data_source__default_value_data[];
 #define AMA__AD_REVENUE__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__ad_revenue__descriptor) \
-, 0, { 6, ama__ad_revenue__data_source__default_value_data }, NULL, 0, {0,NULL}, 0, AMA__AD_REVENUE__AD_TYPE__UNKNOWN, 0, {0,NULL}, 0, {0,NULL}, 0, {0,NULL}, 0, {0,NULL}, 0, {0,NULL}, 0, {0,NULL}, 0, {0,NULL} }
+    , 0, { 6, ama__ad_revenue__data_source__default_value_data }, NULL, 0, {0,NULL}, 0, AMA__AD_REVENUE__AD_TYPE__UNKNOWN, 0, {0,NULL}, 0, {0,NULL}, 0, {0,NULL}, 0, {0,NULL}, 0, {0,NULL}, 0, {0,NULL}, 0, {0,NULL} }
 
 
 /* Ama__AdRevenue__Decimal methods */

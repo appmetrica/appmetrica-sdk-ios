@@ -17,21 +17,21 @@ size_t ama__legacy_event_extras__get_packed_size
                      (const Ama__LegacyEventExtras *message)
 {
   assert(message->base.descriptor == &ama__legacy_event_extras__descriptor);
-  return protobuf_c_message_get_packed_size ((const ProtobufCMessage*)(message));
+  return ama_protobuf_c_message_get_packed_size ((const ProtobufCMessage*)(message));
 }
 size_t ama__legacy_event_extras__pack
                      (const Ama__LegacyEventExtras *message,
                       uint8_t       *out)
 {
   assert(message->base.descriptor == &ama__legacy_event_extras__descriptor);
-  return protobuf_c_message_pack ((const ProtobufCMessage*)message, out);
+  return ama_protobuf_c_message_pack ((const ProtobufCMessage*)message, out);
 }
 size_t ama__legacy_event_extras__pack_to_buffer
                      (const Ama__LegacyEventExtras *message,
                       ProtobufCBuffer *buffer)
 {
   assert(message->base.descriptor == &ama__legacy_event_extras__descriptor);
-  return protobuf_c_message_pack_to_buffer ((const ProtobufCMessage*)message, buffer);
+  return ama_protobuf_c_message_pack_to_buffer ((const ProtobufCMessage*)message, buffer);
 }
 Ama__LegacyEventExtras *
        ama__legacy_event_extras__unpack
@@ -40,7 +40,7 @@ Ama__LegacyEventExtras *
                       const uint8_t       *data)
 {
   return (Ama__LegacyEventExtras *)
-     protobuf_c_message_unpack (&ama__legacy_event_extras__descriptor,
+     ama_protobuf_c_message_unpack (&ama__legacy_event_extras__descriptor,
                                 allocator, len, data);
 }
 void   ama__legacy_event_extras__free_unpacked
@@ -50,7 +50,7 @@ void   ama__legacy_event_extras__free_unpacked
   if(!message)
     return;
   assert(message->base.descriptor == &ama__legacy_event_extras__descriptor);
-  protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
+  ama_protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
 }
 static const ProtobufCFieldDescriptor ama__legacy_event_extras__field_descriptors[3] =
 {

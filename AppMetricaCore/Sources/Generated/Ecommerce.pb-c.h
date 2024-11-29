@@ -84,20 +84,20 @@ struct  Ama__ECommerceEvent__Category
 };
 #define AMA__ECOMMERCE_EVENT__CATEGORY__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__ecommerce_event__category__descriptor) \
-, 0,NULL }
+    , 0,NULL }
 
 
 struct  Ama__ECommerceEvent__Payload__Pair
 {
   ProtobufCMessage base;
-  protobuf_c_boolean has_key;
+  ama_protobuf_c_boolean has_key;
   ProtobufCBinaryData key;
-  protobuf_c_boolean has_value;
+  ama_protobuf_c_boolean has_value;
   ProtobufCBinaryData value;
 };
 #define AMA__ECOMMERCE_EVENT__PAYLOAD__PAIR__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__ecommerce_event__payload__pair__descriptor) \
-, 0, {0,NULL}, 0, {0,NULL} }
+    , 0, {0,NULL}, 0, {0,NULL} }
 
 
 struct  Ama__ECommerceEvent__Payload
@@ -105,27 +105,27 @@ struct  Ama__ECommerceEvent__Payload
   ProtobufCMessage base;
   size_t n_pairs;
   Ama__ECommerceEvent__Payload__Pair **pairs;
-  protobuf_c_boolean has_truncated_pairs_count;
+  ama_protobuf_c_boolean has_truncated_pairs_count;
   uint32_t truncated_pairs_count;
 };
 #define AMA__ECOMMERCE_EVENT__PAYLOAD__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__ecommerce_event__payload__descriptor) \
-, 0,NULL, 0, 0u }
+    , 0,NULL, 0, 0u }
 
 
 struct  Ama__ECommerceEvent__Screen
 {
   ProtobufCMessage base;
-  protobuf_c_boolean has_name;
+  ama_protobuf_c_boolean has_name;
   ProtobufCBinaryData name;
   Ama__ECommerceEvent__Category *category;
-  protobuf_c_boolean has_search_query;
+  ama_protobuf_c_boolean has_search_query;
   ProtobufCBinaryData search_query;
   Ama__ECommerceEvent__Payload *payload;
 };
 #define AMA__ECOMMERCE_EVENT__SCREEN__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__ecommerce_event__screen__descriptor) \
-, 0, {0,NULL}, NULL, 0, {0,NULL}, NULL }
+    , 0, {0,NULL}, NULL, 0, {0,NULL}, NULL }
 
 
 struct  Ama__ECommerceEvent__Decimal
@@ -134,17 +134,17 @@ struct  Ama__ECommerceEvent__Decimal
   /*
    * Decimal value mantissa(signed)
    */
-  protobuf_c_boolean has_mantissa;
+  ama_protobuf_c_boolean has_mantissa;
   int64_t mantissa;
   /*
    * Decimal value exponent(aka scale)
    */
-  protobuf_c_boolean has_exponent;
+  ama_protobuf_c_boolean has_exponent;
   int32_t exponent;
 };
 #define AMA__ECOMMERCE_EVENT__DECIMAL__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__ecommerce_event__decimal__descriptor) \
-, 0, 0ll, 0, 0 }
+    , 0, 0ll, 0, 0 }
 
 
 struct  Ama__ECommerceEvent__Amount
@@ -153,13 +153,13 @@ struct  Ama__ECommerceEvent__Amount
   /*
    * Currency for money(BYN, RUB, USD). Unit type for internal components(wood, gold)
    */
-  protobuf_c_boolean has_unit_type;
+  ama_protobuf_c_boolean has_unit_type;
   ProtobufCBinaryData unit_type;
   Ama__ECommerceEvent__Decimal *value;
 };
 #define AMA__ECOMMERCE_EVENT__AMOUNT__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__ecommerce_event__amount__descriptor) \
-, 0, {0,NULL}, NULL }
+    , 0, {0,NULL}, NULL }
 
 
 struct  Ama__ECommerceEvent__Price
@@ -171,26 +171,26 @@ struct  Ama__ECommerceEvent__Price
 };
 #define AMA__ECOMMERCE_EVENT__PRICE__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__ecommerce_event__price__descriptor) \
-, NULL, 0,NULL }
+    , NULL, 0,NULL }
 
 
 struct  Ama__ECommerceEvent__PromoCode
 {
   ProtobufCMessage base;
-  protobuf_c_boolean has_code;
+  ama_protobuf_c_boolean has_code;
   ProtobufCBinaryData code;
 };
 #define AMA__ECOMMERCE_EVENT__PROMO_CODE__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__ecommerce_event__promo_code__descriptor) \
-, 0, {0,NULL} }
+    , 0, {0,NULL} }
 
 
 struct  Ama__ECommerceEvent__Product
 {
   ProtobufCMessage base;
-  protobuf_c_boolean has_sku;
+  ama_protobuf_c_boolean has_sku;
   ProtobufCBinaryData sku;
-  protobuf_c_boolean has_name;
+  ama_protobuf_c_boolean has_name;
   ProtobufCBinaryData name;
   Ama__ECommerceEvent__Category *category;
   Ama__ECommerceEvent__Payload *payload;
@@ -201,21 +201,21 @@ struct  Ama__ECommerceEvent__Product
 };
 #define AMA__ECOMMERCE_EVENT__PRODUCT__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__ecommerce_event__product__descriptor) \
-, 0, {0,NULL}, 0, {0,NULL}, NULL, NULL, NULL, NULL, 0,NULL }
+    , 0, {0,NULL}, 0, {0,NULL}, NULL, NULL, NULL, NULL, 0,NULL }
 
 
 struct  Ama__ECommerceEvent__Referrer
 {
   ProtobufCMessage base;
-  protobuf_c_boolean has_type;
+  ama_protobuf_c_boolean has_type;
   ProtobufCBinaryData type;
-  protobuf_c_boolean has_id;
+  ama_protobuf_c_boolean has_id;
   ProtobufCBinaryData id;
   Ama__ECommerceEvent__Screen *screen;
 };
 #define AMA__ECOMMERCE_EVENT__REFERRER__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__ecommerce_event__referrer__descriptor) \
-, 0, {0,NULL}, 0, {0,NULL}, NULL }
+    , 0, {0,NULL}, 0, {0,NULL}, NULL }
 
 
 struct  Ama__ECommerceEvent__CartItem
@@ -228,7 +228,7 @@ struct  Ama__ECommerceEvent__CartItem
 };
 #define AMA__ECOMMERCE_EVENT__CART_ITEM__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__ecommerce_event__cart_item__descriptor) \
-, NULL, NULL, NULL, NULL }
+    , NULL, NULL, NULL, NULL }
 
 
 struct  Ama__ECommerceEvent__OrderCartItem
@@ -237,13 +237,13 @@ struct  Ama__ECommerceEvent__OrderCartItem
   /*
    * For sorting and consistency check. Used for `items` in Order.
    */
-  protobuf_c_boolean has_number_in_cart;
+  ama_protobuf_c_boolean has_number_in_cart;
   uint32_t number_in_cart;
   Ama__ECommerceEvent__CartItem *item;
 };
 #define AMA__ECOMMERCE_EVENT__ORDER_CART_ITEM__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__ecommerce_event__order_cart_item__descriptor) \
-, 0, 0u, NULL }
+    , 0, 0u, NULL }
 
 
 struct  Ama__ECommerceEvent__Order
@@ -252,12 +252,12 @@ struct  Ama__ECommerceEvent__Order
   /*
    * Unique identifier of order generated by SDK (UUID v4).
    */
-  protobuf_c_boolean has_uuid;
+  ama_protobuf_c_boolean has_uuid;
   ProtobufCBinaryData uuid;
   /*
    * Identifier of the order, provided by app developer.
    */
-  protobuf_c_boolean has_order_id;
+  ama_protobuf_c_boolean has_order_id;
   ProtobufCBinaryData order_id;
   Ama__ECommerceEvent__Payload *payload;
   size_t n_items;
@@ -265,12 +265,12 @@ struct  Ama__ECommerceEvent__Order
   /*
    * In case of split of order items into several events.
    */
-  protobuf_c_boolean has_total_items_count;
+  ama_protobuf_c_boolean has_total_items_count;
   uint32_t total_items_count;
 };
 #define AMA__ECOMMERCE_EVENT__ORDER__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__ecommerce_event__order__descriptor) \
-, 0, {0,NULL}, 0, {0,NULL}, NULL, 0,NULL, 0, 0u }
+    , 0, {0,NULL}, 0, {0,NULL}, NULL, 0,NULL, 0, 0u }
 
 
 struct  Ama__ECommerceEvent__ShownScreenInfo
@@ -280,7 +280,7 @@ struct  Ama__ECommerceEvent__ShownScreenInfo
 };
 #define AMA__ECOMMERCE_EVENT__SHOWN_SCREEN_INFO__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__ecommerce_event__shown_screen_info__descriptor) \
-, NULL }
+    , NULL }
 
 
 struct  Ama__ECommerceEvent__ShownProductCardInfo
@@ -291,7 +291,7 @@ struct  Ama__ECommerceEvent__ShownProductCardInfo
 };
 #define AMA__ECOMMERCE_EVENT__SHOWN_PRODUCT_CARD_INFO__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__ecommerce_event__shown_product_card_info__descriptor) \
-, NULL, NULL }
+    , NULL, NULL }
 
 
 struct  Ama__ECommerceEvent__ShownProductDetailsInfo
@@ -302,7 +302,7 @@ struct  Ama__ECommerceEvent__ShownProductDetailsInfo
 };
 #define AMA__ECOMMERCE_EVENT__SHOWN_PRODUCT_DETAILS_INFO__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__ecommerce_event__shown_product_details_info__descriptor) \
-, NULL, NULL }
+    , NULL, NULL }
 
 
 struct  Ama__ECommerceEvent__CartActionInfo
@@ -312,7 +312,7 @@ struct  Ama__ECommerceEvent__CartActionInfo
 };
 #define AMA__ECOMMERCE_EVENT__CART_ACTION_INFO__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__ecommerce_event__cart_action_info__descriptor) \
-, NULL }
+    , NULL }
 
 
 struct  Ama__ECommerceEvent__OrderInfo
@@ -322,13 +322,13 @@ struct  Ama__ECommerceEvent__OrderInfo
 };
 #define AMA__ECOMMERCE_EVENT__ORDER_INFO__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__ecommerce_event__order_info__descriptor) \
-, NULL }
+    , NULL }
 
 
 struct  Ama__ECommerceEvent
 {
   ProtobufCMessage base;
-  protobuf_c_boolean has_type;
+  ama_protobuf_c_boolean has_type;
   Ama__ECommerceEvent__ECommerceEventType type;
   /*
    * type = ECOMMERCE_EVENT_TYPE_SHOW_SCREEN
@@ -353,7 +353,7 @@ struct  Ama__ECommerceEvent
 };
 #define AMA__ECOMMERCE_EVENT__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__ecommerce_event__descriptor) \
-, 0, AMA__ECOMMERCE_EVENT__ECOMMERCE_EVENT_TYPE__ECOMMERCE_EVENT_TYPE_UNDEFINED, NULL, NULL, NULL, NULL, NULL }
+    , 0, AMA__ECOMMERCE_EVENT__ECOMMERCE_EVENT_TYPE__ECOMMERCE_EVENT_TYPE_UNDEFINED, NULL, NULL, NULL, NULL, NULL }
 
 
 /* Ama__ECommerceEvent__Category methods */

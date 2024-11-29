@@ -23,21 +23,21 @@ size_t ama_start_event__value__get_packed_size
                      (const AmaStartEvent__Value *message)
 {
   assert(message->base.descriptor == &ama_start_event__value__descriptor);
-  return protobuf_c_message_get_packed_size ((const ProtobufCMessage*)(message));
+  return ama_protobuf_c_message_get_packed_size ((const ProtobufCMessage*)(message));
 }
 size_t ama_start_event__value__pack
                      (const AmaStartEvent__Value *message,
                       uint8_t       *out)
 {
   assert(message->base.descriptor == &ama_start_event__value__descriptor);
-  return protobuf_c_message_pack ((const ProtobufCMessage*)message, out);
+  return ama_protobuf_c_message_pack ((const ProtobufCMessage*)message, out);
 }
 size_t ama_start_event__value__pack_to_buffer
                      (const AmaStartEvent__Value *message,
                       ProtobufCBuffer *buffer)
 {
   assert(message->base.descriptor == &ama_start_event__value__descriptor);
-  return protobuf_c_message_pack_to_buffer ((const ProtobufCMessage*)message, buffer);
+  return ama_protobuf_c_message_pack_to_buffer ((const ProtobufCMessage*)message, buffer);
 }
 AmaStartEvent__Value *
        ama_start_event__value__unpack
@@ -46,7 +46,7 @@ AmaStartEvent__Value *
                       const uint8_t       *data)
 {
   return (AmaStartEvent__Value *)
-     protobuf_c_message_unpack (&ama_start_event__value__descriptor,
+     ama_protobuf_c_message_unpack (&ama_start_event__value__descriptor,
                                 allocator, len, data);
 }
 void   ama_start_event__value__free_unpacked
@@ -56,7 +56,7 @@ void   ama_start_event__value__free_unpacked
   if(!message)
     return;
   assert(message->base.descriptor == &ama_start_event__value__descriptor);
-  protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
+  ama_protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
 }
 static const ProtobufCFieldDescriptor ama_start_event__value__binary_image__field_descriptors[1] =
 {

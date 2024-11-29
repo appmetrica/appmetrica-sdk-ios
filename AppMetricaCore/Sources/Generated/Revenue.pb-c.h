@@ -59,17 +59,17 @@ struct  Ama__Revenue__Receipt
   /*
    * binary object without any encoding or compression
    */
-  protobuf_c_boolean has_data;
+  ama_protobuf_c_boolean has_data;
   ProtobufCBinaryData data;
   /*
    * to determine transaction within receipt
    */
-  protobuf_c_boolean has_transaction_id;
+  ama_protobuf_c_boolean has_transaction_id;
   ProtobufCBinaryData transaction_id;
 };
 #define AMA__REVENUE__RECEIPT__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__revenue__receipt__descriptor) \
-, 0, {0,NULL}, 0, {0,NULL} }
+    , 0, {0,NULL}, 0, {0,NULL} }
 
 
 struct  Ama__Revenue__Transaction
@@ -78,80 +78,80 @@ struct  Ama__Revenue__Transaction
   /*
    * id of transaction that brought money. See also secondary_id
    */
-  protobuf_c_boolean has_id;
+  ama_protobuf_c_boolean has_id;
   ProtobufCBinaryData id;
   /*
    * transaction time in seconds
    */
-  protobuf_c_boolean has_time;
+  ama_protobuf_c_boolean has_time;
   uint64_t time;
   /*
    * iOS only
    */
-  protobuf_c_boolean has_state;
+  ama_protobuf_c_boolean has_state;
   Ama__Revenue__Transaction__State state;
   /*
    * id of secondary transaction. For example, id of restored purchase or id of subscription transaction is this is renewal
    */
-  protobuf_c_boolean has_secondary_id;
+  ama_protobuf_c_boolean has_secondary_id;
   ProtobufCBinaryData secondary_id;
   /*
    * time of original transaction in seconds. See secondary_id
    */
-  protobuf_c_boolean has_secondary_time;
+  ama_protobuf_c_boolean has_secondary_time;
   uint64_t secondary_time;
 };
 #define AMA__REVENUE__TRANSACTION__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__revenue__transaction__descriptor) \
-, 0, {0,NULL}, 0, 0, 0, AMA__REVENUE__TRANSACTION__STATE__STATE_UNDEFINED, 0, {0,NULL}, 0, 0 }
+    , 0, {0,NULL}, 0, 0, 0, AMA__REVENUE__TRANSACTION__STATE__STATE_UNDEFINED, 0, {0,NULL}, 0, 0 }
 
 
 struct  Ama__Revenue__SubscriptionInfo__Period
 {
   ProtobufCMessage base;
-  protobuf_c_boolean has_number;
+  ama_protobuf_c_boolean has_number;
   uint32_t number;
-  protobuf_c_boolean has_time_unit;
+  ama_protobuf_c_boolean has_time_unit;
   Ama__Revenue__SubscriptionInfo__Period__TimeUnit time_unit;
 };
 #define AMA__REVENUE__SUBSCRIPTION_INFO__PERIOD__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__revenue__subscription_info__period__descriptor) \
-, 0, 0, 0, AMA__REVENUE__SUBSCRIPTION_INFO__PERIOD__TIME_UNIT__UNKNOWN }
+    , 0, 0, 0, AMA__REVENUE__SUBSCRIPTION_INFO__PERIOD__TIME_UNIT__UNKNOWN }
 
 
 struct  Ama__Revenue__SubscriptionInfo__Introductory
 {
   ProtobufCMessage base;
-  protobuf_c_boolean has_price_micros;
+  ama_protobuf_c_boolean has_price_micros;
   int64_t price_micros;
   Ama__Revenue__SubscriptionInfo__Period *period;
-  protobuf_c_boolean has_number_of_periods;
+  ama_protobuf_c_boolean has_number_of_periods;
   uint32_t number_of_periods;
-  protobuf_c_boolean has_id;
+  ama_protobuf_c_boolean has_id;
   ProtobufCBinaryData id;
 };
 #define AMA__REVENUE__SUBSCRIPTION_INFO__INTRODUCTORY__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__revenue__subscription_info__introductory__descriptor) \
-, 0, 0, NULL, 0, 0, 0, {0,NULL} }
+    , 0, 0, NULL, 0, 0, 0, {0,NULL} }
 
 
 struct  Ama__Revenue__SubscriptionInfo
 {
   ProtobufCMessage base;
-  protobuf_c_boolean has_auto_renewing;
-  protobuf_c_boolean auto_renewing;
+  ama_protobuf_c_boolean has_auto_renewing;
+  ama_protobuf_c_boolean auto_renewing;
   Ama__Revenue__SubscriptionInfo__Period *subscription_period;
   Ama__Revenue__SubscriptionInfo__Introductory *introductory_info;
 };
 #define AMA__REVENUE__SUBSCRIPTION_INFO__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__revenue__subscription_info__descriptor) \
-, 0, 0, NULL, NULL }
+    , 0, 0, NULL, NULL }
 
 
 struct  Ama__Revenue
 {
   ProtobufCMessage base;
-  protobuf_c_boolean has_quantity;
+  ama_protobuf_c_boolean has_quantity;
   uint32_t quantity;
   /*
    * ISO 4217
@@ -160,12 +160,12 @@ struct  Ama__Revenue
   /*
    * arbitrary string
    */
-  protobuf_c_boolean has_product_id;
+  ama_protobuf_c_boolean has_product_id;
   ProtobufCBinaryData product_id;
   /*
    * arbitrary JSON, same rules as for EVENT_CLIENT
    */
-  protobuf_c_boolean has_payload;
+  ama_protobuf_c_boolean has_payload;
   ProtobufCBinaryData payload;
   /*
    * data for revenue validation
@@ -174,18 +174,18 @@ struct  Ama__Revenue
   /*
    * Price value in micros(price * 10^6).
    */
-  protobuf_c_boolean has_price_micros;
+  ama_protobuf_c_boolean has_price_micros;
   int64_t price_micros;
-  protobuf_c_boolean has_auto_collected;
-  protobuf_c_boolean auto_collected;
-  protobuf_c_boolean has_in_app_type;
+  ama_protobuf_c_boolean has_auto_collected;
+  ama_protobuf_c_boolean auto_collected;
+  ama_protobuf_c_boolean has_in_app_type;
   Ama__Revenue__InAppType in_app_type;
   Ama__Revenue__Transaction *transaction_info;
   Ama__Revenue__SubscriptionInfo *subscription_info;
 };
 #define AMA__REVENUE__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__revenue__descriptor) \
-, 0, 1u, {0,NULL}, 0, {0,NULL}, 0, {0,NULL}, NULL, 0, 0, 0, 0, 0, AMA__REVENUE__IN_APP_TYPE__PURCHASE, NULL, NULL }
+    , 0, 1u, {0,NULL}, 0, {0,NULL}, 0, {0,NULL}, NULL, 0, 0, 0, 0, 0, AMA__REVENUE__IN_APP_TYPE__PURCHASE, NULL, NULL }
 
 
 /* Ama__Revenue__Receipt methods */

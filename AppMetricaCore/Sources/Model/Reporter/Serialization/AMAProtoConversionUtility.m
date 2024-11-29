@@ -3,7 +3,7 @@
 
 @implementation AMAProtoConversionUtility
 
-+ (BOOL)fillBoolValue:(protobuf_c_boolean *)value withOptionalBool:(AMAOptionalBool)optionalBool
++ (BOOL)fillBoolValue:(ama_protobuf_c_boolean *)value withOptionalBool:(AMAOptionalBool)optionalBool
 {
     if (optionalBool == AMAOptionalBoolUndefined) {
         return NO;
@@ -50,7 +50,7 @@
     }
 }
 
-+ (AMAOptionalBool)optionalBoolForBoolValue:(protobuf_c_boolean)value hasValue:(protobuf_c_boolean)hasValue
++ (AMAOptionalBool)optionalBoolForBoolValue:(ama_protobuf_c_boolean)value hasValue:(ama_protobuf_c_boolean)hasValue
 {
     if (hasValue == false) {
         return AMAOptionalBoolUndefined;

@@ -85,7 +85,7 @@
 #endif
 
 #if !defined(_WIN32) || !defined(PROTOBUF_C_USE_SHARED_LIB)
-const char protobuf_c_empty_string[] = "";
+const char ama_protobuf_c_empty_string[] = "";
 #endif
 
 /**
@@ -134,13 +134,13 @@ const char protobuf_c_empty_string[] = "";
 /* --- version --- */
 
 const char *
-protobuf_c_version(void)
+ama_protobuf_c_version(void)
 {
     return PROTOBUF_C_VERSION;
 }
 
 uint32_t
-protobuf_c_version_number(void)
+ama_protobuf_c_version_number(void)
 {
     return PROTOBUF_C_VERSION_NUMBER;
 }
@@ -179,7 +179,7 @@ do_free(ProtobufCAllocator *allocator, void *data)
  * allocator used if NULL is passed as the ProtobufCAllocator to an exported
  * function.
  */
-static ProtobufCAllocator protobuf_c__allocator = {
+static ProtobufCAllocator ama_protobuf_c__allocator = {
     .alloc = &system_alloc,
     .free = &system_free,
     .allocator_data = NULL,
@@ -188,7 +188,7 @@ static ProtobufCAllocator protobuf_c__allocator = {
 /* === buffer-simple === */
 
 void
-protobuf_c_buffer_simple_append(ProtobufCBuffer *buffer,
+ama_protobuf_c_buffer_simple_append(ProtobufCBuffer *buffer,
                 size_t len, const uint8_t *data)
 {
     ProtobufCBufferSimple *simp = (ProtobufCBufferSimple *) buffer;
@@ -200,7 +200,7 @@ protobuf_c_buffer_simple_append(ProtobufCBuffer *buffer,
         uint8_t *new_data;
 
         if (allocator == NULL)
-            allocator = &protobuf_c__allocator;
+            allocator = &ama_protobuf_c__allocator;
         while (new_alloced < new_len)
             new_alloced += new_alloced;
         new_data = do_alloc(allocator, new_alloced);
@@ -219,9 +219,9 @@ protobuf_c_buffer_simple_append(ProtobufCBuffer *buffer,
 }
 
 /**
- * \defgroup packedsz protobuf_c_message_get_packed_size() implementation
+ * \defgroup packedsz ama_protobuf_c_message_get_packed_size() implementation
  *
- * Routines mainly used by protobuf_c_message_get_packed_size().
+ * Routines mainly used by ama_protobuf_c_message_get_packed_size().
  *
  * \ingroup internal
  * @{
@@ -452,7 +452,7 @@ required_field_get_packed_size(const ProtobufCFieldDescriptor *field,
     }
     case PROTOBUF_C_TYPE_MESSAGE: {
         const ProtobufCMessage *msg = *(ProtobufCMessage * const *) member;
-        size_t subrv = msg ? protobuf_c_message_get_packed_size(msg) : 0;
+        size_t subrv = msg ? ama_protobuf_c_message_get_packed_size(msg) : 0;
         return rv + uint32_size((uint32_t)subrv) + subrv;
     }
     }
@@ -508,7 +508,7 @@ oneof_field_get_packed_size(const ProtobufCFieldDescriptor *field,
  */
 static size_t
 optional_field_get_packed_size(const ProtobufCFieldDescriptor *field,
-                   const protobuf_c_boolean has,
+                   const ama_protobuf_c_boolean has,
                    const void *member)
 {
     if (field->type == PROTOBUF_C_TYPE_MESSAGE ||
@@ -524,15 +524,15 @@ optional_field_get_packed_size(const ProtobufCFieldDescriptor *field,
     return required_field_get_packed_size(field, member);
 }
 
-static protobuf_c_boolean
+static ama_protobuf_c_boolean
 field_is_zeroish(const ProtobufCFieldDescriptor *field,
          const void *member)
 {
-    protobuf_c_boolean ret = FALSE;
+    ama_protobuf_c_boolean ret = FALSE;
 
     switch (field->type) {
     case PROTOBUF_C_TYPE_BOOL:
-        ret = (0 == *(const protobuf_c_boolean *) member);
+        ret = (0 == *(const ama_protobuf_c_boolean *) member);
         break;
     case PROTOBUF_C_TYPE_ENUM:
     case PROTOBUF_C_TYPE_SINT32:
@@ -672,7 +672,7 @@ repeated_field_get_packed_size(const ProtobufCFieldDescriptor *field,
         break;
     case PROTOBUF_C_TYPE_MESSAGE:
         for (i = 0; i < count; i++) {
-            size_t len = protobuf_c_message_get_packed_size(
+            size_t len = ama_protobuf_c_message_get_packed_size(
                 ((ProtobufCMessage **) array)[i]);
             rv += uint32_size((uint32_t)len) + len;
         }
@@ -705,7 +705,7 @@ unknown_field_get_packed_size(const ProtobufCMessageUnknownField *field)
 /*
  * Calculate the serialized size of the message.
  */
-size_t protobuf_c_message_get_packed_size(const ProtobufCMessage *message)
+size_t ama_protobuf_c_message_get_packed_size(const ProtobufCMessage *message)
 {
     unsigned i;
     size_t rv = 0;
@@ -732,7 +732,7 @@ size_t protobuf_c_message_get_packed_size(const ProtobufCMessage *message)
         } else if (field->label == PROTOBUF_C_LABEL_OPTIONAL) {
             rv += optional_field_get_packed_size(
                 field,
-                *(protobuf_c_boolean *) qmember,
+                *(ama_protobuf_c_boolean *) qmember,
                 member
             );
         } else if (field->label == PROTOBUF_C_LABEL_NONE) {
@@ -754,9 +754,9 @@ size_t protobuf_c_message_get_packed_size(const ProtobufCMessage *message)
 }
 
 /**
- * \defgroup pack protobuf_c_message_pack() implementation
+ * \defgroup pack ama_protobuf_c_message_pack() implementation
  *
- * Routines mainly used by protobuf_c_message_pack().
+ * Routines mainly used by ama_protobuf_c_message_pack().
  *
  * \ingroup internal
  * @{
@@ -970,7 +970,7 @@ fixed64_pack(uint64_t value, void *out)
  *      Number of bytes written to `out`.
  */
 static inline size_t
-boolean_pack(protobuf_c_boolean value, uint8_t *out)
+boolean_pack(ama_protobuf_c_boolean value, uint8_t *out)
 {
     *out = value ? TRUE : FALSE;
     return 1;
@@ -1043,7 +1043,7 @@ prefixed_message_pack(const ProtobufCMessage *message, uint8_t *out)
         out[0] = 0;
         return 1;
     } else {
-        size_t rv = protobuf_c_message_pack(message, out + 1);
+        size_t rv = ama_protobuf_c_message_pack(message, out + 1);
         size_t rv_packed_size = uint32_size((uint32_t)rv);
         if (rv_packed_size != 1)
             memmove(out + rv_packed_size, out + 1, rv);
@@ -1122,7 +1122,7 @@ required_field_pack(const ProtobufCFieldDescriptor *field,
         return rv + fixed64_pack(*(const uint64_t *) member, out + rv);
     case PROTOBUF_C_TYPE_BOOL:
         out[0] |= PROTOBUF_C_WIRE_TYPE_VARINT;
-        return rv + boolean_pack(*(const protobuf_c_boolean *) member, out + rv);
+        return rv + boolean_pack(*(const ama_protobuf_c_boolean *) member, out + rv);
     case PROTOBUF_C_TYPE_STRING:
         out[0] |= PROTOBUF_C_WIRE_TYPE_LENGTH_PREFIXED;
         return rv + string_pack(*(char *const *) member, out + rv);
@@ -1186,7 +1186,7 @@ oneof_field_pack(const ProtobufCFieldDescriptor *field,
  */
 static size_t
 optional_field_pack(const ProtobufCFieldDescriptor *field,
-            const protobuf_c_boolean has,
+            const ama_protobuf_c_boolean has,
             const void *member, uint8_t *out)
 {
     if (field->type == PROTOBUF_C_TYPE_MESSAGE ||
@@ -1253,7 +1253,7 @@ sizeof_elt_in_repeated_array(ProtobufCType type)
     case PROTOBUF_C_TYPE_DOUBLE:
         return 8;
     case PROTOBUF_C_TYPE_BOOL:
-        return sizeof(protobuf_c_boolean);
+        return sizeof(ama_protobuf_c_boolean);
     case PROTOBUF_C_TYPE_STRING:
     case PROTOBUF_C_TYPE_MESSAGE:
         return sizeof(void *);
@@ -1424,7 +1424,7 @@ repeated_field_pack(const ProtobufCFieldDescriptor *field,
             break;
         }
         case PROTOBUF_C_TYPE_BOOL: {
-            const protobuf_c_boolean *arr = (const protobuf_c_boolean *) array;
+            const ama_protobuf_c_boolean *arr = (const ama_protobuf_c_boolean *) array;
             for (i = 0; i < count; i++)
                 payload_at += boolean_pack(arr[i], payload_at);
             break;
@@ -1469,7 +1469,7 @@ unknown_field_pack(const ProtobufCMessageUnknownField *field, uint8_t *out)
 /**@}*/
 
 size_t
-protobuf_c_message_pack(const ProtobufCMessage *message, uint8_t *out)
+ama_protobuf_c_message_pack(const ProtobufCMessage *message, uint8_t *out)
 {
     unsigned i;
     size_t rv = 0;
@@ -1506,7 +1506,7 @@ protobuf_c_message_pack(const ProtobufCMessage *message, uint8_t *out)
         } else if (field->label == PROTOBUF_C_LABEL_OPTIONAL) {
             rv += optional_field_pack(
                 field,
-                *(const protobuf_c_boolean *) qmember,
+                *(const ama_protobuf_c_boolean *) qmember,
                 member,
                 out + rv
             );
@@ -1523,9 +1523,9 @@ protobuf_c_message_pack(const ProtobufCMessage *message, uint8_t *out)
 }
 
 /**
- * \defgroup packbuf protobuf_c_message_pack_to_buffer() implementation
+ * \defgroup packbuf ama_protobuf_c_message_pack_to_buffer() implementation
  *
- * Routines mainly used by protobuf_c_message_pack_to_buffer().
+ * Routines mainly used by ama_protobuf_c_message_pack_to_buffer().
  *
  * \ingroup internal
  * @{
@@ -1595,7 +1595,7 @@ required_field_pack_to_buffer(const ProtobufCFieldDescriptor *field,
         break;
     case PROTOBUF_C_TYPE_BOOL:
         scratch[0] |= PROTOBUF_C_WIRE_TYPE_VARINT;
-        rv += boolean_pack(*(const protobuf_c_boolean *) member, scratch + rv);
+        rv += boolean_pack(*(const ama_protobuf_c_boolean *) member, scratch + rv);
         buffer->append(buffer, rv, scratch);
         break;
     case PROTOBUF_C_TYPE_STRING: {
@@ -1628,10 +1628,10 @@ required_field_pack_to_buffer(const ProtobufCFieldDescriptor *field,
             rv += uint32_pack(0, scratch + rv);
             buffer->append(buffer, rv, scratch);
         } else {
-            size_t sublen = protobuf_c_message_get_packed_size(msg);
+            size_t sublen = ama_protobuf_c_message_get_packed_size(msg);
             rv += uint32_pack((uint32_t)sublen, scratch + rv);
             buffer->append(buffer, rv, scratch);
-            protobuf_c_message_pack_to_buffer(msg, buffer);
+            ama_protobuf_c_message_pack_to_buffer(msg, buffer);
             rv += sublen;
         }
         break;
@@ -1690,7 +1690,7 @@ oneof_field_pack_to_buffer(const ProtobufCFieldDescriptor *field,
  */
 static size_t
 optional_field_pack_to_buffer(const ProtobufCFieldDescriptor *field,
-                  const protobuf_c_boolean has,
+                  const ama_protobuf_c_boolean has,
                   const void *member, ProtobufCBuffer *buffer)
 {
     if (field->type == PROTOBUF_C_TYPE_MESSAGE ||
@@ -1886,7 +1886,7 @@ pack_buffer_packed_payload(const ProtobufCFieldDescriptor *field,
         break;
     case PROTOBUF_C_TYPE_BOOL:
         for (i = 0; i < count; i++) {
-            size_t len = boolean_pack(((protobuf_c_boolean *) array)[i], scratch);
+            size_t len = boolean_pack(((ama_protobuf_c_boolean *) array)[i], scratch);
             buffer->append(buffer, len, scratch);
             rv += len;
         }
@@ -1955,7 +1955,7 @@ unknown_field_pack_to_buffer(const ProtobufCMessageUnknownField *field,
 /**@}*/
 
 size_t
-protobuf_c_message_pack_to_buffer(const ProtobufCMessage *message,
+ama_protobuf_c_message_pack_to_buffer(const ProtobufCMessage *message,
                   ProtobufCBuffer *buffer)
 {
     unsigned i;
@@ -1984,7 +1984,7 @@ protobuf_c_message_pack_to_buffer(const ProtobufCMessage *message,
         } else if (field->label == PROTOBUF_C_LABEL_OPTIONAL) {
             rv += optional_field_pack_to_buffer(
                 field,
-                *(const protobuf_c_boolean *) qmember,
+                *(const ama_protobuf_c_boolean *) qmember,
                 member,
                 buffer
             );
@@ -2170,7 +2170,7 @@ max_b128_numbers(size_t len, const uint8_t *data)
  * some of its fields may have been reused and changed to their default
  * values during the merge.
  */
-static protobuf_c_boolean
+static ama_protobuf_c_boolean
 merge_messages(ProtobufCMessage *earlier_msg,
            ProtobufCMessage *latter_msg,
            ProtobufCAllocator *allocator)
@@ -2236,7 +2236,7 @@ merge_messages(ProtobufCMessage *earlier_msg,
                                     latter_msg,
                                     fields[i].
                                     quantifier_offset);
-            protobuf_c_boolean need_to_merge = FALSE;
+            ama_protobuf_c_boolean need_to_merge = FALSE;
             void *earlier_elem;
             void *latter_elem;
             const void *def_val;
@@ -2352,7 +2352,7 @@ merge_messages(ProtobufCMessage *earlier_msg,
  * others; the remaining error checking is done by
  * parse_packed_repeated_member().
  */
-static protobuf_c_boolean
+static ama_protobuf_c_boolean
 count_packed_elements(ProtobufCType type,
               size_t len, const uint8_t *data, size_t *count_out)
 {
@@ -2482,7 +2482,7 @@ parse_fixed_uint64(const uint8_t *data)
 #endif
 }
 
-static protobuf_c_boolean
+static ama_protobuf_c_boolean
 parse_boolean(unsigned len, const uint8_t *data)
 {
     unsigned i;
@@ -2492,11 +2492,11 @@ parse_boolean(unsigned len, const uint8_t *data)
     return FALSE;
 }
 
-static protobuf_c_boolean
+static ama_protobuf_c_boolean
 parse_required_member(ScannedMember *scanned_member,
               void *member,
               ProtobufCAllocator *allocator,
-              protobuf_c_boolean maybe_clear)
+              ama_protobuf_c_boolean maybe_clear)
 {
     unsigned len = (unsigned)scanned_member->len;
     const uint8_t *data = scanned_member->data;
@@ -2545,7 +2545,7 @@ parse_required_member(ScannedMember *scanned_member,
         *(uint64_t *) member = parse_fixed_uint64(data);
         return TRUE;
     case PROTOBUF_C_TYPE_BOOL:
-        *(protobuf_c_boolean *) member = parse_boolean(len, data);
+        *(ama_protobuf_c_boolean *) member = parse_boolean(len, data);
         return TRUE;
     case PROTOBUF_C_TYPE_STRING: {
         char **pstr = member;
@@ -2596,7 +2596,7 @@ parse_required_member(ScannedMember *scanned_member,
         ProtobufCMessage **pmessage = member;
         ProtobufCMessage *subm;
         const ProtobufCMessage *def_mess;
-        protobuf_c_boolean merge_successful = TRUE;
+        ama_protobuf_c_boolean merge_successful = TRUE;
         unsigned pref_len = scanned_member->length_prefix_len;
 
         if (wire_type != PROTOBUF_C_WIRE_TYPE_LENGTH_PREFIXED)
@@ -2604,7 +2604,7 @@ parse_required_member(ScannedMember *scanned_member,
 
         def_mess = scanned_member->field->default_value;
         if (len >= pref_len)
-            subm = protobuf_c_message_unpack(scanned_member->field->descriptor,
+            subm = ama_protobuf_c_message_unpack(scanned_member->field->descriptor,
                              allocator,
                              len - pref_len,
                              data + pref_len);
@@ -2618,7 +2618,7 @@ parse_required_member(ScannedMember *scanned_member,
             if (subm != NULL)
                 merge_successful = merge_messages(*pmessage, subm, allocator);
             /* Delete the previous message */
-            protobuf_c_message_free_unpacked(*pmessage, allocator);
+            ama_protobuf_c_message_free_unpacked(*pmessage, allocator);
         }
         *pmessage = subm;
         if (subm == NULL || !merge_successful)
@@ -2629,7 +2629,7 @@ parse_required_member(ScannedMember *scanned_member,
     return FALSE;
 }
 
-static protobuf_c_boolean
+static ama_protobuf_c_boolean
 parse_oneof_member (ScannedMember *scanned_member,
             void *member,
             ProtobufCMessage *message,
@@ -2674,7 +2674,7 @@ parse_oneof_member (ScannedMember *scanned_member,
             ProtobufCMessage **pmessage = member;
             const ProtobufCMessage *def_mess = old_field->default_value;
             if (*pmessage != NULL && *pmessage != def_mess)
-                protobuf_c_message_free_unpacked(*pmessage, allocator);
+                ama_protobuf_c_message_free_unpacked(*pmessage, allocator);
             break;
             }
         default:
@@ -2691,7 +2691,7 @@ parse_oneof_member (ScannedMember *scanned_member,
 }
 
 
-static protobuf_c_boolean
+static ama_protobuf_c_boolean
 parse_optional_member(ScannedMember *scanned_member,
               void *member,
               ProtobufCMessage *message,
@@ -2700,13 +2700,13 @@ parse_optional_member(ScannedMember *scanned_member,
     if (!parse_required_member(scanned_member, member, allocator, TRUE))
         return FALSE;
     if (scanned_member->field->quantifier_offset != 0)
-        STRUCT_MEMBER(protobuf_c_boolean,
+        STRUCT_MEMBER(ama_protobuf_c_boolean,
                   message,
                   scanned_member->field->quantifier_offset) = TRUE;
     return TRUE;
 }
 
-static protobuf_c_boolean
+static ama_protobuf_c_boolean
 parse_repeated_member(ScannedMember *scanned_member,
               void *member,
               ProtobufCMessage *message,
@@ -2740,7 +2740,7 @@ scan_varint(unsigned len, const uint8_t *data)
     return i + 1;
 }
 
-static protobuf_c_boolean
+static ama_protobuf_c_boolean
 parse_packed_repeated_member(ScannedMember *scanned_member,
                  void *member,
                  ProtobufCMessage *message)
@@ -2853,7 +2853,7 @@ parse_packed_repeated_member(ScannedMember *scanned_member,
                 PROTOBUF_C_UNPACK_ERROR("bad packed-repeated boolean value");
                 return FALSE;
             }
-            ((protobuf_c_boolean *) array)[count++] = parse_boolean(s, at);
+            ((ama_protobuf_c_boolean *) array)[count++] = parse_boolean(s, at);
             at += s;
             rem -= s;
         }
@@ -2872,7 +2872,7 @@ no_unpacking_needed:
 #endif
 }
 
-static protobuf_c_boolean
+static ama_protobuf_c_boolean
 is_packable_type(ProtobufCType type)
 {
     return
@@ -2881,7 +2881,7 @@ is_packable_type(ProtobufCType type)
         type != PROTOBUF_C_TYPE_MESSAGE;
 }
 
-static protobuf_c_boolean
+static ama_protobuf_c_boolean
 parse_member(ScannedMember *scanned_member,
          ProtobufCMessage *message,
          ProtobufCAllocator *allocator)
@@ -2976,7 +2976,7 @@ message_init_generic(const ProtobufCMessageDescriptor *desc,
                 memcpy(field, dv, 8);
                 break;
             case PROTOBUF_C_TYPE_BOOL:
-                memcpy(field, dv, sizeof(protobuf_c_boolean));
+                memcpy(field, dv, sizeof(ama_protobuf_c_boolean));
                 break;
             case PROTOBUF_C_TYPE_BYTES:
                 memcpy(field, dv, sizeof(ProtobufCBinaryData));
@@ -3025,7 +3025,7 @@ message_init_generic(const ProtobufCMessageDescriptor *desc,
     (required_fields_bitmap[(index)/8] & (1UL<<((index)%8)))
 
 ProtobufCMessage *
-protobuf_c_message_unpack(const ProtobufCMessageDescriptor *desc,
+ama_protobuf_c_message_unpack(const ProtobufCMessageDescriptor *desc,
               ProtobufCAllocator *allocator,
               size_t len, const uint8_t *data)
 {
@@ -3053,12 +3053,12 @@ protobuf_c_message_unpack(const ProtobufCMessageDescriptor *desc,
     unsigned required_fields_bitmap_len;
     unsigned char required_fields_bitmap_stack[16];
     unsigned char *required_fields_bitmap = required_fields_bitmap_stack;
-    protobuf_c_boolean required_fields_bitmap_alloced = FALSE;
+    ama_protobuf_c_boolean required_fields_bitmap_alloced = FALSE;
 
     ASSERT_IS_MESSAGE_DESCRIPTOR(desc);
 
     if (allocator == NULL)
-        allocator = &protobuf_c__allocator;
+        allocator = &ama_protobuf_c__allocator;
 
     rv = do_alloc(allocator, desc->sizeof_message);
     if (!rv)
@@ -3083,7 +3083,7 @@ protobuf_c_message_unpack(const ProtobufCMessageDescriptor *desc,
      * source (most likely, direct construction from the .proto file).
      */
     if (desc->message_init != NULL)
-        protobuf_c_message_init(desc, rv);
+        ama_protobuf_c_message_init(desc, rv);
     else
         message_init_generic(desc, rv);
 
@@ -3304,7 +3304,7 @@ protobuf_c_message_unpack(const ProtobufCMessageDescriptor *desc,
     return rv;
 
 error_cleanup:
-    protobuf_c_message_free_unpacked(rv, allocator);
+    ama_protobuf_c_message_free_unpacked(rv, allocator);
     for (j = 1; j <= which_slab; j++)
         do_free(allocator, scanned_member_slabs[j]);
     if (required_fields_bitmap_alloced)
@@ -3321,7 +3321,7 @@ error_cleanup_during_scan:
 }
 
 void
-protobuf_c_message_free_unpacked(ProtobufCMessage *message,
+ama_protobuf_c_message_free_unpacked(ProtobufCMessage *message,
                  ProtobufCAllocator *allocator)
 {
     const ProtobufCMessageDescriptor *desc;
@@ -3335,7 +3335,7 @@ protobuf_c_message_free_unpacked(ProtobufCMessage *message,
     ASSERT_IS_MESSAGE(message);
 
     if (allocator == NULL)
-        allocator = &protobuf_c__allocator;
+        allocator = &ama_protobuf_c__allocator;
     message->descriptor = NULL;
     for (f = 0; f < desc->n_fields; f++) {
         if (0 != (desc->fields[f].flags & PROTOBUF_C_FIELD_FLAG_ONEOF) &&
@@ -3366,7 +3366,7 @@ protobuf_c_message_free_unpacked(ProtobufCMessage *message,
                 } else if (desc->fields[f].type == PROTOBUF_C_TYPE_MESSAGE) {
                     unsigned i;
                     for (i = 0; i < n; i++)
-                        protobuf_c_message_free_unpacked(
+                        ama_protobuf_c_message_free_unpacked(
                             ((ProtobufCMessage **) arr)[i],
                             allocator
                         );
@@ -3397,7 +3397,7 @@ protobuf_c_message_free_unpacked(ProtobufCMessage *message,
             sm = STRUCT_MEMBER(ProtobufCMessage *, message,
                        desc->fields[f].offset);
             if (sm && sm != desc->fields[f].default_value)
-                protobuf_c_message_free_unpacked(sm, allocator);
+                ama_protobuf_c_message_free_unpacked(sm, allocator);
         }
     }
 
@@ -3410,14 +3410,14 @@ protobuf_c_message_free_unpacked(ProtobufCMessage *message,
 }
 
 void
-protobuf_c_message_init(const ProtobufCMessageDescriptor * descriptor,
+ama_protobuf_c_message_init(const ProtobufCMessageDescriptor * descriptor,
             void *message)
 {
     descriptor->message_init((ProtobufCMessage *) (message));
 }
 
-protobuf_c_boolean
-protobuf_c_message_check(const ProtobufCMessage *message)
+ama_protobuf_c_boolean
+ama_protobuf_c_message_check(const ProtobufCMessage *message)
 {
     unsigned i;
 
@@ -3452,7 +3452,7 @@ protobuf_c_message_check(const ProtobufCMessage *message)
                 ProtobufCMessage **submessage = *(ProtobufCMessage ***) field;
                 unsigned j;
                 for (j = 0; j < *quantity; j++) {
-                    if (!protobuf_c_message_check(submessage[j]))
+                    if (!ama_protobuf_c_message_check(submessage[j]))
                         return FALSE;
                 }
             } else if (type == PROTOBUF_C_TYPE_STRING) {
@@ -3476,7 +3476,7 @@ protobuf_c_message_check(const ProtobufCMessage *message)
             if (type == PROTOBUF_C_TYPE_MESSAGE) {
                 ProtobufCMessage *submessage = *(ProtobufCMessage **) field;
                 if (label == PROTOBUF_C_LABEL_REQUIRED || submessage != NULL) {
-                    if (!protobuf_c_message_check(submessage))
+                    if (!ama_protobuf_c_message_check(submessage))
                         return FALSE;
                 }
             } else if (type == PROTOBUF_C_TYPE_STRING) {
@@ -3484,7 +3484,7 @@ protobuf_c_message_check(const ProtobufCMessage *message)
                 if (label == PROTOBUF_C_LABEL_REQUIRED && string == NULL)
                     return FALSE;
             } else if (type == PROTOBUF_C_TYPE_BYTES) {
-                protobuf_c_boolean *has = STRUCT_MEMBER_P (message, f->quantifier_offset);
+                ama_protobuf_c_boolean *has = STRUCT_MEMBER_P (message, f->quantifier_offset);
                 ProtobufCBinaryData *bd = field;
                 if (label == PROTOBUF_C_LABEL_REQUIRED || *has == TRUE) {
                     if (bd->len > 0 && bd->data == NULL)
@@ -3504,7 +3504,7 @@ typedef void (*GenericHandler) (void *service,
                 ProtobufCClosure closure,
                 void *closure_data);
 void
-protobuf_c_service_invoke_internal(ProtobufCService *service,
+ama_protobuf_c_service_invoke_internal(ProtobufCService *service,
                    unsigned method_index,
                    const ProtobufCMessage *input,
                    ProtobufCClosure closure,
@@ -3535,18 +3535,18 @@ protobuf_c_service_invoke_internal(ProtobufCService *service,
 }
 
 void
-protobuf_c_service_generated_init(ProtobufCService *service,
+ama_protobuf_c_service_generated_init(ProtobufCService *service,
                   const ProtobufCServiceDescriptor *descriptor,
                   ProtobufCServiceDestroy destroy)
 {
     ASSERT_IS_SERVICE_DESCRIPTOR(descriptor);
     service->descriptor = descriptor;
     service->destroy = destroy;
-    service->invoke = protobuf_c_service_invoke_internal;
+    service->invoke = ama_protobuf_c_service_invoke_internal;
     memset(service + 1, 0, descriptor->n_methods * sizeof(GenericHandler));
 }
 
-void protobuf_c_service_destroy(ProtobufCService *service)
+void ama_protobuf_c_service_destroy(ProtobufCService *service)
 {
     service->destroy(service);
 }
@@ -3554,7 +3554,7 @@ void protobuf_c_service_destroy(ProtobufCService *service)
 /* --- querying the descriptors --- */
 
 const ProtobufCEnumValue *
-protobuf_c_enum_descriptor_get_value_by_name(const ProtobufCEnumDescriptor *desc,
+ama_protobuf_c_enum_descriptor_get_value_by_name(const ProtobufCEnumDescriptor *desc,
                          const char *name)
 {
     unsigned start = 0;
@@ -3584,7 +3584,7 @@ protobuf_c_enum_descriptor_get_value_by_name(const ProtobufCEnumDescriptor *desc
 }
 
 const ProtobufCEnumValue *
-protobuf_c_enum_descriptor_get_value(const ProtobufCEnumDescriptor *desc,
+ama_protobuf_c_enum_descriptor_get_value(const ProtobufCEnumDescriptor *desc,
                      int value)
 {
     int rv = int_range_lookup(desc->n_value_ranges, desc->value_ranges, value);
@@ -3594,7 +3594,7 @@ protobuf_c_enum_descriptor_get_value(const ProtobufCEnumDescriptor *desc,
 }
 
 const ProtobufCFieldDescriptor *
-protobuf_c_message_descriptor_get_field_by_name(const ProtobufCMessageDescriptor *desc,
+ama_protobuf_c_message_descriptor_get_field_by_name(const ProtobufCMessageDescriptor *desc,
                         const char *name)
 {
     unsigned start = 0;
@@ -3628,7 +3628,7 @@ protobuf_c_message_descriptor_get_field_by_name(const ProtobufCMessageDescriptor
 }
 
 const ProtobufCFieldDescriptor *
-protobuf_c_message_descriptor_get_field(const ProtobufCMessageDescriptor *desc,
+ama_protobuf_c_message_descriptor_get_field(const ProtobufCMessageDescriptor *desc,
                     unsigned value)
 {
     int rv = int_range_lookup(desc->n_field_ranges,desc->field_ranges, value);
@@ -3638,7 +3638,7 @@ protobuf_c_message_descriptor_get_field(const ProtobufCMessageDescriptor *desc,
 }
 
 const ProtobufCMethodDescriptor *
-protobuf_c_service_descriptor_get_method_by_name(const ProtobufCServiceDescriptor *desc,
+ama_protobuf_c_service_descriptor_get_method_by_name(const ProtobufCServiceDescriptor *desc,
                          const char *name)
 {
     unsigned start = 0;

@@ -28,13 +28,13 @@ struct  Ama__EventNameHashesCollection
   ProtobufCMessage base;
   ProtobufCBinaryData current_version;
   uint32_t hashes_count_from_current_version;
-  protobuf_c_boolean handle_new_events_as_unknown;
+  ama_protobuf_c_boolean handle_new_events_as_unknown;
   size_t n_event_name_hashes;
   uint64_t *event_name_hashes;
 };
 #define AMA__EVENT_NAME_HASHES_COLLECTION__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__event_name_hashes_collection__descriptor) \
-, {0,NULL}, 0, 0, 0,NULL }
+    , {0,NULL}, 0, 0, 0,NULL }
 
 
 /* Ama__EventNameHashesCollection methods */

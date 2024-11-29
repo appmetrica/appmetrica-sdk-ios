@@ -36,47 +36,47 @@ struct  Ama__LocationMessage__Location
   ProtobufCMessage base;
   uint64_t incremental_id;
   uint64_t collect_timestamp;
-  protobuf_c_boolean has_timestamp;
+  ama_protobuf_c_boolean has_timestamp;
   uint64_t timestamp;
   double latitude;
   double longitude;
-  protobuf_c_boolean has_precision;
+  ama_protobuf_c_boolean has_precision;
   uint32_t precision;
-  protobuf_c_boolean has_direction;
+  ama_protobuf_c_boolean has_direction;
   uint32_t direction;
-  protobuf_c_boolean has_speed;
+  ama_protobuf_c_boolean has_speed;
   uint32_t speed;
-  protobuf_c_boolean has_altitude;
+  ama_protobuf_c_boolean has_altitude;
   int32_t altitude;
-  protobuf_c_boolean has_provider;
+  ama_protobuf_c_boolean has_provider;
   Ama__LocationProvider provider;
 };
 #define AMA__LOCATION_MESSAGE__LOCATION__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__location_message__location__descriptor) \
-, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, AMA__LOCATION_PROVIDER__PROVIDER_UNKNOWN }
+    , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, AMA__LOCATION_PROVIDER__PROVIDER_UNKNOWN }
 
 
 struct  Ama__LocationMessage__Visit
 {
   ProtobufCMessage base;
-  protobuf_c_boolean has_incremental_id;
+  ama_protobuf_c_boolean has_incremental_id;
   uint64_t incremental_id;
-  protobuf_c_boolean has_collect_timestamp;
+  ama_protobuf_c_boolean has_collect_timestamp;
   uint64_t collect_timestamp;
-  protobuf_c_boolean has_arrival_timestamp;
+  ama_protobuf_c_boolean has_arrival_timestamp;
   uint64_t arrival_timestamp;
-  protobuf_c_boolean has_departure_timestamp;
+  ama_protobuf_c_boolean has_departure_timestamp;
   uint64_t departure_timestamp;
-  protobuf_c_boolean has_latitude;
+  ama_protobuf_c_boolean has_latitude;
   double latitude;
-  protobuf_c_boolean has_longitude;
+  ama_protobuf_c_boolean has_longitude;
   double longitude;
-  protobuf_c_boolean has_precision;
+  ama_protobuf_c_boolean has_precision;
   double precision;
 };
 #define AMA__LOCATION_MESSAGE__VISIT__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__location_message__visit__descriptor) \
-, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
+    , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
 
 
 struct  Ama__LocationMessage
@@ -89,7 +89,7 @@ struct  Ama__LocationMessage
 };
 #define AMA__LOCATION_MESSAGE__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__location_message__descriptor) \
-, 0,NULL, 0,NULL }
+    , 0,NULL, 0,NULL }
 
 
 /* Ama__LocationMessage__Location methods */

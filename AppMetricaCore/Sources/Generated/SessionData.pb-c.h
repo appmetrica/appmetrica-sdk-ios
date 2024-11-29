@@ -27,52 +27,52 @@ typedef struct Ama__SessionData__AppState Ama__SessionData__AppState;
 struct  Ama__SessionData__AppState
 {
   ProtobufCMessage base;
-  protobuf_c_boolean has_locale;
+  ama_protobuf_c_boolean has_locale;
   ProtobufCBinaryData locale;
-  protobuf_c_boolean has_app_version_name;
+  ama_protobuf_c_boolean has_app_version_name;
   ProtobufCBinaryData app_version_name;
-  protobuf_c_boolean app_debuggable;
-  protobuf_c_boolean has_kit_version;
+  ama_protobuf_c_boolean app_debuggable;
+  ama_protobuf_c_boolean has_kit_version;
   ProtobufCBinaryData kit_version;
-  protobuf_c_boolean has_kit_version_name;
+  ama_protobuf_c_boolean has_kit_version_name;
   ProtobufCBinaryData kit_version_name;
-  protobuf_c_boolean has_kit_build_type;
+  ama_protobuf_c_boolean has_kit_build_type;
   ProtobufCBinaryData kit_build_type;
   uint32_t kit_build_number;
-  protobuf_c_boolean has_os_version;
+  ama_protobuf_c_boolean has_os_version;
   ProtobufCBinaryData os_version;
   int32_t os_api_level;
-  protobuf_c_boolean is_rooted;
-  protobuf_c_boolean has_uuid;
+  ama_protobuf_c_boolean is_rooted;
+  ama_protobuf_c_boolean has_uuid;
   ProtobufCBinaryData uuid;
-  protobuf_c_boolean has_device_id;
+  ama_protobuf_c_boolean has_device_id;
   ProtobufCBinaryData device_id;
-  protobuf_c_boolean has_ifv;
+  ama_protobuf_c_boolean has_ifv;
   ProtobufCBinaryData ifv;
-  protobuf_c_boolean has_ifa;
+  ama_protobuf_c_boolean has_ifa;
   ProtobufCBinaryData ifa;
-  protobuf_c_boolean lat;
-  protobuf_c_boolean has_app_build_number;
+  ama_protobuf_c_boolean lat;
+  ama_protobuf_c_boolean has_app_build_number;
   ProtobufCBinaryData app_build_number;
 };
 #define AMA__SESSION_DATA__APP_STATE__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__session_data__app_state__descriptor) \
-, 0, {0,NULL}, 0, {0,NULL}, 0, 0, {0,NULL}, 0, {0,NULL}, 0, {0,NULL}, 0, 0, {0,NULL}, 0, 0, 0, {0,NULL}, 0, {0,NULL}, 0, {0,NULL}, 0, {0,NULL}, 0, 0, {0,NULL} }
+    , 0, {0,NULL}, 0, {0,NULL}, 0, 0, {0,NULL}, 0, {0,NULL}, 0, {0,NULL}, 0, 0, {0,NULL}, 0, 0, 0, {0,NULL}, 0, {0,NULL}, 0, {0,NULL}, 0, {0,NULL}, 0, 0, {0,NULL} }
 
 
 struct  Ama__SessionData
 {
   ProtobufCMessage base;
   int64_t session_id;
-  protobuf_c_boolean has_attribution_id;
+  ama_protobuf_c_boolean has_attribution_id;
   ProtobufCBinaryData attribution_id;
-  protobuf_c_boolean has_server_time_offset;
+  ama_protobuf_c_boolean has_server_time_offset;
   int32_t server_time_offset;
   Ama__SessionData__AppState *app_state;
 };
 #define AMA__SESSION_DATA__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__session_data__descriptor) \
-, 0, 0, {0,NULL}, 0, 0, NULL }
+    , 0, 0, {0,NULL}, 0, 0, NULL }
 
 
 /* Ama__SessionData__AppState methods */

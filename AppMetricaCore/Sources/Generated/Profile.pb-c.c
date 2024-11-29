@@ -35,21 +35,21 @@ size_t ama__profile__get_packed_size
                      (const Ama__Profile *message)
 {
   assert(message->base.descriptor == &ama__profile__descriptor);
-  return protobuf_c_message_get_packed_size ((const ProtobufCMessage*)(message));
+  return ama_protobuf_c_message_get_packed_size ((const ProtobufCMessage*)(message));
 }
 size_t ama__profile__pack
                      (const Ama__Profile *message,
                       uint8_t       *out)
 {
   assert(message->base.descriptor == &ama__profile__descriptor);
-  return protobuf_c_message_pack ((const ProtobufCMessage*)message, out);
+  return ama_protobuf_c_message_pack ((const ProtobufCMessage*)message, out);
 }
 size_t ama__profile__pack_to_buffer
                      (const Ama__Profile *message,
                       ProtobufCBuffer *buffer)
 {
   assert(message->base.descriptor == &ama__profile__descriptor);
-  return protobuf_c_message_pack_to_buffer ((const ProtobufCMessage*)message, buffer);
+  return ama_protobuf_c_message_pack_to_buffer ((const ProtobufCMessage*)message, buffer);
 }
 Ama__Profile *
        ama__profile__unpack
@@ -58,7 +58,7 @@ Ama__Profile *
                       const uint8_t       *data)
 {
   return (Ama__Profile *)
-     protobuf_c_message_unpack (&ama__profile__descriptor,
+     ama_protobuf_c_message_unpack (&ama__profile__descriptor,
                                 allocator, len, data);
 }
 void   ama__profile__free_unpacked
@@ -68,10 +68,10 @@ void   ama__profile__free_unpacked
   if(!message)
     return;
   assert(message->base.descriptor == &ama__profile__descriptor);
-  protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
+  ama_protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
 }
-static const protobuf_c_boolean ama__profile__attribute_meta_info__set_if_undefined__default_value = 0;
-static const protobuf_c_boolean ama__profile__attribute_meta_info__reset__default_value = 0;
+static const ama_protobuf_c_boolean ama__profile__attribute_meta_info__set_if_undefined__default_value = 0;
+static const ama_protobuf_c_boolean ama__profile__attribute_meta_info__reset__default_value = 0;
 static const ProtobufCFieldDescriptor ama__profile__attribute_meta_info__field_descriptors[2] =
 {
   {

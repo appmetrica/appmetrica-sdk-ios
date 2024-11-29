@@ -125,21 +125,21 @@ size_t ama__ecommerce_event__get_packed_size
                      (const Ama__ECommerceEvent *message)
 {
   assert(message->base.descriptor == &ama__ecommerce_event__descriptor);
-  return protobuf_c_message_get_packed_size ((const ProtobufCMessage*)(message));
+  return ama_protobuf_c_message_get_packed_size ((const ProtobufCMessage*)(message));
 }
 size_t ama__ecommerce_event__pack
                      (const Ama__ECommerceEvent *message,
                       uint8_t       *out)
 {
   assert(message->base.descriptor == &ama__ecommerce_event__descriptor);
-  return protobuf_c_message_pack ((const ProtobufCMessage*)message, out);
+  return ama_protobuf_c_message_pack ((const ProtobufCMessage*)message, out);
 }
 size_t ama__ecommerce_event__pack_to_buffer
                      (const Ama__ECommerceEvent *message,
                       ProtobufCBuffer *buffer)
 {
   assert(message->base.descriptor == &ama__ecommerce_event__descriptor);
-  return protobuf_c_message_pack_to_buffer ((const ProtobufCMessage*)message, buffer);
+  return ama_protobuf_c_message_pack_to_buffer ((const ProtobufCMessage*)message, buffer);
 }
 Ama__ECommerceEvent *
        ama__ecommerce_event__unpack
@@ -148,7 +148,7 @@ Ama__ECommerceEvent *
                       const uint8_t       *data)
 {
   return (Ama__ECommerceEvent *)
-     protobuf_c_message_unpack (&ama__ecommerce_event__descriptor,
+     ama_protobuf_c_message_unpack (&ama__ecommerce_event__descriptor,
                                 allocator, len, data);
 }
 void   ama__ecommerce_event__free_unpacked
@@ -158,7 +158,7 @@ void   ama__ecommerce_event__free_unpacked
   if(!message)
     return;
   assert(message->base.descriptor == &ama__ecommerce_event__descriptor);
-  protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
+  ama_protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
 }
 static const ProtobufCFieldDescriptor ama__ecommerce_event__category__field_descriptors[1] =
 {

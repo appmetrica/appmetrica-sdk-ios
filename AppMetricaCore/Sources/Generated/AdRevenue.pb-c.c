@@ -23,21 +23,21 @@ size_t ama__ad_revenue__get_packed_size
                      (const Ama__AdRevenue *message)
 {
   assert(message->base.descriptor == &ama__ad_revenue__descriptor);
-  return protobuf_c_message_get_packed_size ((const ProtobufCMessage*)(message));
+  return ama_protobuf_c_message_get_packed_size ((const ProtobufCMessage*)(message));
 }
 size_t ama__ad_revenue__pack
                      (const Ama__AdRevenue *message,
                       uint8_t       *out)
 {
   assert(message->base.descriptor == &ama__ad_revenue__descriptor);
-  return protobuf_c_message_pack ((const ProtobufCMessage*)message, out);
+  return ama_protobuf_c_message_pack ((const ProtobufCMessage*)message, out);
 }
 size_t ama__ad_revenue__pack_to_buffer
                      (const Ama__AdRevenue *message,
                       ProtobufCBuffer *buffer)
 {
   assert(message->base.descriptor == &ama__ad_revenue__descriptor);
-  return protobuf_c_message_pack_to_buffer ((const ProtobufCMessage*)message, buffer);
+  return ama_protobuf_c_message_pack_to_buffer ((const ProtobufCMessage*)message, buffer);
 }
 Ama__AdRevenue *
        ama__ad_revenue__unpack
@@ -46,7 +46,7 @@ Ama__AdRevenue *
                       const uint8_t       *data)
 {
   return (Ama__AdRevenue *)
-     protobuf_c_message_unpack (&ama__ad_revenue__descriptor,
+     ama_protobuf_c_message_unpack (&ama__ad_revenue__descriptor,
                                 allocator, len, data);
 }
 void   ama__ad_revenue__free_unpacked
@@ -56,7 +56,7 @@ void   ama__ad_revenue__free_unpacked
   if(!message)
     return;
   assert(message->base.descriptor == &ama__ad_revenue__descriptor);
-  protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
+  ama_protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
 }
 static const int64_t ama__ad_revenue__decimal__mantissa__default_value = 0ll;
 static const int32_t ama__ad_revenue__decimal__exponent__default_value = 0;

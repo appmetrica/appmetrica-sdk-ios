@@ -65,7 +65,7 @@
     return [self stringForBinaryData:binaryData has:YES];
 }
 
-+ (NSString *)stringForBinaryData:(const ProtobufCBinaryData *)binaryData has:(protobuf_c_boolean)has
++ (NSString *)stringForBinaryData:(const ProtobufCBinaryData *)binaryData has:(ama_protobuf_c_boolean)has
 {
     if (has == false || binaryData == NULL) {
         return nil;
@@ -78,7 +78,7 @@
     return [self dataForBinaryData:binaryData has:YES];
 }
 
-+ (NSData *)dataForBinaryData:(const ProtobufCBinaryData *)binaryData has:(protobuf_c_boolean)has
++ (NSData *)dataForBinaryData:(const ProtobufCBinaryData *)binaryData has:(ama_protobuf_c_boolean)has
 {
     if (has == false || binaryData == NULL) {
         return nil;
@@ -86,7 +86,7 @@
     return [[NSData alloc] initWithBytes:binaryData->data length:binaryData->len];
 }
 
-+ (BOOL)boolForProto:(protobuf_c_boolean)value
++ (BOOL)boolForProto:(ama_protobuf_c_boolean)value
 {
     return value ? YES : NO;
 }

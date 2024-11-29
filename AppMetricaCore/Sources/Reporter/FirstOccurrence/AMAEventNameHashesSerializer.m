@@ -18,7 +18,7 @@
                                   withString:collection.currentVersion
                                      tracker:tracker];
         result.hashes_count_from_current_version = (uint32_t)collection.hashesCountFromCurrentVersion;
-        result.handle_new_events_as_unknown = (protobuf_c_boolean)collection.handleNewEventsAsUnknown;
+        result.handle_new_events_as_unknown = (ama_protobuf_c_boolean)collection.handleNewEventsAsUnknown;
         
         NSUInteger hashesCount = collection.eventNameHashes.count;
         result.n_event_name_hashes = hashesCount;

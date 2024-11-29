@@ -125,14 +125,14 @@ typedef enum _Ama__IOSCrashReport__Crash__Thread__Stack__GrowDirection {
 struct  Ama__IOSCrashReport__BytesPair
 {
   ProtobufCMessage base;
-  protobuf_c_boolean has_key;
+  ama_protobuf_c_boolean has_key;
   ProtobufCBinaryData key;
-  protobuf_c_boolean has_value;
+  ama_protobuf_c_boolean has_value;
   ProtobufCBinaryData value;
 };
 #define AMA__IOSCRASH_REPORT__BYTES_PAIR__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__ioscrash_report__bytes_pair__descriptor) \
-, 0, {0,NULL}, 0, {0,NULL} }
+    , 0, {0,NULL}, 0, {0,NULL} }
 
 
 struct  Ama__IOSCrashReport__Info__VirtualMachineInfo
@@ -141,9 +141,9 @@ struct  Ama__IOSCrashReport__Info__VirtualMachineInfo
   /*
    * Plugin name (flutter, unity, etc)
    */
-  protobuf_c_boolean has_virtual_machine;
+  ama_protobuf_c_boolean has_virtual_machine;
   ProtobufCBinaryData virtual_machine;
-  protobuf_c_boolean has_virtual_machine_version;
+  ama_protobuf_c_boolean has_virtual_machine_version;
   ProtobufCBinaryData virtual_machine_version;
   /*
    *Some key-value attributes defined by plugins
@@ -153,7 +153,7 @@ struct  Ama__IOSCrashReport__Info__VirtualMachineInfo
 };
 #define AMA__IOSCRASH_REPORT__INFO__VIRTUAL_MACHINE_INFO__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__ioscrash_report__info__virtual_machine_info__descriptor) \
-, 0, {0,NULL}, 0, {0,NULL}, 0,NULL }
+    , 0, {0,NULL}, 0, {0,NULL}, 0,NULL }
 
 
 struct  Ama__IOSCrashReport__Info
@@ -162,7 +162,7 @@ struct  Ama__IOSCrashReport__Info
   /*
    * Version of crash reporter
    */
-  protobuf_c_boolean has_version;
+  ama_protobuf_c_boolean has_version;
   ProtobufCBinaryData version;
   /*
    * Identifier of crash
@@ -179,7 +179,7 @@ struct  Ama__IOSCrashReport__Info
 };
 #define AMA__IOSCRASH_REPORT__INFO__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__ioscrash_report__info__descriptor) \
-, 0, {0,NULL}, {0,NULL}, 0, NULL }
+    , 0, {0,NULL}, {0,NULL}, 0, NULL }
 
 
 struct  Ama__IOSCrashReport__BinaryImage
@@ -227,17 +227,17 @@ struct  Ama__IOSCrashReport__BinaryImage
   /*
    * 'message' from __crash_info section of binary (https://opensource.apple.com/source/WebKit2/WebKit2-7605.3.8/Platform/spi/Cocoa/CrashReporterClientSPI.h)
    */
-  protobuf_c_boolean has_crash_info_message;
+  ama_protobuf_c_boolean has_crash_info_message;
   ProtobufCBinaryData crash_info_message;
   /*
    * 'message2' from __crash_info section of binary (see link above)
    */
-  protobuf_c_boolean has_crash_info_message2;
+  ama_protobuf_c_boolean has_crash_info_message2;
   ProtobufCBinaryData crash_info_message2;
 };
 #define AMA__IOSCRASH_REPORT__BINARY_IMAGE__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__ioscrash_report__binary_image__descriptor) \
-, 0, 0, 0, 0, 0, 0, 0, {0,NULL}, {0,NULL}, 0, {0,NULL}, 0, {0,NULL} }
+    , 0, 0, 0, 0, 0, 0, 0, {0,NULL}, {0,NULL}, 0, {0,NULL}, 0, {0,NULL} }
 
 
 struct  Ama__IOSCrashReport__System__Memory
@@ -258,7 +258,7 @@ struct  Ama__IOSCrashReport__System__Memory
 };
 #define AMA__IOSCRASH_REPORT__SYSTEM__MEMORY__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__ioscrash_report__system__memory__descriptor) \
-, 0, 0, 0 }
+    , 0, 0, 0 }
 
 
 struct  Ama__IOSCrashReport__System__ApplicationStats
@@ -267,11 +267,11 @@ struct  Ama__IOSCrashReport__System__ApplicationStats
   /*
    * Before/after entering forground app is in inactive state (https://nda.ya.ru/3UXTo2)
    */
-  protobuf_c_boolean application_active;
+  ama_protobuf_c_boolean application_active;
   /*
    * App was in foreground when crashed
    */
-  protobuf_c_boolean application_in_foreground;
+  ama_protobuf_c_boolean application_in_foreground;
   uint32_t launches_since_last_crash;
   uint32_t sessions_since_last_crash;
   /*
@@ -291,7 +291,7 @@ struct  Ama__IOSCrashReport__System__ApplicationStats
 };
 #define AMA__IOSCRASH_REPORT__SYSTEM__APPLICATION_STATS__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__ioscrash_report__system__application_stats__descriptor) \
-, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
+    , 0, 0, 0, 0, 0, 0, 0, 0, 0 }
 
 
 struct  Ama__IOSCrashReport__System
@@ -306,12 +306,12 @@ struct  Ama__IOSCrashReport__System
   /*
    * Kernel version like an output of `uname -v`
    */
-  protobuf_c_boolean has_kernel_version;
+  ama_protobuf_c_boolean has_kernel_version;
   ProtobufCBinaryData kernel_version;
   /*
    * Build number of OS (i.e 14D27) (KSCrash: os_version)
    */
-  protobuf_c_boolean has_os_build_number;
+  ama_protobuf_c_boolean has_os_build_number;
   ProtobufCBinaryData os_build_number;
   /*
    * required bool jailbroken (removed: unused)
@@ -319,17 +319,17 @@ struct  Ama__IOSCrashReport__System
   /*
    * Timestamp of device boot (UTC)
    */
-  protobuf_c_boolean has_boot_timestamp;
+  ama_protobuf_c_boolean has_boot_timestamp;
   int64_t boot_timestamp;
   /*
    * Timestamp of app start (UTC)
    */
-  protobuf_c_boolean has_app_start_timestamp;
+  ama_protobuf_c_boolean has_app_start_timestamp;
   int64_t app_start_timestamp;
   /*
    * Absolute path to app binary (KSCrash: CFBundleExecutablePath)
    */
-  protobuf_c_boolean has_executable_path;
+  ama_protobuf_c_boolean has_executable_path;
   ProtobufCBinaryData executable_path;
   /*
    * required bytes CFBundleExecutable (removed: last path component of executable_path)
@@ -342,27 +342,27 @@ struct  Ama__IOSCrashReport__System
   /*
    * String representation of sysctl('hw.cputype') and sysctl('hw.cpusubtype'). See https://opensource.apple.com/source/cctools/cctools-836/include/mach/machine.h and KSCrash
    */
-  protobuf_c_boolean has_cpu_arch;
+  ama_protobuf_c_boolean has_cpu_arch;
   ProtobufCBinaryData cpu_arch;
   /*
    * CPU_TYPE_* from https://opensource.apple.com/source/cctools/cctools-836/include/mach/machine.h
    */
-  protobuf_c_boolean has_cpu_type;
+  ama_protobuf_c_boolean has_cpu_type;
   int32_t cpu_type;
   /*
    * CPU_SUBTYPE_* from https://opensource.apple.com/source/cctools/cctools-836/include/mach/machine.h
    */
-  protobuf_c_boolean has_cpu_subtype;
+  ama_protobuf_c_boolean has_cpu_subtype;
   int32_t cpu_subtype;
   /*
    * Binary compilation arch (see cpu_type)
    */
-  protobuf_c_boolean has_binary_cpu_type;
+  ama_protobuf_c_boolean has_binary_cpu_type;
   int32_t binary_cpu_type;
   /*
    * Binary compilation arch (see cpu_subtype)
    */
-  protobuf_c_boolean has_binary_cpu_subtype;
+  ama_protobuf_c_boolean has_binary_cpu_subtype;
   int32_t binary_cpu_subtype;
   /*
    * required bytes time_zone (removed: unused)
@@ -370,17 +370,17 @@ struct  Ama__IOSCrashReport__System
   /*
    * Name of app process
    */
-  protobuf_c_boolean has_process_name;
+  ama_protobuf_c_boolean has_process_name;
   ProtobufCBinaryData process_name;
   /*
    * PID of app process
    */
-  protobuf_c_boolean has_process_id;
+  ama_protobuf_c_boolean has_process_id;
   int64_t process_id;
   /*
    * PID of parrent process
    */
-  protobuf_c_boolean has_parent_process_id;
+  ama_protobuf_c_boolean has_parent_process_id;
   int64_t parent_process_id;
   /*
    * required bytes device_app_hash (removed: unused)
@@ -388,12 +388,12 @@ struct  Ama__IOSCrashReport__System
   /*
    * Type of application build
    */
-  protobuf_c_boolean has_build_type;
+  ama_protobuf_c_boolean has_build_type;
   Ama__IOSCrashReport__System__BuildType build_type;
   /*
    * Device storage size in bytes (full)
    */
-  protobuf_c_boolean has_storage;
+  ama_protobuf_c_boolean has_storage;
   int64_t storage;
   /*
    * Information about device memory state
@@ -406,7 +406,7 @@ struct  Ama__IOSCrashReport__System
 };
 #define AMA__IOSCRASH_REPORT__SYSTEM__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__ioscrash_report__system__descriptor) \
-, 0, {0,NULL}, 0, {0,NULL}, 0, 0, 0, 0, 0, {0,NULL}, 0, {0,NULL}, 0, 0, 0, 0, 0, 0, 0, 0, 0, {0,NULL}, 0, 0, 0, 0, 0, AMA__IOSCRASH_REPORT__SYSTEM__BUILD_TYPE__UNKNOWN, 0, 0, NULL, NULL }
+    , 0, {0,NULL}, 0, {0,NULL}, 0, 0, 0, 0, 0, {0,NULL}, 0, {0,NULL}, 0, 0, 0, 0, 0, 0, 0, 0, 0, {0,NULL}, 0, 0, 0, 0, 0, AMA__IOSCRASH_REPORT__SYSTEM__BUILD_TYPE__UNKNOWN, 0, 0, NULL, NULL }
 
 
 struct  Ama__IOSCrashReport__Crash__Backtrace__Frame
@@ -415,48 +415,48 @@ struct  Ama__IOSCrashReport__Crash__Backtrace__Frame
   /*
    * Absolute address, required for native crashes
    */
-  protobuf_c_boolean has_instruction_addr;
+  ama_protobuf_c_boolean has_instruction_addr;
   uint64_t instruction_addr;
-  protobuf_c_boolean has_object_name;
+  ama_protobuf_c_boolean has_object_name;
   ProtobufCBinaryData object_name;
-  protobuf_c_boolean has_object_addr;
+  ama_protobuf_c_boolean has_object_addr;
   uint64_t object_addr;
   /*
    * Full representation of "function". Class name and method name are combined here if present
    */
-  protobuf_c_boolean has_symbol_name;
+  ama_protobuf_c_boolean has_symbol_name;
   ProtobufCBinaryData symbol_name;
-  protobuf_c_boolean has_symbol_addr;
+  ama_protobuf_c_boolean has_symbol_addr;
   uint64_t symbol_addr;
   /*
    * For crashes and errors from native code and virtual machines (plugins)
    */
-  protobuf_c_boolean has_line_of_code;
+  ama_protobuf_c_boolean has_line_of_code;
   uint64_t line_of_code;
   /*
    * For crashes and errors from native code and virtual machines (plugins)
    */
-  protobuf_c_boolean has_source_file_name;
+  ama_protobuf_c_boolean has_source_file_name;
   ProtobufCBinaryData source_file_name;
   /*
    * For crashes and errors from plugins only
    */
-  protobuf_c_boolean has_class_name;
+  ama_protobuf_c_boolean has_class_name;
   ProtobufCBinaryData class_name;
   /*
    * For crashes and errors from plugins only - in plugins we have more details than symbol name
    */
-  protobuf_c_boolean has_method_name;
+  ama_protobuf_c_boolean has_method_name;
   ProtobufCBinaryData method_name;
   /*
    * For crashes and errors from plugins only - in plugins we have more details than symbol name
    */
-  protobuf_c_boolean has_column_of_code;
+  ama_protobuf_c_boolean has_column_of_code;
   uint32_t column_of_code;
 };
 #define AMA__IOSCRASH_REPORT__CRASH__BACKTRACE__FRAME__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__ioscrash_report__crash__backtrace__frame__descriptor) \
-, 0, 0, 0, {0,NULL}, 0, 0, 0, {0,NULL}, 0, 0, 0, 0, 0, {0,NULL}, 0, {0,NULL}, 0, {0,NULL}, 0, 0 }
+    , 0, 0, 0, {0,NULL}, 0, 0, 0, {0,NULL}, 0, 0, 0, 0, 0, {0,NULL}, 0, {0,NULL}, 0, {0,NULL}, 0, 0 }
 
 
 struct  Ama__IOSCrashReport__Crash__Backtrace
@@ -470,7 +470,7 @@ struct  Ama__IOSCrashReport__Crash__Backtrace
 };
 #define AMA__IOSCRASH_REPORT__CRASH__BACKTRACE__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__ioscrash_report__crash__backtrace__descriptor) \
-, 0,NULL }
+    , 0,NULL }
 
 
 struct  Ama__IOSCrashReport__Crash__Error__Mach
@@ -494,7 +494,7 @@ struct  Ama__IOSCrashReport__Crash__Error__Mach
 };
 #define AMA__IOSCRASH_REPORT__CRASH__ERROR__MACH__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__ioscrash_report__crash__error__mach__descriptor) \
-, 0, 0, 0 }
+    , 0, 0, 0 }
 
 
 struct  Ama__IOSCrashReport__Crash__Error__Signal
@@ -514,7 +514,7 @@ struct  Ama__IOSCrashReport__Crash__Error__Signal
 };
 #define AMA__IOSCRASH_REPORT__CRASH__ERROR__SIGNAL__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__ioscrash_report__crash__error__signal__descriptor) \
-, 0, 0 }
+    , 0, 0 }
 
 
 struct  Ama__IOSCrashReport__Crash__Error__NsException
@@ -523,17 +523,17 @@ struct  Ama__IOSCrashReport__Crash__Error__NsException
   /*
    * Name field of NSException object
    */
-  protobuf_c_boolean has_name;
+  ama_protobuf_c_boolean has_name;
   ProtobufCBinaryData name;
   /*
    * String representation of user info field(which is a dictionary) of NSException object
    */
-  protobuf_c_boolean has_user_info;
+  ama_protobuf_c_boolean has_user_info;
   ProtobufCBinaryData user_info;
 };
 #define AMA__IOSCRASH_REPORT__CRASH__ERROR__NS_EXCEPTION__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__ioscrash_report__crash__error__ns_exception__descriptor) \
-, 0, {0,NULL}, 0, {0,NULL} }
+    , 0, {0,NULL}, 0, {0,NULL} }
 
 
 struct  Ama__IOSCrashReport__Crash__Error__CppException
@@ -542,12 +542,12 @@ struct  Ama__IOSCrashReport__Crash__Error__CppException
   /*
    * Name of C++ crash from __cxxabiv1::__cxa_current_exception_type()->name()
    */
-  protobuf_c_boolean has_name;
+  ama_protobuf_c_boolean has_name;
   ProtobufCBinaryData name;
 };
 #define AMA__IOSCRASH_REPORT__CRASH__ERROR__CPP_EXCEPTION__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__ioscrash_report__crash__error__cpp_exception__descriptor) \
-, 0, {0,NULL} }
+    , 0, {0,NULL} }
 
 
 struct  Ama__IOSCrashReport__Crash__Error__NonFatal__Custom
@@ -560,30 +560,30 @@ struct  Ama__IOSCrashReport__Crash__Error__NonFatal__Custom
   /*
    * Short description of an error
    */
-  protobuf_c_boolean has_message;
+  ama_protobuf_c_boolean has_message;
   ProtobufCBinaryData message;
   /*
    * Name of the error class
    */
-  protobuf_c_boolean has_class_name;
+  ama_protobuf_c_boolean has_class_name;
   ProtobufCBinaryData class_name;
 };
 #define AMA__IOSCRASH_REPORT__CRASH__ERROR__NON_FATAL__CUSTOM__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__ioscrash_report__crash__error__non_fatal__custom__descriptor) \
-, {0,NULL}, 0, {0,NULL}, 0, {0,NULL} }
+    , {0,NULL}, 0, {0,NULL}, 0, {0,NULL} }
 
 
 struct  Ama__IOSCrashReport__Crash__Error__NonFatal__VirtualMachineError
 {
   ProtobufCMessage base;
-  protobuf_c_boolean has_class_name;
+  ama_protobuf_c_boolean has_class_name;
   ProtobufCBinaryData class_name;
-  protobuf_c_boolean has_message;
+  ama_protobuf_c_boolean has_message;
   ProtobufCBinaryData message;
 };
 #define AMA__IOSCRASH_REPORT__CRASH__ERROR__NON_FATAL__VIRTUAL_MACHINE_ERROR__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__ioscrash_report__crash__error__non_fatal__virtual_machine_error__descriptor) \
-, 0, {0,NULL}, 0, {0,NULL} }
+    , 0, {0,NULL}, 0, {0,NULL} }
 
 
 struct  Ama__IOSCrashReport__Crash__Error__NonFatal__NsError
@@ -600,7 +600,7 @@ struct  Ama__IOSCrashReport__Crash__Error__NonFatal__NsError
 };
 #define AMA__IOSCRASH_REPORT__CRASH__ERROR__NON_FATAL__NS_ERROR__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__ioscrash_report__crash__error__non_fatal__ns_error__descriptor) \
-, {0,NULL}, 0 }
+    , {0,NULL}, 0 }
 
 
 struct  Ama__IOSCrashReport__Crash__Error__NonFatal
@@ -613,7 +613,7 @@ struct  Ama__IOSCrashReport__Crash__Error__NonFatal
   /*
    * JSON-string with plain (single-level) map
    */
-  protobuf_c_boolean has_parameters;
+  ama_protobuf_c_boolean has_parameters;
   ProtobufCBinaryData parameters;
   /*
    * Call stack provided by user
@@ -634,21 +634,21 @@ struct  Ama__IOSCrashReport__Crash__Error__NonFatal
 };
 #define AMA__IOSCRASH_REPORT__CRASH__ERROR__NON_FATAL__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__ioscrash_report__crash__error__non_fatal__descriptor) \
-, AMA__IOSCRASH_REPORT__CRASH__ERROR__NON_FATAL__NON_FATAL_TYPE__CUSTOM, 0, {0,NULL}, NULL, NULL, NULL, NULL }
+    , AMA__IOSCRASH_REPORT__CRASH__ERROR__NON_FATAL__NON_FATAL_TYPE__CUSTOM, 0, {0,NULL}, NULL, NULL, NULL, NULL }
 
 
 struct  Ama__IOSCrashReport__Crash__Error__VirtualMachineCrash
 {
   ProtobufCMessage base;
-  protobuf_c_boolean has_class_name;
+  ama_protobuf_c_boolean has_class_name;
   ProtobufCBinaryData class_name;
-  protobuf_c_boolean has_message;
+  ama_protobuf_c_boolean has_message;
   ProtobufCBinaryData message;
   Ama__IOSCrashReport__Crash__Error__VirtualMachineCrash *cause;
 };
 #define AMA__IOSCRASH_REPORT__CRASH__ERROR__VIRTUAL_MACHINE_CRASH__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__ioscrash_report__crash__error__virtual_machine_crash__descriptor) \
-, 0, {0,NULL}, 0, {0,NULL}, NULL }
+    , 0, {0,NULL}, 0, {0,NULL}, NULL }
 
 
 struct  Ama__IOSCrashReport__Crash__Error
@@ -657,12 +657,12 @@ struct  Ama__IOSCrashReport__Crash__Error
   /*
    * Address that caused the fault
    */
-  protobuf_c_boolean has_address;
+  ama_protobuf_c_boolean has_address;
   uint64_t address;
   /*
    * Short description of why the crash occurred (https://nda.ya.ru/t/6D_340h374ZCPk)
    */
-  protobuf_c_boolean has_reason;
+  ama_protobuf_c_boolean has_reason;
   ProtobufCBinaryData reason;
   /*
    * Type
@@ -696,7 +696,7 @@ struct  Ama__IOSCrashReport__Crash__Error
 };
 #define AMA__IOSCRASH_REPORT__CRASH__ERROR__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__ioscrash_report__crash__error__descriptor) \
-, 0, 0, 0, {0,NULL}, AMA__IOSCRASH_REPORT__CRASH__ERROR__CRASH_TYPE__MACH_EXCEPTION, NULL, NULL, NULL, NULL, 0,NULL, NULL }
+    , 0, 0, 0, {0,NULL}, AMA__IOSCRASH_REPORT__CRASH__ERROR__CRASH_TYPE__MACH_EXCEPTION, NULL, NULL, NULL, NULL, 0,NULL, NULL }
 
 
 struct  Ama__IOSCrashReport__Crash__Thread__Registers__Register
@@ -710,7 +710,7 @@ struct  Ama__IOSCrashReport__Crash__Thread__Registers__Register
 };
 #define AMA__IOSCRASH_REPORT__CRASH__THREAD__REGISTERS__REGISTER__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__ioscrash_report__crash__thread__registers__register__descriptor) \
-, {0,NULL}, 0 }
+    , {0,NULL}, 0 }
 
 
 struct  Ama__IOSCrashReport__Crash__Thread__Registers
@@ -726,7 +726,7 @@ struct  Ama__IOSCrashReport__Crash__Thread__Registers
 };
 #define AMA__IOSCRASH_REPORT__CRASH__THREAD__REGISTERS__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__ioscrash_report__crash__thread__registers__descriptor) \
-, 0,NULL, 0,NULL }
+    , 0,NULL, 0,NULL }
 
 
 struct  Ama__IOSCrashReport__Crash__Thread__Stack
@@ -736,16 +736,16 @@ struct  Ama__IOSCrashReport__Crash__Thread__Stack
   uint64_t dump_start;
   uint64_t dump_end;
   uint64_t stack_pointer;
-  protobuf_c_boolean overflow;
+  ama_protobuf_c_boolean overflow;
   /*
    * Bytes of thread stack
    */
-  protobuf_c_boolean has_contents;
+  ama_protobuf_c_boolean has_contents;
   ProtobufCBinaryData contents;
 };
 #define AMA__IOSCRASH_REPORT__CRASH__THREAD__STACK__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__ioscrash_report__crash__thread__stack__descriptor) \
-, AMA__IOSCRASH_REPORT__CRASH__THREAD__STACK__GROW_DIRECTION__PLUS, 0, 0, 0, 0, 0, {0,NULL} }
+    , AMA__IOSCRASH_REPORT__CRASH__THREAD__STACK__GROW_DIRECTION__PLUS, 0, 0, 0, 0, 0, {0,NULL} }
 
 
 struct  Ama__IOSCrashReport__Crash__Thread
@@ -764,24 +764,24 @@ struct  Ama__IOSCrashReport__Crash__Thread
   /*
    * Wheter thread has crashed
    */
-  protobuf_c_boolean crashed;
+  ama_protobuf_c_boolean crashed;
   /*
    * required bool current_thread (removed: unused)
    */
   /*
    * Name of the thread
    */
-  protobuf_c_boolean has_name;
+  ama_protobuf_c_boolean has_name;
   ProtobufCBinaryData name;
   /*
    * Name of the dispatch queue (KSCrash: dispatch_queue)
    */
-  protobuf_c_boolean has_dispatch_queue_name;
+  ama_protobuf_c_boolean has_dispatch_queue_name;
   ProtobufCBinaryData dispatch_queue_name;
 };
 #define AMA__IOSCRASH_REPORT__CRASH__THREAD__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__ioscrash_report__crash__thread__descriptor) \
-, NULL, NULL, NULL, 0, 0, 0, {0,NULL}, 0, {0,NULL} }
+    , NULL, NULL, NULL, 0, 0, 0, {0,NULL}, 0, {0,NULL} }
 
 
 struct  Ama__IOSCrashReport__Crash
@@ -799,7 +799,7 @@ struct  Ama__IOSCrashReport__Crash
 };
 #define AMA__IOSCRASH_REPORT__CRASH__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__ioscrash_report__crash__descriptor) \
-, NULL, 0,NULL }
+    , NULL, 0,NULL }
 
 
 struct  Ama__IOSCrashReport
@@ -829,7 +829,7 @@ struct  Ama__IOSCrashReport
 };
 #define AMA__IOSCRASH_REPORT__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__ioscrash_report__descriptor) \
-, NULL, 0,NULL, NULL, NULL }
+    , NULL, 0,NULL, NULL, NULL }
 
 
 /* Ama__IOSCrashReport__BytesPair methods */
