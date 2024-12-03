@@ -11,7 +11,7 @@
 
 //reporter
 + (NSError *)sessionNotLoadedError;
-+ (NSError *)internalInconsistencyError;
++ (NSError *)internalInconsistencyError:(NSString *)description;
 
 //session
 + (NSError *)badEventNameError:(NSString *)name;

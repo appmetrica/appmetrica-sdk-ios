@@ -130,8 +130,8 @@ static NSTimeInterval const kAMATimerTriggerInterval = 60.0;
     AMAArrayIterator *hostsProvider = [[AMAArrayIterator alloc] initWithArray:self.configuration.hosts];
 
     if (request == nil) {
-        NSError *inconsistencyError = [AMAErrorsFactory internalInconsistencyError];
-        [self completeWithLocationIdentifiers:nil visitIdentifiers:nil error:inconsistencyError];
+        NSError *internalError = [AMAErrorsFactory internalInconsistencyError:@"Failed to process location request"];
+        [self completeWithLocationIdentifiers:nil visitIdentifiers:nil error:internalError];
         return;
     }
     self.currentProcessor = [[AMAHostExchangeRequestProcessor alloc] initWithRequest:request

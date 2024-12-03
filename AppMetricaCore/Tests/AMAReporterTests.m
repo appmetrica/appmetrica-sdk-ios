@@ -198,6 +198,49 @@ describe(@"AMAReporter", ^{
             [[theValue(endedSession.isFinished) should] beYes];
         });
     });
+    context(@"Dispatch internal error", ^{
+        NSString *const eventName = @"test_event";
+        it(@"Should dispatch empty error", ^{
+            [reporterTestHelper initReporterAndSendEventWithParameters:nil];
+            AMAReporter *reporter = [reporterTestHelper appReporterForApiKey:apiKey];
+            
+            NSString *const errorFormat = @"Internal inconsistency error: Failed to save event: %@ session: %@";
+            
+            [eventStorage() stub:@selector(addEvent:toSession:error:) andReturn:theValue(NO)];
+            
+            [reporter reportEvent:eventName onFailure:^(NSError * _Nonnull error) {
+                NSNumber *expectedSessionID = [sessionStorage() lastSessionWithError:nil].sessionID;
+                NSString *expectedDescription = [NSString stringWithFormat:errorFormat, eventName, expectedSessionID];
+                
+                [[error.domain should] equal:kAMAAppMetricaInternalErrorDomain];
+                [[theValue(error.code) should] equal:theValue(AMAAppMetricaInternalEventErrorCodeInternalInconsistency)];
+                
+                [[error.localizedDescription should] equal:expectedDescription];
+            }];
+        });
+        it(@"Should dispatch filled error", ^{
+            [reporterTestHelper initReporterAndSendEventWithParameters:nil];
+            AMAReporter *reporter = [reporterTestHelper appReporterForApiKey:apiKey];
+            
+            NSString *const errorFormat = @"Internal inconsistency error: Failed to save event: %@ session: %@ with error: %@";
+            NSError *const errorMock = [AMAErrorsFactory sessionNotLoadedError];
+            
+            [eventStorage() stub:@selector(addEvent:toSession:error:) withBlock:^id(NSArray *params) {
+                [AMATestUtilities fillObjectPointerParameter:params[2] withValue:errorMock];
+                return NO;
+            }];
+            
+            [reporter reportEvent:eventName onFailure:^(NSError * _Nonnull error) {
+                NSNumber *expectedSessionID = [sessionStorage() lastSessionWithError:nil].sessionID;
+                NSString *expectedDescription = [NSString stringWithFormat:errorFormat, eventName, expectedSessionID, errorMock];
+                
+                [[error.domain should] equal:kAMAAppMetricaInternalErrorDomain];
+                [[theValue(error.code) should] equal:theValue(AMAAppMetricaInternalEventErrorCodeInternalInconsistency)];
+                
+                [[error.localizedDescription should] equal:expectedDescription];
+            }];
+        });
+    });
     context(@"Saves client event to background session", ^{
         it(@"Should save client event to background session if current session is finished", ^{
             [reporterTestHelper initReporterAndSendEventWithParameters:nil];

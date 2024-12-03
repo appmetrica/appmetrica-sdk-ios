@@ -47,8 +47,9 @@ describe(@"AMAErrorsFactory", ^{
         });
         
         context(@"internalInconsistencyError", ^{
+            NSString *const errorMsg = @"Error msg";
             beforeEach(^{
-                error = [AMAErrorsFactory internalInconsistencyError];
+                error = [AMAErrorsFactory internalInconsistencyError:errorMsg];
             });
             it(@"Should use correct domain", ^{
                 [[error.domain should] equal:internalDomain];
@@ -57,7 +58,7 @@ describe(@"AMAErrorsFactory", ^{
                 [[theValue(error.code) should] equal:theValue(2003)];
             });
             it(@"Should use correct description", ^{
-                NSString *description = @"Database inconsistency error";
+                NSString *description = [NSString stringWithFormat:@"Internal inconsistency error: %@", errorMsg];
                 [[error.localizedDescription should] equal:description];
             });
         });

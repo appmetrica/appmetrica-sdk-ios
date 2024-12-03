@@ -341,7 +341,7 @@
     if (success) {
         NSDate *endDate = date ?: [self endDateForSession:session];
         NSTimeInterval timeSinceSession = [self timeIntervalSinceSessionStart:session forDate:endDate];
-        [self addEvent:eventAlive createdAt:endDate toSession:session timeSince:timeSinceSession];
+        [self addEvent:eventAlive createdAt:endDate toSession:session timeSince:timeSinceSession error:&error];
     }
     else {
         AMALogError(@"Failed to end session: %@", error);
@@ -776,8 +776,11 @@
         [self reportEvent:event createdAt:creationDate toSession:eventSession onFailure:onFailure];
     }
     else {
-        AMALogError(@"Failed to create session for event(%@): %@", event, error);
-        [AMAFailureDispatcher dispatchError:[AMAErrorsFactory internalInconsistencyError] withBlock:onFailure];
+        NSString *errorDescription = [NSString stringWithFormat:@"Failed to create session for event(%@): %@",
+                                      event, error];
+        AMALogError(@"%@", errorDescription);
+        [AMAFailureDispatcher dispatchError:[AMAErrorsFactory internalInconsistencyError:errorDescription]
+                                  withBlock:onFailure];
     }
 }
 
@@ -799,8 +802,10 @@
         eventSession.startDate.deviceDate = creationDate;
         timeSinceSession = 0.f;
     }
-    if ([self addEvent:event createdAt:creationDate toSession:eventSession timeSince:timeSinceSession] == NO) {
-        [AMAFailureDispatcher dispatchError:[AMAErrorsFactory internalInconsistencyError] withBlock:onFailure];
+    
+    NSError *error = nil;
+    if ([self addEvent:event createdAt:creationDate toSession:eventSession timeSince:timeSinceSession error:&error] == NO) {
+        [self dispatchInternalError:event toSession:eventSession error:error onFailure:onFailure];
     }
 }
 
@@ -819,8 +824,9 @@
         : [self timeIntervalSinceSessionStart:session forDate:[self endDateForSession:session]];
     NSDate *finalCreationDate = creationDate ?: NSDate.date;
     
-    if ([self addEvent:event createdAt:finalCreationDate toSession:session timeSince:timeSinceSession] == NO) {
-        [AMAFailureDispatcher dispatchError:[AMAErrorsFactory internalInconsistencyError] withBlock:onFailure];
+    NSError *error = nil;
+    if ([self addEvent:event createdAt:finalCreationDate toSession:session timeSince:timeSinceSession error:&error] == NO) {
+        [self dispatchInternalError:event toSession:session error:error onFailure:onFailure];
     }
 }
 
@@ -927,13 +933,14 @@
 - (void)addStartEventWithDate:(NSDate *)date toSession:(AMASession *)session
 {
     AMAEvent *eventStart = [self.eventBuilder eventStartWithData:nil]; //TODO: May be side effects because of `nil`
-    [self addEvent:eventStart createdAt:date toSession:session timeSince:0.0];
+    [self addEvent:eventStart createdAt:date toSession:session timeSince:0.0 error:nil];
 }
 
 - (BOOL)addEvent:(AMAEvent *)event
        createdAt:(NSDate *)creationDate
        toSession:(AMASession *)session
        timeSince:(NSTimeInterval)timeSinceSession
+           error:(NSError **)outError
 {
     // Check for init before touch anything db involved
     BOOL shouldReportInitOrUpdateEvent = [self shouldReportEventInitOrEventUpdateWhenSavingEvent:event
@@ -946,6 +953,7 @@
     NSError *error = nil;
     if ([self.reporterStorage.eventStorage addEvent:event toSession:session error:&error] == NO) {
         AMALogError(@"Failed to save event: %@. Error: %@", event, error);
+        [AMAErrorUtilities fillError:outError withError:error];
         return NO;
     }
 
@@ -959,7 +967,7 @@
         else {
             additionalEvent = [self.eventBuilder eventInitWithParameters:self.evenInitAdditionalParams error:NULL];
         }
-        [self addEvent:additionalEvent createdAt:creationDate toSession:session timeSince:timeSinceSession];
+        [self addEvent:additionalEvent createdAt:creationDate toSession:session timeSince:timeSinceSession error:nil];
     }
     return YES;
 }
@@ -1173,6 +1181,20 @@
     [self reportCommonEventWithBlock:^AMAEvent *(NSError **error) {
         return [self.eventBuilder attributionEventWithName:name value:value];
     }                      onFailure:nil];
+}
+
+- (void)dispatchInternalError:(AMAEvent *)event
+                    toSession:(AMASession *)session
+                        error:(NSError *)error
+                    onFailure:(void (^)(NSError *))onFailure
+{
+    NSString *errorDescription = [NSString stringWithFormat:@"Failed to save event: %@ session: %@%@",
+                                  event.name,
+                                  session.sessionID,
+                                  error ? [NSString stringWithFormat:@" with error: %@", error] : @""];
+    AMALogError(@"%@", errorDescription);
+    [AMAFailureDispatcher dispatchError:[AMAErrorsFactory internalInconsistencyError:errorDescription]
+                              withBlock:onFailure];
 }
 
 @end

@@ -20,10 +20,11 @@
                                 description:@"Session is not loaded"];
 }
 
-+ (NSError *)internalInconsistencyError
++ (NSError *)internalInconsistencyError:(NSString *)description
 {
+    NSString *errorMsg = [NSString stringWithFormat:@"Internal inconsistency error: %@", description];
     return [AMAErrorUtilities internalErrorWithCode:AMAAppMetricaInternalEventErrorCodeInternalInconsistency
-                                        description:@"Database inconsistency error"];
+                                        description:errorMsg];
 }
 
 #pragma mark - Session's errors
