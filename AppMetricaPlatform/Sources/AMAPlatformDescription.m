@@ -139,6 +139,11 @@ NSString *const kAMADeviceTypeWatch = @"watch";
     return [[NSBundle mainBundle].executablePath rangeOfString:@".appex"].location != NSNotFound;
 }
 
++ (AMARunEnvironment)runEnvronment
+{
+    return [self isExtension] ? AMARunEnvironmentExtension : AMARunEnvironmentMainApp;
+}
+
 + (AMAAppBuildType)appBuildType
 {
     static AMAAppBuildType appBuildType = AMAAppBuildTypeUnknown;

@@ -20,6 +20,9 @@
     #import "AMAUserDefaultsMock.h"
     #import "CLLocation+TestUtilities.h"
     #import "NSObject+Swizzling.h"
+    #import "AMAKeyValueStorageDataProvidingMock.h"
+    #import "AMAKeychainMock.h"
+    #import "AMAKeyValueStorageMock.h"
 #else
     #import <AppMetricaTestUtils/AMADateProviderMock.h>
     #import <AppMetricaTestUtils/AMAHTTPRequestsFactoryMock.h>
@@ -41,4 +44,7 @@
     #import <AppMetricaTestUtils/AMAUserDefaultsMock.h>
     #import <AppMetricaTestUtils/CLLocation+TestUtilities.h>
     #import <AppMetricaTestUtils/NSObject+Swizzling.h>
+    #import <AppMetricaTestUtils/AMAKeyValueStorageDataProvidingMock.h>
+    #import <AppMetricaTestUtils/AMAKeychainMoch.h>
+    #import <AppMetricaTestUtils/AMAKeyValueStorageMock.h>
 #endif

@@ -22,7 +22,7 @@
 
 - (instancetype)init 
 {
-    self = [super initWithStorage:nil keychain:nil inMemoryConfiguration:nil];
+    self = [super initWithStorage:nil identifierManager:nil inMemoryConfiguration:nil];
     if (self != nil) {
         
     }

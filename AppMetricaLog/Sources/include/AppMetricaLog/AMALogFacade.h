@@ -31,6 +31,15 @@ NS_SWIFT_NAME(LogFacade)
                addBacktrace:(BOOL)addBacktrace
                      format:(NSString *)format, ... NS_FORMAT_FUNCTION(7, 8);
 
+- (void)logMessageToChannel:(AMALogChannel)channel
+                      level:(AMALogLevel)level
+                       file:(const char *)file
+                   function:(const char *)function
+                       line:(NSUInteger)line
+               addBacktrace:(BOOL)addBacktrace
+                    message:(NSString *)message;
+
+
 - (NSArray *)outputsWithChannel:(AMALogChannel)channel;
 
 @end

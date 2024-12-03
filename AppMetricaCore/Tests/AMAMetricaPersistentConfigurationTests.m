@@ -5,34 +5,33 @@
 #import "AMAAttributionModelConfiguration.h"
 #import "AMAEnvironmentContainer.h"
 #import "AMAExternalAttributionConfiguration.h"
-#import "AMAKeychain.h"
 #import "AMAKeychainBridgeMock.h"
 #import "AMAMetricaInMemoryConfiguration.h"
 #import "AMAMetricaPersistentConfiguration.h"
 #import "AMAMockDatabase.h"
 #import "AMAStartupPermission.h"
 #import "AMAStorageKeys.h"
+#import "AMAIdentifierProviderMock.h"
+@import AppMetricaIdentifiers;
 
 SPEC_BEGIN(AMAMetricaPersistentConfigurationTests)
 
 describe(@"AMAMetricaPersistentConfiguration", ^{
     double floatingComparisonDelta = 1e-5;
     id<AMADatabaseProtocol> __block database = nil;
-    AMAKeychain *__block keychain = nil;
+    AMAIdentifierProviderMock *__block idManager = nil;
     AMAMetricaInMemoryConfiguration *__block inMemory = nil;
     NSObject<AMAKeyValueStoring> *__block storage = nil;
 
     AMAMetricaPersistentConfiguration *(^createConfig)(void) = ^{
         return [[AMAMetricaPersistentConfiguration alloc] initWithStorage:database.storageProvider.syncStorage
-                                                                 keychain:keychain
+                                                        identifierManager:idManager
                                                     inMemoryConfiguration:inMemory];
     };
 
     beforeEach(^{
         database = [AMAMockDatabase configurationDatabase];
-        keychain = [[AMAKeychain alloc] initWithService:@"a"
-                                            accessGroup:@"b"
-                                                 bridge:[[AMAKeychainBridgeMock alloc] init]];
+        idManager = [[AMAIdentifierProviderMock alloc] init];
         inMemory = [AMAMetricaInMemoryConfiguration nullMock];
         storage = (NSObject<AMAKeyValueStoring> *)database.storageProvider.syncStorage;
     });
@@ -82,11 +81,9 @@ describe(@"AMAMetricaPersistentConfiguration", ^{
             AMAMetricaPersistentConfiguration *anotherConfig = createConfig();
             [[anotherConfig.deviceID should] equal:deviceID];
         });
-        it(@"Should use ifv as device id", ^{
+        it(@"Should use IdentifierManager as device id", ^{
             NSUUID *stubUUID = [[NSUUID alloc] initWithUUIDString:@"550e8400-e29b-41d4-a716-446655440001"];
-            UIDevice *stubDevice = [UIDevice new];
-            [stubDevice stub:@selector(identifierForVendor) andReturn:stubUUID];
-            [UIDevice stub:@selector(currentDevice) andReturn:stubDevice];
+            idManager.mockDeviceID = stubUUID.UUIDString;
 
             AMAMetricaPersistentConfiguration *config = createConfig();
             [[config.deviceID should] equal:stubUUID.UUIDString];

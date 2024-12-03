@@ -214,17 +214,36 @@ describe(@"AMAPlatformDescription", ^{
         });
         
         context(@"isExtension", ^{
-            it(@"Should return true if extension", ^{
-                [[NSBundle mainBundle] stub:@selector(executablePath) andReturn:@".appex"];
+            
+            context(@"If extension", ^{
+                beforeEach(^{
+                    [[NSBundle mainBundle] stub:@selector(executablePath) andReturn:@".appex"];
+                });
                 
-                [[theValue([AMAPlatformDescription isExtension]) should] beYes];
+                it(@"Should return true", ^{
+                    [[theValue([AMAPlatformDescription isExtension]) should] beYes];
+                });
+                
+                it(@"Should return AMARunEnvironmentExtension", ^{
+                    [[theValue([AMAPlatformDescription runEnvronment]) should] equal:theValue(AMARunEnvironmentExtension)];
+                });
             });
             
-            it(@"Should return false if not extension", ^{
-                [[NSBundle mainBundle] stub:@selector(executablePath) andReturn:@".app"];
+            context(@"If app", ^{
+                beforeEach(^{
+                    [[NSBundle mainBundle] stub:@selector(executablePath) andReturn:@".app"];
+                });
                 
-                [[theValue([AMAPlatformDescription isExtension]) should] beNo];
+                it(@"Should return false", ^{
+                    [[theValue([AMAPlatformDescription isExtension]) should] beNo];
+                });
+                
+                it(@"Should return AMARunEnvironmentMainApp", ^{
+                    [[theValue([AMAPlatformDescription runEnvronment]) should] equal:theValue(AMARunEnvironmentMainApp)];
+                });
             });
+            
+            
         });
         
         context(@"DeviceDescription", ^{

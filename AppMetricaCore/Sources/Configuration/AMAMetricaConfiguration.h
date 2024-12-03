@@ -7,8 +7,10 @@
 @class AMAMetricaPersistentConfiguration;
 @class AMAMetricaInMemoryConfiguration;
 @class AMAKeychainBridge;
+@class AMAAppGroupIdentifierProvider;
 @protocol AMADatabaseProtocol;
 @protocol AMAKeyValueStoring;
+@protocol AMAIdentifierProviding;
 
 
 @interface AMAMetricaConfiguration : NSObject
@@ -20,11 +22,13 @@
 @property (nonatomic, strong, readonly) AMAMetricaPersistentConfiguration *persistent;
 @property (nonatomic, strong, readonly) AMAInstantFeaturesConfiguration *instant;
 @property (nonatomic, strong, readonly) id<AMAKeyValueStoring> UUIDOldStorage;
+@property (nonatomic, strong, readonly) id<AMAIdentifierProviding> identifierProvider;
 
 @property (atomic, assign, readonly) BOOL persistentConfigurationCreated;
 
 - (instancetype)initWithKeychainBridge:(AMAKeychainBridge *)keychainBridge
-                              database:(id<AMADatabaseProtocol>)database;
+                              database:(id<AMADatabaseProtocol>)database
+            appGroupIdentifierProvider:(AMAAppGroupIdentifierProvider*)appGroupIdentifierProvider;
 
 - (AMAStartupParametersConfiguration *)startupCopy;
 - (void)updateStartupConfiguration:(AMAStartupParametersConfiguration *)startup;

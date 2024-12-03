@@ -551,6 +551,46 @@
                ReferencedContainer = "container:">
             </BuildableReference>
          </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "AppMetricaIdentifiersTests"
+               BuildableName = "AppMetricaIdentifiersTests"
+               BlueprintName = "AppMetricaIdentifiersTests"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "AppMetricaKeychainTests"
+               BuildableName = "AppMetricaKeychainTests"
+               BlueprintName = "AppMetricaKeychainTests"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "AppMetricaLockTests"
+               BuildableName = "AppMetricaLockTests"
+               BlueprintName = "AppMetricaLockTests"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "AppMetricaSynchronizationTests"
+               BuildableName = "AppMetricaSynchronizationTests"
+               BlueprintName = "AppMetricaSynchronizationTests"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
    </TestAction>
    <LaunchAction

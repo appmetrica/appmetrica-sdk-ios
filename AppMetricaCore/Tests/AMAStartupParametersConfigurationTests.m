@@ -1,9 +1,9 @@
 
 #import <Kiwi/Kiwi.h>
+#import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
 #import "AMACore.h"
 #import "AMAStartupParametersConfiguration.h"
 #import "AMAAttributionSerializer.h"
-#import "AMAPair.h"
 #import "AMAAttributionModelConfiguration.h"
 
 SPEC_BEGIN(AMAStartupParametersConfigurationTests)

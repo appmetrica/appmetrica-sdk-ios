@@ -49,4 +49,14 @@
     [AMAIdentifiersTestUtilities stubUUID:self.UUID];
 }
 
+- (void)destubApplicationState
+{
+    [AMAPlatformDescription clearStubs];
+    [AMAIdentifiersTestUtilities destubIFV];
+    [[AMAMetricaConfiguration sharedInstance].persistent clearStubs];
+    [AMAIdentifiersTestUtilities destubIDFA];
+    [AMAIdentifiersTestUtilities destubUUID];
+    [AMAIdentifiersTestUtilities destubIdentifierProvider];
+}
+
 @end

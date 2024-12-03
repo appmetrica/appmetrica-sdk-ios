@@ -4,7 +4,6 @@
 
 @interface AMADiskFileStorage ()
 
-@property (nonatomic, copy, readonly) NSString *path;
 @property (nonatomic, assign, readonly) AMADiskFileStorageOptions options;
 
 @property (atomic, assign) BOOL fileDirectoryExistenceEnsured;

@@ -4,6 +4,7 @@
 #import "AMAKeychainBridgeMock.h"
 #import <Kiwi/Kiwi.h>
 #import "AMAInstantFeaturesConfiguration.h"
+#import "AMAAppGroupIdentifierProvider.h"
 #import <AppMetricaPlatform/AppMetricaPlatform.h>
 
 @implementation AMAMetricaConfigurationTestUtilities
@@ -19,8 +20,10 @@
 {
     AMAKeychainBridge *keychainBridge = [[AMAKeychainBridgeMock alloc] init];
     id<AMADatabaseProtocol> database = [AMAMockDatabase configurationDatabase];
-    AMAMetricaConfiguration *config = [[AMAMetricaConfiguration alloc] initWithKeychainBridge:keychainBridge
-                                                                                     database:database];
+    AMAMetricaConfiguration *config = 
+        [[AMAMetricaConfiguration alloc] initWithKeychainBridge:keychainBridge
+                                                       database:database
+                                     appGroupIdentifierProvider:[AMAAppGroupIdentifierProvider new]];
     [AMAMetricaConfiguration stub:@selector(sharedInstance) andReturn:config];
 }
 

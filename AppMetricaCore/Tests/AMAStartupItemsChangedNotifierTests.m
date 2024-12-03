@@ -7,7 +7,7 @@
 #import "AMAStartupItemsChangedNotifier+Tests.h"
 #import "AMAStartupClientIdentifierFactory.h"
 #import "AMAStartupController.h"
-#import "AMAUUIDProvider.h"
+#import "AMAIdentifierProviderMock.h"
 
 SPEC_BEGIN(AMAStartupItemsChangedNotifierTests)
 
@@ -23,8 +23,8 @@ describe(@"AMAStartupItemsChangedNotifier", ^{
 
     AMAStartupItemsChangedNotifier *__block notifier = nil;
     AMAMetricaConfiguration *__block configMock = nil;
-    AMAUUIDProvider *__block UUIDProviderMock = nil;
-
+    AMAIdentifierProviderMock *__block idMock;
+    
     NSDictionary *__block receivedIdentifiers = nil;
     NSError *__block receivedError = nil;
     BOOL __block defaultBlockIsCalled = NO;
@@ -41,9 +41,15 @@ describe(@"AMAStartupItemsChangedNotifier", ^{
 
         [AMAMetricaConfigurationTestUtilities stubConfigurationWithNullMock];
         configMock = [AMAMetricaConfiguration sharedInstance];
-        UUIDProviderMock = [AMAUUIDProvider nullMock];
-        [AMAUUIDProvider stub:@selector(sharedInstance) andReturn:UUIDProviderMock];
-
+        idMock = [[AMAIdentifierProviderMock alloc] init];
+        [configMock stub:@selector(identifierProvider) andReturn:idMock];
+        [configMock.persistent stub:@selector(deviceID) withBlock:^id(NSArray *params) {
+            return idMock.deviceID;
+        }];
+        [configMock.persistent stub:@selector(deviceIDHash) withBlock:^id(NSArray *params) {
+            return idMock.deviceIDHash;
+        }];
+        
         notifier = [[AMAStartupItemsChangedNotifier alloc] init];
         [notifier stub:@selector(dispatchBlock:withAvailableFields:toQueue:error:)
              withBlock:^id(NSArray *params) {
@@ -119,9 +125,9 @@ describe(@"AMAStartupItemsChangedNotifier", ^{
     });
     context(@"Notifies when deviceIDHash is available or not", ^{
         it(@"Should notify because deviceIDHash has been stored", ^{
-            [UUIDProviderMock stub:@selector(retrieveUUID) andReturn:@"uuid"];
-            [configMock.persistent stub:@selector(deviceID) andReturn:@"deviceID"];
-            [configMock.persistent stub:@selector(deviceIDHash) andReturn:@"deviceIDHash"];
+            idMock.mockMetricaUUID = @"uuid";
+            idMock.mockDeviceID = @"deviceID";
+            idMock.mockDeviceHashID = @"deviceIDHash";
             
             NSString *adHost = @"https://https://mobile-ads-beta.appmetrica.io:4443";
             NSDictionary *extendedParametersMock = @{@"get_ad" : adHost,
@@ -160,9 +166,10 @@ describe(@"AMAStartupItemsChangedNotifier", ^{
         });
 
         it(@"Should notify if required keys are ready", ^{
-            [UUIDProviderMock stub:@selector(retrieveUUID) andReturn:@"uuid"];
-            [configMock.persistent stub:@selector(deviceID) andReturn:@"deviceID"];
-
+            idMock.mockMetricaUUID = @"uuid";
+            idMock.mockDeviceID = @"deviceID";
+            
+            
             [notifier requestStartupItemsWithKeys:@[ kAMAUUIDKey, kAMADeviceIDKey ]
                                                 options:nil
                                                   queue:nil
@@ -174,7 +181,8 @@ describe(@"AMAStartupItemsChangedNotifier", ^{
         });
 
         it(@"Should not notify because deviceIDHash has not been stored", ^{
-            [UUIDProviderMock stub:@selector(retrieveUUID) andReturn:@"uuid"];
+            idMock.mockMetricaUUID = @"uuid";
+            
             [configMock.startup stub:@selector(SDKsCustomHosts) andReturn:@{ @"arbitraryKey" : @[ @"host" ] }];
 
             [notifier requestStartupItemsWithKeys:[allKeys arrayByAddingObject:@"arbitraryKey"]
@@ -185,8 +193,9 @@ describe(@"AMAStartupItemsChangedNotifier", ^{
         });
 
         it(@"Should not notify because deviceID is empty", ^{
-            [UUIDProviderMock stub:@selector(retrieveUUID) andReturn:@"uuid"];
-            [configMock.persistent stub:@selector(deviceID) andReturn:@""];
+            idMock.mockMetricaUUID = @"uuid";
+            idMock.mockDeviceID = @"";
+            
 
             [notifier requestStartupItemsWithKeys:@[ kAMAUUIDKey, kAMADeviceIDKey ]
                                                 options:nil

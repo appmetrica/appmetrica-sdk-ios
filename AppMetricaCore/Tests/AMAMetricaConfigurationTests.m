@@ -2,15 +2,24 @@
 #import <UIKit/UIKit.h>
 #import <Kiwi/Kiwi.h>
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
+#import <AppMetricaStorageUtils/AppMetricaStorageUtils.h>
 #import "AMAMetricaConfiguration.h"
 #import "AMAMetricaInMemoryConfiguration.h"
 #import "AMAStartupParametersConfiguration.h"
 #import "AMAMetricaPersistentConfiguration.h"
 #import "AMAMockDatabase.h"
 #import "AMAKeychainBridgeMock.h"
-#import "AMAKeychainStoring.h"
 #import "AMAInstantFeaturesConfiguration.h"
 #import "AMAReporterTestHelper.h"
+#import <AppMetricaKeychain/AppMetricaKeychain.h>
+#import "AMAAppMetricaUUIDMigrator.h"
+#import "AMAAppGroupIdentifierProvider.h"
+@import AppMetricaIdentifiers;
+
+@interface AMAMetricaConfiguration (TestExtension)
+- (AMAIdentifierProviderConfiguration*)createIdentifierProviderConfiguration;
+- (id<AMAIdentifierProviding>)createIdentifierProvider;
+@end
 
 SPEC_BEGIN(AMAMetricaConfigurationTests)
 
@@ -24,7 +33,10 @@ describe(@"AMAMetricaConfiguration", ^{
     beforeEach(^{
         keychainBridge = [[AMAKeychainBridgeMock alloc] init];
         database = [AMAMockDatabase configurationDatabase];
-        configuration = [[AMAMetricaConfiguration alloc] initWithKeychainBridge:keychainBridge database:database];
+        configuration = 
+            [[AMAMetricaConfiguration alloc] initWithKeychainBridge:keychainBridge
+                                                            database:database
+                                         appGroupIdentifierProvider:[AMAAppGroupIdentifierProvider new]];
     });
 
     it(@"Should add nessesary backup keys", ^{
@@ -34,7 +46,7 @@ describe(@"AMAMetricaConfiguration", ^{
             actualKeys = [NSSet setWithArray:params[0]];
             return nil;
         }];
-        (void)[[AMAMetricaConfiguration alloc] initWithKeychainBridge:nil database:database];
+        (void)[[AMAMetricaConfiguration alloc] initWithKeychainBridge:nil database:database appGroupIdentifierProvider:[AMAAppGroupIdentifierProvider new]];
         [[actualKeys should] equal:[NSSet setWithArray:@[
             @"fallback-keychain-AMAMetricaPersistentConfigurationDeviceIDStorageKey",
             @"fallback-keychain-AMAMetricaPersistentConfigurationDeviceIDHashStorageKey",
@@ -94,7 +106,7 @@ describe(@"AMAMetricaConfiguration", ^{
         id __block mockedDatabase = nil;
         beforeEach(^{
             mockedDatabase = [KWMock nullMockForProtocol:@protocol(AMADatabaseProtocol)];
-            configuration = [[AMAMetricaConfiguration alloc] initWithKeychainBridge:keychainBridge database:mockedDatabase];
+            configuration = [[AMAMetricaConfiguration alloc] initWithKeychainBridge:keychainBridge database:mockedDatabase appGroupIdentifierProvider:[AMAAppGroupIdentifierProvider new]];
         });
         it(@"Should ensure migration", ^{
             [[mockedDatabase should] receive:@selector(ensureMigrated)];
@@ -115,12 +127,12 @@ describe(@"AMAMetricaConfiguration", ^{
                 AMAMetricaPersistentConfiguration *__block allocedPersistent = [AMAMetricaPersistentConfiguration nullMock];
             beforeEach(^{
                 [AMAMetricaPersistentConfiguration stub:@selector(alloc) andReturn:allocedPersistent];
-                [allocedPersistent stub:@selector(initWithStorage:keychain:inMemoryConfiguration:) andReturn:persistent];
+                [allocedPersistent stub:@selector(initWithStorage:identifierManager:inMemoryConfiguration:) andReturn:persistent];
             });
             it(@"Should return persistent configuration with valid storage", ^{
                 id<AMAKeyValueStoring> storage = database.storageProvider.cachingStorage;
                 
-                [[allocedPersistent should] receive:@selector(initWithStorage:keychain:inMemoryConfiguration:) withArguments:storage, kw_any(), kw_any()];
+                [[allocedPersistent should] receive:@selector(initWithStorage:identifierManager:inMemoryConfiguration:) withArguments:storage, kw_any(), kw_any()];
                 
                 [[configuration.persistent should] equal:persistent];
             });
@@ -220,6 +232,116 @@ describe(@"AMAMetricaConfiguration", ^{
             [[(NSObject *)database should] receive:@selector(ensureMigrated)];
             
             [[(NSObject *)[configuration UUIDOldStorage] should] equal:database.storageProvider.cachingStorage];
+        });
+    });
+    
+    context(@"IdentifierProviderConfiguration", ^{
+        AMAKeychain *__block privateKeychain;
+        AMAKeychain *__block groupKeychain;
+        AMADiskFileStorage *__block privateFile;
+        AMADiskFileStorage *__block groupFile;
+        NSString *const lockFilePath = @"/tmp/file.lock";
+        
+        AMAAppMetricaUUIDMigrator *__block migrator;
+        
+        beforeEach(^{
+            privateKeychain = [[AMAKeychain alloc] initWithService:@"io.appmetrica.private" accessGroup:@"" bridge:keychainBridge];
+            groupKeychain = [[AMAKeychain alloc] initWithService:@"io.appmetrica.group" accessGroup:@"" bridge:keychainBridge];
+            privateFile = [AMADiskFileStorage nullMock];
+            groupFile = [AMADiskFileStorage nullMock];
+            
+            migrator = [AMAAppMetricaUUIDMigrator new];
+            [AMAAppMetricaUUIDMigrator stub:@selector(new) andReturn:migrator];
+            
+            [configuration stub:@selector(privateKeychain) andReturn:privateKeychain];
+            [configuration stub:@selector(groupKeychain) andReturn:groupKeychain];
+            [configuration stub:@selector(privateIdentifiersFileStorage) andReturn:privateFile];
+            [configuration stub:@selector(groupIdentifiersFileStorage) andReturn:groupFile];
+            [configuration stub:@selector(groupLockPath) andReturn:lockFilePath];
+        });
+        
+        afterEach(^{
+            [configuration clearStubs];
+            [AMAAppMetricaUUIDMigrator clearStubs];
+        });
+        
+        void(^compareConfig)(AMAIdentifierProviderConfiguration*) = ^(AMAIdentifierProviderConfiguration *config){
+            [[(NSObject*)config.privateKeychain should] equal:privateKeychain];
+            [[(NSObject*)config.groupKeychain should] equal:groupKeychain];
+            [[(NSObject*)config.uuidMigration should] equal:migrator];
+            [[(NSObject*)config.privateFileStorage should] equal:privateFile];
+            [[(NSObject*)config.groupFileStorage should] equal:groupFile];
+            [[config.groupLockFilePath should] equal:lockFilePath];
+        };
+        
+        context(@"if extension", ^{
+            beforeEach(^{
+                [AMAPlatformDescription stub:@selector(isExtension) andReturn:theValue(YES)];
+            });
+            afterEach(^{
+                [AMAPlatformDescription clearStubs];
+            });
+            
+            it(@"should create config", ^{
+                AMAIdentifierProviderConfiguration *config = [configuration createIdentifierProviderConfiguration];
+                
+                compareConfig(config);
+                [(NSObject*)config.appDatabase shouldBeNil];
+            });
+        });
+        
+        context(@"if app", ^{
+            beforeEach(^{
+                [AMAPlatformDescription stub:@selector(isExtension) andReturn:theValue(NO)];
+            });
+            afterEach(^{
+                [AMAPlatformDescription clearStubs];
+            });
+            
+            it(@"Should create config", ^{
+                AMAIdentifierProviderConfiguration *config = [configuration createIdentifierProviderConfiguration];
+                
+                compareConfig(config);
+            });
+        });
+        
+    });
+    
+    context(@"IdentifierProvider", ^{
+        AMAIdentifierProviderConfiguration *__block config;
+        
+        beforeEach(^{
+            config = [AMAIdentifierProviderConfiguration nullMock];
+            [configuration stub:@selector(createIdentifierProviderConfiguration) andReturn:config];
+        });
+        
+        afterEach(^{
+            [configuration clearStubs];
+        });
+        
+        it(@"should use config", ^{
+            id<AMAIdentifierProviding> provider = [configuration createIdentifierProvider];
+            [[(NSObject*)provider should] beKindOfClass:[AMAIdentifierProvider class]];
+            AMAIdentifierProvider *prov = (AMAIdentifierProvider*)provider;
+            
+            void *provConfig = (__bridge void *)(prov.config);
+            void *expectedConfig = (__bridge void *)config;
+            
+            [[thePointerValue(provConfig) should] equal:thePointerValue(expectedConfig)];
+            
+        });
+        
+        it(@"should get corrent config and run env", ^{
+            AMAIdentifierProvider *provider = [AMAIdentifierProvider nullMock];
+            [AMAIdentifierProvider stub:@selector(alloc) andReturn:provider];
+            [provider stub:@selector(initWithConfig:env:) andReturn:provider];
+            [[provider should] receive:@selector(initWithConfig:env:) withArguments:config, theValue([AMAPlatformDescription runEnvronment])];
+            
+            id<AMAIdentifierProviding> createdProvider = [configuration createIdentifierProvider];
+            void *createdProv = (__bridge void *)createdProvider;
+            void *expectedProv = (__bridge void *)provider;
+            
+            [[thePointerValue(createdProv) should] equal:thePointerValue(expectedProv)];
         });
     });
 });

@@ -3,7 +3,6 @@
 #import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
 #import "AMAStartupParametersConfiguration.h"
 #import "AMAStorageKeys.h"
-#import "AMAPair.h"
 #import "AMAAttributionSerializer.h"
 
 #define PROPERTY_FOR_TYPE(returnType, getter, setter, key, storageGetter, storageSetter, setOnce) \

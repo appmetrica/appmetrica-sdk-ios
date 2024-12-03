@@ -7,10 +7,11 @@ SPEC_BEGIN(AMAApplicationStateManagerTests)
 
 describe(@"AMAApplicationStateManager", ^{
     
-    let(testHelper, ^{
-        AMAAppStateManagerTestHelper *helper = [[AMAAppStateManagerTestHelper alloc] init];
-        [helper stubApplicationState];
-        return helper;
+    AMAAppStateManagerTestHelper *__block testHelper;
+    
+    beforeEach(^{
+        testHelper = [[AMAAppStateManagerTestHelper alloc] init];
+        [testHelper stubApplicationState];
     });
 
     context(@"when creating an application state", ^{

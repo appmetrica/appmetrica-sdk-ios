@@ -1,4 +1,5 @@
 
+#import <AppMetricaKeychain/AppMetricaKeychain.h>
 #import "AMAMigrationTo500Utils.h"
 #import "AMATableDescriptionProvider.h"
 #import "AMAStorageKeys.h"
@@ -10,8 +11,6 @@
 #import "AMAReporterStorage.h"
 #import "AMAEvent.h"
 #import "AMALegacyEventExtrasProvider.h"
-#import "AMAKeychainBridge.h"
-#import "AMAKeychain.h"
 #import "AMAMetricaConfiguration.h"
 #import "AMAMetricaPersistentConfiguration.h"
 #import "AMAEventNameHashesStorage.h"
@@ -22,12 +21,13 @@
 #import "AMAReporterDatabaseEncodersFactory+Migration.h"
 #import "AMALocationEncoderFactory+Migration.h"
 #import "AMAMetricaPersistentConfiguration.h"
-#import "AMAFallbackKeychain.h"
 #import <AppMetricaPlatform/AppMetricaPlatform.h>
 #import "AMAKeyValueStorageProvidersFactory.h"
 #import "AMADatabaseObjectProvider.h"
 #import "AMAStringDatabaseKeyValueStorageConverter.h"
 #import "AMAJSONFileKVSDataProvider.h"
+
+@import AppMetricaIdentifiers;
 
 NSString *const kAMAMigrationBundle = @"ru.yandex.mobile.YandexMobileMetrica";
 
@@ -343,8 +343,8 @@ NSString *const kAMAMigrationDeviceIDHashStorageKey = @"YMMMetricaPersistentConf
 {
     NSString *format = @"fallback-keychain-%@";
     return @{
-        [NSString stringWithFormat:format, kAMAMigrationDeviceIDStorageKey]: [NSString stringWithFormat:format, kAMADeviceIDStorageKey],
-        [NSString stringWithFormat:format, kAMAMigrationDeviceIDHashStorageKey]: [NSString stringWithFormat:format, kAMADeviceIDHashStorageKey]
+        [NSString stringWithFormat:format, kAMAMigrationDeviceIDStorageKey]: [NSString stringWithFormat:format, [AMAAppMetricaIdentifiersKeys deviceID]],
+        [NSString stringWithFormat:format, kAMAMigrationDeviceIDHashStorageKey]: [NSString stringWithFormat:format, [AMAAppMetricaIdentifiersKeys deviceIDHash]]
     };
 }
 

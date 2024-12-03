@@ -10,8 +10,8 @@
 #import "AMAStartupParametersConfiguration.h"
 #import "AMAErrorsFactory.h"
 #import "AMATimeoutRequestsController.h"
-#import "AMAUUIDProvider.h"
 #import "AMAAttributionController.h"
+@import AppMetricaIdentifiers;
 
 static NSTimeInterval const kAMAStartupDefaultRequestsInterval = 1 * AMA_DAYS;
 NSErrorDomain const AMAStartupRequestsErrorDomain = @"AMAStartupRequestsErrorDomain";
@@ -141,8 +141,8 @@ NSErrorDomain const AMAStartupRequestsErrorDomain = @"AMAStartupRequestsErrorDom
 
 - (BOOL)hasIdentifiers
 {
-    return [AMAUUIDProvider sharedInstance].retrieveUUID != nil &&
-        [AMAMetricaConfiguration sharedInstance].persistent.deviceIDHash != nil;
+    id<AMAIdentifierProviding> provider = [AMAMetricaConfiguration sharedInstance].identifierProvider;
+    return [provider.appMetricaUUID length] > 0 && [provider.deviceIDHash length] > 0;
 }
 
 - (AMAStartupResponse *)parseResponse:(NSHTTPURLResponse *)response data:(NSData *)data

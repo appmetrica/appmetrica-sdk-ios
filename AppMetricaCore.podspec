@@ -10,6 +10,8 @@ Pod::Spec.new do |s|
 
   s.ios.deployment_target = '12.0'
   s.tvos.deployment_target = '12.0'
+  
+  s.swift_versions = '5.7'
 
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES' }
   
@@ -26,6 +28,8 @@ Pod::Spec.new do |s|
   s.dependency 'AppMetricaEncodingUtils', '= 5.9.0'
   s.dependency 'AppMetricaProtobuf', '= 5.9.0'
   s.dependency 'AppMetricaFMDB', '= 5.9.0'
+  s.dependency 'AppMetricaKeychain', '= 5.9.0'
+  s.dependency 'AppMetricaIdentifiers', '= 5.9.0'
   
   s.header_dir = s.name
   s.source_files = [

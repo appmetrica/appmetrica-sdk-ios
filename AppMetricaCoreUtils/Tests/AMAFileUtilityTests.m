@@ -104,6 +104,18 @@ describe(@"AMAFileUtility", ^{
             [[attributesBefore[@"NSFileExtendedAttributes"] should] equal:attributesAfter[@"NSFileExtendedAttributes"]];
         });
     });
+    
+    context(@"Shared Group", ^{
+        NSURL *containerURL = [NSURL fileURLWithPath:@"/test/container"];
+        beforeEach(^{
+            [fileManager stub:@selector(containerURLForSecurityApplicationGroupIdentifier:) andReturn:containerURL];
+        });
+        
+        it(@"Should return path to group container", ^{
+            NSString *groupIDPath = [AMAFileUtility persistentPathForApplicationGroup:@"group.io.appmetrica.test"];
+            [[groupIDPath should] equal:@"/test/container/io.appmetrica"];
+        });
+    });
 
 });
 

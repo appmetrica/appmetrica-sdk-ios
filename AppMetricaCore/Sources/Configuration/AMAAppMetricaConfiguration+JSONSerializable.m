@@ -30,7 +30,6 @@ NSString *const kAMAAppBuildNumber = @"app.build.number";
 NSString *const kAMACustomHosts = @"custom.hosts";
 NSString *const kAMAAppEnvironment = @"app.environment";
 
-
 - (instancetype)initWithJSON:(NSDictionary *)json 
 {
     if (json == nil || [json isKindOfClass:[NSDictionary class]] == NO) {

@@ -1,5 +1,6 @@
 
 #import <Kiwi/Kiwi.h>
+#import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
 #import "AMAStartupResponseParser.h"
 #import "AMAStartupParametersConfiguration.h"
@@ -7,7 +8,6 @@
 #import "AMAStartupResponseEncoderFactory.h"
 #import "AMAStartupPermission.h"
 #import "AMAStartupPermissionSerializer.h"
-#import "AMAPair.h"
 #import "AMAAttributionModelParser.h"
 #import "AMAAttributionModelConfiguration.h"
 

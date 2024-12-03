@@ -319,7 +319,7 @@ describe(@"AMAAppMetricaConfiguration", ^{
                         kAMALatitude: @(customLocation.coordinate.latitude),
                         kAMALongitude: @(customLocation.coordinate.longitude)
                     },
-                    kAMAPreloadInfo: preloadInfoJson
+                    kAMAPreloadInfo: preloadInfoJson,
                 };
                 
                 AMAAppMetricaConfiguration *deserializedConfig = [[AMAAppMetricaConfiguration alloc] initWithJSON:json];

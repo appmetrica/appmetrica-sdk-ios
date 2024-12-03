@@ -1,5 +1,6 @@
 
 #if __has_include("AppMetricaCoreUtils.h")
+    #import "AppMetricaCoreUtilsDefines.h"
     #import "AMAArrayIterator.h"
     #import "AMABlockTimer.h"
     #import "AMABroadcasting.h"
@@ -26,6 +27,7 @@
     #import "AMALengthStringTruncator.h"
     #import "AMAMultiTimer.h"
     #import "AMANumberUtilities.h"
+    #import "AMAPair.h"
     #import "AMAPermissiveTruncator.h"
     #import "AMAQueuesFactory.h"
     #import "AMATimeUtilities.h"
@@ -37,6 +39,7 @@
     #import "AMAVersionUtils.h"
     #import "AMAMultiTimer.h"
 #else
+    #import <AppMetricaCoreUtils/AppMetricaCoreUtilsDefines.h>
     #import <AppMetricaCoreUtils/AMAArrayIterator.h>
     #import <AppMetricaCoreUtils/AMABlockTimer.h>
     #import <AppMetricaCoreUtils/AMABroadcasting.h>
@@ -63,6 +66,7 @@
     #import <AppMetricaCoreUtils/AMALengthStringTruncator.h>
     #import <AppMetricaCoreUtils/AMAMultiTimer.h>
     #import <AppMetricaCoreUtils/AMANumberUtilities.h>
+    #import <AppMetricaCoreUtils/AMAPair.h>
     #import <AppMetricaCoreUtils/AMAPermissiveTruncator.h>
     #import <AppMetricaCoreUtils/AMAQueuesFactory.h>
     #import <AppMetricaCoreUtils/AMATimeUtilities.h>

@@ -12,10 +12,11 @@
 #import "AMAHostProviderMock.h"
 #import "AMAStartupResponseParser.h"
 #import "AMATimeoutRequestsController.h"
-#import "AMAUUIDProvider.h"
 #import "AMAAttributionController.h"
 #import "AMAAttributionModelConfiguration.h"
 #import "AMAStartupRequest.h"
+#import "AMAIdentifierProviderMock.h"
+#import "AMAIdentifiersTestUtilities.h"
 
 @interface AMAStartupController()
 
@@ -30,12 +31,17 @@ describe(@"AMAStartupController", ^{
 
     AMATimeoutRequestsController *__block timeoutController = nil;
     AMAStartupResponseParser *__block startupResponseParser = nil;
-
+    AMAAppStateManagerTestHelper *__block appStateManagerTestHelper;
+    
     void (^stubAppState)(void) = ^{
-        AMAAppStateManagerTestHelper *helper = [[AMAAppStateManagerTestHelper alloc] init];
-        [helper stubApplicationState];
+        appStateManagerTestHelper = [[AMAAppStateManagerTestHelper alloc] init];
+        [appStateManagerTestHelper stubApplicationState];
         [AMAPlatformDescription stub:@selector(appID) andReturn:@"io.appmetrica.test"];
         [AMAPlatformDescription stub:@selector(appVersion) andReturn:@"1.00"];
+    };
+    void (^destubAppState)(void) = ^{
+        [appStateManagerTestHelper destubApplicationState];
+        [AMAPlatformDescription clearStubs];
     };
     __auto_type currentQueueStartupController = ^AMAStartupController *() {
         id<AMACancelableExecuting> executor = [[AMACurrentQueueExecutor alloc] init];
@@ -166,10 +172,16 @@ describe(@"AMAStartupController", ^{
 
     context(@"Sends startup", ^{
         AMAMetricaConfiguration * __block configuration = nil;
+        AMAIdentifierProviderMock *__block identifierProvider;
+        
         beforeEach(^{
             configuration = [AMAMetricaConfiguration sharedInstance];
-            configuration.persistent.deviceIDHash = @"deviceIDHash";
             stubAppState();
+            identifierProvider = [AMAIdentifiersTestUtilities stubIdentifierProviderIfNeeded];
+            [identifierProvider fillRandom];
+        });
+        afterEach(^{
+            [AMAIdentifiersTestUtilities destubIdentifierProvider];
         });
         it(@"Should ask timeout controller for permission", ^{
             [[timeoutController should] receive:@selector(isAllowed)];
@@ -226,13 +238,15 @@ describe(@"AMAStartupController", ^{
         context(@"Sends startup when some of identifiers are nil or last sent date is nil", ^{
             __block BOOL sent;
             AMAStartupController * __block controller = nil;
-            AMAUUIDProvider *__block UUIDProvider = nil;
+            AMAIdentifierProviderMock *__block identifierProvider;
+            
             beforeEach(^{
                 NSDate *previousDate = [[NSDate date] dateByAddingTimeInterval:-60 * 60 * 24 * 2];
-                [AMAUUIDProvider stub:@selector(sharedInstance) andReturn:UUIDProvider];
-                [UUIDProvider stub:@selector(retrieveUUID) andReturn:@"UUID"];
-                configuration.persistent.deviceIDHash = @"deviceIDHash";
+                
+                identifierProvider = [AMAIdentifiersTestUtilities stubIdentifierProviderIfNeeded];
+                [identifierProvider fillRandom];
                 configuration.persistent.startupUpdatedAt = previousDate;
+                
                 sent = NO;
                 [AMATestNetwork stubHTTPRequestWithBlock:^id(NSArray *params) {
                     sent = YES;
@@ -240,14 +254,18 @@ describe(@"AMAStartupController", ^{
                 }];
                 controller = currentQueueStartupController();
             });
+            afterEach(^{
+                [[AMAMetricaConfiguration sharedInstance].persistent clearStubs];
+                [[AMAMetricaConfiguration sharedInstance] clearStubs];
+            });
             it(@"Should send startup if uuid is nil", ^{
-                [UUIDProvider stub:@selector(retrieveUUID) andReturn:nil];
+                identifierProvider.mockMetricaUUID = nil;
                 [controller update];
 
                 [[theValue(sent) should] beYes];
             });
             it(@"Should send startup if deviceIDHash is nil", ^{
-                configuration.persistent.deviceIDHash = nil;
+                identifierProvider.mockDeviceHashID = nil;
                 [controller update];
 
                 [[theValue(sent) should] beYes];
@@ -313,6 +331,9 @@ describe(@"AMAStartupController", ^{
                                                                   hostProvider:hostProvider
                                                      timeoutRequestsController:timeoutController
                                                          startupResponseParser:startupResponseParser];
+        });
+        afterEach(^{
+            destubAppState();
         });
 
         it(@"Should not change host if if timeout permission denied", ^{

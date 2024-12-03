@@ -1,6 +1,6 @@
 
+#import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
 #import "AMAAttributionSerializer.h"
-#import "AMAPair.h"
 
 static const NSString *kAMAKeyKey = @"key";
 static const NSString *kAMAKeyValue = @"value";

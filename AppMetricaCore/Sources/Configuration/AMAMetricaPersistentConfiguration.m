@@ -1,44 +1,41 @@
 #import "AMACore.h"
+
 #import <UIKit/UIKit.h>
+
 #import <AppMetricaStorageUtils/AppMetricaStorageUtils.h>
+#import <AppMetricaKeychain/AppMetricaKeychain.h>
+
 #import "AMAMetricaPersistentConfiguration.h"
 #import "AMAStorageKeys.h"
-#import "AMAKeychainStoring.h"
 #import "AMAPersistentTimeoutConfiguration.h"
 #import "AMAAttributionModelConfiguration.h"
 #import "AMAExternalAttributionConfiguration.h"
 #import "AMAAppMetricaConfiguration+JSONSerializable.h"
 
-NSString *const kAMADeviceIDStorageKey = @"AMAMetricaPersistentConfigurationDeviceIDStorageKey";
-NSString *const kAMADeviceIDHashStorageKey = @"AMAMetricaPersistentConfigurationDeviceIDHashStorageKey";
+@import AppMetricaIdentifiers;
+
 static NSString *const kAMADeviceIDDefaultValue = @"";
 
 @interface AMAMetricaPersistentConfiguration ()
 
 @property (nonatomic, strong, readonly) id<AMAKeyValueStoring> storage;
-@property (nonatomic, strong, readonly) id<AMAKeychainStoring> keychain;
+@property (nonatomic, strong, readonly) id<AMAIdentifierProviding> identifierManager;
 @property (nonatomic, strong, readonly) AMAMetricaInMemoryConfiguration *inMemoryConfiguration;
-
-@property (nonatomic, strong, readonly) NSObject *keychainLock;
 
 @end
 
 @implementation AMAMetricaPersistentConfiguration
 
-@synthesize deviceID = _deviceID;
-@synthesize deviceIDHash = _deviceIDHash;
-
 - (instancetype)initWithStorage:(id<AMAKeyValueStoring>)storage
-                       keychain:(id<AMAKeychainStoring>)keychain
+              identifierManager:(id<AMAIdentifierProviding>)identifierManager
           inMemoryConfiguration:(AMAMetricaInMemoryConfiguration *)inMemoryConfiguration
 {
     self = [super init];
     if (self != nil) {
         _storage = storage;
-        _keychain = keychain;
+        _identifierManager = identifierManager;
         _inMemoryConfiguration = inMemoryConfiguration;
 
-        _keychainLock = [[NSObject alloc] init];
         _timeoutConfiguration = [[AMAPersistentTimeoutConfiguration alloc] initWithStorage:_storage];
     }
     return self;
@@ -46,71 +43,22 @@ static NSString *const kAMADeviceIDDefaultValue = @"";
 
 - (NSString *)deviceID
 {
-    if (_deviceID.length == 0) {
-        @synchronized (self.keychainLock) {
-            if (_deviceID.length == 0) {
-                _deviceID = [self loadDeviceID];
-            }
-        }
-    }
-    return _deviceID;
+    return self.identifierManager.deviceID;
 }
 
-- (NSString *)loadDeviceID
+- (void)setDeviceID:(NSString *)deviceID 
 {
-    NSError *error = nil;
-    NSString *storageDeviceID = [self.keychain stringValueForKey:kAMADeviceIDStorageKey error:&error];
-    BOOL isValidDeviceID = storageDeviceID.length != 0 && [storageDeviceID isEqual:kAMADeviceIDDefaultValue] == NO;
-    if (isValidDeviceID) {
-        return storageDeviceID;
-    }
-    
-    if (error == nil) {
-        NSString *ifv = [[[UIDevice currentDevice] identifierForVendor] UUIDString];
-        BOOL isValidIFV = [AMAIdentifierValidator isValidVendorIdentifier:ifv];
-        if (isValidIFV) {
-            [self setDeviceID:ifv];
-            return ifv;
-        }
-    }
-
-    return kAMADeviceIDDefaultValue;
-}
-
-- (void)setDeviceID:(NSString *)deviceID
-{
-    if (deviceID != _deviceID && [deviceID isEqual:_deviceID] == NO) {
-        @synchronized (self.keychainLock) {
-            if (deviceID != _deviceID && [deviceID isEqual:_deviceID] == NO) {
-                _deviceID = [deviceID copy];
-                [self.keychain setStringValue:deviceID forKey:kAMADeviceIDStorageKey error:nil];
-            }
-        }
-    }
+    [self.identifierManager updateDeviceID:deviceID];
 }
 
 - (NSString *)deviceIDHash
 {
-    if (_deviceIDHash == nil) {
-        @synchronized (self.keychainLock) {
-            if (_deviceIDHash == nil) {
-                _deviceIDHash = [self.keychain stringValueForKey:kAMADeviceIDHashStorageKey error:nil];
-            }
-        }
-    }
-    return _deviceIDHash;
+    return self.identifierManager.deviceIDHash;
 }
 
 - (void)setDeviceIDHash:(NSString *)deviceIDHash
 {
-    if (deviceIDHash != _deviceIDHash && [deviceIDHash isEqual:_deviceIDHash] == NO) {
-        @synchronized (self.keychainLock) {
-            if (deviceIDHash != _deviceIDHash && [deviceIDHash isEqual:_deviceIDHash] == NO) {
-                _deviceIDHash = [deviceIDHash copy];
-                [self.keychain setStringValue:deviceIDHash forKey:kAMADeviceIDHashStorageKey error:nil];
-            }
-        }
-    }
+    [self.identifierManager updateDeviceIdHash:deviceIDHash];
 }
 
 - (NSArray *)userStartupHosts

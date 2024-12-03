@@ -5,8 +5,8 @@
 #import "AMAMetricaConfiguration.h"
 #import "AMAStartupPermissionSerializer.h"
 #import "AMAStartupParametersConfiguration.h"
-#import "AMAPair.h"
 #import "AMAAttributionModelParser.h"
+#import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
 
 static NSString *const kAMAStartupResponseEnabledKey = @"enabled";
 static NSString *const kAMAStartupResponseURLsKey = @"urls";

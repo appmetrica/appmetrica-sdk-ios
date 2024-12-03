@@ -10,6 +10,8 @@ Pod::Spec.new do |s|
 
   s.ios.deployment_target = '12.0'
   
+  s.swift_versions = '5.7'
+  
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES' }
   
   s.frameworks = 'Foundation'
@@ -20,6 +22,7 @@ Pod::Spec.new do |s|
   s.dependency 'AppMetricaStorageUtils', '= 5.9.0'
   s.dependency 'AppMetricaNetwork', '= 5.9.0'
   s.dependency 'AppMetricaHostState', '= 5.9.0'
+  s.dependency 'AppMetricaKeychain', '= 5.9.0'
   
   s.header_dir = s.name
   s.source_files = "#{s.name}/Sources/**/*.{h,m}"

@@ -20,7 +20,8 @@
 #import "AMAStartupItemsChangedNotifier+Tests.h"
 #import "AMAStartupResponseParser.h"
 #import "AMATimeoutRequestsController.h"
-#import "AMAUUIDProvider.h"
+#import "AMAIdentifierProviderMock.h"
+#import "AMAIdentifiersTestUtilities.h"
 
 @interface AMAAppMetricaImpl () <AMAStartupControllerDelegate>
 
@@ -39,8 +40,10 @@ describe(@"AMAAppMetrica", ^{
     AMAReporterTestHelper *__block reporterTestHelper = nil;
     AMAAppMetricaImpl *__block impl = nil;
     AMAAdProvider *__block adProvider = nil;
+    AMAIdentifierProviderMock *__block identifierManagerMock = nil;
     
     beforeEach(^{
+        [[AMAMetricaConfiguration sharedInstance] stub:@selector(identifierProvider) andReturn:identifierManagerMock];
         [AMATestNetwork stubHTTPRequestWithBlock:nil];
     });
     void (^stubMetricaDependencies)(void) = ^{
@@ -48,6 +51,7 @@ describe(@"AMAAppMetrica", ^{
                                                                   buildNumber:stateHelper.appBuildNumber];
         stateHelper = [[AMAAppStateManagerTestHelper alloc] init];
         [stateHelper stubApplicationState];
+        identifierManagerMock = [AMAIdentifiersTestUtilities stubIdentifierProviderIfNeeded];
         [AMAFailureDispatcherTestHelper stubFailureDispatcher];
         adProvider = [AMAAdProvider nullMock];
         [AMAAdProvider stub:@selector(sharedInstance) andReturn:adProvider];
@@ -801,18 +805,16 @@ describe(@"AMAAppMetrica", ^{
             });
         });
         context(@"Startup identifiers", ^{
-            AMAUUIDProvider *__block UUIDProvider = nil;
+
             beforeEach(^{
                 stubMetrica();
-                UUIDProvider = [AMAUUIDProvider nullMock];
-                [AMAUUIDProvider stub:@selector(sharedInstance) andReturn:UUIDProvider];
                 stubMetricaStarted(YES);
             });
             
             context(@"No identifiers", ^{
                 beforeEach(^{
                     AMAMetricaPersistentConfiguration *conf = [AMAMetricaConfiguration sharedInstance].persistent;
-                    [UUIDProvider stub:@selector(retrieveUUID) andReturn:nil];
+                    identifierManagerMock.mockMetricaUUID = nil;
                     [conf stub:@selector(deviceID) andReturn:@""];
                     [conf stub:@selector(deviceIDHash) andReturn:nil];
                 });
@@ -840,7 +842,7 @@ describe(@"AMAAppMetrica", ^{
                 NSString *const deviceID = @"device_id";
                 beforeEach(^{
                     AMAMetricaPersistentConfiguration *conf = [AMAMetricaConfiguration sharedInstance].persistent;
-                    [UUIDProvider stub:@selector(retrieveUUID) andReturn:uuid];
+                    identifierManagerMock.mockMetricaUUID = uuid;
                     [conf stub:@selector(deviceID) andReturn:deviceID];
                     [conf stub:@selector(deviceIDHash) andReturn:nil];
                 });
@@ -882,7 +884,7 @@ describe(@"AMAAppMetrica", ^{
                 NSString *const deviceIDHash = @"device_id_hash";
                 beforeEach(^{
                     AMAMetricaPersistentConfiguration *conf = [AMAMetricaConfiguration sharedInstance].persistent;
-                    [UUIDProvider stub:@selector(retrieveUUID) andReturn:uuid];
+                    identifierManagerMock.mockMetricaUUID = uuid;
                     [conf stub:@selector(deviceID) andReturn:deviceID];
                     [conf stub:@selector(deviceIDHash) andReturn:deviceIDHash];
                 });

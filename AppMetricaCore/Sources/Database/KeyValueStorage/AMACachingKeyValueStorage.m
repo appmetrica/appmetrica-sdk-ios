@@ -219,6 +219,17 @@ typedef id(^AMAGetterBlock)(id<AMAKeyValueStoring> storage, NSError **internalEr
     SAVE([storage saveString:value forKey:key error:internalError]);
 }
 
+- (BOOL)removeValueForKey:(nonnull NSString *)key error:(NSError *__autoreleasing  _Nullable * _Nullable)error 
+{
+    return [self saveValue:nil
+             forKey:key
+              error:error
+        setterBlock:^BOOL(id<AMAKeyValueStoring> storage, NSError *__autoreleasing *internalError) {
+        return [storage removeValueForKey:key error:internalError];
+    }];
+}
+
+
 #undef GET
 #undef SAVE
 

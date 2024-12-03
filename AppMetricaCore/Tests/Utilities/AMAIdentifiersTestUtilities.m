@@ -7,10 +7,24 @@
 #import "AMAMetricaConfiguration.h"
 #import "AMAMetricaPersistentConfiguration.h"
 #import "AMAStartupClientIdentifierFactory.h"
-#import "AMAUUIDProvider.h"
 #import "AMAAdProvider.h"
+#import "AMAIdentifierProviderMock.h"
+
+static AMAIdentifierProviderMock *identifierManagerMock;
 
 @implementation AMAIdentifiersTestUtilities
+
++ (AMAIdentifierProviderMock *)stubIdentifierProviderIfNeeded
+{
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        identifierManagerMock = [[AMAIdentifierProviderMock alloc] init];
+    });
+    
+    AMAMetricaConfiguration *cfg = [AMAMetricaConfiguration sharedInstance];
+    [cfg stub:@selector(identifierProvider) andReturn:identifierManagerMock];
+    return identifierManagerMock;
+}
 
 + (void)stubIdfaWithEnabled:(BOOL)isEnabled value:(NSString *)UUID
 {
@@ -23,9 +37,8 @@
 
 + (void)stubUUID:(NSString *)UUID
 {
-    AMAUUIDProvider *UUIDProvider = [AMAUUIDProvider nullMock];
-    [UUIDProvider stub:@selector(retrieveUUID) andReturn:UUID];
-    [AMAUUIDProvider stub:@selector(sharedInstance) andReturn:UUIDProvider];
+    AMAIdentifierProviderMock *mock = [self stubIdentifierProviderIfNeeded];
+    mock.mockMetricaUUID = UUID;
 }
 
 + (void)stubIFV:(NSString *)UUID
@@ -52,6 +65,26 @@
     [startupClientID stub:@selector(IFV) andReturn:ifv];
     [startupClientID stub:@selector(deviceIDHash) andReturn:deviceIDHash];
     [AMAStartupClientIdentifier stub:@selector(alloc) andReturn:startupClientID];
+}
+
++ (void)destubIFV
+{
+    [UIDevice clearStubs];
+}
+
++ (void)destubIDFA
+{
+    [AMAAdProvider clearStubs];
+}
+
++ (void)destubUUID
+{
+    [[AMAMetricaConfiguration sharedInstance] clearStubs];
+}
+
++ (void)destubIdentifierProvider
+{
+    [[AMAMetricaConfiguration sharedInstance] clearStubs];
 }
 
 @end

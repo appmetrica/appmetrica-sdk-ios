@@ -2,9 +2,9 @@
 #import "AMAStartupClientIdentifierFactory.h"
 #import "AMAMetricaConfiguration.h"
 #import "AMAMetricaPersistentConfiguration.h"
-#import "AMAUUIDProvider.h"
 #import "AMAStartupClientIdentifier.h"
 #import <UIKit/UIKit.h>
+@import AppMetricaIdentifiers;
 
 @implementation AMAStartupClientIdentifierFactory
 
@@ -13,7 +13,7 @@
     AMAStartupClientIdentifier *identifier = [[AMAStartupClientIdentifier alloc] init];
     identifier.deviceID = [AMAMetricaConfiguration sharedInstance].persistent.deviceID;
     identifier.deviceIDHash = [AMAMetricaConfiguration sharedInstance].persistent.deviceIDHash;
-    identifier.UUID = [AMAUUIDProvider sharedInstance].retrieveUUID;
+    identifier.UUID = [AMAMetricaConfiguration sharedInstance].identifierProvider.appMetricaUUID;
     identifier.IFV = [[[UIDevice currentDevice] identifierForVendor] UUIDString];
     return identifier;
 }

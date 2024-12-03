@@ -516,6 +516,12 @@ describe(@"AMAKeyValueStorage", ^{
             });
         });
     });
+    context(@"Remove", ^{
+        it(@"Should remove in provider", ^{
+            [[provider should] receive:@selector(removeKey:error:) withArguments:key, kw_any()];
+            [storage removeValueForKey:key error:nil];
+        });
+    });
     
     it(@"Should conform to AMAKeyValueStoring", ^{
         [[storage should] conformToProtocol:@protocol(AMAKeyValueStoring)];

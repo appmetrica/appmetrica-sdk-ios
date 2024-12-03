@@ -26,9 +26,9 @@
 #import "AMARevenueInfo.h"
 #import "AMASharedReporterProvider.h"
 #import "AMAStartupParametersConfiguration.h"
-#import "AMAUUIDProvider.h"
 #import "AMAUserProfile.h"
 #import "AMAAppMetricaConfigurationManager.h"
+@import AppMetricaIdentifiers;
 
 NSString *const kAMAUUIDKey = @"appmetrica_uuid";
 NSString *const kAMADeviceIDKey = @"appmetrica_deviceID";
@@ -330,6 +330,7 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
             [AMAErrorLogger logMetricaActivationWithAlreadyPresentedKeyError];
             return;
         }
+        
         [[self class] setupExternalServices];
         
         [[self class] willActivateDelegates:configuration];
@@ -622,7 +623,7 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
 
 + (NSString *)UUID
 {
-    return [AMAUUIDProvider sharedInstance].retrieveUUID;
+    return [AMAMetricaConfiguration sharedInstance].identifierProvider.appMetricaUUID;
 }
 
 + (NSString *)deviceID

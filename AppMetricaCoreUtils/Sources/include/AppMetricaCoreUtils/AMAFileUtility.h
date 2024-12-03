@@ -38,6 +38,8 @@ NS_SWIFT_NAME(FileUtility)
 
 + (NSString *)cacheDirectoryPath;
 
++ (NSString *)persistentPathForApplicationGroup:(NSString *)applicationGroupIdentifier;
+
 + (BOOL)createPathIfNeeded:(NSString *)path;
 
 - (instancetype)init NS_UNAVAILABLE;

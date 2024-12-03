@@ -1,5 +1,6 @@
 
 #import <AppMetricaStorageUtils/AppMetricaStorageUtils.h>
+#import <AppMetricaKeychain/AppMetricaKeychain.h>
 #import <AppMetricaPlatform/AppMetricaPlatform.h>
 #import "AMAMetricaConfiguration.h"
 #import "AMAMetricaInMemoryConfiguration.h"
@@ -9,28 +10,39 @@
 #import "AMAReporterConfiguration+Internal.h"
 #import "AMADatabaseFactory.h"
 #import "AMADatabaseProtocol.h"
-#import "AMAFallbackKeychain.h"
-#import "AMAKeychain.h"
-#import "AMAKeychainBridge.h"
+#import "AMAKeyValueStorageProvidersFactory.h"
+#import "AMAAppMetricaUUIDMigrator.h"
+#import "AMAAppGroupIdentifierProvider.h"
+@import AppMetricaIdentifiers;
 
 // Keychain identifiers
 // Declared without `static` keywords (e.g. extern by default) in order to be used in Sample Application
 NSString *const kAMAMetricaKeychainAccessGroup = @"io.appmetrica";
 NSString *const kAMAMetricaKeychainAppServiceIdentifier = @"io.appmetrica.service.application";
+NSString *const kAMAMetricaKeychainGroupServiceIdentifier = @"io.appmetrica.service.group";
 NSString *const kAMAMetricaKeychainVendorServiceIdentifier = @"io.appmetrica.service.vendor";
 //-----
+
+static NSString *const kAMAMetricaIdentifierLockFileName = @"identifiers.lock";
+static NSString *const kAMAMetricaFallbackPrefix = @"fallback-keychain";
 
 @interface AMAMetricaConfiguration ()
 
 @property (nonatomic, strong, readonly) AMAKeychainBridge *keychainBridge;
 @property (nonatomic, strong, readonly) id<AMADatabaseProtocol> database;
+@property (nonatomic, strong, readonly) id<AMAFileStorage> privateIdentifiersFileStorage;
+@property (nonatomic, strong, readonly) id<AMAFileStorage> groupIdentifiersFileStorage;
 @property (nonatomic, strong, readonly) NSMutableDictionary *apiConfigs;
 
 @property (nonatomic, strong, readonly) NSObject *reporterConfigurationLock;
 @property (nonatomic, strong, readonly) NSObject *startupConfigurationLock;
 @property (nonatomic, strong, readonly) NSObject *persistentConfigurationLock;
+@property (nonatomic, strong, readonly) NSObject *privateIdentifiersFileStorageLock;
+@property (nonatomic, strong, readonly) NSObject *groupIdentifiersFileStorageLock;
+@property (nonatomic, strong, readonly) NSObject *identifierProviderLock;
 
 @property (nonatomic, strong, readwrite) AMAStartupParametersConfiguration *startup;
+@property (nonatomic, strong, readonly) AMAAppGroupIdentifierProvider *appGroupIdentifierProvider;
 
 @end
 
@@ -39,6 +51,9 @@ NSString *const kAMAMetricaKeychainVendorServiceIdentifier = @"io.appmetrica.ser
 @synthesize startup = _startup;
 @synthesize persistent = _persistent;
 @synthesize appConfiguration = _appConfiguration;
+@synthesize identifierProvider = _identifierProvider;
+@synthesize privateIdentifiersFileStorage = _privateIdentifiersFileStorage;
+@synthesize groupIdentifiersFileStorage = _groupIdentifiersFileStorage;
 
 + (instancetype)sharedInstance
 {
@@ -53,11 +68,13 @@ NSString *const kAMAMetricaKeychainVendorServiceIdentifier = @"io.appmetrica.ser
 - (instancetype)init
 {
     return [self initWithKeychainBridge:[[AMAKeychainBridge alloc] init]
-                               database:AMADatabaseFactory.configurationDatabase];
+                               database:AMADatabaseFactory.configurationDatabase
+             appGroupIdentifierProvider:[AMAAppGroupIdentifierProvider new]];
 }
 
 - (instancetype)initWithKeychainBridge:(AMAKeychainBridge *)keychainBridge
                               database:(id<AMADatabaseProtocol>)database
+            appGroupIdentifierProvider:(AMAAppGroupIdentifierProvider*)appGroupIdentifierProvider
 {
     self = [super init];
     if (self != nil) {
@@ -65,34 +82,51 @@ NSString *const kAMAMetricaKeychainVendorServiceIdentifier = @"io.appmetrica.ser
         
         _database = database;
         [_database.storageProvider addBackingKeys:@[
-            [AMAFallbackKeychain wrappedKey:kAMADeviceIDStorageKey],
-            [AMAFallbackKeychain wrappedKey:kAMADeviceIDHashStorageKey],
+            [NSString stringWithFormat:@"%@-%@", kAMAMetricaFallbackPrefix, [AMAAppMetricaIdentifiersKeys deviceID]],
+            [NSString stringWithFormat:@"%@-%@", kAMAMetricaFallbackPrefix, [AMAAppMetricaIdentifiersKeys deviceIDHash]],
         ]];
         
         _inMemory = [[AMAMetricaInMemoryConfiguration alloc] init];
         _apiConfigs = [[NSMutableDictionary alloc] init];
+        _appGroupIdentifierProvider = appGroupIdentifierProvider;
 
         _reporterConfigurationLock = [[NSObject alloc] init];
         _startupConfigurationLock = [[NSObject alloc] init];
         _persistentConfigurationLock = [[NSObject alloc] init];
+        _privateIdentifiersFileStorageLock = [[NSObject alloc] init];
+        _groupIdentifiersFileStorageLock = [[NSObject alloc] init];
+        _identifierProviderLock = [[NSObject alloc] init];
     }
     return self;
 }
 
 #pragma mark - Public -
 
+- (id<AMAIdentifierProviding>)identifierProvider
+{
+    if (_identifierProvider == nil) {
+        @synchronized (self.identifierProviderLock) {
+            if (_identifierProvider == nil) {
+                _identifierProvider = [self createIdentifierProvider];
+            }
+        }
+    }
+    return _identifierProvider;
+}
+
 - (AMAMetricaPersistentConfiguration *)persistent
 {
     if (_persistent == nil) {
         @synchronized (self.persistentConfigurationLock) {
             if (_persistent == nil) {
-                id<AMAKeyValueStoring> storage = self.database.storageProvider.cachingStorage;
-                AMAFallbackKeychain *keychain = [self keychainStorageWithKeyValueStorage:storage];
-                _persistent = [[AMAMetricaPersistentConfiguration alloc] initWithStorage:storage
-                                                                                keychain:keychain
+                id<AMAKeyValueStoring> appDatabase = self.database.storageProvider.cachingStorage;
+                
+                _persistent = [[AMAMetricaPersistentConfiguration alloc] initWithStorage:appDatabase
+                                                                       identifierManager:self.identifierProvider
                                                                    inMemoryConfiguration:self.inMemory];
             }
         }
+
     }
     return _persistent;
 }
@@ -243,25 +277,60 @@ NSString *const kAMAMetricaKeychainVendorServiceIdentifier = @"io.appmetrica.ser
 
 #pragma mark - Private -
 
-- (id<AMAKeychainStoring>)keychainStorageWithKeyValueStorage:(id<AMAKeyValueStoring>)storage
+- (AMAIdentifierProviderConfiguration*)createIdentifierProviderConfiguration
 {
-    AMAKeychain *appKeychain = [[AMAKeychain alloc] initWithService:kAMAMetricaKeychainAppServiceIdentifier
-                                                        accessGroup:@""
-                                                             bridge:self.keychainBridge];
-    id<AMAKeychainStoring> keychain = [[AMAFallbackKeychain alloc] initWithStorage:storage
-                                                                      mainKeychain:appKeychain
-                                                                  fallbackKeychain:self.vendorKeychain];
-    return keychain;
+    id<AMAKeyValueStoring> appDatabase = self.database.storageProvider.cachingStorage;
+    
+    AMAIdentifierProviderConfiguration *config =
+        [[AMAIdentifierProviderConfiguration alloc] initWithPrivateKeychain:[self privateKeychain]
+                                                         privateFileStorage:self.privateIdentifiersFileStorage
+        ];
+    AMAAppMetricaUUIDMigrator *migrator = [AMAAppMetricaUUIDMigrator new];
+    
+    if ([AMAPlatformDescription isExtension] == NO) {
+        config.appDatabase = appDatabase;
+    }
+    config.uuidMigration = migrator;
+    config.vendorKeychain = [self vendorKeychain];
+    config.groupKeychain = [self groupKeychain];
+    config.groupFileStorage = self.groupIdentifiersFileStorage;
+    config.groupLockFilePath = [self groupLockPath];
+    
+    return config;
+}
+
+- (id<AMAIdentifierProviding>)createIdentifierProvider
+{
+    AMAIdentifierProviderConfiguration *config = [self createIdentifierProviderConfiguration];
+    
+    id<AMAIdentifierProviding> provider =
+        [[AMAIdentifierProvider alloc] initWithConfig:config
+                                                  env:[AMAPlatformDescription runEnvronment]
+        ];
+    return provider;
+}
+
+- (AMAKeychain *)privateKeychain
+{
+    return [[AMAKeychain alloc] initWithService:kAMAMetricaKeychainAppServiceIdentifier
+                                    accessGroup:@""
+                                         bridge:self.keychainBridge];;
 }
 
 - (AMAKeychain *)vendorKeychain
 {
+    // Apps that are built for the simulator aren't signed, so there's no keychain access group
+    // for the simulator to check. This means that all apps can see all keychain items when run
+    // on the simulator.
+#if !TARGET_IPHONE_SIMULATOR
     NSString *appIdentifier = [AMAPlatformDescription appIdentifierPrefix];
     if (appIdentifier.length == 0) {
         return nil;
     }
-
     NSString *accessGroup = [appIdentifier stringByAppendingString:kAMAMetricaKeychainAccessGroup];
+#else
+    NSString *accessGroup = @"";
+#endif
     AMAKeychain *vendorKeychain = [[AMAKeychain alloc] initWithService:kAMAMetricaKeychainVendorServiceIdentifier
                                                            accessGroup:accessGroup
                                                                 bridge:self.keychainBridge];
@@ -270,6 +339,84 @@ NSString *const kAMAMetricaKeychainVendorServiceIdentifier = @"io.appmetrica.ser
     }
 
     return vendorKeychain;
+}
+
+- (id<AMAFileStorage>)privateIdentifiersFileStorage
+{
+    if (_privateIdentifiersFileStorage == nil) {
+        @synchronized (self.privateIdentifiersFileStorageLock) {
+            if (_privateIdentifiersFileStorage == nil) {
+                NSString *appDir = [AMAFileUtility persistentPath];
+                NSString *identifiersPath = [appDir stringByAppendingPathComponent:@"identifiers.json"];
+                _privateIdentifiersFileStorage = 
+                    [[AMADiskFileStorage alloc] initWithPath:identifiersPath
+                                                     options:AMADiskFileStorageOptionNoBackup|AMADiskFileStorageOptionCreateDirectory];
+            }
+        }
+    }
+
+    return _privateIdentifiersFileStorage;
+}
+
+- (NSString *)groupLockPath
+{
+    NSString *appGroupId = self.appGroupIdentifierProvider.appGroupIdentifier;
+    if (appGroupId.length == 0) {
+        return nil;
+    }
+
+    NSString *sharedDir = [AMAFileUtility persistentPathForApplicationGroup:appGroupId];
+    [AMAFileUtility createPathIfNeeded:sharedDir];
+    NSString *lockPath = [sharedDir stringByAppendingPathComponent:kAMAMetricaIdentifierLockFileName];
+    return lockPath;
+}
+
+- (id<AMAFileStorage>)groupIdentifiersFileStorage
+{
+    NSString *appGroupId = self.appGroupIdentifierProvider.appGroupIdentifier;
+    if (appGroupId.length == 0) {
+        return nil;
+    }
+
+    if (_groupIdentifiersFileStorage == nil) {
+        @synchronized (self.groupIdentifiersFileStorageLock) {
+            if (_groupIdentifiersFileStorage == nil) {
+                NSString *sharedDir = [AMAFileUtility persistentPathForApplicationGroup:appGroupId];
+                [AMAFileUtility createPathIfNeeded:sharedDir];
+                NSString *identifiersPath = [sharedDir stringByAppendingPathComponent:@"identifiers.json"];
+                _groupIdentifiersFileStorage = [[AMADiskFileStorage alloc] initWithPath:identifiersPath
+                                                                        options:AMADiskFileStorageOptionNoBackup|AMADiskFileStorageOptionCreateDirectory];
+            }
+        }
+    }
+    
+    return _groupIdentifiersFileStorage;
+}
+
+- (AMAKeychain *)groupKeychain
+{
+    NSString *appGroupId = self.appGroupIdentifierProvider.appGroupIdentifier;
+    if (appGroupId.length == 0) {
+        return nil;
+    }
+#if !TARGET_IPHONE_SIMULATOR
+    NSString *appIdentifier = [AMAPlatformDescription appIdentifierPrefix];
+    if (appIdentifier.length == 0) {
+        return nil;
+    }
+    NSString *accessGroup = [appIdentifier stringByAppendingString:appGroupId];
+#else
+    NSString *accessGroup = appGroupId;
+#endif
+
+    AMAKeychain *groupKeychain = [[AMAKeychain alloc] initWithService:kAMAMetricaKeychainGroupServiceIdentifier
+                                                          accessGroup:accessGroup
+                                                               bridge:self.keychainBridge];
+    if (groupKeychain.isAvailable == NO) {
+        return nil;
+    }
+    
+    return groupKeychain;
 }
 
 - (AMAReporterConfiguration *)manualConfigurationForApiKey:(NSString *)apiKey

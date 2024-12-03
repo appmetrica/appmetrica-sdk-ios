@@ -1,8 +1,9 @@
 
 #import <Foundation/Foundation.h>
 #import <Kiwi/Kiwi.h>
+#import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
+#import <AppMetricaStorageUtils/AppMetricaStorageUtils.h>
 #import "AMAAttributionSerializer.h"
-#import "AMAPair.h"
 
 SPEC_BEGIN(AMAAttributtionSerializerTests)
 

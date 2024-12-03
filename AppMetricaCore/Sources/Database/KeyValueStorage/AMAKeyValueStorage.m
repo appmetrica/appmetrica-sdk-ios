@@ -116,6 +116,11 @@
     SAVE(value, [self.converter objectForString:[self stringForJSONObject:value error:error]]);
 }
 
+- (BOOL)removeValueForKey:(NSString *)key error:(NSError *__autoreleasing  _Nullable *)error
+{
+    return [self.dataProvider removeKey:key error:error];
+}
+
 #undef SAVE
 #undef GET
 

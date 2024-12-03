@@ -18,6 +18,11 @@ typedef NS_ENUM(NSUInteger, AMAAppBuildType) {
     AMAAppBuildTypeAppStore,
 } NS_SWIFT_NAME(AppBuildType);
 
+typedef NS_ENUM(NSUInteger, AMARunEnvironment) {
+    AMARunEnvironmentMainApp,
+    AMARunEnvironmentExtension,
+} NS_SWIFT_NAME(RunEnvironment);
+
 NS_SWIFT_NAME(PlatformDescription)
 @interface AMAPlatformDescription : NSObject
 
@@ -39,6 +44,8 @@ NS_SWIFT_NAME(PlatformDescription)
 + (BOOL)appDebuggable;
 + (BOOL)isDebuggerAttached;
 + (BOOL)isExtension;
++ (AMARunEnvironment)runEnvronment;
+
 + (AMAAppBuildType)appBuildType;
 
 // OS //

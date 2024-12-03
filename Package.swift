@@ -10,6 +10,7 @@ enum AppMetricaTarget: String {
     case adSupport = "AppMetricaAdSupport"
     case webKit = "AppMetricaWebKit"
     case log = "AppMetricaLog"
+    case logSwift = "AppMetricaLogSwift"
     case coreUtils = "AppMetricaCoreUtils"
     case testUtils = "AppMetricaTestUtils"
     case network = "AppMetricaNetwork"
@@ -19,10 +20,13 @@ enum AppMetricaTarget: String {
     case storageUtils = "AppMetricaStorageUtils"
     case encodingUtils = "AppMetricaEncodingUtils"
     case libraryAdapter = "AppMetricaLibraryAdapter"
+    case keychain = "AppMetricaKeychain"
+    case identifiers = "AppMetricaIdentifiers"
+    case synchronization = "AppMetricaSynchronization"
 
     case protobuf = "AppMetricaProtobuf"
     case fmdb = "AppMetricaFMDB"
-
+    
     var name: String { rawValue }
     var testsName: String { rawValue + "Tests" }
     var path: String { "\(rawValue)/Sources" }
@@ -48,7 +52,7 @@ enum AppMetricaProduct: String, CaseIterable {
         case .libraryAdapter: return [.libraryAdapter]
         }
     }
-
+    
     var product: Product { .library(name: rawValue, targets: targets.map { $0.name }) }
 }
 
@@ -114,7 +118,7 @@ let package = Package(
             target: .core,
             dependencies: [
                 .network, .log, .coreUtils, .hostState, .protobufUtils, .platform, .storageUtils,
-                .encodingUtils, .protobuf, .fmdb,
+                .encodingUtils, .protobuf, .fmdb, .keychain, .identifiers,
             ],
             searchPaths: [
                 "../../AppMetricaCoreExtension/Sources/include/AppMetricaCoreExtension"
@@ -161,6 +165,11 @@ let package = Package(
             dependencies: [.log]
         ),
 
+        .target(
+            target: .logSwift,
+            dependencies: [.log]
+        ),
+
         //MARK: - AppMetrica Protobuf
         .target(target: .protobuf),
 
@@ -186,7 +195,7 @@ let package = Package(
         //MARK: - AppMetrica TestUtils
         .target(
             target: .testUtils,
-            dependencies: [.coreUtils, .network, .storageUtils, .hostState],
+            dependencies: [.coreUtils, .network, .storageUtils, .hostState, .keychain],
             externalDependencies: [.kiwi],
             includePrivacyManifest: false
         ),
@@ -235,14 +244,38 @@ let package = Package(
             externalDependencies: [.kiwi]
         ),
 
+        //MARK: - AppMetrica Keychain
+        .target(
+            target: .keychain,
+            dependencies: [.log, .storageUtils, .coreUtils]
+        ),
+        .testTarget(
+            target: .keychain,
+            dependencies: [.keychain, .testUtils],
+            externalDependencies: [.kiwi]
+        ),
+
+        //MARK: - AppMetrica Identifiers
+        .target(
+            target: .identifiers,
+            dependencies: [.logSwift, .storageUtils, .keychain, .synchronization, .platform]
+        ),
+        .testTarget(
+            target: .identifiers,
+            dependencies: [.identifiers, .testUtils]
+        ),
+
         //MARK: - AppMetrica StorageUtils
-        .target(target: .storageUtils, dependencies: [.log, .coreUtils]),
+        .target(
+            target: .storageUtils,
+            dependencies: [.log, .coreUtils]
+        ),
         .testTarget(
             target: .storageUtils,
             dependencies: [.storageUtils, .testUtils],
             externalDependencies: [.kiwi]
         ),
-
+        
         //MARK: - AppMetrica EncodingUtils
         .target(target: .encodingUtils, dependencies: [.log, .platform, .coreUtils]),
         .testTarget(
@@ -251,10 +284,20 @@ let package = Package(
             externalDependencies: [.kiwi]
         ),
         
+        //MARK: - AppMetrica Synchronization
+        .target(
+            target: .synchronization,
+            dependencies: [.logSwift]
+        ),
+        .testTarget(
+            target: .synchronization,
+            dependencies: [.synchronization]
+        ),
+
         //MARK: - AppMetricaLibraryAdapter
         .target(target: .libraryAdapter, dependencies: [.core, .coreExtension]),
         .testTarget(target: .libraryAdapter, dependencies: [.libraryAdapter]),
-        
+
         //MARK: - AppMetrica FMDB
         .target(target: .fmdb),
     ]
@@ -274,7 +317,7 @@ extension Target {
         }
         
         let resultSearchPath: Set<String> = target.headerPaths.union(searchPaths)
-        
+
         return .target(
             name: target.name,
             dependencies: dependencies.map { $0.dependency } + externalDependencies.map { $0.dependency },
@@ -426,7 +469,7 @@ extension AppMetricaTarget {
                 "./Resources",
             ]
         case .adSupport, .coreExtension, .encodingUtils, .fmdb, .hostState, .log, .network, .platform,
-                .protobuf, .protobufUtils, .storageUtils, .webKit, .testUtils, .libraryAdapter:
+                .protobuf, .protobufUtils, .storageUtils, .webKit, .testUtils, .libraryAdapter, .keychain, .identifiers, .logSwift, .synchronization:
             return []
         }
     }
@@ -448,7 +491,7 @@ extension AppMetricaTarget {
                 "Mocks",
             ]
         case .crashes, .coreExtension, .adSupport, .webKit, .testUtils, .hostState, .storageUtils,
-                .protobuf, .fmdb, .libraryAdapter:
+                .protobuf, .fmdb, .libraryAdapter, .keychain, .identifiers, .logSwift, .synchronization:
             return []
         }
     }

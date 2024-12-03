@@ -12,6 +12,8 @@ NS_SWIFT_NAME(DiskFileStorage)
 - (instancetype)init NS_UNAVAILABLE;
 + (instancetype)new NS_UNAVAILABLE;
 
+@property (nonatomic, copy, readonly) NSString *path;
+
 - (instancetype)initWithPath:(NSString *)path options:(AMADiskFileStorageOptions)options;
 
 @end

@@ -4,15 +4,13 @@
 
 @protocol AMAKeyValueStoring;
 @protocol AMAKeychainStoring;
+@protocol AMAIdentifierProviding;
 
 @class AMAPersistentTimeoutConfiguration;
 @class AMAMetricaInMemoryConfiguration;
 @class AMAAttributionModelConfiguration;
 @class AMAExternalAttributionConfiguration;
 @class AMAAppMetricaConfiguration;
-
-extern NSString *const kAMADeviceIDStorageKey;
-extern NSString *const kAMADeviceIDHashStorageKey;
 
 typedef NSDictionary<AMAAttributionSource, AMAExternalAttributionConfiguration *> AMAExternalAttributionConfigurationMap;
 
@@ -48,7 +46,7 @@ typedef NSDictionary<AMAAttributionSource, AMAExternalAttributionConfiguration *
 + (instancetype)new NS_UNAVAILABLE;
 
 - (instancetype)initWithStorage:(id<AMAKeyValueStoring>)storage
-                       keychain:(id<AMAKeychainStoring>)keychain
+              identifierManager:(id<AMAIdentifierProviding>)identifierManager
           inMemoryConfiguration:(AMAMetricaInMemoryConfiguration *)inMemoryConfiguration;
 
 @end

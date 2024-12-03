@@ -48,6 +48,27 @@ static const char *kAMALogQueue = "io.appmetrica.log";
                    function:(const char *)function
                        line:(NSUInteger)line
                addBacktrace:(BOOL)addBacktrace
+                    message:(NSString *)message
+{
+    if (message == nil) {
+        return;
+    }
+    
+    [self logMessageToChannel:channel
+                        level:level
+                         file:file
+                     function:function
+                         line:line
+                 addBacktrace:addBacktrace
+                       format:@"%@", message];
+}
+
+- (void)logMessageToChannel:(AMALogChannel)channel
+                      level:(AMALogLevel)level
+                       file:(const char *)file
+                   function:(const char *)function
+                       line:(NSUInteger)line
+               addBacktrace:(BOOL)addBacktrace
                      format:(NSString *)format, ...
 {
     if (format == nil) {

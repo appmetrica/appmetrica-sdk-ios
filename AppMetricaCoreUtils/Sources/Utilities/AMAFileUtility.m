@@ -171,6 +171,15 @@ static NSString *const kAMAFilePath = @"io.appmetrica";
     return [self persistentPathForApiKey:nil];
 }
 
++ (NSString *)persistentPathForApplicationGroup:(NSString *)applicationGroupIdentifier
+{
+    NSFileManager *fm = [NSFileManager defaultManager];
+    NSURL *url = [fm containerURLForSecurityApplicationGroupIdentifier:applicationGroupIdentifier];
+    NSURL *appMetricaURL = [url URLByAppendingPathComponent:kAMAFilePath isDirectory:YES];
+    NSString *result = appMetricaURL.path;
+    return result;
+}
+
 + (NSString *)cacheDirectoryPath
 {
     return [self basePathForSystemType:NSCachesDirectory];
@@ -259,6 +268,11 @@ static NSString *const kAMAFilePath = @"io.appmetrica";
 + (NSDictionary *)fileSystemAttributes:(NSError * __autoreleasing *)error
 {
     return [[NSFileManager defaultManager] attributesOfFileSystemForPath:NSHomeDirectory() error:error];
+}
+
++ (NSFileManager *)fileManager
+{
+    return [NSFileManager defaultManager];
 }
 
 @end

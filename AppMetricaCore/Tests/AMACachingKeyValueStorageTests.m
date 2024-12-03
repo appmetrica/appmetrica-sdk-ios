@@ -62,6 +62,10 @@ describe(@"AMACachingKeyValueStorage", ^{
             [storage saveString:nil forKey:key error:nil];
             [[[storage stringForKey:key error:nil] should] beNil];
         });
+        it(@"Should remove value", ^{
+            [storage removeValueForKey:key error:nil];
+            [[[storage stringForKey:key error:nil] should] beNil];
+        });
         it(@"Should not fill error on success", ^{
             NSError *error = nil;
             [storage stringForKey:key error:&error];
@@ -105,6 +109,10 @@ describe(@"AMACachingKeyValueStorage", ^{
                 [storage saveString:nil forKey:key error:nil];
                 [[[storage stringForKey:key error:nil] should] beNil];
             });
+            it(@"Should remove value", ^{
+                [storage removeValueForKey:key error:nil];
+                [[[storage stringForKey:key error:nil] should] beNil];
+            });
         });
         context(@"After first write", ^{
             beforeEach(^{
@@ -125,10 +133,25 @@ describe(@"AMACachingKeyValueStorage", ^{
                 [storage saveString:nil forKey:key error:nil];
                 [[[storage stringForKey:key error:nil] should] beNil];
             });
+            it(@"Should remove value", ^{
+                [storage removeValueForKey:key error:nil];
+                [[[storage stringForKey:key error:nil] should] beNil];
+            });
             it(@"Should write to underlying storage on flush", ^{
                 [[underlyingStorage should] receive:@selector(saveString:forKey:error:)
                                       withArguments:value, key, kw_any()];
                 [storage flush];
+            });
+            context(@"Should remove on flush", ^{
+                beforeEach(^{
+                    [storage removeValueForKey:key error:nil];
+                });
+                
+                it(@"Should remove value from underlying storage on flush", ^{
+                    [[underlyingStorage should] receive:@selector(removeValueForKey:error:)
+                                          withArguments:key, kw_any()];
+                    [storage flush];
+                });
             });
             context(@"After flush", ^{
                 beforeEach(^{

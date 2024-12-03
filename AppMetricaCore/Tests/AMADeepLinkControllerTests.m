@@ -1,12 +1,12 @@
 
 #import <Kiwi/Kiwi.h>
+#import <AppMetricaCore/AppMetricaCore.h>
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
 #import "AMADeepLinkController.h"
 #import "AMADeepLinkPayloadFactory.h"
 #import "AMAReporter.h"
 #import "AMAMetricaConfiguration.h"
 #import "AMAStartupParametersConfiguration.h"
-#import "AMAPair.h"
 
 SPEC_BEGIN(AMADeepLinkControllerTests)
 

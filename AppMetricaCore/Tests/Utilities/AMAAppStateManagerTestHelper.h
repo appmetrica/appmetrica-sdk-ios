@@ -21,5 +21,6 @@
 @property (nonatomic, assign) uint32_t appBuildNumber;
 
 - (void)stubApplicationState;
+- (void)destubApplicationState;
 
 @end

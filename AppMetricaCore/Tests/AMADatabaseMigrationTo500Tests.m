@@ -2,6 +2,7 @@
 #import <Kiwi/Kiwi.h>
 #import <sqlite3.h>
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
+#import <AppMetricaKeychain/AppMetricaKeychain.h>
 #import "AMADatabase.h"
 #import "AMATableSchemeController.h"
 #import "AMAStringDatabaseKeyValueStorageConverter.h"
@@ -50,14 +51,13 @@
 #import "AMALocationEncoderFactory+Migration.h"
 #import "AMALocation.h"
 #import "AMAVisit.h"
-#import "AMAKeychainBridge.h"
-#import "AMAKeychain.h"
-#import "AMAFallbackKeychain.h"
 #import "AMAMetricaConfiguration.h"
 #import "AMAMetricaPersistentConfiguration.h"
 #import "AMADatabaseMigrationTestsUtils.h"
 #import "AMAStartupParametersConfiguration.h"
 #import "AMADatabaseHelper.h"
+
+@import AppMetricaIdentifiers;
 
 @interface AMAMigrationTo500Utils ()
 
@@ -298,8 +298,8 @@ describe(@"AMADatabaseMigrationTo500Tests", ^{
                         id<AMAKeyValueStoring> storage = [newDB.storageProvider storageForDB:db];
                         [[[storage stringForKey:AMAStorageStringKeyDidApplyDataMigrationFor500 error:nil] should] equal:@"1"];
 
-                        [[[storage stringForKey:[NSString stringWithFormat:format, kAMADeviceIDStorageKey] error:nil] should] equal:deviceID];
-                        [[[storage stringForKey:[NSString stringWithFormat:format, kAMADeviceIDHashStorageKey] error:nil] should] equal:deviceIDHash];
+                        [[[storage stringForKey:[NSString stringWithFormat:format, [AMAAppMetricaIdentifiersKeys deviceID]] error:nil] should] equal:deviceID];
+                        [[[storage stringForKey:[NSString stringWithFormat:format, [AMAAppMetricaIdentifiersKeys deviceIDHash]] error:nil] should] equal:deviceIDHash];
                     }];
                 });
             });

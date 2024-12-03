@@ -1,8 +1,8 @@
 
+#import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
 #import "AMADeepLinkController.h"
 #import "AMADeepLinkPayloadFactory.h"
 #import "AMAReporter.h"
-#import "AMAPair.h"
 #import "AMAMetricaConfiguration.h"
 #import "AMAStartupParametersConfiguration.h"
 
