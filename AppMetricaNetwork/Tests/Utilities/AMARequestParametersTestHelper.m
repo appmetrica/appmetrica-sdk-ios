@@ -1,6 +1,7 @@
 
 #import <Kiwi/Kiwi.h>
 #import "AMARequestParametersTestHelper.h"
+#import "AMABundleInfoProviderMock.h"
 #import <AppMetricaPlatform/AppMetricaPlatform.h>
 
 @implementation AMARequestParametersTestHelper
@@ -18,8 +19,17 @@
         _scalefactor = @"2";
         _screenDPI = @"326";
         _appID = @"io.appmetrica.tests";
+        _mainAppID = @"io.appmetrica.tests";
+        _extensionAppID = @"io.appmetrica.tests.extension";
         _version = @"1";
         _appFramework = @"native";
+        
+        _appInfoProvider = [[AMABundleInfoProviderMock alloc] initWithAppID:self.appID
+                                                    copyOtherPropertiesFrom:[AMAPlatformDescription currentAppInfo]];
+        _mainAppInfoProvider = [[AMABundleInfoProviderMock alloc] initWithAppID:self.mainAppID
+                                                        copyOtherPropertiesFrom:[AMAPlatformDescription mainAppInfo]];
+        _extensionAppInfoProvider = [[AMABundleInfoProviderMock alloc] initWithAppID:self.extensionAppID
+                                                             copyOtherPropertiesFrom:[AMAPlatformDescription extensionAppInfo]];
     }
     return self;
 }
@@ -34,8 +44,10 @@
     [AMAPlatformDescription stub:@selector(screenHeight) andReturn:self.screenHeight];
     [AMAPlatformDescription stub:@selector(scalefactor) andReturn:self.scalefactor];
     [AMAPlatformDescription stub:@selector(screenDPI) andReturn:self.screenDPI];
-    [AMAPlatformDescription stub:@selector(appID) andReturn:self.appID];
     [AMAPlatformDescription stub:@selector(appFramework) andReturn:self.appFramework];
+    [AMAPlatformDescription stub:@selector(currentAppInfo) andReturn:self.appInfoProvider];
+    [AMAPlatformDescription stub:@selector(mainAppInfo) andReturn:self.appInfoProvider];
+    [AMAPlatformDescription stub:@selector(extensionAppInfo) andReturn:self.extensionAppInfoProvider];
 }
 
 @end

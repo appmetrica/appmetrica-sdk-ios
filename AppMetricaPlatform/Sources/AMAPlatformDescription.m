@@ -65,22 +65,22 @@ NSString *const kAMADeviceTypeWatch = @"watch";
 
 + (NSString *)appVersion
 {
-    return [[[self class] appVersionProvider] appVersion];
+    return [[self currentAppInfo] appVersion];
 }
 
 + (NSString *)appVersionName
 {
-    return [[[self class] appVersionProvider] appVersionName];
+    return [[self currentAppInfo] appVersionName];
 }
 
 + (NSString *)appBuildNumber
 {
-    return [[[self class] appVersionProvider] appBuildNumber];
+    return [[self currentAppInfo] appBuildNumber];
 }
 
 + (NSString *)appID
 {
-    return [[[self class] appVersionProvider] appID];
+    return [[self currentAppInfo] appID];
 }
 
 + (NSString *)appIdentifierPrefix
@@ -113,6 +113,21 @@ NSString *const kAMADeviceTypeWatch = @"watch";
     }
 
     return kAMANativeAppFramework;
+}
+
++ (id<AMABundleInfoProvider>)mainAppInfo
+{
+    return [self mainAppVersionProvider];
+}
+
++ (nullable id<AMABundleInfoProvider>)extensionAppInfo
+{
+    return [self extensionVersionProvider];
+}
+
++ (id<AMABundleInfoProvider>)currentAppInfo
+{
+    return [self currentAppVersionProvider];
 }
 
 + (BOOL)appDebuggable
@@ -244,12 +259,36 @@ NSString *const kAMADeviceTypeWatch = @"watch";
 
 #pragma mark - AppVersionProvider
 
-+ (AMAAppVersionProvider *)appVersionProvider
++ (AMAAppVersionProvider *)currentAppVersionProvider
 {
     static AMAAppVersionProvider *appVersionProvider = nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         appVersionProvider = [[AMAAppVersionProvider alloc] init];
+    });
+    return appVersionProvider;
+}
+
++ (nullable AMAAppVersionProvider *)extensionVersionProvider
+{
+    if ([self isExtension]) {
+        return [self currentAppVersionProvider];
+    } else {
+        return nil;
+    }
+}
+
++ (AMAAppVersionProvider *)mainAppVersionProvider
+{
+    static AMAAppVersionProvider *appVersionProvider = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        if ([self isExtension]) {
+            NSBundle *bundle = [[NSBundle mainBundle] applicationBundle];
+            appVersionProvider = [[AMAAppVersionProvider alloc] initWithBundle:bundle];
+        } else {
+            appVersionProvider = [self currentAppVersionProvider];
+        }
     });
     return appVersionProvider;
 }

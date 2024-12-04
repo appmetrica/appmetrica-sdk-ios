@@ -1,13 +1,8 @@
 
 #import <AppMetricaPlatform/AppMetricaPlatform.h>
 
-@interface AMAAppVersionProvider : NSObject
+@interface AMAAppVersionProvider : NSObject<AMABundleInfoProvider>
 
 - (instancetype)initWithBundle:(NSBundle *)bundle;
-
-- (NSString *)appID;
-- (NSString *)appBuildNumber;
-- (NSString *)appVersion;
-- (NSString *)appVersionName;
 
 @end

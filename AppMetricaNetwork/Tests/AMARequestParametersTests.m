@@ -63,6 +63,12 @@ describe(@"AMARequestParameters", ^{
         it(@"Should provide app_id in dictionary representation", ^{
             [[parametersDictionary[@"app_id"] should] equal:requestParametersHelper.appID];
         });
+        it(@"Should provide mai in dictionary representation", ^{
+            [[parametersDictionary[@"mai"] should] equal:requestParametersHelper.mainAppID];
+        });
+        it(@"Should provide app_id in dictionary representation", ^{
+            [[parametersDictionary[@"eai"] should] equal:requestParametersHelper.extensionAppID];
+        });
         it(@"Should provide api_key_128 in dictionary representation", ^{
             [[parametersDictionary[@"api_key_128"] should] equal:apiKey];
         });

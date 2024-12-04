@@ -24,7 +24,7 @@
 #import "AMASessionStorage.h"
 #import "AMASessionsCleaner.h"
 #import <AppMetricaPlatform/AppMetricaPlatform.h>
-
+#import "AMABundleInfoProviderMock.h"
 
 SPEC_BEGIN(AMAReportRequestTests)
 
@@ -33,7 +33,11 @@ describe(@"AMAReportRequestTests", ^{
     NSString *const attributionID = @"1";
     NSString *const requestIdentifier = @"42";
     NSString *const appID = @"com.appmetrica.mobile.test";
+    NSString *const extID = @"com.appmetrica.mobile.test.ext";
     NSString *const host = @"http://www.appmetrica.io";
+    AMABundleInfoProviderMock *appMock = [[AMABundleInfoProviderMock alloc] initWithAppID:appID appBuildNumber:@"1" appVersion:@"1.0.0" appVersionName:@"1.0.0"];
+    AMABundleInfoProviderMock *extensionMock = [[AMABundleInfoProviderMock alloc] initWithAppID:extID appBuildNumber:@"1" appVersion:@"1.0.0" appVersionName:@"1.0.0"];
+    
     AMAReporterTestHelper *__block reporterTestHelper = nil;
     beforeEach(^{
         [AMAMetricaConfigurationTestUtilities stubConfigurationWithNullMock];
@@ -43,6 +47,12 @@ describe(@"AMAReportRequestTests", ^{
         [encoder stub:@selector(encodeData:error:) withBlock:^(NSArray *params) {
             return params[0];
         }];
+        [AMAPlatformDescription stub:@selector(mainAppInfo) andReturn:appMock];
+        [AMAPlatformDescription stub:@selector(extensionAppInfo) andReturn:extensionMock];
+        [AMAPlatformDescription stub:@selector(currentAppInfo) andReturn:extensionMock];
+    });
+    afterEach(^{
+        [AMAPlatformDescription clearStubs];
     });
     AMAReportEventsBatch *(^createEventBatch)(void) = ^AMAReportEventsBatch *(void) {
         AMASession *session =
@@ -75,7 +85,6 @@ describe(@"AMAReportRequestTests", ^{
     context(@"Sets correct GET parameters", ^{
         NSString *const deviceType = @"device";
         void (^stubPlatformDescription)(void) = ^{
-            [AMAPlatformDescription stub:@selector(appID) andReturn:appID];
             [AMAPlatformDescription stub:@selector(deviceType) andReturn:deviceType];
         };
         NSDictionary * __block GETParameters = nil;
@@ -146,7 +155,13 @@ describe(@"AMAReportRequestTests", ^{
             [[GETParameters[@"analytics_sdk_version_name"] should] equal:helper.kitVersionName];
         });
         it(@"Should add app_id to GET parameters", ^{
-            [[GETParameters[@"app_id"] should] equal:appID];
+            [[GETParameters[@"app_id"] should] equal:extID];
+        });
+        it(@"Should add mai to GET parameters", ^{
+            [[GETParameters[@"mai"] should] equal:appID];
+        });
+        it(@"Should add eai to GET parameters", ^{
+            [[GETParameters[@"eai"] should] equal:extID];
         });
         it(@"Should add api_key_128 to GET parameters", ^{
             [[GETParameters[@"api_key_128"] should] equal:apiKey];

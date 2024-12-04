@@ -1,5 +1,6 @@
 
 #if __has_include("AppMetricaPlatform.h")
+    #import "AMABundleInfoProvider.h"
     #import "AMAPlatformDescription.h"
     #import "AMAPlatformLocaleState.h"
     #import "AMAVersion.h"
@@ -7,6 +8,7 @@
     #import "AMAApplicationStateKeys.h"
     #import "NSBundle+ApplicationBundle.h"
 #else
+    #import <AppMetricaPlatform/AMABundleInfoProvider.h>
     #import <AppMetricaPlatform/AMAPlatformDescription.h>
     #import <AppMetricaPlatform/AMAPlatformLocaleState.h>
     #import <AppMetricaPlatform/AMAVersion.h>

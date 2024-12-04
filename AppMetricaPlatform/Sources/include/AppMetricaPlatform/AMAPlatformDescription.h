@@ -23,6 +23,8 @@ typedef NS_ENUM(NSUInteger, AMARunEnvironment) {
     AMARunEnvironmentExtension,
 } NS_SWIFT_NAME(RunEnvironment);
 
+@protocol AMABundleInfoProvider;
+
 NS_SWIFT_NAME(PlatformDescription)
 @interface AMAPlatformDescription : NSObject
 
@@ -47,6 +49,10 @@ NS_SWIFT_NAME(PlatformDescription)
 + (AMARunEnvironment)runEnvronment;
 
 + (AMAAppBuildType)appBuildType;
+
++ (id<AMABundleInfoProvider>)mainAppInfo;
++ (nullable id<AMABundleInfoProvider>)extensionAppInfo;
++ (id<AMABundleInfoProvider>)currentAppInfo;
 
 // OS //
 + (NSString *)OSName;
