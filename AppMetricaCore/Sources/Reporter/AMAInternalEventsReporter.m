@@ -100,6 +100,12 @@ static NSString *const kAMASearchAdsTokenSuccessEventName = @"AppleSearchAdsToke
     }
 }
 
+- (void)reportAppEnvironmentError:(NSDictionary *)parameters type:(NSString *)type
+{
+    NSString *event = [NSString stringWithFormat:@"app_environment_%@_error", type];
+    [self reportEvent:event parameters:parameters];
+}
+
 #pragma mark - Utils -
 
 - (void)reportEvent:(NSString *)event withError:(NSError *)error

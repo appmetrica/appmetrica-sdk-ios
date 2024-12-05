@@ -134,7 +134,34 @@ describe(@"AMAInternalEventsReporter", ^{
         });
         
     });
-
+    
+    context(@"App Environment Error", ^{
+        it(@"Should report app environment error with parameters", ^{
+            NSDictionary *parameters = @{ @"error": @"invalid_key" };
+            NSString *type = @"key";
+            NSString *expectedEventName = @"app_environment_key_error";
+            
+            [[reporterMock should] receive:@selector(reportEvent:parameters:onFailure:)
+                             withArguments:expectedEventName, parameters, kw_any()];
+            
+            [reporter reportAppEnvironmentError:parameters type:type];
+        });
+        
+        it(@"Should handle different types correctly", ^{
+            NSDictionary *parameters = @{ @"error": @"unexpected_type" };
+            NSArray *types = @[@"key", @"value", @"other"];
+            
+            for (NSString *type in types) {
+                NSString *expectedEventName = [NSString stringWithFormat:@"app_environment_%@_error", type];
+                
+                [[reporterMock should] receive:@selector(reportEvent:parameters:onFailure:)
+                                 withArguments:expectedEventName, parameters, kw_any()];
+                
+                [reporter reportAppEnvironmentError:parameters type:type];
+            }
+        });
+        
+    });
 });
 
 SPEC_END

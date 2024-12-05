@@ -28,4 +28,6 @@
 
 - (void)reportSKADAttributionParsingError:(NSDictionary *)parameters;
 
+- (void)reportAppEnvironmentError:(NSDictionary *)parameters type:(NSString *)type;
+
 @end

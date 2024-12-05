@@ -2,10 +2,10 @@
 #import "AMACore.h"
 #import "AMAEnvironmentLimiter.h"
 
-static NSInteger const kAMAEnvironmentCountLimit = 30;
-static NSInteger const kAMAEnvironmentKeyLengthLimit = 50;
-static NSInteger const kAMAEnvironmentValueLengthLimit = 4000;
-static NSInteger const kAMAEnvironmentTotalLengthLimit = 4500;
+NSInteger const kAMAEnvironmentCountLimit = 30;
+NSInteger const kAMAEnvironmentKeyLengthLimit = 50;
+NSInteger const kAMAEnvironmentValueLengthLimit = 4000;
+NSInteger const kAMAEnvironmentTotalLengthLimit = 4500;
 
 @interface AMAEnvironmentLimiter ()
 

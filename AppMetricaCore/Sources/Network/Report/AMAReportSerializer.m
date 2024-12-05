@@ -14,11 +14,32 @@
 #import "AMAFileEventValue.h"
 #import "AMASession.h"
 #import "AMADate.h"
+#import "AMAAppEnvironmentValidator.h"
 
 NSString *const kAMAReportSerializerErrorDomain = @"kAMAReportSerializerErrorDomain";
 NSString *const kAMAReportSerializerErrorKeyActualSize = @"kAMAReportSerializerErrorKeyActualSize";
 
+@interface AMAReportSerializer ()
+
+@property (nonatomic, strong, readonly) AMAAppEnvironmentValidator *appEnvironmentValidator;
+
+@end
+
 @implementation AMAReportSerializer
+
+- (instancetype)init
+{
+    return [self initWithAppEnvironmentValidator:[[AMAAppEnvironmentValidator alloc] init]];
+}
+
+- (instancetype)initWithAppEnvironmentValidator:(AMAAppEnvironmentValidator *)validator
+{
+    self = [super init];
+    if (self) {
+        _appEnvironmentValidator = validator;
+    }
+    return self;
+}
 
 #define AMA_ENSURE_MEMORY_ALLOCATED(var) \
     if ((var) == NULL) { \
@@ -409,10 +430,20 @@ NSString *const kAMAReportSerializerErrorKeyActualSize = @"kAMAReportSerializerE
         AMA_ENSURE_MEMORY_ALLOCATED(variable);
         ama__report_message__environment_variable__init(variable);
 
-        variable->name = [AMAProtobufUtilities addNSString:key toTracker:tracker];
-        AMA_ENSURE_MEMORY_ALLOCATED(variable->name);
-        variable->value = [AMAProtobufUtilities addNSString:value toTracker:tracker];
-        AMA_ENSURE_MEMORY_ALLOCATED(variable->value);
+        if ([self.appEnvironmentValidator validateAppEnvironmentKey:key]) {
+            variable->name = [AMAProtobufUtilities addNSString:key toTracker:tracker];
+            AMA_ENSURE_MEMORY_ALLOCATED(variable->name);
+        } 
+        else {
+            AMALogError(@"Failed to validate app environment key: %@", key);
+        }
+        if ([self.appEnvironmentValidator validateAppEnvironmentValue:value]) {
+            variable->value = [AMAProtobufUtilities addNSString:value toTracker:tracker];
+            AMA_ENSURE_MEMORY_ALLOCATED(variable->value);
+        }
+        else {
+            AMALogError(@"Failed to validate app environment value: %@", value);
+        }
 
         reportMessage->app_environment[index++] = variable;
     }

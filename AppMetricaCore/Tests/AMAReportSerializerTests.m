@@ -15,6 +15,7 @@
 #import "AMAReportSerializer.h"
 #import "AMASession.h"
 #import "AMAStringEventValue.h"
+#import "AMAAppEnvironmentValidator.h"
 
 SPEC_BEGIN(AMAReportSerializerTests)
 
@@ -39,6 +40,7 @@ describe(@"AMAReportSerializer", ^{
     AMAApplicationState *__block appState = nil;
     NSObject<AMAReportSerializerDelegate> *__block delegate = nil;
     AMAReportSerializer *__block serializer = nil;
+    AMAAppEnvironmentValidator *__block validator = nil;
 
     AMAReportRequestModel *__block model = nil;
     NSUInteger __block sizeLimit = 0;
@@ -53,8 +55,9 @@ describe(@"AMAReportSerializer", ^{
         [appStateHelper stubApplicationState];
         appState = AMAApplicationStateManager.applicationState;
         delegate = [KWMock nullMockForProtocol:@protocol(AMAReportSerializerDelegate)];
+        validator = [AMAAppEnvironmentValidator nullMock];
 
-        serializer = [[AMAReportSerializer alloc] init];
+        serializer = [[AMAReportSerializer alloc] initWithAppEnvironmentValidator:validator];
         serializer.delegate = delegate;
         sizeLimit = NSUIntegerMax;
         filledError = nil;
@@ -126,17 +129,39 @@ describe(@"AMAReportSerializer", ^{
                 });
             });
             context(@"App Environment", ^{
-                beforeEach(^{
-                    fillReport();
+                context(@"Valid", ^{
+                    beforeEach(^{
+                        [validator stub:@selector(validateAppEnvironmentKey:) andReturn:theValue(YES)];
+                        [validator stub:@selector(validateAppEnvironmentValue:) andReturn:theValue(YES)];
+                        
+                        fillReport();
+                    });
+                    it(@"Should have valid count", ^{
+                        [[theValue(reportData->n_app_environment) should] equal:theValue(1)];
+                    });
+                    it(@"Should have valid key", ^{
+                        [[convertString(reportData->app_environment[0]->name) should] equal:appEnvironment.allKeys.firstObject];
+                    });
+                    it(@"Should have valid value", ^{
+                        [[convertString(reportData->app_environment[0]->value) should] equal:appEnvironment.allValues.firstObject];
+                    });
                 });
-                it(@"Should have valid count", ^{
-                    [[theValue(reportData->n_app_environment) should] equal:theValue(1)];
-                });
-                it(@"Should have valid key", ^{
-                    [[convertString(reportData->app_environment[0]->name) should] equal:appEnvironment.allKeys.firstObject];
-                });
-                it(@"Should have valid value", ^{
-                    [[convertString(reportData->app_environment[0]->value) should] equal:appEnvironment.allValues.firstObject];
+                context(@"Invalid", ^{
+                    beforeEach(^{
+                        [validator stub:@selector(validateAppEnvironmentKey:) andReturn:theValue(NO)];
+                        [validator stub:@selector(validateAppEnvironmentValue:) andReturn:theValue(NO)];
+                        
+                        fillReport();
+                    });
+                    it(@"Should have valid count", ^{
+                        [[theValue(reportData->n_app_environment) should] equal:theValue(1)];
+                    });
+                    it(@"Should have valid key", ^{
+                        [[convertString(reportData->app_environment[0]->name) should] beEmpty];
+                    });
+                    it(@"Should have valid value", ^{
+                        [[convertString(reportData->app_environment[0]->value) should] beEmpty];
+                    });
                 });
             });
             it(@"Should have valid sessions count", ^{

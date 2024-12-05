@@ -10,6 +10,7 @@ typedef NS_ENUM(NSInteger, AMAReportSerializerErrorCode) {
     AMAReportSerializerErrorEmpty,
 };
 
+@class AMAAppEnvironmentValidator;
 @class AMAReportRequestModel;
 @class AMAReportSerializer;
 @class AMAEvent;
@@ -21,6 +22,8 @@ typedef NS_ENUM(NSInteger, AMAReportSerializerErrorCode) {
 @end
 
 @interface AMAReportSerializer : NSObject
+
+- (instancetype)initWithAppEnvironmentValidator:(AMAAppEnvironmentValidator *)validator;
 
 @property (nonatomic, weak) id<AMAReportSerializerDelegate> delegate;
 

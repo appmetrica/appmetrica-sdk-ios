@@ -3,6 +3,11 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+extern NSInteger const kAMAEnvironmentCountLimit;
+extern NSInteger const kAMAEnvironmentKeyLengthLimit;
+extern NSInteger const kAMAEnvironmentValueLengthLimit;
+extern NSInteger const kAMAEnvironmentTotalLengthLimit;
+
 @protocol AMAStringTruncating;
 
 @interface AMAEnvironmentLimiter : NSObject
