@@ -7,10 +7,6 @@
 #import "AMACore.h"
 #import "AMAInstantFeaturesConfiguration+Migration.h"
 
-@interface AMAAppMetricaUUIDMigrator ()
-
-@end
-
 @implementation AMAAppMetricaUUIDMigrator
 
 

@@ -43,9 +43,6 @@ public final class IdentifierProviderConfiguration: NSObject {
     public var appDatabase: KeyValueStoring?
 
     @objc
-    public var uuidMigration: AppMetricaUUIDMigratable?
-
-    @objc
     public init(privateKeychain: KeychainStoring, privateFileStorage: FileStorage) {
         self.privateKeychain = privateKeychain
         self.privateFileStorage = privateFileStorage
@@ -93,7 +90,6 @@ public final class IdentifierProvider: NSObject, IdentifierProviding {
             providers: identifierSet,
             runEnv: env,
             appDatabase: appDatabase,
-            appMetricaUUIDMigration: config.uuidMigration,
             deviceIDGenerator: deviceIDGenerator,
             appMetricaUUIDGenerator: appMetricaUUIDGenerator
         )

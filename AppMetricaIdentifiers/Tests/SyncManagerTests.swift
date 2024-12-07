@@ -40,7 +40,6 @@ class SyncManagerTests: XCTestCase {
             providers: sourcesSet.map { $0 },
             runEnv: .mainApp,
             appDatabase: nil,
-            appMetricaUUIDMigration: nil,
             deviceIDGenerator: deviceIDGenerator,
             appMetricaUUIDGenerator: appMetricaUUIDGenerator
         )

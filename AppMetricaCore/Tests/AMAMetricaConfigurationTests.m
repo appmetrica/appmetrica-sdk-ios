@@ -12,7 +12,6 @@
 #import "AMAInstantFeaturesConfiguration.h"
 #import "AMAReporterTestHelper.h"
 #import <AppMetricaKeychain/AppMetricaKeychain.h>
-#import "AMAAppMetricaUUIDMigrator.h"
 #import "AMAAppGroupIdentifierProvider.h"
 @import AppMetricaIdentifiers;
 
@@ -242,16 +241,11 @@ describe(@"AMAMetricaConfiguration", ^{
         AMADiskFileStorage *__block groupFile;
         NSString *const lockFilePath = @"/tmp/file.lock";
         
-        AMAAppMetricaUUIDMigrator *__block migrator;
-        
         beforeEach(^{
             privateKeychain = [[AMAKeychain alloc] initWithService:@"io.appmetrica.private" accessGroup:@"" bridge:keychainBridge];
             groupKeychain = [[AMAKeychain alloc] initWithService:@"io.appmetrica.group" accessGroup:@"" bridge:keychainBridge];
             privateFile = [AMADiskFileStorage nullMock];
             groupFile = [AMADiskFileStorage nullMock];
-            
-            migrator = [AMAAppMetricaUUIDMigrator new];
-            [AMAAppMetricaUUIDMigrator stub:@selector(new) andReturn:migrator];
             
             [configuration stub:@selector(privateKeychain) andReturn:privateKeychain];
             [configuration stub:@selector(groupKeychain) andReturn:groupKeychain];
@@ -262,13 +256,11 @@ describe(@"AMAMetricaConfiguration", ^{
         
         afterEach(^{
             [configuration clearStubs];
-            [AMAAppMetricaUUIDMigrator clearStubs];
         });
         
         void(^compareConfig)(AMAIdentifierProviderConfiguration*) = ^(AMAIdentifierProviderConfiguration *config){
             [[(NSObject*)config.privateKeychain should] equal:privateKeychain];
             [[(NSObject*)config.groupKeychain should] equal:groupKeychain];
-            [[(NSObject*)config.uuidMigration should] equal:migrator];
             [[(NSObject*)config.privateFileStorage should] equal:privateFile];
             [[(NSObject*)config.groupFileStorage should] equal:groupFile];
             [[config.groupLockFilePath should] equal:lockFilePath];

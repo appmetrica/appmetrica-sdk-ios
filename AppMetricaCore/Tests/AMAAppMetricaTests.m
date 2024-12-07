@@ -874,6 +874,13 @@ describe(@"AMAAppMetrica", ^{
                 it(@"Should return uuid", ^{
                     [[[AMAAppMetrica UUID] should] equal:uuid];
                 });
+                it(@"Should migrate before return UUID", ^{
+                    AMAMetricaConfiguration *configuration = [AMAMetricaConfiguration nullMock];
+                    [AMAMetricaConfiguration stub:@selector(sharedInstance) andReturn:configuration];
+                    [[configuration should] receive:@selector(ensureMigrated)];
+                    
+                    [AMAAppMetrica UUID];
+                });
                 it(@"Should return deviceID", ^{
                     [[[AMAAppMetrica deviceID] should] equal:deviceID];
                 });

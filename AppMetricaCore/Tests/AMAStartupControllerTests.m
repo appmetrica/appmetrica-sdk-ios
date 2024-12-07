@@ -54,7 +54,6 @@ describe(@"AMAStartupController", ^{
                                         startupResponseParser:startupResponseParser];
     };
     beforeAll(^{
-
         [AMATestNetwork stubHTTPRequestWithBlock:nil];
     });
     beforeEach(^{

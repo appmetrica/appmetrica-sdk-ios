@@ -29,7 +29,6 @@ final class SyncManager {
     let runEnv: RunEnvironment
     
     let appDatabase: IdentifiersStorable?
-    let appMetricaUUIDMigration: AppMetricaUUIDMigratable?
     
     let deviceIDGenerator: DeviceIDGenerator
     let appMetricaUUIDGenerator: AppMetricaUUIDGenerator
@@ -40,14 +39,12 @@ final class SyncManager {
         providers: IdentifierSet<MutableIdentifiersStorable>, 
         runEnv: RunEnvironment,
         appDatabase: IdentifiersStorable?,
-        appMetricaUUIDMigration: AppMetricaUUIDMigratable?,
         deviceIDGenerator: DeviceIDGenerator,
         appMetricaUUIDGenerator: AppMetricaUUIDGenerator
     ) {
         self.providers = providers
         self.runEnv = runEnv
         self.appDatabase = appDatabase
-        self.appMetricaUUIDMigration = appMetricaUUIDMigration
         self.deviceIDGenerator = deviceIDGenerator
         self.appMetricaUUIDGenerator = appMetricaUUIDGenerator
     }
@@ -162,6 +159,7 @@ private extension SyncManager {
         
         let rUUID: AppMetricaUUID
         
+        //TODO: https://nda.ya.ru/t/lb6gBoj_7AACua
         if result.resultDeviceID == nil {
             result.resultDeviceID = fetchDatabaseProvider()?.deviceID
             result.resultDeviceIDHash = fetchDatabaseProvider()?.deviceIDHash
@@ -177,7 +175,7 @@ private extension SyncManager {
         if let rAppMetricaUUID = result.resultAppMetricaUUID {
             rUUID = rAppMetricaUUID
         } else {
-            rUUID = AppMetricaUUID(optionalValue: appMetricaUUIDMigration?.migrateAppMetricaUUID()) ?? appMetricaUUIDGenerator.generateAppMetricaUUID()
+            rUUID = appMetricaUUIDGenerator.generateAppMetricaUUID()
             result.resultAppMetricaUUID = rUUID
             result.sourcesToUpdate.formUnion(IdentifierSource.appMetricaUUIDSources)
         }

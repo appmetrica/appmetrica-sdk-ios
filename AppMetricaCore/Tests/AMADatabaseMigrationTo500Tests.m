@@ -56,6 +56,7 @@
 #import "AMADatabaseMigrationTestsUtils.h"
 #import "AMAStartupParametersConfiguration.h"
 #import "AMADatabaseHelper.h"
+#import "AMAAppMetricaUUIDMigrator.h"
 
 @import AppMetricaIdentifiers;
 
@@ -171,6 +172,114 @@ describe(@"AMADatabaseMigrationTo500Tests", ^{
                 }];
             });
             
+            
+            __auto_type testMigrationTo590 = ^(BOOL isExtension) {
+                context(@"Migration to 5.9.0", ^{
+                    AMAAppMetricaUUIDMigrator *__block migrator = nil;
+                    NSObject<AMAIdentifierProviding> *__block identifierProviderMock = nil;
+                    
+                    beforeEach(^{
+                        [AMADataMigrationTo500 stubbedNullMockForDefaultInit];
+                        [AMADataMigrationTo580 stubbedNullMockForDefaultInit];
+                        
+                        identifierProviderMock = [KWMock nullMockForProtocol:@protocol(AMAIdentifierProviding)];
+                        [configuration stub:@selector(identifierProvider) andReturn:identifierProviderMock];
+                    });
+                    
+                    it(@"Should migrate uuid to identifier provider", ^{
+                        NSString *const expectedUUID = @"appmetrica_uuid";
+                        NSString *__block resultUUID = nil;
+                        
+                        migrator = [AMAAppMetricaUUIDMigrator stubbedNullMockForDefaultInit];
+                        [migrator stub:@selector(migrateAppMetricaUUID) andReturn:expectedUUID];
+                        
+                        [identifierProviderMock stub:@selector(updateAppMetricaUUID:) withBlock:^id(NSArray *params) {
+                            resultUUID = params[0];
+                            return nil;
+                        }];
+                        
+                        id<AMADatabaseProtocol> newDB = [AMADatabaseFactory configurationDatabase];
+                        [newDB inDatabase:^(AMAFMDatabase *db) {
+                            id<AMAKeyValueStoring> storage = [newDB.storageProvider storageForDB:db];
+                            
+                            [[[storage stringForKey:AMAStorageStringKeyDidApplyDataMigrationFor500 error:nil] should] beNil];
+                            [[[storage stringForKey:AMAStorageStringKeyDidApplyDataMigrationFor580 error:nil] should] beNil];
+                            
+                            [[[storage stringForKey:AMAStorageStringKeyDidApplyDataMigrationFor590 error:nil] should] equal:@"1"];
+                        }];
+                        if (isExtension) {
+                            [[resultUUID should] beNil];
+                        }
+                        else {
+                            [[resultUUID should] equal:expectedUUID];
+                        }
+                    });
+                    
+                    it(@"Should migrate deviceID to identifier provider", ^{
+                        NSString *const expectedDeviceID = @"appmetrica_deviceID";
+                        NSString *const expectedDeviceIDHash = @"appmetrica_deviceIDHash";
+                        NSString *__block resultDeviceID = nil;
+                        NSString *__block resultDeviceIDHash = nil;
+                        
+                        [identifierProviderMock stub:@selector(updateDeviceID:) withBlock:^id(NSArray *params) {
+                            resultDeviceID = params[0];
+                            return nil;
+                        }];
+                        [identifierProviderMock stub:@selector(updateDeviceIdHash:) withBlock:^id(NSArray *params) {
+                            resultDeviceIDHash = params[0];
+                            return nil;
+                        }];
+                        
+                        NSString *(^dbStorageKey)(NSString *) = ^NSString *(NSString *key) {
+                            return [NSString stringWithFormat:@"fallback-keychain-%@", key];
+                        };
+                        
+                        id<AMADatabaseProtocol> newDB = [AMADatabaseFactory configurationDatabase];
+                        id<AMAKeyValueStoring> dbStorage = newDB.storageProvider.cachingStorage;
+                        
+                        [(NSObject *)dbStorage stub:@selector(stringForKey:error:)
+                                          andReturn:expectedDeviceID
+                                      withArguments:dbStorageKey(AMAAppMetricaIdentifiersKeys.deviceID), kw_any()];
+                        
+                        [(NSObject *)dbStorage stub:@selector(stringForKey:error:)
+                                          andReturn:expectedDeviceIDHash
+                                      withArguments:dbStorageKey(AMAAppMetricaIdentifiersKeys.deviceIDHash), kw_any()];
+                        
+                        [newDB inDatabase:^(AMAFMDatabase *db) {
+                            id<AMAKeyValueStoring> storage = [newDB.storageProvider storageForDB:db];
+                            
+                            [[[storage stringForKey:AMAStorageStringKeyDidApplyDataMigrationFor500 error:nil] should] beNil];
+                            [[[storage stringForKey:AMAStorageStringKeyDidApplyDataMigrationFor580 error:nil] should] beNil];
+                            
+                            [[[storage stringForKey:AMAStorageStringKeyDidApplyDataMigrationFor590 error:nil] should] equal:@"1"];
+                        }];
+                        
+                        if (isExtension) {
+                            [[resultDeviceID should] beNil];
+                            [[resultDeviceIDHash should] beNil];
+                        }
+                        else {
+                            [[resultDeviceID should] equal:expectedDeviceID];
+                            [[resultDeviceIDHash should] equal:expectedDeviceIDHash];
+                        }
+                    });
+                });
+            };
+            
+            context(@"Should migrate within App", ^{
+                beforeEach(^{
+                    [AMAPlatformDescription stub:@selector(isExtension) andReturn:theValue(NO)];
+                });
+                testMigrationTo590(NO);
+            });
+            
+            context(@"Should migrate within Extension", ^{
+                beforeEach(^{
+                    [AMAPlatformDescription stub:@selector(isExtension) andReturn:theValue(YES)];
+                });
+                testMigrationTo590(YES);
+            });
+            
             context(@"UUID", ^{
                 NSString *const uuid = @"768a11f6f9f4422fa5ec19eb0d8e074a";
                 it(@"Should migrate uuid", ^{
@@ -211,13 +320,13 @@ describe(@"AMADatabaseMigrationTo500Tests", ^{
                 AMAKeychain *__block keychainMock = nil;
                 NSString *const appIdentifierPrefix = @"appIdentifierPrefix";
                 AMAKeychainBridge *__block keychainBridge = nil;
-
+                
                 beforeEach(^{
                     keychainMock = [AMAKeychain nullMock];
                     [AMAPlatformDescription stub:@selector(appIdentifierPrefix) andReturn:appIdentifierPrefix];
                     keychainBridge = [[AMAKeychainBridge alloc] init];
                 });
-
+                
                 void (^stubKeychain)(NSString *, NSString *, AMAKeychain *) = ^(NSString *serviceIdentifier,
                                                                                 NSString *accessGroup,
                                                                                 AMAKeychain *mockedKeychain) {
@@ -227,11 +336,11 @@ describe(@"AMADatabaseMigrationTo500Tests", ^{
                                 andReturn:mockedKeychain
                             withArguments:serviceIdentifier, accessGroup, kw_any()];
                 };
-
+                
                 it(@"Should migrate deviceID with fallback keychain", ^{
                     NSString *accessGroup = [appIdentifierPrefix stringByAppendingString:kAMAMigrationKeychainAccessGroup];
                     stubKeychain(kAMAMigrationKeychainVendorServiceIdentifier, accessGroup, keychainMock);
-
+                    
                     [keychainMock stub:@selector(isAvailable) andReturn:theValue(YES)];
                     [keychainMock stub:@selector(stringValueForKey:error:)
                              andReturn:deviceID
@@ -239,13 +348,13 @@ describe(@"AMADatabaseMigrationTo500Tests", ^{
                     [keychainMock stub:@selector(stringValueForKey:error:)
                              andReturn:deviceIDHash
                          withArguments:kAMAMigrationDeviceIDHashStorageKey, kw_any()];
-
-
+                    
+                    
                     [[persistentMock should] receive:@selector(setDeviceID:) withArguments:deviceID];
                     [[persistentMock should] receive:@selector(setDeviceIDHash:) withArguments:deviceIDHash];
-
+                    
                     id<AMADatabaseProtocol> newDB = [AMADatabaseFactory configurationDatabase];
-
+                    
                     [newDB inDatabase:^(AMAFMDatabase *db) {
                         id<AMAKeyValueStoring> storage = [newDB.storageProvider storageForDB:db];
                         [[[storage stringForKey:AMAStorageStringKeyDidApplyDataMigrationFor500 error:nil] should] equal:@"1"];
@@ -253,21 +362,21 @@ describe(@"AMADatabaseMigrationTo500Tests", ^{
                 });
                 it(@"Should migrate deviceID with app keychain", ^{
                     stubKeychain(kAMAMigrationKeychainAppServiceIdentifier, @"", keychainMock);
-
+                    
                     [keychainMock stub:@selector(isAvailable) andReturn:theValue(YES)];
                     [keychainMock stub:@selector(stringValueForKey:error:)
-                               andReturn:deviceID
-                           withArguments:kAMAMigrationDeviceIDStorageKey, kw_any()];
+                             andReturn:deviceID
+                         withArguments:kAMAMigrationDeviceIDStorageKey, kw_any()];
                     [keychainMock stub:@selector(stringValueForKey:error:)
                              andReturn:deviceIDHash
                          withArguments:kAMAMigrationDeviceIDHashStorageKey, kw_any()];
-
-
+                    
+                    
                     [[persistentMock should] receive:@selector(setDeviceID:) withArguments:deviceID];
                     [[persistentMock should] receive:@selector(setDeviceIDHash:) withArguments:deviceIDHash];
-
+                    
                     id<AMADatabaseProtocol> newDB = [AMADatabaseFactory configurationDatabase];
-
+                    
                     [newDB inDatabase:^(AMAFMDatabase *db) {
                         id<AMAKeyValueStoring> storage = [newDB.storageProvider storageForDB:db];
                         [[[storage stringForKey:AMAStorageStringKeyDidApplyDataMigrationFor500 error:nil] should] equal:@"1"];
@@ -276,10 +385,10 @@ describe(@"AMADatabaseMigrationTo500Tests", ^{
                 it(@"Should migrate deviceID with storage", ^{
                     NSString *const format = @"fallback-keychain-%@";
                     stubKeychain(kAMAMigrationKeychainAppServiceIdentifier, @"", NULL);
-
+                    
                     [migrationDatabase inDatabase:^(AMAFMDatabase *db) {
                         id<AMAKeyValueStoring> storage = [migrationDatabase.storageProvider storageForDB:db];
-
+                        
                         [storage saveString:deviceID
                                      forKey:[NSString stringWithFormat:format, kAMAMigrationDeviceIDStorageKey]
                                       error:nil];
@@ -287,17 +396,17 @@ describe(@"AMADatabaseMigrationTo500Tests", ^{
                                      forKey:[NSString stringWithFormat:format, kAMAMigrationDeviceIDHashStorageKey]
                                       error:nil];
                     }];
-
-
+                    
+                    
                     [[persistentMock should] receive:@selector(setDeviceID:) withArguments:deviceID];
                     [[persistentMock should] receive:@selector(setDeviceIDHash:) withArguments:deviceIDHash];
-
+                    
                     id<AMADatabaseProtocol> newDB = [AMADatabaseFactory configurationDatabase];
-
+                    
                     [newDB inDatabase:^(AMAFMDatabase *db) {
                         id<AMAKeyValueStoring> storage = [newDB.storageProvider storageForDB:db];
                         [[[storage stringForKey:AMAStorageStringKeyDidApplyDataMigrationFor500 error:nil] should] equal:@"1"];
-
+                        
                         [[[storage stringForKey:[NSString stringWithFormat:format, [AMAAppMetricaIdentifiersKeys deviceID]] error:nil] should] equal:deviceID];
                         [[[storage stringForKey:[NSString stringWithFormat:format, [AMAAppMetricaIdentifiersKeys deviceIDHash]] error:nil] should] equal:deviceIDHash];
                     }];

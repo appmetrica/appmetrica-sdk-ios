@@ -285,12 +285,10 @@ static NSString *const kAMAMetricaFallbackPrefix = @"fallback-keychain";
         [[AMAIdentifierProviderConfiguration alloc] initWithPrivateKeychain:[self privateKeychain]
                                                          privateFileStorage:self.privateIdentifiersFileStorage
         ];
-    AMAAppMetricaUUIDMigrator *migrator = [AMAAppMetricaUUIDMigrator new];
     
     if ([AMAPlatformDescription isExtension] == NO) {
         config.appDatabase = appDatabase;
     }
-    config.uuidMigration = migrator;
     config.vendorKeychain = [self vendorKeychain];
     config.groupKeychain = [self groupKeychain];
     config.groupFileStorage = self.groupIdentifiersFileStorage;

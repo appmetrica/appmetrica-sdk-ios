@@ -623,6 +623,7 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
 
 + (NSString *)UUID
 {
+    [[AMAMetricaConfiguration sharedInstance] ensureMigrated];
     return [AMAMetricaConfiguration sharedInstance].identifierProvider.appMetricaUUID;
 }
 
