@@ -153,6 +153,12 @@ describe(@"AMALocationDispatcher", ^{
             [[executor should] receive:@selector(executeAfterDelay:block:)];
             [dispatcher handleVisitAdd];
         });
+        
+        it(@"Should not process request if no hosts are provided", ^{
+            [configuration stub:@selector(hosts) andReturn:@[]];
+            [[requestProcessor shouldNot] receive:@selector(processWithCallback:)];
+            [dispatcher handleVisitAdd];
+        });
     
         context(@"Callback location", ^{
             beforeEach(^{
