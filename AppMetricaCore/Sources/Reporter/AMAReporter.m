@@ -86,12 +86,17 @@
         [[AMASessionExpirationHandler alloc] initWithConfiguration:[AMAMetricaConfiguration sharedInstance]
                                                             APIKey:apiKey];
     
-    AMAMetrikaPrivacyTimerStorage *timerStorage =
-        [[AMAMetrikaPrivacyTimerStorage alloc] initWithReporterMetricaConfiguration:[AMAMetricaConfiguration sharedInstance]
-                                                                       stateStorage:reporterStorage.stateStorage];
-    AMAPrivacyTimer *privacyTimer = [[AMAPrivacyTimer alloc] initWithTimerStorage:timerStorage
-                                                                 delegateExecutor:executor
-                                                                       adProvider:adProvider];
+    
+    AMAPrivacyTimer *privacyTimer = nil;
+    if ([AMAPlatformDescription isExtension] == NO) {
+        AMAMetrikaPrivacyTimerStorage *timerStorage =
+            [[AMAMetrikaPrivacyTimerStorage alloc] initWithReporterMetricaConfiguration:[AMAMetricaConfiguration sharedInstance]
+                                                                           stateStorage:reporterStorage.stateStorage];
+        
+        privacyTimer = [[AMAPrivacyTimer alloc] initWithTimerStorage:timerStorage
+                                                    delegateExecutor:executor
+                                                          adProvider:adProvider];
+    }
     
     AMAAdServicesDataProvider *adServicesDataProvider = nil;
     if (@available(iOS 14.3, *)) {
@@ -1110,6 +1115,10 @@
 
 - (void)privacyTimerDidFire:(AMAPrivacyTimer *)privacyTimer
 {
+    if ([AMAPlatformDescription isExtension]) {
+        return;
+    }
+    
     BOOL needSent = [self.adProvider isAdvertisingTrackingEnabled] && self.privacyTimer.timerStorage.isResendPeriodOutdated;
     AMALogInfo(@"send privacy event: %@ %d", self.apiKey, needSent);
     if (needSent) {

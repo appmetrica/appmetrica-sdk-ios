@@ -58,6 +58,7 @@
 #import "AMAAdProvider.h"
 #import "AMAPrivacyTimerStorageMock.h"
 #import "AMAIdentifiersTestUtilities.h"
+#import "AMAPrivacyTimer.h"
 
 @interface AMAReporterStorage (Test)
 
@@ -1844,14 +1845,83 @@ describe(@"AMAReporter", ^{
         });
 #endif
     });
-
-    context(@"Privacy manifest", ^{
-        NSUUID *newIDFA = [NSUUID UUID];
+    
+    context(@"Creating", ^{
+        __block AMAReporter *reporter = nil;
         
-        __block id reporter = nil;
-        __block AMAPrivacyTimerStorageMock *privacyStorageMock;
+        __block AMAAdProvider *adProvider = nil;
+        __block AMAReporterStorage *reporterStorage = nil;
+        __block AMAEventBuilder *eventBuilder = nil;
+        __block AMACurrentQueueExecutor *executor = nil;
+        __block AMAInternalEventsReporter *internalEventsReporter = nil;
+        __block AMAMetrikaPrivacyTimerStorage *privacyTimerStorage = nil;
+        __block AMAPrivacyTimer *privacyTimer = nil;
         
         beforeEach(^{
+            adProvider = [AMAAdProvider nullMock];
+            [AMAAdProvider stub:@selector(sharedInstance) andReturn:adProvider];
+            
+            reporterStorage = [AMAReporterStorage nullMock];
+            eventBuilder = [AMAEventBuilder nullMock];
+            internalEventsReporter = [AMAInternalEventsReporter nullMock];
+            executor = [AMACurrentQueueExecutor nullMock];
+            
+            privacyTimerStorage = [AMAMetrikaPrivacyTimerStorage nullMock];
+            [privacyTimerStorage stub:@selector(initWithReporterMetricaConfiguration:stateStorage:) andReturn:privacyTimerStorage];
+            [AMAMetrikaPrivacyTimerStorage stub:@selector(alloc) andReturn:privacyTimerStorage];
+            
+            privacyTimer = [AMAPrivacyTimer nullMock];
+            [privacyTimer stub:@selector(initWithTimerStorage:delegateExecutor:adProvider:) andReturn:privacyTimer];
+            [AMAPrivacyTimer stub:@selector(alloc) andReturn:privacyTimer];
+        });
+        afterEach(^{
+            [AMAPrivacyTimer clearStubs];
+            [AMAAdProvider clearStubs];
+            [AMAPlatformDescription clearStubs];
+            [AMAMetrikaPrivacyTimerStorage clearStubs];
+            [AMAPrivacyTimer clearStubs];
+        });
+        
+        it(@"Should create privacy timer in app", ^{
+            [AMAPlatformDescription stub:@selector(isExtension) andReturn:theValue(NO)];
+            
+            [[AMAMetrikaPrivacyTimerStorage should] receive:@selector(alloc)];
+            [[AMAPrivacyTimer should] receive:@selector(alloc)];
+            
+            reporter = [[AMAReporter alloc] initWithApiKey:apiKey
+                                                      main:YES
+                                           reporterStorage:reporterStorage
+                                              eventBuilder:eventBuilder
+                                          internalReporter:internalEventsReporter
+                                  attributionCheckExecutor:executor];
+            
+            [[[reporter performSelector:@selector(privacyTimer)] should] equal:privacyTimer];
+        });
+        
+        it(@"Should not create privacy timer in extension", ^{
+            [AMAPlatformDescription stub:@selector(isExtension) andReturn:theValue(YES)];
+            
+            [[AMAMetrikaPrivacyTimerStorage shouldNot] receive:@selector(alloc)];
+            [[AMAPrivacyTimer shouldNot] receive:@selector(alloc)];
+            
+            reporter = [[AMAReporter alloc] initWithApiKey:apiKey
+                                                      main:YES
+                                           reporterStorage:reporterStorage
+                                              eventBuilder:eventBuilder
+                                          internalReporter:internalEventsReporter
+                                  attributionCheckExecutor:executor];
+            
+            [[[reporter performSelector:@selector(privacyTimer)] should] beNil];
+        });
+        
+    });
+
+    context(@"Privacy manifest", ^{
+        __block id reporter = nil;
+        __block AMAPrivacyTimerStorageMock *privacyStorageMock;
+        NSUUID *newIDFA = [NSUUID UUID];
+        
+        void (^prepareReporter)() = ^{
             reporter = [reporterTestHelper appReporterForApiKey:apiKey];
             privacyStorageMock = [reporterTestHelper privacyTimerStorageMockForApiKey:apiKey];
             
@@ -1865,14 +1935,42 @@ describe(@"AMAReporter", ^{
             
             [reporter resumeSession];
             [reporter privacyTimerDidFire:[reporterTestHelper privacyTimerForApiKey:apiKey]];
+        };
+        
+        void (^cleanReporter)() = ^{
+            [AMAIdentifiersTestUtilities clearStubs];
+        };
+        
+        context(@"In application", ^{
+            beforeEach(^{
+                prepareReporter();
+            });
+            afterEach(^{
+                cleanReporter();
+            });
+            
+            it(@"Should fire event if tracking is enabled", ^{
+                [[[eventStorage() amatest_savedEventWithType:AMAEventTypeApplePrivacy] should] beNonNil];
+            });
+            
+            it(@"Should update IDFA if tracking enabled", ^{
+                [[[sessionStorage() lastSessionWithError:nil].appState.IFA should] equal:newIDFA.UUIDString];
+            });
         });
         
-        it(@"Should fire event if tracking is enabled", ^{
-            [[[eventStorage() amatest_savedEventWithType:AMAEventTypeApplePrivacy] should] beNonNil];
-        });
-        
-        it(@"Should update IDFA if tracking enabled", ^{
-            [[[sessionStorage() lastSessionWithError:nil].appState.IFA should] equal:newIDFA.UUIDString];
+        context(@"In extension", ^{
+            beforeEach(^{
+                [AMAPlatformDescription stub:@selector(isExtension) andReturn:theValue(YES)];
+                prepareReporter();
+            });
+            afterEach(^{
+                cleanReporter();
+                [AMAPlatformDescription clearStubs];
+            });
+            
+            it(@"Should not fire", ^{
+                [[[eventStorage() amatest_savedEventWithType:AMAEventTypeApplePrivacy] should] beNil];
+            });
         });
     });
     
