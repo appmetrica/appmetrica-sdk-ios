@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name = "AppMetricaLogSwift"
-  s.version = '5.9.0'
+  s.version = '5.10.0'
   s.summary = "AppMetricaLog offers modules the capability to log messages at various levels"
 
   s.homepage = 'https://appmetrica.io'
@@ -15,7 +15,7 @@ Pod::Spec.new do |s|
 
   s.frameworks = 'Foundation'
 
-  s.dependency 'AppMetricaLog', '= 5.9.0'
+  s.dependency 'AppMetricaLog', '= 5.10.0'
   
   s.header_dir = s.name
   s.source_files = [
