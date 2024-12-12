@@ -603,16 +603,6 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "AppMetricaLockTests"
-               BuildableName = "AppMetricaLockTests"
-               BlueprintName = "AppMetricaLockTests"
-               ReferencedContainer = "container:">
-            </BuildableReference>
-         </TestableReference>
-         <TestableReference
-            skipped = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
                BlueprintIdentifier = "AppMetricaSynchronizationTests"
                BuildableName = "AppMetricaSynchronizationTests"
                BlueprintName = "AppMetricaSynchronizationTests"
