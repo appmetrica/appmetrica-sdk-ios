@@ -46,12 +46,24 @@ describe(@"AMARSACrypter", ^{
         NSData *const encodedData = [@"WRONG DATA" dataUsingEncoding:NSUTF8StringEncoding];
         it(@"Should return nil", ^{
             NSData *decodedData = [crypter decodeData:encodedData error:NULL];
-            [[decodedData should] beNil];
+            
+            if (@available(iOS 17.3, tvOS 17.3, *)) {
+                [[decodedData shouldNot] beNil];
+            }
+            else {
+                [[decodedData should] beNil];
+            }
         });
         it(@"Should fill error", ^{
             NSError *error = nil;
             [crypter decodeData:encodedData error:&error];
-            [[error shouldNot] beNil];
+
+            if (@available(iOS 17.3, tvOS 17.3, *)) {
+                [[error should] beNil];
+            }
+            else {
+                [[error shouldNot] beNil];
+            }
         });
     });
     
