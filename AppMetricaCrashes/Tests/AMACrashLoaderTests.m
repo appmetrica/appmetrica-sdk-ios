@@ -536,14 +536,42 @@ describe(@"AMACrashLoader", ^{
                     [ksCrash stub:@selector(deleteReportWithID:)];
                 });
 
-                it(@"Should remove crashes within rollback", ^{
+                it(@"Should remove last crash within rollback", ^{
                     [crashLoader handleCrashReports:reportIDs];
-                    [[reportStore should] receive:@selector(deleteAllReports)];
+                    [[reportStore should] receive:@selector(deleteReportWithID:) withArguments:theValue(crashID.integerValue)];
                     rollback(@"context");
                 });
 
                 it(@"Should not call crash loading outside of transaction", ^{
                     [[ksCrash shouldNot] receive:@selector(reportForID:)];
+                    [crashLoader handleCrashReports:reportIDs];
+                });
+            });
+
+            context(@"Crash report IDs loading", ^{
+                NSArray *const reportIDs = @[ crashID ];
+                
+                beforeEach(^{
+                    [ksCrash stub:@selector(reportIDs)];
+                    [ksCrash stub:@selector(deleteAllReports)];
+                });
+                
+                it(@"Should receive report transaction name with report ID", ^{
+                    NSString *const transactionName = [NSString stringWithFormat:@"ReportWithID_%lld", crashID.longLongValue];
+                    
+                    [[transactor should] receive:@selector(processTransactionWithID:name:transaction:rollback:)
+                                   withArguments:kw_any(), transactionName, kw_any(), kw_any()];
+                    
+                    [crashLoader handleCrashReports:reportIDs];
+                });
+                
+                it(@"Should receive decode transaction name with report ID", ^{
+                    NSString *const transactionName = [NSString stringWithFormat:@"DecodeReport_%lld",
+                                                       crashID.longLongValue];
+                    
+                    [[transactor should] receive:@selector(processTransactionWithID:name:rollbackContext:transaction:rollback:)
+                                   withArguments:kw_any(), transactionName, kw_any(), kw_any(), kw_any()];
+                    
                     [crashLoader handleCrashReports:reportIDs];
                 });
             });

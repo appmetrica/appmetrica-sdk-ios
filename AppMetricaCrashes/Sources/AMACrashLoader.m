@@ -165,21 +165,23 @@ NSString *const kAMAApplicationNotRespondingCrashType = @"AMAApplicationNotRespo
         __block KSCrashReportDictionary *crashReport = nil;
 
         AMACrashSafeTransactorRollbackBlock rollback = ^NSString *(id context) {
-            [[self class] purgeAllRawCrashReports];
+            [[self class] purgeRawCrashReport:reportID];
             success = NO;
             return nil;
         };
 
         NSString *transactionID = kAMALoadingCrashReportsTransactionKey;
-        [self.transactor processTransactionWithID:transactionID name:@"ReportWithID" transaction:^{
+        NSString *reportTransactionName = [NSString stringWithFormat:@"ReportWithID_%lld", reportID.longLongValue];
+        [self.transactor processTransactionWithID:transactionID name:reportTransactionName transaction:^{
             crashReport = [KSCrash.sharedInstance.reportStore reportForID:reportID.longLongValue];
         } rollback:rollback];
 
         if (success) {
+            NSString *DecodeTransactionName = [NSString stringWithFormat:@"DecodeReport_%lld", reportID.longLongValue];
             [self.transactor processTransactionWithID:transactionID
-                                                        name:@"DecodeReport"
-                                             rollbackContext:[reportID stringValue]
-                                                 transaction:^{
+                                                 name:DecodeTransactionName
+                                      rollbackContext:[reportID stringValue]
+                                          transaction:^{
                 [decoder decode:crashReport.value];
             } rollback:rollback];
         }
@@ -191,9 +193,7 @@ NSString *const kAMAApplicationNotRespondingCrashType = @"AMAApplicationNotRespo
 - (void)handleCrashReports:(NSArray *)reportIDs
 {
     for (NSNumber *reportID in reportIDs) {
-        if ([self handleCrashReportWithID:reportID] == NO) {
-            break;
-        }
+        [self handleCrashReportWithID:reportID];
     }
 }
 

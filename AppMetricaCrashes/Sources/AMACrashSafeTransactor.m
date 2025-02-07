@@ -5,7 +5,7 @@
 
 @implementation AMACrashSafeTransactor
 
-- (instancetype)initWithReporter:(id<AMATransactionReporter>)reporter
+- (instancetype)initWithReporter:(id<AMATransactionReporting>)reporter
 {
     self = [super init];
     if (self != nil) {

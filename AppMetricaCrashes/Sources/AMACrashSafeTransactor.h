@@ -3,7 +3,7 @@
 
 typedef NSString * (^AMACrashSafeTransactorRollbackBlock)(id context);
 
-@protocol AMATransactionReporter <NSObject>
+@protocol AMATransactionReporting <NSObject>
 - (void)reportFailedTransactionWithID:(NSString *)transactionID
                             ownerName:(NSString *)ownerName
                       rollbackContent:(NSString *)rollbackContent
@@ -14,10 +14,10 @@ typedef NSString * (^AMACrashSafeTransactorRollbackBlock)(id context);
 
 @interface AMACrashSafeTransactor : NSObject
 
-@property (nonatomic, strong, readonly) id<AMATransactionReporter> reporter;
+@property (nonatomic, strong, readonly) id<AMATransactionReporting> reporter;
 
 - (instancetype)init NS_UNAVAILABLE;
-- (instancetype)initWithReporter:(id<AMATransactionReporter>)reporter;
+- (instancetype)initWithReporter:(id<AMATransactionReporting>)reporter;
 
 - (void)processTransactionWithID:(NSString *)transactionID
                             name:(NSString *)name
@@ -33,6 +33,5 @@ typedef NSString * (^AMACrashSafeTransactorRollbackBlock)(id context);
                  rollbackContext:(id<NSCoding>)rollBackContext
                      transaction:(dispatch_block_t)transaction
                         rollback:(AMACrashSafeTransactorRollbackBlock)rollback;
-                 
 
 @end

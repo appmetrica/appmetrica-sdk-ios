@@ -29,6 +29,7 @@
 #import "AMASignal.h"
 #import "AMAAppMetricaPluginsImpl.h"
 #import "AMABuildUID.h"
+#import "AMATransactionReporter.h"
 
 @interface AMAAppMetricaCrashes ()
 
@@ -84,11 +85,14 @@
 {
     AMAExecutor *executor = [[AMAExecutor alloc] initWithIdentifier:self];
     AMAUserDefaultsStorage *storage = [[AMAUserDefaultsStorage alloc] init];
-    AMAUnhandledCrashDetector *detector = [[AMAUnhandledCrashDetector alloc] initWithStorage:storage executor:executor];
-    AMACrashSafeTransactor *transactor = [[AMACrashSafeTransactor alloc] initWithReporter:nil];
+    AMAUnhandledCrashDetector *detector = [[AMAUnhandledCrashDetector alloc] initWithStorage:storage
+                                                                                    executor:executor];
+    AMATransactionReporter *transactionReporter = [[AMATransactionReporter alloc] init];
+    AMACrashSafeTransactor *transactor = [[AMACrashSafeTransactor alloc] initWithReporter:transactionReporter];
 
     return [self initWithExecutor:executor
-                      crashLoader:[[AMACrashLoader alloc] initWithUnhandledCrashDetector:detector transactor:transactor]
+                      crashLoader:[[AMACrashLoader alloc] initWithUnhandledCrashDetector:detector
+                                                                              transactor:transactor]
                     stateNotifier:[[AMACrashReportingStateNotifier alloc] init]
                 hostStateProvider:[[AMAHostStateProvider alloc] init]
                        serializer:[[AMADecodedCrashSerializer alloc] init]

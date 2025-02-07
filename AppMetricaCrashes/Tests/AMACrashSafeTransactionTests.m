@@ -9,7 +9,7 @@ describe(@"AMACrashSafeTransactor", ^{
     
     __block AMACrashSafeTransactor *transactor = nil;
     __block AMAUserDefaultsMock *defaultsMock = nil;
-    __block NSObject<AMATransactionReporter> *reporterMock = nil;
+    __block NSObject<AMATransactionReporting> *reporterMock = nil;
     
     NSString *buildUID = @"BUILD";
     NSString *transactionID = @"TRANSACTION";
@@ -27,7 +27,7 @@ describe(@"AMACrashSafeTransactor", ^{
     };
     
     beforeEach(^{
-        reporterMock = [KWMock mockForProtocol:@protocol(AMATransactionReporter)];
+        reporterMock = [KWMock mockForProtocol:@protocol(AMATransactionReporting)];
         [reporterMock stub:reportingSelector];
 
         transactor = [[AMACrashSafeTransactor alloc] initWithReporter:reporterMock];

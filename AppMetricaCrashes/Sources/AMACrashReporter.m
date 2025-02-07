@@ -10,7 +10,7 @@
 #import "AMAPluginErrorDetails.h"
 #import "AMAErrorEnvironment.h"
 
-static NSString *const kAppMetricaLibraryAPIKey = @"20799a27-fa80-4b36-b2db-0f8141f24180";
+NSString *const kAppMetricaLibraryAPIKey = @"20799a27-fa80-4b36-b2db-0f8141f24180";
 
 @interface AMACrashReporter ()
 
@@ -308,43 +308,6 @@ static NSString *const kAppMetricaLibraryAPIKey = @"20799a27-fa80-4b36-b2db-0f81
     };
     
     [self.libraryErrorReporter reportEvent:eventName parameters:parameters onFailure:nil];
-}
-
-- (NSDictionary *)descriptionParametersForException:(NSException *)exception
-{
-    if (exception == nil) {
-        return nil;
-    }
-
-    NSMutableDictionary *parameters = [NSMutableDictionary dictionary];
-    parameters[@"name"] = exception.name;
-    parameters[@"reason"] = exception.reason;
-    parameters[@"backtrace"] = exception.callStackSymbols;
-    parameters[@"userInfo"] = exception.userInfo;
-
-    return [parameters copy];
-}
-
-#pragma mark - AMATransactionReporter
-
-- (void)reportFailedTransactionWithID:(NSString *)transactionID
-                            ownerName:(NSString *)ownerName
-                      rollbackContent:(NSString *)rollbackContent
-                    rollbackException:(NSException *)rollbackException
-                       rollbackFailed:(BOOL)rollbackFailed
-{
-    NSString *parametersKey = transactionID ?: @"Unknown";
-    NSDictionary *exceptionParameters = [self descriptionParametersForException:rollbackException];
-
-    NSMutableDictionary *parameters = [NSMutableDictionary dictionary];
-    parameters[@"name"] = ownerName;
-    parameters[@"exception"] = exceptionParameters;
-    parameters[@"rollbackcontent"] = rollbackContent;
-    parameters[@"rollback"] = rollbackFailed ? @"failed" : @"succeeded";
-
-    [self.libraryErrorReporter reportEvent:@"TransactionFailure"
-                                parameters:@{ parametersKey: [parameters copy] }
-                                 onFailure:nil];
 }
 
 @end

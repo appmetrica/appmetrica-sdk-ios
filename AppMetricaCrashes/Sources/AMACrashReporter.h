@@ -1,5 +1,4 @@
 #import <Foundation/Foundation.h>
-#import "AMACrashSafeTransactor.h"
 #import "AMAAppMetricaCrashReporting.h"
 #import "AMAAppMetricaPluginReporting.h"
 
@@ -9,7 +8,9 @@ NS_ASSUME_NONNULL_BEGIN
 @class AMAEventPollingParameters;
 @class AMAErrorEnvironment;
 
-@interface AMACrashReporter : NSObject <AMATransactionReporter, AMAAppMetricaCrashReporting, AMAAppMetricaPluginReporting>
+extern NSString *const kAppMetricaLibraryAPIKey;
+
+@interface AMACrashReporter : NSObject <AMAAppMetricaCrashReporting, AMAAppMetricaPluginReporting>
 
 - (instancetype)init NS_UNAVAILABLE;
 - (instancetype)initWithApiKey:(NSString *)apiKey;
