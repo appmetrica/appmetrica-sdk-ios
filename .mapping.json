@@ -1,4 +1,5 @@
 {
+  ".":"mobile/metrika/ios/appmetrica-sdk/public",
   ".github/ISSUE_TEMPLATE/BUG_REPORT.yml":"mobile/metrika/ios/appmetrica-sdk/public/.github/ISSUE_TEMPLATE/BUG_REPORT.yml",
   ".github/ISSUE_TEMPLATE/config.yml":"mobile/metrika/ios/appmetrica-sdk/public/.github/ISSUE_TEMPLATE/config.yml",
   ".github/workflows/objective-c-xcode.yml":"mobile/metrika/ios/appmetrica-sdk/public/.github/workflows/objective-c-xcode.yml",
