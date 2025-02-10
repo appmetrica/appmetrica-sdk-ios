@@ -111,7 +111,7 @@ const ProtobufCMessageDescriptor ama__ad_revenue__decimal__descriptor =
   (ProtobufCMessageInit) ama__ad_revenue__decimal__init,
   NULL,NULL,NULL    /* reserved[123] */
 };
-static const ProtobufCEnumValue ama__ad_revenue__ad_type__enum_values_by_number[7] =
+static const ProtobufCEnumValue ama__ad_revenue__ad_type__enum_values_by_number[8] =
 {
   { "UNKNOWN", "AMA__AD_REVENUE__AD_TYPE__UNKNOWN", 0 },
   { "NATIVE", "AMA__AD_REVENUE__AD_TYPE__NATIVE", 1 },
@@ -120,12 +120,14 @@ static const ProtobufCEnumValue ama__ad_revenue__ad_type__enum_values_by_number[
   { "INTERSTITIAL", "AMA__AD_REVENUE__AD_TYPE__INTERSTITIAL", 4 },
   { "MREC", "AMA__AD_REVENUE__AD_TYPE__MREC", 5 },
   { "OTHER", "AMA__AD_REVENUE__AD_TYPE__OTHER", 6 },
+  { "APP_OPEN", "AMA__AD_REVENUE__AD_TYPE__APP_OPEN", 7 },
 };
 static const ProtobufCIntRange ama__ad_revenue__ad_type__value_ranges[] = {
-{0, 0},{0, 7}
+{0, 0},{0, 8}
 };
-static const ProtobufCEnumValueIndex ama__ad_revenue__ad_type__enum_values_by_name[7] =
+static const ProtobufCEnumValueIndex ama__ad_revenue__ad_type__enum_values_by_name[8] =
 {
+  { "APP_OPEN", 7 },
   { "BANNER", 2 },
   { "INTERSTITIAL", 4 },
   { "MREC", 5 },
@@ -141,9 +143,9 @@ const ProtobufCEnumDescriptor ama__ad_revenue__ad_type__descriptor =
   "AdType",
   "Ama__AdRevenue__AdType",
   "ama",
-  7,
+  8,
   ama__ad_revenue__ad_type__enum_values_by_number,
-  7,
+  8,
   ama__ad_revenue__ad_type__enum_values_by_name,
   1,
   ama__ad_revenue__ad_type__value_ranges,

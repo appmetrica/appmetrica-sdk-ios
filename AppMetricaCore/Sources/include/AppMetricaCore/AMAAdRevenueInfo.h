@@ -11,6 +11,7 @@ typedef NS_ENUM(NSUInteger, AMAAdType) {
     AMAAdTypeInterstitial = 4,
     AMAAdTypeMrec = 5,
     AMAAdTypeOther = 6,
+    AMAAdTypeAppOpen = 7,
 } NS_SWIFT_NAME(AdType);
 
 /** The class to store Ad Revenue data.

@@ -11,6 +11,7 @@ message AdRevenue {
         INTERSTITIAL = 4;
         MREC = 5;
         OTHER = 6;
+        APP_OPEN = 7;
     }
     message Decimal {
         optional int64 mantissa = 1 [default = 0]; // Decimal value mantissa(signed)

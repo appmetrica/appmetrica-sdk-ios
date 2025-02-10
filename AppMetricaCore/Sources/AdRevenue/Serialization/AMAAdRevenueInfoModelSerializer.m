@@ -77,6 +77,8 @@
             return AMA__AD_REVENUE__AD_TYPE__MREC;
         case AMAAdTypeOther:
             return AMA__AD_REVENUE__AD_TYPE__OTHER;
+        case AMAAdTypeAppOpen:
+            return AMA__AD_REVENUE__AD_TYPE__APP_OPEN;
         case AMAAdTypeUnknown:
         default:
             return AMA__AD_REVENUE__AD_TYPE__UNKNOWN;
