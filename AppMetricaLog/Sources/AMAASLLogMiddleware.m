@@ -17,6 +17,7 @@ static const char* const kAMAASLValue = "1";
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated"
+// TODO: https://nda.ya.ru/t/3D5qG9OV7CLvuR
 @implementation AMAASLLogMiddleware
 
 - (BOOL)isAsyncLoggingAcceptable

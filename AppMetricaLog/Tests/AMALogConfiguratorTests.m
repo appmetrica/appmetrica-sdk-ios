@@ -37,60 +37,22 @@ static NSString *const kAMATestChannel = @"TestChannel";
 
 - (void)testOSLogAvailability
 {
-    if (@available(iOS 10.0, *)) {
-        [self.configurator setupLogWithChannel:kAMATestChannel];
-        XCTAssertEqual(self.logMock.OSOutputs.count, 1);
-    }
-    else {
-        XCTSkip("Test requires iOS 10.0 or later");
-    }
+    [self.configurator setupLogWithChannel:kAMATestChannel];
+    XCTAssertEqual(self.logMock.OSOutputs.count, 1);
 }
 
 - (void)testOSLogConfigurations
 {
-    if (@available(iOS 10.0, *)) {
-        [self.configurator setupLogWithChannel:kAMATestChannel];
-        AMALogOutput *output = self.logMock.OSOutputs.firstObject;
-        
-        XCTAssertEqual(output.channel, kAMATestChannel);
-        BOOL contains = [self.formatterFactory.calls containsObject:@[@(AMALogFormatPartOrigin),
-                                                                      @(AMALogFormatPartContent),
-                                                                      @(AMALogFormatPartBacktrace)]];
-        XCTAssertTrue(contains);
-    }
-    else {
-        XCTSkip("Test requires iOS 10.0 or later");
-    }
+    [self.configurator setupLogWithChannel:kAMATestChannel];
+    AMALogOutput *output = self.logMock.OSOutputs.firstObject;
+    
+    XCTAssertEqual(output.channel, kAMATestChannel);
+    BOOL contains = [self.formatterFactory.calls containsObject:@[@(AMALogFormatPartOrigin),
+                                                                  @(AMALogFormatPartContent),
+                                                                  @(AMALogFormatPartBacktrace)]];
+    XCTAssertTrue(contains);
 }
 
-- (void)testASLLogAvailability
-{
-    if (@available(iOS 10.0, *)) {
-        XCTSkip("This test is relevant prior to iOS 10");
-    }
-    else {
-        [self.configurator setupLogWithChannel:kAMATestChannel];
-        XCTAssertEqual(self.logMock.ASLOutputs.count, 1);
-    }
-}
-
-- (void)testASLLogConfiguration
-{
-    if (@available(iOS 10.0, *)) {
-        XCTSkip("This test is relevant prior to iOS 10");
-    }
-    else {
-        [self.configurator setupLogWithChannel:kAMATestChannel];
-        AMALogOutput *output = self.logMock.ASLOutputs.firstObject;
-        
-        XCTAssertEqual(output.channel, kAMATestChannel);
-        BOOL contains = [self.formatterFactory.calls containsObject:@[@(AMALogFormatPartPublicPrefix),
-                                                                      @(AMALogFormatPartOrigin),
-                                                                      @(AMALogFormatPartContent),
-                                                                      @(AMALogFormatPartBacktrace)]];
-        XCTAssertTrue(contains);
-    }
-}
 #ifdef AMA_ENABLE_FILE_LOG
 - (void)testFileLogAvailability
 {

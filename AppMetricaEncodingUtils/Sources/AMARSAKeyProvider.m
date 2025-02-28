@@ -26,9 +26,7 @@
     SecKeyRef keyRef = NULL;
     OSStatus internalStatus = noErr;
 
-    if (@available(iOS 10.0, tvOS 10.0, *)) {
-        keyRef = [self createKey];
-    }
+    keyRef = [self createKey];
 
     if (keyRef == NULL) {
         internalStatus = [self fetchExistingKey:&keyRef];
@@ -45,7 +43,7 @@
     return keyRef;
 }
 
-- (SecKeyRef)createKey API_AVAILABLE(ios(10.0), tvos(10.0))
+- (SecKeyRef)createKey
 {
     CFErrorRef error = NULL;
     NSMutableDictionary *attributes = [[NSMutableDictionary alloc] init];

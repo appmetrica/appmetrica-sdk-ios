@@ -3,20 +3,18 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-API_AVAILABLE(ios(11.2))
 @interface SKProductMutableDiscount : SKProductDiscount
 
 @property(nonatomic, strong) NSDecimalNumber *price;
 @property(nonatomic, strong) NSLocale *priceLocale;
-@property(nonatomic, strong) NSString *identifier API_AVAILABLE(ios(12.2));
+@property(nonatomic, strong) NSString *identifier;
 @property(nonatomic, nullable, strong) SKProductSubscriptionPeriod *subscriptionPeriod;
 @property(nonatomic, assign) NSUInteger numberOfPeriods;
 @property(nonatomic, assign) SKProductDiscountPaymentMode paymentMode;
-@property(nonatomic, assign) SKProductDiscountType type API_AVAILABLE(ios(12.2));
+@property(nonatomic, assign) SKProductDiscountType type;
 
 @end
 
-API_AVAILABLE(ios(11.2))
 @interface  SKProductSubscriptionMutablePeriod : SKProductSubscriptionPeriod
 
 @property(nonatomic, assign) NSUInteger numberOfUnits;
@@ -36,10 +34,10 @@ NS_SWIFT_NAME(MutableSKProduct)
 @property(nonatomic, assign) BOOL isFamilyShareable;
 @property(nonatomic, strong) NSArray<NSNumber *> *downloadContentLengths;
 @property(nonatomic, strong) NSString *downloadContentVersion;
-@property(nonatomic, nullable, strong) SKProductSubscriptionPeriod *subscriptionPeriod API_AVAILABLE(ios(11.2));
-@property(nonatomic, nullable, strong) SKProductDiscount *introductoryPrice API_AVAILABLE(ios(11.2));
+@property(nonatomic, nullable, strong) SKProductSubscriptionPeriod *subscriptionPeriod;
+@property(nonatomic, nullable, strong) SKProductDiscount *introductoryPrice;
 @property(nonatomic, nullable, strong) NSString *subscriptionGroupIdentifier;
-@property(nonatomic, nullable, strong) NSArray<SKProductDiscount *> *discounts API_AVAILABLE(ios(11.2));
+@property(nonatomic, nullable, strong) NSArray<SKProductDiscount *> *discounts;
 
 @end
 

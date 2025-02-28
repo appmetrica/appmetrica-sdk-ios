@@ -236,11 +236,7 @@ static const NSUInteger AMALogControllerMaxAllowedLogFilesCount = 20;
 
 - (id<AMALogMiddleware>)osMiddlewareWithCategory:(const char *)category
 {
-    id<AMALogMiddleware> middleware = nil;
-    if (@available(iOS 10.0, tvOS 10.0, *)) {
-        middleware = [[AMAOSLogMiddleware alloc] initWithCategory:category];
-    }
-    return middleware;
+    return [[AMAOSLogMiddleware alloc] initWithCategory:category];
 }
 
 #ifdef AMA_ENABLE_FILE_LOG

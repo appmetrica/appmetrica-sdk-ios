@@ -38,7 +38,11 @@
 {
     const char *pointer = [sourceString UTF8String];
     unsigned char *md5Buffer = malloc(CC_MD5_DIGEST_LENGTH);
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+    //TODO: https://nda.ya.ru/t/W5HgqaKE7CKfkV
     CC_MD5(pointer, (CC_LONG)strlen(pointer), md5Buffer);
+#pragma clang diagnostic pop
     NSData *md5Data = [NSData dataWithBytesNoCopy:md5Buffer length:CC_MD5_DIGEST_LENGTH];
     return md5Data;
 }

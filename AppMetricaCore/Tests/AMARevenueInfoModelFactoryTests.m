@@ -35,11 +35,9 @@ describe(@"AMARevenueInfoModelFactory", ^{
         product.isFamilyShareable = NO;
         product.downloadContentLengths = @[];
         product.downloadContentVersion = @"1.0.0";
-        if (@available(iOS 11.2, *)) {
-            product.subscriptionPeriod = nil;
-            product.introductoryPrice = nil;
-            product.discounts = @[];
-        }
+        product.subscriptionPeriod = nil;
+        product.introductoryPrice = nil;
+        product.discounts = @[];
         product.subscriptionGroupIdentifier = nil;
         
         payment = [[SKMutablePayment alloc] init];
@@ -47,9 +45,7 @@ describe(@"AMARevenueInfoModelFactory", ^{
         payment.requestData = nil;
         payment.quantity = 1;
         payment.applicationUsername = nil;
-        if (@available(iOS 12.2, *)) {
-            payment.paymentDiscount = nil;
-        }
+        payment.paymentDiscount = nil;
         
         AMAMutableSKPaymentTransaction *originalTransaction = [[AMAMutableSKPaymentTransaction alloc] init];
         originalTransaction.transactionIdentifier = @"123456789";
@@ -76,9 +72,7 @@ describe(@"AMARevenueInfoModelFactory", ^{
     context(@"Purchase", ^{
         
         beforeEach(^{
-            if (@available(iOS 11.2, *)) {
-                product.subscriptionPeriod = nil;
-            }
+            product.subscriptionPeriod = nil;
             transaction.transactionState = SKPaymentTransactionStatePurchased;
             createModel(AMATransactionStatePurchased);
         });
@@ -243,29 +237,25 @@ describe(@"AMARevenueInfoModelFactory", ^{
     context(@"Subscription", ^{
         
         beforeEach(^{
-            if (@available(iOS 11.2, *)) {
-                SKProductSubscriptionMutablePeriod *period = [[SKProductSubscriptionMutablePeriod alloc] init];
-                period.unit = SKProductPeriodUnitMonth;
-                period.numberOfUnits = 6;
-                
-                SKProductSubscriptionMutablePeriod *discountPeriod = [[SKProductSubscriptionMutablePeriod alloc] init];
-                discountPeriod.unit = SKProductPeriodUnitWeek;
-                discountPeriod.numberOfUnits = 1;
-                
-                SKProductMutableDiscount *discount = [[SKProductMutableDiscount alloc] init];
-                discount.price = [NSDecimalNumber decimalNumberWithString:@"19.99"];
-                discount.priceLocale = [NSLocale localeWithLocaleIdentifier:@"en_US"]; // for USD currency
-                discount.subscriptionPeriod = discountPeriod;
-                discount.numberOfPeriods = 2;
-                discount.paymentMode = SKProductDiscountPaymentModePayUpFront;
-                if (@available(iOS 12.2, *)) {
-                    discount.identifier = @"76543456789";
-                    discount.type = SKProductDiscountTypeIntroductory;
-                }
-                
-                product.subscriptionPeriod = period;
-                product.introductoryPrice = discount;
-            }
+            SKProductSubscriptionMutablePeriod *period = [[SKProductSubscriptionMutablePeriod alloc] init];
+            period.unit = SKProductPeriodUnitMonth;
+            period.numberOfUnits = 6;
+            
+            SKProductSubscriptionMutablePeriod *discountPeriod = [[SKProductSubscriptionMutablePeriod alloc] init];
+            discountPeriod.unit = SKProductPeriodUnitWeek;
+            discountPeriod.numberOfUnits = 1;
+            
+            SKProductMutableDiscount *discount = [[SKProductMutableDiscount alloc] init];
+            discount.price = [NSDecimalNumber decimalNumberWithString:@"19.99"];
+            discount.priceLocale = [NSLocale localeWithLocaleIdentifier:@"en_US"]; // for USD currency
+            discount.subscriptionPeriod = discountPeriod;
+            discount.numberOfPeriods = 2;
+            discount.paymentMode = SKProductDiscountPaymentModePayUpFront;
+            discount.identifier = @"76543456789";
+            discount.type = SKProductDiscountTypeIntroductory;
+            
+            product.subscriptionPeriod = period;
+            product.introductoryPrice = discount;
             product.price = [NSDecimalNumber decimalNumberWithString:@"29.99"];
             product.subscriptionGroupIdentifier = @"Subscriptions";
             product.productIdentifier = @"io.appmetrica.subscription.halfyear";
@@ -299,87 +289,67 @@ describe(@"AMARevenueInfoModelFactory", ^{
             [[theValue(model.isAutoCollected) should] beYes];
         });
         
-        if (@available(iOS 11.2, *)) {
-            it(@"Should fill in-app type with Subscription", ^{
-                [[theValue(model.inAppType) should] equal:theValue(AMAInAppTypeSubscription)];
-            });
-            
-            it(@"Should set auto-renewing always to YES", ^{
-                [[theValue(model.subscriptionInfo.isAutoRenewing) should] beYes];
-            });
-        }
-        else {
-            it(@"Should fill in-app type with Purchase", ^{
-                [[theValue(model.inAppType) should] equal:theValue(AMAInAppTypePurchase)];
-            });
-        }
+        it(@"Should fill in-app type with Subscription", ^{
+            [[theValue(model.inAppType) should] equal:theValue(AMAInAppTypeSubscription)];
+        });
+        
+        it(@"Should set auto-renewing always to YES", ^{
+            [[theValue(model.subscriptionInfo.isAutoRenewing) should] beYes];
+        });
         
         context(@"Subscription period", ^{
+            it(@"Should fill subscription duration", ^{
+                [[theValue(model.subscriptionInfo.subscriptionPeriod.count) should] equal:theValue(6)];
+            });
             
-            if (@available(iOS 11.2, *)) {
-                it(@"Should fill subscription duration", ^{
-                    [[theValue(model.subscriptionInfo.subscriptionPeriod.count) should] equal:theValue(6)];
-                });
-                
-                it(@"It should set Day period", ^{
-                    ((SKProductSubscriptionMutablePeriod *)product.subscriptionPeriod).unit = SKProductPeriodUnitDay;
-                    createModel(AMATransactionStatePurchased);
-                    [[theValue(model.subscriptionInfo.subscriptionPeriod.timeUnit) should] equal:theValue(AMATimeUnitDay)];
-                });
-                
-                it(@"It should set Week period", ^{
-                    ((SKProductSubscriptionMutablePeriod *)product.subscriptionPeriod).unit = SKProductPeriodUnitWeek;
-                    createModel(AMATransactionStatePurchased);
-                    [[theValue(model.subscriptionInfo.subscriptionPeriod.timeUnit) should] equal:theValue(AMATimeUnitWeek)];
-                });
-                
-                it(@"It should set Month period", ^{
-                    ((SKProductSubscriptionMutablePeriod *)product.subscriptionPeriod).unit = SKProductPeriodUnitMonth;
-                    createModel(AMATransactionStatePurchased);
-                    [[theValue(model.subscriptionInfo.subscriptionPeriod.timeUnit) should] equal:theValue(AMATimeUnitMonth)];
-                });
-                
-                it(@"It should set Year period", ^{
-                    ((SKProductSubscriptionMutablePeriod *)product.subscriptionPeriod).unit = SKProductPeriodUnitYear;
-                    createModel(AMATransactionStatePurchased);
-                    [[theValue(model.subscriptionInfo.subscriptionPeriod.timeUnit) should] equal:theValue(AMATimeUnitYear)];
-                });
-            }
-            else {
-                it(@"It should set Undefined period", ^{
-                    createModel(AMATransactionStatePurchased);
-                    [[theValue(model.subscriptionInfo.subscriptionPeriod.timeUnit) should] equal:theValue(AMATimeUnitUndefined)];
-                });
-            }
+            it(@"It should set Day period", ^{
+                ((SKProductSubscriptionMutablePeriod *)product.subscriptionPeriod).unit = SKProductPeriodUnitDay;
+                createModel(AMATransactionStatePurchased);
+                [[theValue(model.subscriptionInfo.subscriptionPeriod.timeUnit) should] equal:theValue(AMATimeUnitDay)];
+            });
+            
+            it(@"It should set Week period", ^{
+                ((SKProductSubscriptionMutablePeriod *)product.subscriptionPeriod).unit = SKProductPeriodUnitWeek;
+                createModel(AMATransactionStatePurchased);
+                [[theValue(model.subscriptionInfo.subscriptionPeriod.timeUnit) should] equal:theValue(AMATimeUnitWeek)];
+            });
+            
+            it(@"It should set Month period", ^{
+                ((SKProductSubscriptionMutablePeriod *)product.subscriptionPeriod).unit = SKProductPeriodUnitMonth;
+                createModel(AMATransactionStatePurchased);
+                [[theValue(model.subscriptionInfo.subscriptionPeriod.timeUnit) should] equal:theValue(AMATimeUnitMonth)];
+            });
+            
+            it(@"It should set Year period", ^{
+                ((SKProductSubscriptionMutablePeriod *)product.subscriptionPeriod).unit = SKProductPeriodUnitYear;
+                createModel(AMATransactionStatePurchased);
+                [[theValue(model.subscriptionInfo.subscriptionPeriod.timeUnit) should] equal:theValue(AMATimeUnitYear)];
+            });
         });
-        if (@available(iOS 11.2, *)) {
-            context(@"Intoductary", ^{
-                if (@available(iOS 12.2, *)) {
-                    it(@"Should set Indroductary ID", ^{
-                        [[model.subscriptionInfo.introductoryID should] equal:product.introductoryPrice.identifier];
-                    });
-                }
+        context(@"Intoductary", ^{
+            it(@"Should set Indroductary ID", ^{
+                [[model.subscriptionInfo.introductoryID should] equal:product.introductoryPrice.identifier];
+            });
+            
+            it(@"Should set intoructary price", ^{
+                [[model.subscriptionInfo.introductoryPrice should] equal:product.introductoryPrice.price];
+            });
+            
+            context(@"Intoductary period", ^{
                 
-                it(@"Should set intoructary price", ^{
-                    [[model.subscriptionInfo.introductoryPrice should] equal:product.introductoryPrice.price];
+                it(@"Should fill Intoductary duration", ^{
+                    [[theValue(model.subscriptionInfo.introductoryPeriod.count) should] equal:theValue(1)];
                 });
                 
-                context(@"Intoductary period", ^{
-                    
-                    it(@"Should fill Intoductary duration", ^{
-                        [[theValue(model.subscriptionInfo.introductoryPeriod.count) should] equal:theValue(1)];
-                    });
-                    
-                    it(@"Should fill Intoductary unit", ^{
-                        [[theValue(model.subscriptionInfo.introductoryPeriod.timeUnit) should] equal:theValue(AMATimeUnitWeek)];
-                    });
-                    
-                    it(@"Should fill Intoductary durations count", ^{
-                        [[theValue(model.subscriptionInfo.introductoryPeriodCount) should] equal:theValue(2)];
-                    });
+                it(@"Should fill Intoductary unit", ^{
+                    [[theValue(model.subscriptionInfo.introductoryPeriod.timeUnit) should] equal:theValue(AMATimeUnitWeek)];
+                });
+                
+                it(@"Should fill Intoductary durations count", ^{
+                    [[theValue(model.subscriptionInfo.introductoryPeriodCount) should] equal:theValue(2)];
                 });
             });
-        }
+        });
     });
 });
 

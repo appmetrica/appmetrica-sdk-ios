@@ -96,69 +96,54 @@
 }
 
 #pragma mark - Subscription
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "UnavailableInDeploymentTarget"
 - (AMASubscriptionInfoModel *)constructSubscriptionModelWithProduct:(SKProduct *)product
 {
     AMASubscriptionInfoModel *model = nil;
-    if (@available(iOS 11.2, tvOS 11.2, *)) {
-        NSString *introductoryID = nil;
-        if (@available(iOS 12.2, tvOS 12.2, *)) {
-            introductoryID = product.introductoryPrice.identifier;
-        }
-
-        SKProductDiscount *discount = product.introductoryPrice;
-        AMASubscriptionPeriod *introductoryPeriod = [self convertSubscriptionPeriod:discount.subscriptionPeriod];
-
-        model = [[AMASubscriptionInfoModel alloc] initWithIsAutoRenewing:YES
-                                                      subscriptionPeriod:[self convertSubscriptionPeriod:product.subscriptionPeriod]
-                                                          introductoryID:introductoryID
-                                                       introductoryPrice:product.introductoryPrice.price
-                                                      introductoryPeriod:introductoryPeriod
-                                                 introductoryPeriodCount:discount.numberOfPeriods];
-    }
+    NSString *introductoryID = product.introductoryPrice.identifier;
+    SKProductDiscount *discount = product.introductoryPrice;
+    AMASubscriptionPeriod *introductoryPeriod = [self convertSubscriptionPeriod:discount.subscriptionPeriod];
+    
+    model = [[AMASubscriptionInfoModel alloc] initWithIsAutoRenewing:YES
+                                                  subscriptionPeriod:[self convertSubscriptionPeriod:product.subscriptionPeriod]
+                                                      introductoryID:introductoryID
+                                                   introductoryPrice:product.introductoryPrice.price
+                                                  introductoryPeriod:introductoryPeriod
+                                             introductoryPeriodCount:discount.numberOfPeriods];
     return model;
 }
 
 - (BOOL)isSubscription:(SKProduct *)product
 {
-    if (@available(iOS 11.2, tvOS 11.2, *)) {
-        return product.subscriptionPeriod != nil && product.subscriptionPeriod.numberOfUnits > 0;
-    }
-    return NO;
+    return product.subscriptionPeriod != nil && product.subscriptionPeriod.numberOfUnits > 0;
 }
 
 - (AMASubscriptionPeriod *)convertSubscriptionPeriod:(id)object
 {
-    if (@available(iOS 11.2, tvOS 11.2, *)) {
-        if ([object isKindOfClass:[self.storeKit classFromString:@"SKProductSubscriptionPeriod"]]) {
-            SKProductSubscriptionPeriod *period = (SKProductSubscriptionPeriod *)object;
-
-            AMATimeUnit timeUnit = AMATimeUnitUndefined;
-            switch (period.unit) {
-                case SKProductPeriodUnitDay:
-                    timeUnit = AMATimeUnitDay;
-                    break;
-                case SKProductPeriodUnitWeek:
-                    timeUnit = AMATimeUnitWeek;
-                    break;
-                case SKProductPeriodUnitMonth:
-                    timeUnit = AMATimeUnitMonth;
-                    break;
-                case SKProductPeriodUnitYear:
-                    timeUnit = AMATimeUnitYear;
-                    break;
-                default:
-                    break;
-            }
-
-            return [[AMASubscriptionPeriod alloc] initWithCount:period.numberOfUnits
-                                                       timeUnit:timeUnit];
+    if ([object isKindOfClass:[self.storeKit classFromString:@"SKProductSubscriptionPeriod"]]) {
+        SKProductSubscriptionPeriod *period = (SKProductSubscriptionPeriod *)object;
+        
+        AMATimeUnit timeUnit = AMATimeUnitUndefined;
+        switch (period.unit) {
+            case SKProductPeriodUnitDay:
+                timeUnit = AMATimeUnitDay;
+                break;
+            case SKProductPeriodUnitWeek:
+                timeUnit = AMATimeUnitWeek;
+                break;
+            case SKProductPeriodUnitMonth:
+                timeUnit = AMATimeUnitMonth;
+                break;
+            case SKProductPeriodUnitYear:
+                timeUnit = AMATimeUnitYear;
+                break;
+            default:
+                break;
         }
+        
+        return [[AMASubscriptionPeriod alloc] initWithCount:period.numberOfUnits
+                                                   timeUnit:timeUnit];
     }
     return nil;
 }
-
-#pragma clang diagnostic pop
 
 @end
