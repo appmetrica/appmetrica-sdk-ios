@@ -12,10 +12,10 @@
     {
       "identity" : "kscrash",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/kstenerud/KSCrash",
+      "location" : "https://github.com/kstenerud/KSCrash.git",
       "state" : {
-        "revision" : "c3bbb7241c9730edfa14675898de00770a85dc0e",
-        "version" : "2.0.0-rc.4"
+        "revision" : "e62b01179f951ffa6670af186b21f00657a92557",
+        "version" : "2.0.0-rc.8"
       }
     }
   ],

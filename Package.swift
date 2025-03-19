@@ -67,7 +67,7 @@ enum ExternalPackage: String, CaseIterable {
     var package: Package.Dependency {
         switch self {
         case .ksCrash:
-            return package(url: "https://github.com/kstenerud/KSCrash", "2.0.0-rc.1"..<"2.1.0")
+            return package(url: "https://github.com/kstenerud/KSCrash.git", exact: "2.0.0-rc.8")
         case .kiwi:
             return package(url: "https://github.com/appmetrica/Kiwi", exact: "3.0.1-spm")
         }
