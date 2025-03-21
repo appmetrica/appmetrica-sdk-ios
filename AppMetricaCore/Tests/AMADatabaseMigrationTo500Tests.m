@@ -337,6 +337,32 @@ describe(@"AMADatabaseMigrationTo500Tests", ^{
                             withArguments:serviceIdentifier, accessGroup, kw_any()];
                 };
                 
+                it(@"Should migrate deviceID with keychain if no old db exists", ^{
+                    [[NSFileManager defaultManager] removeItemAtPath:[AMAMigrationTo500Utils migrationPath] error:nil];
+                    
+                    NSString *accessGroup = [appIdentifierPrefix stringByAppendingString:kAMAMigrationKeychainAccessGroup];
+                    stubKeychain(kAMAMigrationKeychainVendorServiceIdentifier, accessGroup, keychainMock);
+                    
+                    [keychainMock stub:@selector(isAvailable) andReturn:theValue(YES)];
+                    [keychainMock stub:@selector(stringValueForKey:error:)
+                             andReturn:deviceID
+                         withArguments:kAMAMigrationDeviceIDStorageKey, kw_any()];
+                    [keychainMock stub:@selector(stringValueForKey:error:)
+                             andReturn:deviceIDHash
+                         withArguments:kAMAMigrationDeviceIDHashStorageKey, kw_any()];
+                    
+                    
+                    [[persistentMock should] receive:@selector(setDeviceID:) withArguments:deviceID];
+                    [[persistentMock should] receive:@selector(setDeviceIDHash:) withArguments:deviceIDHash];
+                    
+                    id<AMADatabaseProtocol> newDB = [AMADatabaseFactory configurationDatabase];
+                    
+                    [newDB inDatabase:^(AMAFMDatabase *db) {
+                        id<AMAKeyValueStoring> storage = [newDB.storageProvider storageForDB:db];
+                        [[[storage stringForKey:AMAStorageStringKeyDidApplyDataMigrationFor500 error:nil] should] equal:@"1"];
+                    }];
+                });
+                
                 it(@"Should migrate deviceID with fallback keychain", ^{
                     NSString *accessGroup = [appIdentifierPrefix stringByAppendingString:kAMAMigrationKeychainAccessGroup];
                     stubKeychain(kAMAMigrationKeychainVendorServiceIdentifier, accessGroup, keychainMock);

@@ -32,6 +32,9 @@
             }];
             [self migrateExtendedStartupParametersIfNeeded:database];
         }
+        else {
+            [AMAMigrationTo500Utils migrateDeviceIDFromDB:nil];
+        }
         
         [self migrateInstantIfNeeded:database];
         
