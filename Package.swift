@@ -23,6 +23,7 @@ enum AppMetricaTarget: String {
     case keychain = "AppMetricaKeychain"
     case identifiers = "AppMetricaIdentifiers"
     case synchronization = "AppMetricaSynchronization"
+    case screenshot = "AppMetricaScreenshot"
 
     case protobuf = "AppMetricaProtobuf"
     case fmdb = "AppMetricaFMDB"
@@ -40,6 +41,7 @@ enum AppMetricaProduct: String, CaseIterable {
     case adSupport = "AppMetricaAdSupport"
     case webKit = "AppMetricaWebKit"
     case libraryAdapter = "AppMetricaLibraryAdapter"
+    case screenshot = "AppMetricaScreenshot"
 
     static var allProducts: [Product] { allCases.map { $0.product } }
 
@@ -50,6 +52,7 @@ enum AppMetricaProduct: String, CaseIterable {
         case .adSupport: return [.adSupport]
         case .webKit: return [.webKit]
         case .libraryAdapter: return [.libraryAdapter]
+        case .screenshot: return [.screenshot]
         }
     }
     
@@ -297,6 +300,14 @@ let package = Package(
         //MARK: - AppMetricaLibraryAdapter
         .target(target: .libraryAdapter, dependencies: [.core, .coreExtension]),
         .testTarget(target: .libraryAdapter, dependencies: [.libraryAdapter]),
+        
+        //MARK: - AppMetricaScreenshot
+        .target(target: .screenshot, dependencies: [.core, .coreExtension]),
+        .testTarget(
+            target: .screenshot,
+            dependencies: [.screenshot, .core, .testUtils],
+            externalDependencies: [.kiwi]
+        ),
 
         //MARK: - AppMetrica FMDB
         .target(target: .fmdb),
@@ -468,6 +479,11 @@ extension AppMetricaTarget {
                 "./Plugins",
                 "./Resources",
             ]
+        case .screenshot:
+            return [
+                "./Reporter",
+                "./Configuration",
+            ]
         case .adSupport, .coreExtension, .encodingUtils, .fmdb, .hostState, .log, .network, .platform,
                 .protobuf, .protobufUtils, .storageUtils, .webKit, .testUtils, .libraryAdapter, .keychain, .identifiers, .logSwift, .synchronization:
             return []
@@ -482,7 +498,7 @@ extension AppMetricaTarget {
                 "Resources",
                 "Utilities",
             ]
-        case .coreUtils, .encodingUtils, .network:
+        case .coreUtils, .encodingUtils, .network, .screenshot:
             return [
                 "Utilities",
             ]

@@ -19,4 +19,5 @@ Pod::Spec.new do |s|
   s.dependency 'AppMetricaAdSupport', '= 5.10.0'
   s.dependency 'AppMetricaWebKit', '= 5.10.0'
   s.dependency 'AppMetricaCrashes', '= 5.10.0'
+  s.dependency 'AppMetricaScreenshot', '= 5.10.0'
 end
