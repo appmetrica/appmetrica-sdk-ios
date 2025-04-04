@@ -311,6 +311,13 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
     }
 }
 
++ (void)reportSystemEvent:(NSString *)name onFailure:(void (^)(NSError *))onFailure
+{
+    if ([self isAppMetricaStartedWithLogging:onFailure]) {
+        [[self sharedImpl] reportSystemEvent:name onFailure:onFailure];
+    }
+}
+
 #pragma mark - Public API -
 
 + (void)activateWithConfiguration:(AMAAppMetricaConfiguration *)configuration

@@ -432,6 +432,18 @@
     return event;
 }
 
+- (AMAEvent *)systemEvent:(NSString *)name
+{
+    if (name.length == 0) {
+        AMALogWarn(@"Ignoring SDK system event: event name is empty.");
+        return nil;
+    }
+    AMAEvent *event = [self eventOfType:AMAEventTypeClient];
+    [self fillEvent:event withName:name];
+    event.source = AMAEventSourceSDKSystem;
+    return event;
+}
+
 #pragma mark - Private -
 
 - (void)fillEvent:(AMAEvent *)event withName:(NSString *)name

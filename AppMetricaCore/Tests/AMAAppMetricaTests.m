@@ -604,6 +604,27 @@ describe(@"AMAAppMetrica", ^{
                 });
             });
         });
+        context(@"System SDK event", ^{
+            NSString *const eventName = @"eventName";
+            
+            beforeEach(^{
+                stubMetricaStarted(YES);
+            });
+            it(@"Should report event", ^{
+                [[impl should] receive:@selector(reportSystemEvent:onFailure:)
+                         withArguments:eventName, nil];
+                
+                [AMAAppMetrica reportSystemEvent:eventName onFailure:nil];
+            });
+            
+            it(@"Should not report event if metrica is not started", ^{
+                stubMetricaStarted(NO);
+                
+                [[impl shouldNot] receive:@selector(reportSystemEvent:onFailure:)];
+                
+                [AMAAppMetrica reportSystemEvent:eventName onFailure:nil];
+            });
+        });
         context(@"Profile event type", ^{
             AMAUserProfile *__block profile = nil;
             

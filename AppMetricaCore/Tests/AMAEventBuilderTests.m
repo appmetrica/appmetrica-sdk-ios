@@ -501,6 +501,41 @@ describe(@"AMAEventBuilder", ^{
                 [builder jsInitEvent:@"value"];
             });
         });
+        context(@"SDK system event", ^{
+            NSString *const name = @"event name";
+            context(@"Fields", ^{
+                beforeEach(^{
+                    event = [builder systemEvent:name];
+                });
+                it(@"Should have valid value", ^{
+                    [((NSObject *)event.value) shouldBeNil];
+                });
+                it(@"Should have valid name", ^{
+                    [[event.name should] equal:name];
+                });
+                it(@"Should have valid type", ^{
+                    [[theValue(event.type) should] equal:theValue(AMAEventTypeClient)];
+                });
+                it(@"Should have JS source", ^{
+                    [[theValue(event.source) should] equal:theValue(AMAEventSourceSDKSystem)];
+                });
+            });
+            context(@"Empty parameters", ^{
+                it(@"Should not create event with nil value", ^{
+                    event = [builder systemEvent:nil];
+                    [[event should] beNil];
+                });
+                it(@"Should not create event with empty value", ^{
+                    event = [builder systemEvent:@""];
+                    [[event should] beNil];
+                });
+            });
+            it(@"Should be passed to composer", ^{
+                [[eventComposerProvider should] receive:@selector(composerForType:) withArguments:theValue(AMAEventTypeClient)];
+                [[eventComposer should] receive:@selector(compose:)];
+                [builder systemEvent:@"event"];
+            });
+        });
         context(@"Attribution event", ^{
             NSString *name = @"some name";
             NSDictionary *value = @{ @"some key" : @"some value" };

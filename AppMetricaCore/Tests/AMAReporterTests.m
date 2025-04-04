@@ -1794,6 +1794,19 @@ describe(@"AMAReporter", ^{
                 [[event shouldNot] beNil];
             });
         });
+        context(@"System events", ^{
+            NSString *const eventName = @"event";
+            __block AMAEvent *event;
+            beforeEach(^{
+                [reporter reportSystemEvent:eventName onFailure:^(NSError *anError) { error = anError; }];
+                event = [eventStorage() amatest_savedEventWithType:AMAEventTypeClient];
+            });
+            it(@"Should save event", ^{
+                [[error should] beNil];
+                [[event shouldNot] beNil];
+                [[theValue(event.source) should] equal:theValue(AMAEventSourceSDKSystem)];
+            });
+        });
     });
     
     context(@"Session extras", ^{

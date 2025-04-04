@@ -115,6 +115,7 @@ message ReportMessage {
             enum EventSource {
                 NATIVE = 0;
                 JS = 1;
+                SDK_SYSTEM = 2;
             }
             optional EventSource source = 22 [default = NATIVE];
             optional bool attribution_id_changed = 23 [default = false];

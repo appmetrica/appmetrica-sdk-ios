@@ -1,5 +1,5 @@
 
-#import <AppMetricaCore/AppMetricaCore.h>
+#import <AppMetricaCoreExtension/AppMetricaCoreExtension.h>
 #import "AMAScreenshotMainReporter.h"
 #import "AMAScreenshotEventName.h"
 
@@ -7,7 +7,7 @@
 
 - (void)reportScreenshot
 {
-    [AMAAppMetrica reportEvent:AMAScreenshotEventName onFailure:nil];
+    [AMAAppMetrica reportSystemEvent:AMAScreenshotEventName onFailure:nil];
 }
 
 @end

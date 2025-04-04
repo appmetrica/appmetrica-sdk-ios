@@ -102,4 +102,6 @@
 
 - (AMAEvent *)eventExternalAttribution:(NSData *)data;
 
+- (AMAEvent *)systemEvent:(NSString *)name;
+
 @end

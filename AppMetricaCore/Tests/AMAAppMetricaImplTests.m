@@ -1222,6 +1222,17 @@ describe(@"AMAAppMetricaImpl", ^{
                 [appMetricaImpl activateAnonymously];
             });
         });
+        
+        context(@"System event", ^{
+            NSString *const eventName = @"event name";
+            it(@"Should report system event", ^{
+                [appMetricaImpl activateWithConfiguration:configuration];
+                [[appMetricaImpl.mainReporter should] receive:@selector(reportSystemEvent:onFailure:)
+                                                withArguments:eventName, nil];
+                
+                [appMetricaImpl reportSystemEvent:eventName onFailure:nil];
+            });
+        });
     });
     context(@"Session extras", ^{
         NSString *const key = @"key";

@@ -76,6 +76,15 @@ NS_SWIFT_NAME(AppMetricaExtendedReporting)
                          extras:(nullable NSDictionary<NSString *, NSData *> *)extras
                       onFailure:(nullable void (^)(NSError *error))onFailure;
 
+/** Reports an SDK system event.
+
+ @param name Short name or description of the event.
+ @param onFailure Block to be executed if an error occurs while reporting, the error is passed as block argument.
+ */
+- (void)reportSystemEvent:(NSString *)name
+                onFailure:(nullable void (^)(NSError *error))onFailure
+NS_SWIFT_NAME(reportSystemEvent(name:onFailure:));
+
 @end
 
 NS_ASSUME_NONNULL_END

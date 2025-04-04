@@ -245,6 +245,11 @@ describe(@"AMAEventSerializer", ^{
                     fillEventData();
                     [[theValue(eventData->source) should] equal:theValue(AMA__EVENT_DATA__EVENT_SOURCE__JS)];
                 });
+                it(@"Should have SDK source", ^{
+                    event.source = AMAEventSourceSDKSystem;
+                    fillEventData();
+                    [[theValue(eventData->source) should] equal:theValue(AMA__EVENT_DATA__EVENT_SOURCE__SDK_SYSTEM)];
+                });
             });
             context(@"Attribution id changed", ^{
                 it(@"Should have attribution_id_changed as true", ^{
@@ -707,17 +712,23 @@ describe(@"AMAEventSerializer", ^{
                 [[theValue(event.numberOfType) should] equal:theValue(number)];
             });
             context(@"Event source", ^{
-                it (@"Should have native source", ^{
+                it(@"Should have native source", ^{
                     eventData->has_source = true;
                     eventData->source = AMA__EVENT_DATA__EVENT_SOURCE__NATIVE;
                     fillEvent();
                     [[theValue(event.source) should] equal:theValue(AMAEventSourceNative)];
                 });
-                it (@"Should have JS source", ^{
+                it(@"Should have JS source", ^{
                     eventData->has_source = true;
                     eventData->source = AMA__EVENT_DATA__EVENT_SOURCE__JS;
                     fillEvent();
                     [[theValue(event.source) should] equal:theValue(AMAEventSourceJs)];
+                });
+                it(@"Should have SDK system source", ^{
+                    eventData->has_source = true;
+                    eventData->source = AMA__EVENT_DATA__EVENT_SOURCE__SDK_SYSTEM;
+                    fillEvent();
+                    [[theValue(event.source) should] equal:theValue(AMAEventSourceSDKSystem)];
                 });
             });
             context(@"First occurrence", ^{

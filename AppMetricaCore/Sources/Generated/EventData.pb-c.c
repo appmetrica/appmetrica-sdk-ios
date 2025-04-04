@@ -404,18 +404,20 @@ const ProtobufCMessageDescriptor ama__event_data__extra_entry__descriptor =
   (ProtobufCMessageInit) ama__event_data__extra_entry__init,
   NULL,NULL,NULL    /* reserved[123] */
 };
-static const ProtobufCEnumValue ama__event_data__event_source__enum_values_by_number[2] =
+static const ProtobufCEnumValue ama__event_data__event_source__enum_values_by_number[3] =
 {
   { "NATIVE", "AMA__EVENT_DATA__EVENT_SOURCE__NATIVE", 0 },
   { "JS", "AMA__EVENT_DATA__EVENT_SOURCE__JS", 1 },
+  { "SDK_SYSTEM", "AMA__EVENT_DATA__EVENT_SOURCE__SDK_SYSTEM", 2 },
 };
 static const ProtobufCIntRange ama__event_data__event_source__value_ranges[] = {
-{0, 0},{0, 2}
+{0, 0},{0, 3}
 };
-static const ProtobufCEnumValueIndex ama__event_data__event_source__enum_values_by_name[2] =
+static const ProtobufCEnumValueIndex ama__event_data__event_source__enum_values_by_name[3] =
 {
   { "JS", 1 },
   { "NATIVE", 0 },
+  { "SDK_SYSTEM", 2 },
 };
 const ProtobufCEnumDescriptor ama__event_data__event_source__descriptor =
 {
@@ -424,9 +426,9 @@ const ProtobufCEnumDescriptor ama__event_data__event_source__descriptor =
   "EventSource",
   "Ama__EventData__EventSource",
   "ama",
-  2,
+  3,
   ama__event_data__event_source__enum_values_by_number,
-  2,
+  3,
   ama__event_data__event_source__enum_values_by_name,
   1,
   ama__event_data__event_source__value_ranges,

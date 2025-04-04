@@ -40,6 +40,12 @@ describe(@"AMAProtoConversionUtility", ^{
             [[theValue(result) should] equal:theValue(AMA__REPORT_MESSAGE__SESSION__EVENT__EVENT_SOURCE__JS)];
         });
         
+        it(@"should convert SDK source to local proto SDK source", ^{
+            testEventSource = AMAEventSourceSDKSystem;
+            Ama__ReportMessage__Session__Event__EventSource result = [AMAProtoConversionUtility eventSourceToLocalProto:testEventSource];
+            [[theValue(result) should] equal:theValue(AMA__REPORT_MESSAGE__SESSION__EVENT__EVENT_SOURCE__SDK_SYSTEM)];
+        });
+        
         it(@"should convert native source (or default) to local proto native", ^{
             testEventSource = AMAEventSourceNative;
             Ama__ReportMessage__Session__Event__EventSource result = [AMAProtoConversionUtility eventSourceToLocalProto:testEventSource];
@@ -54,6 +60,12 @@ describe(@"AMAProtoConversionUtility", ^{
             [[theValue(result) should] equal:theValue(AMA__EVENT_DATA__EVENT_SOURCE__JS)];
         });
         
+        it(@"should convert SDK source to server proto SKD source", ^{
+            testEventSource = AMAEventSourceSDKSystem;
+            Ama__EventData__EventSource result = [AMAProtoConversionUtility eventSourceToServerProto:testEventSource];
+            [[theValue(result) should] equal:theValue(AMA__EVENT_DATA__EVENT_SOURCE__SDK_SYSTEM)];
+        });
+        
         it(@"should convert native source (or default) to server proto native", ^{
             testEventSource = AMAEventSourceNative;
             Ama__EventData__EventSource result = [AMAProtoConversionUtility eventSourceToServerProto:testEventSource];
@@ -66,6 +78,12 @@ describe(@"AMAProtoConversionUtility", ^{
             testProtoEventSource = AMA__EVENT_DATA__EVENT_SOURCE__JS;
             AMAEventSource result = [AMAProtoConversionUtility eventSourceToModel:testProtoEventSource];
             [[theValue(result) should] equal:theValue(AMAEventSourceJs)];
+        });
+        
+        it(@"should convert proto SDK to model SDK", ^{
+            testProtoEventSource = AMA__EVENT_DATA__EVENT_SOURCE__SDK_SYSTEM;
+            AMAEventSource result = [AMAProtoConversionUtility eventSourceToModel:testProtoEventSource];
+            [[theValue(result) should] equal:theValue(AMAEventSourceSDKSystem)];
         });
         
         it(@"should convert proto native (or default) to model native", ^{

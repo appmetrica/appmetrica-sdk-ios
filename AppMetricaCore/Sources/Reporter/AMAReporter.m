@@ -474,6 +474,14 @@
                            onFailure:onFailure];
 }
 
+- (void)reportSystemEvent:(NSString *)name onFailure:(void (^)(NSError *))onFailure
+{
+    [self reportCommonEventWithBlock:^AMAEvent *(NSError **error) {
+        return [self.eventBuilder systemEvent:name];
+    }
+                           onFailure:onFailure];
+}
+
 - (void)setSessionExtras:(nullable NSData *)data forKey:(nonnull NSString *)key
 {
     [self execute:^{

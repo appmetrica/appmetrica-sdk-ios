@@ -67,7 +67,8 @@ typedef enum _Ama__ReportMessage__Session__Event__EncodingType {
 } Ama__ReportMessage__Session__Event__EncodingType;
 typedef enum _Ama__ReportMessage__Session__Event__EventSource {
   AMA__REPORT_MESSAGE__SESSION__EVENT__EVENT_SOURCE__NATIVE = 0,
-  AMA__REPORT_MESSAGE__SESSION__EVENT__EVENT_SOURCE__JS = 1
+  AMA__REPORT_MESSAGE__SESSION__EVENT__EVENT_SOURCE__JS = 1,
+  AMA__REPORT_MESSAGE__SESSION__EVENT__EVENT_SOURCE__SDK_SYSTEM = 2
     PROTOBUF_C__FORCE_ENUM_TO_BE_INT_SIZE(AMA__REPORT_MESSAGE__SESSION__EVENT__EVENT_SOURCE)
 } Ama__ReportMessage__Session__Event__EventSource;
 typedef enum _Ama__ReportMessage__OptionalBool {
@@ -87,7 +88,7 @@ struct  Ama__RequestParameters
 };
 #define AMA__REQUEST_PARAMETERS__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__request_parameters__descriptor) \
-, NULL, NULL }
+    , NULL, NULL }
 
 
 struct  Ama__Time
@@ -98,7 +99,7 @@ struct  Ama__Time
 };
 #define AMA__TIME__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__time__descriptor) \
-, 0, 0 }
+    , 0, 0 }
 
 
 struct  Ama__ReportMessage__Location
@@ -119,7 +120,7 @@ struct  Ama__ReportMessage__Location
 };
 #define AMA__REPORT_MESSAGE__LOCATION__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__report_message__location__descriptor) \
-, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
+    , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
 
 
 struct  Ama__ReportMessage__Session__SessionDesc
@@ -132,7 +133,7 @@ struct  Ama__ReportMessage__Session__SessionDesc
 };
 #define AMA__REPORT_MESSAGE__SESSION__SESSION_DESC__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__report_message__session__session_desc__descriptor) \
-, NULL, NULL, 0, AMA__REPORT_MESSAGE__SESSION__SESSION_DESC__SESSION_TYPE__SESSION_FOREGROUND }
+    , NULL, NULL, 0, AMA__REPORT_MESSAGE__SESSION__SESSION_DESC__SESSION_TYPE__SESSION_FOREGROUND }
 
 
 struct  Ama__ReportMessage__Session__Event__ExtrasEntry
@@ -145,7 +146,7 @@ struct  Ama__ReportMessage__Session__Event__ExtrasEntry
 };
 #define AMA__REPORT_MESSAGE__SESSION__EVENT__EXTRAS_ENTRY__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__report_message__session__event__extras_entry__descriptor) \
-, 0, {0,NULL}, 0, {0,NULL} }
+    , 0, {0,NULL}, 0, {0,NULL} }
 
 
 struct  Ama__ReportMessage__Session__Event
@@ -184,7 +185,7 @@ struct  Ama__ReportMessage__Session__Event
 };
 #define AMA__REPORT_MESSAGE__SESSION__EVENT__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__report_message__session__event__descriptor) \
-, 0, 0, 0, NULL, 0, {0,NULL}, NULL, NULL, 0, 0, 0, AMA__REPORT_MESSAGE__SESSION__EVENT__ENCODING_TYPE__NONE, 0, AMA__REPORT_MESSAGE__OPTIONAL_BOOL__OPTIONAL_BOOL_UNDEFINED, 0, {0,NULL}, 0, AMA__REPORT_MESSAGE__OPTIONAL_BOOL__OPTIONAL_BOOL_UNDEFINED, 0, 0, 0, 0, 0, AMA__REPORT_MESSAGE__SESSION__EVENT__EVENT_SOURCE__NATIVE, 0, 0, 0, 1ull, 0,NULL }
+    , 0, 0, 0, NULL, 0, {0,NULL}, NULL, NULL, 0, 0, 0, AMA__REPORT_MESSAGE__SESSION__EVENT__ENCODING_TYPE__NONE, 0, AMA__REPORT_MESSAGE__OPTIONAL_BOOL__OPTIONAL_BOOL_UNDEFINED, 0, {0,NULL}, 0, AMA__REPORT_MESSAGE__OPTIONAL_BOOL__OPTIONAL_BOOL_UNDEFINED, 0, 0, 0, 0, 0, AMA__REPORT_MESSAGE__SESSION__EVENT__EVENT_SOURCE__NATIVE, 0, 0, 0, 1ull, 0,NULL }
 
 
 struct  Ama__ReportMessage__Session
@@ -197,7 +198,7 @@ struct  Ama__ReportMessage__Session
 };
 #define AMA__REPORT_MESSAGE__SESSION__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__report_message__session__descriptor) \
-, 0, NULL, 0,NULL }
+    , 0, NULL, 0,NULL }
 
 
 struct  Ama__ReportMessage__EnvironmentVariable
@@ -208,7 +209,7 @@ struct  Ama__ReportMessage__EnvironmentVariable
 };
 #define AMA__REPORT_MESSAGE__ENVIRONMENT_VARIABLE__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__report_message__environment_variable__descriptor) \
-, NULL, NULL }
+    , NULL, NULL }
 
 
 struct  Ama__ReportMessage
@@ -222,7 +223,7 @@ struct  Ama__ReportMessage
 };
 #define AMA__REPORT_MESSAGE__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__report_message__descriptor) \
-, 0,NULL, NULL, 0,NULL }
+    , 0,NULL, NULL, 0,NULL }
 
 
 /* Ama__RequestParameters methods */

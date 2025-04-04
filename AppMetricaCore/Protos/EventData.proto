@@ -53,6 +53,7 @@ message EventData {
     enum EventSource {
         NATIVE = 0;
         JS = 1;
+        SDK_SYSTEM = 2;
     }
     optional EventSource source = 15 [default = NATIVE];
     optional bool attribution_id_changed = 16 [default = false];

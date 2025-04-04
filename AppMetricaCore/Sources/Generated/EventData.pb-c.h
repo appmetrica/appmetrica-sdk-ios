@@ -39,7 +39,8 @@ typedef enum _Ama__EventData__Payload__ValueType {
 } Ama__EventData__Payload__ValueType;
 typedef enum _Ama__EventData__EventSource {
   AMA__EVENT_DATA__EVENT_SOURCE__NATIVE = 0,
-  AMA__EVENT_DATA__EVENT_SOURCE__JS = 1
+  AMA__EVENT_DATA__EVENT_SOURCE__JS = 1,
+  AMA__EVENT_DATA__EVENT_SOURCE__SDK_SYSTEM = 2
     PROTOBUF_C__FORCE_ENUM_TO_BE_INT_SIZE(AMA__EVENT_DATA__EVENT_SOURCE)
 } Ama__EventData__EventSource;
 
@@ -58,7 +59,7 @@ struct  Ama__EventData__Payload
 };
 #define AMA__EVENT_DATA__PAYLOAD__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__event_data__payload__descriptor) \
-, 0, {0,NULL}, AMA__EVENT_DATA__PAYLOAD__VALUE_TYPE__EMPTY, 0, {0,NULL}, AMA__EVENT_DATA__PAYLOAD__ENCRYPTION_TYPE__NONE, 0 }
+    , 0, {0,NULL}, AMA__EVENT_DATA__PAYLOAD__VALUE_TYPE__EMPTY, 0, {0,NULL}, AMA__EVENT_DATA__PAYLOAD__ENCRYPTION_TYPE__NONE, 0 }
 
 
 struct  Ama__EventData__Location
@@ -76,7 +77,7 @@ struct  Ama__EventData__Location
 };
 #define AMA__EVENT_DATA__LOCATION__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__event_data__location__descriptor) \
-, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
+    , 0, 0, 0, 0, 0, 0, 0, 0, 0 }
 
 
 struct  Ama__EventData__ExtraEntry
@@ -87,7 +88,7 @@ struct  Ama__EventData__ExtraEntry
 };
 #define AMA__EVENT_DATA__EXTRA_ENTRY__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__event_data__extra_entry__descriptor) \
-, {0,NULL}, {0,NULL} }
+    , {0,NULL}, {0,NULL} }
 
 
 struct  Ama__EventData
@@ -125,7 +126,7 @@ struct  Ama__EventData
 };
 #define AMA__EVENT_DATA__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__event_data__descriptor) \
-, NULL, 0, 0, 0, 0, 0, NULL, 0, 0, 0, {0,NULL}, 0, {0,NULL}, 0, {0,NULL}, 0, AMA__EVENT_DATA__EVENT_SOURCE__NATIVE, 0, 0, 0, 1ull, 0,NULL }
+    , NULL, 0, 0, 0, 0, 0, NULL, 0, 0, 0, {0,NULL}, 0, {0,NULL}, 0, {0,NULL}, 0, AMA__EVENT_DATA__EVENT_SOURCE__NATIVE, 0, 0, 0, 1ull, 0,NULL }
 
 
 /* Ama__EventData__Payload methods */

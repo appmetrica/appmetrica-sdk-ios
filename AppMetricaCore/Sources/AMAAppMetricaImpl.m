@@ -341,6 +341,15 @@
     }];
 }
 
+- (void)reportSystemEvent:(NSString *)name onFailure:(void (^)(NSError *))onFailure
+{
+    [self execute:^{
+        [self reportEventWithBlock:^{
+            [self.mainReporter reportSystemEvent:name onFailure:onFailure];
+        } onFailure:onFailure];
+    }];
+}
+
 - (void)reportEventWithBlock:(dispatch_block_t)reportEvent
                    onFailure:(nullable void (^)(NSError *error))onFailure
 {

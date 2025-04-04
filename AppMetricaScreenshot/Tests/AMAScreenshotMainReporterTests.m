@@ -22,10 +22,11 @@
     [AMAAppMetrica clearStubs];
 }
 
-- (void)testReportScreenshot {
-    XCTestExpectation *reportEventExpectation = [self expectationWithDescription:@"reportEvent"];
+- (void)testReportScreenshot
+{
+    XCTestExpectation *reportEventExpectation = [self expectationWithDescription:@"reportSystemEvent"];
     
-    [AMAAppMetrica stub:@selector(reportEvent:onFailure:) withBlock:^id(NSArray *params) {
+    [AMAAppMetrica stub:@selector(reportSystemEvent:onFailure:) withBlock:^id(NSArray *params) {
         [reportEventExpectation fulfill];
         
         return nil;

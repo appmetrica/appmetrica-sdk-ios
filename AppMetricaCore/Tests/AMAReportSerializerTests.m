@@ -272,6 +272,12 @@ describe(@"AMAReportSerializer", ^{
                             [[theValue(eventData->source) should]
                                 equal:theValue(AMA__REPORT_MESSAGE__SESSION__EVENT__EVENT_SOURCE__JS)];
                         });
+                        it(@"Should have SDK source", ^{
+                            event.source = AMAEventSourceSDKSystem;
+                            fillReport();
+                            [[theValue(eventData->source) should]
+                             equal:theValue(AMA__REPORT_MESSAGE__SESSION__EVENT__EVENT_SOURCE__SDK_SYSTEM)];
+                        });
                     });
                     context(@"Event attribution id changed", ^{
                         it(@"Should have true", ^{

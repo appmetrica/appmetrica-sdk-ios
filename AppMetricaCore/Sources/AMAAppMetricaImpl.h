@@ -81,6 +81,8 @@ NS_ASSUME_NONNULL_BEGIN
                          extras:(nullable NSDictionary<NSString *, NSData *> *)extras
                       onFailure:(nullable void (^)(NSError *error))onFailure;
 
+- (void)reportSystemEvent:(NSString *)name onFailure:(nullable void (^)(NSError *error))onFailure;
+
 - (void)reportUserProfile:(AMAUserProfile *)userProfile onFailure:(nullable void (^)(NSError *error))onFailure;
 - (void)reportRevenue:(AMARevenueInfo *)revenueInfo onFailure:(nullable void (^)(NSError *error))onFailure;
 - (void)reportAdRevenue:(AMAAdRevenueInfo *)adRevenueInfo onFailure:(nullable void (^)(NSError *error))onFailure;
