@@ -22,8 +22,11 @@ NS_ASSUME_NONNULL_BEGIN
 + (void)addEventPollingDelegate:(Class<AMAEventPollingDelegate>)delegate;
 
 // Registration Methods
-+ (void)registerAdProvider:(id<AMAAdProviding>)provider;
 + (void)registerExternalService:(AMAServiceConfiguration *)configuration;
+
+// Ad related methods
++ (void)registerAdProvider:(id<AMAAdProviding>)provider;
++ (void)setAdProviderEnabled:(BOOL)newValue;
 
 // State Checks
 + (BOOL)isAPIKeyValid:(NSString *)apiKey;
@@ -39,6 +42,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 // Anonymous activation
 + (void)activate;
++ (void)activateWithAdIdentifierTrackingEnabled:(BOOL)adIdentifierTrackingEnabled NS_SWIFT_NAME(activate(adIdentifierTrackingEnabled:));
 
 // Reporting
 + (nullable id<AMAAppMetricaExtendedReporting>)extendedReporterForApiKey:(NSString *)apiKey

@@ -28,6 +28,7 @@
 #import "AMAStartupParametersConfiguration.h"
 #import "AMAUserProfile.h"
 #import "AMAAppMetricaConfigurationManager.h"
+#import "AMAAdResolver.h"
 @import AppMetricaIdentifiers;
 
 NSString *const kAMAUUIDKey = @"appmetrica_uuid";
@@ -46,6 +47,7 @@ static NSMutableSet<Class<AMAEventFlushableDelegate>> *eventFlushableDelegates =
 static NSMutableSet<Class<AMAEventPollingDelegate>> *eventPollingDelegates = nil;
 
 static id<AMAAdProviding> adProvider = nil;
+static AMAAdResolver *adResolver = nil;
 static NSMutableSet<id<AMAExtendedStartupObserving>> *startupObservers = nil;
 static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControllers = nil;
 
@@ -160,11 +162,31 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
     }
 }
 
++ (AMAAdResolver *)createAdResolverIfNeeded
+{
+    @synchronized (self) {
+        if (adResolver == nil) {
+            adResolver = [[AMAAdResolver alloc] initWithDestination: [AMAAdProvider sharedInstance]];
+        }
+        return adResolver;
+    }
+}
+
 + (void)registerAdProvider:(id<AMAAdProviding>)provider
 {
     @synchronized(self) {
         if ([self isActivated] == NO) {
             adProvider = provider;
+        }
+    }
+}
+
++ (void)setAdProviderEnabled:(BOOL)newValue
+{
+    @synchronized (self) {
+        if ([self isActivated] == NO) {
+            AMAAdResolver *resolver = [self createAdResolverIfNeeded];
+            [resolver setEnabledAdProvider:newValue];
         }
     }
 }
@@ -178,11 +200,11 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
         if (startupObservers != nil) {
             [[self sharedImpl] setExtendedStartupObservers:startupObservers];
         }
+        if (adProvider != nil) {
+            [self createAdResolverIfNeeded].adProvider = adProvider;
+        }
         if (reporterStorageControllers != nil) {
             [[self sharedImpl] setExtendedReporterStorageControllers:reporterStorageControllers];
-        }
-        if (adProvider != nil) {
-            [[AMAAdProvider sharedInstance] setupAdProvider:adProvider];
         }
         if (eventPollingDelegates != nil) {
             [[self sharedImpl] setEventPollingDelegates:eventPollingDelegates];
@@ -350,11 +372,18 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
 
 + (void)activate
 {
+    [self activateWithAdIdentifierTrackingEnabled:YES];
+}
+
++ (void)activateWithAdIdentifierTrackingEnabled:(BOOL)adIdentifierTrackingEnabled
+{
     @synchronized (self) {
         if ([self isActivated]) {
             [AMAErrorLogger logMetricaAlreadyStartedError];
             return;
         }
+        
+        [[self createAdResolverIfNeeded] setEnabledForAnonymousActivation:adIdentifierTrackingEnabled];
         
         [[self class] setupExternalServices];
         

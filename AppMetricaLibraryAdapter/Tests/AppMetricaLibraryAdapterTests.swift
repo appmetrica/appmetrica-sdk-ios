@@ -68,4 +68,22 @@ class AppMetricaLibraryAdapterTests: XCTestCase {
         waitForExpectations(timeout: 1.0, handler: nil)
         XCTAssertTrue(MockAppMetrica.reportEventCalled)
     }
+    
+    func testEnableAppForKids() {
+        let cfg = MutableLibraryAdapterConfiguration()
+        cfg.advIdentifiersTrackingEnabled = false
+        adapter.activate(config: cfg.config)
+        
+        wait(for: [MockAppMetrica.anonymousActivationExpectation], timeout: 1)
+        XCTAssertEqual(MockAppMetrica.anonymousActivationAdTrackingEnabled, false)
+    }
+    
+    func testNotToCallDisableAdProvided() {
+        MockAppMetrica.setAdProviderEnabledExpectation.isInverted = true
+        
+        adapter.activate()
+        
+        wait(for: [MockAppMetrica.setAdProviderEnabledExpectation], timeout: 1)
+    }
+    
 }

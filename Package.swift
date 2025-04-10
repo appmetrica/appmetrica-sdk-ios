@@ -397,6 +397,7 @@ extension AppMetricaTarget {
                 "./AdRevenue/Serialization",
                 "./AdRevenue/Validation",
                 "./AdServices",
+                "./AdSupport",
                 "./Attribution",
                 "./Configuration",
                 "./Core",

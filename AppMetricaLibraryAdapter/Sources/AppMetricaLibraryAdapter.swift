@@ -26,7 +26,16 @@ public final class AppMetricaLibraryAdapter: NSObject {
 
     /// Activates AppMetrica without `API_KEY` in anonymous mode.
     @objc public func activate() {
-        appMetrica.activate()
+        activate(config: .init())
+    }
+    
+    /// Activates AppMetrica without `API_KEY` in anonymous mode.
+    @objc public func activate(configuration: LibraryAdapterConfiguration) {
+        activate(config: configuration.config)
+    }
+    
+    func activate(config: LibraryAdapterConfig) {
+        appMetrica.activate(adIdentifierTrackingEnabled: config.advIdentifiersTrackingEnabled)
     }
 
     /// Sends a system report with provided data.
