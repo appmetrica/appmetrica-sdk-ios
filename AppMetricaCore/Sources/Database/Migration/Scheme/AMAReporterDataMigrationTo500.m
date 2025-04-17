@@ -7,6 +7,7 @@
 #import <AppMetricaFMDB/AppMetricaFMDB.h>
 #import "AMATableDescriptionProvider.h"
 #import "AMAMigrationTo500Utils.h"
+#import "AMAReporterStorage.h"
 
 @interface AMAReporterDataMigrationTo500 ()
 
@@ -35,42 +36,62 @@
     NSString *oldDirPath = [[AMAMigrationTo500Utils migrationPath] stringByAppendingPathComponent:self.apiKey];
     NSString *oldDBPath = [oldDirPath stringByAppendingPathComponent:@"data.sqlite"];
     
+    if ([AMAFileUtility fileExistsAtPath:oldDBPath] == NO) {
+        return;
+    }
+    
+    NSString *newAPIKeyDirPath = [AMAFileUtility persistentPathForApiKey:self.apiKey];
+    NSString *newAPIKeyDBPath = [newAPIKeyDirPath stringByAppendingPathComponent:@"data.sqlite"];
+    
     @synchronized (self) {
-        if ([AMAFileUtility fileExistsAtPath:oldDBPath]) {
-            [self migrateReporterData:oldDBPath database:database];
-            [AMAMigrationTo500Utils migrateReporterEventHashes:oldDirPath apiKey:self.apiKey];
-        }
+        [self createStorageIfNeeded:newAPIKeyDBPath];
+        [self migrateReporterData:oldDBPath destinationDBPath:newAPIKeyDBPath];
+        [AMAMigrationTo500Utils migrateReporterEventHashes:oldDirPath apiKey:self.apiKey];
     }
 }
 
 - (void)migrateReporterData:(NSString *)sourceDBPath
-                   database:(id<AMADatabaseProtocol>)database
+          destinationDBPath:(NSString *)destinationDBPath
 {
     AMAFMDatabase *sourceDB = [AMAFMDatabase databaseWithPath:sourceDBPath];
-    
+    AMAFMDatabase *destinationDB = [AMAFMDatabase databaseWithPath:destinationDBPath];
+
     if ([sourceDB open] == NO) {
         AMALogWarn(@"Failed to open database at path: %@", sourceDBPath);
         return;
     }
-    
+
+    if ([destinationDB open] == NO) {
+        AMALogWarn(@"Failed to open database at path: %@", destinationDBPath);
+        return;
+    }
+
     NSDictionary *tables = @{
         kAMAKeyValueTableName : [AMATableDescriptionProvider binaryKVTableMetaInfo],
         kAMASessionTableName : [AMATableDescriptionProvider sessionsTableMetaInfo],
     };
-    [database inDatabase:^(AMAFMDatabase *db) {
-        for (NSString *table in tables) {
-            [AMAMigrationTo500Utils migrateTable:table
-                                     tableScheme:[tables objectForKey:table]
-                                        sourceDB:sourceDB
-                                   destinationDB:db];
-        }
-        [AMAMigrationTo500Utils migrateReporterEvents:sourceDB
-                                        destinationDB:db
-                                               apiKey:self.apiKey];
-        
-        [db close];
-    }];
+    for (NSString *table in tables) {
+        [AMAMigrationTo500Utils migrateTable:table
+                                 tableScheme:[tables objectForKey:table]
+                                    sourceDB:sourceDB
+                               destinationDB:destinationDB];
+    }
+    [AMAMigrationTo500Utils migrateReporterEvents:sourceDB
+                                    destinationDB:destinationDB
+                                           apiKey:self.apiKey];
+
     [sourceDB close];
+    [destinationDB close];
+}
+
+- (void)createStorageIfNeeded:(NSString *)dbPath
+{
+    if ([AMAFileUtility fileExistsAtPath:dbPath] == NO) {
+        AMAReporterStorage *reporterStorage = [[AMAReporterStorage alloc] initWithApiKey:self.apiKey
+                                                                        eventEnvironment:[[AMAEnvironmentContainer alloc] init]
+                                                                                    main:NO];
+        [reporterStorage storageInDatabase:^(id<AMAKeyValueStoring>  _Nonnull storage) {}];
+    }
 }
 
 @end

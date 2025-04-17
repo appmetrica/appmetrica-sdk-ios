@@ -468,6 +468,7 @@ describe(@"AMADatabaseMigrationTo500Tests", ^{
             
         });
         
+        //FIXME: https://nda.ya.ru/t/rdPvwj0x7DfZdu
         context(@"Reporter data migration", ^{
             NSString *const key = @"foo";
             NSString *const value = @"bar";
@@ -507,107 +508,118 @@ describe(@"AMADatabaseMigrationTo500Tests", ^{
                                                                      storageProvider:storageProvider
                                                                     schemeController:tableSchemeController];
             });
-
-            it(@"Should migrate kv table", ^{
-                [AMADataMigrationTo580 stubbedNullMockForDefaultInit];
-                [migrationDatabase inDatabase:^(AMAFMDatabase *db) {
-                    id<AMAKeyValueStoring> storage = [migrationDatabase.storageProvider storageForDB:db];
-
-                    [storage saveString:value forKey:key error:nil];
-                }];
-
-                id<AMADatabaseProtocol> newDB = [AMADatabaseFactory reporterDatabaseForApiKey:apiKey
-                                                                                         main:NO
-                                                                                eventsCleaner:eventsCleaner];
-
-                [newDB inDatabase:^(AMAFMDatabase *db) {
-                    id<AMAKeyValueStoring> storage = [newDB.storageProvider storageForDB:db];
-
-                    [[[storage stringForKey:key error:nil] should] equal:value];
-                    [[theValue([storage boolNumberForKey:AMAStorageStringKeyDidApplyDataMigrationFor500 error:nil].boolValue) should] beYes];
-                }];
-            });
-
-            it(@"Should migrate event hashes", ^{
-                [AMAReporterDataMigrationTo580 stubbedNullMockForInit:@selector(initWithApiKey:main:)];
-                NSMutableSet *eventNameHashes = [NSMutableSet set];
-                [eventNameHashes addObjectsFromArray:@[@13, @4, @8293]];
+            
+            __auto_type testMigrationData500 = ^(BOOL main) {
                 
-                [migrationDatabase inDatabase:^(AMAFMDatabase *db) {
-                    id<AMAKeyValueStoring> storage = [migrationDatabase.storageProvider storageForDB:db];
-
-                    [storage saveString:value forKey:key error:nil];
-                }];
-
-                NSString *migrationPath = [[AMAMigrationTo500Utils migrationPath] stringByAppendingPathComponent:apiKey];
-                AMAEventNameHashesStorage *migrationStorage = [AMAEventNameHashesStorageFactory migrationStorageForPath:migrationPath];
-
-                AMAEventNameHashesCollection *eventHashesCollection = [[AMAEventNameHashesCollection alloc] initWithCurrentVersion:@"2.3.4"
-                                                                                                     hashesCountFromCurrentVersion:9
-                                                                                                          handleNewEventsAsUnknown:YES
-                                                                                                                   eventNameHashes:eventNameHashes];
-                [migrationStorage saveCollection:eventHashesCollection];
-
-                // After migration
-                id<AMADatabaseProtocol> newDB = [AMADatabaseFactory reporterDatabaseForApiKey:apiKey
-                                                                                         main:NO
-                                                                                eventsCleaner:eventsCleaner];
-                [newDB inDatabase:^(AMAFMDatabase *db) {
-                    id<AMAKeyValueStoring> storage = [newDB.storageProvider storageForDB:db];
-                    [[theValue([storage boolNumberForKey:AMAStorageStringKeyDidApplyDataMigrationFor500 error:nil].boolValue) should] beYes];
-                }];
-
-                AMAEventNameHashesStorage *currentStorage = [AMAEventNameHashesStorageFactory storageForApiKey:apiKey main:NO];
-                AMAEventNameHashesCollection *loadedCollection = [currentStorage loadCollection];
-
-                [[loadedCollection.currentVersion should] equal:eventHashesCollection.currentVersion];
-                [[theValue(loadedCollection.hashesCountFromCurrentVersion) should] equal:theValue(eventHashesCollection.hashesCountFromCurrentVersion)];
-                [[theValue(loadedCollection.handleNewEventsAsUnknown) should] equal:theValue(eventHashesCollection.handleNewEventsAsUnknown)];
-                [[loadedCollection.eventNameHashes should] equal:eventHashesCollection.eventNameHashes];
+                it(@"Should migrate kv table", ^{
+                    [AMADataMigrationTo580 stubbedNullMockForDefaultInit];
+                    [migrationDatabase inDatabase:^(AMAFMDatabase *db) {
+                        id<AMAKeyValueStoring> storage = [migrationDatabase.storageProvider storageForDB:db];
+                        
+                        [storage saveString:value forKey:key error:nil];
+                    }];
+                    
+                    id<AMADatabaseProtocol> newDB = [AMADatabaseFactory reporterDatabaseForApiKey:apiKey
+                                                                                             main:main
+                                                                                    eventsCleaner:eventsCleaner];
+                    
+                    [newDB inDatabase:^(AMAFMDatabase *db) {
+                        id<AMAKeyValueStoring> storage = [newDB.storageProvider storageForDB:db];
+                        
+                        [[[storage stringForKey:key error:nil] should] equal:value];
+                        [[theValue([storage boolNumberForKey:AMAStorageStringKeyDidApplyDataMigrationFor500 error:nil].boolValue) should] beYes];
+                    }];
+                });
+                
+                it(@"Should migrate event hashes", ^{
+                    [AMAReporterDataMigrationTo580 stubbedNullMockForInit:@selector(initWithApiKey:main:)];
+                    NSMutableSet *eventNameHashes = [NSMutableSet set];
+                    [eventNameHashes addObjectsFromArray:@[@13, @4, @8293]];
+                    
+                    [migrationDatabase inDatabase:^(AMAFMDatabase *db) {
+                        id<AMAKeyValueStoring> storage = [migrationDatabase.storageProvider storageForDB:db];
+                        
+                        [storage saveString:value forKey:key error:nil];
+                    }];
+                    
+                    NSString *migrationPath = [[AMAMigrationTo500Utils migrationPath] stringByAppendingPathComponent:apiKey];
+                    AMAEventNameHashesStorage *migrationStorage = [AMAEventNameHashesStorageFactory migrationStorageForPath:migrationPath];
+                    
+                    AMAEventNameHashesCollection *eventHashesCollection = [[AMAEventNameHashesCollection alloc] initWithCurrentVersion:@"2.3.4"
+                                                                                                         hashesCountFromCurrentVersion:9
+                                                                                                              handleNewEventsAsUnknown:YES
+                                                                                                                       eventNameHashes:eventNameHashes];
+                    [migrationStorage saveCollection:eventHashesCollection];
+                    
+                    // After migration
+                    id<AMADatabaseProtocol> newDB = [AMADatabaseFactory reporterDatabaseForApiKey:apiKey
+                                                                                             main:main
+                                                                                    eventsCleaner:eventsCleaner];
+                    [newDB inDatabase:^(AMAFMDatabase *db) {
+                        id<AMAKeyValueStoring> storage = [newDB.storageProvider storageForDB:db];
+                        [[theValue([storage boolNumberForKey:AMAStorageStringKeyDidApplyDataMigrationFor500 error:nil].boolValue) should] beYes];
+                    }];
+                    
+                    AMAEventNameHashesStorage *currentStorage = [AMAEventNameHashesStorageFactory storageForApiKey:apiKey main:NO];
+                    AMAEventNameHashesCollection *loadedCollection = [currentStorage loadCollection];
+                    
+                    [[loadedCollection.currentVersion should] equal:eventHashesCollection.currentVersion];
+                    [[theValue(loadedCollection.hashesCountFromCurrentVersion) should] equal:theValue(eventHashesCollection.hashesCountFromCurrentVersion)];
+                    [[theValue(loadedCollection.handleNewEventsAsUnknown) should] equal:theValue(eventHashesCollection.handleNewEventsAsUnknown)];
+                    [[loadedCollection.eventNameHashes should] equal:eventHashesCollection.eventNameHashes];
+                });
+                
+                it(@"Should not migrate event hashes if db file does not exist", ^{
+                    [AMAReporterDataMigrationTo580 stubbedNullMockForInit:@selector(initWithApiKey:main:)];
+                    NSMutableSet *eventNameHashes = [NSMutableSet set];
+                    [eventNameHashes addObjectsFromArray:@[@13, @4, @8293]];
+                    
+                    [migrationDatabase inDatabase:^(AMAFMDatabase *db) {
+                        id<AMAKeyValueStoring> storage = [migrationDatabase.storageProvider storageForDB:db];
+                        
+                        [storage saveString:value forKey:key error:nil];
+                    }];
+                    
+                    [AMAFileUtility stub:@selector(fileExistsAtPath:)
+                               andReturn:theValue(NO)
+                           withArguments:[[[AMAMigrationTo500Utils migrationPath]
+                                           stringByAppendingPathComponent:apiKey]
+                                          stringByAppendingPathComponent:@"data.sqlite"]];
+                    
+                    NSString *migrationPath = [[AMAMigrationTo500Utils migrationPath] stringByAppendingPathComponent:apiKey];
+                    AMAEventNameHashesStorage *migrationStorage = [AMAEventNameHashesStorageFactory migrationStorageForPath:migrationPath];
+                    
+                    AMAEventNameHashesCollection *eventHashesCollection = [[AMAEventNameHashesCollection alloc] initWithCurrentVersion:@"2.3.4"
+                                                                                                         hashesCountFromCurrentVersion:9
+                                                                                                              handleNewEventsAsUnknown:YES
+                                                                                                                       eventNameHashes:eventNameHashes];
+                    [migrationStorage saveCollection:eventHashesCollection];
+                    
+                    // After migration
+                    id<AMADatabaseProtocol> newDB = [AMADatabaseFactory reporterDatabaseForApiKey:apiKey
+                                                                                             main:main
+                                                                                    eventsCleaner:eventsCleaner];
+                    [newDB inDatabase:^(AMAFMDatabase *db) {
+                        id<AMAKeyValueStoring> storage = [newDB.storageProvider storageForDB:db];
+                        [[theValue([storage boolNumberForKey:AMAStorageStringKeyDidApplyDataMigrationFor500 error:nil].boolValue) should] beYes];
+                    }];
+                    
+                    AMAEventNameHashesStorage *currentStorage = [AMAEventNameHashesStorageFactory storageForApiKey:apiKey main:NO];
+                    AMAEventNameHashesCollection *loadedCollection = [currentStorage loadCollection];
+                    
+                    [[loadedCollection.currentVersion should] beNil];
+                    [[theValue(loadedCollection.hashesCountFromCurrentVersion) should] beZero];
+                    [[theValue(loadedCollection.handleNewEventsAsUnknown) should] beNo];
+                    [[loadedCollection.eventNameHashes should] beNil];
+                });
+            };
+            
+            context(@"Should migrate main reporter", ^{
+                testMigrationData500(YES);
             });
             
-            it(@"Should not migrate event hashes if db file does not exist", ^{
-                [AMAReporterDataMigrationTo580 stubbedNullMockForInit:@selector(initWithApiKey:main:)];
-                NSMutableSet *eventNameHashes = [NSMutableSet set];
-                [eventNameHashes addObjectsFromArray:@[@13, @4, @8293]];
-                
-                [migrationDatabase inDatabase:^(AMAFMDatabase *db) {
-                    id<AMAKeyValueStoring> storage = [migrationDatabase.storageProvider storageForDB:db];
-
-                    [storage saveString:value forKey:key error:nil];
-                }];
-                
-                [AMAFileUtility stub:@selector(fileExistsAtPath:)
-                           andReturn:theValue(NO)
-                       withArguments:[[[AMAMigrationTo500Utils migrationPath]
-                                       stringByAppendingPathComponent:apiKey]
-                                      stringByAppendingPathComponent:@"data.sqlite"]];
-                
-                NSString *migrationPath = [[AMAMigrationTo500Utils migrationPath] stringByAppendingPathComponent:apiKey];
-                AMAEventNameHashesStorage *migrationStorage = [AMAEventNameHashesStorageFactory migrationStorageForPath:migrationPath];
-
-                AMAEventNameHashesCollection *eventHashesCollection = [[AMAEventNameHashesCollection alloc] initWithCurrentVersion:@"2.3.4"
-                                                                                                     hashesCountFromCurrentVersion:9
-                                                                                                          handleNewEventsAsUnknown:YES
-                                                                                                                   eventNameHashes:eventNameHashes];
-                [migrationStorage saveCollection:eventHashesCollection];
-
-                // After migration
-                id<AMADatabaseProtocol> newDB = [AMADatabaseFactory reporterDatabaseForApiKey:apiKey
-                                                                                         main:NO
-                                                                                eventsCleaner:eventsCleaner];
-                [newDB inDatabase:^(AMAFMDatabase *db) {
-                    id<AMAKeyValueStoring> storage = [newDB.storageProvider storageForDB:db];
-                    [[theValue([storage boolNumberForKey:AMAStorageStringKeyDidApplyDataMigrationFor500 error:nil].boolValue) should] beYes];
-                }];
-
-                AMAEventNameHashesStorage *currentStorage = [AMAEventNameHashesStorageFactory storageForApiKey:apiKey main:NO];
-                AMAEventNameHashesCollection *loadedCollection = [currentStorage loadCollection];
-
-                [[loadedCollection.currentVersion should] beNil];
-                [[theValue(loadedCollection.hashesCountFromCurrentVersion) should] beZero];
-                [[theValue(loadedCollection.handleNewEventsAsUnknown) should] beNo];
-                [[loadedCollection.eventNameHashes should] beNil];
+            context(@"Should migrate non main reporter", ^{
+                testMigrationData500(NO);
             });
             
             AMAReporterStorage *(^buildReporterStorage)(id<AMADatabaseProtocol>, NSString *) = ^(id<AMADatabaseProtocol> database, NSString *apiKey) {

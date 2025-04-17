@@ -62,7 +62,7 @@
     
     [database inDatabase:^(AMAFMDatabase *db) {
         [AMAMigrationTo500Utils migrateTable:kAMAKeyValueTableName
-                                 tableScheme:[AMATableDescriptionProvider binaryKVTableMetaInfo]
+                                 tableScheme:[AMATableDescriptionProvider stringKVTableMetaInfo]
                                     sourceDB:sourceDB
                                destinationDB:db];
         
