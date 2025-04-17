@@ -38,7 +38,7 @@ static double const kAMALocationsOverflowPurgingFactor = 0.1;
     return [self initWithConfiguration:configuration
                             serializer:[[AMALocationSerializer alloc] init]
                               database:[AMADatabaseFactory locationDatabase]
-                               crypter:[AMALocationEncoderFactory encoder]];
+                               crypter:[[[AMALocationEncoderFactory alloc] init] encoder]];
 }
 
 - (instancetype)initWithConfiguration:(AMALocationCollectingConfiguration *)configuration

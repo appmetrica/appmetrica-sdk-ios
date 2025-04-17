@@ -11,6 +11,7 @@
 #import "AMAEventStorage+Migration.h"
 #import "AMAEventSerializer.h"
 #import "AMAEventNameHashesStorageFactory.h"
+#import "AMAEventSerializer+Migration.h"
 
 @implementation AMAMigrationTo580Utils
 
@@ -54,7 +55,7 @@
                 destinationDB:(AMAFMDatabase *)destinationDB
                        apiKey:(NSString *)apiKey
 {
-    AMAEventSerializer *serializer = [[AMAEventSerializer alloc] init];
+    AMAEventSerializer *serializer = [[AMAEventSerializer alloc] migrationTo5100Init];
     NSArray<AMAEvent*> *reporterEvents = [self getEventsInDB:sourceDB eventSerializer:serializer];
     
     [self saveReporterEvents:reporterEvents apiKey:apiKey db:destinationDB];
@@ -105,15 +106,20 @@
                     apiKey:(NSString *)apiKey
                         db:(AMAFMDatabase *)db
 {
-    AMAReporterStoragesContainer *container = [AMAReporterStoragesContainer sharedInstance];
-    AMAReporterStorage *reporterStorage = [container mainStorageForApiKey:apiKey];
-    if (reporterStorage == nil) {
-        AMALogError(@"Failed to create storage for apiKey: %@", apiKey);
-        return NO;
-    }
+    AMAEventSerializer *eventSerializer = [[AMAEventSerializer alloc] migrationTo5100Init];
+    
     BOOL __block result = NO;
     for (AMAEvent *event in events) {
-        result = [reporterStorage.eventStorage addEvent:event db:db error:nil];
+        NSDictionary *eventDictionary = [eventSerializer dictionaryForEvent:event error:nil];
+        if (eventDictionary == nil) {
+            return NO;
+        }
+        
+        NSNumber *eventOID = [AMADatabaseHelper insertRowWithDictionary:eventDictionary
+                                                              tableName:kAMAEventTableName
+                                                                     db:db
+                                                                  error:nil];
+        result = result && eventOID != nil;
     }
     return result;
 }

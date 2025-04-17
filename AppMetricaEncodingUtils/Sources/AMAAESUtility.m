@@ -20,7 +20,7 @@
 + (NSData *)defaultIv
 {
     NSString *sourceString = [AMAPlatformDescription appID] ?: [AMAPlatformDescription SDKBundleName];
-    return [self ivWithSource:sourceString];
+    return [self sha256_ivWithSource:sourceString];
 }
 
 #pragma mark - Private -
@@ -34,24 +34,37 @@
     return [NSData dataWithBytesNoCopy:bytes length:size];
 }
 
-+ (NSData *)ivWithSource:(NSString *)sourceString
++ (NSData *)md5_ivWithSource:(NSString *)sourceString
 {
     const char *pointer = [sourceString UTF8String];
     unsigned char *md5Buffer = malloc(CC_MD5_DIGEST_LENGTH);
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
-    //TODO: https://nda.ya.ru/t/W5HgqaKE7CKfkV
     CC_MD5(pointer, (CC_LONG)strlen(pointer), md5Buffer);
 #pragma clang diagnostic pop
     NSData *md5Data = [NSData dataWithBytesNoCopy:md5Buffer length:CC_MD5_DIGEST_LENGTH];
     return md5Data;
 }
 
++ (NSData *)sha256_ivWithSource:(NSString *)sourceString
+{
+    const char *pointer = [sourceString UTF8String];
+    unsigned char sha256Buffer[CC_SHA256_DIGEST_LENGTH];
+    CC_SHA256(pointer, (CC_LONG)strlen(pointer), sha256Buffer);
+    return [NSData dataWithBytes:sha256Buffer length:CC_SHA256_DIGEST_LENGTH];
+}
+
 #pragma mark - Migration -
 + (NSData *)migrationIv:(NSString *)migrationSource
 {
     NSString *sourceString = [AMAPlatformDescription appID] ?: migrationSource;
-    return [self ivWithSource:sourceString];
+    return [self md5_ivWithSource:sourceString];
+}
+
++ (NSData *)md5_migrationIv
+{
+    NSString *sourceString = [AMAPlatformDescription appID] ?: [AMAPlatformDescription SDKBundleName];
+    return [self md5_ivWithSource:sourceString];
 }
 
 @end

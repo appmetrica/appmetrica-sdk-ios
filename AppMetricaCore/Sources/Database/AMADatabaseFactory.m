@@ -38,9 +38,12 @@
 #import "AMADataMigrationTo500.h"
 #import "AMAReporterDataMigrationTo500.h"
 #import "AMALocationDataMigrationTo500.h"
+#import "AMALocationDataMigrationTo5100.h"
 #import "AMADataMigrationTo580.h"
 #import "AMAReporterDataMigrationTo580.h"
+#import "AMAReporterDataMigrationTo5100.h"
 #import "AMADataMigrationTo590.h"
+#import "AMADataMigrationTo5100.h"
 
 #import "AMALocationDatabaseSchemeMigrationTo2.h"
 
@@ -115,6 +118,7 @@ NSString *const kAMAMainReporterDBPath = @"main";
         [AMADataMigrationTo500 new],
         [AMADataMigrationTo580 new],
         [AMADataMigrationTo590 new],
+        [AMADataMigrationTo5100 new],
     ];
     NSArray *libraryMigrations = @[
         [AMALibraryMigration320 new],
@@ -183,6 +187,7 @@ NSString *const kAMAMainReporterDBPath = @"main";
     NSArray *dataMigrations = @[
         [[AMAReporterDataMigrationTo500 alloc] initWithApiKey:apiKey],
         [[AMAReporterDataMigrationTo580 alloc] initWithApiKey:apiKey main:main],
+        [[AMAReporterDataMigrationTo5100 alloc] initWithApiKey:apiKey],
     ];
     NSArray *libraryMigrations = @[
     ];
@@ -237,6 +242,7 @@ NSString *const kAMAMainReporterDBPath = @"main";
     ];
     NSArray *dataMigrations = @[
         [AMALocationDataMigrationTo500 new],
+        [AMALocationDataMigrationTo5100 new],
     ];
     NSArray *libraryMigrations = @[
     ];

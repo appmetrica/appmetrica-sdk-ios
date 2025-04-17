@@ -19,9 +19,12 @@
 #import "AMAStorageKeys.h"
 #import "AMADatabaseConstants.h"
 #import "AMADataMigrationTo500.h"
+#import "AMADataMigrationTo5100.h"
 #import "AMALocationDataMigrationTo500.h"
+#import "AMALocationDataMigrationTo5100.h"
 #import "AMAReporterDataMigrationTo500.h"
 #import "AMAReporterDataMigrationTo580.h"
+#import "AMAReporterDataMigrationTo5100.h"
 #import "AMADataMigrationTo580.h"
 #import "AMADatabaseMigrationManager.h"
 #import "AMAReporterTestHelper.h"
@@ -48,7 +51,9 @@
 #import "AMALocationCollectingConfiguration.h"
 #import "AMALocationSerializer.h"
 #import <AppMetricaEncodingUtils/AppMetricaEncodingUtils.h>
-#import "AMALocationEncoderFactory+Migration.h"
+#import "AMALocationEncoderFactory.h"
+#import "AMALocationMigrationTo500EncoderFactory.h"
+#import "AMALocationMigrationTo5100EncoderFactory.h"
 #import "AMALocation.h"
 #import "AMAVisit.h"
 #import "AMAMetricaConfiguration.h"
@@ -159,13 +164,41 @@ describe(@"AMADatabaseMigrationTo500Tests", ^{
             });
             
             it(@"Should reset startup update date during migration to 5.8.0", ^{
-                [AMADataMigrationTo500 stubbedNullMockForDefaultInit];
+                [migrationDatabase inDatabase:^(AMAFMDatabase *db) {
+                    id<AMAKeyValueStoring> storage = [migrationDatabase.storageProvider storageForDB:db];
+                    
+                    [storage saveString:@"1" forKey:AMAStorageStringKeyDidApplyDataMigrationFor500 error:nil];
+                    [storage saveString:nil forKey:AMAStorageStringKeyDidApplyDataMigrationFor580 error:nil];
+                    [storage saveString:@"1" forKey:AMAStorageStringKeyDidApplyDataMigrationFor590 error:nil];
+                    [storage saveString:@"1" forKey:AMAStorageStringKeyDidApplyDataMigrationFor5100 error:nil];
+                }];
+                
                 id<AMADatabaseProtocol> newDB = [AMADatabaseFactory configurationDatabase];
                 [newDB inDatabase:^(AMAFMDatabase *db) {
                     id<AMAKeyValueStoring> storage = [newDB.storageProvider storageForDB:db];
 
                     [[[storage stringForKey:AMAStorageStringKeyDidApplyDataMigrationFor580 error:nil] should] equal:@"1"];
-                    [[[storage stringForKey:AMAStorageStringKeyDidApplyDataMigrationFor500 error:nil] should] beNil];
+
+                    // Should reset startup update date
+                    [[[storage dateForKey:AMAStorageStringKeyStartupUpdatedAt error:nil] should] equal:[NSDate distantPast]];
+                }];
+            });
+            
+            it(@"Should reset startup update date during migration to 5.10.0", ^{
+                [migrationDatabase inDatabase:^(AMAFMDatabase *db) {
+                    id<AMAKeyValueStoring> storage = [migrationDatabase.storageProvider storageForDB:db];
+                    
+                    [storage saveString:@"1" forKey:AMAStorageStringKeyDidApplyDataMigrationFor500 error:nil];
+                    [storage saveString:@"1" forKey:AMAStorageStringKeyDidApplyDataMigrationFor580 error:nil];
+                    [storage saveString:@"1" forKey:AMAStorageStringKeyDidApplyDataMigrationFor590 error:nil];
+                    [storage saveString:nil forKey:AMAStorageStringKeyDidApplyDataMigrationFor5100 error:nil];
+                }];
+                
+                id<AMADatabaseProtocol> newDB = [AMADatabaseFactory configurationDatabase];
+                [newDB inDatabase:^(AMAFMDatabase *db) {
+                    id<AMAKeyValueStoring> storage = [newDB.storageProvider storageForDB:db];
+
+                    [[[storage stringForKey:AMAStorageStringKeyDidApplyDataMigrationFor5100 error:nil] should] equal:@"1"];
 
                     // Should reset startup update date
                     [[[storage dateForKey:AMAStorageStringKeyStartupUpdatedAt error:nil] should] equal:[NSDate distantPast]];
@@ -622,7 +655,8 @@ describe(@"AMADatabaseMigrationTo500Tests", ^{
                 testMigrationData500(NO);
             });
             
-            AMAReporterStorage *(^buildReporterStorage)(id<AMADatabaseProtocol>, NSString *) = ^(id<AMADatabaseProtocol> database, NSString *apiKey) {
+            AMAReporterStorage *(^buildReporterStorage)(id<AMADatabaseProtocol>, NSString *) = ^(id<AMADatabaseProtocol> database,
+                                                                                                 NSString *apiKey) {
                 AMAEnvironmentContainer *eventEnvironment = [[AMAEnvironmentContainer alloc] init];
 
                 return [[AMAReporterStorage alloc] initWithApiKey:apiKey
@@ -732,11 +766,10 @@ describe(@"AMADatabaseMigrationTo500Tests", ^{
                     [[loadedCollection.eventNameHashes should] beNil];
                 });
                 
-                it(@"Should migrate events and sessions", ^{
+                it(@"Should migrate events and sessions to 5.8.0", ^{
                     NSDictionary *const extras = @{ @"extras" : [@"value" dataUsingEncoding:NSUTF8StringEncoding] };
                     NSDictionary *const params = @{ @"foo" : @"bar" };
                     
-                    [AMAReporterDataMigrationTo500 stubbedNullMockForInit:@selector(initWithApiKey:)];
                     id<AMADatabaseProtocol> prevDB = [AMADatabaseFactory reporterDatabaseForApiKey:apiKey main:NO eventsCleaner:eventsCleaner];
                     [prevDB inDatabase:^(AMAFMDatabase *db) {
                         id<AMAKeyValueStoring> storage = [prevDB.storageProvider storageForDB:db];
@@ -749,8 +782,9 @@ describe(@"AMADatabaseMigrationTo500Tests", ^{
                     AMAEventBuilder *eventBuilder = [[AMAEventBuilder alloc] initWithStateStorage:migrationStorage.stateStorage
                                                                                       preloadInfo:nil];
 
-                    AMASessionSerializer *migrationSessionSerializer = [[AMASessionSerializer alloc] init];
+                    AMASessionSerializer *migrationSessionSerializer = [[AMASessionSerializer alloc] migrationTo500Init];
                     [migrationStorage.sessionStorage stub:@selector(serializer) andReturn:migrationSessionSerializer];
+                    
                     NSDate *creationDate = [NSDate date];
                     AMASession *sessionToMigrate = [migrationStorage.sessionStorage newGeneralSessionCreatedAt:creationDate error:nil];
 
@@ -768,17 +802,32 @@ describe(@"AMADatabaseMigrationTo500Tests", ^{
                     eventToMigrate.appEnvironment = params;
                     eventToMigrate.profileID = @"profileID";
 
-
-                    AMAEventSerializer *migrationEventSerializer = [[AMAEventSerializer alloc] init];
+                    AMAEventSerializer *migrationEventSerializer = [[AMAEventSerializer alloc] migrationTo500Init];
                     [migrationStorage.eventStorage stub:@selector(eventSerializer) andReturn:migrationEventSerializer];
 
                     [migrationStorage.eventStorage addEvent:eventToMigrate toSession:sessionToMigrate error:nil];
+                    
+                    [migrationDatabase inDatabase:^(AMAFMDatabase *db) {
+                        id<AMAKeyValueStoring> storage = [migrationDatabase.storageProvider storageForDB:db];
+                        
+                        //TODO: Refactor
+                        // Disable 5.0.0, 5.10.0 migration
+                        [storage saveString:@"1" forKey:AMAStorageStringKeyDidApplyDataMigrationFor500 error:nil];
+                        [storage saveString:@"1" forKey:AMAStorageStringKeyDidApplyDataMigrationFor5100 error:nil];
+                    }];
 
                     // After migration
                     id<AMADatabaseProtocol> newDB = [AMADatabaseFactory reporterDatabaseForApiKey:apiKey
                                                                                              main:YES
                                                                                     eventsCleaner:eventsCleaner];
                     AMAReporterStorage *newReporterStorage = buildReporterStorage(newDB, apiKey);
+                    
+                    
+                    AMAEventSerializer *eventSerializer = [[AMAEventSerializer alloc] migrationTo5100Init];
+                    [newReporterStorage.eventStorage stub:@selector(eventSerializer) andReturn:eventSerializer];
+                    
+                    AMASessionSerializer *sessionSerializer = [[AMASessionSerializer alloc] migrationTo5100Init];
+                    [newReporterStorage.sessionStorage stub:@selector(serializer) andReturn:sessionSerializer];
 
 
                     AMAEvent *migratedEvent = [[newReporterStorage.eventStorage allEvents] firstObject];
@@ -838,26 +887,25 @@ describe(@"AMADatabaseMigrationTo500Tests", ^{
                 });
             });
             
-            __auto_type testMigrationEventsAndSessions = ^() {
-                it(@"Should migrate events and sessions", ^{
-                    [AMAReporterDataMigrationTo580 stubbedNullMockForInit:@selector(initWithApiKey:main:)];
+            __auto_type testMigrationEventsAndSessions500 = ^() {
+                it(@"Should migrate events and sessions to 5.0.0", ^{
                     NSDictionary *const extras = @{ @"extras" : [@"value" dataUsingEncoding:NSUTF8StringEncoding] };
                     NSDictionary *const legacyExtras = @{@"user_id":@"user id",
                                                          @"type":@"user type",
                                                          @"options":@{@"key":@"value"}};
 
                     NSDictionary *const params = @{ @"foo" : @"bar" };
-
+                    
                     AMAReporterStorage *migrationStorage = buildReporterStorage(migrationDatabase, apiKey);
-
+                    
                     AMAEventBuilder *eventBuilder = [[AMAEventBuilder alloc] initWithStateStorage:migrationStorage.stateStorage
                                                                                       preloadInfo:nil];
-
-                    AMASessionSerializer *migrationSessionSerializer = [[AMASessionSerializer alloc] migrationInit];
+                    
+                    AMASessionSerializer *migrationSessionSerializer = [[AMASessionSerializer alloc] migrationTo500Init];
                     [migrationStorage.sessionStorage stub:@selector(serializer) andReturn:migrationSessionSerializer];
                     NSDate *creationDate = [NSDate date];
                     AMASession *sessionToMigrate = [migrationStorage.sessionStorage newGeneralSessionCreatedAt:creationDate error:nil];
-
+                    
                     AMAEvent *eventToMigrate = [eventBuilder eventWithType:99
                                                                       name:@"eventName"
                                                                      value:@"eventValue"
@@ -871,37 +919,47 @@ describe(@"AMADatabaseMigrationTo500Tests", ^{
                     eventToMigrate.location = [[CLLocation alloc] initWithLatitude:22.0 longitude:33.0];
                     eventToMigrate.appEnvironment = params;
                     eventToMigrate.profileID = @"profileID";
-
-
-                    AMAEventSerializer *migrationEventSerializer = [[AMAEventSerializer alloc] migrationInit];
+                    
+                    
+                    AMAEventSerializer *migrationEventSerializer = [[AMAEventSerializer alloc] migrationTo500Init];
                     [migrationStorage.eventStorage stub:@selector(eventSerializer) andReturn:migrationEventSerializer];
-
+                    
                     [migrationStorage.eventStorage addEvent:eventToMigrate toSession:sessionToMigrate error:nil];
-
+                    
                     NSData *legacyExtrasValue = [AMALegacyEventExtrasProvider packExtras:legacyExtras];
                     NSMutableDictionary *expectedExtras = [@{ @"ai" : legacyExtrasValue } mutableCopy];
                     [expectedExtras addEntriesFromDictionary:extras];
-
-
+                    
+                    
                     [migrationDatabase inDatabase:^(AMAFMDatabase *db) {
                         id<AMAKeyValueStoring> storage = [migrationDatabase.storageProvider storageForDB:db];
-
+                        
                         [storage saveString:[AMAJSONSerialization stringWithJSONObject:legacyExtras error:nil] forKey:@"user_info" error:nil];
+                        
+                        //TODO: Refactor
+                        // Disable 5.8.0, 5.10.0 migration
+                        [storage saveString:@"1" forKey:AMAStorageStringKeyDidApplyDataMigrationFor580 error:nil];
+                        [storage saveString:@"1" forKey:AMAStorageStringKeyDidApplyDataMigrationFor5100 error:nil];
                     }];
-
+                    
                     // After migration
                     id<AMAAppMetricaExtendedReporting> reporter = [AMAAppMetrica extendedReporterForApiKey:apiKey];
                     [(NSObject *)reporter stub:@selector(setSessionExtras:forKey:)];
                     [[(NSObject *)reporter should] receive:@selector(setSessionExtras:forKey:) withArguments:legacyExtrasValue, @"ai"];
-
+                    
                     id<AMADatabaseProtocol> newDB = [AMADatabaseFactory reporterDatabaseForApiKey:apiKey
                                                                                              main:NO
                                                                                     eventsCleaner:eventsCleaner];
                     AMAReporterStorage *newReporterStorage = buildReporterStorage(newDB, apiKey);
-
-
+                    
+                    AMAEventSerializer *eventSerializer = [[AMAEventSerializer alloc] migrationTo5100Init];
+                    [newReporterStorage.eventStorage stub:@selector(eventSerializer) andReturn:eventSerializer];
+                    
+                    AMASessionSerializer *sessionSerializer = [[AMASessionSerializer alloc] migrationTo5100Init];
+                    [newReporterStorage.sessionStorage stub:@selector(serializer) andReturn:sessionSerializer];
+                    
                     AMAEvent *migratedEvent = [[newReporterStorage.eventStorage allEvents] firstObject];
-
+                    
                     [[theValue(migratedEvent.type) should] equal:theValue(eventToMigrate.type)];
                     [[migratedEvent.oid should] equal:eventToMigrate.oid];
                     [[theValue(migratedEvent.sequenceNumber) should] equal:theValue(eventToMigrate.sequenceNumber)];
@@ -922,12 +980,12 @@ describe(@"AMADatabaseMigrationTo500Tests", ^{
                     [[theValue(migratedEvent.source) should] equal:theValue(eventToMigrate.source)];
                     [[theValue(migratedEvent.attributionIDChanged) should] equal:theValue(eventToMigrate.attributionIDChanged)];
                     [[migratedEvent.openID should] equal:eventToMigrate.openID];
-
+                    
                     [[migratedEvent.extras should] equal:expectedExtras];
-
-
+                    
+                    
                     AMASession *migratedSession = [newReporterStorage.sessionStorage lastSessionWithError:nil];
-
+                    
                     [[migratedSession.oid should] equal:sessionToMigrate.oid];
                     [[migratedSession.startDate should] equal:sessionToMigrate.startDate];
                     [[migratedSession.lastEventTime should] equal:sessionToMigrate.lastEventTime];
@@ -935,8 +993,8 @@ describe(@"AMADatabaseMigrationTo500Tests", ^{
                     [[migratedSession.sessionID should] equal:sessionToMigrate.sessionID];
                     [[migratedSession.attributionID should] equal:sessionToMigrate.attributionID];
                     [[theValue(migratedSession.type) should] equal:theValue(sessionToMigrate.type)];
-
-
+                    
+                    
                     [newDB inDatabase:^(AMAFMDatabase *db) {
                         [AMADatabaseHelper deleteFirstRowsWithCount:1
                                                              filter:nil
@@ -945,7 +1003,7 @@ describe(@"AMADatabaseMigrationTo500Tests", ^{
                                                           tableName:kAMASessionTableName
                                                                  db:db
                                                               error:nil];
-
+                        
                         [AMADatabaseHelper deleteFirstRowsWithCount:1
                                                              filter:nil
                                                               order:nil
@@ -956,75 +1014,223 @@ describe(@"AMADatabaseMigrationTo500Tests", ^{
                     }];
                 });
             };
-
-            context(@"Migration with appID", ^{
-                testMigrationEventsAndSessions();
+            
+            context(@"Migration 5.0 with appID", ^{
+                testMigrationEventsAndSessions500();
             });
-
-            context(@"Migration with SDK Bundle", ^{
+            
+            context(@"Migration 5.0 with SDK Bundle", ^{
                 beforeEach(^{
                     [AMAPlatformDescription stub:@selector(appID) andReturn:nil];
                 });
-                testMigrationEventsAndSessions();
+                testMigrationEventsAndSessions500();
+            });
+            
+            __auto_type testMigrationEventsAndSessions5100 = ^() {
+                it(@"Should migrate events and sessions to 5.10.0", ^{
+                    NSDictionary *const extras = @{ @"extras" : [@"value" dataUsingEncoding:NSUTF8StringEncoding] };
+                    NSDictionary *const params = @{ @"foo" : @"bar" };
+                    
+                    id<AMADatabaseProtocol> prevDB = [AMADatabaseFactory reporterDatabaseForApiKey:apiKey
+                                                                                              main:NO
+                                                                                     eventsCleaner:eventsCleaner];
+                    
+                    AMAReporterStorage *migrationStorage = buildReporterStorage(prevDB, apiKey);
+                    
+                    AMAEventBuilder *eventBuilder = [[AMAEventBuilder alloc] initWithStateStorage:migrationStorage.stateStorage
+                                                                                      preloadInfo:nil];
+                    
+                    AMASessionSerializer *migrationSessionSerializer = [[AMASessionSerializer alloc] migrationTo5100Init];
+                    [migrationStorage.sessionStorage stub:@selector(serializer) andReturn:migrationSessionSerializer];
+                    NSDate *creationDate = [NSDate date];
+                    AMASession *sessionToMigrate = [migrationStorage.sessionStorage newGeneralSessionCreatedAt:creationDate error:nil];
+                    
+                    AMAEvent *eventToMigrate = [eventBuilder eventWithType:99
+                                                                      name:@"eventName"
+                                                                     value:@"eventValue"
+                                                          eventEnvironment:params
+                                                            appEnvironment:params
+                                                                    extras:extras
+                                                                     error:nil];
+                    eventToMigrate.createdAt = creationDate;
+                    eventToMigrate.timeSinceSession = [creationDate timeIntervalSinceDate:sessionToMigrate.startDate.deviceDate];
+                    eventToMigrate.sessionOid = sessionToMigrate.oid;
+                    eventToMigrate.location = [[CLLocation alloc] initWithLatitude:22.0 longitude:33.0];
+                    eventToMigrate.appEnvironment = params;
+                    eventToMigrate.profileID = @"profileID";
+                    
+                    
+                    AMAEventSerializer *migrationEventSerializer = [[AMAEventSerializer alloc] migrationTo5100Init];
+                    [migrationStorage.eventStorage stub:@selector(eventSerializer) andReturn:migrationEventSerializer];
+                    
+                    [migrationStorage.eventStorage addEvent:eventToMigrate toSession:sessionToMigrate error:nil];
+                    
+                    NSMutableDictionary *expectedExtras = [NSMutableDictionary dictionaryWithDictionary:extras];
+                    
+                    
+                    [prevDB inDatabase:^(AMAFMDatabase *db) {
+                        id<AMAKeyValueStoring> storage = [prevDB.storageProvider storageForDB:db];
+                        
+                        //TODO: Refactor
+                        // Disable 5.0.0, 5.8.0 migration
+                        [storage saveString:@"1" forKey:AMAStorageStringKeyDidApplyDataMigrationFor580 error:nil];
+                        [storage saveString:@"1" forKey:AMAStorageStringKeyDidApplyDataMigrationFor500 error:nil];
+                        
+                        // Enable 5.10.0 migration
+                        [storage saveString:nil forKey:AMAStorageStringKeyDidApplyDataMigrationFor5100 error:nil];
+                    }];
+                    
+                    // After migration
+                    id<AMADatabaseProtocol> newDB = [AMADatabaseFactory reporterDatabaseForApiKey:apiKey
+                                                                                             main:NO
+                                                                                    eventsCleaner:eventsCleaner];
+                    AMAReporterStorage *newReporterStorage = buildReporterStorage(newDB, apiKey);
+                    
+                    
+                    AMAEventSerializer *eventSerializer = [[AMAEventSerializer alloc] init];
+                    [newReporterStorage.eventStorage stub:@selector(eventSerializer) andReturn:eventSerializer];
+                    
+                    AMASessionSerializer *sessionSerializer = [[AMASessionSerializer alloc] init];
+                    [newReporterStorage.sessionStorage stub:@selector(serializer) andReturn:sessionSerializer];
+                    
+                    AMAEvent *migratedEvent = [[newReporterStorage.eventStorage allEvents] firstObject];
+                    
+                    [[theValue(migratedEvent.type) should] equal:theValue(eventToMigrate.type)];
+                    [[migratedEvent.oid should] equal:eventToMigrate.oid];
+                    [[theValue(migratedEvent.sequenceNumber) should] equal:theValue(eventToMigrate.sequenceNumber)];
+                    [[theValue(migratedEvent.globalNumber) should] equal:theValue(eventToMigrate.globalNumber)];
+                    [[theValue(migratedEvent.numberOfType) should] equal:theValue(eventToMigrate.numberOfType)];
+                    [[migratedEvent.name should] equal:eventToMigrate.name];
+                    [[migratedEvent.eventEnvironment should] equal:eventToMigrate.eventEnvironment];
+                    [[[migratedEvent.value dataWithError:nil] should] equal:[eventToMigrate.value dataWithError:nil]];
+                    [[migratedEvent.sessionOid should] equal:eventToMigrate.sessionOid];
+                    [[migratedEvent.createdAt should] equal:eventToMigrate.createdAt];
+                    [[theValue(migratedEvent.timeSinceSession) should] equal:theValue(eventToMigrate.timeSinceSession)];
+                    [[theValue(migratedEvent.location.coordinate.latitude) should] equal:theValue(eventToMigrate.location.coordinate.latitude)];
+                    [[theValue(migratedEvent.location.coordinate.longitude) should] equal:theValue(eventToMigrate.location.coordinate.longitude)];
+                    [[theValue(migratedEvent.locationEnabled) should] equal:theValue(eventToMigrate.locationEnabled)];
+                    [[theValue(migratedEvent.firstOccurrence) should] equal:theValue(eventToMigrate.firstOccurrence)];
+                    [[migratedEvent.appEnvironment should] equal:eventToMigrate.appEnvironment];
+                    [[migratedEvent.profileID should] equal:eventToMigrate.profileID];
+                    [[theValue(migratedEvent.source) should] equal:theValue(eventToMigrate.source)];
+                    [[theValue(migratedEvent.attributionIDChanged) should] equal:theValue(eventToMigrate.attributionIDChanged)];
+                    [[migratedEvent.openID should] equal:eventToMigrate.openID];
+                    
+                    [[migratedEvent.extras should] equal:expectedExtras];
+                    
+                    
+                    AMASession *migratedSession = [newReporterStorage.sessionStorage lastSessionWithError:nil];
+                    
+                    [[migratedSession.oid should] equal:sessionToMigrate.oid];
+                    [[migratedSession.startDate should] equal:sessionToMigrate.startDate];
+                    [[migratedSession.lastEventTime should] equal:sessionToMigrate.lastEventTime];
+                    [[migratedSession.pauseTime should] equal:sessionToMigrate.pauseTime];
+                    [[migratedSession.sessionID should] equal:sessionToMigrate.sessionID];
+                    [[migratedSession.attributionID should] equal:sessionToMigrate.attributionID];
+                    [[theValue(migratedSession.type) should] equal:theValue(sessionToMigrate.type)];
+                    
+                    
+                    [newDB inDatabase:^(AMAFMDatabase *db) {
+                        [AMADatabaseHelper deleteFirstRowsWithCount:1
+                                                             filter:nil
+                                                              order:nil
+                                                        valuesArray:nil
+                                                          tableName:kAMASessionTableName
+                                                                 db:db
+                                                              error:nil];
+                        
+                        [AMADatabaseHelper deleteFirstRowsWithCount:1
+                                                             filter:nil
+                                                              order:nil
+                                                        valuesArray:nil
+                                                          tableName:kAMAEventTableName
+                                                                 db:db
+                                                              error:nil];
+                    }];
+                });
+            };
+            
+            context(@"Migration 5.10.0 with appID", ^{
+                testMigrationEventsAndSessions5100();
+            });
+            
+            context(@"Migration 5.10.0 with SDK Bundle", ^{
+                beforeEach(^{
+                    [AMAPlatformDescription stub:@selector(appID) andReturn:nil];
+                });
+                testMigrationEventsAndSessions5100();
             });
         });
-
-        context(@"Location data migration", ^{
-            id<AMADatabaseProtocol> __block migrationDatabase = nil;
-
-            beforeEach(^{
-                cleanDatabase();
-
-                AMADatabaseMigrationManager *migrationManager =
-                    [[AMADatabaseMigrationManager alloc] initWithCurrentSchemeVersion:2
-                                                                     schemeMigrations:@[]
-                                                                     apiKeyMigrations:@[]
-                                                                       dataMigrations:@[]
-                                                                    libraryMigrations:@[]];
-                AMATableSchemeController *tableSchemeController = [[AMATableSchemeController alloc] initWithTableSchemes:@{
-                    kAMALocationsTableName: [AMATableDescriptionProvider locationsTableMetaInfo],
-                    kAMALocationsVisitsTableName: [AMATableDescriptionProvider visitsTableMetaInfo],
-                    kAMAKeyValueTableName: [AMATableDescriptionProvider stringKVTableMetaInfo],
-                }];
-                id<AMADatabaseKeyValueStorageProviding> storageProvider =
-                    [AMAKeyValueStorageProvidersFactory databaseProviderForTableName:kAMAKeyValueTableName
-                                                                           converter:[[AMAStringDatabaseKeyValueStorageConverter alloc] init]
-                                                                      objectProvider:[AMADatabaseObjectProvider blockForStrings]
-                                                              backingKVSDataProvider:nil];
-
-                migrationDatabase = [AMADatabaseMigrationTestsUtils databaseWithPath:[[AMAMigrationTo500Utils migrationPath]
-                                                                                      stringByAppendingPathComponent:@"l_data.sqlite"]
-                                                                    migrationManager:migrationManager
-                                                                     storageProvider:storageProvider
-                                                                    schemeController:tableSchemeController];
-            });
-
-            it(@"Should migrate kv table", ^{
-                NSString *const key = @"foo";
-                NSString *const value = @"bar";
-
-                [migrationDatabase inDatabase:^(AMAFMDatabase *db) {
-                    id<AMAKeyValueStoring> storage = [migrationDatabase.storageProvider storageForDB:db];
-
-                    [storage saveString:value forKey:key error:nil];
-                }];
-
-                id<AMADatabaseProtocol> newDB = [AMADatabaseFactory locationDatabase];
-                [newDB inDatabase:^(AMAFMDatabase *db) {
-                    id<AMAKeyValueStoring> storage = [newDB.storageProvider storageForDB:db];
-
-                    [[[storage stringForKey:key error:nil] should] equal:value];
-                    [[[storage stringForKey:AMAStorageStringKeyDidApplyDataMigrationFor500 error:nil] should] equal:@"1"];
-                }];
-            });
-
-            __auto_type testMigrationVisitsAndLocations = ^() {
+        
+        id<AMADatabaseProtocol> (^createLocationMigrationDatabase)(NSString *) = ^(NSString *basePath) {
+            AMADatabaseMigrationManager *migrationManager =
+            [[AMADatabaseMigrationManager alloc] initWithCurrentSchemeVersion:2
+                                                             schemeMigrations:@[]
+                                                             apiKeyMigrations:@[]
+                                                               dataMigrations:@[]
+                                                            libraryMigrations:@[]];
+            AMATableSchemeController *tableSchemeController = [[AMATableSchemeController alloc] initWithTableSchemes:@{
+                kAMALocationsTableName: [AMATableDescriptionProvider locationsTableMetaInfo],
+                kAMALocationsVisitsTableName: [AMATableDescriptionProvider visitsTableMetaInfo],
+                kAMAKeyValueTableName: [AMATableDescriptionProvider stringKVTableMetaInfo],
+            }];
+            id<AMADatabaseKeyValueStorageProviding> storageProvider =
+            [AMAKeyValueStorageProvidersFactory databaseProviderForTableName:kAMAKeyValueTableName
+                                                                   converter:[[AMAStringDatabaseKeyValueStorageConverter alloc] init]
+                                                              objectProvider:[AMADatabaseObjectProvider blockForStrings]
+                                                      backingKVSDataProvider:nil];
+            
+            return [AMADatabaseMigrationTestsUtils databaseWithPath:[basePath
+                                                                     stringByAppendingPathComponent:@"l_data.sqlite"]
+                                                   migrationManager:migrationManager
+                                                    storageProvider:storageProvider
+                                                   schemeController:tableSchemeController];
+        };
+        
+        __auto_type testMigrationLocation = ^(id<AMALocationEncoderProviding> migrationEncoderFactory,
+                                              id<AMALocationEncoderProviding> encoderFactory,
+                                              NSArray *migrationsToRun,
+                                              NSString *basePath) {
+            context(@"Location data migration", ^{
+                id<AMADatabaseProtocol> __block migrationDatabase = nil;
+                beforeEach(^{
+                    cleanDatabase();
+                    
+                    migrationDatabase = createLocationMigrationDatabase(basePath);
+                });
+                
+                it(@"Should migrate kv table", ^{
+                    NSString *const key = @"foo";
+                    NSString *const value = @"bar";
+                    
+                    [migrationDatabase inDatabase:^(AMAFMDatabase *db) {
+                        id<AMAKeyValueStoring> storage = [migrationDatabase.storageProvider storageForDB:db];
+                        
+                        [storage saveString:value forKey:key error:nil];
+                        
+                        for (NSString *migrationKey in migrationsToRun) {
+                            [storage saveString:nil forKey:migrationKey error:nil];
+                        }
+                    }];
+                    
+                    id<AMADatabaseProtocol> newDB = [AMADatabaseFactory locationDatabase];
+                    [newDB inDatabase:^(AMAFMDatabase *db) {
+                        id<AMAKeyValueStoring> storage = [newDB.storageProvider storageForDB:db];
+                        
+                        [[[storage stringForKey:key error:nil] should] equal:value];
+                        
+                        for (NSString *migrationKey in migrationsToRun) {
+                            [[[storage stringForKey:migrationKey error:nil] should] equal:@"1"];
+                        }
+                    }];
+                });
+                
                 it(@"Should migrate visits and locations", ^{
                     AMALocationStorage *migrationStorage = [[AMALocationStorage alloc] initWithConfiguration:[[AMALocationCollectingConfiguration alloc] init]
                                                                                                   serializer:[[AMALocationSerializer alloc] init]
                                                                                                     database:migrationDatabase
-                                                                                                     crypter:[AMALocationEncoderFactory migrationEncoder]];
-
+                                                                                                     crypter:[migrationEncoderFactory encoder]];
+                    
                     NSDate *visitDate = [NSDate dateWithTimeIntervalSince1970:22.0];
                     AMAVisit *visitToMigrate = [AMAVisit visitWithIdentifier:@8
                                                                  collectDate:visitDate
@@ -1034,50 +1240,95 @@ describe(@"AMADatabaseMigrationTo500Tests", ^{
                                                                    longitude:24.0
                                                                    precision:5];
                     [migrationStorage addVisit:visitToMigrate];
-
+                    
                     NSDate *locationDate = [NSDate dateWithTimeIntervalSince1970:23.0];
                     AMALocation *locationToMigrate = [[AMALocation alloc] initWithIdentifier:@9
                                                                                  collectDate:locationDate
                                                                                     location:[[CLLocation alloc] initWithLatitude:22.0 longitude:33.0]
                                                                                     provider:AMALocationProviderGPS];
                     [migrationStorage addLocations:@[locationToMigrate]];
-
+                    
+                    
+                    // Migrate
+                    [migrationDatabase inDatabase:^(AMAFMDatabase *db) {
+                        id<AMAKeyValueStoring> storage = [migrationDatabase.storageProvider storageForDB:db];
+                        
+                        for (NSString *migrationKey in migrationsToRun) {
+                            [storage saveString:nil forKey:migrationKey error:nil];
+                        }
+                    }];
+                    
                     // After migration
                     id<AMADatabaseProtocol> newDB = [AMADatabaseFactory locationDatabase];
                     AMALocationStorage *locationStorage = [[AMALocationStorage alloc] initWithConfiguration:[[AMALocationCollectingConfiguration alloc] init]
                                                                                                  serializer:[[AMALocationSerializer alloc] init]
                                                                                                    database:newDB
-                                                                                                    crypter:[AMALocationEncoderFactory encoder]];
+                                                                                                    crypter:[encoderFactory encoder]];
                     AMAVisit *migratedVisit = [[locationStorage visitsWithLimit:1] firstObject];
-
+                    
                     [[migratedVisit.collectDate should] equal:visitToMigrate.collectDate];
                     [[migratedVisit.departureDate should] equal:visitToMigrate.departureDate];
                     [[migratedVisit.arrivalDate should] equal:visitToMigrate.arrivalDate];
                     [[theValue(migratedVisit.latitude) should] equal:theValue(visitToMigrate.latitude)];
                     [[theValue(migratedVisit.longitude) should] equal:theValue(visitToMigrate.longitude)];
                     [[theValue(migratedVisit.precision) should] equal:theValue(visitToMigrate.precision)];
-
+                    
                     AMALocation *migratedLocation = [[locationStorage locationsWithLimit:1] firstObject];
-
+                    
                     [[migratedLocation.collectDate should] equal:locationToMigrate.collectDate];
                     [[theValue(migratedLocation.location.coordinate.latitude) should] equal:theValue(locationToMigrate.location.coordinate.latitude)];
                     [[theValue(migratedLocation.location.coordinate.longitude) should] equal:theValue(locationToMigrate.location.coordinate.longitude)];
                     [[theValue(migratedLocation.provider) should] equal:theValue(locationToMigrate.provider)];
-
+                    
                     [locationStorage purgeVisitsWithIdentifiers:@[visitToMigrate.identifier]];
                     [locationStorage purgeLocationsWithIdentifiers:@[locationToMigrate.identifier]];
                 });
-            };
-
-            context(@"Migration with appID", ^{
-                testMigrationVisitsAndLocations();
             });
-
+        };
+        
+        context(@"Migration 5.0", ^{
+            beforeEach(^{
+                [AMALocationDataMigrationTo5100 stubbedNullMockForDefaultInit];
+            });
+            
+            context(@"Migration with appID", ^{
+                testMigrationLocation([[AMALocationMigrationTo500EncoderFactory alloc] init],
+                                      [[AMALocationMigrationTo5100EncoderFactory alloc] init],
+                                      @[AMAStorageStringKeyDidApplyDataMigrationFor500],
+                                      [AMAMigrationTo500Utils migrationPath]);
+            });
+            
             context(@"Migration with SDK Bundle", ^{
                 beforeEach(^{
                     [AMAPlatformDescription stub:@selector(appID) andReturn:nil];
                 });
-                testMigrationVisitsAndLocations();
+                testMigrationLocation([[AMALocationMigrationTo500EncoderFactory alloc] init],
+                                      [[AMALocationMigrationTo5100EncoderFactory alloc] init],
+                                      @[AMAStorageStringKeyDidApplyDataMigrationFor500],
+                                      [AMAMigrationTo500Utils migrationPath]);
+            });
+        });
+        
+        context(@"Migration 5.10", ^{
+            beforeEach(^{
+                [AMALocationDataMigrationTo500 stubbedNullMockForDefaultInit];
+            });
+            
+            context(@"Migration with appID", ^{
+                testMigrationLocation([[AMALocationMigrationTo5100EncoderFactory alloc] init],
+                                      [[AMALocationEncoderFactory alloc] init],
+                                      @[AMAStorageStringKeyDidApplyDataMigrationFor5100],
+                                      [AMAFileUtility persistentPath]);
+            });
+            
+            context(@"Migration with SDK Bundle", ^{
+                beforeEach(^{
+                    [AMAPlatformDescription stub:@selector(appID) andReturn:nil];
+                });
+                testMigrationLocation([[AMALocationMigrationTo5100EncoderFactory alloc] init],
+                                      [[AMALocationEncoderFactory alloc] init],
+                                      @[AMAStorageStringKeyDidApplyDataMigrationFor5100],
+                                      [AMAFileUtility persistentPath]);
             });
         });
     });

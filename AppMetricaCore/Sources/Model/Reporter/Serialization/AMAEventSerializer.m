@@ -9,17 +9,18 @@
 #import "AMAFileEventValue.h"
 #import "EventData.pb-c.h"
 #import "AMAReporterDatabaseEncodersFactory.h"
+#import "AMAReporterDatabaseMigrationTo500EncodersFactory.h"
+#import "AMAReporterDatabaseMigrationTo5100EncodersFactory.h"
+#import "AMAReporterDatabaseEncryptionDefaults.h"
 #import "AMATypeSafeDictionaryHelper.h"
 #import "AMAModelSerialization.h"
 #import <CoreLocation/CoreLocation.h>
 #import <AppMetricaProtobufUtils/AppMetricaProtobufUtils.h>
-#import "AMAReporterDatabaseEncodersFactory+Migration.h"
 
 @interface AMAEventSerializer ()
 
 @property (nonatomic, assign, readonly) AMAReporterDatabaseEncryptionType encryptionType;
-@property (nonatomic, strong, readonly) id<AMADataEncoding> encoder;
-@property (nonatomic, assign, readonly) BOOL useMigrationEncoder;
+@property (nonatomic, strong, readonly) id<AMAReporterDatabaseEncoderProviding> encoderFactory;
 
 @end
 
@@ -27,21 +28,15 @@
 
 - (instancetype)init
 {
-    AMAReporterDatabaseEncryptionType encryptionType = [AMAReporterDatabaseEncodersFactory eventDataEncryptionType];
-    return [self initWithEncryptionType:encryptionType
-                                encoder:[AMAReporterDatabaseEncodersFactory encoderForEncryptionType:encryptionType]
-                    useMigrationEncoder:NO];
+    return [self initWithEncoderFactory:[[AMAReporterDatabaseEncodersFactory alloc] init]];
 }
 
-- (instancetype)initWithEncryptionType:(AMAReporterDatabaseEncryptionType)encryptionType
-                               encoder:(id<AMADataEncoding>)encoder
-                   useMigrationEncoder:(BOOL)useMigrationEncoder
+- (instancetype)initWithEncoderFactory:(id<AMAReporterDatabaseEncoderProviding>)encoderFactory
 {
     self = [super init];
     if (self != nil) {
-        _encryptionType = encryptionType;
-        _encoder = encoder;
-        _useMigrationEncoder = useMigrationEncoder;
+        _encoderFactory = encoderFactory;
+        _encryptionType = [AMAReporterDatabaseEncryptionDefaults eventDataEncryptionType];
     }
     return self;
 }
@@ -61,7 +56,8 @@
     result[kAMACommonTableFieldDataEncryptionType] = @(self.encryptionType);
 
     NSError *internalError = nil;
-    result[kAMACommonTableFieldData] = [self.encoder encodeData:[self dataForEvent:event] error:&internalError];
+    id<AMADataEncoding> encoder = [self encoderForEncryptionType:self.encryptionType];
+    result[kAMACommonTableFieldData] = [encoder encodeData:[self dataForEvent:event] error:&internalError];
 
     if (internalError != nil) {
         AMALogError(@"Failed to serialize event: %@", internalError);
@@ -309,7 +305,7 @@
 
     AMAReporterDatabaseEncryptionType encryptionType =
         (AMAReporterDatabaseEncryptionType)[encryptionTypeNumber unsignedIntegerValue];
-    id<AMADataEncoding> encoder = self.encoder;
+    id<AMADataEncoding> encoder = [self encoderForEncryptionType:self.encryptionType];
     if (encryptionType != self.encryptionType) {
         encoder = [self encoderForEncryptionType:encryptionType];
     }
@@ -486,22 +482,19 @@
 
 #pragma mark - Migration -
 
-- (instancetype)migrationInit
+- (instancetype)migrationTo500Init
 {
-    AMAReporterDatabaseEncryptionType encryptionType = [AMAReporterDatabaseEncodersFactory eventDataEncryptionType];
-    return [self initWithEncryptionType:encryptionType
-                                encoder:[AMAReporterDatabaseEncodersFactory migrationEncoderForEncryptionType:encryptionType]
-                    useMigrationEncoder:YES];
+    return [self initWithEncoderFactory:[[AMAReporterDatabaseMigrationTo500EncodersFactory alloc] init]];
+}
+
+- (instancetype)migrationTo5100Init
+{
+    return [self initWithEncoderFactory:[[AMAReporterDatabaseMigrationTo5100EncodersFactory alloc] init]];
 }
 
 - (id<AMADataEncoding>)encoderForEncryptionType:(AMAReporterDatabaseEncryptionType)encryptionType
 {
-    if (self.useMigrationEncoder) {
-        return [AMAReporterDatabaseEncodersFactory migrationEncoderForEncryptionType:encryptionType];
-    }
-    else {
-        return [AMAReporterDatabaseEncodersFactory encoderForEncryptionType:encryptionType];
-    }
+    return [self.encoderFactory encoderForEncryptionType:encryptionType];
 }
 
 @end

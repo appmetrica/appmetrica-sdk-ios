@@ -18,14 +18,18 @@
 #import "AMAEventSerializer+Migration.h"
 #import "AMAInstantFeaturesConfiguration+Migration.h"
 #import "AMAEventNameHashesStorageFactory+Migration.h"
-#import "AMAReporterDatabaseEncodersFactory+Migration.h"
-#import "AMALocationEncoderFactory+Migration.h"
+#import "AMAReporterDatabaseEncodersFactory.h"
+#import "AMAReporterDatabaseMigrationTo5100EncodersFactory.h"
+#import "AMAReporterDatabaseMigrationTo500EncodersFactory.h"
 #import "AMAMetricaPersistentConfiguration.h"
 #import <AppMetricaPlatform/AppMetricaPlatform.h>
 #import "AMAKeyValueStorageProvidersFactory.h"
 #import "AMADatabaseObjectProvider.h"
 #import "AMAStringDatabaseKeyValueStorageConverter.h"
 #import "AMAJSONFileKVSDataProvider.h"
+#import "AMALocationMigrationTo500EncoderFactory.h"
+#import "AMALocationMigrationTo5100EncoderFactory.h"
+#import "AMADatabaseFactory.h"
 
 @import AppMetricaIdentifiers;
 
@@ -98,7 +102,7 @@ NSString *const kAMAMigrationDeviceIDHashStorageKey = @"YMMMetricaPersistentConf
                 destinationDB:(AMAFMDatabase *)destinationDB
                        apiKey:(NSString *)apiKey
 {
-    AMAEventSerializer *migrationSerializer = [[AMAEventSerializer alloc] migrationInit];
+    AMAEventSerializer *migrationSerializer = [[AMAEventSerializer alloc] migrationTo500Init];
     
     NSArray<AMAEvent*> *reporterEvents = [self getEventsInDB:sourceDB eventSerializer:migrationSerializer];
     
@@ -175,10 +179,12 @@ NSString *const kAMAMigrationDeviceIDHashStorageKey = @"YMMMetricaPersistentConf
 {
     AMAReporterDatabaseEncryptionType encryptionType = (AMAReporterDatabaseEncryptionType)[encryptionValue unsignedIntegerValue];
     
-    id<AMADataEncoding> migrationEncoder = [AMAReporterDatabaseEncodersFactory migrationEncoderForEncryptionType:encryptionType];
+    id<AMAReporterDatabaseEncoderProviding> migrationEncoderFactory = [[AMAReporterDatabaseMigrationTo500EncodersFactory alloc] init];
+    id<AMADataEncoding> migrationEncoder = [migrationEncoderFactory encoderForEncryptionType:encryptionType];
     NSData *decodedWithOldEncrypterData = [migrationEncoder decodeData:data error:nil];
     
-    id<AMADataEncoding> encoder = [AMAReporterDatabaseEncodersFactory encoderForEncryptionType:encryptionType];
+    id<AMAReporterDatabaseEncoderProviding> encoderFactory = [[AMAReporterDatabaseMigrationTo5100EncodersFactory alloc] init];
+    id<AMADataEncoding> encoder = [encoderFactory encoderForEncryptionType:encryptionType];
     NSData *encodedWithNewEncrypterData = [encoder encodeData:decodedWithOldEncrypterData error:nil];
     
     return encodedWithNewEncrypterData;
@@ -186,10 +192,12 @@ NSString *const kAMAMigrationDeviceIDHashStorageKey = @"YMMMetricaPersistentConf
 
 + (NSData *)locationMigrationData:(NSData *)data
 {
-    id<AMADataEncoding> migrationEncoder = [AMALocationEncoderFactory migrationEncoder];
+    id<AMALocationEncoderProviding> migrationEncoderFactory = [[AMALocationMigrationTo500EncoderFactory alloc] init];
+    id<AMADataEncoding> migrationEncoder = [migrationEncoderFactory encoder];
     NSData *decodedWithOldEncrypterData = [migrationEncoder decodeData:data error:nil];
     
-    id<AMADataEncoding> encoder = [AMALocationEncoderFactory encoder];
+    id<AMALocationEncoderProviding> encoderFactory = [[AMALocationMigrationTo5100EncoderFactory alloc] init];
+    id<AMADataEncoding> encoder = [encoderFactory encoder];
     NSData *encodedWithNewEncrypterData = [encoder encodeData:decodedWithOldEncrypterData error:nil];
     
     return encodedWithNewEncrypterData;
@@ -229,15 +237,20 @@ NSString *const kAMAMigrationDeviceIDHashStorageKey = @"YMMMetricaPersistentConf
                     apiKey:(NSString *)apiKey
                         db:(AMAFMDatabase *)db
 {
-    AMAReporterStoragesContainer *container = [AMAReporterStoragesContainer sharedInstance];
-    AMAReporterStorage *reporterStorage = [container storageForApiKey:apiKey];
-    if (reporterStorage == nil) {
-        AMALogError(@"Failed to create storage for apiKey: %@", apiKey);
-        return NO;
-    }
+    AMAEventSerializer *eventSerializer = [[AMAEventSerializer alloc] migrationTo5100Init];
+    
     BOOL __block result = NO;
     for (AMAEvent *event in events) {
-        result = [reporterStorage.eventStorage addEvent:event db:db error:nil];
+        NSDictionary *eventDictionary = [eventSerializer dictionaryForEvent:event error:nil];
+        if (eventDictionary == nil) {
+            return NO;
+        }
+        
+        NSNumber *eventOID = [AMADatabaseHelper insertRowWithDictionary:eventDictionary
+                                                              tableName:kAMAEventTableName
+                                                                     db:db
+                                                                  error:nil];
+        result = result && eventOID != nil;
     }
     return result;
 }

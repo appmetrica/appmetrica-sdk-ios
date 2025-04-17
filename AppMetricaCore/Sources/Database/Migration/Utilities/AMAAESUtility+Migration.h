@@ -5,5 +5,6 @@
 @interface AMAAESUtility (Migration)
 
 + (NSData *)migrationIv:(NSString *)migrationSource;
++ (NSData *)md5_migrationIv;
 
 @end

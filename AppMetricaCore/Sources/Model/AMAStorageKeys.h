@@ -73,6 +73,7 @@ extern NSString *const AMAStorageStringKeyAppleRetryPeriods;
 extern NSString *const AMAStorageStringKeyDidApplyDataMigrationFor500;
 extern NSString *const AMAStorageStringKeyDidApplyDataMigrationFor580;
 extern NSString *const AMAStorageStringKeyDidApplyDataMigrationFor590;
+extern NSString *const AMAStorageStringKeyDidApplyDataMigrationFor5100;
 
 extern NSString *const AMAStorageStringKeyAppMetricaClientConfiguration;
 extern NSString *const AMAStorageStringKeyRecentMainApiKey;

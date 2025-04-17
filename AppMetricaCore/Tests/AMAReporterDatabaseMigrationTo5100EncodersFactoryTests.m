@@ -1,18 +1,19 @@
 
 #import <Kiwi/Kiwi.h>
-#import <AppMetricaEncodingUtils/AppMetricaEncodingUtils.h>
-#import "AMAReporterDatabaseEncodersFactory.h"
-#import <AppMetricaTestUtils/AppMetricaTestUtils.h>
+#import "AMAReporterDatabaseMigrationTo5100EncodersFactory.h"
+#import "AMAReporterDatabaseEncryptionDefaults.h"
 #import "AMAAESUtility+Migration.h"
 #import "AMAMigrationTo500Utils.h"
-#import "AMAReporterDatabaseEncryptionDefaults.h"
+#import <AppMetricaEncodingUtils/AppMetricaEncodingUtils.h>
+#import <AppMetricaTestUtils/AppMetricaTestUtils.h>
+#import "AMAMigrationTo500Utils.h"
 
-SPEC_BEGIN(AMAReporterDatabaseEncodersFactoryTests)
+SPEC_BEGIN(AMAReporterDatabaseMigrationTo5100EncodersFactoryTests)
 
-describe(@"AMAReporterDatabaseEncodersFactory", ^{
+describe(@"AMAReporterDatabaseMigrationTo5100EncodersFactory", ^{
 
-    NSData *const defaultIV = [@"DEFAULT_IV" dataUsingEncoding:NSUTF8StringEncoding];
-    
+    NSData *const iv = [@"5100_IV" dataUsingEncoding:NSUTF8StringEncoding];
+
     NSObject<AMAReporterDatabaseEncoderProviding> *__block encoderFactory = nil;
 
     AMACompositeDataEncoder *__block compositeDataEncoder = nil;
@@ -24,9 +25,9 @@ describe(@"AMAReporterDatabaseEncodersFactory", ^{
         gzipDataEncoder = [AMAGZipDataEncoder stubbedNullMockForDefaultInit];
         aesCrypter = [AMAAESCrypter stubbedNullMockForInit:@selector(initWithKey:iv:)];
 
-        [AMAAESUtility stub:@selector(defaultIv) andReturn:defaultIV];
-        
-        encoderFactory = [[AMAReporterDatabaseEncodersFactory alloc] init];
+        [AMAAESUtility stub:@selector(md5_migrationIv) andReturn:iv];
+
+        encoderFactory = [[AMAReporterDatabaseMigrationTo5100EncodersFactory alloc] init];
     });
     
     context(@"AES", ^{
@@ -39,7 +40,7 @@ describe(@"AMAReporterDatabaseEncodersFactory", ^{
                 0x8e, 0xed, 0x7f, 0x8d, 0x98, 0x84, 0x40, 0x45, 0x93, 0x3e, 0x98, 0x6e, 0x41, 0x2a, 0xe9, 0x2b,
             };
             NSData *expectedData = [NSData dataWithBytes:data length:16];
-            [[aesCrypter should] receive:@selector(initWithKey:iv:) withArguments:expectedData, defaultIV];
+            [[aesCrypter should] receive:@selector(initWithKey:iv:) withArguments:expectedData, iv];
             encoder();
         });
         it(@"Should return valid encoder", ^{
@@ -57,7 +58,7 @@ describe(@"AMAReporterDatabaseEncodersFactory", ^{
                 0xaf, 0x9d, 0xca, 0x1b, 0xe7, 0x9a, 0x41, 0x97, 0xa0, 0x4b, 0x42, 0x24, 0x28, 0x50, 0xc6, 0xc2,
             };
             NSData *expectedData = [NSData dataWithBytes:data length:16];
-            [[aesCrypter should] receive:@selector(initWithKey:iv:) withArguments:expectedData, defaultIV];
+            [[aesCrypter should] receive:@selector(initWithKey:iv:) withArguments:expectedData, iv];
             encoder();
         });
         it(@"Should create valid composite encoder", ^{
@@ -69,8 +70,6 @@ describe(@"AMAReporterDatabaseEncodersFactory", ^{
             [[encoder() should] equal:compositeDataEncoder];
         });
     });
-
 });
 
 SPEC_END
-

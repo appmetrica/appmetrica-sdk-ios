@@ -1,17 +1,17 @@
 
 #import <Kiwi/Kiwi.h>
 #import <AppMetricaEncodingUtils/AppMetricaEncodingUtils.h>
-#import "AMALocationEncoderFactory.h"
+#import "AMALocationMigrationTo500EncoderFactory.h"
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
 #import "AMAAESUtility+Migration.h"
 #import "AMAMigrationTo500Utils.h"
 #import "AMALocationEncryptionDefaults.h"
 
-SPEC_BEGIN(AMALocationEncoderFactoryTests)
+SPEC_BEGIN(AMALocationMigrationTo500EncoderFactoryTests)
 
-describe(@"AMALocationEncoderFactory", ^{
+describe(@"AMALocationMigrationTo500EncoderFactory", ^{
     
-    __auto_type *const encoderFactory = [[AMALocationEncoderFactory alloc] init];
+    __auto_type *const encoderFactory = [[AMALocationMigrationTo500EncoderFactory alloc] init];
     AMAAESCrypter *__block crypterMock = nil;
     
     beforeEach(^{
@@ -22,7 +22,7 @@ describe(@"AMALocationEncoderFactory", ^{
         it(@"Should return encoder", ^{
             NSData *iv = [NSData nullMock];
             NSData *message = [NSData nullMock];
-            [AMAAESUtility stub:@selector(defaultIv) andReturn:iv];
+            [AMAAESUtility stub:@selector(migrationIv:) andReturn:iv withArguments:kAMAMigrationBundle];
             [AMALocationEncryptionDefaults stub:@selector(message) andReturn:message];
             
             [[crypterMock should] receive:@selector(initWithKey:iv:) withArguments:message, iv];

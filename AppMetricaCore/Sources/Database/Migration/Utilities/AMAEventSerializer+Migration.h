@@ -4,6 +4,7 @@
 
 @interface AMAEventSerializer (Migration)
 
-- (instancetype)migrationInit;
+- (instancetype)migrationTo500Init;
+- (instancetype)migrationTo5100Init;
 
 @end

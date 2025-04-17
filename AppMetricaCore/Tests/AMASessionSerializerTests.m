@@ -12,6 +12,9 @@
 #import "SessionData.pb-c.h"
 #import "AMAReporterDatabaseEncodersFactory.h"
 #import "AMAMetricaConfigurationTestUtilities.h"
+#import "AMAReporterDatabaseMigrationTo500EncodersFactory.h"
+#import "AMAReporterDatabaseMigrationTo5100EncodersFactory.h"
+#import "AMASessionSerializer+Migration.h"
 
 SPEC_BEGIN(AMASessionSerializerTests)
 
@@ -23,6 +26,10 @@ describe(@"AMASessionSerializer", ^{
     NSObject<AMADataEncoding> *__block encoder = nil;
     AMAAppStateManagerTestHelper *__block stateHelper = nil;
     AMASessionSerializer *__block serializer = nil;
+    
+    __auto_type *const encoderFactory = [[AMAReporterDatabaseEncodersFactory alloc] init];
+    __auto_type *const encoderTo500Factory = [[AMAReporterDatabaseMigrationTo500EncodersFactory alloc] init];
+    __auto_type *const encoderTo5100Factory = [[AMAReporterDatabaseMigrationTo5100EncodersFactory alloc] init];
 
     beforeEach(^{
         [AMAMetricaConfigurationTestUtilities stubConfigurationWithNullMock];
@@ -30,8 +37,10 @@ describe(@"AMASessionSerializer", ^{
         stateHelper = [[AMAAppStateManagerTestHelper alloc] init];
         [stateHelper stubApplicationState];
         session = [[AMASession alloc] init];
-        encoder = (NSObject<AMADataEncoding> *)
-            [AMAReporterDatabaseEncodersFactory encoderForEncryptionType:AMAReporterDatabaseEncryptionTypeAES];
+        [AMAReporterDatabaseEncodersFactory stubInstance:encoderFactory forInit:@selector(init)];
+        [AMAReporterDatabaseMigrationTo500EncodersFactory stubInstance:encoderTo500Factory forInit:@selector(init)];
+        [AMAReporterDatabaseMigrationTo5100EncodersFactory stubInstance:encoderTo5100Factory forInit:@selector(init)];
+        encoder = (NSObject<AMADataEncoding> *)[encoderFactory encoderForEncryptionType:AMAReporterDatabaseEncryptionTypeAES];
         serializer = [[AMASessionSerializer alloc] init];
     });
 
@@ -260,13 +269,31 @@ describe(@"AMASessionSerializer", ^{
 
             sessionDictionary = [NSMutableDictionary dictionary];
         });
-
+        
         it(@"Should create different encoder", ^{
-            [[AMAReporterDatabaseEncodersFactory should] receive:@selector(encoderForEncryptionType:)
-                                                   withArguments:theValue(AMAReporterDatabaseEncryptionTypeGZipAES)];
+            [[encoderFactory should] receive:@selector(encoderForEncryptionType:)
+                               withArguments:theValue(AMAReporterDatabaseEncryptionTypeGZipAES)];
             prepareDictionary();
             sessionDictionary[kAMACommonTableFieldDataEncryptionType] = @(AMAReporterDatabaseEncryptionTypeGZipAES);
             [serializer sessionForDictionary:sessionDictionary error:nil];
+        });
+        it(@"Should create migration to 5.0.0 encoder", ^{
+            AMASessionSerializer *__block migrationSerialzer = [[AMASessionSerializer alloc] migrationTo500Init];
+            
+            [[encoderTo500Factory should] receive:@selector(encoderForEncryptionType:)
+                                    withArguments:theValue(AMAReporterDatabaseEncryptionTypeGZipAES)];
+            prepareDictionary();
+            sessionDictionary[kAMACommonTableFieldDataEncryptionType] = @(AMAReporterDatabaseEncryptionTypeGZipAES);
+            [migrationSerialzer sessionForDictionary:sessionDictionary error:nil];
+        });
+        it(@"Should create migration to 5.10.0 encoder", ^{
+            AMASessionSerializer *__block migrationSerialzer = [[AMASessionSerializer alloc] migrationTo5100Init];
+            
+            [[encoderTo5100Factory should] receive:@selector(encoderForEncryptionType:)
+                                     withArguments:theValue(AMAReporterDatabaseEncryptionTypeGZipAES)];
+            prepareDictionary();
+            sessionDictionary[kAMACommonTableFieldDataEncryptionType] = @(AMAReporterDatabaseEncryptionTypeGZipAES);
+            [migrationSerialzer sessionForDictionary:sessionDictionary error:nil];
         });
         it(@"Should return nil if data is empty", ^{
             prepareDictionary();
