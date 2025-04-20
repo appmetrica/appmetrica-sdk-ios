@@ -13,10 +13,6 @@
             sourceDB:(AMAFMDatabase *)sourceDB
        destinationDB:(AMAFMDatabase *)destinationDB;
 
-+ (void)migrateReporterEvents:(AMAFMDatabase *)sourceDB
-                destinationDB:(AMAFMDatabase *)destinationDB
-                       apiKey:(NSString *)apiKey;
-
 + (void)migrateReporterEventHashes:(NSString *)apiKey;
 
 @end

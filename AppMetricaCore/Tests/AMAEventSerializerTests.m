@@ -16,8 +16,7 @@
 
 SPEC_BEGIN(AMAEventSerializerTests)
 
-describe(@"AMAEventSerializer",
- ^{
+describe(@"AMAEventSerializer", ^{
     double const EPSILON = 0.0001;
     __auto_type *const encoderFactory = [[AMAReporterDatabaseEncodersFactory alloc] init];
     __auto_type *const encoderTo500Factory = [[AMAReporterDatabaseMigrationTo500EncodersFactory alloc] init];

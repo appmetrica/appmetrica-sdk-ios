@@ -116,7 +116,7 @@ NSString *const kAMAMigrationDeviceIDHashStorageKey = @"YMMMetricaPersistentConf
         [reporter setSessionExtras:legacyExtras forKey:legacyExtrasKey];
     }
     
-    [self saveReporterEvents:reporterEvents apiKey:apiKey db:destinationDB];
+    [self saveReporterEvents:reporterEvents db:destinationDB];
 }
 
 + (void)migrateReporterEventHashes:(NSString *)migrationPath apiKey:(NSString *)apiKey
@@ -233,26 +233,20 @@ NSString *const kAMAMigrationDeviceIDHashStorageKey = @"YMMMetricaPersistentConf
     return [result copy];
 }
 
-+ (BOOL)saveReporterEvents:(NSArray<AMAEvent*> *)events
-                    apiKey:(NSString *)apiKey
++ (void)saveReporterEvents:(NSArray<AMAEvent*> *)events
                         db:(AMAFMDatabase *)db
 {
     AMAEventSerializer *eventSerializer = [[AMAEventSerializer alloc] migrationTo5100Init];
     
-    BOOL __block result = NO;
     for (AMAEvent *event in events) {
         NSDictionary *eventDictionary = [eventSerializer dictionaryForEvent:event error:nil];
-        if (eventDictionary == nil) {
-            return NO;
+        if (eventDictionary != nil) {
+            [AMADatabaseHelper insertRowWithDictionary:eventDictionary
+                                             tableName:kAMAEventTableName
+                                                    db:db
+                                                 error:nil];
         }
-        
-        NSNumber *eventOID = [AMADatabaseHelper insertRowWithDictionary:eventDictionary
-                                                              tableName:kAMAEventTableName
-                                                                     db:db
-                                                                  error:nil];
-        result = result && eventOID != nil;
     }
-    return result;
 }
 
 + (void)addExtrasToEvents:(NSArray<AMAEvent*> *)events

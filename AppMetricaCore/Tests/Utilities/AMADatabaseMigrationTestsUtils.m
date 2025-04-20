@@ -1,6 +1,7 @@
 
 #import "AMADatabaseMigrationTestsUtils.h"
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
+#import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
 #import <AppMetricaFMDB/AppMetricaFMDB.h>
 #import <sqlite3.h>
 #import "AMATableSchemeController.h"
@@ -11,6 +12,23 @@
 #import "AMADatabaseObjectProvider.h"
 #import "AMAStorageKeys.h"
 #import "AMADatabase.h"
+#import "AMAMigrationTo500Utils.h"
+#import "AMATableDescriptionProvider.h"
+#import "AMADatabaseConstants.h"
+#import "AMAKeyValueStorageProvidersFactory.h"
+#import "AMABinaryDatabaseKeyValueStorageConverter.h"
+#import "AMADatabaseMigrationManager.h"
+#import "AMADatabaseDataMigration.h"
+#import "AMADatabaseMigrationProvider.h"
+#import "AMASharedReporterProvider.h"
+#import "AMAEventsCleaner.h"
+#import "AMAEventSerializer.h"
+#import "AMAEvent.h"
+#import "AMASessionSerializer.h"
+#import "AMADatabaseHelper.h"
+#import "AMADatabaseFactory.h"
+#import "AMAJSONFileKVSDataProvider.h"
+#import "AMAProxyDataToStringKVSDataProvider.h"
 
 @implementation AMADatabaseMigrationTestsUtils
 
@@ -55,7 +73,7 @@
     AMATableSchemeController *schemeController = [AMATableSchemeController nullMock];
     id<AMAKeyValueStorageConverting> converter = [[AMAStringDatabaseKeyValueStorageConverter alloc] init];
     AMADatabaseKeyValueStorageProvider *keyValueStorageProvider =
-        [[AMADatabaseKeyValueStorageProvider alloc] initWithTableName:@"kv"
+        [[AMADatabaseKeyValueStorageProvider alloc] initWithTableName:kAMAKeyValueTableName
                                                             converter:converter
                                                        objectProvider:[AMADatabaseObjectProvider blockForStrings]
                                                backingKVSDataProvider:nil];
@@ -86,6 +104,127 @@
                                                                      criticalKeyValueKeys:kCriticalKVKeys];
     [storageProvider setDatabase:database];
     return database;
+}
+
++ (id<AMADatabaseProtocol>)configurationDatabase:(NSString *)basePath
+{
+    AMADatabaseMigrationManager *migrationManager =
+        [[AMADatabaseMigrationManager alloc] initWithCurrentSchemeVersion:kAMAConfigurationDatabaseSchemaVersion
+                                                         schemeMigrations:@[]
+                                                         apiKeyMigrations:@[]
+                                                           dataMigrations:@[]
+                                                        libraryMigrations:@[]];
+    AMATableSchemeController *tableSchemeController = [[AMATableSchemeController alloc] initWithTableSchemes:@{
+        kAMAKeyValueTableName: [AMATableDescriptionProvider stringKVTableMetaInfo],
+    }];
+    
+    id<AMADatabaseKeyValueStorageProviding> storageProvider =
+        [AMAKeyValueStorageProvidersFactory databaseProviderForTableName:kAMAKeyValueTableName
+                                                               converter:[[AMAStringDatabaseKeyValueStorageConverter alloc] init]
+                                                          objectProvider:[AMADatabaseObjectProvider blockForStrings]
+                                                  backingKVSDataProvider:nil];
+    
+    return [self databaseWithPath:[basePath stringByAppendingPathComponent:@"storage.sqlite"]
+                 migrationManager:migrationManager
+                  storageProvider:storageProvider
+                 schemeController:tableSchemeController];
+}
+
++ (id<AMADatabaseProtocol>)reporterDatabase:(NSString *)basePath
+                                     apiKey:(NSString *)apiKey
+{
+    return [self reporterDatabase:basePath apiKey:apiKey main:NO];
+}
+
++ (id<AMADatabaseProtocol>)reporterDatabase:(NSString *)basePath
+                                     apiKey:(NSString *)apiKey
+                                       main:(BOOL)main
+{
+    AMASharedReporterProvider *reporterProvider = [[AMASharedReporterProvider alloc] initWithApiKey:apiKey];
+    AMAEventsCleaner *eventsCleaner = [[AMAEventsCleaner alloc] initWithReporterProvider:reporterProvider];
+
+    AMADatabaseMigrationManager *migrationManager =
+    [[AMADatabaseMigrationManager alloc] initWithCurrentSchemeVersion:kAMAReporterDatabaseSchemaVersion
+                                                         schemeMigrations:@[]
+                                                         apiKeyMigrations:@[]
+                                                           dataMigrations:@[]
+                                                        libraryMigrations:@[]];
+    AMATableSchemeController *tableSchemeController = [[AMATableSchemeController alloc] initWithTableSchemes:@{
+        kAMAEventTableName: [AMATableDescriptionProvider eventsTableMetaInfo],
+        kAMASessionTableName: [AMATableDescriptionProvider sessionsTableMetaInfo],
+        kAMAKeyValueTableName: [AMATableDescriptionProvider binaryKVTableMetaInfo],
+    }];
+    
+    NSString *dirPath = main ? kAMAMainReporterDBPath : apiKey;
+    NSString *backingDataPath = [[basePath stringByAppendingPathComponent:dirPath] stringByAppendingPathComponent:@"data.bak"];
+    AMADiskFileStorageOptions options = AMADiskFileStorageOptionCreateDirectory | AMADiskFileStorageOptionNoBackup;
+    AMADiskFileStorage *fileStorage = [[AMADiskFileStorage alloc] initWithPath:backingDataPath options:options];
+    AMAJSONFileKVSDataProvider *jsonDataProvider = [[AMAJSONFileKVSDataProvider alloc] initWithFileStorage:fileStorage];
+    id<AMAKeyValueStorageDataProviding> backingDataProvider = [[AMAProxyDataToStringKVSDataProvider alloc]
+                                                               initWithUnderlyingDataProvider:jsonDataProvider];
+    
+    id<AMADatabaseKeyValueStorageProviding> storageProvider =
+        [AMAKeyValueStorageProvidersFactory databaseProviderForTableName:kAMAKeyValueTableName
+                                                               converter:[[AMABinaryDatabaseKeyValueStorageConverter alloc] init]
+                                                          objectProvider:[AMADatabaseObjectProvider blockForDataBlobs]
+                                                  backingKVSDataProvider:backingDataProvider];
+    
+    return [self databaseWithPath:[[basePath
+                                    stringByAppendingPathComponent:dirPath]
+                                   stringByAppendingPathComponent:@"data.sqlite"]
+                 migrationManager:migrationManager
+                  storageProvider:storageProvider
+                 schemeController:tableSchemeController];
+}
+
++ (id<AMADatabaseProtocol>)locationDatabase:(NSString *)basePath
+{
+    AMADatabaseMigrationManager *migrationManager =
+        [[AMADatabaseMigrationManager alloc] initWithCurrentSchemeVersion:kAMALocationDatabaseSchemaVersion
+                                                         schemeMigrations:@[]
+                                                         apiKeyMigrations:@[]
+                                                           dataMigrations:@[]
+                                                        libraryMigrations:@[]];
+    AMATableSchemeController *tableSchemeController = [[AMATableSchemeController alloc] initWithTableSchemes:@{
+        kAMALocationsTableName: [AMATableDescriptionProvider locationsTableMetaInfo],
+        kAMALocationsVisitsTableName: [AMATableDescriptionProvider visitsTableMetaInfo],
+        kAMAKeyValueTableName: [AMATableDescriptionProvider stringKVTableMetaInfo],
+    }];
+    
+    id<AMADatabaseKeyValueStorageProviding> storageProvider =
+        [AMAKeyValueStorageProvidersFactory databaseProviderForTableName:kAMAKeyValueTableName
+                                                               converter:[[AMAStringDatabaseKeyValueStorageConverter alloc] init]
+                                                          objectProvider:[AMADatabaseObjectProvider blockForStrings]
+                                                  backingKVSDataProvider:nil];
+    
+    return [self databaseWithPath:[basePath stringByAppendingPathComponent:@"l_data.sqlite"]
+                 migrationManager:migrationManager
+                  storageProvider:storageProvider
+                 schemeController:tableSchemeController];
+}
+
++ (void)cleanDatabase
+{
+    [[NSFileManager defaultManager] removeItemAtPath:[AMAMigrationTo500Utils migrationPath] error:nil];
+    [[NSFileManager defaultManager] removeItemAtPath:AMAFileUtility.persistentPath error:nil];
+}
+
++ (void)includeDataMigration:(id<AMADatabaseDataMigration>)migration
+                 contentType:(AMADatabaseContentType)contentType
+                  inDatabase:(id<AMADatabaseProtocol>)database
+{
+    [database inDatabase:^(AMAFMDatabase *db) {
+        id<AMAKeyValueStoring> storage = [database.storageProvider storageForDB:db];
+        
+        __auto_type *migrationProvider = [[AMADatabaseMigrationProvider alloc] initWithContentType:contentType];
+        NSArray *migrations = [migrationProvider dataMigrationsWithAPIKey:nil main:YES];
+        
+        for (id<AMADatabaseDataMigration> migration in migrations) {
+            [storage saveBoolNumber:@YES forKey:migration.migrationKey error:nil];
+        }
+        
+        [storage saveBoolNumber:@NO forKey:migration.migrationKey error:nil];
+    }];
 }
 
 @end

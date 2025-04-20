@@ -76,6 +76,7 @@
     NSDictionary *tables = @{
         kAMAKeyValueTableName : [AMATableDescriptionProvider binaryKVTableMetaInfo],
         kAMASessionTableName : [AMATableDescriptionProvider sessionsTableMetaInfo],
+        kAMAEventTableName : [AMATableDescriptionProvider eventsTableMetaInfo],
     };
     [database inDatabase:^(AMAFMDatabase *db) {
         for (NSString *table in tables) {
@@ -84,9 +85,6 @@
                                         sourceDB:sourceDB
                                    destinationDB:db];
         }
-        [AMAMigrationTo580Utils migrateReporterEvents:sourceDB
-                                        destinationDB:db
-                                               apiKey:self.apiKey];
         
         [db close];
     }];
