@@ -283,12 +283,15 @@ NSString *const kAMAMigrationDeviceIDHashStorageKey = @"YMMMetricaPersistentConf
 
 + (AMAKeychain *)vendorMigrationKeychainWithBridge:(AMAKeychainBridge *)keychainBridge
 {
+#if !TARGET_IPHONE_SIMULATOR
     NSString *appIdentifier = [AMAPlatformDescription appIdentifierPrefix];
     if (appIdentifier.length == 0) {
         return nil;
     }
-    
     NSString *accessGroup = [appIdentifier stringByAppendingString:kAMAMigrationKeychainAccessGroup];
+#else
+    NSString *accessGroup = @"";
+#endif
     AMAKeychain *migrationVendorKeychain = [[AMAKeychain alloc] initWithService:kAMAMigrationKeychainVendorServiceIdentifier
                                                                     accessGroup:accessGroup
                                                                          bridge:keychainBridge];

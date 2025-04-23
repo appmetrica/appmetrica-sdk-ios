@@ -277,8 +277,11 @@ describe(@"AMADataMigrationsTests", ^{
                 
                 it(@"Should migrate deviceID with keychain if no prev db", ^{
                     [[NSFileManager defaultManager] removeItemAtPath:basePath error:nil];
-                    
+#if !TARGET_IPHONE_SIMULATOR
                     NSString *accessGroup = [appIdentifierPrefix stringByAppendingString:kAMAMigrationKeychainAccessGroup];
+#else
+                    NSString *accessGroup = @"";
+#endif
                     stubKeychain(kAMAMigrationKeychainVendorServiceIdentifier, accessGroup, keychainMock);
                     
                     [keychainMock stub:@selector(isAvailable) andReturn:theValue(YES)];
@@ -301,7 +304,11 @@ describe(@"AMADataMigrationsTests", ^{
                 });
                 
                 it(@"Should migrate deviceID with fallback keychain", ^{
+#if !TARGET_IPHONE_SIMULATOR
                     NSString *accessGroup = [appIdentifierPrefix stringByAppendingString:kAMAMigrationKeychainAccessGroup];
+#else
+                    NSString *accessGroup = @"";
+#endif
                     stubKeychain(kAMAMigrationKeychainVendorServiceIdentifier, accessGroup, keychainMock);
                     
                     [keychainMock stub:@selector(isAvailable) andReturn:theValue(YES)];
