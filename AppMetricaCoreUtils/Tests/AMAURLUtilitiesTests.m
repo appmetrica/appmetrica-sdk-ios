@@ -180,6 +180,25 @@ describe(@"AMAURLUtilities", ^{
             [[parameters should] equal:@{ @"foo": @"bar2" }];
         });
     });
+    
+    context(@"unescapeString:", ^{
+        NSString * const expected = @"appmetrica_tracking_id=97066511625096571&ym_tracking_id=8842404282613596432&reattribution=1";
+        it(@"Should remove percent encoding", ^{
+            NSString *input = @"appmetrica_tracking_id=97066511625096571%26ym_tracking_id=8842404282613596432%26reattribution=1";
+            NSString *output = [AMAURLUtilities unescapeString:input];
+            [[output should] equal:expected];
+        });
+        it(@"Should remove double percent encoding", ^{
+            NSString *input = @"appmetrica_tracking_id%3D97066511625096571%2526ym_tracking_id%3D8842404282613596432%2526reattribution%3D1";
+            NSString *output = [AMAURLUtilities unescapeString:input];
+            [[output should] equal:expected];
+        });
+        it(@"Should return input string if invalid characters", ^{
+            NSString *input = @"appmetrica_tracking_id=97066511625096571%XXym_tracking_id=8842404282613596432%26reattribution=1";
+            NSString *output = [AMAURLUtilities unescapeString:input];
+            [[output should] equal:input];
+        });
+    });
 
 });
 

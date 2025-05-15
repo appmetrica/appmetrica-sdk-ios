@@ -2,9 +2,30 @@
 #import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
 #import "AMACoreUtilsLogging.h"
 
+static NSUInteger unescapeLimit = 5;
+
 @implementation AMAURLUtilities
 
 #pragma mark - Public
+
++ (NSString *)unescapeString:(NSString *)string
+{
+    NSString *prevValue = string;
+    NSString *nextValue = [prevValue stringByRemovingPercentEncoding];
+    NSUInteger limit = unescapeLimit;
+    
+    while (nextValue != nil && limit >= 0 && [nextValue isEqualToString:prevValue] == NO) {
+        prevValue = nextValue;
+        nextValue = [nextValue stringByRemovingPercentEncoding];
+        limit--;
+    }
+    
+    if (nextValue.length > 0) {
+        return nextValue;
+    } else {
+        return string;
+    }
+}
 
 + (NSURL *)URLWithBaseURLString:(NSString *)baseURLString
               httpGetParameters:(NSDictionary *)httpGetParameters

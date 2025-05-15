@@ -4,6 +4,8 @@
 NS_SWIFT_NAME(URLUtilities)
 @interface AMAURLUtilities : NSObject
 
++ (NSString *)unescapeString:(NSString *)string;
+
 + (NSURL *)URLWithBaseURLString:(NSString *)baseURLString
               httpGetParameters:(NSDictionary *)httpGetParameters;
 + (NSURL *)URLWithBaseURLString:(NSString *)baseURLString

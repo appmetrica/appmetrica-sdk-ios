@@ -62,6 +62,7 @@ NSString *const kAMADLControllerUrlTypeOpen = @"open";
     NSDictionary *parameters = [AMAURLUtilities HTTPGetParametersForURL:url];
     NSString *referrer = parameters[@"referrer"];
     if (referrer.length != 0) {
+        referrer = [AMAURLUtilities unescapeString:referrer];
         NSArray *referrerComponents = [referrer componentsSeparatedByString:@"&"];
         NSArray<AMAPair *> *conditions = [[AMAMetricaConfiguration sharedInstance].startup attributionDeeplinkConditions];
         for (NSString *component in referrerComponents) {
