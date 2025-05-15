@@ -27,8 +27,8 @@ describe(@"AMAAdRevenueInfoConverter", ^{
 
     AMAMutableAdRevenueInfo *__block adRevenueInfo = nil;
     AMAAdRevenueInfoModel *__block converted = nil;
-
-    beforeEach(^{
+    
+    __auto_type initAdRevenueWithAutocollected = ^(BOOL isAutocollected) {
         adRevenueInfo = [[AMAMutableAdRevenueInfo alloc] initWithAdRevenue:amount
                                                                   currency:currency];
         adRevenueInfo.adType = adType;
@@ -40,10 +40,14 @@ describe(@"AMAAdRevenueInfoConverter", ^{
         adRevenueInfo.precision = precision;
         adRevenueInfo.payload = payload;
 
-        converted = [AMAAdRevenueInfoConverter convertAdRevenueInfo:adRevenueInfo error:&error];
-    });
+        converted = [AMAAdRevenueInfoConverter convertAdRevenueInfo:adRevenueInfo isAutocollected:isAutocollected error:&error];
+    };
 
     context(@"All fields", ^{
+        beforeAll(^{
+            initAdRevenueWithAutocollected(NO);
+        });
+        
         it(@"Should convert amount decimal", ^{
             [[converted.amount should] equal:adRevenueInfo.adRevenue];
         });
@@ -77,22 +81,37 @@ describe(@"AMAAdRevenueInfoConverter", ^{
         it(@"Should not fill error", ^{
             [[error should] beNil];
         });
+        it(@"Should fill isAutocollected", ^{
+            [[theValue(converted.isAutocollected) should] beNo];
+        });
+    });
+    
+    context(@"Autocollected field", ^{
+        it(@"autocollected", ^{
+            initAdRevenueWithAutocollected(YES);
+            [[theValue(converted.isAutocollected) should] beYes];
+        });
+        it(@"manual", ^{
+            initAdRevenueWithAutocollected(NO);
+            [[theValue(converted.isAutocollected) should] beNo];
+        });
     });
 
     context(@"Payload", ^{
         NSDictionary *const payload = @{ @"key": @"value" };
         NSString *const expectedPayloadString = @"{\"key\":\"value\"}";
         beforeEach(^{
+            initAdRevenueWithAutocollected(NO);
             adRevenueInfo.payload = payload;
         });
         context(@"Valid payload", ^{
             it(@"Should return model with valid value", ^{
-                [[[AMAAdRevenueInfoConverter convertAdRevenueInfo:adRevenueInfo error:nil].payloadString should]
+                [[[AMAAdRevenueInfoConverter convertAdRevenueInfo:adRevenueInfo isAutocollected:NO error:nil].payloadString should]
                  equal:expectedPayloadString];
             });
             it(@"Should not fill error", ^{
                 NSError *error = nil;
-                [AMAAdRevenueInfoConverter convertAdRevenueInfo:adRevenueInfo error:&error];
+                [AMAAdRevenueInfoConverter convertAdRevenueInfo:adRevenueInfo isAutocollected:NO error:&error];
                 [[error should] beNil];
             });
         });
@@ -110,7 +129,9 @@ describe(@"AMAAdRevenueInfoConverter", ^{
                                                              code:AMAAppMetricaInternalEventJsonSerializationError
                                                          userInfo:@{ NSLocalizedDescriptionKey: desription }];
                 NSError *error = nil;
-                AMAAdRevenueInfoModel *result = [AMAAdRevenueInfoConverter convertAdRevenueInfo:adRevenueInfo error:&error];
+                AMAAdRevenueInfoModel *result = [AMAAdRevenueInfoConverter convertAdRevenueInfo:adRevenueInfo
+                                                                                isAutocollected:NO
+                                                                                          error:&error];
                 [[result.payloadString should] beNil];
                 [[error should] equal:expectedError];
             });

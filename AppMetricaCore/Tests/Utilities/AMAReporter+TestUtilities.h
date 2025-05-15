@@ -12,7 +12,8 @@ NS_ASSUME_NONNULL_BEGIN
                   eventBuilder:(AMAEventBuilder *)eventBuilder
               internalReporter:(AMAInternalEventsReporter *)internalReporter
       attributionCheckExecutor:(id<AMAAsyncExecuting>)attributionCheckExecutor
-                  privacyTimer:(AMAPrivacyTimer *)privacyTimer;
+                  privacyTimer:(AMAPrivacyTimer *)privacyTimer
+        adRevenueSourceStorage:(id<AMAAdRevenueSourceStorable>)adRevenueSourceStorage;
 
 @end
 

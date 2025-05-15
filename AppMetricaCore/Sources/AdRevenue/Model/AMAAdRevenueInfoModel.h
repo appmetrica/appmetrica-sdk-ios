@@ -15,6 +15,7 @@
 @property (nonatomic, copy, readonly) NSString *precision;
 @property (nonatomic, copy, readonly) NSString *payloadString;
 @property (nonatomic, assign, readonly) NSUInteger bytesTruncated;
+@property (nonatomic, assign, readonly) BOOL isAutocollected;
 
 
 - (instancetype)initWithAmount:(NSDecimalNumber *)amount
@@ -27,7 +28,8 @@
                adPlacementName:(NSString *)adPlacementName
                      precision:(NSString *)precision
                  payloadString:(NSString *)payloadString
-                bytesTruncated:(NSUInteger)bytesTruncated;
+                bytesTruncated:(NSUInteger)bytesTruncated
+               isAutocollected:(BOOL)isAutocollected;
 
 - (instancetype)init NS_UNAVAILABLE;
 + (instancetype)new NS_UNAVAILABLE;

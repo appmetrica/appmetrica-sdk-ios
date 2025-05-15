@@ -23,6 +23,7 @@
 #import "AMAIdentifierProviderMock.h"
 #import "AMAIdentifiersTestUtilities.h"
 #import "AMAAdResolver.h"
+#import "AMAAdRevenueSourceContainer.h"
 
 @interface AMAAppMetricaImpl () <AMAStartupControllerDelegate>
 
@@ -716,15 +717,21 @@ describe(@"AMAAppMetrica", ^{
             });
             
             it(@"Should report event if metrica is started", ^{
-                [[impl should] receive:@selector(reportAdRevenue:onFailure:)
-                         withArguments:adRevenueInfo, nil];
+                [[impl should] receive:@selector(reportAdRevenue:isAutocollected:onFailure:)
+                         withArguments:adRevenueInfo, theValue(NO), nil];
                 
                 [AMAAppMetrica reportAdRevenue:adRevenueInfo onFailure:nil];
+            });
+            it(@"Should report event if metrica is started with autocollected", ^{
+                [[impl should] receive:@selector(reportAdRevenue:isAutocollected:onFailure:)
+                         withArguments:adRevenueInfo, theValue(YES), nil];
+                
+                [AMAAppMetrica reportAdRevenue:adRevenueInfo isAutocollected:YES onFailure:nil];
             });
             it(@"Should not report event if metrica is not started", ^{
                 stubMetricaStarted(NO);
                 
-                [[impl shouldNot] receive:@selector(reportAdRevenue:onFailure:)];
+                [[impl shouldNot] receive:@selector(reportAdRevenue:isAutocollected:onFailure:)];
                 
                 [AMAAppMetrica reportAdRevenue:adRevenueInfo onFailure:nil];
             });
@@ -1435,6 +1442,43 @@ describe(@"AMAAppMetrica", ^{
             [[mockedImpl should] receive:@selector(clearSessionExtras)];
             
             [AMAAppMetrica clearSessionExtras];
+        });
+    });
+    
+    context(@"LibaryAdapter report", ^{
+        AMAAppMetricaImpl *__block mockedImpl = nil;
+        NSString *eventName = @"test_event_name";
+        NSDictionary *parameters = @{
+            @"key1": @"value1",
+        };
+        
+        afterEach(^{
+            [AMAAppMetrica clearStubs];
+        });
+        
+        it(@"reportLibraryAdapterAdRevenueRelatedEvent", ^{
+            mockedImpl = [AMAAppMetricaImpl nullMock];
+            stubMetrica();
+            [AMAAppMetrica stub:@selector(sharedImpl) andReturn:mockedImpl];
+            
+            [[mockedImpl should] receive:@selector(reportLibraryAdapterAdRevenueRelatedEvent:parameters:onFailure:)
+                           withArguments:eventName, parameters, kw_any()];
+            
+            stubMetricaStarted(YES);
+            [AMAAppMetrica reportLibraryAdapterAdRevenueRelatedEvent:eventName
+                                                          parameters:parameters
+                                                           onFailure:nil];
+        });
+        
+        it(@"registerAdRevenueNativeSource", ^{
+            NSString *nativeSource = @"native_source";
+            NSArray *expected = @[
+                @"yandex",
+                @"native_source",
+            ];
+            
+            [AMAAppMetrica registerAdRevenueNativeSource:nativeSource];
+            [[[AMAAdRevenueSourceContainer sharedInstance].nativeSupportedSources should] equal:expected];
         });
     });
 });

@@ -5,6 +5,8 @@
 #import "AMAAdRevenueInfoModel.h"
 #import <AppMetricaProtobufUtils/AppMetricaProtobufUtils.h>
 
+NSString *const kAdRevenueAutocollectedValue = @"autocollected";
+
 @implementation AMAAdRevenueInfoModelSerializer
 
 #pragma mark - Public -
@@ -44,6 +46,11 @@
         adRevenue.has_payload = [AMAProtobufUtilities fillBinaryData:&(adRevenue.payload)
                                                           withString:model.payloadString
                                                              tracker:tracker];
+        if (model.isAutocollected) {
+            adRevenue.has_data_source = [AMAProtobufUtilities fillBinaryData:&(adRevenue.data_source)
+                                                                  withString:kAdRevenueAutocollectedValue
+                                                                     tracker:tracker];
+        }
 
         packedAdRevenue = [self packAdRevenue:&adRevenue];
     }];

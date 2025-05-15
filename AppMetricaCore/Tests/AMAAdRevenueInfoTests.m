@@ -1,6 +1,8 @@
 
 #import <Kiwi/Kiwi.h>
 #import "AMAAdRevenueInfo.h"
+#import "AMAMutableAdRevenueInfo+AdRevenueHelper.h"
+#import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
 
 SPEC_BEGIN(AMAAdRevenueInfoTests)
 
@@ -16,6 +18,8 @@ describe(@"AMAAdRevenueInfo", ^{
     NSString *const adPlacementName = @"some placement name";
     NSString *const precision = @"very precise";
     NSDictionary *payload = @{ @"key1" : @"value1", @"key2" : @"value2" };
+    NSArray *const pluginSources = @[ @"plugin1", @"yetanotherplugin" ];
+    NSArray *const nativeSources = @[ @"native1", @"yetanothernative" ];
 
     context(@"Immutable", ^{
         context(@"Minimal", ^{
@@ -212,7 +216,59 @@ describe(@"AMAAdRevenueInfo", ^{
                 });
             });
         });
-
+        context(@"Update sources", ^{
+            AMAAdRevenueInfo *__block immutable = nil;
+            AMAMutableAdRevenueInfo *mutable = [[AMAMutableAdRevenueInfo alloc] initWithAdRevenue:price
+                                                                                         currency:currency];
+            NSDictionary *expectedPayload = @{
+                @"plugin_supported_sources": [AMAJSONSerialization stringWithJSONObject:pluginSources error:nil],
+                @"native_supported_sources": [AMAJSONSerialization stringWithJSONObject:nativeSources error:nil],
+            };
+            
+            beforeEach(^{
+                mutable.adType = type;
+                mutable.adNetwork = adNetwork;
+                mutable.adUnitID = adUnitID;
+                mutable.adUnitName = adUnitName;
+                mutable.adPlacementID = adPlacementID;
+                mutable.adPlacementName = adPlacementName;
+                mutable.precision = precision;
+            });
+            
+            it(@"should update empty payload", ^{
+                mutable.payload = nil;
+                [mutable updatePluginSupportedSources:pluginSources
+                               nativeSupportedSources:nativeSources];
+                
+                [[mutable.payload should] equal:expectedPayload];
+            });
+            it(@"should update fill payload", ^{
+                NSMutableDictionary *expected = [NSMutableDictionary dictionaryWithDictionary:payload];
+                [expected addEntriesFromDictionary:expectedPayload];
+                
+                mutable.payload = payload;
+                
+                [mutable updatePluginSupportedSources:pluginSources
+                               nativeSupportedSources:nativeSources];
+                
+                [[mutable.payload should] equal:expected];
+            });
+            it(@"should update override payload", ^{
+                NSMutableDictionary *expected = [NSMutableDictionary dictionaryWithDictionary:payload];
+                [expected addEntriesFromDictionary:expectedPayload];
+                
+                NSMutableDictionary *inputPayload = [NSMutableDictionary dictionaryWithDictionary:payload];
+                inputPayload[@"plugin_supported_sources"] = @[ @"some value" ];
+                inputPayload[@"native_supported_sources"] = @[ @"another value" ];
+                
+                mutable.payload = inputPayload;
+                
+                [mutable updatePluginSupportedSources:pluginSources
+                               nativeSupportedSources:nativeSources];
+                
+                [[mutable.payload should] equal:expected];
+            });
+        });
     });
 });
 

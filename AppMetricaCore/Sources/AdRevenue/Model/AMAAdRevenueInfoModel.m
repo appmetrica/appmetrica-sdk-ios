@@ -30,6 +30,7 @@
                      precision:(NSString *)precision
                  payloadString:(NSString *)payloadString
                 bytesTruncated:(NSUInteger)bytesTruncated
+               isAutocollected:(BOOL)isAutocollected
 {
     self = [super init];
     if (self != nil) {
@@ -44,6 +45,7 @@
         _precision = [precision copy];
         _payloadString = [payloadString copy];
         _bytesTruncated = bytesTruncated;
+        _isAutocollected = isAutocollected;
     }
 
     return self;

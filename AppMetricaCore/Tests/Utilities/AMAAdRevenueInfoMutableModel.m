@@ -27,7 +27,8 @@
                  adPlacementName:nil
                        precision:nil
                    payloadString:nil
-                  bytesTruncated:0];
+                  bytesTruncated:0
+                 isAutocollected:NO];
 }
 
 @end

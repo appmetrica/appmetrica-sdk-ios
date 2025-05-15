@@ -7,6 +7,7 @@
 #import "AMAECommerceSerializer.h"
 #import "AMAECommerceTruncator.h"
 #import "AMAExternalAttributionSerializer.h"
+#import "AMAAdRevenueSourceContainer.h"
 
 @implementation AMAReporter (TestUtilities)
 
@@ -17,6 +18,7 @@
               internalReporter:(AMAInternalEventsReporter *)internalReporter
       attributionCheckExecutor:(id<AMAAsyncExecuting>)attributionCheckExecutor
                   privacyTimer:(AMAPrivacyTimer *)privacyTimer
+        adRevenueSourceStorage:(id<AMAAdRevenueSourceStorable>)adRevenueSourceStorage
 {
     AMACancelableDelayedExecutor *executor = [[AMACancelableDelayedExecutor alloc] initWithIdentifier:self];
 
@@ -44,7 +46,8 @@
   externalAttributionSerializer:[[AMAExternalAttributionSerializer alloc] init]
        sessionExpirationHandler:sessionExpirationHandler
                      adProvider:adProvider
-                   privacyTimer:privacyTimer];
+                   privacyTimer:privacyTimer
+         adRevenueSourceStorage:adRevenueSourceStorage];
 }
 
 @end

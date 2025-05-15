@@ -20,6 +20,7 @@
 @class AMAAdProvider;
 @class AMAPrivacyTimer;
 @class AMAExternalAttributionSerializer;
+@protocol AMAAdRevenueSourceStorable;
 
 @protocol AMAReporterDelegate <NSObject>
 
@@ -40,6 +41,7 @@
 @property (nonatomic, strong, readonly) AMAReporterStorage *reporterStorage;
 @property (nonatomic, assign, readonly) BOOL main;
 @property (nonatomic, strong, readwrite) AMAAttributionChecker *attributionChecker;
+@property (nonatomic, strong, readonly) id<AMAAdRevenueSourceStorable> adRevenueSourceStorage;
 
 - (instancetype)init NS_UNAVAILABLE;
 + (instancetype)new NS_UNAVAILABLE;
@@ -64,7 +66,8 @@
  externalAttributionSerializer:(AMAExternalAttributionSerializer *)externalAttributionSerializer
       sessionExpirationHandler:(AMASessionExpirationHandler *)sessionExpirationHandler
                     adProvider:(AMAAdProvider *)adProvider
-                  privacyTimer:(AMAPrivacyTimer *)privacyTimer;
+                  privacyTimer:(AMAPrivacyTimer *)privacyTimer
+        adRevenueSourceStorage:(id<AMAAdRevenueSourceStorable>)adRevenueSourceStorage;
 
 - (void)setupWithOnStorageRestored:(dispatch_block_t)onStorageRestored
                    onSetupComplete:(dispatch_block_t)onSetupComplete;

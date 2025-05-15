@@ -22,6 +22,7 @@ describe(@"AMAAdRevenueInfoModelValidator", ^{
     NSString *const precision = @"precision";
     NSString *const payloadString = @"{\"key\":\"value\"}";
     NSUInteger const bytesTruncated = 121;
+    BOOL const isAutocollected = YES;
 
     AMAAdRevenueInfoMutableModel *__block model = nil;
     AMAAdRevenueInfoProcessingLogger *__block logger = nil;
@@ -44,7 +45,9 @@ describe(@"AMAAdRevenueInfoModelValidator", ^{
                                                          adPlacementName:adPlacementName
                                                                precision:precision
                                                            payloadString:payloadString
-                                                          bytesTruncated:bytesTruncated];
+                                                          bytesTruncated:bytesTruncated
+                                                         isAutocollected:isAutocollected
+            ];
         });
         it(@"Should return YES", ^{
             [[theValue([validator validateAdRevenueInfoModel:model error:nil]) should] beYes];

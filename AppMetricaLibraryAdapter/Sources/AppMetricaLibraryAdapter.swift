@@ -56,8 +56,14 @@ public final class AppMetricaLibraryAdapter: NSObject {
             "sender": sender,
             "event": event,
             "payload": payload,
+            "layer": "native",
+            "source": "yandex",
         ]
 
-        appMetrica.reportEvent(name: Self.systemEventName, parameters: parameters, onFailure: onFailure)
+        appMetrica.reportLibraryAdapterAdRevenueRelatedEvent(
+            name: Self.systemEventName,
+            parameters: parameters,
+            onFailure: onFailure
+        )
     }
 }

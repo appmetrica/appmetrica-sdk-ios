@@ -268,6 +268,17 @@
     }];
 }
 
+- (void)reportLibraryAdapterAdRevenueRelatedEvent:(NSString *)eventName
+                                       parameters:(NSDictionary *)params
+                                        onFailure:(void (^)(NSError *error))onFailure
+{
+    [self execute:^{
+        [self reportEventWithBlock:^{
+            [self.mainReporter reportLibraryAdapterAdRevenueRelatedEvent:eventName parameters:params onFailure:onFailure];
+        } onFailure:onFailure];
+    }];
+}
+
 - (void)reportEventWithType:(NSUInteger)eventType
                        name:(NSString *)name
                       value:(NSString *)value
@@ -399,11 +410,13 @@
     }];
 }
 
-- (void)reportAdRevenue:(AMAAdRevenueInfo *)adRevenueInfo onFailure:(void (^)(NSError *error))onFailure
+- (void)reportAdRevenue:(AMAAdRevenueInfo *)adRevenueInfo
+        isAutocollected:(BOOL)isAutocollected
+              onFailure:(void (^)(NSError *error))onFailure
 {
     [self execute:^{
         [self reportEventWithBlock:^{
-            [self.mainReporter reportAdRevenue:adRevenueInfo onFailure:onFailure];
+            [self.mainReporter reportAdRevenue:adRevenueInfo isAutocollected:isAutocollected onFailure:onFailure];
         } onFailure:onFailure];
     }];
 }

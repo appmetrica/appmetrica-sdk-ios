@@ -45,6 +45,7 @@ describe(@"AMAAdRevenueInfoModelFormatter", ^{
                                                                         precision:precision
                                                                     payloadString:payloadString
                                                                    bytesTruncated:bytesTruncated
+                                                                  isAutocollected:NO
         ];
         stringTruncator = [[AMATestTruncator alloc] init];
         payloadTruncator = [[AMATestTruncator alloc] init];

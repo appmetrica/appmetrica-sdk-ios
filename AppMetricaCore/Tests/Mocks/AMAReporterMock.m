@@ -17,7 +17,8 @@
    externalAttributionSerializer:nil
         sessionExpirationHandler:nil
                       adProvider:nil 
-                    privacyTimer:nil];
+                    privacyTimer:nil
+          adRevenueSourceStorage:nil];
 
     if (self != nil) {
         

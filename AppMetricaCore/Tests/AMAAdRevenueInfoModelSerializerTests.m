@@ -19,6 +19,7 @@ describe(@"AMAAdRevenueInfoModelSerializer", ^{
     AMAAdRevenueInfoModel *__block model = nil;
     AMAAdRevenueInfoModelSerializer *__block serializer = nil;
     NSString *const dataSource = @"manual";
+    NSString *const autocollectedDataSource = @"autocollected";
 
     beforeEach(^{
         serializer = [[AMAAdRevenueInfoModelSerializer alloc] init];
@@ -50,7 +51,8 @@ describe(@"AMAAdRevenueInfoModelSerializer", ^{
                                                   adPlacementName:nil
                                                         precision:nil
                                                     payloadString:nil
-                                                   bytesTruncated:0];
+                                                   bytesTruncated:0
+                                                  isAutocollected:NO];
             adRevenue = serializeAndDeserializeModel(model);
         });
         it(@"Should fill data_source", ^{
@@ -123,6 +125,51 @@ describe(@"AMAAdRevenueInfoModelSerializer", ^{
             [[stringForBinary(&(adRevenue->payload)) should] beEmpty];
         });
     });
+    
+    context(@"Autocollected field", ^{
+        
+        __auto_type createModel = ^(BOOL isAutocollected) {
+            model = [[AMAAdRevenueInfoModel alloc] initWithAmount:nil
+                                                         currency:nil
+                                                           adType:AMAAdTypeUnknown
+                                                        adNetwork:nil
+                                                         adUnitID:nil
+                                                       adUnitName:nil
+                                                    adPlacementID:nil
+                                                  adPlacementName:nil
+                                                        precision:nil
+                                                    payloadString:nil
+                                                   bytesTruncated:0
+                                                  isAutocollected:isAutocollected];
+            adRevenue = serializeAndDeserializeModel(model);
+        };
+        
+        context(@"should fill autocollected model", ^{
+            beforeAll(^{
+                createModel(YES);
+            });
+            
+            it(@"Should fill data_source", ^{
+                [[stringForBinary(&(adRevenue->data_source)) should] equal:autocollectedDataSource];
+            });
+            it(@"Should set has_data_source", ^{
+                [[theValue(adRevenue->has_data_source) should] beYes];
+            });
+        });
+        
+        context(@"should fill manual collected model", ^{
+            beforeAll(^{
+                createModel(NO);
+            });
+            
+            it(@"Should fill data_source", ^{
+                [[stringForBinary(&(adRevenue->data_source)) should] equal:dataSource];
+            });
+            it(@"Should set has_data_source", ^{
+                [[theValue(adRevenue->has_data_source) should] beNo];
+            });
+        });
+    });
 
     context(@"Complete model", ^{
         NSDecimalNumber *const amount = [NSDecimalNumber decimalNumberWithString:@"23.34"
@@ -149,7 +196,9 @@ describe(@"AMAAdRevenueInfoModelSerializer", ^{
                                                   adPlacementName:adPlacementName
                                                         precision:precision
                                                     payloadString:payloadString
-                                                   bytesTruncated:bytesTruncated];
+                                                   bytesTruncated:bytesTruncated
+                                                  isAutocollected:NO
+            ];
             adRevenue = serializeAndDeserializeModel(model);
         });
         it(@"Should fill data_source", ^{

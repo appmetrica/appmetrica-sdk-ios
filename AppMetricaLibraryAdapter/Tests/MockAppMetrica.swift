@@ -38,6 +38,23 @@ class MockAppMetrica: AppMetrica {
                     userInfo: [NSLocalizedDescriptionKey: "Mock reporting failure"]))
         }
     }
+    
+    class override func reportLibraryAdapterAdRevenueRelatedEvent(
+        name: String,
+        parameters params: [AnyHashable : Any]?,
+        onFailure: ((any Error) -> Void)? = nil
+    ) {
+        reportEventCalled = true
+        lastReportedEventName = name
+        lastReportedEventParameters = params
+        
+        if shouldFailReporting {
+            onFailure?(
+                NSError(
+                    domain: "MockAppMetrica", code: 1,
+                    userInfo: [NSLocalizedDescriptionKey: "Mock reporting failure"]))
+        }
+    }
 
     static func reset() {
         anonymousActivationExpectation = XCTestExpectation(description: "Should activate anonymously via extended interface")

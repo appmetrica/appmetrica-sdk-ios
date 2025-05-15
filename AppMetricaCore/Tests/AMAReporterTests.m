@@ -59,6 +59,7 @@
 #import "AMAPrivacyTimerStorageMock.h"
 #import "AMAIdentifiersTestUtilities.h"
 #import "AMAPrivacyTimer.h"
+#import "AMAAdRevenueSourceContainerMock.h"
 
 @interface AMAReporterStorage (Test)
 
@@ -1984,6 +1985,71 @@ describe(@"AMAReporter", ^{
             it(@"Should not fire", ^{
                 [[[eventStorage() amatest_savedEventWithType:AMAEventTypeApplePrivacy] should] beNil];
             });
+        });
+    });
+    
+    context(@"LibraryAdapter", ^{
+        NSDictionary __block *expectedParamers;
+        NSDictionary __block *onlySourcesParams;
+        NSArray *const pluginSources = @[@"plugin1", @"plugin2"];
+        NSArray *const nativeSources = @[@"native1", @"native2"];
+        
+        beforeAll(^{
+            onlySourcesParams = @{
+                @"plugin_supported_sources": [AMAJSONSerialization stringWithJSONObject:pluginSources error:nil],
+                @"native_supported_sources": [AMAJSONSerialization stringWithJSONObject:nativeSources error:nil],
+            };
+            
+            NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithDictionary:parameters];
+            [dict addEntriesFromDictionary:onlySourcesParams];
+            
+            expectedParamers = [dict copy];
+        });
+        
+        beforeEach(^{
+            AMAAdRevenueSourceContainerMock *adRevenueMock = [reporterTestHelper adRevenueSourceStorageForApiKey:apiKey];
+            adRevenueMock.pluginSupportedSources = pluginSources;
+            adRevenueMock.nativeSupportedSources = nativeSources;
+        });
+        
+        afterEach(^{
+            AMAReporter *reporter = [reporterTestHelper appReporterForApiKey:apiKey];
+            [reporter clearStubs];
+        });
+        
+        it(@"should add sources", ^{
+            AMAReporter *reporter = [reporterTestHelper appReporterForApiKey:apiKey];
+            [[reporter should] receive:@selector(reportEvent:parameters:onFailure:)
+                         withArguments:testEventName, expectedParamers, kw_any()];
+            
+            [reporter reportLibraryAdapterAdRevenueRelatedEvent:testEventName
+                                                     parameters:parameters
+                                                      onFailure:nil];
+        });
+        
+        it(@"should add sources to nil params", ^{
+            AMAReporter *reporter = [reporterTestHelper appReporterForApiKey:apiKey];
+            [[reporter should] receive:@selector(reportEvent:parameters:onFailure:)
+                         withArguments:testEventName, onlySourcesParams, kw_any()];
+            
+            [reporter reportLibraryAdapterAdRevenueRelatedEvent:testEventName
+                                                     parameters:nil
+                                                      onFailure:nil];
+        });
+        
+        it(@"should override params", ^{
+            NSDictionary *params = @{
+                @"plugin_supported_sources": @"plugin123",
+                @"native_supported_sources": @"native234",
+            };
+            
+            AMAReporter *reporter = [reporterTestHelper appReporterForApiKey:apiKey];
+            [[reporter should] receive:@selector(reportEvent:parameters:onFailure:)
+                         withArguments:testEventName, onlySourcesParams, kw_any()];
+            
+            [reporter reportLibraryAdapterAdRevenueRelatedEvent:testEventName
+                                                     parameters:params
+                                                      onFailure:nil];
         });
     });
     

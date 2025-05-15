@@ -46,6 +46,9 @@
 #import "AMAPrivacyTimer.h"
 #import "AMAPrivacyTimerStorage.h"
 #import "AMAExternalAttributionSerializer.h"
+#import "AMAMutableAdRevenueInfo+AdRevenueHelper.h"
+#import "NSMutableDictionary+AdRevenueHelper.h"
+#import "AMAAdRevenueSourceContainer.h"
 
 @interface AMAReporter () <AMAPrivacyTimerDelegate>
 
@@ -116,7 +119,9 @@
   externalAttributionSerializer:[[AMAExternalAttributionSerializer alloc] init]
        sessionExpirationHandler:sessionExpirationHandler
                      adProvider:adProvider
-                   privacyTimer:privacyTimer];
+                   privacyTimer:privacyTimer
+         adRevenueSourceStorage:[AMAAdRevenueSourceContainer sharedInstance]
+    ];
 }
 
 - (instancetype)initWithApiKey:(NSString *)apiKey
@@ -133,6 +138,7 @@
       sessionExpirationHandler:(AMASessionExpirationHandler *)sessionExpirationHandler
                     adProvider:(AMAAdProvider *)adProvider
                   privacyTimer:(AMAPrivacyTimer *)privacyTimer
+        adRevenueSourceStorage:(id<AMAAdRevenueSourceStorable>)adRevenueSourceStorage
 
 {
     self = [super init];
@@ -153,6 +159,7 @@
         _externalAttributionSerializer = externalAttributionSerializer;
         _adProvider = adProvider;
         _privacyTimer = privacyTimer;
+        _adRevenueSourceStorage = adRevenueSourceStorage;
         privacyTimer.delegate = self;
         
         AMAEventNameHashesStorage *eventHashesStorage = [AMAEventNameHashesStorageFactory storageForApiKey:self.apiKey main:main];
@@ -397,6 +404,17 @@
                                    firstOccurrence:firstOccurrence
                                              error:error];
     }                      onFailure:onFailure];
+}
+
+- (void)reportLibraryAdapterAdRevenueRelatedEvent:(NSString *)eventName
+                       parameters:(NSDictionary *)params
+                        onFailure:(void (^)(NSError *error))onFailure
+{
+    NSMutableDictionary *p = [params mutableCopy] ?: [NSMutableDictionary dictionary];
+    [p updatePluginSupportedSources:self.adRevenueSourceStorage.pluginSupportedSources
+             nativeSupportedSources:self.adRevenueSourceStorage.nativeSupportedSources];
+    
+    [self reportEvent:eventName parameters:[p copy] onFailure:onFailure];
 }
 
 - (void)reportEvent:(NSString *)message onFailure:(void (^)(NSError *error))onFailure
@@ -673,9 +691,22 @@
 
 - (void)reportAdRevenue:(AMAAdRevenueInfo *)adRevenue onFailure:(void (^)(NSError *error))onFailure
 {
-    adRevenue = [adRevenue copy];
+    [self reportAdRevenue:adRevenue isAutocollected:NO onFailure:onFailure];
+}
+
+- (void)reportAdRevenue:(AMAAdRevenueInfo *)adRevenue
+        isAutocollected:(BOOL)isAutocollected
+              onFailure:(nullable void (^)(NSError *error))onFailure
+{
+    AMAMutableAdRevenueInfo *copied = [adRevenue mutableCopy];
+    
+    [copied updatePluginSupportedSources:self.adRevenueSourceStorage.pluginSupportedSources
+                  nativeSupportedSources:self.adRevenueSourceStorage.nativeSupportedSources];
+
     NSError *convertationError = nil;
-    AMAAdRevenueInfoModel *model = [AMAAdRevenueInfoConverter convertAdRevenueInfo:adRevenue error:&convertationError];
+    AMAAdRevenueInfoModel *model = [AMAAdRevenueInfoConverter convertAdRevenueInfo:copied
+                                                                   isAutocollected:isAutocollected
+                                                                             error:&convertationError];
     if (convertationError != nil) {
         AMALogWarn(@"Failed to convert adRevenueInfo: %@", convertationError.localizedDescription);
     }

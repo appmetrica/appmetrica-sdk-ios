@@ -62,7 +62,8 @@ static NSUInteger const kAMAPayloadStringLength = 30 * 1024;
                                                                  adPlacementName:truncPlacementName
                                                                        precision:truncPrecision
                                                                    payloadString:truncPayloadString
-                                                                  bytesTruncated:bytesTruncated];
+                                                                  bytesTruncated:bytesTruncated
+                                                                 isAutocollected:adRevenueModel.isAutocollected];
     return model;
 }
 

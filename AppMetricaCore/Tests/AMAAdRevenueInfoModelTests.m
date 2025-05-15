@@ -17,6 +17,7 @@ describe(@"AMAAdRevenueInfoModel", ^{
     NSString *const precision = @"precision";
     NSString *const payloadString = @"{\"key\":\"value\"}";
     NSUInteger const bytesTruncated = 121;
+    BOOL const isAutocollected = YES;
 
     AMAAdRevenueInfoModel *__block model = nil;
 
@@ -31,7 +32,8 @@ describe(@"AMAAdRevenueInfoModel", ^{
                                               adPlacementName:adPlacementName
                                                     precision:precision
                                                 payloadString:payloadString
-                                               bytesTruncated:bytesTruncated];
+                                               bytesTruncated:bytesTruncated
+                                              isAutocollected:isAutocollected];
     });
 
     it(@"Should store amount", ^{
@@ -67,6 +69,10 @@ describe(@"AMAAdRevenueInfoModel", ^{
     it(@"Should store bytesTruncated", ^{
         [[theValue(model.bytesTruncated) should] equal:theValue(bytesTruncated)];
     });
+    it(@"Should store isAutocollected", ^{
+        [[theValue(model.isAutocollected) should] equal:theValue(isAutocollected)];
+    });
+    
 });
 
 SPEC_END

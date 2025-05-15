@@ -65,7 +65,8 @@ static NSString *const kAMAEnvironmentTestValue = @"TestEnvironmentValue";
 
 SPEC_BEGIN(AMAAppMetricaImplTests)
 
-describe(@"AMAAppMetricaImpl", ^{
+describe(@"AMAAppMetricaImpl",
+ ^{
     AMAAppMetricaConfiguration *__block configuration = nil;
     NSString *apiKey = @"550e8400-e29b-41d4-a716-446655440000";
     NSString *const anonymousApiKey = @"629a824d-c717-4ba5-bc0f-3f3968554d01";
@@ -487,7 +488,7 @@ describe(@"AMAAppMetricaImpl", ^{
             [appMetricaImpl activateWithConfiguration:configuration];
             AMAAdRevenueInfo *adRevenueInfo = [[AMAAdRevenueInfo alloc] initWithAdRevenue:[NSDecimalNumber one]
                                                                                  currency:@"USD"];
-            [appMetricaImpl reportAdRevenue:adRevenueInfo onFailure:nil];
+            [appMetricaImpl reportAdRevenue:adRevenueInfo isAutocollected:NO onFailure:nil];
             
             AMAEvent *event = [eventStorage amatest_savedEventWithType:AMAEventTypeAdRevenue];
             [[event shouldNot] beNil];
@@ -497,7 +498,7 @@ describe(@"AMAAppMetricaImpl", ^{
             AMAAdRevenueInfo *adRevenueInfo = [[AMAAdRevenueInfo alloc] initWithAdRevenue:[NSDecimalNumber one]
                                                                               currency:@"USD"];
 
-            [appMetricaImpl reportAdRevenue:adRevenueInfo onFailure:nil];
+            [appMetricaImpl reportAdRevenue:adRevenueInfo isAutocollected:NO onFailure:nil];
             
             AMAEvent *event = [anomymousEventStorage amatest_savedEventWithType:AMAEventTypeAdRevenue];
             [[event shouldNot] beNil];
@@ -1410,6 +1411,23 @@ describe(@"AMAAppMetricaImpl", ^{
                                               completionQueue:queue
                                               completionBlock:identifiersBlock
                                                 notifyOnError:NO];
+        });
+    });
+    
+    context(@"LibraryAdapter", ^{
+        NSString *const eventName = @"test_event_name";
+        NSDictionary *const params = @{
+            @"key": @"value"
+        };
+        
+        it(@"reportLibraryAdapterAdRevenueRelatedEvent",^{
+            [appMetricaImpl activateWithConfiguration:configuration];
+            [[appMetricaImpl.mainReporter should] receive:@selector(reportLibraryAdapterAdRevenueRelatedEvent:parameters:onFailure:)
+                                            withArguments:eventName, params, kw_any()];
+
+            [appMetricaImpl reportLibraryAdapterAdRevenueRelatedEvent:eventName
+                                                           parameters:params
+                                                            onFailure:nil];
         });
     });
     

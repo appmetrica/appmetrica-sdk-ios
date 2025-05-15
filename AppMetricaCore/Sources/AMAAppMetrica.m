@@ -29,6 +29,7 @@
 #import "AMAUserProfile.h"
 #import "AMAAppMetricaConfigurationManager.h"
 #import "AMAAdResolver.h"
+#import "AMAAdRevenueSourceContainer.h"
 @import AppMetricaIdentifiers;
 
 NSString *const kAMAUUIDKey = @"appmetrica_uuid";
@@ -411,6 +412,15 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
     }
 }
 
++ (void)reportLibraryAdapterAdRevenueRelatedEvent:(NSString *)name
+                                       parameters:(NSDictionary *)params
+                                        onFailure:(void (^)(NSError *error))onFailure
+{
+    if ([self isAppMetricaStartedWithLogging:onFailure]) {
+        [[self sharedImpl] reportLibraryAdapterAdRevenueRelatedEvent:[name copy] parameters:[params copy] onFailure:onFailure];
+    }
+}
+
 + (void)reportUserProfile:(AMAUserProfile *)userProfile onFailure:(nullable void (^)(NSError *error))onFailure
 {
     if ([self isAppMetricaStartedWithLogging:onFailure]) {
@@ -443,10 +453,18 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
 
 + (void)reportAdRevenue:(AMAAdRevenueInfo *)adRevenue onFailure:(void (^)(NSError *error))onFailure
 {
+    [self reportAdRevenue:adRevenue isAutocollected:NO onFailure:onFailure];
+}
+
++ (void)reportAdRevenue:(AMAAdRevenueInfo *)adRevenue
+        isAutocollected:(BOOL)isAutocollected
+              onFailure:(nullable void (^)(NSError *error))onFailure
+{
     if ([self isAppMetricaStartedWithLogging:onFailure]) {
-        [[self sharedImpl] reportAdRevenue:adRevenue onFailure:onFailure];
+        [[self sharedImpl] reportAdRevenue:adRevenue isAutocollected:isAutocollected onFailure:onFailure];
     }
 }
+
 
 #if !TARGET_OS_TV
 + (void)setupWebViewReporting:(id<AMAJSControlling>)controller
@@ -807,6 +825,11 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
 + (NSUInteger)backgroundSessionTimeout
 {
     return [AMAMetricaConfiguration sharedInstance].inMemory.backgroundSessionTimeout;
+}
+
++ (void)registerAdRevenueNativeSource:(NSString *)source
+{
+    [[AMAAdRevenueSourceContainer sharedInstance] addNativeSupportedSource:source];
 }
 
 @end

@@ -7,6 +7,7 @@
 @implementation AMAAdRevenueInfoConverter
 
 + (AMAAdRevenueInfoModel *)convertAdRevenueInfo:(AMAAdRevenueInfo *)adRevenueInfo
+                                isAutocollected:(BOOL)isAutocollected
                                           error:(NSError **)error
 {
     NSString *payloadString = [AMAJSONSerialization stringWithJSONObject:adRevenueInfo.payload error:error];
@@ -20,7 +21,8 @@
                                                                  adPlacementName:adRevenueInfo.adPlacementName
                                                                        precision:adRevenueInfo.precision
                                                                    payloadString:payloadString
-                                                                  bytesTruncated:0];
+                                                                  bytesTruncated:0
+                                                                 isAutocollected:isAutocollected];
     return model;
 }
 

@@ -31,6 +31,7 @@
 #import "AMAPrivacyTimerStorageMock.h"
 #import "AMAPrivacyTimerMock.h"
 #import "AMAReporter+TestUtilities.h"
+#import "AMAAdRevenueSourceContainerMock.h"
 
 @interface AMAReporterTestHelper ()
 
@@ -41,6 +42,7 @@
 @property (nonatomic, strong, readonly) NSMutableDictionary<NSString *, AMAPrivacyTimer *> *privacyTimers;
 @property (nonatomic, strong, readonly) NSMutableDictionary<NSString *, AMAPrivacyTimerStorageMock *> *privacyTimerStorages;
 @property (nonatomic, strong, readonly) NSMutableDictionary<NSString *, AMAAdProvider *> *adProviders;
+@property (nonatomic, strong, readonly) NSMutableDictionary<NSString *, AMAAdRevenueSourceContainerMock *> *adRevenueSourceStorage;
 
 @end
 
@@ -57,6 +59,7 @@
         _adProviders = [NSMutableDictionary dictionary];
         _privacyTimerStorages = [NSMutableDictionary dictionary];
         _privacyTimers = [NSMutableDictionary dictionary];
+        _adRevenueSourceStorage = [NSMutableDictionary dictionary];
         
         __weak __typeof(self) weakSelf = self;
         [_storagesContainer stub:@selector(storageForApiKey:) withBlock:^id(NSArray *params) {
@@ -187,7 +190,10 @@
     AMAPrivacyTimerMock *privacyTimer = [[AMAPrivacyTimerMock alloc] initWithTimerStorage:privacyStorage
                                                                          delegateExecutor:executor
                                                                                adProvider:adProvider];
+    
     privacyTimer.disableFire = YES;
+    
+    AMAAdRevenueSourceContainerMock *adRevenueSourceContainerMock = [self adRevenueSourceStorageForApiKey:apiKey];
     
     _privacyTimers[apiKey] = privacyTimer;
     AMAReporter *reporter = nil;
@@ -198,7 +204,8 @@
                                           eventBuilder:builder
                                       internalReporter:[AMAInternalEventsReporter nullMock]
                               attributionCheckExecutor:attributionCheckExecutor
-                                          privacyTimer:privacyTimer];
+                                          privacyTimer:privacyTimer
+                                adRevenueSourceStorage:adRevenueSourceContainerMock];
     }
     else {
         
@@ -215,7 +222,8 @@
                          externalAttributionSerializer:[AMAExternalAttributionSerializer nullMock]
                               sessionExpirationHandler:expirationHandler
                                             adProvider:adProvider
-                                          privacyTimer:privacyTimer];
+                                          privacyTimer:privacyTimer
+                                adRevenueSourceStorage:adRevenueSourceContainerMock];
     }
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wundeclared-selector"
@@ -298,6 +306,18 @@
 - (NSObject<AMADatabaseProtocol> *)databaseForApiKey:(NSString *)apiKey
 {
     return self.databases[apiKey];
+}
+
+- (AMAAdRevenueSourceContainerMock *)adRevenueSourceStorageForApiKey:(NSString*)apiKey
+{
+    AMAAdRevenueSourceContainerMock *storage = self.adRevenueSourceStorage[apiKey];
+    if (storage != nil) {
+        return storage;
+    }
+    
+    storage = [AMAAdRevenueSourceContainerMock new];
+    self.adRevenueSourceStorage[apiKey] = storage;
+    return storage;
 }
 
 #pragma mark - Events
