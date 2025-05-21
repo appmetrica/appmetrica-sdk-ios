@@ -83,20 +83,16 @@
 {
     CLLocation *currentLocation = nil;
     @synchronized (self) {
-        if (self.currentTrackLocationEnabled) {
-            if ([self isExternalLocationAvailable]) {
-                currentLocation = self.externalLocation;
-            }
-            else {
-                if ([self isLocationSystemPermissionGranted]) {
-                    currentLocation = self.locationManager.location;
-                }
-            }
+        if ([self isExternalLocationAvailable]) {
+            currentLocation = self.externalLocation;
+        } else if (self.currentTrackLocationEnabled && [self isLocationSystemPermissionGranted]) {
+            currentLocation = self.locationManager.location;
         }
     }
     AMALogInfo(@"Current location is: %@", currentLocation);
     return currentLocation;
 }
+
 #if TARGET_OS_IOS
 - (void)sendMockVisit:(CLVisit *)visit
 {

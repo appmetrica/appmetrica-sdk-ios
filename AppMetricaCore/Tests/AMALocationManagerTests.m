@@ -257,6 +257,14 @@ describe(@"AMALocationManager", ^{
                 });
                 [[AMALocationManager sharedManager] start];
             });
+            it(@"Custom location should ignore location collecting disabled", ^{
+                [[AMALocationManager sharedManager] setTrackLocationEnabled:NO];
+                
+                CLLocation *mockLocation = [CLLocation nullMock];
+                [[AMALocationManager sharedManager] setLocation:mockLocation];
+                
+                [[[[AMALocationManager sharedManager] currentLocation] should] equal:mockLocation];
+            });
             it(@"Should stop when custom location is set", ^{
                 [[AMALocationManager sharedManager] start];
                 [[systemLocationManager should] receive:@selector(stopUpdatingLocation)];
