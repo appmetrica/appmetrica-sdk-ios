@@ -4,6 +4,7 @@
 #import "AMABacktrace.h"
 #import "AMABacktraceFrame.h"
 #import "AMABinaryImage.h"
+#import "AMAKSCrashImports.h"
 
 static NSArray *fooA()
 {
@@ -41,6 +42,8 @@ describe(@"AMABacktraceSymbolicator", ^{
     beforeEach(^{
         binaryImages = nil;
         symbolicator = [[AMABacktraceSymbolicator alloc] init];
+        
+        ksbic_init();
     });
 
     context(@"Real backtrace", ^{

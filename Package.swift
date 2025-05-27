@@ -70,7 +70,7 @@ enum ExternalPackage: String, CaseIterable {
     var package: Package.Dependency {
         switch self {
         case .ksCrash:
-            return package(url: "https://github.com/kstenerud/KSCrash", "2.0.0"..<"2.1.0")
+            return package(url: "https://github.com/kstenerud/KSCrash", "2.1.0"..<"2.2.0")
         case .kiwi:
             return package(url: "https://github.com/appmetrica/Kiwi", exact: "3.0.1-spm")
         }
@@ -509,7 +509,11 @@ extension AppMetricaTarget {
             return [
                 "Mocks",
             ]
-        case .crashes, .coreExtension, .adSupport, .webKit, .testUtils, .hostState, .storageUtils,
+        case .crashes:
+            return [
+                "Helpers",
+            ]
+        case .coreExtension, .adSupport, .webKit, .testUtils, .hostState, .storageUtils,
                 .protobuf, .fmdb, .libraryAdapter, .keychain, .identifiers, .logSwift, .synchronization:
             return []
         }

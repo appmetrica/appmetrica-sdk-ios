@@ -9,6 +9,7 @@
     #import <KSCrash/KSCrashReport.h>
     #import <KSCrash/KSDynamicLinker.h>
     #import <KSCrash/KSSymbolicator.h>
+    #import <KSCrash/KSBinaryImageCache.h>
 #else
 // SPM imports
     @import KSCrashRecording;

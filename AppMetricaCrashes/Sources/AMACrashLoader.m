@@ -63,6 +63,8 @@ NSString *const kAMAApplicationNotRespondingCrashType = @"AMAApplicationNotRespo
             | KSCrashMonitorTypeApplicationState
         );
         [self installKSCrashWithMonitoring:monitoring];
+        
+        [self initializeKSCrashBinaryImageCache];
 
         [self.unhandledCrashDetector startDetecting];
 
@@ -101,6 +103,11 @@ NSString *const kAMAApplicationNotRespondingCrashType = @"AMAApplicationNotRespo
     else {
         AMALogInfo(@"Crash reporter successfully installed with monitoring type: %lu", (unsigned long)monitoring);
     }
+}
+
+- (void)initializeKSCrashBinaryImageCache
+{
+    ksbic_init();
 }
 
 - (void)shutdown
