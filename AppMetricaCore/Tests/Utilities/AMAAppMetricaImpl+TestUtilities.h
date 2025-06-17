@@ -17,7 +17,6 @@
 @property (nonatomic, strong) AMADispatchingController *dispatchingController;
 @property (nonatomic, strong) AMADispatchStrategiesContainer *strategiesContainer;
 
-- (AMAReporter *)reporterForApiKey:(NSString *)apiKey;
 - (void)dispatcherDidPerformStartup:(AMADispatcher *)dispatcher
                              failed:(BOOL)failure
                             fakeRun:(BOOL)fakeRun;

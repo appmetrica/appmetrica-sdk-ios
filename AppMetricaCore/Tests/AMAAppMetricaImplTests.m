@@ -65,8 +65,7 @@ static NSString *const kAMAEnvironmentTestValue = @"TestEnvironmentValue";
 
 SPEC_BEGIN(AMAAppMetricaImplTests)
 
-describe(@"AMAAppMetricaImpl",
- ^{
+describe(@"AMAAppMetricaImpl", ^{
     AMAAppMetricaConfiguration *__block configuration = nil;
     NSString *apiKey = @"550e8400-e29b-41d4-a716-446655440000";
     NSString *const anonymousApiKey = @"629a824d-c717-4ba5-bc0f-3f3968554d01";
@@ -1325,6 +1324,12 @@ describe(@"AMAAppMetricaImpl",
                 [[appMetricaImpl should] receive:@selector(activateAnonymously)];
                 
                 [appMetricaImpl scheduleAnonymousActivationIfNeeded];
+            });
+            it(@"Schedules anonymous activation upon reporter creation", ^{
+                [[appMetricaImpl shouldNot] receive:@selector(activateAnonymously)];
+                [[appMetricaImpl shouldEventuallyBeforeTimingOutAfter(10.2)] receive:@selector(activateAnonymously)];
+                
+                [appMetricaImpl manualReporterForConfiguration:[[AMAReporterConfiguration alloc] initWithAPIKey:apiKey]];
             });
         });
         context(@"Activation", ^{

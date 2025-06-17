@@ -57,6 +57,8 @@
 #import "AMAAppMetricaConfigurationManager.h"
 #import "AMAFirstActivationDetector.h"
 
+static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
+
 @interface AMAAppMetricaImpl () <AMADispatcherDelegate,
                                  AMADispatchStrategyDelegate,
                                  AMAHostStateProviderDelegate,
@@ -183,19 +185,24 @@
 {
     if ([self.firstActivationDetector isFirstLibraryReporterActivation] == NO &&
         [self.firstActivationDetector isFirstMainReporterActivation] == YES) {
-        AMADelayedExecutor *delayedExecutor = [[AMADelayedExecutor alloc] init];
-        
-        __weak typeof(self) weakSelf = self;
-        [delayedExecutor executeAfterDelay:0.1 block:^{
-            __strong typeof(self) strongSelf = weakSelf;
-            if (strongSelf.apiKey == nil) {
-                [strongSelf activateAnonymously];
-            }
-        }];
+        [self scheduleAnonymousActivationWithDelay:0.1];
     }
     else {
         [self activateAnonymously];
     }
+}
+
+- (void)scheduleAnonymousActivationWithDelay:(NSTimeInterval)delay
+{
+    AMADelayedExecutor *delayedExecutor = [[AMADelayedExecutor alloc] init];
+
+    __weak typeof(self) weakSelf = self;
+    [delayedExecutor executeAfterDelay:delay block:^{
+        __strong typeof(self) strongSelf = weakSelf;
+        if (strongSelf.apiKey == nil) {
+            [strongSelf activateAnonymously];
+        }
+    }];
 }
 
 - (void)activateAnonymously
@@ -526,6 +533,7 @@
         if (onSetupComplete != nil) {
             onSetupComplete();
         }
+        [weakSelf scheduleAnonymousActivationWithDelay:kAMAReporterAnonymousActivationDelay];
     }];
     
     [reporter reportFirstEventIfNeeded];
