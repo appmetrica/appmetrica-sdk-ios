@@ -1,8 +1,10 @@
 
 #import <XCTest/XCTest.h>
 #import "AMACachingStorageProvider.h"
-#import "AMADatabaseFactory.h"
+#import "AMAMetricaConfiguration.h"
 #import "AMADatabaseProtocol.h"
+#import "AMADatabaseFactory.h"
+#import <AppMetricaKeychain/AppMetricaKeychain.h>
 
 @interface AMACachingStorageProviderTests : XCTestCase
 
@@ -13,7 +15,11 @@
 - (void)testCachingStorageProviding
 {
     id<AMADatabaseProtocol> database = AMADatabaseFactory.configurationDatabase;
-    AMACachingStorageProvider *provider = [[AMACachingStorageProvider alloc] initWithDatabase:database];
+    __auto_type *configuration = [[AMAMetricaConfiguration alloc] initWithKeychainBridge:[AMAKeychainBridge new]
+                                                                                database:database
+                                                              appGroupIdentifierProvider:nil];
+    
+    AMACachingStorageProvider *provider = [[AMACachingStorageProvider alloc] initWithConfiguration:configuration];
     id<AMAKeyValueStoring> expectedStorage = database.storageProvider.cachingStorage;
     XCTAssertEqualObjects([provider cachingStorage], expectedStorage, @"Should return actual caching storage");
 }

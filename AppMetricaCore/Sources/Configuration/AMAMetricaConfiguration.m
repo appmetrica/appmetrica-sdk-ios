@@ -119,8 +119,8 @@ static NSString *const kAMAMetricaFallbackPrefix = @"fallback-keychain";
     if (_persistent == nil) {
         @synchronized (self.persistentConfigurationLock) {
             if (_persistent == nil) {
-                id<AMAKeyValueStoring> appDatabase = self.database.storageProvider.cachingStorage;
-                
+                id<AMAKeyValueStoring> appDatabase = [self storageProvider].cachingStorage;
+
                 _persistent = [[AMAMetricaPersistentConfiguration alloc] initWithStorage:appDatabase
                                                                        identifierManager:self.identifierProvider
                                                                    inMemoryConfiguration:self.inMemory];
@@ -143,11 +143,11 @@ static NSString *const kAMAMetricaFallbackPrefix = @"fallback-keychain";
             if (_startup == nil) {
                 NSError *__block error = nil;
                 id<AMAKeyValueStoring> storage =
-                    [self.database.storageProvider nonPersistentStorageForKeys:[AMAStartupParametersConfiguration allKeys]
-                                                                         error:&error];
+                [[self storageProvider] nonPersistentStorageForKeys:[AMAStartupParametersConfiguration allKeys]
+                                                              error:&error];
                 if (error != nil) {
                     AMALogError(@"Failed to load startup parameters");
-                    storage = self.database.storageProvider.emptyNonPersistentStorage;
+                    storage = [self storageProvider].emptyNonPersistentStorage;
                 }
                 _startup = [[AMAStartupParametersConfiguration alloc] initWithStorage:storage];
             }
@@ -159,11 +159,11 @@ static NSString *const kAMAMetricaFallbackPrefix = @"fallback-keychain";
 - (AMAStartupParametersConfiguration *)startupCopy
 {
     NSError *error = nil;
-    id<AMAKeyValueStoring> storage = [self.database.storageProvider nonPersistentStorageForStorage:self.startup.storage
-                                                                                             error:&error];
+    id<AMAKeyValueStoring> storage = [[self storageProvider] nonPersistentStorageForStorage:self.startup.storage
+                                                                                      error:&error];
     if (error != nil) {
         AMALogAssert(@"Failed to copy startup configuration: %@", error);
-        storage = self.database.storageProvider.emptyNonPersistentStorage;
+        storage = [self storageProvider].emptyNonPersistentStorage;
     }
     return [[AMAStartupParametersConfiguration alloc] initWithStorage:storage];
 }
@@ -179,7 +179,7 @@ static NSString *const kAMAMetricaFallbackPrefix = @"fallback-keychain";
 {
     @synchronized (self.startupConfigurationLock) {
         NSError *__block error = nil;
-        [self.database.storageProvider saveStorage:self.startup.storage error:&error];
+        [[self storageProvider] saveStorage:self.startup.storage error:&error];
         if (error != nil) {
             AMALogError(@"Failed to save startup parameters");
         }
@@ -272,14 +272,14 @@ static NSString *const kAMAMetricaFallbackPrefix = @"fallback-keychain";
 - (id<AMAKeyValueStoring>)UUIDOldStorage
 {
     [self ensureMigrated];
-    return self.database.storageProvider.cachingStorage;
+    return [self storageProvider].cachingStorage;
 }
 
 #pragma mark - Private -
 
 - (AMAIdentifierProviderConfiguration*)createIdentifierProviderConfiguration
 {
-    id<AMAKeyValueStoring> appDatabase = self.database.storageProvider.cachingStorage;
+    id<AMAKeyValueStoring> appDatabase = [self storageProvider].cachingStorage;
     
     AMAIdentifierProviderConfiguration *config =
         [[AMAIdentifierProviderConfiguration alloc] initWithPrivateKeychain:[self privateKeychain]
@@ -463,6 +463,11 @@ static NSString *const kAMAMetricaFallbackPrefix = @"fallback-keychain";
     }
 
     return validConfiguration;
+}
+
+- (id<AMAKeyValueStorageProviding>)storageProvider
+{
+    return self.database.storageProvider;
 }
 
 @end

@@ -2,10 +2,10 @@
 #import <Foundation/Foundation.h>
 #import "AMACore.h"
 
-@protocol AMADatabaseProtocol;
+@class AMAMetricaConfiguration;
 
 @interface AMAStartupStorageProvider : NSObject<AMAStartupStorageProviding>
 
-- (instancetype)initWithDatabase:(id<AMADatabaseProtocol>)database;
+- (instancetype)initWithConfiguration:(AMAMetricaConfiguration *)configuration;
 
 @end

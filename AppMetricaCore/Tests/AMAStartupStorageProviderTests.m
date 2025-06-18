@@ -1,8 +1,10 @@
 
 #import <XCTest/XCTest.h>
 #import "AMAStartupStorageProvider.h"
+#import "AMAMetricaConfiguration.h"
 #import "AMADatabaseProtocol.h"
 #import "AMADatabaseFactory.h"
+#import <AppMetricaKeychain/AppMetricaKeychain.h>
 
 @interface AMAStartupStorageProviderTests : XCTestCase
 
@@ -13,7 +15,11 @@
 - (void)testStartupStorageProviding
 {
     id<AMADatabaseProtocol> database = AMADatabaseFactory.configurationDatabase;
-    AMAStartupStorageProvider *provider = [[AMAStartupStorageProvider alloc] initWithDatabase:database];
+    __auto_type *configuration = [[AMAMetricaConfiguration alloc] initWithKeychainBridge:[AMAKeychainBridge new]
+                                                                                database:database
+                                                              appGroupIdentifierProvider:nil];
+    
+    AMAStartupStorageProvider *provider = [[AMAStartupStorageProvider alloc] initWithConfiguration:configuration];
     NSString *key = @"foo";
     NSString *value = @"bar";
     

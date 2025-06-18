@@ -11,7 +11,7 @@
 @protocol AMADatabaseProtocol;
 @protocol AMAKeyValueStoring;
 @protocol AMAIdentifierProviding;
-
+@protocol AMAKeyValueStorageProviding;
 
 @interface AMAMetricaConfiguration : NSObject
 
@@ -41,6 +41,7 @@
 - (void)ensureMigrated;
 - (NSString *)detectedInconsistencyDescription;
 - (void)resetDetectedInconsistencyDescription;
+- (id<AMAKeyValueStorageProviding>)storageProvider;
 
 + (instancetype)sharedInstance;
 

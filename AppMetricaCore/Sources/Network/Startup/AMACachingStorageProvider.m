@@ -1,11 +1,10 @@
 
 #import "AMACachingStorageProvider.h"
-#import "AMADatabaseProtocol.h"
-#import "AMADatabaseFactory.h"
+#import "AMAMetricaConfiguration.h"
 
 @interface AMACachingStorageProvider ()
 
-@property (nonatomic, strong, readonly) id<AMADatabaseProtocol> database;
+@property (nonatomic, strong, readonly) AMAMetricaConfiguration *configuration;
 
 @end
 
@@ -13,21 +12,21 @@
 
 - (instancetype)init
 {
-    return [self initWithDatabase:AMADatabaseFactory.configurationDatabase];
+    return [self initWithConfiguration:[AMAMetricaConfiguration sharedInstance]];
 }
 
-- (instancetype)initWithDatabase:(id<AMADatabaseProtocol>)database
+- (instancetype)initWithConfiguration:(AMAMetricaConfiguration *)configuration
 {
     self = [super init];
     if (self != nil) {
-        _database = database;
+        _configuration = configuration;
     }
     return self;
 }
 
 - (id<AMAKeyValueStoring>)cachingStorage
 {
-    return self.database.storageProvider.cachingStorage;
+    return [[self.configuration storageProvider] cachingStorage];
 }
 
 @end
