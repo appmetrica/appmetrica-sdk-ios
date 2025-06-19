@@ -1,28 +1,28 @@
 
 #import <Kiwi/Kiwi.h>
-#import "AppMetricaConfigForAnonymousActivationProvider.h"
-#import "AppMetricaDefaultAnonymousConfigProvider.h"
+#import "AMAConfigForAnonymousActivationProvider.h"
+#import "AMADefaultAnonymousConfigProvider.h"
 #import "AMAMetricaPersistentConfiguration.h"
 #import "AMAAppMetricaConfiguration.h"
 #import "AMAFirstActivationDetector.h"
 
-SPEC_BEGIN(AppMetricaConfigForAnonymousActivationProviderTests)
+SPEC_BEGIN(AMAConfigForAnonymousActivationProviderTests)
 
-describe(@"AppMetricaConfigForAnonymousActivationProvider", ^{
+describe(@"AMAConfigForAnonymousActivationProvider", ^{
     
-    AppMetricaConfigForAnonymousActivationProvider *__block provider = nil;
+    AMAConfigForAnonymousActivationProvider *__block provider = nil;
     AMAMetricaPersistentConfiguration *__block persistentMock = nil;
-    AppMetricaDefaultAnonymousConfigProvider *__block defaultProvider = nil;
+    AMADefaultAnonymousConfigProvider *__block defaultProvider = nil;
     AMAFirstActivationDetector *__block firstActivationDetector = nil;
 
     beforeEach(^{
         persistentMock = [AMAMetricaPersistentConfiguration nullMock];
-        defaultProvider = [[AppMetricaDefaultAnonymousConfigProvider alloc] init];
+        defaultProvider = [[AMADefaultAnonymousConfigProvider alloc] init];
         firstActivationDetector = [[AMAFirstActivationDetector alloc] init];
         
-        provider = [[AppMetricaConfigForAnonymousActivationProvider alloc] initWithStorage:persistentMock
-                                                                           defaultProvider:defaultProvider
-                                                                   firstActivationDetector:firstActivationDetector];
+        provider = [[AMAConfigForAnonymousActivationProvider alloc] initWithStorage:persistentMock
+                                                                    defaultProvider:defaultProvider
+                                                            firstActivationDetector:firstActivationDetector];
     });
     
     context(@"With stored configuration", ^{

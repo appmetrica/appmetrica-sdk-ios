@@ -56,7 +56,9 @@
 #import "AMAExternalAttributionController.h"
 #import "AMAAppMetricaConfigurationManager.h"
 #import "AMAFirstActivationDetector.h"
+#import "AMAAnonymousActivationPolicy.h"
 
+static NSTimeInterval const kAMAAnonymousActivationDelay = 0.1;
 static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
 
 @interface AMAAppMetricaImpl () <AMADispatcherDelegate,
@@ -185,10 +187,17 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
 {
     if ([self.firstActivationDetector isFirstLibraryReporterActivation] == NO &&
         [self.firstActivationDetector isFirstMainReporterActivation] == YES) {
-        [self scheduleAnonymousActivationWithDelay:0.1];
+        [self scheduleAnonymousActivationWithDelay:kAMAAnonymousActivationDelay];
     }
     else {
         [self activateAnonymously];
+    }
+}
+
+- (void)scheduleReporterAnonymousActivationIfNeeded
+{
+    if ([AMAAnonymousActivationPolicy sharedInstance].isAnonymousActivationAllowedForReporter == YES) {
+        [self scheduleAnonymousActivationWithDelay:kAMAReporterAnonymousActivationDelay];
     }
 }
 
@@ -533,7 +542,7 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
         if (onSetupComplete != nil) {
             onSetupComplete();
         }
-        [weakSelf scheduleAnonymousActivationWithDelay:kAMAReporterAnonymousActivationDelay];
+        [weakSelf scheduleReporterAnonymousActivationIfNeeded];
     }];
     
     [reporter reportFirstEventIfNeeded];

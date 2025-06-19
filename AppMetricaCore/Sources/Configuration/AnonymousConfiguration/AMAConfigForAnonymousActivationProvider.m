@@ -1,29 +1,29 @@
 
-#import "AppMetricaConfigForAnonymousActivationProvider.h"
-#import "AppMetricaDefaultAnonymousConfigProvider.h"
+#import "AMAConfigForAnonymousActivationProvider.h"
+#import "AMADefaultAnonymousConfigProvider.h"
 #import "AMAMetricaPersistentConfiguration.h"
 #import "AMAFirstActivationDetector.h"
 #import "AMAFirstActivationDetector.h"
 
-@interface AppMetricaConfigForAnonymousActivationProvider ()
+@interface AMAConfigForAnonymousActivationProvider ()
 
-@property (nonatomic, strong, readwrite) AppMetricaDefaultAnonymousConfigProvider *defaultProvider;
+@property (nonatomic, strong, readwrite) AMADefaultAnonymousConfigProvider *defaultProvider;
 @property (nonatomic, strong, readwrite) AMAMetricaPersistentConfiguration *persistent;
 @property (nonatomic, strong, readwrite) AMAFirstActivationDetector *firstActivationDetector;
 
 @end
 
-@implementation AppMetricaConfigForAnonymousActivationProvider
+@implementation AMAConfigForAnonymousActivationProvider
 
 - (instancetype)initWithStorage:(AMAMetricaPersistentConfiguration *)persistent
 {
     return [self initWithStorage:persistent
-                 defaultProvider:[[AppMetricaDefaultAnonymousConfigProvider alloc] init]
+                 defaultProvider:[[AMADefaultAnonymousConfigProvider alloc] init]
          firstActivationDetector:[[AMAFirstActivationDetector alloc] init]];
 }
 
 - (instancetype)initWithStorage:(AMAMetricaPersistentConfiguration *)persistent
-                defaultProvider:(AppMetricaDefaultAnonymousConfigProvider *)defaultProvider
+                defaultProvider:(AMADefaultAnonymousConfigProvider *)defaultProvider
         firstActivationDetector:(AMAFirstActivationDetector *)firstActivationDetector
 {
     self = [super init];

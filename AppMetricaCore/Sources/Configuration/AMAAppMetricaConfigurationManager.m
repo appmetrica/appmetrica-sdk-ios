@@ -2,7 +2,7 @@
 #import "AMACore.h"
 #import "AMAAppMetrica+Internal.h"
 #import "AMAAppMetricaConfigurationManager.h"
-#import "AppMetricaConfigForAnonymousActivationProvider.h"
+#import "AMAConfigForAnonymousActivationProvider.h"
 #import "AMALocationManager.h"
 #import "AMAMetricaConfiguration.h"
 #import "AMADataSendingRestrictionController.h"
@@ -14,12 +14,12 @@
 #import "AMAErrorLogger.h"
 #import "AMADispatchStrategiesContainer.h"
 #import "AMADatabaseQueueProvider.h"
-#import "AppMetricaDefaultAnonymousConfigProvider.h"
+#import "AMADefaultAnonymousConfigProvider.h"
 
 @interface AMAAppMetricaConfigurationManager ()
 
 @property (nonatomic, strong) id<AMAAsyncExecuting, AMASyncExecuting> executor;
-@property (nonatomic, strong) AppMetricaConfigForAnonymousActivationProvider *anonymousConfigProvider;
+@property (nonatomic, strong) AMAConfigForAnonymousActivationProvider *anonymousConfigProvider;
 @property (nonatomic, strong) AMAMetricaConfiguration *metricaConfiguration;
 @property (nonatomic, strong) AMALocationManager *locationManager;
 @property (nonatomic, strong) AMADataSendingRestrictionController *restrictionController;
@@ -34,10 +34,10 @@
          firstActivationDetector:(AMAFirstActivationDetector *)firstActivationDetector
 {
     AMAMetricaConfiguration *metricaConfiguration = [AMAMetricaConfiguration sharedInstance];
-    AppMetricaConfigForAnonymousActivationProvider *anonymousConfigProvider =
-        [[AppMetricaConfigForAnonymousActivationProvider alloc] initWithStorage:metricaConfiguration.persistent
-                                                                defaultProvider:[[AppMetricaDefaultAnonymousConfigProvider alloc] init]
-                                                        firstActivationDetector:firstActivationDetector];
+    AMAConfigForAnonymousActivationProvider *anonymousConfigProvider =
+    [[AMAConfigForAnonymousActivationProvider alloc] initWithStorage:metricaConfiguration.persistent
+                                                     defaultProvider:[[AMADefaultAnonymousConfigProvider alloc] init]
+                                             firstActivationDetector:firstActivationDetector];
     return [self initWithExecutor:executor
               strategiesContainer:strategiesContainer
              metricaConfiguration:metricaConfiguration
@@ -51,7 +51,7 @@
             metricaConfiguration:(AMAMetricaConfiguration *)metricaConfiguration
                  locationManager:(AMALocationManager *)locationManager
            restrictionController:(AMADataSendingRestrictionController *)restrictionController
-         anonymousConfigProvider:(AppMetricaConfigForAnonymousActivationProvider *)anonymousConfigProvider
+         anonymousConfigProvider:(AMAConfigForAnonymousActivationProvider *)anonymousConfigProvider
 {
     self = [super init];
     if (self != nil) {

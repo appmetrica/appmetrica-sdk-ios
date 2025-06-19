@@ -1,19 +1,19 @@
 
 #import <Foundation/Foundation.h>
 
-@class AppMetricaDefaultAnonymousConfigProvider;
+@class AMADefaultAnonymousConfigProvider;
 @class AMAMetricaPersistentConfiguration;
 @class AMAAppMetricaConfiguration;
 @class AMAFirstActivationDetector;
 
-@interface AppMetricaConfigForAnonymousActivationProvider : NSObject
+@interface AMAConfigForAnonymousActivationProvider : NSObject
 
 - (instancetype)init NS_UNAVAILABLE;
 + (instancetype)new NS_UNAVAILABLE;
 
 - (instancetype)initWithStorage:(AMAMetricaPersistentConfiguration *)persistent;
 - (instancetype)initWithStorage:(AMAMetricaPersistentConfiguration *)persistent
-                defaultProvider:(AppMetricaDefaultAnonymousConfigProvider *)defaultProvider
+                defaultProvider:(AMADefaultAnonymousConfigProvider *)defaultProvider
         firstActivationDetector:(AMAFirstActivationDetector *)firstActivationDetector;
 
 - (AMAAppMetricaConfiguration *)configuration;

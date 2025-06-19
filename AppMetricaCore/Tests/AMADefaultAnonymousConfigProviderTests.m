@@ -1,23 +1,23 @@
 
 #import <Kiwi/Kiwi.h>
-#import "AppMetricaDefaultAnonymousConfigProvider.h"
+#import "AMADefaultAnonymousConfigProvider.h"
 #import "AMAAppMetricaConfiguration.h"
 #import "AMAMetricaInMemoryConfiguration.h"
 
-SPEC_BEGIN(AppMetricaDefaultAnonymousConfigProviderTests)
+SPEC_BEGIN(AMADefaultAnonymousConfigProviderTests)
 
-describe(@"AppMetricaDefaultAnonymousConfigProvider", ^{
+describe(@"AMADefaultAnonymousConfigProvider", ^{
     
     context(@"configuration", ^{
         it(@"should return a valid configuration with the anonymous API key", ^{
-            AppMetricaDefaultAnonymousConfigProvider *provider = [[AppMetricaDefaultAnonymousConfigProvider alloc] init];
+            AMADefaultAnonymousConfigProvider *provider = [[AMADefaultAnonymousConfigProvider alloc] init];
             AMAAppMetricaConfiguration *config = [provider configuration];
             
             [[config.APIKey should] equal:@"629a824d-c717-4ba5-bc0f-3f3968554d01"];
         });
         
         it(@"should set default values in configuration", ^{
-            AppMetricaDefaultAnonymousConfigProvider *provider = [[AppMetricaDefaultAnonymousConfigProvider alloc] init];
+            AMADefaultAnonymousConfigProvider *provider = [[AMADefaultAnonymousConfigProvider alloc] init];
             AMAAppMetricaConfiguration *config = [provider configuration];
             
             [[theValue(config.revenueAutoTrackingEnabled) should] equal:theValue(kAMADefaultRevenueAutoTrackingEnabled)];

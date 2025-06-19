@@ -56,6 +56,7 @@
 #import "AMAMetricaPersistentConfiguration.h"
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
 #import "AMAAppMetricaConfiguration+JSONSerializable.h"
+#import "AMAAnonymousActivationPolicy.h"
 
 static NSString *const kAMAEnvironmentTestKey = @"TestEnvironmentKey";
 static NSString *const kAMAEnvironmentTestValue = @"TestEnvironmentValue";
@@ -1328,6 +1329,13 @@ describe(@"AMAAppMetricaImpl", ^{
             it(@"Schedules anonymous activation upon reporter creation", ^{
                 [[appMetricaImpl shouldNot] receive:@selector(activateAnonymously)];
                 [[appMetricaImpl shouldEventuallyBeforeTimingOutAfter(10.2)] receive:@selector(activateAnonymously)];
+                
+                [appMetricaImpl manualReporterForConfiguration:[[AMAReporterConfiguration alloc] initWithAPIKey:apiKey]];
+            });
+            it(@"Should not schedule reporter anonymous activation when disabled", ^{
+                [[AMAAnonymousActivationPolicy sharedInstance] stub:@selector(isAnonymousActivationAllowedForReporter)
+                                                          andReturn:theValue(NO)];
+                [[appMetricaImpl shouldNotEventually] receive:@selector(activateAnonymously)];
                 
                 [appMetricaImpl manualReporterForConfiguration:[[AMAReporterConfiguration alloc] initWithAPIKey:apiKey]];
             });

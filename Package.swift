@@ -400,6 +400,7 @@ extension AppMetricaTarget {
                 "./AdSupport",
                 "./Attribution",
                 "./Configuration",
+                "./Configuration/AnonymousConfiguration",
                 "./Core",
                 "./Database",
                 "./Database/IntegrityManager",

@@ -8,7 +8,7 @@
 #import "AMAMetricaConfiguration.h"
 #import "AMALocationManager.h"
 #import "AMADispatchStrategiesContainer.h"
-#import "AppMetricaConfigForAnonymousActivationProvider.h"
+#import "AMAConfigForAnonymousActivationProvider.h"
 #import "AMADatabaseQueueProvider.h"
 #import "AMAMetricaPersistentConfiguration.h"
 #import "AMAMetricaInMemoryConfiguration.h"
@@ -29,7 +29,7 @@ describe(@"AMAAppMetricaConfigurationManager", ^{
     AMAMetricaInMemoryConfiguration *__block inMemoryConfig = nil;
     AMALocationManager *__block locationManager = nil;
     AMADataSendingRestrictionController *__block restrictionController = nil;
-    AppMetricaConfigForAnonymousActivationProvider *__block anonymousConfigProviderMock = nil;
+    AMAConfigForAnonymousActivationProvider *__block anonymousConfigProviderMock = nil;
     
     beforeEach(^{
         executor = [AMACurrentQueueExecutor new];
@@ -43,7 +43,7 @@ describe(@"AMAAppMetricaConfigurationManager", ^{
         
         locationManager = [AMALocationManager sharedManager];
         restrictionController = [AMADataSendingRestrictionController sharedInstance];
-        anonymousConfigProviderMock = [AppMetricaConfigForAnonymousActivationProvider nullMock];
+        anonymousConfigProviderMock = [AMAConfigForAnonymousActivationProvider nullMock];
         
         [AMAMetricaConfiguration stub:@selector(sharedInstance) andReturn:metricaConfigurationMock];
         

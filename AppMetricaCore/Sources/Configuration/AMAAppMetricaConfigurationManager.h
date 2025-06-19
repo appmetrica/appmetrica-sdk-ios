@@ -10,7 +10,7 @@
 @class AMADispatchStrategiesContainer;
 @protocol AMAAsyncExecuting;
 @protocol AMASyncExecuting;
-@class AppMetricaConfigForAnonymousActivationProvider;
+@class AMAConfigForAnonymousActivationProvider;
 @class AMAFirstActivationDetector;
 
 @interface AMAAppMetricaConfigurationManager : NSObject
@@ -29,7 +29,7 @@
             metricaConfiguration:(AMAMetricaConfiguration *)metricaConfiguration
                  locationManager:(AMALocationManager *)locationManager
            restrictionController:(AMADataSendingRestrictionController *)restrictionController
-         anonymousConfigProvider:(AppMetricaConfigForAnonymousActivationProvider *)anonymousConfigProvider;
+         anonymousConfigProvider:(AMAConfigForAnonymousActivationProvider *)anonymousConfigProvider;
 
 
 - (void)updateMainConfiguration:(AMAAppMetricaConfiguration *)configuration;

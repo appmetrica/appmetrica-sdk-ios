@@ -2,7 +2,7 @@
 #import <Foundation/Foundation.h>
 #import "AMACore.h"
 
-@interface AppMetricaDefaultAnonymousConfigProvider : NSObject
+@interface AMADefaultAnonymousConfigProvider : NSObject
 
 - (AMAAppMetricaConfiguration *)configuration;
 
