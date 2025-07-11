@@ -251,6 +251,11 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
     }
 }
 
++ (BOOL)shouldReportToApiKey:(NSString *)apiKey
+{
+    return [[AMADataSendingRestrictionController sharedInstance] shouldReportToApiKey:apiKey];
+}
+
 + (void)reportEventWithType:(NSUInteger)eventType
                        name:(nullable NSString *)name
                       value:(nullable NSString *)value
@@ -651,6 +656,7 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
             [[AMADataSendingRestrictionController sharedInstance] setReporterRestriction:AMADataSendingRestrictionUndefined
                                                                                forApiKey:apiKey];
         }
+        [[self class] setupExternalServices];
         AMAReporterConfiguration *configuration = [[AMAReporterConfiguration alloc] initWithAPIKey:apiKey];
         id<AMAAppMetricaExtendedReporting> reporter = [[self sharedImpl] manualReporterForConfiguration:configuration];
         return reporter;

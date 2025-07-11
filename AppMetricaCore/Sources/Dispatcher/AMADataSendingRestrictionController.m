@@ -2,6 +2,9 @@
 #import "AMACore.h"
 #import "AMADataSendingRestrictionController.h"
 #import "AMAMetricaInMemoryConfiguration.h"
+#import <AppMetricaStorageUtils/AppMetricaStorageUtils.h>
+
+static NSString *const kAMAMainRestrictionKey = @"appmetrica_main_api_key_restriction_key";
 
 typedef BOOL(^kAMARestrictionMatchBlock)(NSString *apiKey, AMADataSendingRestriction restriction);
 
@@ -10,6 +13,7 @@ typedef BOOL(^kAMARestrictionMatchBlock)(NSString *apiKey, AMADataSendingRestric
 @property (nonatomic, copy) NSString *mainApiKey;
 @property (nonatomic, assign) AMADataSendingRestriction mainRestriction;
 @property (nonatomic, strong, readonly) NSMutableDictionary<NSString *, NSNumber *> *reporterRestrictions;
+@property (nonatomic, strong, readonly) AMAUserDefaultsStorage *storage;
 
 @end
 
@@ -21,6 +25,7 @@ typedef BOOL(^kAMARestrictionMatchBlock)(NSString *apiKey, AMADataSendingRestric
     if (self != nil) {
         _mainRestriction = AMADataSendingRestrictionNotActivated;
         _reporterRestrictions = [NSMutableDictionary dictionary];
+        _storage = [[AMAUserDefaultsStorage alloc] init];
     }
     return self;
 }
@@ -33,6 +38,7 @@ typedef BOOL(^kAMARestrictionMatchBlock)(NSString *apiKey, AMADataSendingRestric
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         instance = [[AMADataSendingRestrictionController alloc] init];
+        [instance restoreMainRestriction];
     });
     return instance;
 }
@@ -44,6 +50,7 @@ typedef BOOL(^kAMARestrictionMatchBlock)(NSString *apiKey, AMADataSendingRestric
             AMALogInfo(@"Set statistic restriction to '%lu' for main apiKey",
                        (unsigned long)restriction);
             self.mainRestriction = restriction;
+            [self saveMainRestriction:restriction];
         }
     }
 }
@@ -118,7 +125,6 @@ typedef BOOL(^kAMARestrictionMatchBlock)(NSString *apiKey, AMADataSendingRestric
             || newRestriction != AMADataSendingRestrictionUndefined;
 }
 
-
 - (BOOL)allRestrictionsMatch:(kAMARestrictionMatchBlock)matcher
 {
     BOOL __block result = matcher(nil, self.mainRestriction);
@@ -180,6 +186,24 @@ typedef BOOL(^kAMARestrictionMatchBlock)(NSString *apiKey, AMADataSendingRestric
             shouldEnable = shouldEnable && [self anyIsActivated];
         }
         return shouldEnable;
+    }
+}
+
+#pragma mark - Restriction retrieving -
+
+- (void)saveMainRestriction:(AMADataSendingRestriction)restriction
+{
+    @synchronized (self) {
+        [self.storage setBool:restriction == AMADataSendingRestrictionForbidden forKey:kAMAMainRestrictionKey];
+    }
+}
+
+- (void)restoreMainRestriction
+{
+    @synchronized (self) {
+        if ([self.storage boolForKey:kAMAMainRestrictionKey] == YES) {
+            [self setMainApiKeyRestriction:AMADataSendingRestrictionForbidden];
+        }
     }
 }
 

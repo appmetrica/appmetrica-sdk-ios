@@ -56,6 +56,7 @@
 #import "AMAExternalAttributionController.h"
 #import "AMAAppMetricaConfigurationManager.h"
 #import "AMAFirstActivationDetector.h"
+#import "AMADataSendingRestrictionController.h"
 
 @interface AMAAppMetricaImpl () <AMADispatcherDelegate,
                                  AMADispatchStrategyDelegate,
@@ -921,7 +922,7 @@
     [self execute:^{
         NSString *apiKey = strategy.storage.apiKey;
         AMALogInfo(@"Dispatch strategy %@ wants to report to apiKey %@", strategy, apiKey);
-        if ([strategy canBeExecuted:self.startupController]) {
+        if ([self isAllowedToSendData:apiKey] && [strategy canBeExecuted:self.startupController]) {
             [self.dispatchingController performReportForApiKey:apiKey forced:NO];
         }
     }];
@@ -941,11 +942,16 @@
 {
     AMALogInfo(@"Report failed with error: %@", error);
     [self execute:^{
-        if (error.code == AMADispatcherReportErrorNoHosts || error.code == AMADispatcherReportErrorNoDeviceId) {
-            NSString *apiKey = error.userInfo[kAMADispatcherErrorApiKeyUserInfoKey];
-            if ([apiKey isEqualToString:kAMAMetricaLibraryApiKey] == NO) {
-                [self.startupController update];
-            }
+        if (error.code != AMADispatcherReportErrorNoHosts &&
+            error.code != AMADispatcherReportErrorNoDeviceId) {
+            return;
+        }
+        NSString *apiKey = error.userInfo[kAMADispatcherErrorApiKeyUserInfoKey];
+        if (apiKey == nil || [apiKey isEqualToString:kAMAMetricaLibraryApiKey]) {
+            return;
+        }
+        if ([self isAllowedToSendData:apiKey]) {
+            [self.startupController update];
         }
     }];
 }
@@ -1217,7 +1223,9 @@
 
         NSDictionary *options = @{ kAMARequestIdentifiersOptionCallbackModeKey : callbackMode };
         [self.startupItemsNotifier requestStartupItemsWithKeys:allKeys options:options queue:queue completion:block];
-        [self.startupController update];
+        if ([self isAllowedToSendData:self.apiKey] == YES) {
+            [self.startupController update];
+        }
     }];
 }
 
@@ -1235,6 +1243,11 @@
 - (void)reportUrl:(NSURL *)url ofType:(NSString *)type isAuto:(BOOL)isAuto
 {
     [self.deeplinkController reportUrl:url ofType:type isAuto:isAuto];
+}
+
+- (BOOL)isAllowedToSendData:(NSString *)apiKey
+{
+    return [[AMADataSendingRestrictionController sharedInstance] shouldReportToApiKey:apiKey];
 }
 
 @end

@@ -449,6 +449,18 @@ describe(@"AMADataSendingRestrictionController", ^{
             });
         });
     });
+    
+    context(@"Restriction storage", ^{
+        it(@"Should save and retrieve main api key restriction", ^{
+            controller = [[AMADataSendingRestrictionController alloc] init];
+            
+            [controller setMainApiKey:mainApiKey];
+            [controller setMainApiKeyRestriction:AMADataSendingRestrictionForbidden];
+            
+            controller = [[AMADataSendingRestrictionController alloc] init];
+            [[theValue([controller shouldReportToApiKey:mainApiKey]) should] beNo];
+        });
+    });
 
 });
 
