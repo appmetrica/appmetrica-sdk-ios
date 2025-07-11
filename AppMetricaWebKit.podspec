@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name = "AppMetricaWebKit"
-  s.version = '5.11.1'
+  s.version = '5.11.2'
   s.summary = "Enriches web analytics by providing a robust interface for capturing and reporting JavaScript events directly to AppMetrica."
 
   s.homepage = 'https://appmetrica.io'
@@ -17,9 +17,9 @@ Pod::Spec.new do |s|
 
   s.frameworks = 'Foundation'
 
-  s.dependency 'AppMetricaCore', '= 5.11.1'
-  s.dependency 'AppMetricaCoreUtils', '= 5.11.1'
-  s.dependency 'AppMetricaLog', '= 5.11.1'
+  s.dependency 'AppMetricaCore', '= 5.11.2'
+  s.dependency 'AppMetricaCoreUtils', '= 5.11.2'
+  s.dependency 'AppMetricaLog', '= 5.11.2'
 
   s.header_dir = s.name
   s.source_files = "#{s.name}/Sources/**/*.{h,m}"

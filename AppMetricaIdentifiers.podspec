@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name = "AppMetricaIdentifiers"
-  s.version = '5.11.1'
+  s.version = '5.11.2'
   s.summary = "AppMetrica utility modules that generates and provides identifiers"
 
   s.homepage = 'https://appmetrica.io'
@@ -15,11 +15,11 @@ Pod::Spec.new do |s|
 
   s.frameworks = 'Foundation', 'UIKit'
 
-  s.dependency 'AppMetricaLogSwift', '= 5.11.1'
-  s.dependency 'AppMetricaStorageUtils', '= 5.11.1'
-  s.dependency 'AppMetricaKeychain', '= 5.11.1'
-  s.dependency 'AppMetricaSynchronization', '= 5.11.1'
-  s.dependency 'AppMetricaPlatform', '= 5.11.1'
+  s.dependency 'AppMetricaLogSwift', '= 5.11.2'
+  s.dependency 'AppMetricaStorageUtils', '= 5.11.2'
+  s.dependency 'AppMetricaKeychain', '= 5.11.2'
+  s.dependency 'AppMetricaSynchronization', '= 5.11.2'
+  s.dependency 'AppMetricaPlatform', '= 5.11.2'
   
   s.header_dir = s.name
   s.source_files = [
