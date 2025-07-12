@@ -253,7 +253,7 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
 
 + (BOOL)shouldReportToApiKey:(NSString *)apiKey
 {
-    return [[AMADataSendingRestrictionController sharedInstance] shouldReportToApiKey:apiKey];
+    return [[self sharedImpl] isAllowedToSendData:apiKey];
 }
 
 + (void)reportEventWithType:(NSUInteger)eventType

@@ -916,9 +916,17 @@ describe(@"AMAAppMetricaImpl", ^{
             [[dispatchingController shouldNot] receive:@selector(performReportForApiKey:forced:)];
             [appMetricaImpl dispatchStrategyWantsReportingToHappen:strategy];
         });
-        it(@"Cannot be executed if not allowed to report", ^{
+        it(@"Cannot be executed if not allowed to report for secondary reporter", ^{
             [strategy stub:@selector(canBeExecuted:) andReturn:theValue(YES)];
             [restrictionController stub:@selector(shouldReportToApiKey:) andReturn:theValue(NO)];
+            [[dispatchingController shouldNot] receive:@selector(performReportForApiKey:forced:)];
+            [appMetricaImpl dispatchStrategyWantsReportingToHappen:strategy];
+        });
+        it(@"Cannot be executed if not allowed to report for main reporter", ^{
+            [strategy stub:@selector(canBeExecuted:) andReturn:theValue(YES)];
+            [appMetricaImpl stub:@selector(apiKey) andReturn:apiKey];
+            
+            [restrictionController stub:@selector(shouldEnableGenericRequestsSending) andReturn:theValue(NO)];
             [[dispatchingController shouldNot] receive:@selector(performReportForApiKey:forced:)];
             [appMetricaImpl dispatchStrategyWantsReportingToHappen:strategy];
         });
@@ -1363,7 +1371,7 @@ describe(@"AMAAppMetricaImpl", ^{
             queue = [AMAQueuesFactory serialQueueForIdentifierObject:self domain:@"Tests"];
             identifiersBlock = ^(NSDictionary<NSString *,id> * identifiers,
                                  NSError * error) {};
-            [restrictionController stub:@selector(shouldReportToApiKey:) andReturn:theValue(YES)];
+            [restrictionController stub:@selector(shouldEnableGenericRequestsSending) andReturn:theValue(YES)];
         });
         it(@"Should dispatch request identifiers with all keys", ^{
             [[appMetricaImpl should] receive:@selector(requestStartupIdentifiersWithKeys:
@@ -1415,7 +1423,7 @@ describe(@"AMAAppMetricaImpl", ^{
         });
         
         it(@"Should not update startup controller on request identifiers if data sending is disabled", ^{
-            [restrictionController stub:@selector(shouldReportToApiKey:) andReturn:theValue(NO)];
+            [restrictionController stub:@selector(shouldEnableGenericRequestsSending) andReturn:theValue(NO)];
             
             [[startupController shouldNot] receive:@selector(update)];
             

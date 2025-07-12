@@ -450,7 +450,7 @@ describe(@"AMADataSendingRestrictionController", ^{
         });
     });
     
-    context(@"Restriction storage", ^{
+    context(@"Restriction", ^{
         it(@"Should save and retrieve main api key restriction", ^{
             controller = [[AMADataSendingRestrictionController alloc] init];
             
@@ -459,6 +459,18 @@ describe(@"AMADataSendingRestrictionController", ^{
             
             controller = [[AMADataSendingRestrictionController alloc] init];
             [[theValue([controller shouldReportToApiKey:mainApiKey]) should] beNo];
+        });
+        it(@"Should allow main restriction if not forbidden", ^{
+            [controller allowMainRestrictionIfNotForbidden];
+            
+            [[theValue([controller shouldEnableGenericRequestsSending]) should] beYes];
+        });
+        it(@"Should not allow main restriction if not forbidden", ^{
+            [controller setMainApiKeyRestriction:AMADataSendingRestrictionForbidden];
+            
+            [controller allowMainRestrictionIfNotForbidden];
+            
+            [[theValue([controller shouldEnableGenericRequestsSending]) should] beNo];
         });
     });
 

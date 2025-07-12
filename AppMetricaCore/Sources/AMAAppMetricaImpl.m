@@ -1215,6 +1215,8 @@
                             notifyOnError:(BOOL)notifyOnError
 {
     [self execute:^{
+        [[AMADataSendingRestrictionController sharedInstance] allowMainRestrictionIfNotForbidden];
+        
         NSString *callbackMode = kAMARequestIdentifiersOptionCallbackOnSuccess;
         if (notifyOnError) {
             callbackMode = kAMARequestIdentifiersOptionCallbackInAnyCase;
@@ -1247,7 +1249,12 @@
 
 - (BOOL)isAllowedToSendData:(NSString *)apiKey
 {
-    return [[AMADataSendingRestrictionController sharedInstance] shouldReportToApiKey:apiKey];
+    AMADataSendingRestrictionController *restrictionController = [AMADataSendingRestrictionController sharedInstance];
+
+    BOOL isMainKeyRestriction = (apiKey == nil || [self.apiKey isEqualToString:apiKey]);
+    return isMainKeyRestriction
+        ? [restrictionController shouldEnableGenericRequestsSending]
+        : [restrictionController shouldReportToApiKey:apiKey];
 }
 
 @end

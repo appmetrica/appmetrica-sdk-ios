@@ -32,6 +32,15 @@ typedef BOOL(^kAMARestrictionMatchBlock)(NSString *apiKey, AMADataSendingRestric
 
 #pragma mark - Public -
 
+- (void)allowMainRestrictionIfNotForbidden
+{
+    @synchronized (self) {
+        if (self.mainRestriction != AMADataSendingRestrictionForbidden) {
+            [self setMainRestriction:AMADataSendingRestrictionAllowed];
+        }
+    }
+}
+
 + (instancetype)sharedInstance
 {
     static AMADataSendingRestrictionController *instance = nil;
@@ -116,6 +125,21 @@ typedef BOOL(^kAMARestrictionMatchBlock)(NSString *apiKey, AMADataSendingRestric
     }
 }
 
+- (BOOL)shouldEnableGenericRequestsSending
+{
+    @synchronized (self) {
+        BOOL __block shouldEnable = YES;
+        if (self.mainRestriction != AMADataSendingRestrictionNotActivated) {
+            shouldEnable = shouldEnable && self.mainRestriction != AMADataSendingRestrictionForbidden;
+        }
+        else {
+            shouldEnable = shouldEnable && [self allAreNotForbidden];
+            shouldEnable = shouldEnable && [self anyIsActivated];
+        }
+        return shouldEnable;
+    }
+}
+
 #pragma mark - Private -
 
 - (BOOL)shouldUpdateRestriction:(AMADataSendingRestriction)restriction
@@ -172,21 +196,6 @@ typedef BOOL(^kAMARestrictionMatchBlock)(NSString *apiKey, AMADataSendingRestric
 {
     AMALogInfo(@"Should %@: %@ (main: %lu, reporters: %@)",
                action, result ? @"YES": @"NO", (unsigned long)self.mainRestriction, self.reporterRestrictions);
-}
-
-- (BOOL)shouldEnableGenericRequestsSending
-{
-    @synchronized (self) {
-        BOOL __block shouldEnable = YES;
-        if (self.mainRestriction != AMADataSendingRestrictionNotActivated) {
-            shouldEnable = shouldEnable && self.mainRestriction != AMADataSendingRestrictionForbidden;
-        }
-        else {
-            shouldEnable = shouldEnable && [self allAreNotForbidden];
-            shouldEnable = shouldEnable && [self anyIsActivated];
-        }
-        return shouldEnable;
-    }
 }
 
 #pragma mark - Restriction retrieving -

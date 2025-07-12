@@ -130,6 +130,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)setExtendedReporterStorageControllers:(NSSet<id<AMAReporterStorageControlling>> *)controllers;
 - (void)setEventPollingDelegates:(NSSet<Class<AMAEventPollingDelegate>> *)delegates;
 
+- (BOOL)isAllowedToSendData:(NSString *)apiKey;
+
 @end
 
 NS_ASSUME_NONNULL_END

@@ -329,7 +329,7 @@ describe(@"AMAAppMetrica", ^{
             });
             
             it(@"Should return restriction value", ^{
-                [restrictionController stub:@selector(shouldReportToApiKey:)
+                [impl stub:@selector(isAllowedToSendData:)
                                   andReturn:theValue(NO)
                               withArguments:apiKey];
                 
