@@ -69,8 +69,6 @@
     NSArray *features = @[
         @"ea",
         @"exc",
-        @"s",
-        @"sc",
         @"pc",
         @"vc",
         @"dlch",
@@ -79,7 +77,6 @@
         @"query_hosts": @"2",
         @"queries": @"1",
         @"b": @"1",
-        @"s": @"1",
         @"permissions": @"1",
         @"stat_sending": @"1",
         @"exc": @"1",
