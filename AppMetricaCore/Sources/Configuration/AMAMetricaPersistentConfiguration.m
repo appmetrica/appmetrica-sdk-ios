@@ -46,19 +46,9 @@ static NSString *const kAMADeviceIDDefaultValue = @"";
     return self.identifierManager.deviceID;
 }
 
-- (void)setDeviceID:(NSString *)deviceID 
-{
-    [self.identifierManager updateDeviceID:deviceID];
-}
-
 - (NSString *)deviceIDHash
 {
     return self.identifierManager.deviceIDHash;
-}
-
-- (void)setDeviceIDHash:(NSString *)deviceIDHash
-{
-    [self.identifierManager updateDeviceIdHash:deviceIDHash];
 }
 
 - (NSArray *)userStartupHosts

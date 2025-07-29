@@ -27,6 +27,9 @@ describe(@"AMAEventCountDispatchStrategy", ^{
         reporterStorage = reporterTestHelper.appReporter.reporterStorage;
         executionConditionChecker = [KWMock nullMockForProtocol:@protocol(AMAReportExecutionConditionChecker)];
     });
+    afterEach(^{
+        [AMAMetricaConfigurationTestUtilities destubConfiguration];
+    });
 
 	context(@"Handles configuration update", ^{
         void (^setup)(void) = ^{

@@ -137,25 +137,22 @@ NSString *const kAMAMigrationDeviceIDHashStorageKey = @"YMMMetricaPersistentConf
     AMAFallbackKeychain *keychain = [self migrationKeychainStorageWithKVStorage:migrationStorage];
     
     NSString *storageDeviceID = [keychain stringValueForKey:kAMAMigrationDeviceIDStorageKey error:nil];
-    if (storageDeviceID.length > 0) {
-        [[AMAMetricaConfiguration sharedInstance].persistent setDeviceID:storageDeviceID];
-    }
-    
     NSString *deviceIDHash = [keychain stringValueForKey:kAMAMigrationDeviceIDHashStorageKey error:nil];
-    if (deviceIDHash.length != 0) {
-        [[AMAMetricaConfiguration sharedInstance].persistent setDeviceIDHash:deviceIDHash];
-    }
+    
+    id<AMAIdentifierProviding> idProvider = [AMAMetricaConfiguration sharedInstance].identifierProvider;
+    
+    [idProvider updateIfMissingWithDeviceID:storageDeviceID deviceIDHash:deviceIDHash];
 }
 
 + (void)migrateUUID
 {
     AMAInstantFeaturesConfiguration *migrationConfiguration = [AMAInstantFeaturesConfiguration migrationInstance];
-    AMAInstantFeaturesConfiguration *currentConfiguration = [AMAInstantFeaturesConfiguration sharedInstance];
+    id<AMAIdentifierProviding> idProvider = [AMAMetricaConfiguration sharedInstance].identifierProvider;
     
     NSString *uuid = [migrationConfiguration UUID];
     
     if (uuid != nil) {
-        [currentConfiguration setUUID:uuid];
+        [idProvider updateIfMissingWithUuid:uuid];
     }
 }
 

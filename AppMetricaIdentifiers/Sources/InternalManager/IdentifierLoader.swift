@@ -10,30 +10,16 @@ struct IdentifierLoaderData {
         return identifierSet[index]
     }
     
-    func itemsToUpdate(resultIdentifiers: IdentifiersStorageData) -> IdentifierSourceSet {
-        var result = IdentifierSourceSet()
-        
-        for i in IdentifierSource.allCases {
-            if let value = identifierSet[i], !value.isLocked {
-                let resultData = i.isStoreOnlyDeviceIdentifier ? resultIdentifiers.withoutAppMetricaUUID : resultIdentifiers
-                if value.isNone || (resultData != value.data && !i.isProtectedForRewriting) {
-                    result.insert(i)
-                }
-            }
-        }
-        
-        return result
-    }
-    
     @discardableResult
-    mutating func updateDeviceIDHash(_ deviceIDHash: DeviceIDHash, for deviceID: DeviceID) -> IdentifierSourceSet {
+    mutating func update(deviceID: DeviceID, deviceIDHash: DeviceIDHash?) -> IdentifierSourceSet {
         var result = IdentifierSourceSet()
         
         identifierSet = identifierSet.enumeratedMap {
             switch $1 {
             case .data(var d):
-                if d.deviceID == deviceID {
+                if d.deviceID != deviceID || d.deviceIDHash != deviceIDHash {
                     result.insert($0)
+                    d.deviceID = deviceID
                     d.deviceIDHash = deviceIDHash
                     return .data(d)
                 }
@@ -45,6 +31,7 @@ struct IdentifierLoaderData {
         
         return result
     }
+    
 }
 
 enum IdentifierLoader {

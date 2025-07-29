@@ -22,6 +22,9 @@ describe(@"AMAEventBoundBasedModelHelper", ^{
         boundMappingChecker = [AMABoundMappingChecker nullMock];
         helper = [[AMAEventSumBoundBasedModelHelper alloc] initWithBoundMappingChecker:boundMappingChecker];
     });
+    afterEach(^{
+        [AMAMetricaConfiguration clearStubs];
+    });
 
     context(@"Should update sum", ^{
         it(@"Was zero", ^{

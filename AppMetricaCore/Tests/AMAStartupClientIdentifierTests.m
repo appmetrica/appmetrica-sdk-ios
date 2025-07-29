@@ -12,6 +12,12 @@ describe(@"AMAStartupClientIdentifier", ^{
     NSString *UUDIDString = @"68753A44-4D6F-1226-9C60-0050E4C00067";
     NSString *IFV = @"98753A44-4D6F-1226-9C60-0050E4C00067";
     NSString *deviceIDHash = @"deviceIDHash";
+    
+    afterEach(^{
+        [AMAMetricaConfigurationTestUtilities destubConfiguration];
+        [AMAIdentifiersTestUtilities destubAll];
+    });
+    
     it(@"Should return ifv as device id", ^{
         [AMAMetricaConfigurationTestUtilities stubConfiguration];
         [[AMAMetricaConfiguration sharedInstance].persistent stub:@selector(deviceID) andReturn:IFV];

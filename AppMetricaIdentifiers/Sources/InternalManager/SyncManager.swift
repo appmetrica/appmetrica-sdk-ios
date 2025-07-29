@@ -28,23 +28,21 @@ final class SyncManager {
     
     let runEnv: RunEnvironment
     
-    let appDatabase: IdentifiersStorable?
-    
     let deviceIDGenerator: DeviceIDGenerator
     let appMetricaUUIDGenerator: AppMetricaUUIDGenerator
     
     private var syncData: IdentifiersSyncData?
     
+    var migrationData: IdentifiersStorageData?
+    
     init(
         providers: IdentifierSet<MutableIdentifiersStorable>, 
         runEnv: RunEnvironment,
-        appDatabase: IdentifiersStorable?,
         deviceIDGenerator: DeviceIDGenerator,
         appMetricaUUIDGenerator: AppMetricaUUIDGenerator
     ) {
         self.providers = providers
         self.runEnv = runEnv
-        self.appDatabase = appDatabase
         self.deviceIDGenerator = deviceIDGenerator
         self.appMetricaUUIDGenerator = appMetricaUUIDGenerator
     }
@@ -87,9 +85,10 @@ extension SyncManager {
         return syncData.identifiers
     }
     
-    func updateDeviceIDHash(_ deviceIDHash: DeviceIDHash, for deviceID: DeviceID) -> Identifiers {
+    func update(deviceID: DeviceID, deviceIDHash: DeviceIDHash?) -> Identifiers {
+        
         var ids = IdentifierLoader.loadIdentifiers(providers: providers)
-        let modifiedSources = ids.updateDeviceIDHash(deviceIDHash, for: deviceID)
+        let modifiedSources: IdentifierSourceSet = ids.update(deviceID: deviceID, deviceIDHash: deviceIDHash)
         
         for i in modifiedSources {
             let val = ids[i]
@@ -106,25 +105,7 @@ extension SyncManager {
         }
         
         return internalLoad().identifiers
-    }
-    
-    func updateAppMetricaUUID(_ appMetricaUUID: AppMetricaUUID?) -> Identifiers {
-        var syncData = internalLoadIfNeeded()
-        syncData.identifiers.appMetricaUUID = appMetricaUUID ?? .defaultValue
         
-        do {
-            try IdentifierUpdater.updateIdentifiers(
-                providers: providers,
-                id: syncData.storageData,
-                sourcesToUpdate: IdentifierSource.appMetricaUUIDSources,
-                handleVendorError: false
-            )
-            self.syncData = syncData
-        } catch let e {
-            logger.error(e)
-        }
-        
-        return syncData.identifiers
     }
     
 }
@@ -144,28 +125,19 @@ private extension SyncManager {
         let ids = IdentifierLoader.loadIdentifiers(providers: providers)
         var result = IdentifierResolver.resolve(runEnvionment: runEnv, input: ids.identifierSet)
         
-        var appDatabaseMigrationCachedData: IdentifiersStorageData?
-        func fetchDatabaseProvider() -> IdentifiersStorageData? {
-            if let cachedData = appDatabaseMigrationCachedData {
-                return cachedData
-            }
-            do {
-                appDatabaseMigrationCachedData = try appDatabase?.fetchIdentifiers().data
-            } catch let e {
-                logger.error(e)
-            }
-            return appDatabaseMigrationCachedData
-        }
-        
         let rUUID: AppMetricaUUID
         
-        //TODO: https://nda.ya.ru/t/lb6gBoj_7AACua
-        if result.resultDeviceID == nil {
-            result.resultDeviceID = fetchDatabaseProvider()?.deviceID
-            result.resultDeviceIDHash = fetchDatabaseProvider()?.deviceIDHash
-            result.sourcesToUpdate.formUnion(IdentifierSource.deviceIDSources)
+        if let migrationData = migrationData {
+            if result.resultDeviceID == nil {
+                result.resultDeviceID = migrationData.deviceID
+                result.resultDeviceIDHash = migrationData.deviceIDHash
+            }
+            if result.resultAppMetricaUUID == nil {
+                result.resultAppMetricaUUID = migrationData.appMetricaUUID
+            }
         }
         
+        //TODO: https://nda.ya.ru/t/lb6gBoj_7AACua
         if result.resultDeviceID == nil {
             result.resultDeviceID = deviceIDGenerator.generateDeviceID()
             result.resultDeviceIDHash = nil

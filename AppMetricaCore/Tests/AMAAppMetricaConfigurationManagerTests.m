@@ -54,6 +54,9 @@ describe(@"AMAAppMetricaConfigurationManager", ^{
                                                               restrictionController:restrictionController
                                                             anonymousConfigProvider:anonymousConfigProviderMock];
     });
+    afterEach(^{
+        [AMAMetricaConfiguration clearStubs];
+    });
     
     context(@"updateMainConfiguration", ^{
         AMAAppMetricaConfiguration *__block mockConfig = nil;

@@ -18,6 +18,9 @@ describe(@"AMAEventCountByKeyHelper", ^{
         [AMAMetricaConfiguration stub:@selector(sharedInstance) andReturn:metricaConfiguration];
         helper = [[AMAEventCountByKeyHelper alloc] init];
     });
+    afterEach(^{
+        [AMAMetricaConfiguration clearStubs];
+    });
 
     context(@"Get count for key", ^{
         it(@"Should be 0 for nil map", ^{

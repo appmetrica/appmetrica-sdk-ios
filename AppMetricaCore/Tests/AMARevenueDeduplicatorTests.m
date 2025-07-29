@@ -21,6 +21,9 @@ describe(@"AMARevenueDeduplicator", ^{
         [configuration stub:@selector(persistent) andReturn:persistent];
         revenueDeduplicator = [[AMARevenueDeduplicator alloc] initWithConfig:config];
     });
+    afterEach(^{
+        [AMAMetricaConfiguration clearStubs];
+    });
 
     context(@"Read saved ids from disk", ^{
         beforeEach(^{

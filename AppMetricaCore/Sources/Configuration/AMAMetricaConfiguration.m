@@ -279,16 +279,11 @@ static NSString *const kAMAMetricaFallbackPrefix = @"fallback-keychain";
 
 - (AMAIdentifierProviderConfiguration*)createIdentifierProviderConfiguration
 {
-    id<AMAKeyValueStoring> appDatabase = [self storageProvider].cachingStorage;
-    
     AMAIdentifierProviderConfiguration *config =
         [[AMAIdentifierProviderConfiguration alloc] initWithPrivateKeychain:[self privateKeychain]
                                                          privateFileStorage:self.privateIdentifiersFileStorage
         ];
     
-    if ([AMAPlatformDescription isExtension] == NO) {
-        config.appDatabase = appDatabase;
-    }
     config.vendorKeychain = [self vendorKeychain];
     config.groupKeychain = [self groupKeychain];
     config.groupFileStorage = self.groupIdentifiersFileStorage;

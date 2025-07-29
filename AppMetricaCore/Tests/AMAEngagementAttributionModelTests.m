@@ -31,6 +31,9 @@ describe(@"AMAEngagementAttributionModel", ^{
         [configuration stub:@selector(persistent) andReturn:persistentConfiguration];
         [persistentConfiguration stub:@selector(conversionValue) andReturn:@13];
     });
+    afterEach(^{
+        [AMAMetricaConfiguration clearStubs];
+    });
     context(@"Client event", ^{
         NSArray *boundMappings = @[ [AMABoundMapping nullMock] ];
         AMAClientEventCondition *__block firstClientCondition;

@@ -73,31 +73,6 @@ describe(@"AMAMetricaPersistentConfiguration", ^{
             [[theValue(savedInterval) should] equal:expectedInterval withDelta:floatingComparisonDelta];
         });
     });
-    context(@"Saves deviceID", ^{
-        NSString *deviceID = @"550e8400-e29b-41d4-a716-446655440000";
-        it(@"Should save deviceID", ^{
-            AMAMetricaPersistentConfiguration *config = createConfig();
-            config.deviceID = deviceID;
-            AMAMetricaPersistentConfiguration *anotherConfig = createConfig();
-            [[anotherConfig.deviceID should] equal:deviceID];
-        });
-        it(@"Should use IdentifierManager as device id", ^{
-            NSUUID *stubUUID = [[NSUUID alloc] initWithUUIDString:@"550e8400-e29b-41d4-a716-446655440001"];
-            idManager.mockDeviceID = stubUUID.UUIDString;
-
-            AMAMetricaPersistentConfiguration *config = createConfig();
-            [[config.deviceID should] equal:stubUUID.UUIDString];
-        });
-    });
-    context(@"Saves deviceIDHash", ^{
-        NSString *deviceIDHash = @"160518";
-        it(@"Should save deviceIDHash", ^{
-            AMAMetricaPersistentConfiguration *config = createConfig();
-            config.deviceIDHash = deviceIDHash;
-            AMAMetricaPersistentConfiguration *anotherConfig = createConfig();
-            [[anotherConfig.deviceIDHash should] equal:deviceIDHash];
-        });
-    });
     context(@"userStartupHosts", ^{
         NSArray *const values = @[ @"a", @"b" ];
         NSString *const key = @"user.startup.hosts";

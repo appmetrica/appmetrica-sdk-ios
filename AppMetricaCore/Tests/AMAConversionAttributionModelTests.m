@@ -27,6 +27,9 @@ describe(@"AMAConversionAttributionModel", ^{
         [AMAMetricaConfiguration stub:@selector(sharedInstance) andReturn:configuration];
         [configuration stub:@selector(persistent) andReturn:persistentConfiguration];
     });
+    afterEach(^{
+        [AMAMetricaConfiguration clearStubs];
+    });
     context(@"Client event", ^{
         beforeEach(^{
             AMAEventFilter *firstClientEventFilter = [[AMAEventFilter alloc] initWithEventType:AMAEventTypeClient

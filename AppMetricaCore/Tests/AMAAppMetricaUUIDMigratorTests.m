@@ -40,6 +40,11 @@ describe(@"AMAAppMetricaUUIDMigratorTests", ^{
             [configuration stub:@selector(UUIDOldStorage) andReturn:uuidOldStorage];
             [AMADatabaseFactory stub:@selector(configurationDatabasePath) andReturn:oldUUIDDatabasePath];
         });
+        afterEach(^{
+            [AMAMetricaConfiguration clearStubs];
+            [AMAInstantFeaturesConfiguration clearStubs];
+            [AMADatabaseFactory clearStubs];
+        });
 
         context(@"No cached UUID", ^{
             context(@"Has UUID in instant configuration", ^{

@@ -114,6 +114,9 @@ describe(@"AMAReporter", ^{
 
         reporterTestHelper = [[AMAReporterTestHelper alloc] init];
     });
+    afterEach(^{
+        [AMAMetricaConfigurationTestUtilities destubConfiguration];
+    });
     context(@"ApiKey update", ^{
         it(@"Should update apiKey", ^{
             NSString *const apiKey = @"API_KEY";
@@ -1640,6 +1643,9 @@ describe(@"AMAReporter", ^{
             [metricaConfiguration stub:@selector(persistent) andReturn:persistentConfiguration];
             [AMAMetricaConfiguration stub:@selector(sharedInstance) andReturn:metricaConfiguration];
             reporter = [reporterTestHelper appReporterForApiKey:apiKey attributionCheckExecutor:attributionCheckExecutor];
+        });
+        afterEach(^{
+            [AMAMetricaConfiguration clearStubs];
         });
         it(@"Should proxy initial attribution check to right queue", ^{
             [[attributionCheckExecutor should] receive:@selector(execute:)];

@@ -1593,6 +1593,7 @@
   "AppMetricaIdentifiers/Sources/RunEnvironment+Priorities.swift":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaIdentifiers/Sources/RunEnvironment+Priorities.swift",
   "AppMetricaIdentifiers/Sources/Utils/FileStorageJSONProvider.swift":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaIdentifiers/Sources/Utils/FileStorageJSONProvider.swift",
   "AppMetricaIdentifiers/Sources/Utils/Result+Extension.swift":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaIdentifiers/Sources/Utils/Result+Extension.swift",
+  "AppMetricaIdentifiers/Tests/IdentifierLoaderDataTests.swift":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaIdentifiers/Tests/IdentifierLoaderDataTests.swift",
   "AppMetricaIdentifiers/Tests/IdentifierLoaderTests.swift":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaIdentifiers/Tests/IdentifierLoaderTests.swift",
   "AppMetricaIdentifiers/Tests/IdentifierResolverTests.swift":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaIdentifiers/Tests/IdentifierResolverTests.swift",
   "AppMetricaIdentifiers/Tests/IdentifierUpdaterTests.swift":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaIdentifiers/Tests/IdentifierUpdaterTests.swift",

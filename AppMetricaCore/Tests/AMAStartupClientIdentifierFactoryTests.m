@@ -45,6 +45,9 @@ describe(@"AMAStartupClientIdentifierFactory", ^{
         [UIDevice stub:@selector(currentDevice) andReturn:mockDevice];
         [mockDevice stub:@selector(identifierForVendor) andReturn:testIFVUUID];
     });
+    afterEach(^{
+        [AMAMetricaConfiguration clearStubs];
+    });
     
     context(@"When all identifiers are available", ^{
         it(@"Should return a startupClientIdentifier with correct fields", ^{

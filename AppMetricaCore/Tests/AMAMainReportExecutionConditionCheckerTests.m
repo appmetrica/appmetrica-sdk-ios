@@ -21,6 +21,9 @@ describe(@"AMAMainReportExecutionConditionChecker", ^{
         [metricaConfiguration stub:@selector(persistent) andReturn:persistentConfiguration];
         checker = [[AMAMainReportExecutionConditionChecker alloc] init];
     });
+    afterEach(^{
+        [AMAMetricaConfiguration clearStubs];
+    });
     context(@"Can be executed", ^{
         context(@"Startup is not up-to-date", ^{
             beforeEach(^{

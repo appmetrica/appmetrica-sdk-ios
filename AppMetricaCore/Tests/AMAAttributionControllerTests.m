@@ -21,6 +21,9 @@ describe(@"AMAAttributionController", ^{
         [metricaConfiguration stub:@selector(persistent) andReturn:persistentConfiguration];
         [AMAMetricaConfiguration stub:@selector(sharedInstance) andReturn:metricaConfiguration];
     });
+    afterEach(^{
+        [AMAMetricaConfiguration clearStubs];
+    });
     
     context(@"Shared instance", ^{
         it(@"Should be the same", ^{

@@ -64,6 +64,9 @@ describe(@"AMADeepLinkController", ^{
             [AMAMetricaConfiguration stub:@selector(sharedInstance) andReturn:metricaConfiguration];
             [metricaConfiguration stub:@selector(startup) andReturn:startup];
         });
+        afterEach(^{
+            [AMAMetricaConfiguration clearStubs];
+        });
 
         context(@"Null conditions", ^{
             beforeEach(^{

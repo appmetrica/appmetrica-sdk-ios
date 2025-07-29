@@ -10,5 +10,6 @@
 + (void)stubConfigurationWithAppVersion:(NSString *)appVersion buildNumber:(uint32_t)buildNumber;
 + (void)stubConfiguration;
 + (void)stubConfigurationWithNullMock;
++ (void)destubConfiguration;
 
 @end

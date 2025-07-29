@@ -45,14 +45,6 @@ NSString *const kAMAInstantFileName = @"instant.json";
 
 #pragma mark - Public -
 
-- (void)setUUID:(NSString *)value
-{
-    NSString *uuid = [self.backingFileStorage objectForKey:AMAStorageStringKeyUUID error:NULL];
-    if (uuid.length == 0) {
-        [self.backingFileStorage saveObject:value.copy forKey:AMAStorageStringKeyUUID error:NULL];
-    }
-}
-
 - (NSString *)UUID
 {
     return [self.backingFileStorage objectForKey:AMAStorageStringKeyUUID error:NULL];

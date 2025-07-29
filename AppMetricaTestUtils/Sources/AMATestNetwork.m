@@ -81,4 +81,10 @@ static NSUInteger AMATestNetworkRequestIndex = 0;
     }];
 }
 
++ (void)clearStubs
+{
+    [NSURLConnection clearStubs];
+    [AMAHTTPRequestor clearStubs];
+}
+
 @end

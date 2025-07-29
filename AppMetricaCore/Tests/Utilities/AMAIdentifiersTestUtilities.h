@@ -18,5 +18,6 @@
 + (void)destubIDFA;
 + (void)destubUUID;
 + (void)destubIdentifierProvider;
++ (void)destubAll;
 
 @end

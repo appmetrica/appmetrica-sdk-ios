@@ -43,15 +43,6 @@ describe(@"AMAInstantFeaturesConfiguration", ^{
             it(@"Should return valid value", ^{
                 [[configuration.UUID should] equal:value];
             });
-            it(@"Should not save new value", ^{
-                [[dataProviderMock shouldNot] receive:@selector(saveObject:forKey:error:)];
-                configuration.UUID = value;
-            });
-            it(@"Should save intial value", ^{
-                [dataProviderMock stub:@selector(objectForKey:error:) andReturn:nil];
-                [[dataProviderMock should] receive:@selector(saveObject:forKey:error:) withArguments:value, key, kw_any()];
-                configuration.UUID = value;
-            });
         });
     });
 });

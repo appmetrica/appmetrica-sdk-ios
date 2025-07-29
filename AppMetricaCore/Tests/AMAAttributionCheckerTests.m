@@ -57,6 +57,10 @@ describe(@"AMAAttributionChecker", ^{
                                     lightECommerceEventConverter:lightECommerceEventConverter
                                       lightRevenueEventConverter:lightRevenueEventConverter];
     });
+    afterEach(^{
+        [AMASKAdNetworkRequestor clearStubs];
+        [AMAMetricaConfiguration clearStubs];
+    });
 
     context(@"Client event", ^{
         NSString *eventName = @"some event name";

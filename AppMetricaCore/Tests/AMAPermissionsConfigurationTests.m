@@ -29,6 +29,9 @@ describe(@"AMAPermissionsConfiguration", ^{
     
         configuration = [[AMAPermissionsConfiguration alloc] init];
     });
+    afterEach(^{
+        [AMAMetricaConfiguration clearStubs];
+    });
     
     it(@"Should contain all permissions keys", ^{
         [[AMAPermissionsConfiguration.allKeys should] containObjectsInArray:@[

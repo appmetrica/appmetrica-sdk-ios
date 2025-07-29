@@ -25,6 +25,9 @@ describe(@"AMASessionExpirationHandler", ^{
         [config stub:@selector(configurationForApiKey:) andReturn:reporterConfigMock withArguments:apiKey];
         return config;
     });
+    afterEach(^{
+        [AMAMetricaConfigurationTestUtilities destubConfiguration];
+    });
     
     let(sessionHandler, ^{ return [[AMASessionExpirationHandler alloc] initWithConfiguration:config APIKey:apiKey]; });
 

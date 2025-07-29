@@ -41,6 +41,9 @@ describe(@"AMAEventLogger", ^{
 
         logger = [[AMAEventLogger alloc] initWithApiKey:apiKey];
     });
+    afterEach(^{
+        [AMAMetricaConfiguration clearStubs];
+    });
 
     AMALogMessageSpy *(^message)(NSString *) = ^(NSString *text) {
         return [AMALogMessageSpy messageWithText:text channel:@"AppMetricaCore" level:AMALogLevelInfo];

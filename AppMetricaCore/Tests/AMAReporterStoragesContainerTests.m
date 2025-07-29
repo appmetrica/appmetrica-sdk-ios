@@ -40,6 +40,9 @@ describe(@"AMAReporterStoragesContainer", ^{
         
         container = [[AMAReporterStoragesContainer alloc] init];
     });
+    afterEach(^{
+        [AMAMetricaConfiguration clearStubs];
+    });
 
     it(@"Should return valid error environment", ^{
         [[container.eventEnvironment should] equal:eventEnvironment];

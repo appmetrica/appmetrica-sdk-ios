@@ -886,6 +886,10 @@ describe(@"AMAAppMetrica", ^{
                     [conf stub:@selector(deviceID) andReturn:deviceID];
                     [conf stub:@selector(deviceIDHash) andReturn:nil];
                 });
+                afterEach(^{
+                    [AMAMetricaConfiguration clearStubs];
+                    [[AMAMetricaConfiguration sharedInstance].persistent clearStubs];
+                });
                 it(@"Should return error async", ^{
                     NSError *error = [NSError errorWithDomain:@"test_domain" code:1 userInfo:nil];
                     [AMATestNetwork stubHTTPRequestToFinishWithError:error];

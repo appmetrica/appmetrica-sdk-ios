@@ -199,6 +199,9 @@ describe(@"AMAMetricaSessions", ^{
             date = [NSDate date];
             [NSDate stub:@selector(date) andReturn:date];
         });
+        afterEach(^{
+            [AMAMetricaConfigurationTestUtilities destubConfiguration];
+        });
         it(@"Should create new general session with correct date", ^{
             AMASession *session = [sessionStorage newGeneralSessionCreatedAt:date error:nil];
             [[session.startDate.deviceDate should] equal:date];

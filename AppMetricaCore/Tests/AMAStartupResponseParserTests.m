@@ -23,6 +23,9 @@ describe(@"AMAStartupResponseParser", ^{
         attributionModelParser = [AMAAttributionModelParser nullMock];
         parser = [[AMAStartupResponseParser alloc] initWithAttributionModelParser:attributionModelParser];
     });
+    afterEach(^{
+        [AMAMetricaConfigurationTestUtilities destubConfiguration];
+    });
 
     context(@"response", ^{
         NSString *response = @"{"

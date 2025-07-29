@@ -33,7 +33,7 @@
     NSString *uuid = [uuidMigrator migrateAppMetricaUUID];
     
     if (uuid != nil) {
-        [identifierProvider updateAppMetricaUUID:uuid];
+        [identifierProvider updateIfMissingWithUuid:uuid];
     }
 }
 
@@ -49,10 +49,7 @@
     NSString *deviceID = [storage stringForKey:dbStorageKey(AMAAppMetricaIdentifiersKeys.deviceID) error:nil];
     NSString *deviceIDHash = [storage stringForKey:dbStorageKey(AMAAppMetricaIdentifiersKeys.deviceIDHash) error:nil];
     
-    if (deviceID != nil && deviceIDHash != nil) {
-        [identifierProvider updateDeviceID:deviceID];
-        [identifierProvider updateDeviceIdHash:deviceIDHash];
-    }
+    [identifierProvider updateIfMissingWithDeviceID:deviceID deviceIDHash:deviceIDHash];
 }
 
 @end

@@ -12,9 +12,11 @@ public protocol IdentifierProviding: NSObjectProtocol {
     var deviceID: String? { get }
     var deviceIDHash: String? { get }
     var appMetricaUUID: String? { get }
-    func updateDeviceID(_ deviceID: String)
-    func updateDeviceIdHash(_ deviceHashID: String)
-    func updateAppMetricaUUID(_ uuid: String?)
+    
+    func update(deviceID: String, deviceIDHash: String?, useFileLock: Bool)
+    
+    func updateIfMissing(uuid: String?)
+    func updateIfMissing(deviceID: String, deviceIDHash: String?)
 }
 
 public let identifierErrorDomain = "io.appmetrica.identifier.error"
@@ -38,9 +40,6 @@ public final class IdentifierProviderConfiguration: NSObject {
 
     @objc
     public var groupLockFilePath: String?
-
-    @objc
-    public var appDatabase: KeyValueStoring?
 
     @objc
     public init(privateKeychain: KeychainStoring, privateFileStorage: FileStorage) {
@@ -83,13 +82,10 @@ public final class IdentifierProvider: NSObject, IdentifierProviding {
         identifierSet[.groupKeychain] = groupKeychain
         identifierSet[.groupFile] = groupFile
         identifierSet[.vendorKeychain] = vendorKeychain
-        
-        let appDatabase = config.appDatabase.map { ReadOnlyKeyValueIdentifiersStorage(storage: $0, prefix: "fallback-keychain-") }
 
         return SyncManager(
             providers: identifierSet,
             runEnv: env,
-            appDatabase: appDatabase,
             deviceIDGenerator: deviceIDGenerator,
             appMetricaUUIDGenerator: appMetricaUUIDGenerator
         )
@@ -126,6 +122,10 @@ public final class IdentifierProvider: NSObject, IdentifierProviding {
         loadIdentifiersLock.lock()
         defer { loadIdentifiersLock.unlock() }
         
+        return loadIdentifiersInternal()
+    }
+    
+    private func loadIdentifiersInternal() -> Identifiers {
         if let id = identifierData.value {
             return id
         }
@@ -167,43 +167,57 @@ public final class IdentifierProvider: NSObject, IdentifierProviding {
         return id.appMetricaUUID.rawValue
     }
     
-    public func updateDeviceID(_ deviceID: String) {
+    public func update(deviceID: String, deviceIDHash: String?, useFileLock: Bool) {
+        guard let deviceIDValue = DeviceID(rawValue: deviceID) else { return }
+        let deviceIDHashValue = deviceIDHash.flatMap { DeviceIDHash(rawValue: $0) }
+
         loadIdentifiersLock.lock()
         defer { loadIdentifiersLock.unlock() }
         
-        let result = withFileLock {
-            syncManager.updateDeviceID(DeviceID(nonEmptyString: deviceID))
+        func doWithFileLockIfNeeded<T>(closure: () throws -> T) rethrows -> T {
+            if useFileLock {
+                return try withFileLock(closure)
+            } else {
+                return try closure()
+            }
         }
+        
+        let result: Identifiers = doWithFileLockIfNeeded {
+            syncManager.update(deviceID: deviceIDValue, deviceIDHash: deviceIDHashValue)
+        }
+        
         if result.isValid {
             identifierData.value = result
         }
+    }
+
+    public func updateIfMissing(uuid: String?) {
+        guard let uuid = uuid, !uuid.isEmpty else { return }
+        loadIdentifiersLock.lock()
+        defer { loadIdentifiersLock.unlock() }
+
+        var md = syncManager.migrationData ?? IdentifiersStorageData()
+        if let uuid = AppMetricaUUID(rawValue: uuid) {
+            md.appMetricaUUID = uuid
+        }
+        
+        syncManager.migrationData = md
     }
     
-    public func updateDeviceIdHash(_ newHash: String) {
+    public func updateIfMissing(deviceID: String, deviceIDHash: String?) {
         loadIdentifiersLock.lock()
         defer { loadIdentifiersLock.unlock() }
-
-        guard let ids = identifierData.value, let deviceID = ids.deviceID else { return }
         
-        let result = withFileLock {
-            syncManager.updateDeviceIDHash(DeviceIDHash(nonEmptyString: newHash), for: deviceID)
+        var md = syncManager.migrationData ?? IdentifiersStorageData()
+        
+        if let deviceID = DeviceID(rawValue: deviceID) {
+            md.deviceID = deviceID
+        }
+        if let deviceIDHash = deviceIDHash.flatMap({ DeviceIDHash(rawValue: $0) }) {
+            md.deviceIDHash = deviceIDHash
         }
         
-        if result.isValid {
-            identifierData.value = result
-        }
-    }
-
-    public func updateAppMetricaUUID(_ uuid: String?) {
-        loadIdentifiersLock.lock()
-        defer { loadIdentifiersLock.unlock() }
-
-        let result = withFileLock {
-            syncManager.updateAppMetricaUUID(uuid.flatMap { AppMetricaUUID(rawValue: $0) })
-        }
-        if result.isValid {
-            identifierData.value = result
-        }
+        syncManager.migrationData = md
     }
     
 }

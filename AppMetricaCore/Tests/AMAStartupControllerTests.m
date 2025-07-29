@@ -17,6 +17,7 @@
 #import "AMAStartupRequest.h"
 #import "AMAIdentifierProviderMock.h"
 #import "AMAIdentifiersTestUtilities.h"
+#import "AMAMetricaConfiguration.h"
 
 @interface AMAStartupController()
 
@@ -27,7 +28,8 @@
 
 SPEC_BEGIN(AMAStartupControllerTests)
 
-describe(@"AMAStartupController", ^{
+describe(@"AMAStartupController",
+ ^{
 
     AMATimeoutRequestsController *__block timeoutController = nil;
     AMAStartupResponseParser *__block startupResponseParser = nil;
@@ -56,34 +58,29 @@ describe(@"AMAStartupController", ^{
     beforeAll(^{
         [AMATestNetwork stubHTTPRequestWithBlock:nil];
     });
+    afterAll(^{
+        [AMATestNetwork clearStubs];
+    });
     beforeEach(^{
         [AMAMetricaConfigurationTestUtilities stubConfiguration];
         timeoutController = [AMATimeoutRequestsController nullMock];
         [timeoutController stub:@selector(isAllowed) andReturn:theValue(YES)];
     });
+    afterEach(^{
+        [AMAMetricaConfigurationTestUtilities destubConfiguration];
+    });
 
-    context(@"Handles startup response",^{
+    context(@"Handles startup response", ^{
         NSNumber *offset = @60;
+        NSString *deviceID = @"deviceID";
+        NSString *deviceIDHash = @"deviceIDHash";
+        
         void (^handleStartupResponse)(void) = ^() {
             AMAStartupController *controller = currentQueueStartupController();
             AMAStartupParametersConfiguration *configuration = [AMAStartupParametersConfiguration nullMock];
             AMAStartupResponse *response = [[AMAStartupResponse alloc] initWithStartupConfiguration:configuration];
             [configuration stub:@selector(serverTimeOffset) andReturn:offset];
             [controller handleStartupResponse:response];
-        };
-        BOOL (^handleDeviceIdStartupResponse)(NSString *) = ^BOOL(NSString *deviceId) {
-            BOOL __block hit = NO;
-            [[AMAMetricaConfiguration sharedInstance].persistent stub:@selector(setDeviceID:) withBlock:^id(NSArray *params) {
-                hit = YES;
-                return nil;
-            }];
-
-            AMAStartupController *controller = currentQueueStartupController();
-            AMAStartupResponse *response = [AMAStartupResponse nullMock];
-            [response stub:@selector(deviceID) andReturn:deviceId];
-            [controller handleStartupResponse:response];
-
-            return hit;
         };
         it(@"Should save server time offset to configuration", ^{
             handleStartupResponse();
@@ -111,13 +108,37 @@ describe(@"AMAStartupController", ^{
             handleStartupResponse();
             [[spy.argument should] equal:offset.doubleValue withDelta:0.01];
         });
-        it(@"Should replace deviceId with value received from startup if not nil", ^{
-            BOOL result = handleDeviceIdStartupResponse(@"deviceId");
-            [[theValue(result) should] beYes];
-        });
         it(@"Should not replace deviceId when deviceId from startup is nil", ^{
-            BOOL result = handleDeviceIdStartupResponse(nil);
-            [[theValue(result) should] beNo];
+            NSObject *idProvider = (NSObject *)[AMAMetricaConfiguration sharedInstance].identifierProvider;
+            [idProvider stub:@selector(deviceID) andReturn:deviceID];
+            [idProvider stub:@selector(updateWithDeviceID:deviceIDHash:useFileLock:)];
+
+            AMAStartupController *controller = currentQueueStartupController();
+            AMAStartupResponse *response = [AMAStartupResponse nullMock];
+            [response stub:@selector(deviceID) andReturn:nil];
+            [response stub:@selector(deviceIDHash) andReturn:deviceIDHash];
+            
+            [[idProvider should] receive:@selector(updateWithDeviceID:deviceIDHash:useFileLock:)
+                           withArguments:deviceID, deviceIDHash, theValue(NO)];
+            
+            [controller handleStartupResponse:response];
+        });
+        it(@"Should replace deviceId with value received from startup if not nil", ^{
+            NSString *deviceID2 = @"deviceId2";
+            
+            NSObject *idProvider = (NSObject *)[AMAMetricaConfiguration sharedInstance].identifierProvider;
+            [idProvider stub:@selector(deviceID) andReturn:deviceID];
+            [idProvider stub:@selector(updateWithDeviceID:deviceIDHash:useFileLock:)];
+
+            AMAStartupController *controller = currentQueueStartupController();
+            AMAStartupResponse *response = [AMAStartupResponse nullMock];
+            [response stub:@selector(deviceID) andReturn:deviceID2];
+            [response stub:@selector(deviceIDHash) andReturn:deviceIDHash];
+            
+            [[idProvider should] receive:@selector(updateWithDeviceID:deviceIDHash:useFileLock:)
+                           withArguments:deviceID2, deviceIDHash, theValue(NO)];
+            
+            [controller handleStartupResponse:response];
         });
         context(@"Attribution model", ^{
             AMAAttributionController *__block attributionController = nil;
@@ -180,6 +201,7 @@ describe(@"AMAStartupController", ^{
             [identifierProvider fillRandom];
         });
         afterEach(^{
+            destubAppState();
             [AMAIdentifiersTestUtilities destubIdentifierProvider];
         });
         it(@"Should ask timeout controller for permission", ^{

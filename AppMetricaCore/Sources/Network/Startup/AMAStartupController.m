@@ -174,13 +174,16 @@ NSErrorDomain const AMAStartupRequestsErrorDomain = @"AMAStartupRequestsErrorDom
     AMALogInfo(@"Handle startup response %@", startupResponse);
     AMAMetricaConfiguration *configuration = [AMAMetricaConfiguration sharedInstance];
     AMAMetricaPersistentConfiguration *persistent = configuration.persistent;
-
-    if (startupResponse.deviceID.length > 0) {
-        persistent.deviceID = startupResponse.deviceID;
+    id<AMAIdentifierProviding> idProvider = configuration.identifierProvider;
+    
+    NSString *deviceID = [startupResponse.deviceID length] > 0 ? startupResponse.deviceID : idProvider.deviceID;
+    
+    if (deviceID.length > 0) {
+        [idProvider updateWithDeviceID:deviceID
+                          deviceIDHash:startupResponse.deviceIDHash
+                           useFileLock:NO];
     }
-    if (startupResponse.deviceIDHash.length > 0) {
-        persistent.deviceIDHash = startupResponse.deviceIDHash;
-    }
+    
     if (persistent.hadFirstStartup == NO) {
         persistent.attributionModelConfiguration = startupResponse.attributionModelConfiguration;
     }

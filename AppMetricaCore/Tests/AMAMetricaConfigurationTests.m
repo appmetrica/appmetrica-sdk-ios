@@ -266,22 +266,6 @@ describe(@"AMAMetricaConfiguration", ^{
             [[config.groupLockFilePath should] equal:lockFilePath];
         };
         
-        context(@"if extension", ^{
-            beforeEach(^{
-                [AMAPlatformDescription stub:@selector(isExtension) andReturn:theValue(YES)];
-            });
-            afterEach(^{
-                [AMAPlatformDescription clearStubs];
-            });
-            
-            it(@"should create config", ^{
-                AMAIdentifierProviderConfiguration *config = [configuration createIdentifierProviderConfiguration];
-                
-                compareConfig(config);
-                [(NSObject*)config.appDatabase shouldBeNil];
-            });
-        });
-        
         context(@"if app", ^{
             beforeEach(^{
                 [AMAPlatformDescription stub:@selector(isExtension) andReturn:theValue(NO)];

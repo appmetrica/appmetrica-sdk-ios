@@ -10,5 +10,6 @@ NS_SWIFT_NAME(TestNetwork)
 + (void)stubNetworkRequestWithStatusCode:(NSInteger)statusCode block:(dispatch_block_t)block;
 + (void)clearNetworkRequestIndex;
 + (void)stubNetworkRequestWithStatusCodes:(NSArray *)statusCodes block:(dispatch_block_t)block;
++ (void)clearStubs;
 
 @end
