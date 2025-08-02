@@ -58,21 +58,6 @@
    // skip testing Location
 }
 
-- (void)startUIDServer
-{
-   // skip testing server
-}
-
-- (void)shutdownUIDServer
-{
-    // skip testing server
-}
-
-- (void)initializeUIDServer
-{
-    // skip creation of server
-}
-
 - (void)performStartup
 {
     //skip testing Startup

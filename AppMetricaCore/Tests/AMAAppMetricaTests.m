@@ -86,6 +86,7 @@ describe(@"AMAAppMetrica", ^{
                                  startupResponseParser:[[AMAStartupResponseParser alloc] init]];
         startupController.delegate = impl;
         [impl stub:@selector(startupController) andReturn:startupController];
+        [impl stub:@selector(apiKey) andReturn:apiKey];
         
         AMAInternalEventsReporter *internalEventsReporter = [AMAInternalEventsReporter nullMock];
         [AMAAppMetrica stub:@selector(sharedInternalEventsReporter) andReturn:internalEventsReporter];
@@ -325,6 +326,14 @@ describe(@"AMAAppMetrica", ^{
                 [[restrictionController should] receive:@selector(setMainApiKeyRestriction:) withArguments:theValue(AMADataSendingRestrictionForbidden)];
                 
                 [AMAAppMetrica setDataSendingEnabled:NO];
+            });
+            
+            it(@"Should return restriction value", ^{
+                [impl stub:@selector(isAllowedToSendData:)
+                 andReturn:theValue(NO)
+             withArguments:apiKey];
+                
+                [[theValue([AMAAppMetrica shouldReportToApiKey:apiKey]) should] beNo];
             });
         });
         
@@ -849,6 +858,7 @@ describe(@"AMAAppMetrica", ^{
             beforeEach(^{
                 stubMetrica();
                 stubMetricaStarted(YES);
+                [AMAAppMetrica setDataSendingEnabled:YES];
             });
             
             context(@"No identifiers", ^{
@@ -1298,6 +1308,17 @@ describe(@"AMAAppMetrica", ^{
                         
                         [[spy.argument should] equal:[NSMutableSet setWithObject:startupObserver]];
                     });
+                    it(@"Should register Startup observer on activation anonymous reporter", ^{
+                        [AMAAppMetrica registerExternalService:config];
+                        
+                        KWCaptureSpy *spy = [impl captureArgument:@selector(setExtendedStartupObservers:) atIndex:0];
+                        
+                        [[impl should] receive:@selector(setExtendedStartupObservers:)];
+                        
+                        id reporter = [AMAAppMetrica reporterForAPIKey:apiKey];
+                        
+                        [[spy.argument should] equal:[NSMutableSet setWithObject:startupObserver]];
+                    });
                 });
                 context(@"Reporter storage controller", ^{
                     id<AMAReporterStorageControlling> __block reporterStorageController = nil;
@@ -1337,6 +1358,17 @@ describe(@"AMAAppMetrica", ^{
                         [[impl should] receive:@selector(setExtendedReporterStorageControllers:)];
                         
                         activateAnonymously();
+                        
+                        [[spy.argument should] equal:[NSMutableSet setWithObject:reporterStorageController]];
+                    });
+                    it(@"Should register reporter storage controller when create reporter", ^{
+                        [AMAAppMetrica registerExternalService:config];
+                        
+                        KWCaptureSpy *spy = [impl captureArgument:@selector(setExtendedReporterStorageControllers:) atIndex:0];
+                        
+                        [[impl should] receive:@selector(setExtendedReporterStorageControllers:)];
+                        
+                        id reporter = [AMAAppMetrica reporterForAPIKey:apiKey];
                         
                         [[spy.argument should] equal:[NSMutableSet setWithObject:reporterStorageController]];
                     });

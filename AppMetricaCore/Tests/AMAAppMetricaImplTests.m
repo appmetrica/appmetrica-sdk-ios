@@ -1,3 +1,4 @@
+
 #import <Kiwi/Kiwi.h>
 #import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
 #import <AppMetricaWebKit/AppMetricaWebKit.h>
@@ -57,6 +58,7 @@
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
 #import "AMAAppMetricaConfiguration+JSONSerializable.h"
 #import "AMAAnonymousActivationPolicy.h"
+#import "AMADataSendingRestrictionController.h"
 
 static NSString *const kAMAEnvironmentTestKey = @"TestEnvironmentKey";
 static NSString *const kAMAEnvironmentTestValue = @"TestEnvironmentValue";
@@ -89,7 +91,8 @@ describe(@"AMAAppMetricaImpl", ^{
     AMAStartupItemsChangedNotifier *__block startupNotifier = nil;
     AMAExternalAttributionController *__block externalAttributionController = nil;
     AMAFirstActivationDetector *__block firstActivationDetector = nil;
-
+    AMADataSendingRestrictionController *__block restrictionController = nil;
+        
     beforeEach(^{
         [AMALocationManager stub:@selector(sharedManager)];
         configuration = [AMAAppMetricaConfiguration nullMock];
@@ -131,9 +134,13 @@ describe(@"AMAAppMetricaImpl", ^{
         id<AMAAsyncExecuting>executor = [AMACurrentQueueExecutor new];
         [AMAAppMetrica stub:@selector(sharedExecutor) andReturn:executor];
         [AMAAppMetrica stub:@selector(sharedInternalEventsReporter) andReturn:internalEventsReporter];
+        
+        restrictionController = [AMADataSendingRestrictionController stubbedNullMockForDefaultInit];
+        [AMADataSendingRestrictionController stub:@selector(sharedInstance) andReturn:restrictionController];
     });
     afterEach(^{
         appMetricaImpl = nil;
+        [AMAAppMetrica clearStubs];
     });
     
     void (^activationBlock)(BOOL) = ^(BOOL anonymous) {
@@ -236,7 +243,7 @@ describe(@"AMAAppMetricaImpl", ^{
             AMASessionStorage *sessionStorage = reporterTestHelper.appReporter.reporterStorage.sessionStorage;
             AMAEventStorage *eventsStorage = reporterTestHelper.appReporter.reporterStorage.eventStorage;
             NSDate *creationDate = [NSDate dateWithTimeIntervalSinceNow:-10];
-            AMASession *session = [sessionStorage newFinishedBackgroundSessionCreatedAt:creationDate 
+            AMASession *session = [sessionStorage newFinishedBackgroundSessionCreatedAt:creationDate
                                                                                appState:nil error:NULL];
             
             AMAEventPollingDelegateMock.mockedEvents = @[
@@ -899,6 +906,7 @@ describe(@"AMAAppMetricaImpl", ^{
             storage = [AMAReporterStorage nullMock];
             [storage stub:@selector(apiKey) andReturn:apiKey];
             [strategy stub:@selector(storage) andReturn:storage];
+            [restrictionController stub:@selector(shouldReportToApiKey:) andReturn:theValue(YES)];
         });
         it(@"Can be executed", ^{
             [strategy stub:@selector(canBeExecuted:) andReturn:theValue(YES)];
@@ -907,6 +915,20 @@ describe(@"AMAAppMetricaImpl", ^{
         });
         it(@"Cannot be executed", ^{
             [strategy stub:@selector(canBeExecuted:) andReturn:theValue(NO)];
+            [[dispatchingController shouldNot] receive:@selector(performReportForApiKey:forced:)];
+            [appMetricaImpl dispatchStrategyWantsReportingToHappen:strategy];
+        });
+        it(@"Cannot be executed if not allowed to report for secondary reporter", ^{
+            [strategy stub:@selector(canBeExecuted:) andReturn:theValue(YES)];
+            [restrictionController stub:@selector(shouldReportToApiKey:) andReturn:theValue(NO)];
+            [[dispatchingController shouldNot] receive:@selector(performReportForApiKey:forced:)];
+            [appMetricaImpl dispatchStrategyWantsReportingToHappen:strategy];
+        });
+        it(@"Cannot be executed if not allowed to report for main reporter", ^{
+            [strategy stub:@selector(canBeExecuted:) andReturn:theValue(YES)];
+            [appMetricaImpl stub:@selector(apiKey) andReturn:apiKey];
+            
+            [restrictionController stub:@selector(shouldEnableGenericRequestsSending) andReturn:theValue(NO)];
             [[dispatchingController shouldNot] receive:@selector(performReportForApiKey:forced:)];
             [appMetricaImpl dispatchStrategyWantsReportingToHappen:strategy];
         });
@@ -1364,6 +1386,7 @@ describe(@"AMAAppMetricaImpl", ^{
             queue = [AMAQueuesFactory serialQueueForIdentifierObject:self domain:@"Tests"];
             identifiersBlock = ^(NSDictionary<NSString *,id> * identifiers,
                                  NSError * error) {};
+            [restrictionController stub:@selector(shouldEnableGenericRequestsSending) andReturn:theValue(YES)];
         });
         it(@"Should dispatch request identifiers with all keys", ^{
             [[appMetricaImpl should] receive:@selector(requestStartupIdentifiersWithKeys:
@@ -1407,6 +1430,17 @@ describe(@"AMAAppMetricaImpl", ^{
         
         it(@"Should update startup controller on request identifiers", ^{
             [[startupController should] receive:@selector(update)];
+            
+            [appMetricaImpl requestStartupIdentifiersWithKeys:@[]
+                                              completionQueue:queue
+                                              completionBlock:identifiersBlock
+                                                notifyOnError:NO];
+        });
+        
+        it(@"Should not update startup controller on request identifiers if data sending is disabled", ^{
+            [restrictionController stub:@selector(shouldEnableGenericRequestsSending) andReturn:theValue(NO)];
+            
+            [[startupController shouldNot] receive:@selector(update)];
             
             [appMetricaImpl requestStartupIdentifiersWithKeys:@[]
                                               completionQueue:queue

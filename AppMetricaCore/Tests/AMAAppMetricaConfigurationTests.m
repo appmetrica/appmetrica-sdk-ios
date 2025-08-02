@@ -2,6 +2,7 @@
 #import <Kiwi/Kiwi.h>
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
 #import "AMAAppMetricaConfiguration+JSONSerializable.h"
+#import "AMAAppMetricaConfiguration+Internal.h"
 #import "AMAAppMetricaPreloadInfo+JSONSerializable.h"
 #import "AMAMetricaInMemoryConfiguration.h"
 
@@ -289,6 +290,8 @@ describe(@"AMAAppMetricaConfiguration", ^{
                 [[json[kAMAAppBuildNumber] should] equal:[NSNull null]];
                 [[json[kAMACustomHosts] should] equal:[NSNull null]];
                 [[json[kAMAAppEnvironment] should] equal:[NSNull null]];
+                [[json[kAMADataSendingEnabled] should] beNil];
+                [[json[kAMALocationTracking] should] beNil];
             });
         });
         

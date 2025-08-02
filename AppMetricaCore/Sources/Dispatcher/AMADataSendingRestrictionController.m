@@ -2,6 +2,9 @@
 #import "AMACore.h"
 #import "AMADataSendingRestrictionController.h"
 #import "AMAMetricaInMemoryConfiguration.h"
+#import <AppMetricaStorageUtils/AppMetricaStorageUtils.h>
+
+static NSString *const kAMAMainRestrictionKey = @"appmetrica_main_api_key_restriction_key";
 
 typedef BOOL(^kAMARestrictionMatchBlock)(NSString *apiKey, AMADataSendingRestriction restriction);
 
@@ -10,6 +13,7 @@ typedef BOOL(^kAMARestrictionMatchBlock)(NSString *apiKey, AMADataSendingRestric
 @property (nonatomic, copy) NSString *mainApiKey;
 @property (nonatomic, assign) AMADataSendingRestriction mainRestriction;
 @property (nonatomic, strong, readonly) NSMutableDictionary<NSString *, NSNumber *> *reporterRestrictions;
+@property (nonatomic, strong, readonly) AMAUserDefaultsStorage *storage;
 
 @end
 
@@ -21,6 +25,7 @@ typedef BOOL(^kAMARestrictionMatchBlock)(NSString *apiKey, AMADataSendingRestric
     if (self != nil) {
         _mainRestriction = AMADataSendingRestrictionNotActivated;
         _reporterRestrictions = [NSMutableDictionary dictionary];
+        _storage = [[AMAUserDefaultsStorage alloc] init];
     }
     return self;
 }
@@ -33,8 +38,18 @@ typedef BOOL(^kAMARestrictionMatchBlock)(NSString *apiKey, AMADataSendingRestric
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         instance = [[AMADataSendingRestrictionController alloc] init];
+        [instance restoreMainRestriction];
     });
     return instance;
+}
+
+- (void)allowMainRestrictionIfNotForbidden
+{
+    @synchronized (self) {
+        if (self.mainRestriction != AMADataSendingRestrictionForbidden) {
+            [self setMainRestriction:AMADataSendingRestrictionAllowed];
+        }
+    }
 }
 
 - (void)setMainApiKeyRestriction:(AMADataSendingRestriction)restriction
@@ -44,6 +59,7 @@ typedef BOOL(^kAMARestrictionMatchBlock)(NSString *apiKey, AMADataSendingRestric
             AMALogInfo(@"Set statistic restriction to '%lu' for main apiKey",
                        (unsigned long)restriction);
             self.mainRestriction = restriction;
+            [self saveMainRestriction:restriction];
         }
     }
 }
@@ -109,6 +125,21 @@ typedef BOOL(^kAMARestrictionMatchBlock)(NSString *apiKey, AMADataSendingRestric
     }
 }
 
+- (BOOL)shouldEnableGenericRequestsSending
+{
+    @synchronized (self) {
+        BOOL __block shouldEnable = YES;
+        if (self.mainRestriction != AMADataSendingRestrictionNotActivated) {
+            shouldEnable = shouldEnable && self.mainRestriction != AMADataSendingRestrictionForbidden;
+        }
+        else {
+            shouldEnable = shouldEnable && [self allAreNotForbidden];
+            shouldEnable = shouldEnable && [self anyIsActivated];
+        }
+        return shouldEnable;
+    }
+}
+
 #pragma mark - Private -
 
 - (BOOL)shouldUpdateRestriction:(AMADataSendingRestriction)restriction
@@ -117,7 +148,6 @@ typedef BOOL(^kAMARestrictionMatchBlock)(NSString *apiKey, AMADataSendingRestric
     return restriction == AMADataSendingRestrictionNotActivated
             || newRestriction != AMADataSendingRestrictionUndefined;
 }
-
 
 - (BOOL)allRestrictionsMatch:(kAMARestrictionMatchBlock)matcher
 {
@@ -168,18 +198,21 @@ typedef BOOL(^kAMARestrictionMatchBlock)(NSString *apiKey, AMADataSendingRestric
                action, result ? @"YES": @"NO", (unsigned long)self.mainRestriction, self.reporterRestrictions);
 }
 
-- (BOOL)shouldEnableGenericRequestsSending
+#pragma mark - Restriction retrieving -
+
+- (void)saveMainRestriction:(AMADataSendingRestriction)restriction
 {
     @synchronized (self) {
-        BOOL __block shouldEnable = YES;
-        if (self.mainRestriction != AMADataSendingRestrictionNotActivated) {
-            shouldEnable = shouldEnable && self.mainRestriction != AMADataSendingRestrictionForbidden;
+        [self.storage setBool:restriction == AMADataSendingRestrictionForbidden forKey:kAMAMainRestrictionKey];
+    }
+}
+
+- (void)restoreMainRestriction
+{
+    @synchronized (self) {
+        if ([self.storage boolForKey:kAMAMainRestrictionKey] == YES) {
+            [self setMainApiKeyRestriction:AMADataSendingRestrictionForbidden];
         }
-        else {
-            shouldEnable = shouldEnable && [self allAreNotForbidden];
-            shouldEnable = shouldEnable && [self anyIsActivated];
-        }
-        return shouldEnable;
     }
 }
 

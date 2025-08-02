@@ -16,8 +16,11 @@ typedef NS_ENUM(NSUInteger, AMADataSendingRestriction) {
 
 - (AMADataSendingRestriction)restrictionForApiKey:(NSString *)apiKey;
 
+- (BOOL)shouldEnableGenericRequestsSending;
 - (BOOL)shouldEnableLocationSending;
 - (BOOL)shouldReportToApiKey:(NSString *)apiKey;
+
+- (void)allowMainRestrictionIfNotForbidden;
 
 + (instancetype)sharedInstance;
 

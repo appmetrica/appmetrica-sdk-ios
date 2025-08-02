@@ -1,6 +1,7 @@
 
 #import "AMAAppMetricaConfiguration+JSONSerializable.h"
 #import "AMAAppMetricaPreloadInfo+JSONSerializable.h"
+#import "AMAAppMetricaConfiguration+Internal.h"
 #import <CoreLocation/CoreLocation.h>
 
 @implementation AMAAppMetricaConfiguration (JSONSerializable)
@@ -163,9 +164,9 @@ NSString *const kAMAAppEnvironment = @"app.environment";
     json[kAMAHandleFirstActivationAsUpdate] = @(self.handleFirstActivationAsUpdate);
     json[kAMAHandleActivationAsSessionStart] = @(self.handleActivationAsSessionStart);
     json[kAMASessionsAutoTracking] = @(self.sessionsAutoTracking);
-    json[kAMADataSendingEnabled] = @(self.dataSendingEnabled);
+    json[kAMADataSendingEnabled] = self.dataSendingEnabledState;
     json[kAMAMaximumReportsInDatabaseCount] = @(self.maxReportsInDatabaseCount);
-    json[kAMALocationTracking] = @(self.locationTracking);
+    json[kAMALocationTracking] = self.locationTrackingState;
     json[kAMAAllowsBackgroundLocationUpdates] = @(self.allowsBackgroundLocationUpdates);
     json[kAMAAccurateLocationTracking] = @(self.accurateLocationTracking);
     json[kAMADispatchPeriod] = @(self.dispatchPeriod);

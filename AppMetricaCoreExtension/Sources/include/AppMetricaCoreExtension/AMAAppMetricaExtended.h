@@ -39,6 +39,7 @@ NS_SWIFT_NAME(reportLibraryAdapterAdRevenueRelatedEvent(name:parameters:onFailur
 // State Checks
 + (BOOL)isAPIKeyValid:(NSString *)apiKey;
 + (BOOL)isReporterCreatedForAPIKey:(NSString *)apiKey;
++ (BOOL)shouldReportToApiKey:(NSString *)apiKey;
 
 // Session Management
 + (void)setSessionExtras:(nullable NSData *)data

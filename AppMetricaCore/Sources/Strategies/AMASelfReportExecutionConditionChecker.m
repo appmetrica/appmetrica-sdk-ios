@@ -9,5 +9,4 @@
     return startupController.upToDate;
 }
 
-
 @end

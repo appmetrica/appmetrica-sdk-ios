@@ -57,6 +57,7 @@
 #import "AMAAppMetricaConfigurationManager.h"
 #import "AMAFirstActivationDetector.h"
 #import "AMAAnonymousActivationPolicy.h"
+#import "AMADataSendingRestrictionController.h"
 
 static NSTimeInterval const kAMAAnonymousActivationDelay = 0.1;
 static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
@@ -938,7 +939,7 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
     [self execute:^{
         NSString *apiKey = strategy.storage.apiKey;
         AMALogInfo(@"Dispatch strategy %@ wants to report to apiKey %@", strategy, apiKey);
-        if ([strategy canBeExecuted:self.startupController]) {
+        if ([self isAllowedToSendData:apiKey] && [strategy canBeExecuted:self.startupController]) {
             [self.dispatchingController performReportForApiKey:apiKey forced:NO];
         }
     }];
@@ -958,11 +959,16 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
 {
     AMALogInfo(@"Report failed with error: %@", error);
     [self execute:^{
-        if (error.code == AMADispatcherReportErrorNoHosts || error.code == AMADispatcherReportErrorNoDeviceId) {
-            NSString *apiKey = error.userInfo[kAMADispatcherErrorApiKeyUserInfoKey];
-            if ([apiKey isEqualToString:kAMAMetricaLibraryApiKey] == NO) {
-                [self.startupController update];
-            }
+        if (error.code != AMADispatcherReportErrorNoHosts &&
+            error.code != AMADispatcherReportErrorNoDeviceId) {
+            return;
+        }
+        NSString *apiKey = error.userInfo[kAMADispatcherErrorApiKeyUserInfoKey];
+        if (apiKey == nil || [apiKey isEqualToString:kAMAMetricaLibraryApiKey]) {
+            return;
+        }
+        if ([self isAllowedToSendData:apiKey]) {
+            [self.startupController update];
         }
     }];
 }
@@ -1226,6 +1232,8 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
                             notifyOnError:(BOOL)notifyOnError
 {
     [self execute:^{
+        [[AMADataSendingRestrictionController sharedInstance] allowMainRestrictionIfNotForbidden];
+        
         NSString *callbackMode = kAMARequestIdentifiersOptionCallbackOnSuccess;
         if (notifyOnError) {
             callbackMode = kAMARequestIdentifiersOptionCallbackInAnyCase;
@@ -1234,7 +1242,9 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
 
         NSDictionary *options = @{ kAMARequestIdentifiersOptionCallbackModeKey : callbackMode };
         [self.startupItemsNotifier requestStartupItemsWithKeys:allKeys options:options queue:queue completion:block];
-        [self.startupController update];
+        if ([self isAllowedToSendData:self.apiKey] == YES) {
+            [self.startupController update];
+        }
     }];
 }
 
@@ -1252,6 +1262,16 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
 - (void)reportUrl:(NSURL *)url ofType:(NSString *)type isAuto:(BOOL)isAuto
 {
     [self.deeplinkController reportUrl:url ofType:type isAuto:isAuto];
+}
+
+- (BOOL)isAllowedToSendData:(NSString *)apiKey
+{
+    AMADataSendingRestrictionController *restrictionController = [AMADataSendingRestrictionController sharedInstance];
+
+    BOOL isMainKeyRestriction = (apiKey == nil || [self.apiKey isEqualToString:apiKey]);
+    return isMainKeyRestriction
+        ? [restrictionController shouldEnableGenericRequestsSending]
+        : [restrictionController shouldReportToApiKey:apiKey];
 }
 
 @end
