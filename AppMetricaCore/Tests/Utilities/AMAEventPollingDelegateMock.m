@@ -14,7 +14,7 @@ static NSArray<AMAEventPollingParameters *> *_mockedEvents = nil;
     _mockedEvents = mockedEvents;
 }
 
-+ (NSArray<AMAEventPollingParameters *> *)eventsForPreviousSession 
++ (NSArray<AMAEventPollingParameters *> *)pollingEvents
 {
     return _mockedEvents ?: @[];
 }

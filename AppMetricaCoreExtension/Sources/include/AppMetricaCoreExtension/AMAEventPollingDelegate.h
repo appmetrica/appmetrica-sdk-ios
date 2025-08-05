@@ -31,7 +31,7 @@ NS_SWIFT_NAME(AMAEventPollingParameters)
 NS_SWIFT_NAME(EventFlushableDelegate)
 @protocol AMAEventPollingDelegate <NSObject>
 
-+ (NSArray<AMAEventPollingParameters *> *)eventsForPreviousSession;
++ (NSArray<AMAEventPollingParameters *> *)pollingEvents;
 
 + (void)setupAppEnvironment:(AMAEnvironmentContainer *)appEnvironment;
 

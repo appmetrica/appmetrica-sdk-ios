@@ -574,11 +574,13 @@ describe(@"AMAReportRequestTests", ^{
                 [reporterTestHelper.appReporter reportFileEventWithType:AMAEventTypeClient
                                                                    data:[@"RANDOM_DATA" dataUsingEncoding:kCFStringEncodingUTF8]
                                                                fileName:@""
+                                                                   date:nil
                                                                 gZipped:YES
                                                               encrypted:YES
                                                               truncated:YES
                                                        eventEnvironment:@{}
                                                          appEnvironment:@{}
+                                                               appState:nil
                                                                  extras:nil
                                                               onFailure:nil];
                 

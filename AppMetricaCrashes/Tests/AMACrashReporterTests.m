@@ -59,8 +59,8 @@ describe(@"AMACrashReporter", ^{
                 return nil;
             }];
             
-            [extendedReporter stub:@selector(reportFileEventWithType:data:fileName:gZipped:encrypted:truncated:eventEnvironment:appEnvironment:extras:onFailure:) withBlock:^id(NSArray *params) {
-                void (^failureBlock)(NSError *) = params[9];
+            [extendedReporter stub:@selector(reportFileEventWithType:data:fileName:date:gZipped:encrypted:truncated:eventEnvironment:appEnvironment:appState:extras:onFailure:) withBlock:^id(NSArray *params) {
+                void (^failureBlock)(NSError *) = params[11];
                 if ([failureBlock isEqual:NSNull.null] == NO) {
                     failureBlock(failureError);
                 }
@@ -72,15 +72,17 @@ describe(@"AMACrashReporter", ^{
             [[extendedReporter should] receive:@selector(reportFileEventWithType:
                                                          data:
                                                          fileName:
+                                                         date:
                                                          gZipped:
                                                          encrypted:
                                                          truncated:
                                                          eventEnvironment:
                                                          appEnvironment:
+                                                         appState:
                                                          extras:
                                                          onFailure:)
-                                 withArguments:theValue(AMACrashEventTypeCrash), kw_any(), kw_any(),
-             theValue(YES), theValue(NO), theValue(NO), kw_any(), kw_any(), kw_any(), kw_any()];
+                                 withArguments:theValue(AMACrashEventTypeCrash),  kw_any(), kw_any(), kw_any(),
+             theValue(YES), theValue(NO), theValue(NO), kw_any(), kw_any(), kw_any(), kw_any(), kw_any()];
             
             [crashReporter reportCrashWithParameters:[[AMAEventPollingParameters alloc] initWithEventType:99]];
         });
@@ -89,15 +91,17 @@ describe(@"AMACrashReporter", ^{
             [[extendedReporter should] receive:@selector(reportFileEventWithType:
                                                          data:
                                                          fileName:
+                                                         date:
                                                          gZipped:
                                                          encrypted:
                                                          truncated:
                                                          eventEnvironment:
                                                          appEnvironment:
+                                                         appState:
                                                          extras:
                                                          onFailure:)
-                                 withArguments:theValue(AMACrashEventTypeANR), kw_any(), kw_any(),
-             theValue(YES), theValue(NO), theValue(NO), kw_any(), kw_any(), kw_any(), kw_any()];
+                                 withArguments:theValue(AMACrashEventTypeANR), kw_any(), kw_any(), kw_any(),
+             theValue(YES), theValue(NO), theValue(NO), kw_any(), kw_any(), kw_any(), kw_any(), kw_any()];
             
             [crashReporter reportANRWithParameters:[[AMAEventPollingParameters alloc] initWithEventType:99]];
         });

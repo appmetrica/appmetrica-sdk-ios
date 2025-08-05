@@ -26,6 +26,7 @@
 
 + (AMAApplicationState *)normalApplicationState;
 + (AMAApplicationState *)previousAppVersionState;
++ (AMAApplicationState *)randomApplicationState;
 
 + (NSString *)testJSONValue;
 

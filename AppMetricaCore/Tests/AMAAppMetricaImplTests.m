@@ -203,8 +203,6 @@ describe(@"AMAAppMetricaImpl", ^{
             [[appEnvironment().dictionaryEnvironment[@"bar"] should] equal:@"foo"];
             
             AMAReporter *reporter = [reporterTestHelper appReporterForApiKey:apiKey];
-            NSLog(@"%@", reporter);
-            NSLog(@"%@", reporter);
         });
         it(@"Should clean app environment before metrica activation", ^{
             [impl setAppEnvironmentValue:@"foo" forKey:@"bar"];
@@ -235,25 +233,28 @@ describe(@"AMAAppMetricaImpl", ^{
         });
         
         it(@"Should poll polling delegates", ^{
-            [[AMAEventPollingDelegateMock should] receive:@selector(eventsForPreviousSession)];
+            [[AMAEventPollingDelegateMock should] receive:@selector(pollingEvents)];
             [impl activateWithConfiguration:configuration];
         });
         
-        it(@"Should add events from delegage to previous session", ^{
+        it(@"Should add events and appState from delegate to session", ^{
             AMASessionStorage *sessionStorage = reporterTestHelper.appReporter.reporterStorage.sessionStorage;
             AMAEventStorage *eventsStorage = reporterTestHelper.appReporter.reporterStorage.eventStorage;
-            NSDate *creationDate = [NSDate dateWithTimeIntervalSinceNow:-10];
-            AMASession *session = [sessionStorage newFinishedBackgroundSessionCreatedAt:creationDate
-                                                                               appState:nil error:NULL];
             
-            AMAEventPollingDelegateMock.mockedEvents = @[
-                [[AMAEventPollingParameters alloc] initWithEventType:AMAEventTypeProtobufCrash],
-                [[AMAEventPollingParameters alloc] initWithEventType:AMAEventTypeProtobufError],
-            ];
+            AMAApplicationState *appState = [AMAReporterTestHelper randomApplicationState];
+            AMAEventPollingParameters *crash = [[AMAEventPollingParameters alloc] initWithEventType:AMAEventTypeProtobufCrash];
+            crash.appState = appState;
+            AMAEventPollingParameters *error = [[AMAEventPollingParameters alloc] initWithEventType:AMAEventTypeProtobufError];
+            
+            AMAEventPollingDelegateMock.mockedEvents = @[crash, error];
             [impl activateWithConfiguration:configuration];
             
             [[theValue([eventStorage totalCountOfEventsWithTypes:@[ @(AMAEventTypeProtobufCrash) ]]) should] equal:theValue(1)];
             [[theValue([eventStorage totalCountOfEventsWithTypes:@[ @(AMAEventTypeProtobufError) ]]) should] equal:theValue(1)];
+            
+            AMASession *session = [sessionStorage lastSessionWithError:nil];
+            
+            [[theValue([session.appState isEqual:appState]) should] beYes];
         });
         
         it(@"Should setup app environment events", ^{
@@ -672,29 +673,35 @@ describe(@"AMAAppMetricaImpl", ^{
     
     context(@"Sends file events with custom EventType", ^{
         NSUInteger const eventType = 2341;
+        AMAApplicationState *const appState = [AMAApplicationState new];
+        
         it(@"Should dispatch reporter with correct event type", ^{
             [appMetricaImpl activateWithConfiguration:configuration];
             
             [[appMetricaImpl.mainReporter should] receive:@selector(reportFileEventWithType:
                                                                     data:
                                                                     fileName:
+                                                                    date:
                                                                     gZipped:
                                                                     encrypted:
                                                                     truncated:
                                                                     eventEnvironment:
                                                                     appEnvironment:
+                                                                    appState:
                                                                     extras:
                                                                     onFailure:)
-                                            withArguments:theValue(eventType), kw_any(), @"", theValue(YES), theValue(YES), theValue(YES), @{}, @{}, nil, nil];
+                                            withArguments:theValue(eventType), kw_any(), @"", kw_any(), theValue(YES), theValue(YES), theValue(YES), @{}, @{}, appState, nil, nil];
             
             [appMetricaImpl reportFileEventWithType:eventType
                                                data:[NSData data]
                                            fileName:@""
+                                               date:nil
                                             gZipped:YES
                                           encrypted:YES
                                           truncated:YES
                                    eventEnvironment:@{}
                                      appEnvironment:@{}
+                                           appState:appState
                                              extras:nil
                                           onFailure:nil];
         });
@@ -703,11 +710,13 @@ describe(@"AMAAppMetricaImpl", ^{
             [appMetricaImpl reportFileEventWithType:eventType
                                                data:[NSData data]
                                            fileName:@""
+                                               date:nil
                                             gZipped:YES
                                           encrypted:YES
                                           truncated:YES
                                    eventEnvironment:@{}
                                      appEnvironment:@{}
+                                           appState:nil
                                              extras:nil
                                           onFailure:nil];
             
@@ -719,11 +728,13 @@ describe(@"AMAAppMetricaImpl", ^{
             [appMetricaImpl reportFileEventWithType:eventType
                                                data:[NSData data]
                                            fileName:@""
+                                               date:nil
                                             gZipped:YES
                                           encrypted:YES
                                           truncated:YES
                                    eventEnvironment:@{}
                                      appEnvironment:@{}
+                                           appState:nil
                                              extras:nil
                                           onFailure:nil];
             
@@ -1216,7 +1227,7 @@ describe(@"AMAAppMetricaImpl", ^{
             });
             it(@"Should setup event polling delegate with main reporter", ^{
                 for (NSObject<AMAEventPollingDelegate> *delegate in delegates) {
-                    [[delegate should] receive:@selector(eventsForPreviousSession)];
+                    [[delegate should] receive:@selector(pollingEvents)];
                     
                     [[delegate should] receive:@selector(setupAppEnvironment:)];
                 }
@@ -1226,7 +1237,7 @@ describe(@"AMAAppMetricaImpl", ^{
             });
             it(@"Should NOT setup event polling delegate with secondary reporter", ^{
                 for (NSObject<AMAEventPollingDelegate> *delegate in delegates) {
-                    [[delegate shouldNot] receive:@selector(eventsForPreviousSession)];
+                    [[delegate shouldNot] receive:@selector(pollingEvents)];
                     
                     [[delegate shouldNot] receive:@selector(setupAppEnvironment:)];
                 }
@@ -1236,7 +1247,7 @@ describe(@"AMAAppMetricaImpl", ^{
             });
             it(@"Should setup event polling delegate with anonymous reporter", ^{
                 for (NSObject<AMAEventPollingDelegate> *delegate in delegates) {
-                    [[delegate should] receive:@selector(eventsForPreviousSession)];
+                    [[delegate should] receive:@selector(pollingEvents)];
                     
                     [[delegate should] receive:@selector(setupAppEnvironment:)];
                 }

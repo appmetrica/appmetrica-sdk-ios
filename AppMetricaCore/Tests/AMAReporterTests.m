@@ -1580,12 +1580,41 @@ describe(@"AMAReporter", ^{
             [[theValue(sessions.count) should] equal:theValue(3)];
         });
     });
+    
+    context(@"Polling events", ^{
+        let(reporter, ^{ return [reporterTestHelper appReporterForApiKey:apiKey]; });
+        let(appState, ^{ return [AMAReporterTestHelper randomApplicationState]; });
+        NSDate *const creationDate = [NSDate dateWithTimeIntervalSince1970:1];
+        NSUInteger const eventType = 99;
+        
+        __block AMAEvent *event = nil;
+        
+        it(@"Should update session appState", ^{
+            AMAEventPollingParameters *params = [[AMAEventPollingParameters alloc] initWithEventType:eventType];
+            params.appState = appState;
+            
+            [[sessionStorage() should] receive:@selector(updateSession:appState:error:)
+                                 withArguments:kw_any(), appState, kw_any()];
+            
+            [reporter reportPollingEvent:params onFailure:nil];
+        });
+        
+        it(@"Should update event creation date", ^{
+            AMAEventPollingParameters *params = [[AMAEventPollingParameters alloc] initWithEventType:eventType];
+            params.creationDate = creationDate;
+            
+            [reporter reportPollingEvent:params onFailure:nil];
+            
+            event = [eventStorage() amatest_savedEventWithType:eventType];
+            [[event.createdAt should] equal:creationDate];
+        });
+    });
 
     context(@"Environment data handling", ^{
         it(@"Should use event environment dictionary", ^{
             __block AMAEvent *userEvent = nil;
             AMAReporter *reporter = [reporterTestHelper appReporterForApiKey:apiKey];
-            [reporter stub:NSSelectorFromString(@"reportEvent:createdAt:onFailure:")
+            [reporter stub:NSSelectorFromString(@"reportEvent:createdAt:appState:onFailure:")
                  withBlock:^id(NSArray *params) {
                      userEvent = params.firstObject;
                      return nil;
@@ -1597,7 +1626,7 @@ describe(@"AMAReporter", ^{
         it(@"Should remove event environment value for empty value", ^{
             __block AMAEvent *userEvent = nil;
             AMAReporter *reporter = [reporterTestHelper appReporterForApiKey:apiKey];
-            [reporter stub:NSSelectorFromString(@"reportEvent:createdAt:onFailure:")
+            [reporter stub:NSSelectorFromString(@"reportEvent:createdAt:appState:onFailure:")
                  withBlock:^id(NSArray *params) {
                      userEvent = params.firstObject;
                      return nil;
@@ -1787,11 +1816,13 @@ describe(@"AMAReporter", ^{
                 [reporter reportFileEventWithType:AMAEventTypeClient
                                              data:data
                                          fileName:@""
+                                             date:nil
                                           gZipped:YES
                                         encrypted:YES
                                         truncated:YES
                                  eventEnvironment:nil
                                    appEnvironment:nil
+                                         appState:nil
                                            extras:nil
                                         onFailure:^(NSError *anError) { error = anError; }];
                 event = [eventStorage() amatest_savedEventWithType:AMAEventTypeClient];

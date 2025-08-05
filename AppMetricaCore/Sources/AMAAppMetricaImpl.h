@@ -23,6 +23,7 @@
 @protocol AMAJSControlling;
 #endif
 @class AMAAppMetricaConfigurationManager;
+@class AMAApplicationState;
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -77,11 +78,13 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)reportFileEventWithType:(NSUInteger)eventType
                            data:(NSData *)data
                        fileName:(NSString *)fileName
+                           date:(nullable NSDate *)date
                         gZipped:(BOOL)gZipped
                       encrypted:(BOOL)encrypted
                       truncated:(BOOL)truncated
                eventEnvironment:(nullable NSDictionary *)eventEnvironment
                  appEnvironment:(nullable NSDictionary *)appEnvironment
+                       appState:(nullable AMAApplicationState *)appState
                          extras:(nullable NSDictionary<NSString *, NSData *> *)extras
                       onFailure:(nullable void (^)(NSError *error))onFailure;
 

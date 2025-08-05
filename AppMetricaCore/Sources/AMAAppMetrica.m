@@ -317,11 +317,13 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
 + (void)reportFileEventWithType:(NSUInteger)eventType
                            data:(NSData *)data
                        fileName:(NSString *)fileName
+                           date:(nullable NSDate *)date
                         gZipped:(BOOL)gZipped
                       encrypted:(BOOL)encrypted
                       truncated:(BOOL)truncated
                eventEnvironment:(nullable NSDictionary *)eventEnvironment
                  appEnvironment:(nullable NSDictionary *)appEnvironment
+                       appState:(nullable AMAApplicationState *)appState
                          extras:(nullable NSDictionary<NSString *, NSData *> *)extras
                       onFailure:(nullable void (^)(NSError *error))onFailure
 {
@@ -329,11 +331,13 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
         [[self sharedImpl] reportFileEventWithType:eventType
                                               data:data
                                           fileName:fileName
+                                              date:date
                                            gZipped:gZipped
                                          encrypted:encrypted
                                          truncated:truncated
                                   eventEnvironment:eventEnvironment
                                     appEnvironment:appEnvironment
+                                          appState:appState
                                             extras:extras
                                          onFailure:onFailure];
     }

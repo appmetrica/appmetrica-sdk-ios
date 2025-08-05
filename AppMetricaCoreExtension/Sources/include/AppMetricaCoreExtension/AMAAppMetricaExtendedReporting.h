@@ -2,6 +2,8 @@
 #import <Foundation/Foundation.h>
 #import <AppMetricaCore/AppMetricaCore.h>
 
+@class AMAApplicationState;
+
 NS_ASSUME_NONNULL_BEGIN
 
 NS_SWIFT_NAME(AppMetricaExtendedReporting)
@@ -57,22 +59,26 @@ NS_SWIFT_NAME(AppMetricaExtendedReporting)
  @param eventType The type of the event. See AMAEventTypes.h file for reserved event types.
  @param data The data of the event, cannot be nil.
  @param fileName The name of file, cannot be nil.
+ @param date The creation date of the event, can be nil.
  @param gZipped The boolean value, determines whether data should be compressed using the gzip compression. If true, encryption is ignored.
  @param encrypted The boolean value, determines whether data should be encrypted.
  @param truncated  The boolean value, determines whether data should be truncated partially or completely.
  @param eventEnvironment The event environment data, can be nil.
  @param appEnvironment  The app environment data, can be nil.
+ @param appState  The application state, can be nil.
  @param extras The additional data for the event, can be nil.
  @param onFailure The block to be called when the operation fails, can be nil.
  */
 - (void)reportFileEventWithType:(NSUInteger)eventType
                            data:(NSData *)data
                        fileName:(NSString *)fileName
+                           date:(nullable NSDate *)date
                         gZipped:(BOOL)gZipped
                       encrypted:(BOOL)encrypted
                       truncated:(BOOL)truncated
                eventEnvironment:(nullable NSDictionary *)eventEnvironment
                  appEnvironment:(nullable NSDictionary *)appEnvironment
+                       appState:(nullable AMAApplicationState *)appState
                          extras:(nullable NSDictionary<NSString *, NSData *> *)extras
                       onFailure:(nullable void (^)(NSError *error))onFailure;
 

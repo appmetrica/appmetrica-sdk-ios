@@ -108,6 +108,26 @@
     return [[self normalApplicationState] copyWithNewAppVersion:@"9.9.9" appBuildNumber:@"999"];
 }
 
++ (AMAApplicationState *)randomApplicationState
+{
+    return [[AMAApplicationState alloc] initWithAppVersionName:@"9.7.3.0"
+                                                 appDebuggable:NO
+                                                    kitVersion:@"9.8.1"
+                                                kitVersionName:@"4.2.0"
+                                                kitBuildNumber:182
+                                                  kitBuildType:@"Release"
+                                                     OSVersion:@"17.4.2"
+                                                    OSAPILevel:33
+                                                        locale:@"es-MX"
+                                                      isRooted:YES
+                                                          UUID:@"DEADBEEF-1234-5678-90AB-CDEF12345678"
+                                                      deviceID:@"abc123xyz"
+                                                           IFV:@"A1B2C3D4-E5F6-7890-1234-56789ABCDEF0"
+                                                           IFA:@"00000000-0000-0000-0000-000000000000"
+                                                           LAT:YES
+                                                appBuildNumber:@"730"];
+}
+
 + (NSString *)testJSONValue
 {
     NSData *JSON = [NSJSONSerialization dataWithJSONObject:[self testUserInfo]

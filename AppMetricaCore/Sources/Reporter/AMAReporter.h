@@ -21,6 +21,7 @@
 @class AMAPrivacyTimer;
 @class AMAExternalAttributionSerializer;
 @protocol AMAAdRevenueSourceStorable;
+@class AMAEventPollingParameters;
 
 @protocol AMAReporterDelegate <NSObject>
 
@@ -90,5 +91,8 @@
 - (void)reportExternalAttribution:(NSDictionary *)attribution
                            source:(AMAAttributionSource)source
                         onFailure:(void (^)(NSError *error))onFailure;
+
+- (void)reportPollingEvent:(AMAEventPollingParameters *)event
+                 onFailure:(void (^)(NSError *error))onFailure;
 
 @end

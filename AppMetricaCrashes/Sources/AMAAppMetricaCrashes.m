@@ -400,7 +400,7 @@ them while retaining external immutability. Needed for testability. */
     [self.executor execute:block];
 }
 
-- (NSArray<AMAEventPollingParameters *> *)eventsForPreviousSession
+- (NSArray<AMAEventPollingParameters *> *)pollingEvents
 {
     __weak typeof(self) weakSelf = self;
     return [self.executor syncExecute:^id{
@@ -423,19 +423,20 @@ them while retaining external immutability. Needed for testability. */
 
 + (void)willActivateWithConfiguration:(__unused AMAModuleActivationConfiguration *)configuration
 {
+    // Initialize reporter before activation to ensure it is available when crashes are loaded.
+    [[[self class] crashes] setupReporterWithConfiguration:configuration];
     [[[self class] crashes] activate];
 }
 
 + (void)didActivateWithConfiguration:(__unused AMAModuleActivationConfiguration *)configuration
 {
-    [[[self class] crashes] setupReporterWithConfiguration:configuration];
 }
 
 #pragma mark - AMAEventPollingDelegate
 
-+ (NSArray<AMAEventPollingParameters *> *)eventsForPreviousSession
++ (NSArray<AMAEventPollingParameters *> *)pollingEvents
 {
-    return [[[self class] crashes] eventsForPreviousSession];
+    return [[[self class] crashes] pollingEvents];
 }
 
 + (void)setupAppEnvironment:(AMAEnvironmentContainer *)appEnvironment

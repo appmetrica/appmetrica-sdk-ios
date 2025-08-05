@@ -549,11 +549,13 @@ describe(@"AMAAppMetrica", ^{
                         [AMAAppMetrica reportFileEventWithType:0
                                                           data:[NSData data]
                                                       fileName:@""
+                                                          date:nil
                                                        gZipped:YES
                                                      encrypted:NO
                                                      truncated:NO
                                               eventEnvironment:nil
                                                 appEnvironment:nil
+                                                      appState:nil
                                                         extras:nil
                                                      onFailure:^(NSError *error) {
                             resultError = error;
@@ -568,11 +570,13 @@ describe(@"AMAAppMetrica", ^{
                         [[theValue(errorFromReporting().code) should] equal:theValue(AMAAppMetricaEventErrorCodeInitializationError)];
                     });
                 });
-                context(@"Event with binary type", ^{
+                context(@"Event with file type", ^{
                     NSUInteger const eventType = 1234;
                     NSDictionary *const environment = @{ @"a": @"b" };
                     NSData *data = [NSData data];
                     NSString *fileName = @"file:///";
+                    NSDate *const date = [NSDate date];
+                    AMAApplicationState *const appState = [AMAApplicationState new];
                     
                     it(@"Should report event with custom type", ^{
                         activate();
@@ -580,22 +584,26 @@ describe(@"AMAAppMetrica", ^{
                         [[reporter should] receive:@selector(reportFileEventWithType:
                                                              data:
                                                              fileName:
+                                                             date:
                                                              gZipped:
                                                              encrypted:
                                                              truncated:
                                                              eventEnvironment:
                                                              appEnvironment:
+                                                             appState:
                                                              extras:
                                                              onFailure:)
-                                     withArguments:theValue(eventType), data, fileName, theValue(YES), theValue(YES), theValue(YES), environment, environment, nil, nil];
+                                     withArguments:theValue(eventType), data, fileName, date, theValue(YES), theValue(YES), theValue(YES), environment, environment, appState, nil, nil];
                         [AMAAppMetrica reportFileEventWithType:eventType
                                                           data:data
                                                       fileName:fileName
+                                                          date:date
                                                        gZipped:YES
                                                      encrypted:YES
                                                      truncated:YES
                                               eventEnvironment:environment
                                                 appEnvironment:environment
+                                                      appState:appState
                                                         extras:nil
                                                      onFailure:nil];
                     });
@@ -605,21 +613,25 @@ describe(@"AMAAppMetrica", ^{
                         [[reporter shouldNot] receive:@selector(reportFileEventWithType:
                                                                 data:
                                                                 fileName:
+                                                                date:
                                                                 gZipped:
                                                                 encrypted:
                                                                 truncated:
                                                                 eventEnvironment:
                                                                 appEnvironment:
+                                                                appState:
                                                                 extras:
                                                                 onFailure:)];
                         [AMAAppMetrica reportFileEventWithType:eventType
                                                           data:data
                                                       fileName:fileName
+                                                          date:date
                                                        gZipped:YES
                                                      encrypted:YES
                                                      truncated:YES
                                               eventEnvironment:environment
                                                 appEnvironment:environment
+                                                      appState:appState
                                                         extras:nil
                                                      onFailure:nil];
                     });

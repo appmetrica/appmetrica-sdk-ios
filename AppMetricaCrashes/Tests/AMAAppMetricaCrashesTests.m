@@ -214,7 +214,7 @@ describe(@"AMAAppMetricaCrashes", ^{
                 
                 [AMAAppMetricaCrashes stub:@selector(crashes) andReturn:crashes];
                 AMAModuleActivationConfiguration *config = [[AMAModuleActivationConfiguration alloc] initWithApiKey:testsAPIKey];
-                [AMAAppMetricaCrashes didActivateWithConfiguration:config];
+                [AMAAppMetricaCrashes willActivateWithConfiguration:config];
             });
 
             context(@"CrashLoader Configuration", ^{
@@ -322,6 +322,9 @@ describe(@"AMAAppMetricaCrashes", ^{
         context(@"After activation", ^{
             beforeEach(^{
                 [crashes activate];
+                
+                AMAModuleActivationConfiguration *config = [[AMAModuleActivationConfiguration alloc] initWithApiKey:testsAPIKey];
+                [AMAAppMetricaCrashes willActivateWithConfiguration:config];
             });
 
             it(@"Should correctly report NSError objects", ^{
@@ -379,7 +382,7 @@ describe(@"AMAAppMetricaCrashes", ^{
             
             [AMAAppMetricaCrashes stub:@selector(crashes) andReturn:crashes];
             AMAModuleActivationConfiguration *config = [[AMAModuleActivationConfiguration alloc] initWithApiKey:testsAPIKey];
-            [AMAAppMetricaCrashes didActivateWithConfiguration:config];
+            [AMAAppMetricaCrashes willActivateWithConfiguration:config];
         });
 
         it(@"Should process crash on didLoadCrash callback", ^{
@@ -397,9 +400,14 @@ describe(@"AMAAppMetricaCrashes", ^{
 
     context(@"AMAModuleActivationDelegate", ^{
 
-        it(@"Should activate crashes on delegate callback", ^{
+        beforeEach(^{
             [AMAAppMetricaCrashes stub:@selector(crashes) andReturn:crashes];
-            [AMAAppMetricaCrashes willActivateWithConfiguration:[AMAAppMetricaConfiguration mock]];
+        });
+        
+        it(@"Should activate crashes on delegate callback", ^{
+            AMAModuleActivationConfiguration *config = [[AMAModuleActivationConfiguration alloc] initWithApiKey:testsAPIKey];
+            [AMAAppMetricaCrashes willActivateWithConfiguration:config];
+            
             [[theValue(crashes.isActivated) should] beYes];
         });
     });
@@ -423,7 +431,7 @@ describe(@"AMAAppMetricaCrashes", ^{
                                andReturn:mockedEvents[1]
                            withArguments:mockedCrashes[1], KWNull.null];
 
-            [[[AMAAppMetricaCrashes eventsForPreviousSession] should] equal:mockedEvents];
+            [[[AMAAppMetricaCrashes pollingEvents] should] equal:mockedEvents];
         });
 
         it(@"Should handle serialization errors gracefully", ^{
@@ -434,7 +442,7 @@ describe(@"AMAAppMetricaCrashes", ^{
                                andReturn:nil
                                withCount:mockedCrashes.count];
 
-            [[[AMAAppMetricaCrashes eventsForPreviousSession] should] beEmpty];
+            [[[AMAAppMetricaCrashes pollingEvents] should] beEmpty];
         });
 
         it(@"Should return events even if some crashes fail to serialize", ^{
@@ -447,7 +455,7 @@ describe(@"AMAAppMetricaCrashes", ^{
             [serializer stub:@selector(eventParametersFromDecodedData:error:)
                    andReturn:nil withArguments:mockedCrashes[1], nil];
 
-            NSArray *events = [AMAAppMetricaCrashes eventsForPreviousSession];
+            NSArray *events = [AMAAppMetricaCrashes pollingEvents];
             [[events should] haveCountOf:1];
             [[events[0] should] equal:event];
         });
@@ -463,7 +471,7 @@ describe(@"AMAAppMetricaCrashes", ^{
             
             [AMAAppMetricaCrashes stub:@selector(crashes) andReturn:crashes];
             AMAModuleActivationConfiguration *config = [[AMAModuleActivationConfiguration alloc] initWithApiKey:testsAPIKey];
-            [AMAAppMetricaCrashes didActivateWithConfiguration:config];
+            [AMAAppMetricaCrashes willActivateWithConfiguration:config];
         });
 
         it(@"Should process a crash when didLoadCrash:withError: is called", ^{

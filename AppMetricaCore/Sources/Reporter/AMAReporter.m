@@ -469,14 +469,17 @@
 - (void)reportFileEventWithType:(NSUInteger)eventType
                            data:(NSData *)data
                        fileName:(NSString *)fileName
+                           date:(nullable NSDate *)date
                         gZipped:(BOOL)gZipped
                       encrypted:(BOOL)encrypted
                       truncated:(BOOL)truncated
                eventEnvironment:(nullable NSDictionary *)eventEnvironment
                  appEnvironment:(nullable NSDictionary *)appEnvironment
-                         extras:(nullable NSDictionary<NSString *,NSData *> *)extras
-                      onFailure:(void (^)(NSError *))onFailure
+                       appState:(nullable AMAApplicationState *)appState
+                         extras:(nullable NSDictionary<NSString *, NSData *> *)extras
+                      onFailure:(nullable void (^)(NSError *error))onFailure
 {
+    NSDate *creationDate = date ?: [NSDate date];
     [self reportCommonEventWithBlock:^AMAEvent *(NSError **error) {
         return [self.eventBuilder fileEventWithType:eventType
                                                data:data
@@ -488,8 +491,7 @@
                                      appEnvironment:appEnvironment
                                              extras:extras
                                               error:error];
-    }
-                           onFailure:onFailure];
+    } session:nil date:creationDate appState:appState onFailure:onFailure];
 }
 
 - (void)reportSystemEvent:(NSString *)name onFailure:(void (^)(NSError *))onFailure
@@ -565,7 +567,7 @@
             return [self.eventBuilder eventOpen:parameters
                            attributionIDChanged:reattribution
                                           error:error];
-        }                        session:session date:date onFailure:onFailure];
+        }                        session:session date:date appState:nil onFailure:onFailure];
     }];
 }
 
@@ -573,22 +575,24 @@
                          onFailure:(void (^)(NSError *error))onFailure
 {
     [self stampedExecute:^(NSDate *date) {
-        [self reportCommonEventWithBlock:eventCreationBlock session:nil date:date onFailure:onFailure];
+        [self reportCommonEventWithBlock:eventCreationBlock session:nil date:date appState:nil onFailure:onFailure];
     }];
 }
 
 - (void)reportCommonEventWithBlock:(AMAEvent *(^)(NSError **error))eventCreationBlock
                            session:(AMASession *)session
                               date:(NSDate *)date
+                          appState:(AMAApplicationState *)appState
                          onFailure:(void (^)(NSError *error))onFailure
 {
     AMAEvent *event = [self buildEventWithBlock:eventCreationBlock onFailure:onFailure];
     if (event != nil) {
         if (session != nil) {
+            [self applyAppStateToSessionIfNeeded:session appState:appState];
             [self reportEvent:event createdAt:date toSession:session onFailure:onFailure];
         }
         else {
-            [self reportEvent:event createdAt:date onFailure:onFailure];
+            [self reportEvent:event createdAt:date appState:appState onFailure:onFailure];
         }
     }
 }
@@ -626,7 +630,7 @@
 {
     [self reportCommonEventWithBlock:^AMAEvent *(NSError **error) {
         return [self.eventBuilder eventProfile:nil];
-    }                        session:nil date:date onFailure:nil];
+    }                        session:nil date:date appState:nil onFailure:nil];
 }
 
 - (AMAEvent *)revenueEventWithModel:(AMARevenueInfoModel *)model error:(NSError **)error
@@ -684,7 +688,7 @@
             [self reportCommonEventWithBlock:^AMAEvent *(NSError **error) {
                 return [self.eventBuilder eventECommerce:result.data
                                           bytesTruncated:result.bytesTruncated];
-            }                        session:nil date:date onFailure:onFailure];
+            }                        session:nil date:date appState:nil onFailure:onFailure];
         }
     }];
 }
@@ -791,6 +795,15 @@
     } onFailure:onFailure];
 }
 
+- (void)reportPollingEvent:(AMAEventPollingParameters *)event
+                 onFailure:(void (^)(NSError *error))onFailure
+{
+    NSDate *creationDate = event.creationDate ?: [NSDate date];
+    [self reportCommonEventWithBlock:^AMAEvent *(NSError **error) {
+        return [self.eventBuilder eventWithPollingParameters:event error:error];
+    } session:nil date:creationDate appState:event.appState onFailure:onFailure];
+}
+
 #pragma mark - Execution -
 
 - (void)execute:(dispatch_block_t)block
@@ -808,7 +821,10 @@
 
 #pragma mark - Events -
 
-- (void)reportEvent:(AMAEvent *)event createdAt:(NSDate *)creationDate onFailure:(void (^)(NSError *))onFailure
+- (void)reportEvent:(AMAEvent *)event
+          createdAt:(NSDate *)creationDate
+           appState:(AMAApplicationState *)appState
+          onFailure:(void (^)(NSError *))onFailure
 {
     NSError *error = nil;
     AMASession *eventSession = [self currentSessionForEventCreatedAt:creationDate
@@ -816,6 +832,7 @@
                                               onNewSession:^(AMASession *newSession) {
                                                   [self addStartEventWithDate:creationDate toSession:newSession];
                                               }];
+    [self applyAppStateToSessionIfNeeded:eventSession appState:appState];
     if (eventSession != nil) {
         [self reportEvent:event createdAt:creationDate toSession:eventSession onFailure:onFailure];
     }
@@ -1243,6 +1260,14 @@
     AMALogError(@"%@", errorDescription);
     [AMAFailureDispatcher dispatchError:[AMAErrorsFactory internalInconsistencyError:errorDescription]
                               withBlock:onFailure];
+}
+
+- (void)applyAppStateToSessionIfNeeded:(AMASession *)session
+                              appState:(AMAApplicationState *)appState
+{
+    if (session != nil && appState != nil) {
+        [self.reporterStorage.sessionStorage updateSession:session appState:appState error:nil];
+    }
 }
 
 @end

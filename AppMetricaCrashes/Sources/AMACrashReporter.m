@@ -14,7 +14,7 @@ NSString *const kAppMetricaLibraryAPIKey = @"20799a27-fa80-4b36-b2db-0f8141f2418
 
 @interface AMACrashReporter ()
 
-@property (nonatomic, strong, readonly) id<AMAAppMetricaReporting> libraryErrorReporter;
+@property (nonatomic, strong) id<AMAAppMetricaReporting> libraryErrorReporter;
 @property (nonatomic, strong, readonly) id<AMAExceptionFormatting> exceptionFormatter;
 @property (nonatomic, strong, readonly) AMAErrorModelFactory *errorModelFactory;
 @property (nonatomic, copy, readonly) NSString *apiKey;
@@ -35,7 +35,7 @@ NSString *const kAppMetricaLibraryAPIKey = @"20799a27-fa80-4b36-b2db-0f8141f2418
     self = [super init];
     if (self != nil) {
         _apiKey = apiKey;
-        _libraryErrorReporter = [AMAAppMetrica reporterForAPIKey:kAppMetricaLibraryAPIKey];
+        _libraryErrorReporter = nil;
         _exceptionFormatter = [[AMAExceptionFormatter alloc] init];
         _errorEnvironment = errorEnvironment;
         _errorModelFactory = [AMAErrorModelFactory sharedInstance];
@@ -203,15 +203,17 @@ NSString *const kAppMetricaLibraryAPIKey = @"20799a27-fa80-4b36-b2db-0f8141f2418
 - (void)reportCrashWithParameters:(nonnull AMAEventPollingParameters *)parameters
 {
     id<AMAAppMetricaExtendedReporting> reporter = [AMAAppMetrica extendedReporterForApiKey:self.apiKey];
-    
+
     [reporter reportFileEventWithType:AMACrashEventTypeCrash
                                  data:parameters.data
                              fileName:parameters.fileName
+                                 date:parameters.creationDate
                               gZipped:YES
                             encrypted:NO
                             truncated:NO
                      eventEnvironment:parameters.eventEnvironment
                        appEnvironment:parameters.appEnvironment
+                             appState:parameters.appState
                                extras:parameters.extras
                             onFailure:^(NSError *error) {
         if (error != nil) {
@@ -228,11 +230,13 @@ NSString *const kAppMetricaLibraryAPIKey = @"20799a27-fa80-4b36-b2db-0f8141f2418
     [reporter reportFileEventWithType:AMACrashEventTypeANR
                                  data:parameters.data
                              fileName:parameters.fileName
+                                 date:parameters.creationDate
                               gZipped:YES
                             encrypted:NO
                             truncated:NO
                      eventEnvironment:parameters.eventEnvironment
                        appEnvironment:parameters.appEnvironment
+                             appState:parameters.appState
                                extras:parameters.extras
                             onFailure:^(NSError *error) {
         if (error != nil) {
@@ -301,6 +305,9 @@ NSString *const kAppMetricaLibraryAPIKey = @"20799a27-fa80-4b36-b2db-0f8141f2418
 
 - (void)reportErrorToAppMetricaWithError:(NSError *)error eventName:(NSString *)eventName
 {
+    if (self.libraryErrorReporter == nil) {
+        self.libraryErrorReporter = [AMAAppMetrica reporterForAPIKey:kAppMetricaLibraryAPIKey];
+    }
     NSDictionary *parameters = @{
         @"domain" : error.domain ?: @"<unknown>",
         @"error_code" : @(error.code),

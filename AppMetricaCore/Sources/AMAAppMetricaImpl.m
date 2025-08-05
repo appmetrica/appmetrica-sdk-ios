@@ -345,24 +345,28 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
 - (void)reportFileEventWithType:(NSUInteger)eventType
                            data:(NSData *)data
                        fileName:(NSString *)fileName
+                           date:(nullable NSDate *)date
                         gZipped:(BOOL)gZipped
                       encrypted:(BOOL)encrypted
                       truncated:(BOOL)truncated
-               eventEnvironment:(NSDictionary *)eventEnvironment
-                 appEnvironment:(NSDictionary *)appEnvironment
-                         extras:(NSDictionary<NSString *,NSData *> *)extras
-                      onFailure:(void (^)(NSError *))onFailure
+               eventEnvironment:(nullable NSDictionary *)eventEnvironment
+                 appEnvironment:(nullable NSDictionary *)appEnvironment
+                       appState:(nullable AMAApplicationState *)appState
+                         extras:(nullable NSDictionary<NSString *, NSData *> *)extras
+                      onFailure:(nullable void (^)(NSError *error))onFailure
 {
     [self execute:^{
         [self reportEventWithBlock:^{
             [self.mainReporter reportFileEventWithType:eventType
                                                   data:data
                                               fileName:fileName
+                                                  date:date
                                                gZipped:gZipped
                                              encrypted:encrypted
                                              truncated:truncated
                                       eventEnvironment:eventEnvironment
                                         appEnvironment:appEnvironment
+                                              appState:appState
                                                 extras:extras
                                              onFailure:onFailure];
         } onFailure:onFailure];
@@ -778,7 +782,6 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
                                  onStorageRestored:^(AMAEventBuilder *eventBuilder) {
             // called on reporter.executor queue
             [weakSelf applyDeferredAppEnvironmentUpdatesWithStorage:reporterStorage];
-            [weakSelf applyEventsFromPollingDelegatesWithStorage:reporterStorage eventBuilder:eventBuilder];
             [weakSelf applyUserProfileIDWithStorage:reporterStorage
                                       userProfileID:[self mergeUserProfileIDs:configuration.userProfileID]];
             [weakSelf setupAppEnvironmentPollingDelegatesWithStorage:reporterStorage];
@@ -789,26 +792,23 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
         [self execute:^{
             self.mainReporter = reporter;
             [AMAAttributionController sharedInstance].mainReporter = reporter;
+            [self addEventsFromPollingDelegates:reporter];
             [self triggerSessionStartIfNeeded];
         }];
         return reporter;
     }
 }
 
-// FIXME: (glinnik) manupulating storage in impl. Logic similar to Reporter. Move there later
-- (void)applyEventsFromPollingDelegatesWithStorage:(AMAReporterStorage *)reporterStorage
-                                      eventBuilder:(AMAEventBuilder *)eventBuilder
+- (void)addEventsFromPollingDelegates:(AMAReporter *)reporter
 {
-    NSArray<AMAEvent *> *events = [self pollingEvents:eventBuilder];
+    NSArray<AMAEventPollingParameters *> *events =
+        [AMACollectionUtilities flatMapArray:self.eventPollingDelegatesTable.allObjects
+                                   withBlock:^NSArray *(Class<AMAEventPollingDelegate> delegate) {
+            return [delegate pollingEvents];
+        }];
     
-    if (events.count > 0) {
-        AMASession *session = [reporterStorage.sessionStorage lastSessionWithError:NULL];
-        if (session != nil) {
-            for (AMAEvent *event in events) {
-                event.sessionOid = session.oid;
-                [reporterStorage.eventStorage addEvent:event toSession:session error:NULL];
-            }
-        }
+    for (AMAEventPollingParameters *parameters in events) {
+        [reporter reportPollingEvent:parameters onFailure:nil];
     }
 }
 
@@ -1145,17 +1145,6 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
         for (id<AMAEventPollingDelegate> delegate in self.eventPollingDelegatesTable) {
             [delegate setupAppEnvironment:reporterStorage.stateStorage.appEnvironment];
         }
-    }];
-}
-
-- (NSArray<AMAEvent *> *)pollingEvents:(AMAEventBuilder *)eventBuilder
-{
-    return [AMACollectionUtilities flatMapArray:self.eventPollingDelegatesTable.allObjects
-                                      withBlock:^NSArray *(Class<AMAEventPollingDelegate> delegate) {
-        return [AMACollectionUtilities mapArray:[delegate eventsForPreviousSession]
-                                      withBlock:^id(AMAEventPollingParameters *params) {
-            return [eventBuilder eventWithPollingParameters:params error:NULL];
-        }];
     }];
 }
 
