@@ -5,7 +5,7 @@
 @class AMAAdProvider;
 @protocol AMACancelableExecuting;
 @protocol AMAAsyncExecuting;
-@protocol AMAPrivacyTimerStorage;
+@protocol AMAPrivacyTimerRetryPolicy;
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -16,16 +16,16 @@ NS_ASSUME_NONNULL_BEGIN
 @interface AMAPrivacyTimer : NSObject
 
 @property (nullable, nonatomic, weak) id<AMAPrivacyTimerDelegate> delegate;
-@property (nonatomic, strong) id<AMAPrivacyTimerStorage> timerStorage;
+@property (nonatomic, strong) id<AMAPrivacyTimerRetryPolicy> timerStorage;
 
-- (instancetype)initWithTimerStorage:(id<AMAPrivacyTimerStorage>)timerStorage
-                    delegateExecutor:(id<AMAAsyncExecuting>)executor
+- (instancetype)initWithTimerRetryPolicy:(id<AMAPrivacyTimerRetryPolicy>)retryPolicy
+                        delegateExecutor:(id<AMAAsyncExecuting>)executor
                           adProvider:(AMAAdProvider*)adProvider;
 
-- (instancetype)initWithTimerStorage:(id<AMAPrivacyTimerStorage>)timerStorage
-                            executor:(id<AMACancelableExecuting>)executor
-                    delegateExecutor:(id<AMAAsyncExecuting>)executor
-                          adProvider:(AMAAdProvider*)adProvider;
+- (instancetype)initWithTimerRetryPolicy:(id<AMAPrivacyTimerRetryPolicy>)retryPolicy
+                                executor:(id<AMACancelableExecuting>)executor
+                        delegateExecutor:(id<AMAAsyncExecuting>)executor
+                              adProvider:(AMAAdProvider*)adProvider;
 
 - (void)start;
 - (void)stop;

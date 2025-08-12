@@ -1,10 +1,10 @@
 #import <Foundation/Foundation.h>
-#import "AMAPrivacyTimerStorage.h"
+#import "AMAPrivacyTimerRetryPolicy.h"
 #import <XCTest/XCTest.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface AMAPrivacyTimerStorageMock : NSObject<AMAPrivacyTimerStorage>
+@interface AMAPrivacyTimerStorageMock : NSObject<AMAPrivacyTimerRetryPolicy>
 
 @property (nullable, nonatomic) XCTestExpectation *retryPeriodExpectation;
 @property (nullable, nonatomic) XCTestExpectation *isResendPeriodOutdatedExpection;

@@ -1,6 +1,6 @@
 #import <XCTest/XCTest.h>
 #import "AMAPrivacyTimer.h"
-#import "AMAPrivacyTimerStorage.h"
+#import "AMAPrivacyTimerRetryPolicy.h"
 #import "AMAAdProvider.h"
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
 #import "AMAPrivacyTimerStorageMock.h"
@@ -53,7 +53,7 @@
     self.timerStorage.privacyEventSentExpectation = [bag expectationWithDescription:@"Privacy event sent not called" inverted:YES];
     self.timerStorage.isResendPeriodOutdatedExpection = [bag expectationWithDescription:@"Outdated not called" inverted:YES];
     
-    AMAPrivacyTimer *privacyTimer = [[AMAPrivacyTimer alloc] initWithTimerStorage:self.timerStorage
+    AMAPrivacyTimer *privacyTimer = [[AMAPrivacyTimer alloc] initWithTimerRetryPolicy:self.timerStorage
                                                      delegateExecutor:self.executor
                                                            adProvider:self.adProvider];
     privacyTimer.delegate = self.delegateMock;
@@ -68,7 +68,7 @@
     [self.adProvider stub:@selector(isAdvertisingTrackingEnabled) andReturn:theValue(NO)];
     self.delegateMock.fireExpectation = [bag expectationWithDescription:@"Fire not called" inverted:YES];
     
-    AMAPrivacyTimer * privacyTimer = [[AMAPrivacyTimer alloc] initWithTimerStorage:self.timerStorage
+    AMAPrivacyTimer * privacyTimer = [[AMAPrivacyTimer alloc] initWithTimerRetryPolicy:self.timerStorage
                                                                   delegateExecutor:self.executor
                                                                         adProvider:self.adProvider];
     privacyTimer.delegate = self.delegateMock;
@@ -85,7 +85,7 @@
     [self.adProvider stub:@selector(isAdvertisingTrackingEnabled) andReturn:theValue(NO)];
     self.delegateMock.fireExpectation = [bag expectationWithDescription:@"Fire not called" inverted:YES];
     
-    AMAPrivacyTimerMock *privacyTimer = [[AMAPrivacyTimerMock alloc] initWithTimerStorage:self.timerStorage
+    AMAPrivacyTimerMock *privacyTimer = [[AMAPrivacyTimerMock alloc] initWithTimerRetryPolicy:self.timerStorage
                                                                          delegateExecutor:self.executor
                                                                                adProvider:self.adProvider];
     privacyTimer.delegate = self.delegateMock;
@@ -105,7 +105,7 @@
     self.timerStorage.isResendPeriodOutdatedExpection = [bag expectationWithDescription:@"isOutdatedPeriod called"];
     self.delegateMock.fireExpectation = [bag expectationWithDescription:@"Fire not called" inverted:YES];
     
-    AMAPrivacyTimer * privacyTimer = [[AMAPrivacyTimer alloc] initWithTimerStorage:self.timerStorage
+    AMAPrivacyTimer * privacyTimer = [[AMAPrivacyTimer alloc] initWithTimerRetryPolicy:self.timerStorage
                                                                   delegateExecutor:self.executor
                                                                         adProvider:self.adProvider];
     privacyTimer.delegate = self.delegateMock;
@@ -122,7 +122,7 @@
     [self.adProvider stub:@selector(isAdvertisingTrackingEnabled) andReturn:theValue(NO)];
     self.delegateMock.fireExpectation = [bag expectationWithDescription:@"Fire not called" inverted:YES];
     
-    AMAPrivacyTimerMock *privacyTimer = [[AMAPrivacyTimerMock alloc] initWithTimerStorage:self.timerStorage
+    AMAPrivacyTimerMock *privacyTimer = [[AMAPrivacyTimerMock alloc] initWithTimerRetryPolicy:self.timerStorage
                                                                          delegateExecutor:self.executor
                                                                                adProvider:self.adProvider];
     privacyTimer.delegate = self.delegateMock;
@@ -142,7 +142,7 @@
     [self.adProvider stub:@selector(isAdvertisingTrackingEnabled) andReturn:theValue(NO)];
     self.delegateMock.fireExpectation = [bag expectationWithDescription:@"Fire called"];
     
-    AMAPrivacyTimerMock *privacyTimer = [[AMAPrivacyTimerMock alloc] initWithTimerStorage:self.timerStorage
+    AMAPrivacyTimerMock *privacyTimer = [[AMAPrivacyTimerMock alloc] initWithTimerRetryPolicy:self.timerStorage
                                                                          delegateExecutor:self.executor
                                                                                adProvider:self.adProvider];
     privacyTimer.delegate = self.delegateMock;

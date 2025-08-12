@@ -1,7 +1,7 @@
 
 #import "AMAPrivacyTimer.h"
 #import "AMAAdProvider.h"
-#import "AMAPrivacyTimerStorage.h"
+#import "AMAPrivacyTimerRetryPolicy.h"
 #import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
 
 @interface AMAPrivacyTimer () <AMAMultiTimerDelegate>
@@ -23,25 +23,25 @@
 
 @implementation AMAPrivacyTimer
 
-- (instancetype)initWithTimerStorage:(id<AMAPrivacyTimerStorage>)timerStorage
-                    delegateExecutor:(id<AMAAsyncExecuting>)delegateExecutor
-                          adProvider:(AMAAdProvider*)adProvider
+- (instancetype)initWithTimerRetryPolicy:(id<AMAPrivacyTimerRetryPolicy>)retryPolicy
+                        delegateExecutor:(id<AMAAsyncExecuting>)delegateExecutor
+                              adProvider:(AMAAdProvider*)adProvider
 {
     AMACancelableDelayedExecutor *executor = [[AMACancelableDelayedExecutor alloc] initWithIdentifier:self];
-    return [self initWithTimerStorage:timerStorage
-                             executor:executor
-                     delegateExecutor:delegateExecutor
-                           adProvider:adProvider];
+    return [self initWithTimerRetryPolicy:retryPolicy
+                                 executor:executor
+                         delegateExecutor:delegateExecutor
+                               adProvider:adProvider];
 }
 
-- (instancetype)initWithTimerStorage:(id<AMAPrivacyTimerStorage>)timerStorage
-                            executor:(id<AMACancelableExecuting>)executor
-                    delegateExecutor:(id<AMAAsyncExecuting>)delegateExecutor
-                          adProvider:(AMAAdProvider *)adProvider
+- (instancetype)initWithTimerRetryPolicy:(id<AMAPrivacyTimerRetryPolicy>)retryPolicy
+                                executor:(id<AMACancelableExecuting>)executor
+                        delegateExecutor:(id<AMAAsyncExecuting>)delegateExecutor
+                              adProvider:(AMAAdProvider *)adProvider
 {
     self = [super init];
     if (self) {
-        _timerStorage = timerStorage;
+        _timerStorage = retryPolicy;
         _adProvider = adProvider;
         _executor = executor;
         _delegateExecutor = delegateExecutor;

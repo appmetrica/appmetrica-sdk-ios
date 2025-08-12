@@ -92,11 +92,11 @@
     
     AMAPrivacyTimer *privacyTimer = nil;
     if ([AMAPlatformDescription isExtension] == NO) {
-        AMAMetrikaPrivacyTimerStorage *timerStorage =
-            [[AMAMetrikaPrivacyTimerStorage alloc] initWithReporterMetricaConfiguration:[AMAMetricaConfiguration sharedInstance]
+        AMAPrivacyTimerStorage *timerStorage =
+            [[AMAPrivacyTimerStorage alloc] initWithReporterMetricaConfiguration:[AMAMetricaConfiguration sharedInstance]
                                                                            stateStorage:reporterStorage.stateStorage];
         
-        privacyTimer = [[AMAPrivacyTimer alloc] initWithTimerStorage:timerStorage
+        privacyTimer = [[AMAPrivacyTimer alloc] initWithTimerRetryPolicy:timerStorage
                                                     delegateExecutor:executor
                                                           adProvider:adProvider];
     }

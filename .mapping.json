@@ -657,6 +657,7 @@
   "AppMetricaCore/Sources/Permissions/AMAPermissionsSerializer.m":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCore/Sources/Permissions/AMAPermissionsSerializer.m",
   "AppMetricaCore/Sources/Privacy/AMAPrivacyTimer.h":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCore/Sources/Privacy/AMAPrivacyTimer.h",
   "AppMetricaCore/Sources/Privacy/AMAPrivacyTimer.m":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCore/Sources/Privacy/AMAPrivacyTimer.m",
+  "AppMetricaCore/Sources/Privacy/AMAPrivacyTimerRetryPolicy.h":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCore/Sources/Privacy/AMAPrivacyTimerRetryPolicy.h",
   "AppMetricaCore/Sources/Privacy/AMAPrivacyTimerStorage.h":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCore/Sources/Privacy/AMAPrivacyTimerStorage.h",
   "AppMetricaCore/Sources/Privacy/AMAPrivacyTimerStorage.m":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCore/Sources/Privacy/AMAPrivacyTimerStorage.m",
   "AppMetricaCore/Sources/Profiles/AMAAttributeNameProvider.h":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCore/Sources/Profiles/AMAAttributeNameProvider.h",

@@ -5,13 +5,13 @@
 #import "AMAReporterStateStorage.h"
 #import "AMAStartupParametersConfiguration.h"
 
-@interface AMAMetrikaPrivacyTimerStorage ()
+@interface AMAPrivacyTimerStorage ()
 
 @property (nonnull, nonatomic, strong, readonly) AMAReporterStateStorage *stateStorage;
 
 @end
 
-@implementation AMAMetrikaPrivacyTimerStorage
+@implementation AMAPrivacyTimerStorage
 
 - (nonnull instancetype)initWithReporterMetricaConfiguration:(nonnull AMAMetricaConfiguration *)metricaConfiguration 
                                                 stateStorage:(nonnull AMAReporterStateStorage *)stateStorage 

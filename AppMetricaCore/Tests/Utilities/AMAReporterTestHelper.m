@@ -26,7 +26,7 @@
 #import "AMASessionExpirationHandler.h"
 #import "AMAAdProvider.h"
 #import "AMAPrivacyTimer.h"
-#import "AMAPrivacyTimerStorage.h"
+#import "AMAPrivacyTimerRetryPolicy.h"
 #import "AMAExternalAttributionSerializer.h"
 #import "AMAPrivacyTimerStorageMock.h"
 #import "AMAPrivacyTimerMock.h"
@@ -207,7 +207,7 @@
     
     AMAAdProvider *adProvider = [self adProviderForApiKey:apiKey];
     AMAPrivacyTimerStorageMock *privacyStorage = [self privacyTimerStorageMockForApiKey:apiKey];
-    AMAPrivacyTimerMock *privacyTimer = [[AMAPrivacyTimerMock alloc] initWithTimerStorage:privacyStorage
+    AMAPrivacyTimerMock *privacyTimer = [[AMAPrivacyTimerMock alloc] initWithTimerRetryPolicy:privacyStorage
                                                                          delegateExecutor:executor
                                                                                adProvider:adProvider];
     

@@ -1905,7 +1905,7 @@ describe(@"AMAReporter", ^{
         __block AMAEventBuilder *eventBuilder = nil;
         __block AMACurrentQueueExecutor *executor = nil;
         __block AMAInternalEventsReporter *internalEventsReporter = nil;
-        __block AMAMetrikaPrivacyTimerStorage *privacyTimerStorage = nil;
+        __block AMAPrivacyTimerStorage *privacyTimerStorage = nil;
         __block AMAPrivacyTimer *privacyTimer = nil;
         
         beforeEach(^{
@@ -1917,26 +1917,26 @@ describe(@"AMAReporter", ^{
             internalEventsReporter = [AMAInternalEventsReporter nullMock];
             executor = [AMACurrentQueueExecutor nullMock];
             
-            privacyTimerStorage = [AMAMetrikaPrivacyTimerStorage nullMock];
+            privacyTimerStorage = [AMAPrivacyTimerStorage nullMock];
             [privacyTimerStorage stub:@selector(initWithReporterMetricaConfiguration:stateStorage:) andReturn:privacyTimerStorage];
-            [AMAMetrikaPrivacyTimerStorage stub:@selector(alloc) andReturn:privacyTimerStorage];
+            [AMAPrivacyTimerStorage stub:@selector(alloc) andReturn:privacyTimerStorage];
             
             privacyTimer = [AMAPrivacyTimer nullMock];
-            [privacyTimer stub:@selector(initWithTimerStorage:delegateExecutor:adProvider:) andReturn:privacyTimer];
+            [privacyTimer stub:@selector(initWithTimerRetryPolicy:delegateExecutor:adProvider:) andReturn:privacyTimer];
             [AMAPrivacyTimer stub:@selector(alloc) andReturn:privacyTimer];
         });
         afterEach(^{
             [AMAPrivacyTimer clearStubs];
             [AMAAdProvider clearStubs];
             [AMAPlatformDescription clearStubs];
-            [AMAMetrikaPrivacyTimerStorage clearStubs];
+            [AMAPrivacyTimerStorage clearStubs];
             [AMAPrivacyTimer clearStubs];
         });
         
         it(@"Should create privacy timer in app", ^{
             [AMAPlatformDescription stub:@selector(isExtension) andReturn:theValue(NO)];
             
-            [[AMAMetrikaPrivacyTimerStorage should] receive:@selector(alloc)];
+            [[AMAPrivacyTimerStorage should] receive:@selector(alloc)];
             [[AMAPrivacyTimer should] receive:@selector(alloc)];
             
             reporter = [[AMAReporter alloc] initWithApiKey:apiKey
@@ -1952,7 +1952,7 @@ describe(@"AMAReporter", ^{
         it(@"Should not create privacy timer in extension", ^{
             [AMAPlatformDescription stub:@selector(isExtension) andReturn:theValue(YES)];
             
-            [[AMAMetrikaPrivacyTimerStorage shouldNot] receive:@selector(alloc)];
+            [[AMAPrivacyTimerStorage shouldNot] receive:@selector(alloc)];
             [[AMAPrivacyTimer shouldNot] receive:@selector(alloc)];
             
             reporter = [[AMAReporter alloc] initWithApiKey:apiKey
