@@ -38,6 +38,10 @@ describe(@"AMADefaultAnonymousConfigProvider", ^{
             
             [[config.appEnvironment should] beNil];
         });
+        
+        it(@"should return anonymous api key", ^{
+            [[AMADefaultAnonymousConfigProvider.anonymousAPIKey should] equal:@"629a824d-c717-4ba5-bc0f-3f3968554d01"];
+        });
     });
     
 });

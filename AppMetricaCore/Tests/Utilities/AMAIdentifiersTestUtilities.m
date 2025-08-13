@@ -32,6 +32,8 @@ static AMAIdentifierProviderMock *identifierManagerMock;
     [idfaMock stub:@selector(isAdvertisingTrackingEnabled) andReturn:theValue(isEnabled)];
     NSUUID *idfa = [[NSUUID alloc] initWithUUIDString:UUID];
     [idfaMock stub:@selector(advertisingIdentifier) andReturn:idfa];
+    [idfaMock stub:@selector(setIsEnabled:)];
+    [idfaMock stub:@selector(markActivationCompleted)];
     [AMAAdProvider stub:@selector(sharedInstance) andReturn:idfaMock];
 }
 

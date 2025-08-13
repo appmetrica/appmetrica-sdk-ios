@@ -29,13 +29,32 @@ public final class AppMetricaLibraryAdapter: NSObject {
         activate(config: .init())
     }
     
-    /// Activates AppMetrica without `API_KEY` in anonymous mode.
+    /// Activates AppMetrica without `API_KEY` in anonymous mode with configuration
     @objc public func activate(configuration: LibraryAdapterConfiguration) {
         activate(config: configuration.config)
     }
     
-    func activate(config: LibraryAdapterConfig) {
-        appMetrica.activate(adIdentifierTrackingEnabled: config.advIdentifiersTrackingEnabled)
+    /// Enables or disables using IDFA. This options can be overriden by ``AppMetrica/setAdProviderEnabled`
+    @objc public func setAdvertisingTracking(_ enabled: Bool) {
+        appMetrica.setLibraryAdapterAdvertisingIdentifierTracking(enabled)
+    }
+    
+    /// Enables or disables location tracking. This option can be overriden by ``AppMetrica/setLocationTrackingEnabled``
+    @objc public func setLocationTracking(_ enabled: Bool) {
+        appMetrica.setLibraryAdapterLocationTracking(enabled)
+    }
+    
+    /// Activates AppMetrica without `API_KEY` in anonymous mode.
+    public func activate(config: LibraryAdapterConfig) {
+        let cfg = AppMetricaLibraryAdapterConfiguration()
+        if let advIdentifiersTrackingEnabled = config.advIdentifiersTrackingEnabled {
+            cfg.advertisingIdentifierTrackingEnabled = advIdentifiersTrackingEnabled
+        }
+        if let locationTrackingEnabled = config.locationTrackingEnabled {
+            cfg.locationTrackingEnabled = locationTrackingEnabled
+        }
+        appMetrica.setupLibraryAdapterConfiguration(cfg)
+        appMetrica.activate()
     }
 
     /// Sends a system report with provided data.

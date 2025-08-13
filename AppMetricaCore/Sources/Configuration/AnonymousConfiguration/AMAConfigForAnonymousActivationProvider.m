@@ -1,9 +1,11 @@
 
+#import "AMACore.h"
 #import "AMAConfigForAnonymousActivationProvider.h"
 #import "AMADefaultAnonymousConfigProvider.h"
 #import "AMAMetricaPersistentConfiguration.h"
 #import "AMAFirstActivationDetector.h"
-#import "AMAFirstActivationDetector.h"
+#import "AMAAppMetricaConfiguration+Internal.h"
+#import "AMAAppMetricaLibraryAdapterConfiguration+Internal.h"
 
 @interface AMAConfigForAnonymousActivationProvider ()
 
@@ -45,6 +47,7 @@
             configuration.handleFirstActivationAsUpdate = true;
         }
     }
+    
     return configuration;
 }
 

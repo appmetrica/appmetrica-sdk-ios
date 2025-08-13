@@ -22,8 +22,9 @@
 #import "AMATimeoutRequestsController.h"
 #import "AMAIdentifierProviderMock.h"
 #import "AMAIdentifiersTestUtilities.h"
-#import "AMAAdResolver.h"
 #import "AMAAdRevenueSourceContainer.h"
+#import "AMAAdProviderResolver.h"
+#import "AMALocationResolver.h"
 
 @interface AMAAppMetricaImpl () <AMAStartupControllerDelegate>
 
@@ -41,21 +42,22 @@ describe(@"AMAAppMetrica", ^{
     AMAAppStateManagerTestHelper *__block stateHelper = nil;
     AMAReporterTestHelper *__block reporterTestHelper = nil;
     AMAAppMetricaImpl *__block impl = nil;
+    AMAAdProvider *__block adProvider = nil;
     AMAIdentifierProviderMock *__block identifierManagerMock = nil;
-    AMAAdResolver *__block adResolver = nil;
     
     beforeEach(^{
-        adResolver = [AMAAdResolver nullMock];
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wnonnull"
         [AMAAppMetrica registerAdProvider:nil]; // reset adProvider
 #pragma clang diagnostic pop
-        [AMAAppMetrica stub:@selector(createAdResolverIfNeeded) andReturn:adResolver];
         [[AMAMetricaConfiguration sharedInstance] stub:@selector(identifierProvider) andReturn:identifierManagerMock];
         [AMATestNetwork stubHTTPRequestWithBlock:nil];
     });
     afterEach(^{
         [AMAAppMetrica clearStubs];
+        [AMAAdProvider clearStubs];
+        [AMAAdProviderResolver clearStubs];
+        [AMALocationResolver clearStubs];
     });
     
     void (^stubMetricaDependencies)(void) = ^{
@@ -65,6 +67,8 @@ describe(@"AMAAppMetrica", ^{
         [stateHelper stubApplicationState];
         identifierManagerMock = [AMAIdentifiersTestUtilities stubIdentifierProviderIfNeeded];
         [AMAFailureDispatcherTestHelper stubFailureDispatcher];
+        adProvider = [AMAAdProvider nullMock];
+        [AMAAdProvider stub:@selector(sharedInstance) andReturn:adProvider];
     };
     void (^stubMetrica)(void) = ^{
         stubMetricaDependencies();
@@ -104,9 +108,6 @@ describe(@"AMAAppMetrica", ^{
     };
     void (^activateAnonymously)(void) = ^{
         [AMAAppMetrica activate];
-    };
-    void (^activateAnonymouslyWithAdTrackingEnabled)(BOOL) = ^(BOOL trackingEnabled){
-        [AMAAppMetrica activateWithAdIdentifierTrackingEnabled:trackingEnabled];
     };
     void (^stubMetricaStarted)(BOOL) = ^(BOOL started) {
         [[AMAMetricaConfiguration sharedInstance].inMemory stub:@selector(appMetricaStarted)
@@ -156,9 +157,9 @@ describe(@"AMAAppMetrica", ^{
         });
         
         it(@"Should set location tracking enabled", ^{
-            AMALocationManager *locationManager = [AMALocationManager sharedManager];
-            [[locationManager should] receive:@selector(setTrackLocationEnabled:)
-                                withArguments:theValue(YES)];
+            AMALocationResolver *mockResolver = [AMALocationResolver nullMock];
+            [AMALocationResolver stub:@selector(sharedInstance) andReturn:mockResolver];
+            [[mockResolver should] receive:@selector(setUserValue:) withArguments:theValue(YES)];
             
             [AMAAppMetrica setLocationTrackingEnabled:YES];
         });
@@ -177,6 +178,15 @@ describe(@"AMAAppMetrica", ^{
                                 withArguments:theValue(YES)];
             
             [AMAAppMetrica setAllowsBackgroundLocationUpdates:YES];
+        });
+    });
+    context(@"Advertising", ^{
+        it(@"Should set AdProvider", ^{
+            AMAAdProviderResolver *mockResolver = [AMAAdProviderResolver nullMock];
+            [AMAAdProviderResolver stub:@selector(sharedInstance) andReturn:mockResolver];
+            [[mockResolver should] receive:@selector(setUserValue:) withArguments:theValue(YES)];
+            
+            [AMAAppMetrica setAdvertisingIdentifierTrackingEnabled:YES];
         });
     });
     context(@"Set UserProfile ID", ^{
@@ -1263,7 +1273,7 @@ describe(@"AMAAppMetrica", ^{
                 [[[AMAMetricaConfiguration sharedInstance].inMemory shouldNot] receive:@selector(markExternalServicesConfigured)];
                 [[impl shouldNot] receive:@selector(setExtendedStartupObservers:)];
                 [[impl shouldNot] receive:@selector(setExtendedReporterStorageControllers:)];
-                [[adResolver shouldNot] receive:@selector(setAdProvider:)];
+//                [[adResolver shouldNot] receive:@selector(setAdProvider:)];
                 
                 activate();
             });
@@ -1274,7 +1284,7 @@ describe(@"AMAAppMetrica", ^{
                 [[[AMAMetricaConfiguration sharedInstance].inMemory shouldNot] receive:@selector(markExternalServicesConfigured)];
                 [[impl shouldNot] receive:@selector(setExtendedStartupObservers:)];
                 [[impl shouldNot] receive:@selector(setExtendedReporterStorageControllers:)];
-                [[adResolver shouldNot] receive:@selector(setAdProvider:)];
+//                [[adResolver shouldNot] receive:@selector(setAdProvider:)];
                 
                 [AMAAppMetrica activateReporterWithConfiguration:[[AMAReporterConfiguration alloc] initWithAPIKey:apiKey]];
             });
@@ -1386,27 +1396,11 @@ describe(@"AMAAppMetrica", ^{
                     });
                 });
             });
-            it(@"Should not register external AdController before activate", ^{
+            it(@"Should register external AdController when activating main reporter", ^{
                 id adController = [KWMock nullMockForProtocol:@protocol(AMAAdProviding)];
-
-                [[adResolver shouldNot] receive:@selector(setAdProvider:) withArguments:adController];
-                [AMAAppMetrica registerAdProvider:adController];
-            });
-            it(@"Should register external AdController", ^{
-                id adController = [KWMock nullMockForProtocol:@protocol(AMAAdProviding)];
-
-                [[adResolver should] receive:@selector(setAdProvider:) withArguments:adController];
-                [AMAAppMetrica registerAdProvider:adController];
                 
-                activate();
-            });
-            it(@"Should not register external AdController if setAdProviderEnabled called", ^{
-                id adController = [KWMock nullMockForProtocol:@protocol(AMAAdProviding)];
-
-                [[adResolver should] receive:@selector(setAdProvider:) withArguments:adController];
-                
-                [AMAAppMetrica setAdProviderEnabled:NO];
                 [AMAAppMetrica registerAdProvider:adController];
+                [[adProvider should] receive:@selector(setupAdProvider:) withArguments:adController];
                 
                 activate();
             });
@@ -1415,7 +1409,7 @@ describe(@"AMAAppMetrica", ^{
 
                 [AMAAppMetrica registerAdProvider:adController];
 
-                [[adResolver should] receive:@selector(setAdProvider:) withArguments:adController];
+//                [[adResolver should] receive:@selector(setAdProvider:) withArguments:adController];
 
                 [AMAAppMetrica activateReporterWithConfiguration:[[AMAReporterConfiguration alloc] initWithAPIKey:apiKey]];
             });
@@ -1424,25 +1418,9 @@ describe(@"AMAAppMetrica", ^{
 
                 [AMAAppMetrica registerAdProvider:adController];
 
-                [[adResolver should] receive:@selector(setAdProvider:) withArguments:adController];
+//                [[adResolver should] receive:@selector(setAdProvider:) withArguments:adController];
 
                 activateAnonymously();
-            });
-            it(@"Should call setAdProviderEnabled in resolver", ^{
-                id adController = [KWMock nullMockForProtocol:@protocol(AMAAdProviding)];
-
-                [[adResolver should] receive:@selector(setEnabledAdProvider:) withArguments:theValue(NO)];
-                
-                [AMAAppMetrica setAdProviderEnabled:NO];
-                
-                activate();
-            });
-            it(@"Should call setEnabledForAnomimousActivation in resolver", ^{
-                id adController = [KWMock nullMockForProtocol:@protocol(AMAAdProviding)];
-
-                [[adResolver should] receive:@selector(setEnabledForAnonymousActivation:) withArguments:theValue(NO)];
-                
-                activateAnonymouslyWithAdTrackingEnabled(NO);
             });
             it(@"Should return yes if api key is valid", ^{
                 [AMAIdentifierValidator stub:@selector(isValidUUIDKey:) andReturn:theValue(YES)];

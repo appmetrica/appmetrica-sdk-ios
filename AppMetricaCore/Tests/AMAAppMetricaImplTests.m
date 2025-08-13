@@ -139,6 +139,8 @@ describe(@"AMAAppMetricaImpl", ^{
         [AMADataSendingRestrictionController stub:@selector(sharedInstance) andReturn:restrictionController];
     });
     afterEach(^{
+        [AMALocationManager clearStubs];
+        [AMAAppMetrica clearStubs];
         appMetricaImpl = nil;
         [AMAAppMetrica clearStubs];
     });

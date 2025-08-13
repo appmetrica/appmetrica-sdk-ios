@@ -8,20 +8,47 @@ SPEC_BEGIN(AMAAdProviderTests)
 describe(@"AMAAdProvider", ^{
     
     let(externalProvider, ^{ return [KWMock nullMockForProtocol:@protocol(AMAAdProviding)]; });
+    AMAAdProvider *__block adProvider;
+    
+    beforeEach(^{
+        adProvider = [AMAAdProvider new];
+    });
     
     context(@"Default values", ^{
         
         it(@"Should return false on isAdvertisingTrackingEnabled", ^{
-            [[theValue([[AMAAdProvider sharedInstance] isAdvertisingTrackingEnabled]) should] beNo];
+            [[theValue([adProvider isAdvertisingTrackingEnabled]) should] beNo];
         });
         
         it(@"Should return nil on advertisingIdentifier", ^{
-            [[[[AMAAdProvider sharedInstance] advertisingIdentifier] should] beNil];
+            [[[adProvider advertisingIdentifier] should] beNil];
         });
         
         it(@"Should return AuthorizationStatusNotDetermined on ATTStatus", ^{
             if (@available(iOS 14.0, tvOS 14.0, *)) {
-                [[theValue([[AMAAdProvider sharedInstance] ATTStatus]) should]
+                [[theValue([adProvider ATTStatus]) should]
+                 equal:theValue(AMATrackingManagerAuthorizationStatusNotDetermined)];
+            }
+        });
+    });
+    
+    context(@"Disabled", ^{
+        
+        beforeEach(^{
+            adProvider.isEnabled = NO;
+        });
+        
+        it(@"Should return false on isAdvertisingTrackingEnabled", ^{
+            [[theValue([adProvider isAdvertisingTrackingEnabled]) should] beNo];
+        });
+        
+        it(@"Should return nil on advertisingIdentifier", ^{
+            [[[adProvider advertisingIdentifier] should] beNil];
+        });
+        
+        it(@"Should return AuthorizationStatusNotDetermined on ATTStatus", ^{
+            if (@available(iOS 14.0, tvOS 14.0, *)) {
+                [[theValue([adProvider ATTStatus]) should]
                  equal:theValue(AMATrackingManagerAuthorizationStatusNotDetermined)];
             }
         });
@@ -29,20 +56,20 @@ describe(@"AMAAdProvider", ^{
     
     context(@"ExternalProvider", ^{
         beforeEach(^{
-            [[AMAAdProvider sharedInstance] setupAdProvider:externalProvider];
+            [adProvider setupAdProvider:externalProvider];
         });
         
         it(@"Should call AMAAdController on isAdvertisingTrackingEnabled", ^{
             [externalProvider stub:@selector(isAdvertisingTrackingEnabled) andReturn:theValue(YES)];
             
-            [[theValue([[AMAAdProvider sharedInstance] isAdvertisingTrackingEnabled]) should] beYes];
+            [[theValue([adProvider isAdvertisingTrackingEnabled]) should] beYes];
         });
         
         it(@"Should call AMAAdController on advertisingIdentifier", ^{
             NSUUID *uuid = [NSUUID nullMock];
             [externalProvider stub:@selector(advertisingIdentifier) andReturn:uuid];
             
-            [[[[AMAAdProvider sharedInstance] advertisingIdentifier] should] equal:uuid];
+            [[[adProvider advertisingIdentifier] should] equal:uuid];
         });
         
         it(@"Should call AMAAdController on ATTStatus", ^{
@@ -50,7 +77,7 @@ describe(@"AMAAdProvider", ^{
                 NSUInteger statusValue = arc4random_uniform(4);
                 [externalProvider stub:@selector(ATTStatus) andReturn:theValue(statusValue)];
                 
-                [[theValue([[AMAAdProvider sharedInstance] ATTStatus]) should] equal:theValue(statusValue)];
+                [[theValue([adProvider ATTStatus]) should] equal:theValue(statusValue)];
             }
         });
     });

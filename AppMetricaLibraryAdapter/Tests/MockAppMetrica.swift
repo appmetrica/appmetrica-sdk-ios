@@ -1,4 +1,5 @@
 import AppMetricaCore
+import AppMetricaCoreExtension
 import Foundation
 import XCTest
 
@@ -8,22 +9,37 @@ class MockAppMetrica: AppMetrica {
     static var lastReportedEventParameters: [AnyHashable: Any]?
     static var shouldFailReporting = false
     
-    static var anonymousActivationAdTrackingEnabled: Bool?
+    static var anonymousConfiguration: AppMetricaConfiguration?
     static var anonymousActivationExpectation: XCTestExpectation = XCTestExpectation()
     
-    static var setAdProviderEnabledValue: Bool?
-    static var setAdProviderEnabledExpectation: XCTestExpectation = XCTestExpectation()
+    static var libraryAdapterConfiguration: AppMetricaLibraryAdapterConfiguration?
+    static var setupLibraryAdapterConfigurationExpectation: XCTestExpectation = XCTestExpectation()
     
-    override class func setAdProviderEnabled(_ newValue: Bool) {
-        setAdProviderEnabledValue = newValue
-        setAdProviderEnabledExpectation.fulfill()
-    }
+    static var locationTrackingEnabledValue: Bool?
+    static var locationTrackingEnabledExpectation: XCTestExpectation = XCTestExpectation()
     
-    override class func activate(adIdentifierTrackingEnabled: Bool) {
-        anonymousActivationAdTrackingEnabled = adIdentifierTrackingEnabled
+    static var advertisingIdentifierTrackingEnabledValue: Bool?
+    static var advertisingIdentifierTrackingEnabledExpectation: XCTestExpectation = XCTestExpectation()
+    
+    override class func activate() {
         anonymousActivationExpectation.fulfill()
     }
-
+    
+    override class func setupLibraryAdapterConfiguration(_ configuration: AppMetricaLibraryAdapterConfiguration) {
+        libraryAdapterConfiguration = configuration
+        setupLibraryAdapterConfigurationExpectation.fulfill()
+    }
+    
+    override class func setLibraryAdapterLocationTracking(_ locationTracking: Bool) {
+        locationTrackingEnabledValue = locationTracking
+        locationTrackingEnabledExpectation.fulfill()
+    }
+    
+    override class func setLibraryAdapterAdvertisingIdentifierTracking(_ advertisingIdentifierTracking: Bool) {
+        advertisingIdentifierTrackingEnabledValue = advertisingIdentifierTracking
+        advertisingIdentifierTrackingEnabledExpectation.fulfill()
+    }
+    
     override class func reportEvent(
         name: String, parameters params: [AnyHashable: Any]?, onFailure: ((any Error) -> Void)? = nil
     ) {
@@ -58,10 +74,7 @@ class MockAppMetrica: AppMetrica {
 
     static func reset() {
         anonymousActivationExpectation = XCTestExpectation(description: "Should activate anonymously via extended interface")
-        anonymousActivationAdTrackingEnabled = nil
-        
-        setAdProviderEnabledExpectation = XCTestExpectation(description: "Should call setAdProviderEnabled")
-        setAdProviderEnabledValue = nil
+        anonymousConfiguration = nil
         
         reportEventCalled = false
         lastReportedEventName = nil

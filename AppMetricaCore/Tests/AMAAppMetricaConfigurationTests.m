@@ -53,6 +53,10 @@ describe(@"AMAAppMetricaConfiguration", ^{
                 AMAAppMetricaConfiguration *config = [[AMAAppMetricaConfiguration alloc] initWithAPIKey:apiKey];
                 [[theValue(config.accurateLocationTracking) should] beNo];
             });
+            it(@"Should have enabled advertisingIdentifierTracking", ^{
+                AMAAppMetricaConfiguration *config = [[AMAAppMetricaConfiguration alloc] initWithAPIKey:apiKey];
+                [[theValue(config.advertisingIdentifierTrackingEnabled) should] beYes];
+            });
         });
         context(@"Number", ^{
             it(@"Should have default sessionTimeout", ^{

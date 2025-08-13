@@ -1332,6 +1332,9 @@ describe(@"AMAReporter", ^{
                 [helper stubApplicationState];
                 [reporterTestHelper initReporterAndSendEventWithParameters:nil];
             };
+            afterEach(^{
+                [AMALocationManager clearStubs];
+            });
             it(@"Should set location if any location object exists", ^{
                 CLLocation *location = [[CLLocation alloc] initWithLatitude:113.0 longitude:-53.0];
                 initAndSendEventWithStubbedLocation(nil);

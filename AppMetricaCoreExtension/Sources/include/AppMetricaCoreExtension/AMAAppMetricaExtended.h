@@ -7,6 +7,7 @@ NS_ASSUME_NONNULL_BEGIN
 @class AMALogConfigurator;
 @class AMAEventPollingParameters;
 @class AMAServiceConfiguration;
+@class AMAAppMetricaLibraryAdapterConfiguration;
 @class AMAApplicationState;
 
 @protocol AMAModuleActivationDelegate;
@@ -14,6 +15,7 @@ NS_ASSUME_NONNULL_BEGIN
 @protocol AMAEventPollingDelegate;
 @protocol AMAAdProviding;
 @protocol AMAAppMetricaExtendedReporting;
+@protocol AMAActivationStrategy;
 
 @interface AMAAppMetrica ()
 
@@ -27,7 +29,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 // Ad related methods
 + (void)registerAdProvider:(id<AMAAdProviding>)provider;
-+ (void)setAdProviderEnabled:(BOOL)newValue;
+@property (class, nonatomic, getter=isAdvertisingIdentifierTrackingEnabled) BOOL advertisingIdentifierTrackingEnabled;
 
 // AdRevenue methods
 + (void)registerAdRevenueNativeSource:(NSString *)source;
@@ -51,8 +53,11 @@ NS_SWIFT_NAME(reportLibraryAdapterAdRevenueRelatedEvent(name:parameters:onFailur
 + (AMALogConfigurator *)sharedLogConfigurator;
 
 // Anonymous activation
++ (void)setupLibraryAdapterConfiguration:(AMAAppMetricaLibraryAdapterConfiguration *)configuration;
 + (void)activate;
-+ (void)activateWithAdIdentifierTrackingEnabled:(BOOL)adIdentifierTrackingEnabled NS_SWIFT_NAME(activate(adIdentifierTrackingEnabled:));
+
++ (void)setLibraryAdapterAdvertisingIdentifierTracking:(BOOL)advertisingIdentifierTracking;
++ (void)setLibraryAdapterLocationTracking:(BOOL)locationTracking;
 
 // Reporting
 + (nullable id<AMAAppMetricaExtendedReporting>)extendedReporterForApiKey:(NSString *)apiKey
@@ -99,7 +104,7 @@ NS_SWIFT_NAME(extendedReporter(for:));
                         onFailure:(nullable void (^)(NSError *error))onFailure;
 
 /** Reports a file event of a specified type to the server. This method is intended for reporting file data.
- 
+
  @param eventType The type of the event. See AMAEventTypes.h file for reserved event types.
  @param data The data of the event, cannot be nil.
  @param fileName The name of file, cannot be nil.

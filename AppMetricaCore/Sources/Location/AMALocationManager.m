@@ -480,6 +480,10 @@
 
 - (void)locationManager:(CLLocationManager *)manager didUpdateLocations:(NSArray *)locations
 {
+    if (self.trackLocationEnabled == NO) {
+        return;
+    }
+    
     AMALogInfo(@"Location updated with %@", locations.lastObject);
     [self.locationCollectingController addSystemLocations:locations];
 }

@@ -2,6 +2,7 @@
     #import "AMAAdProviding.h"
     #import "AMAAppMetricaExtended.h"
     #import "AMAAppMetricaExtendedReporting.h"
+    #import "AMAAppMetricaLibraryAdapterConfiguration.h"
     #import "AMAApplicationStateManager.h"
     #import "AMAEnvironmentContainer.h"
     #import "AMAEventFlushableDelegate.h"
@@ -13,8 +14,10 @@
     #import "AMAServiceConfiguration.h"
 #else
     #import <AppMetricaCoreExtension/AMAAdProviding.h>
+    #import <AppMetricaCoreExtension/AMAAppMetricaDeprecated.h>
     #import <AppMetricaCoreExtension/AMAAppMetricaExtended.h>
     #import <AppMetricaCoreExtension/AMAAppMetricaExtendedReporting.h>
+    #import <AppMetricaCoreExtension/AMAAppMetricaLibraryAdapterConfiguration.h>
     #import <AppMetricaCoreExtension/AMAApplicationStateManager.h>
     #import <AppMetricaCoreExtension/AMAEnvironmentContainer.h>
     #import <AppMetricaCoreExtension/AMAEventFlushableDelegate.h>

@@ -8,8 +8,9 @@
 @interface AMAAppMetricaConfiguration ()
 
 @property (nonatomic, copy, readwrite) NSString *APIKey;
-@property (nonatomic, strong, nullable) NSNumber *locationTrackingState;
-@property (nonatomic, strong, nullable) NSNumber *dataSendingEnabledState;
+@property (nonatomic, copy, nullable, readwrite) NSNumber *locationTrackingState;
+@property (nonatomic, copy, nullable, readwrite) NSNumber *dataSendingEnabledState;
+@property (nonatomic, copy, nullable, readwrite) NSNumber *advertisingIdentifierTrackingEnabledState;
 
 @end
 
@@ -39,6 +40,7 @@
     _sessionsAutoTracking = YES;
     _locationTrackingState = nil;
     _dataSendingEnabledState = nil;
+    _advertisingIdentifierTrackingEnabledState = nil;
     _accurateLocationTracking = NO;
     _customLocation = nil;
     _logsEnabled = NO;
@@ -97,6 +99,16 @@
 - (BOOL)dataSendingEnabled
 {
     return self.dataSendingEnabledState != nil ? [self.dataSendingEnabledState boolValue] : YES;
+}
+
+- (BOOL)advertisingIdentifierTrackingEnabled
+{
+    return self.advertisingIdentifierTrackingEnabledState != nil ? [self.advertisingIdentifierTrackingEnabledState boolValue] : YES;
+}
+
+- (void)setAdvertisingIdentifierTrackingEnabled:(BOOL)advertisingIdentifierTrackingEnabled
+{
+    self.advertisingIdentifierTrackingEnabledState = @(advertisingIdentifierTrackingEnabled);
 }
 
 @end

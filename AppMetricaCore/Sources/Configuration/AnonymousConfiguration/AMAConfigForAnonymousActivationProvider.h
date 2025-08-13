@@ -5,6 +5,9 @@
 @class AMAMetricaPersistentConfiguration;
 @class AMAAppMetricaConfiguration;
 @class AMAFirstActivationDetector;
+@class AMAAppMetricaLibraryAdapterConfiguration;
+
+NS_ASSUME_NONNULL_BEGIN
 
 @interface AMAConfigForAnonymousActivationProvider : NSObject
 
@@ -19,3 +22,5 @@
 - (AMAAppMetricaConfiguration *)configuration;
 
 @end
+
+NS_ASSUME_NONNULL_END

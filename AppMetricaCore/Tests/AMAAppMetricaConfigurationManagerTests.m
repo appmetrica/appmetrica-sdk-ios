@@ -14,6 +14,10 @@
 #import "AMAMetricaInMemoryConfiguration.h"
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
 #import <AppMetricaPlatform/AppMetricaPlatform.h>
+#import "AMAAdProvider.h"
+#import "AMAPermissionResolving.h"
+#import "AMAAdProviderResolver.h"
+#import "AMAAppMetricaLibraryAdapterConfiguration.h"
 
 SPEC_BEGIN(AMAAppMetricaConfigurationManagerTests)
 
@@ -22,14 +26,21 @@ describe(@"AMAAppMetricaConfigurationManager", ^{
     NSString *const apiKey = @"api_key";
     
     AMAAppMetricaConfigurationManager *__block configManager = nil;
-    __block id<AMAAsyncExecuting, AMASyncExecuting> executor = nil;
+    __block id<AMAAsyncExecuting,
+ AMASyncExecuting> executor = nil;
     AMADispatchStrategiesContainer *__block strategiesContainerMock = nil;
     AMAMetricaConfiguration *__block metricaConfigurationMock = nil;
     AMAMetricaPersistentConfiguration *__block persistentMock = nil;
     AMAMetricaInMemoryConfiguration *__block inMemoryConfig = nil;
-    AMALocationManager *__block locationManager = nil;
     AMADataSendingRestrictionController *__block restrictionController = nil;
     AMAConfigForAnonymousActivationProvider *__block anonymousConfigProviderMock = nil;
+    
+    AMALocationManager *__block locationManager = nil;
+    id<AMAPermissionResolvingInput> __block locationResolver = nil;
+    
+    AMAAdProvider *__block adProvider = nil;
+    AMAAdProviderResolver *__block adResolver = nil;
+    
     
     beforeEach(^{
         executor = [AMACurrentQueueExecutor new];
@@ -41,18 +52,24 @@ describe(@"AMAAppMetricaConfigurationManager", ^{
         inMemoryConfig = [AMAMetricaInMemoryConfiguration new];
         [metricaConfigurationMock stub:@selector(inMemory) andReturn:inMemoryConfig];
         
-        locationManager = [AMALocationManager sharedManager];
+        locationManager = [AMALocationManager nullMock];
+        locationResolver = [KWMock mockForProtocol:@protocol(AMAPermissionResolvingInput)];
+        
+        adProvider = [AMAAdProvider nullMock];
+        adResolver = [AMAAdProviderResolver nullMock];
+        
         restrictionController = [AMADataSendingRestrictionController sharedInstance];
         anonymousConfigProviderMock = [AMAConfigForAnonymousActivationProvider nullMock];
         
         [AMAMetricaConfiguration stub:@selector(sharedInstance) andReturn:metricaConfigurationMock];
-        
+
         configManager = [[AMAAppMetricaConfigurationManager alloc] initWithExecutor:executor
                                                                 strategiesContainer:strategiesContainerMock
                                                                metricaConfiguration:metricaConfigurationMock
-                                                                    locationManager:locationManager
                                                               restrictionController:restrictionController
-                                                            anonymousConfigProvider:anonymousConfigProviderMock];
+                                                            anonymousConfigProvider:anonymousConfigProviderMock locationManager:locationManager
+                                                                   locationResolver:locationResolver
+                                                                 adProviderResolver:adResolver];
     });
     afterEach(^{
         [AMAMetricaConfiguration clearStubs];
@@ -63,6 +80,9 @@ describe(@"AMAAppMetricaConfigurationManager", ^{
         NSString *const apiKey = @"api_key";
         beforeEach(^{
             mockConfig = [AMAAppMetricaConfiguration nullMock];
+            
+            [(NSObject *)locationResolver stub:@selector(updateBoolValue:isAnonymous:)];
+            [(NSObject *)adResolver stub:@selector(updateBoolValue:isAnonymous:)];
         });
         it(@"should update last main api key in local storage", ^{
             [mockConfig stub:@selector(APIKey) andReturn:apiKey];
@@ -192,10 +212,18 @@ describe(@"AMAAppMetricaConfigurationManager", ^{
             [mockConfig stub:@selector(locationTracking) andReturn:theValue(YES)];
             [mockConfig stub:@selector(customLocation) andReturn:customLocation];
             
-            [[AMAAppMetrica should] receive:@selector(setLocationTrackingEnabled:) withArguments:theValue(YES)];
-            [[AMAAppMetrica should] receive:@selector(setCustomLocation:) withArguments:customLocation];
-            [[AMAAppMetrica should] receive:@selector(setAccurateLocationTrackingEnabled:) withArguments:theValue(YES)];
+            [[(NSObject *)locationResolver should] receive:@selector(updateBoolValue:isAnonymous:)
+                                             withArguments:theValue(YES), theValue(NO)];
+            [[locationManager should] receive:@selector(setLocation:) withArguments:customLocation];
+            [[locationManager should] receive:@selector(setAccurateLocationEnabled:) withArguments:theValue(YES)];
             
+            [configManager updateMainConfiguration:mockConfig];
+        });
+        it(@"should update adv", ^{
+            [mockConfig stub:@selector(advertisingIdentifierTrackingEnabledState) andReturn:@(YES)];
+            
+            [[(NSObject *)adResolver should] receive:@selector(updateBoolValue:isAnonymous:)
+                                       withArguments:@(YES), theValue(NO)];
             [configManager updateMainConfiguration:mockConfig];
         });
         it(@"should update log configuration", ^{
@@ -262,6 +290,38 @@ describe(@"AMAAppMetricaConfigurationManager", ^{
             
             [configManager updateReporterConfiguration:mockReporterConfig];
         });
+    });
+    
+    context(@"updateAnonymousConfigurationWithLibraryAdapterConfiguration", ^{
+        
+        AMAAppMetricaConfiguration *__block configMock = nil;
+        AMAAppMetricaLibraryAdapterConfiguration *__block adapterConfig = nil;
+        
+        beforeEach(^{
+            configMock = [AMAAppMetricaConfiguration nullMock];
+            [configMock stub:@selector(APIKey) andReturn:@"629a824d-c717-4ba5-bc0f-3f3968554d01"];
+            [anonymousConfigProviderMock stub:@selector(configuration) andReturn:configMock];
+            
+            [configMock stub:@selector(setAdvertisingIdentifierTrackingEnabled:)];
+            [configMock stub:@selector(setLocationTracking:)];
+            
+            adapterConfig = [AMAAppMetricaLibraryAdapterConfiguration new];
+            adapterConfig.advertisingIdentifierTrackingEnabled = YES;
+            adapterConfig.locationTrackingEnabled = YES;
+        });
+        
+        it(@"should setup anonymousConfig", ^{
+            [[configMock should] receive:@selector(setAdvertisingIdentifierTrackingEnabled:) withArguments:theValue(YES)];
+            [[configMock should] receive:@selector(setLocationTracking:) withArguments:theValue(YES)];
+            
+            [configManager updateAnonymousConfigurationWithLibraryAdapterConfiguration:adapterConfig];
+        });
+        
+        it(@"should return updated config as anonymousConfiguration", ^{
+            [configManager updateAnonymousConfigurationWithLibraryAdapterConfiguration:adapterConfig];
+            [[configManager.anonymousConfiguration should] equal:configMock];
+        });
+        
     });
     
     context(@"anonymousConfiguration", ^{

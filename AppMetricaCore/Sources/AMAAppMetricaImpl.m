@@ -58,6 +58,10 @@
 #import "AMAFirstActivationDetector.h"
 #import "AMAAnonymousActivationPolicy.h"
 #import "AMADataSendingRestrictionController.h"
+#import "AMAAdProvider.h"
+#import "AMALocationResolver.h"
+#import "AMAAdProviderResolver.h"
+#import "AMAActivationTypeResolver.h"
 
 static NSTimeInterval const kAMAAnonymousActivationDelay = 0.1;
 static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
@@ -88,12 +92,17 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
 @property (atomic, strong) AMAExternalAttributionController *externalAttributionController;
 @property (nonatomic, strong, readonly) AMAAutoPurchasesWatcher *autoPurchasesWatcher;
 @property (nonatomic, strong, readonly) AMAFirstActivationDetector *firstActivationDetector;
+@property (nonatomic, strong, readonly) AMAAdProvider *adProvider;
+@property (nonatomic, strong, readonly) AMALocationManager *locationManager;
 
 @property (nonatomic, strong) NSHashTable *startupCompletionObservers;
 
 @property (nonatomic, strong) NSHashTable *extendedStartupCompletionObservers;
 @property (nonatomic, strong) NSHashTable *extendedReporterStorageControllersTable;
 @property (nonatomic, strong) NSHashTable *eventPollingDelegatesTable;
+
+@property (nonatomic, strong) AMALocationResolver *locationResolver;
+@property (nonatomic, strong) AMAAdProviderResolver *adProviderResolver;
 
 @end
 
@@ -124,6 +133,8 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
         _appOpenWatcher = [[AMAAppOpenWatcher alloc] init];
         // auto in app reporting executor should be the same as usual events reporting executor for conversion value flow to work
         _autoPurchasesWatcher = [[AMAAutoPurchasesWatcher alloc] initWithExecutor:executor];
+        _adProvider = [AMAAdProvider sharedInstance];
+        _locationManager = [AMALocationManager sharedManager];
 
         AMAMetricaPersistentConfiguration *persistent = [AMAMetricaConfiguration sharedInstance].persistent;
         AMAPersistentTimeoutConfiguration *configuration = persistent.timeoutConfiguration;
@@ -135,6 +146,9 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
                                                                         strategiesContainer:_strategiesContainer
                                                                     firstActivationDetector:_firstActivationDetector];
         
+        _locationResolver = [AMALocationResolver sharedInstance];
+        _adProviderResolver = [AMAAdProviderResolver sharedInstance];
+
         [[AMASKAdNetworkRequestor sharedInstance] registerForAdNetworkAttribution];
 
         [self initializeStartupController];
@@ -169,10 +183,15 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
     [self addStartupCompletionObserver:self.externalAttributionController];
 }
 
+- (void)updateResolversWithAnonymousConfigurationActivated:(BOOL)isAnonymousConfigurationActivated
+{
+    self.locationResolver.isAnonymousConfigurationActivated = isAnonymousConfigurationActivated;
+    self.adProviderResolver.isAnonymousConfigurationActivated = isAnonymousConfigurationActivated;
+}
+
 - (void)activateWithConfiguration:(AMAAppMetricaConfiguration *)configuration
 {
     [self.configurationManager updateMainConfiguration:configuration];
-    
     self.apiKey = configuration.APIKey;
 
     [self migrate];
@@ -181,6 +200,7 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
     [self activateCommonComponents:configuration reporter:reporter];
     
     [[AMAMetricaConfiguration sharedInstance].inMemory markAppMetricaStarted];
+    [self updateResolversWithAnonymousConfigurationActivated:NO];
     [self logMetricaStart:configuration.APIKey];
 }
 
@@ -219,7 +239,6 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
 {
     AMAAppMetricaConfiguration *configuration = [self.configurationManager anonymousConfiguration];
     [self.configurationManager updateMainConfiguration:configuration];
-
     self.apiKey = configuration.APIKey;
 
     [self migrate];
@@ -228,6 +247,8 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
     [self activateCommonComponents:configuration reporter:reporter];
     
     [[AMAMetricaConfiguration sharedInstance].inMemory markAppMetricaStartedAnonymously];
+    [self updateResolversWithAnonymousConfigurationActivated:YES];
+
     [self logMetricaStart:nil];
 }
 
@@ -884,7 +905,7 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
 - (void)startLocationManager
 {
     [self execute:^{
-        [[AMALocationManager sharedManager] updateAuthorizationStatus];
+        [self.locationManager updateAuthorizationStatus];
     }];
 }
 
@@ -981,7 +1002,7 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
     [self notifyOnStartupCompleted];
 
     [self execute:^{
-        [[AMALocationManager sharedManager] updateLocationManagerForCurrentStatus];
+        [self.locationManager updateLocationManagerForCurrentStatus];
         [self.strategiesContainer dispatchMoreIfNeeded];
         [self.reportersContainer restartPrivacyTimer];
         [self reportPermissionsIfNeeded];
@@ -1222,7 +1243,7 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
 {
     [self execute:^{
         [[AMADataSendingRestrictionController sharedInstance] allowMainRestrictionIfNotForbidden];
-        
+
         NSString *callbackMode = kAMARequestIdentifiersOptionCallbackOnSuccess;
         if (notifyOnError) {
             callbackMode = kAMARequestIdentifiersOptionCallbackInAnyCase;

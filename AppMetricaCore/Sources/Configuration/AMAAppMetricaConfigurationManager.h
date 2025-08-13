@@ -4,7 +4,6 @@
 @class AMAAppMetricaConfiguration;
 @class AMAReporterConfiguration;
 @class AMAMetricaConfiguration;
-@class AMALocationManager;
 @class AMADataSendingRestrictionController;
 @class AMAAppMetricaPreloadInfo;
 @class AMADispatchStrategiesContainer;
@@ -12,6 +11,9 @@
 @protocol AMASyncExecuting;
 @class AMAConfigForAnonymousActivationProvider;
 @class AMAFirstActivationDetector;
+@class AMAAppMetricaLibraryAdapterConfiguration;
+@protocol AMAPermissionResolvingInput;
+@class AMALocationManager;
 
 @interface AMAAppMetricaConfigurationManager : NSObject
 
@@ -27,14 +29,17 @@
 - (instancetype)initWithExecutor:(id<AMAAsyncExecuting, AMASyncExecuting>)executor
              strategiesContainer:(AMADispatchStrategiesContainer *)strategiesContainer
             metricaConfiguration:(AMAMetricaConfiguration *)metricaConfiguration
-                 locationManager:(AMALocationManager *)locationManager
            restrictionController:(AMADataSendingRestrictionController *)restrictionController
-         anonymousConfigProvider:(AMAConfigForAnonymousActivationProvider *)anonymousConfigProvider;
+         anonymousConfigProvider:(AMAConfigForAnonymousActivationProvider *)anonymousConfigProvider
+                 locationManager:(AMALocationManager *)locationManager
+                locationResolver:(id<AMAPermissionResolvingInput>)locationResolver
+              adProviderResolver:(id<AMAPermissionResolvingInput>)adProviderResolver;
 
 
 - (void)updateMainConfiguration:(AMAAppMetricaConfiguration *)configuration;
 - (void)updateReporterConfiguration:(AMAReporterConfiguration *)configuration;
 - (AMAAppMetricaPreloadInfo *)preloadInfo;
 - (AMAAppMetricaConfiguration *)anonymousConfiguration;
+- (void)updateAnonymousConfigurationWithLibraryAdapterConfiguration:(AMAAppMetricaLibraryAdapterConfiguration *)libraryAdapterConfiguration;
 
 @end

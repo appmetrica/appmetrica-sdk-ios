@@ -77,6 +77,9 @@ describe(@"AMALocationManager", ^{
             
             [AMALocationManager stub:@selector(sharedManager) andReturn:locationManager];
         });
+        afterEach(^{
+            [AMALocationManager clearStubs];
+        });
         it(@"Should create location manager on start if location permission not granted", ^{
             stubSystemLocationManager();
             [[AMALocationManager sharedManager] start];

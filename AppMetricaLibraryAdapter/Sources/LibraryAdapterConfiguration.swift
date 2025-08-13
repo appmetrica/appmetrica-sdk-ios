@@ -1,9 +1,10 @@
 
 import Foundation
 
-struct LibraryAdapterConfig {
-    init() { }
-    var advIdentifiersTrackingEnabled: Bool = true
+public struct LibraryAdapterConfig {
+    public init() { }
+    public var advIdentifiersTrackingEnabled: Bool?
+    public var locationTrackingEnabled: Bool?
 }
 
 @objc(AMALibraryAdapterConfiguration)
@@ -22,7 +23,12 @@ public class LibraryAdapterConfiguration: NSObject, NSCopying, NSMutableCopying 
     
     @objc
     public var advIdentifiersTrackingEnabled: Bool {
-        return config.advIdentifiersTrackingEnabled
+        return config.advIdentifiersTrackingEnabled ?? true
+    }
+    
+    @objc
+    public var locationTrackingEnabled: Bool {
+        return config.locationTrackingEnabled ?? false
     }
     
     public func copy(with zone: NSZone? = nil) -> Any {
@@ -39,8 +45,14 @@ public class MutableLibraryAdapterConfiguration: LibraryAdapterConfiguration {
     
     @objc
     public override var advIdentifiersTrackingEnabled: Bool {
-        get { config.advIdentifiersTrackingEnabled }
+        get { config.advIdentifiersTrackingEnabled ?? true }
         set { config.advIdentifiersTrackingEnabled = newValue }
+    }
+    
+    @objc
+    public override var locationTrackingEnabled: Bool {
+        get { config.locationTrackingEnabled ?? false }
+        set { config.locationTrackingEnabled = newValue }
     }
     
     public override func copy(with zone: NSZone? = nil) -> Any {

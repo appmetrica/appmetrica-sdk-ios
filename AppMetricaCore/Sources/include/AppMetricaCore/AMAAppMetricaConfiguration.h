@@ -185,6 +185,16 @@ NS_SWIFT_NAME(AppMetricaConfiguration)
  */
 @property (nonatomic, copy, nullable) NSDictionary<NSString *, NSString *> *appEnvironment;
 
+
+/** Enable/disable IDFA reporting to AppMetrica.
+
+ Note, using IDFA requires AdSupport library. This method is intended to disable IDFA if you dependencies requires AdSupport but your application must not send it.
+
+ Enabled by default.
+
+ */
+@property (nonatomic, assign) BOOL advertisingIdentifierTrackingEnabled;
+
 @end
 
 NS_ASSUME_NONNULL_END

@@ -30,6 +30,7 @@ NSString *const kAMAMaxReportsCount = @"max.reports.count";
 NSString *const kAMAAppBuildNumber = @"app.build.number";
 NSString *const kAMACustomHosts = @"custom.hosts";
 NSString *const kAMAAppEnvironment = @"app.environment";
+NSString *const kAMAAdvertisingIdentifierTracking = @"adv.tracking";
 
 - (instancetype)initWithJSON:(NSDictionary *)json 
 {
@@ -102,6 +103,10 @@ NSString *const kAMAAppEnvironment = @"app.environment";
         
         if (json[kAMAMaxReportsCount] != nil) {
             self.maxReportsCount = [json[kAMAMaxReportsCount] unsignedIntegerValue];
+        }
+        
+        if (json[kAMAAdvertisingIdentifierTracking] != nil) {
+            self.advertisingIdentifierTrackingEnabled = [json[kAMAAdvertisingIdentifierTracking] boolValue];
         }
         
         NSDictionary *locationDict = json[kAMACustomLocation];
@@ -189,6 +194,7 @@ NSString *const kAMAAppEnvironment = @"app.environment";
     json[kAMAAppBuildNumber] = self.appBuildNumber ?: [NSNull null];
     json[kAMACustomHosts] = self.customHosts ?: [NSNull null];
     json[kAMAAppEnvironment] = self.appEnvironment ?: [NSNull null];
+    json[kAMAAdvertisingIdentifierTracking] = self.advertisingIdentifierTrackingEnabledState;
 
     return [json copy];
 }

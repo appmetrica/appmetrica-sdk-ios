@@ -23,7 +23,37 @@ class AppMetricaLibraryAdapterTests: XCTestCase {
         
         wait(for: [MockAppMetrica.anonymousActivationExpectation], timeout: 1)
     }
+    
+    func testActivateWithConfig() {
+        let config = MutableLibraryAdapterConfiguration()
+        config.advIdentifiersTrackingEnabled = true
+        config.locationTrackingEnabled = true
+        
+        adapter.activate(configuration: config)
+        
+        wait(
+            for: [
+                MockAppMetrica.anonymousActivationExpectation,
+                MockAppMetrica.setupLibraryAdapterConfigurationExpectation,
+            ],
+            timeout: 1
+        )
+        XCTAssertEqual(MockAppMetrica.libraryAdapterConfiguration?.advertisingIdentifierTrackingEnabled, true)
+        XCTAssertEqual(MockAppMetrica.libraryAdapterConfiguration?.locationTrackingEnabled, true)
+    }
+    
+    func testSetLocationTrackingEnabled() {
+        adapter.setLocationTracking(true)
+        wait(for: [MockAppMetrica.locationTrackingEnabledExpectation], timeout: 1)
+        XCTAssertEqual(MockAppMetrica.locationTrackingEnabledValue, true)
+    }
 
+    func testSetAdvTrackingEnabled() {
+        adapter.setAdvertisingTracking(true)
+        wait(for: [MockAppMetrica.advertisingIdentifierTrackingEnabledExpectation], timeout: 1)
+        XCTAssertEqual(MockAppMetrica.advertisingIdentifierTrackingEnabledValue, true)
+    }
+    
     func testReportEventSuccess() {
         // Given
         let sender = "test_sender"
@@ -67,23 +97,6 @@ class AppMetricaLibraryAdapterTests: XCTestCase {
         // Then
         waitForExpectations(timeout: 1.0, handler: nil)
         XCTAssertTrue(MockAppMetrica.reportEventCalled)
-    }
-    
-    func testEnableAppForKids() {
-        let cfg = MutableLibraryAdapterConfiguration()
-        cfg.advIdentifiersTrackingEnabled = false
-        adapter.activate(config: cfg.config)
-        
-        wait(for: [MockAppMetrica.anonymousActivationExpectation], timeout: 1)
-        XCTAssertEqual(MockAppMetrica.anonymousActivationAdTrackingEnabled, false)
-    }
-    
-    func testNotToCallDisableAdProvided() {
-        MockAppMetrica.setAdProviderEnabledExpectation.isInverted = true
-        
-        adapter.activate()
-        
-        wait(for: [MockAppMetrica.setAdProviderEnabledExpectation], timeout: 1)
     }
     
 }

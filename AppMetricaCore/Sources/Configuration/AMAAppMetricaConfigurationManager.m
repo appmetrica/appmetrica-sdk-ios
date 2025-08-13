@@ -3,7 +3,6 @@
 #import "AMAAppMetrica+Internal.h"
 #import "AMAAppMetricaConfigurationManager.h"
 #import "AMAConfigForAnonymousActivationProvider.h"
-#import "AMALocationManager.h"
 #import "AMAMetricaConfiguration.h"
 #import "AMADataSendingRestrictionController.h"
 #import "AMAAppMetricaConfiguration+Internal.h"
@@ -15,15 +14,24 @@
 #import "AMADispatchStrategiesContainer.h"
 #import "AMADatabaseQueueProvider.h"
 #import "AMADefaultAnonymousConfigProvider.h"
+#import "AMAAppMetricaLibraryAdapterConfiguration+Internal.h"
+#import "AMAPermissionResolving.h"
+#import "AMALocationManager.h"
+#import "AMALocationResolver.h"
+#import "AMAAdProviderResolver.h"
+#import "AMAActivationTypeResolver.h"
 
 @interface AMAAppMetricaConfigurationManager ()
 
 @property (nonatomic, strong) id<AMAAsyncExecuting, AMASyncExecuting> executor;
 @property (nonatomic, strong) AMAConfigForAnonymousActivationProvider *anonymousConfigProvider;
 @property (nonatomic, strong) AMAMetricaConfiguration *metricaConfiguration;
-@property (nonatomic, strong) AMALocationManager *locationManager;
 @property (nonatomic, strong) AMADataSendingRestrictionController *restrictionController;
 @property (nonatomic, strong) AMADispatchStrategiesContainer *strategiesContainer;
+@property (nonatomic, strong) AMAAppMetricaConfiguration *savedAnonimousConfiguration;
+@property (nonatomic, strong) AMALocationManager *locationManager;
+@property (nonatomic, strong) id<AMAPermissionResolvingInput> adProvidingResolver;
+@property (nonatomic, strong) id<AMAPermissionResolvingInput> locationResolver;
 
 @end
 
@@ -41,26 +49,32 @@
     return [self initWithExecutor:executor
               strategiesContainer:strategiesContainer
              metricaConfiguration:metricaConfiguration
-                  locationManager:[AMALocationManager sharedManager]
             restrictionController:[AMADataSendingRestrictionController sharedInstance]
-          anonymousConfigProvider:anonymousConfigProvider];
+          anonymousConfigProvider:anonymousConfigProvider
+                  locationManager:[AMALocationManager sharedManager]
+                 locationResolver:[AMALocationResolver sharedInstance]
+               adProviderResolver:[AMAAdProviderResolver sharedInstance]];
 }
 
-- (instancetype)initWithExecutor:(id<AMAAsyncExecuting,AMASyncExecuting>)executor
+- (instancetype)initWithExecutor:(id<AMAAsyncExecuting, AMASyncExecuting>)executor
              strategiesContainer:(AMADispatchStrategiesContainer *)strategiesContainer
             metricaConfiguration:(AMAMetricaConfiguration *)metricaConfiguration
-                 locationManager:(AMALocationManager *)locationManager
            restrictionController:(AMADataSendingRestrictionController *)restrictionController
          anonymousConfigProvider:(AMAConfigForAnonymousActivationProvider *)anonymousConfigProvider
+                 locationManager:(AMALocationManager *)locationManager
+                locationResolver:(id<AMAPermissionResolvingInput>)locationResolver
+              adProviderResolver:(id<AMAPermissionResolvingInput>)adProviderResolver
 {
     self = [super init];
     if (self != nil) {
         _executor = executor;
         _strategiesContainer = strategiesContainer;
         _metricaConfiguration = metricaConfiguration;
-        _locationManager = locationManager;
         _restrictionController = restrictionController;
         _anonymousConfigProvider = anonymousConfigProvider;
+        _locationManager = locationManager;
+        _locationResolver = locationResolver;
+        _adProvidingResolver = adProviderResolver;
     }
     return self;
 }
@@ -72,7 +86,10 @@
     }
     [self importLogConfiguration:configuration];
     
-    [self importLocationConfiguration:configuration];
+    BOOL isAnonymous = [AMAActivationTypeResolver isAnonymousConfiguration:configuration];
+    
+    [self importLocationConfiguration:configuration isAnonymous:isAnonymous];
+    [self importAdvertisingConfiguration:configuration isAnonymous:isAnonymous];
     [self importDataSendingEnabledConfiguration:configuration];
     self.metricaConfiguration.persistent.userStartupHosts = configuration.customHosts;
     
@@ -106,7 +123,24 @@
 
 - (AMAAppMetricaConfiguration *)anonymousConfiguration
 {
-    return [self.anonymousConfigProvider configuration];
+    return self.savedAnonimousConfiguration ?: [self.anonymousConfigProvider configuration];
+}
+
+- (void)updateAnonymousConfigurationWithLibraryAdapterConfiguration:(AMAAppMetricaLibraryAdapterConfiguration *)libraryAdapterConfiguration
+{
+    AMAAppMetricaConfiguration *configuration = [self.anonymousConfigProvider configuration];
+    BOOL isAnonConfiguration = [AMAActivationTypeResolver isAnonymousConfiguration:configuration];
+    
+    if (isAnonConfiguration) {
+        if (libraryAdapterConfiguration.locationTrackingEnabledValue != nil) {
+            configuration.locationTracking = [libraryAdapterConfiguration.locationTrackingEnabledValue boolValue];
+        }
+        if (libraryAdapterConfiguration.advertisingIdentifierTrackingEnabledValue != nil) {
+            configuration.advertisingIdentifierTrackingEnabled = [libraryAdapterConfiguration.advertisingIdentifierTrackingEnabledValue boolValue];
+        }
+    }
+    
+    self.savedAnonimousConfiguration = configuration;
 }
 
 #pragma mark - Handle configuration
@@ -123,15 +157,22 @@
     [self.restrictionController setMainApiKeyRestriction:restriction];
 }
 
-- (void)importLocationConfiguration:(AMAAppMetricaConfiguration *)configuration
+- (void)importLocationConfiguration:(AMAAppMetricaConfiguration *)configuration isAnonymous:(BOOL)isAnonymous
 {
     if (configuration.locationTrackingState != nil) {
-        AMAAppMetrica.locationTrackingEnabled = configuration.locationTracking;
+        [self.locationResolver updateBoolValue:configuration.locationTrackingState isAnonymous:isAnonymous];
     }
     if (configuration.customLocation != nil) {
-        AMAAppMetrica.customLocation = configuration.customLocation;
+        self.locationManager.location = configuration.customLocation;
     }
-    AMAAppMetrica.accurateLocationTrackingEnabled = configuration.accurateLocationTracking;
+    self.locationManager.accurateLocationEnabled = configuration.accurateLocationTracking;
+}
+
+- (void)importAdvertisingConfiguration:(AMAAppMetricaConfiguration *)configuration isAnonymous:(BOOL)isAnonymous
+{
+    if (configuration.advertisingIdentifierTrackingEnabledState != nil) {
+        [self.adProvidingResolver updateBoolValue:configuration.advertisingIdentifierTrackingEnabledState isAnonymous:isAnonymous];
+    }
 }
 
 - (void)importReporterConfiguration:(AMAAppMetricaConfiguration *)configuration

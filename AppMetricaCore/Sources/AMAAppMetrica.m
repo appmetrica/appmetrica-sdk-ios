@@ -28,8 +28,9 @@
 #import "AMAStartupParametersConfiguration.h"
 #import "AMAUserProfile.h"
 #import "AMAAppMetricaConfigurationManager.h"
-#import "AMAAdResolver.h"
 #import "AMAAdRevenueSourceContainer.h"
+#import "AMAAdProviderResolver.h"
+#import "AMALocationResolver.h"
 @import AppMetricaIdentifiers;
 
 NSString *const kAMAUUIDKey = @"appmetrica_uuid";
@@ -48,7 +49,6 @@ static NSMutableSet<Class<AMAEventFlushableDelegate>> *eventFlushableDelegates =
 static NSMutableSet<Class<AMAEventPollingDelegate>> *eventPollingDelegates = nil;
 
 static id<AMAAdProviding> adProvider = nil;
-static AMAAdResolver *adResolver = nil;
 static NSMutableSet<id<AMAExtendedStartupObserving>> *startupObservers = nil;
 static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControllers = nil;
 
@@ -163,33 +163,31 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
     }
 }
 
-+ (AMAAdResolver *)createAdResolverIfNeeded
-{
-    @synchronized (self) {
-        if (adResolver == nil) {
-            adResolver = [[AMAAdResolver alloc] initWithDestination: [AMAAdProvider sharedInstance]];
-        }
-        return adResolver;
-    }
-}
-
 + (void)registerAdProvider:(id<AMAAdProviding>)provider
 {
-    @synchronized(self) {
+    @synchronized (self) {
         if ([self isActivated] == NO) {
             adProvider = provider;
+        } else {
+            [[AMAAdProvider sharedInstance] setupAdProvider:provider];
         }
     }
 }
 
 + (void)setAdProviderEnabled:(BOOL)newValue
 {
-    @synchronized (self) {
-        if ([self isActivated] == NO) {
-            AMAAdResolver *resolver = [self createAdResolverIfNeeded];
-            [resolver setEnabledAdProvider:newValue];
-        }
-    }
+    [self setAdvertisingIdentifierTrackingEnabled:newValue];
+}
+
++ (BOOL)isAdvertisingIdentifierTrackingEnabled
+{
+    return [AMAAdProvider sharedInstance].isEnabled;
+}
+
++ (void)setAdvertisingIdentifierTrackingEnabled:(BOOL)enabled
+{
+    [AMAAdProviderResolver sharedInstance].userValue = @(enabled);
+    AMALogInfo(@"Set track advertising enabled %i", enabled);
 }
 
 + (void)setupExternalServices
@@ -201,11 +199,11 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
         if (startupObservers != nil) {
             [[self sharedImpl] setExtendedStartupObservers:startupObservers];
         }
-        if (adProvider != nil) {
-            [self createAdResolverIfNeeded].adProvider = adProvider;
-        }
         if (reporterStorageControllers != nil) {
             [[self sharedImpl] setExtendedReporterStorageControllers:reporterStorageControllers];
+        }
+        if (adProvider != nil) {
+            [[AMAAdProvider sharedInstance] setupAdProvider:adProvider];
         }
         if (eventPollingDelegates != nil) {
             [[self sharedImpl] setEventPollingDelegates:eventPollingDelegates];
@@ -236,6 +234,14 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
                [AMAMetricaConfiguration sharedInstance].inMemory.appMetricaStartedAnonymously;
     }
 }
+
++ (BOOL)isAnonymousActivated
+{
+    @synchronized(self) {
+        return [AMAMetricaConfiguration sharedInstance].inMemory.appMetricaStartedAnonymously;
+    }
+}
+
 
 + (BOOL)isActivatedAsMain
 {
@@ -382,18 +388,11 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
 
 + (void)activate
 {
-    [self activateWithAdIdentifierTrackingEnabled:YES];
-}
-
-+ (void)activateWithAdIdentifierTrackingEnabled:(BOOL)adIdentifierTrackingEnabled
-{
     @synchronized (self) {
         if ([self isActivated]) {
             [AMAErrorLogger logMetricaAlreadyStartedError];
             return;
         }
-        
-        [[self createAdResolverIfNeeded] setEnabledForAnonymousActivation:adIdentifierTrackingEnabled];
         
         [[self class] setupExternalServices];
         
@@ -404,6 +403,30 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
         [[self sharedImpl] scheduleAnonymousActivationIfNeeded];
         
         [[self class] didActivateDelegates:anonymousConfiguration];
+    }
+}
+
++ (void)setupLibraryAdapterConfiguration:(AMAAppMetricaLibraryAdapterConfiguration *)configuration
+{
+    @synchronized (self) {
+        if ([self isActivatedAsMain] == NO) {
+            [[self sharedImpl].configurationManager updateAnonymousConfigurationWithLibraryAdapterConfiguration:configuration];
+        }
+    }
+    
+}
+
++ (void)setLibraryAdapterAdvertisingIdentifierTracking:(BOOL)advertisingIdentifierTracking
+{
+    @synchronized (self) {
+        [AMAAdProviderResolver sharedInstance].anonymousValue = @(advertisingIdentifierTracking);
+    }
+}
+
++ (void)setLibraryAdapterLocationTracking:(BOOL)locationTracking
+{
+    @synchronized (self) {
+        [AMALocationResolver sharedInstance].anonymousValue = @(locationTracking);
     }
 }
 
@@ -528,7 +551,7 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
 
 + (void)setLocationTrackingEnabled:(BOOL)enabled
 {
-    [[AMALocationManager sharedManager] setTrackLocationEnabled:enabled];
+    [AMALocationResolver sharedInstance].userValue = @(enabled);
     AMALogInfo(@"Set track location enabled %i", enabled);
 }
 

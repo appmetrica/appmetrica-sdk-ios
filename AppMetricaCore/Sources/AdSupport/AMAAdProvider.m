@@ -10,6 +10,8 @@
 
 @implementation AMAAdProvider
 
+@synthesize isEnabled = _isEnabled;
+
 #pragma mark - Public -
 
 + (instancetype)sharedInstance
@@ -22,10 +24,19 @@
     return shared;
 }
 
+- (instancetype)init
+{
+    self = [super init];
+    if (self) {
+        _isEnabled = YES;
+    }
+    return self;
+}
+
 - (BOOL)isAdvertisingTrackingEnabled
 {
     @synchronized (self) {
-        if (self.externalProvider != nil) {
+        if (self.isEnabled && self.externalProvider != nil) {
             return [self.externalProvider isAdvertisingTrackingEnabled];
         }
         else {
@@ -37,7 +48,7 @@
 - (NSUUID *)advertisingIdentifier
 {
     @synchronized (self) {
-        if (self.externalProvider != nil) {
+        if (self.isEnabled && self.externalProvider != nil) {
             return [self.externalProvider advertisingIdentifier];
         }
         else {
@@ -49,12 +60,19 @@
 - (NSUInteger)ATTStatus
 {
     @synchronized (self) {
-        if (self.externalProvider != nil) {
+        if (self.isEnabled && self.externalProvider != nil) {
             return [self.externalProvider ATTStatus];
         }
         else {
             return AMATrackingManagerAuthorizationStatusNotDetermined;
         }
+    }
+}
+
+- (void)setEnabled:(BOOL)isEnabled
+{
+    @synchronized (self) {
+        _isEnabled = isEnabled;
     }
 }
 
