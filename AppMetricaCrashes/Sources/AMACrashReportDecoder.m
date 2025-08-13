@@ -213,8 +213,14 @@ NSString *const kAMASysInfoUsableMemory = @"usableMemory";
 {
     NSString *appVersion = userInfo[kAMACrashContextAppVersionKey]; // Legacy key since 2.8.0
     NSNumber *appBuildNumber = userInfo[kAMACrashContextAppBuildNumberKey]; // Legacy key since 2.8.0
+    
+    NSDictionary *appStateDict = userInfo[kAMACrashContextAppStateKey];
+    if (appStateDict == nil) {
+        appStateDict = userInfo[kAMACrashContextLegacyAppStateKey]; // Legacy key since 5.0.0
+    }
     AMAApplicationState *appState =
-        [AMAApplicationState objectWithDictionaryRepresentation:userInfo[kAMACrashContextAppStateKey]];
+        [AMAApplicationState objectWithDictionaryRepresentation:appStateDict];
+    
     if (appVersion != nil || appBuildNumber != nil) {
         appState = [appState copyWithNewAppVersion:appVersion appBuildNumber:appBuildNumber.stringValue];
     }

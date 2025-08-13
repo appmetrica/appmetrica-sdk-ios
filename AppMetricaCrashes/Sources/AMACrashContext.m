@@ -7,3 +7,5 @@ NSString *const kAMACrashContextAppBuildUIDKey = @"io.appmetrica.mobile.crash.ap
 NSString *const kAMACrashContextAppStateKey = @"io.appmetrica.mobile.crash.appState";
 NSString *const kAMACrashContextErrorEnvironmentKey = @"io.appmetrica.mobile.crash.environment";
 NSString *const kAMACrashContextAppEnvironmentKey = @"io.appmetrica.mobile.crash.appEnvironment";
+
+NSString *const kAMACrashContextLegacyAppStateKey = @"com.yandex.mobile.YandexMobileMetrica.appState";

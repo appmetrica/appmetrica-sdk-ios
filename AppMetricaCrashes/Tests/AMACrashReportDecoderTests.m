@@ -201,6 +201,35 @@ describe(@"AMACrashReportDecoder", ^{
                 [[decodedCrash(root).appState.appBuildNumber should] equal:[testBuildNumber stringValue]];
             });
             
+            context(@"AppState", ^{
+                NSNumber *const legacyApiLevel = @999;
+                NSNumber *const apiLevel = @777;
+                
+                it(@"Should use provided app state", ^{
+                    NSDictionary *appState = @{ kAMAOSAPILevelKey : apiLevel };
+                    userInfo[kAMACrashContextAppStateKey] = appState;
+                    
+                    [[theValue(decodedCrash(root).appState.OSAPILevel) should] equal:theValue(apiLevel.integerValue)];
+                });
+                
+                it(@"Should use legacy app state", ^{
+                    NSDictionary *appState = @{ kAMAOSAPILevelKey : legacyApiLevel };
+                    userInfo[kAMACrashContextLegacyAppStateKey] = appState;
+                    userInfo[kAMACrashContextAppStateKey] = nil;
+                    
+                    [[theValue(decodedCrash(root).appState.OSAPILevel) should] equal:theValue(legacyApiLevel.integerValue)];
+                });
+                
+                it(@"Should not use legacy app state if primary is available", ^{
+                    NSDictionary *legacyAppState = @{ kAMAOSAPILevelKey : legacyApiLevel };
+                    NSDictionary *appState = @{ kAMAOSAPILevelKey : apiLevel };
+                    userInfo[kAMACrashContextLegacyAppStateKey] = legacyAppState;
+                    userInfo[kAMACrashContextAppStateKey] = appState;
+                    
+                    [[theValue(decodedCrash(root).appState.OSAPILevel) should] equal:theValue(apiLevel.integerValue)];
+                });
+            });
+            
             it(@"Should decode build UID", ^{
                 [[decodedCrash(root).appBuildUID.stringValue should] equal:userInfo[kAMACrashContextAppBuildUIDKey]];
             });
