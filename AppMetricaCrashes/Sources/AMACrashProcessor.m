@@ -20,7 +20,7 @@
 @property (nonatomic, strong, readonly) AMAExceptionFormatter *formatter;
 @property (nonatomic, strong, readonly) AMACrashReporter *crashReporter;
 
-@property (nonatomic, strong, readonly) NSArray<id<AMAExtendedCrashProcessing>> *extendedCrashProcessors;
+@property (nonatomic, strong, readonly) NSMutableArray<id<AMAExtendedCrashProcessing>> *extendedCrashProcessors;
 
 @end
 
@@ -51,7 +51,7 @@
         _formatter = formatter;
         _ignoredCrashSignals = [ignoredSignals copy];
         _crashReporter = crashReporter;
-        _extendedCrashProcessors = extendedCrashProcessors;
+        _extendedCrashProcessors = [extendedCrashProcessors mutableCopy];
     }
 
     return self;
@@ -128,6 +128,13 @@
         NSError *error = [AMAErrorUtilities internalErrorWithCode:AMAAppMetricaInternalEventErrorCodeProbableUnhandledCrash
                                                       description:@"Unhandled crash"];
         [processor processError:error];
+    }
+}
+
+- (void)addExtendedCrashProcessor:(id<AMAExtendedCrashProcessing>)extendedCrashProcessor
+{
+    @synchronized (self) {
+        [self.extendedCrashProcessors addObject:extendedCrashProcessor];
     }
 }
 

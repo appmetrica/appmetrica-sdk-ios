@@ -541,7 +541,13 @@ them while retaining external immutability. Needed for testability. */
 {
     if (crashProcessor != nil) {
         [self execute:^{
-            [self.extendedCrashProcessors addObject:crashProcessor];
+            // TODO: Rework within https://nda.ya.ru/t/HRd8dJIs7HaJts
+            if (self.crashProcessor == nil) {
+                [self.extendedCrashProcessors addObject:crashProcessor];
+            }
+            else {
+                [self.crashProcessor addExtendedCrashProcessor:crashProcessor];
+            }
         }];
     }
 }

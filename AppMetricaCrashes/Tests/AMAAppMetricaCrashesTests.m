@@ -22,6 +22,9 @@
 @property (nonatomic, strong) AMAErrorEnvironment *errorEnvironment;
 @property (nonatomic, strong) AMAEnvironmentContainer *appEnvironment;
 
+// TODO: Rework after https://nda.ya.ru/t/HRd8dJIs7HaJts
+- (void)addExtendedCrashProcessor:(id<AMAExtendedCrashProcessing>)crashProcessor;
+
 - (void)handlePluginInitFinished;
 @end
 
@@ -215,6 +218,17 @@ describe(@"AMAAppMetricaCrashes", ^{
                 [AMAAppMetricaCrashes stub:@selector(crashes) andReturn:crashes];
                 AMAModuleActivationConfiguration *config = [[AMAModuleActivationConfiguration alloc] initWithApiKey:testsAPIKey];
                 [AMAAppMetricaCrashes willActivateWithConfiguration:config];
+            });
+            
+            it(@"Should add extended crash processor if primary is already configured", ^{
+                [AMAAppMetricaCrashes stub:@selector(crashes) andReturn:crashes];
+                AMAModuleActivationConfiguration *config = [[AMAModuleActivationConfiguration alloc] initWithApiKey:testsAPIKey];
+                [AMAAppMetricaCrashes willActivateWithConfiguration:config];
+                
+                NSObject<AMAExtendedCrashProcessing> *extendedProcessor = [KWMock nullMockForProtocol:@protocol(AMAExtendedCrashProcessing)];
+                [[crashProcessor should] receive:@selector(addExtendedCrashProcessor:) withArguments:extendedProcessor];
+                
+                [crashes addExtendedCrashProcessor:extendedProcessor];
             });
 
             context(@"CrashLoader Configuration", ^{

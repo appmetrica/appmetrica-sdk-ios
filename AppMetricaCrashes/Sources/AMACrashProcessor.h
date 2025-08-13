@@ -27,4 +27,6 @@
 - (void)processANR:(AMADecodedCrash *)decodedCrash withError:(NSError *)error;
 - (void)processError:(NSError *)error;
 
+- (void)addExtendedCrashProcessor:(id<AMAExtendedCrashProcessing>)extendedCrashProcessor;
+
 @end

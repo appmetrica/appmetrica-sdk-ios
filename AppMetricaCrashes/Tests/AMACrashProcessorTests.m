@@ -166,6 +166,20 @@ describe(@"AMACrashProcessor", ^{
                 
                 [processor processError:errorMock];
             });
+            it(@"Should add extended crash processor", ^{
+                NSObject<AMAExtendedCrashProcessing> *extendedProcessor = [KWMock nullMockForProtocol:@protocol(AMAExtendedCrashProcessing)];
+                AMACrashProcessor *processor = [[AMACrashProcessor alloc] initWithIgnoredSignals:@[ @SIGABRT ]
+                                                                                      serializer:serializer
+                                                                                   crashReporter:crashReporterMock
+                                                                                       formatter:formatterMock
+                                                                              extendedProcessors:@[]];
+                
+                [processor addExtendedCrashProcessor:extendedProcessor];
+                
+                [[extendedProcessor should] receive:@selector(processError:) withArguments:errorMock];
+                
+                [processor processError:errorMock];
+            });
         });
     });
 });
