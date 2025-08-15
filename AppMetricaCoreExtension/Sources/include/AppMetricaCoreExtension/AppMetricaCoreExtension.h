@@ -14,7 +14,6 @@
     #import "AMAServiceConfiguration.h"
 #else
     #import <AppMetricaCoreExtension/AMAAdProviding.h>
-    #import <AppMetricaCoreExtension/AMAAppMetricaDeprecated.h>
     #import <AppMetricaCoreExtension/AMAAppMetricaExtended.h>
     #import <AppMetricaCoreExtension/AMAAppMetricaExtendedReporting.h>
     #import <AppMetricaCoreExtension/AMAAppMetricaLibraryAdapterConfiguration.h>
