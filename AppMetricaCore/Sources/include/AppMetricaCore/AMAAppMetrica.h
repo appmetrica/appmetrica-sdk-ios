@@ -363,6 +363,17 @@ NS_SWIFT_NAME(setupWebViewReporting(with:onFailure:));
  */
 + (void)clearAppEnvironment;
 
+//MARK: - Advertising Identifier Tracking
+
+/** Enable/disable IDFA reporting to AppMetrica.
+
+ Note, using IDFA requires AdSupport library. This method is intended to disable IDFA if you dependencies requires AdSupport but your application must not send it.
+
+ Enabled by default.
+
+ */
+@property (class, nonatomic, getter=isAdvertisingIdentifierTrackingEnabled) BOOL advertisingIdentifierTrackingEnabled;
+
 //MARK: - Utility
 
 /** Retrieves current version of library.
