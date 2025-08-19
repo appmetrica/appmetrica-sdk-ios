@@ -27,7 +27,7 @@ class AppMetricaLibraryAdapterTests: XCTestCase {
     func testActivateWithConfig() {
         let config = MutableLibraryAdapterConfiguration()
         config.advIdentifiersTrackingEnabled = true
-        config.locationTrackingEnabled = true
+//        config.locationTrackingEnabled = true
         
         adapter.activate(configuration: config)
         

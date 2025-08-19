@@ -50,9 +50,9 @@ public final class AppMetricaLibraryAdapter: NSObject {
         if let advIdentifiersTrackingEnabled = config.advIdentifiersTrackingEnabled {
             cfg.advertisingIdentifierTrackingEnabled = advIdentifiersTrackingEnabled
         }
-        if let locationTrackingEnabled = config.locationTrackingEnabled {
-            cfg.locationTrackingEnabled = locationTrackingEnabled
-        }
+//         if let locationTrackingEnabled = config.locationTrackingEnabled {
+//             cfg.locationTrackingEnabled = locationTrackingEnabled
+//         }
         appMetrica.setupLibraryAdapterConfiguration(cfg)
         appMetrica.activate()
     }

@@ -1,10 +1,11 @@
 
 import Foundation
 
+// these classes MUST NOT be changed  https://nda.ya.ru/t/KhAKgSKA7HojJj
+
 public struct LibraryAdapterConfig {
     public init() { }
     public var advIdentifiersTrackingEnabled: Bool?
-    public var locationTrackingEnabled: Bool?
 }
 
 @objc(AMALibraryAdapterConfiguration)
@@ -25,12 +26,7 @@ public class LibraryAdapterConfiguration: NSObject, NSCopying, NSMutableCopying 
     public var advIdentifiersTrackingEnabled: Bool {
         return config.advIdentifiersTrackingEnabled ?? true
     }
-    
-    @objc
-    public var locationTrackingEnabled: Bool {
-        return config.locationTrackingEnabled ?? false
-    }
-    
+
     public func copy(with zone: NSZone? = nil) -> Any {
         return self
     }
@@ -47,12 +43,6 @@ public class MutableLibraryAdapterConfiguration: LibraryAdapterConfiguration {
     public override var advIdentifiersTrackingEnabled: Bool {
         get { config.advIdentifiersTrackingEnabled ?? true }
         set { config.advIdentifiersTrackingEnabled = newValue }
-    }
-    
-    @objc
-    public override var locationTrackingEnabled: Bool {
-        get { config.locationTrackingEnabled ?? false }
-        set { config.locationTrackingEnabled = newValue }
     }
     
     public override func copy(with zone: NSZone? = nil) -> Any {
