@@ -17,7 +17,7 @@ public final class Logger {
         self.channel = channel
     }
     
-    func message(_ str: String, level: LogLevel, file: StaticString = #file, line: UInt = #line, function: StaticString = #function) {
+    func message(_ str: String, level: LogLevel, file: StaticString = #fileID, line: UInt = #line, function: StaticString = #function) {
         facade.logMessage(toChannel: channel as String,
                           level: level.appMetricaLogLevel,
                           file: file.utf8Start,
@@ -27,23 +27,23 @@ public final class Logger {
                           message: str)
     }
     
-    public func info(_ str: String, file: StaticString = #file, line: UInt = #line, function: StaticString = #function) {
+    public func info(_ str: String, file: StaticString = #fileID, line: UInt = #line, function: StaticString = #function) {
         message(str, level: .info, file: file, line: line, function: function)
     }
     
-    public func warning(_ str: String, file: StaticString = #file, line: UInt = #line, function: StaticString = #function) {
+    public func warning(_ str: String, file: StaticString = #fileID, line: UInt = #line, function: StaticString = #function) {
         message(str, level: .warning, file: file, line: line, function: function)
     }
     
-    public func error(_ str: String, file: StaticString = #file, line: UInt = #line, function: StaticString = #function) {
+    public func error(_ str: String, file: StaticString = #fileID, line: UInt = #line, function: StaticString = #function) {
         message(str, level: .error, file: file, line: line, function: function)
     }
     
-    public func notify(_ str: String, file: StaticString = #file, line: UInt = #line, function: StaticString = #function) {
+    public func notify(_ str: String, file: StaticString = #fileID, line: UInt = #line, function: StaticString = #function) {
         message(str, level: .notify, file: file, line: line, function: function)
     }
     
-    public func error(_ error: Error, file: StaticString = #file, line: UInt = #line, function: StaticString = #function) {
+    public func error(_ error: Error, file: StaticString = #fileID, line: UInt = #line, function: StaticString = #function) {
         message(String(describing: error), level: .error, file: file, line: line, function: function)
     }
 }
