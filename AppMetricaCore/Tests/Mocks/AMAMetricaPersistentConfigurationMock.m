@@ -19,6 +19,7 @@
 @synthesize eventCountsByKey = _eventCountsByKey;
 @synthesize eventSum = _eventSum;
 @synthesize revenueTransactionIds = _revenueTransactionIds;
+@synthesize autocollectedData = _autocollectedData;
 
 - (instancetype)init 
 {

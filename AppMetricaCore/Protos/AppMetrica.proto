@@ -140,5 +140,6 @@ message ReportMessage {
         required string value = 2;
     }
     repeated EnvironmentVariable app_environment = 7;
-    reserved 10;
+    reserved 8 to 11;
+    repeated bytes additional_api_keys = 12;
 }

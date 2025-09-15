@@ -70,7 +70,11 @@ NSString *const kAMAReportSerializerErrorKeyActualSize = @"kAMAReportSerializerE
                                       withAppState:requestModel.appState
                                            tracker:tracker
                                              error:&internalError];
-
+        result = result && [self fillReportMessage:&reportMessage
+                             withAdditionalAPIKeys:requestModel.additionalAPIKeys
+                                           tracker:tracker
+                                             error:&internalError];
+        
         if (result) {
             resultData = [self dataForReportMessage:&reportMessage sizeLimit:sizeLimit error:&internalError];
         }
@@ -469,6 +473,33 @@ NSString *const kAMAReportSerializerErrorKeyActualSize = @"kAMAReportSerializerE
     reportMessage->report_request_parameters = requestParameters;
     return YES;
 }
+
+- (BOOL)fillReportMessage:(Ama__ReportMessage *)reportMessage
+    withAdditionalAPIKeys:(NSArray<NSString *> *)additionalAPIKeys
+                  tracker:(id<AMAAllocationsTracking>)tracker
+                    error:(NSError **)error
+{
+    NSMutableOrderedSet<NSString *> *unique = [NSMutableOrderedSet orderedSet];
+    for (NSString *apiKey in additionalAPIKeys) {
+        if (apiKey.length > 0) {
+            [unique addObject:apiKey];
+        }
+    }
+    if (unique.count == 0) {
+        return YES;
+    }
+    reportMessage->n_additional_api_keys = unique.count;
+    
+    if (reportMessage->n_additional_api_keys != 0) {
+        reportMessage->additional_api_keys = [tracker allocateSize:sizeof(ProtobufCBinaryData) * reportMessage->n_additional_api_keys];
+        AMA_ENSURE_MEMORY_ALLOCATED(reportMessage->additional_api_keys);
+        [unique enumerateObjectsUsingBlock:^(NSString *item, NSUInteger idx, BOOL * _Nonnull stop) {
+            [AMAProtobufUtilities fillBinaryData:&(reportMessage->additional_api_keys[idx]) withString:item tracker:tracker];
+        }];
+    }
+    return YES;
+}
+
 
 #undef AMA_ENSURE_MEMORY_ALLOCATED
 

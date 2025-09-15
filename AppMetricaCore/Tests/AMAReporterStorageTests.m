@@ -16,6 +16,7 @@
 #import "AMAReporterStoragesContainer.h"
 #import "AMAEnvironmentContainer.h"
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
+#import "AMAReporterAutocollectedDataProviding.h"
 
 SPEC_BEGIN(AMAReporterStorageTests)
 
@@ -37,6 +38,7 @@ describe(@"AMAReporterStorage", ^{
     AMAReportRequestProvider *__block reportRequestProvider = nil;
     AMASessionsCleaner *__block sessionCleaner = nil;
     AMAReporterStorage *__block storage = nil;
+    NSObject<AMAReporterAutocollectedDataProviding> *__block autocollectedDataProvider = nil;
 
     beforeEach(^{
         storagesContainer = [AMAReporterStoragesContainer nullMock];
@@ -54,9 +56,10 @@ describe(@"AMAReporterStorage", ^{
         sessionStorage = [AMASessionStorage stubbedNullMockForInit:@selector(initWithDatabase:serializer:stateStorage:)];
         eventStorage = [AMAEventStorage stubbedNullMockForInit:@selector(initWithDatabase:eventSerializer:)];
         reportRequestProvider =
-            [AMAReportRequestProvider stubbedNullMockForInit:@selector(initWithApiKey:database:eventSerializer:sessionSerializer:)];
+            [AMAReportRequestProvider stubbedNullMockForInit:@selector(initWithApiKey:database:eventSerializer:sessionSerializer:additionalAPIKeys:)];
         eventsCleaner = [AMAEventsCleaner stubbedNullMockForInit:@selector(initWithReporterProvider:)];
         sessionCleaner = [AMASessionsCleaner stubbedNullMockForInit:@selector(initWithDatabase:eventsCleaner:apiKey:)];
+        autocollectedDataProvider = [KWMock nullMockForProtocol:@protocol(AMAReporterAutocollectedDataProviding)];
     });
 
     void (^createStorage)(void) = ^{
@@ -94,9 +97,18 @@ describe(@"AMAReporterStorage", ^{
         createStorage();
     });
     it(@"Should return valid report request provider", ^{
-        [[reportRequestProvider should] receive:@selector(initWithApiKey:database:eventSerializer:sessionSerializer:)
-                                  withArguments:apiKey, database, eventSerializer, sessionSerializer];
+        NSArray *const apiKeys = @[@"YET_ANOTHER_API_KEY"];
+        [[reportRequestProvider should] receive:@selector(initWithApiKey:
+                                                          database:
+                                                          eventSerializer:
+                                                          sessionSerializer:
+                                                          additionalAPIKeys:)
+                                  withArguments:apiKey, database, eventSerializer, sessionSerializer, apiKeys];
         createStorage();
+        
+        [autocollectedDataProvider stub:@selector(additionalAPIKeys) andReturn:apiKeys];
+        [storage setupAutocollectedDataProvider:autocollectedDataProvider];
+        
         __unused id _ = storage.reportRequestProvider;
     });
     it(@"Should create valid session cleaner", ^{

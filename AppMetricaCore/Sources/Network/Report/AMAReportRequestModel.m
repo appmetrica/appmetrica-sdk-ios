@@ -10,6 +10,7 @@
                               appEnvironment:(NSDictionary *)appEnvironment
                                     appState:(AMAApplicationState *)appState
                             inMemoryDatabase:(BOOL)inMemoryDatabase
+                           additionalAPIKeys:(NSArray<NSString *> *)additionalAPIKeys
                                eventsBatches:(NSArray<AMAReportEventsBatch *> *)eventsBatches
 {
     return [[AMAReportRequestModel alloc] initWithApiKey:apiKey
@@ -17,6 +18,7 @@
                                           appEnvironment:appEnvironment
                                                 appState:appState
                                         inMemoryDatabase:inMemoryDatabase
+                                       additionalAPIKeys:additionalAPIKeys
                                            eventsBatches:eventsBatches];
 }
 
@@ -25,6 +27,7 @@
                 appEnvironment:(NSDictionary *)appEnvironment
                       appState:(AMAApplicationState *)appState
               inMemoryDatabase:(BOOL)inMemoryDatabase
+             additionalAPIKeys:(NSArray<NSString *> *)additionalAPIKeys
                  eventsBatches:(NSArray<AMAReportEventsBatch *> *)eventsBatches
 {
     self = [super init];
@@ -35,6 +38,7 @@
         _appState = appState;
         _inMemoryDatabase = inMemoryDatabase;
         _eventsBatches = [eventsBatches copy];
+        _additionalAPIKeys = [additionalAPIKeys copy];
     }
     return self;
 }
@@ -46,6 +50,7 @@
                                           appEnvironment:self.appEnvironment
                                                 appState:self.appState
                                         inMemoryDatabase:self.inMemoryDatabase
+                                       additionalAPIKeys:self.additionalAPIKeys
                                            eventsBatches:eventsBatches];
 }
 
@@ -56,6 +61,7 @@
                                           appEnvironment:self.appEnvironment
                                                 appState:appState
                                         inMemoryDatabase:self.inMemoryDatabase
+                                       additionalAPIKeys:self.additionalAPIKeys
                                            eventsBatches:self.eventsBatches];
 }
 
@@ -88,6 +94,7 @@
         && [self.appEnvironment isEqualToDictionary:other.appEnvironment]
         && [self.appState isEqual:other.appState]
         && self.inMemoryDatabase == other.inMemoryDatabase
+        && [self.additionalAPIKeys isEqualToArray:other.additionalAPIKeys]
         && [self.eventsBatches isEqualToArray:other.eventsBatches];
 }
 
@@ -101,6 +108,7 @@
     result = prime * result + self.appEnvironment.hash;
     result = prime * result + self.appState.hash;
     result = prime * result + (self.inMemoryDatabase ? 1231 : 1237);
+    result = prime * result + self.additionalAPIKeys.hash;
     result = prime * result + self.eventsBatches.hash;
     
     return result;

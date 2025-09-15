@@ -35,8 +35,15 @@ describe(@"AMAReportRequestTests", ^{
     NSString *const appID = @"com.appmetrica.mobile.test";
     NSString *const extID = @"com.appmetrica.mobile.test.ext";
     NSString *const host = @"http://www.appmetrica.io";
-    AMABundleInfoProviderMock *appMock = [[AMABundleInfoProviderMock alloc] initWithAppID:appID appBuildNumber:@"1" appVersion:@"1.0.0" appVersionName:@"1.0.0"];
-    AMABundleInfoProviderMock *extensionMock = [[AMABundleInfoProviderMock alloc] initWithAppID:extID appBuildNumber:@"1" appVersion:@"1.0.0" appVersionName:@"1.0.0"];
+    NSArray *const additionalAPIKeys = @[@"additional_api_key_1", @"additional_api_key_2"];
+    AMABundleInfoProviderMock *appMock = [[AMABundleInfoProviderMock alloc] initWithAppID:appID
+                                                                           appBuildNumber:@"1"
+                                                                               appVersion:@"1.0.0"
+                                                                           appVersionName:@"1.0.0"];
+    AMABundleInfoProviderMock *extensionMock = [[AMABundleInfoProviderMock alloc] initWithAppID:extID
+                                                                                 appBuildNumber:@"1"
+                                                                                     appVersion:@"1.0.0"
+                                                                                 appVersionName:@"1.0.0"];
     
     AMAReporterTestHelper *__block reporterTestHelper = nil;
     beforeEach(^{
@@ -71,6 +78,7 @@ describe(@"AMAReportRequestTests", ^{
                                                                                    appEnvironment:@{}
                                                                                          appState:state
                                                                                  inMemoryDatabase:YES
+                                                                                additionalAPIKeys:additionalAPIKeys
                                                                                     eventsBatches:@[eventBatch]];
         requestModel = [requestModel copyWithAppState:AMAApplicationStateManager.applicationState];
         AMAReportPayloadProvider *provider = [[AMAReportPayloadProvider alloc] init];

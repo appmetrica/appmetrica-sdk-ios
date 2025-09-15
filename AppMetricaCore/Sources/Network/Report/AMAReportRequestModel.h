@@ -11,6 +11,7 @@
 @property (nonatomic, copy, readonly) NSDictionary *appEnvironment;
 @property (nonatomic, strong, readonly) AMAApplicationState *appState;
 @property (nonatomic, assign, readonly) BOOL inMemoryDatabase;
+@property (nonatomic, copy, readonly) NSArray<NSString *> *additionalAPIKeys;
 @property (nonatomic, copy, readonly) NSArray<AMAReportEventsBatch *> *eventsBatches;
 
 + (instancetype)reportRequestModelWithApiKey:(NSString *)apiKey
@@ -18,6 +19,7 @@
                               appEnvironment:(NSDictionary *)appEnvironment
                                     appState:(AMAApplicationState *)appState
                             inMemoryDatabase:(BOOL)inMemoryDatabase
+                           additionalAPIKeys:(NSArray<NSString *> *)additionalAPIKeys
                                eventsBatches:(NSArray<AMAReportEventsBatch *> *)eventsBatches;
 
 - (instancetype)copyWithEventsBatches:(NSArray<AMAReportEventsBatch *> *)eventsBatches;

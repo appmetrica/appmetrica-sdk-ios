@@ -20,6 +20,7 @@
 @property (nonatomic, strong, readonly) id<AMADatabaseProtocol> database;
 @property (nonatomic, strong, readonly) AMAEventSerializer *eventSerializer;
 @property (nonatomic, strong, readonly) AMASessionSerializer *sessionSerializer;
+@property (nonatomic, copy, readonly) NSArray *additionalAPIKeys;
 
 @end
 
@@ -29,6 +30,7 @@
                       database:(id<AMADatabaseProtocol>)database
                eventSerializer:(AMAEventSerializer *)eventSerializer
              sessionSerializer:(AMASessionSerializer *)sessionSerializer
+             additionalAPIKeys:(NSArray *)additionalAPIKeys
 {
     self = [super init];
     if (self != nil) {
@@ -36,6 +38,7 @@
         _database = database;
         _eventSerializer = eventSerializer;
         _sessionSerializer = sessionSerializer;
+        _additionalAPIKeys = [additionalAPIKeys copy];
     }
     return self;
 }
@@ -217,6 +220,7 @@
                                                  appEnvironment:firstBatch.appEnvironment
                                                        appState:batchAppState
                                                inMemoryDatabase:inMemoryDatabase
+                                              additionalAPIKeys:self.additionalAPIKeys
                                                   eventsBatches:batchesGroup];
         if (requestModel != nil) {
             [requestModels addObject:requestModel];

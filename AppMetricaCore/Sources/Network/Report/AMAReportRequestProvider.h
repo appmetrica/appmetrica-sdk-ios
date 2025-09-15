@@ -13,7 +13,8 @@
 - (instancetype)initWithApiKey:(NSString *)apiKey
                       database:(id<AMADatabaseProtocol>)database
                eventSerializer:(AMAEventSerializer *)eventSerializer
-             sessionSerializer:(AMASessionSerializer *)sessionSerializer;
+             sessionSerializer:(AMASessionSerializer *)sessionSerializer
+             additionalAPIKeys:(NSArray *)additionalAPIKeys;
 
 - (NSArray *)requestModels;
 

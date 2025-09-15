@@ -61,6 +61,8 @@ NS_SWIFT_NAME(reportLibraryAdapterAdRevenueRelatedEvent(name:parameters:onFailur
 + (void)setLibraryAdapterAdvertisingIdentifierTracking:(BOOL)advertisingIdentifierTracking;
 + (void)setLibraryAdapterLocationTracking:(BOOL)locationTracking;
 
++ (void)subscribeForAutocollectedDataForApiKey:(NSString *)apiKey NS_SWIFT_NAME(subscribeForAutocollectedData(apiKey:));
+
 // Reporting
 + (nullable id<AMAAppMetricaExtendedReporting>)extendedReporterForApiKey:(NSString *)apiKey
 NS_SWIFT_NAME(extendedReporter(for:));

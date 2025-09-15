@@ -217,6 +217,40 @@ describe(@"AMAMetricaPersistentConfiguration", ^{
             [[[anotherConfig eventCountsByKey] should] beNil];
         });
     });
+    context(@"autocollectedData", ^{
+        NSDictionary *dict = @{
+            @"11" : @25,
+            @"22" : @26
+        };
+        NSString *const key = @"autocollected.data.apikeys";
+        it(@"Should use valid key", ^{
+            AMAMetricaPersistentConfiguration *config = createConfig();
+            [[storage should] receive:@selector(jsonDictionaryForKey:error:) withArguments:key, kw_any()];
+            [config autocollectedData];
+        });
+        it(@"Should be nil by default", ^{
+            AMAMetricaPersistentConfiguration *config = createConfig();
+            [[[config autocollectedData] should] beNil];
+        });
+        it(@"Should save in memory", ^{
+            AMAMetricaPersistentConfiguration *config = createConfig();
+            [config setAutocollectedData:dict];
+            [[[config autocollectedData] should] equal:dict];
+        });
+        it(@"Should save in database", ^{
+            AMAMetricaPersistentConfiguration *config = createConfig();
+            [config setAutocollectedData:dict];
+            AMAMetricaPersistentConfiguration *anotherConfig = createConfig();
+            [[[anotherConfig autocollectedData] should] equal:dict];
+        });
+        it(@"Should save nil", ^{
+            AMAMetricaPersistentConfiguration *config = createConfig();
+            [config setAutocollectedData:dict];
+            [config setAutocollectedData:nil];
+            AMAMetricaPersistentConfiguration *anotherConfig = createConfig();
+            [[[anotherConfig autocollectedData] should] beNil];
+        });
+    });
 
     context(@"eventSum", ^{
         NSDecimalNumber *eventSum = [NSDecimalNumber decimalNumberWithString:@"878787"];

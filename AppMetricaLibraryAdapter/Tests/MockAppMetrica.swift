@@ -21,6 +21,9 @@ class MockAppMetrica: AppMetrica {
     static var advertisingIdentifierTrackingEnabledValue: Bool?
     static var advertisingIdentifierTrackingEnabledExpectation: XCTestExpectation = XCTestExpectation()
     
+    static var autocollectedData: String?
+    static var subscribeForAutocollectedDataExpectation: XCTestExpectation = XCTestExpectation()
+    
     override class func activate() {
         anonymousActivationExpectation.fulfill()
     }
@@ -70,6 +73,11 @@ class MockAppMetrica: AppMetrica {
                     domain: "MockAppMetrica", code: 1,
                     userInfo: [NSLocalizedDescriptionKey: "Mock reporting failure"]))
         }
+    }
+    
+    override class func subscribeForAutocollectedData(apiKey: String) {
+        autocollectedData = apiKey
+        subscribeForAutocollectedDataExpectation.fulfill()
     }
 
     static func reset() {

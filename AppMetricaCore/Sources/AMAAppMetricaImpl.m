@@ -62,6 +62,7 @@
 #import "AMALocationResolver.h"
 #import "AMAAdProviderResolver.h"
 #import "AMAActivationTypeResolver.h"
+#import "AMAReporterAutocollectedDataProvider.h"
 
 static NSTimeInterval const kAMAAnonymousActivationDelay = 0.1;
 static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
@@ -103,6 +104,8 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
 
 @property (nonatomic, strong) AMALocationResolver *locationResolver;
 @property (nonatomic, strong) AMAAdProviderResolver *adProviderResolver;
+
+@property (nonatomic, strong) AMAReporterAutocollectedDataProvider *autocollectedDataProvider;
 
 @end
 
@@ -148,6 +151,8 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
         
         _locationResolver = [AMALocationResolver sharedInstance];
         _adProviderResolver = [AMAAdProviderResolver sharedInstance];
+        
+        _autocollectedDataProvider = [[AMAReporterAutocollectedDataProvider alloc] initWithPersistentConfiguration:persistent];
 
         [[AMASKAdNetworkRequestor sharedInstance] registerForAdNetworkAttribution];
 
@@ -780,6 +785,7 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
                 [reporter updateAPIKey:apiKey];
                 [self.reportersContainer setReporter:reporter forApiKey:apiKey];
                 AMAReporterStorage *mainStorage = [[AMAReporterStoragesContainer sharedInstance] mainStorageForApiKey:apiKey];
+                [mainStorage setupAutocollectedDataProvider:self.autocollectedDataProvider];
                 [self postSetupReporterWithStorage:mainStorage
                                               main:YES
                          executionConditionChecker:[self getExecutionConditionCheckerForApiKey:apiKey main:YES]];
@@ -797,6 +803,8 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
         
         AMAReporterStorage *reporterStorage =
             [[AMAReporterStoragesContainer sharedInstance] mainStorageForApiKey:self.apiKey];
+        [reporterStorage setupAutocollectedDataProvider:self.autocollectedDataProvider];
+        
         __weak __typeof(self) weakSelf = self;
         reporter = [self createReporterWithStorage:reporterStorage
                                               main:YES
@@ -1282,6 +1290,12 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
     return isMainKeyRestriction
         ? [restrictionController shouldEnableGenericRequestsSending]
         : [restrictionController shouldReportToApiKey:apiKey];
+}
+
+- (void)addAutocollectedData:(NSString *)apiKey
+{
+    [self.autocollectedDataProvider addAutocollectedData:apiKey];
+    [self scheduleReporterAnonymousActivationIfNeeded];
 }
 
 @end

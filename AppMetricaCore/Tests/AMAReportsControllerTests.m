@@ -30,6 +30,7 @@ NSArray<NSString *> *const hosts = @[ firstHost, secondHost, thirdHost ];
 NSString *const firstTrackingHost = @"https://tracking.appmetrica.com";
 NSString *const secondTrackingHost = @"https://tracking.appmetri.ca";
 NSString *const thirdTrackingHost = @"https://tracking.appmetrica.io";
+NSArray *const additionalAPIKeys = @[@"additional_api_key_1", @"additional_api_key_2"];
 NSArray<NSString *> *const trackingHosts = @[firstTrackingHost, secondTrackingHost, thirdTrackingHost];
 NSData *const responseData = [@"BODY" dataUsingEncoding:NSUTF8StringEncoding];
 
@@ -80,6 +81,7 @@ void (^beforeEachReporter)() = ^{
                                                                    appEnvironment:@{}
                                                                          appState:appstate
                                                                  inMemoryDatabase:NO
+                                                                additionalAPIKeys:additionalAPIKeys
                                                                     eventsBatches:@[ firstEventBatch, secondEventBatch ]];
 
     payload = [[AMAReportPayload alloc] initWithReportModel:firstReportRequestModel data:[NSData data]];
@@ -159,6 +161,7 @@ void (^beforeEachProxyReporter)() = ^{
                                                                    appEnvironment:@{}
                                                                          appState:appstate
                                                                  inMemoryDatabase:NO
+                                                                additionalAPIKeys:additionalAPIKeys
                                                                     eventsBatches:@[ firstEventBatch, secondEventBatch ]];
 
     payload = [[AMAReportPayload alloc] initWithReportModel:firstReportRequestModel data:[NSData data]];

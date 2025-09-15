@@ -220,10 +220,12 @@ struct  Ama__ReportMessage
   Ama__RequestParameters *report_request_parameters;
   size_t n_app_environment;
   Ama__ReportMessage__EnvironmentVariable **app_environment;
+  size_t n_additional_api_keys;
+  ProtobufCBinaryData *additional_api_keys;
 };
 #define AMA__REPORT_MESSAGE__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&ama__report_message__descriptor) \
-    , 0,NULL, NULL, 0,NULL }
+    , 0,NULL, NULL, 0,NULL, 0,NULL }
 
 
 /* Ama__RequestParameters methods */

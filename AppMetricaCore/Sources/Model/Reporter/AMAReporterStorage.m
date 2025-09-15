@@ -12,6 +12,7 @@
 #import "AMASessionsCleaner.h"
 #import "AMAReporterStoragesContainer.h"
 #import "AMASharedReporterProvider.h"
+#import "AMAReporterAutocollectedDataProviding.h"
 
 @interface AMAReporterStorage ()
 
@@ -19,6 +20,7 @@
 @property (nonatomic, strong, readonly) AMAEventSerializer *eventSerializer;
 @property (nonatomic, strong, readonly) AMASessionSerializer *sessionSerializer;
 @property (nonatomic, copy, readwrite) NSString *apiKey;
+@property (nonatomic, strong, readwrite) id<AMAReporterAutocollectedDataProviding> autocollectedDataProvider;
 
 @end
 
@@ -63,6 +65,7 @@
         _sessionsCleaner = [[AMASessionsCleaner alloc] initWithDatabase:database
                                                           eventsCleaner:eventsCleaner
                                                                  apiKey:apiKey];
+        _autocollectedDataProvider = nil;
     }
     return self;
 }
@@ -94,12 +97,24 @@
     }
 }
 
+- (void)setupAutocollectedDataProvider:(id<AMAReporterAutocollectedDataProviding>)autocollectedDataProvider
+{
+    @synchronized (self) {
+        self.autocollectedDataProvider = autocollectedDataProvider;
+    }
+}
+
 - (AMAReportRequestProvider *)reportRequestProvider
 {
+    NSArray *additionalKeys = nil;
+    @synchronized (self) {
+        additionalKeys = [self.autocollectedDataProvider.additionalAPIKeys copy] ?: @[];
+    }
     return [[AMAReportRequestProvider alloc] initWithApiKey:self.apiKey
                                                    database:self.database
                                             eventSerializer:self.eventSerializer
-                                          sessionSerializer:self.sessionSerializer];
+                                          sessionSerializer:self.sessionSerializer
+                                          additionalAPIKeys:additionalKeys];
 }
 
 @end

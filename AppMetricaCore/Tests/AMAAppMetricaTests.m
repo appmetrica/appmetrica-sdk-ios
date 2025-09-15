@@ -1506,6 +1506,15 @@ describe(@"AMAAppMetrica", ^{
             [AMAAppMetrica registerAdRevenueNativeSource:nativeSource];
             [[[AMAAdRevenueSourceContainer sharedInstance].nativeSupportedSources should] equal:expected];
         });
+        
+        it(@"subscribeForAutocollectedData", ^{
+            NSString *data = @"data";
+            stubMetrica();
+            
+            [[impl should] receive:@selector(addAutocollectedData:) withArguments:data];
+            
+            [AMAAppMetrica subscribeForAutocollectedDataForApiKey:data];
+        });
     });
 });
 

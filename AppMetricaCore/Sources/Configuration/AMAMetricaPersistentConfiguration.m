@@ -209,4 +209,14 @@ LONG_PROPERTY(conversionValue, setConversionValue, AMAStorageStringKeyConversion
                        error:NULL];
 }
 
+- (NSDictionary<NSString *, NSNumber *> *)autocollectedData
+{
+    return [self.storage jsonDictionaryForKey:AMAStorageStringKeyAutocollectedData error:nil];
+}
+
+- (void)setAutocollectedData:(NSDictionary<NSString *, NSNumber *> *)value
+{
+    [self.storage saveJSONDictionary:value forKey:AMAStorageStringKeyAutocollectedData error:nil];
+}
+
 @end

@@ -1084,7 +1084,7 @@ const ProtobufCEnumDescriptor ama__report_message__optional_bool__descriptor =
   ama__report_message__optional_bool__value_ranges,
   NULL,NULL,NULL,NULL   /* reserved[1234] */
 };
-static const ProtobufCFieldDescriptor ama__report_message__field_descriptors[3] =
+static const ProtobufCFieldDescriptor ama__report_message__field_descriptors[4] =
 {
   {
     "sessions",
@@ -1122,17 +1122,31 @@ static const ProtobufCFieldDescriptor ama__report_message__field_descriptors[3] 
     0,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
+  {
+    "additional_api_keys",
+    12,
+    PROTOBUF_C_LABEL_REPEATED,
+    PROTOBUF_C_TYPE_BYTES,
+    offsetof(Ama__ReportMessage, n_additional_api_keys),
+    offsetof(Ama__ReportMessage, additional_api_keys),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
 };
 static const unsigned ama__report_message__field_indices_by_name[] = {
+  3,   /* field[3] = additional_api_keys */
   2,   /* field[2] = app_environment */
   1,   /* field[1] = report_request_parameters */
   0,   /* field[0] = sessions */
 };
-static const ProtobufCIntRange ama__report_message__number_ranges[2 + 1] =
+static const ProtobufCIntRange ama__report_message__number_ranges[3 + 1] =
 {
   { 3, 0 },
   { 7, 2 },
-  { 0, 3 }
+  { 12, 3 },
+  { 0, 4 }
 };
 const ProtobufCMessageDescriptor ama__report_message__descriptor =
 {
@@ -1142,10 +1156,10 @@ const ProtobufCMessageDescriptor ama__report_message__descriptor =
   "Ama__ReportMessage",
   "ama",
   sizeof(Ama__ReportMessage),
-  3,
+  4,
   ama__report_message__field_descriptors,
   ama__report_message__field_indices_by_name,
-  2,  ama__report_message__number_ranges,
+  3,  ama__report_message__number_ranges,
   (ProtobufCMessageInit) ama__report_message__init,
   NULL,NULL,NULL    /* reserved[123] */
 };

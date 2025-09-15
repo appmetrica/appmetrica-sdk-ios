@@ -44,6 +44,11 @@ public final class AppMetricaLibraryAdapter: NSObject {
         appMetrica.setLibraryAdapterLocationTracking(enabled)
     }
     
+    @objc(subscribeForAutocollectedDataForApiKey:)
+    public func subscribeForAutocollectedData(apiKey: String) {
+        appMetrica.subscribeForAutocollectedData(apiKey: apiKey)
+    }
+    
     /// Activates AppMetrica without `API_KEY` in anonymous mode.
     public func activate(config: LibraryAdapterConfig) {
         let cfg = AppMetricaLibraryAdapterConfiguration()

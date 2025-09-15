@@ -13,6 +13,7 @@
 @class AMAEnvironmentContainer;
 @class AMAEvent;
 @class AMASession;
+@protocol AMAReporterAutocollectedDataProviding;
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -43,6 +44,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)restoreState;
 
 - (void)updateAPIKey:(NSString *)apiKey;
+
+- (void)setupAutocollectedDataProvider:(id<AMAReporterAutocollectedDataProviding>)autocollectedDataProvider;
 
 @end
 

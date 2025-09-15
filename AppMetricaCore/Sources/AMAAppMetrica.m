@@ -811,6 +811,11 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
     return logConfigurator;
 }
 
++ (void)subscribeForAutocollectedDataForApiKey:(NSString *)apiKey
+{
+    [[self sharedImpl] addAutocollectedData:apiKey];
+}
+
 #pragma mark - Private & Testing Availability
 
 + (NSArray<Class<AMAEventPollingDelegate>> *)eventPollingDelegates

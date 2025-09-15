@@ -59,6 +59,7 @@
 #import "AMAAppMetricaConfiguration+JSONSerializable.h"
 #import "AMAAnonymousActivationPolicy.h"
 #import "AMADataSendingRestrictionController.h"
+#import "AMAReporterAutocollectedDataProvider.h"
 
 static NSString *const kAMAEnvironmentTestKey = @"TestEnvironmentKey";
 static NSString *const kAMAEnvironmentTestValue = @"TestEnvironmentValue";
@@ -92,6 +93,7 @@ describe(@"AMAAppMetricaImpl", ^{
     AMAExternalAttributionController *__block externalAttributionController = nil;
     AMAFirstActivationDetector *__block firstActivationDetector = nil;
     AMADataSendingRestrictionController *__block restrictionController = nil;
+    AMAReporterAutocollectedDataProvider *__block autocollectedDataProvider = nil;
         
     beforeEach(^{
         [AMALocationManager stub:@selector(sharedManager)];
@@ -115,6 +117,8 @@ describe(@"AMAAppMetricaImpl", ^{
         dispatchingController = [AMADispatchingController stubbedNullMockForInit:@selector(initWithTimeoutConfiguration:)];
         internalEventsReporter = [AMAInternalEventsReporter nullMock];
         firstActivationDetector = [AMAFirstActivationDetector stubbedNullMockForDefaultInit];
+        
+        autocollectedDataProvider = [AMAReporterAutocollectedDataProvider stubbedNullMockForInit:@selector(initWithPersistentConfiguration:)];
 
         hostStateProvider = [AMAStubHostAppStateProvider new];
         hostStateProvider.hostState = AMAHostAppStateBackground;
@@ -1488,6 +1492,36 @@ describe(@"AMAAppMetricaImpl", ^{
             [appMetricaImpl reportLibraryAdapterAdRevenueRelatedEvent:eventName
                                                            parameters:params
                                                             onFailure:nil];
+        });
+        
+        context(@"Autocollected data", ^{
+            it(@"Should add auto collected data", ^{
+                [[autocollectedDataProvider should] receive:@selector(addAutocollectedData:) withArguments:apiKey];
+                
+                [appMetricaImpl addAutocollectedData:apiKey];
+            });
+            it(@"Schedules anonymous activation on subscribe autocollected data", ^{
+                [[appMetricaImpl shouldNot] receive:@selector(activateAnonymously)];
+                [[appMetricaImpl shouldEventuallyBeforeTimingOutAfter(10.2)] receive:@selector(activateAnonymously)];
+                
+                [appMetricaImpl addAutocollectedData:apiKey];
+            });
+            it(@"Should setup autocollected data for main reporter", ^{
+                AMAReporterStorage *storage = [[AMAReporterStoragesContainer sharedInstance] mainStorageForApiKey:apiKey];
+                
+                [[storage should] receive:@selector(setupAutocollectedDataProvider:) withArguments:autocollectedDataProvider];
+                
+                [appMetricaImpl addAutocollectedData:apiKey];
+                [appMetricaImpl activateWithConfiguration:configuration];
+            });
+            it(@"Should not setup autocollected data for non main reporter", ^{
+                AMAReporterStorage *storage = [[AMAReporterStoragesContainer sharedInstance] storageForApiKey:apiKey];
+                
+                [[storage shouldNot] receive:@selector(setupAutocollectedDataProvider:)];
+                
+                [appMetricaImpl addAutocollectedData:apiKey];
+                [appMetricaImpl manualReporterForConfiguration:[[AMAReporterConfiguration alloc] initWithAPIKey:apiKey]];
+            });
         });
     });
     

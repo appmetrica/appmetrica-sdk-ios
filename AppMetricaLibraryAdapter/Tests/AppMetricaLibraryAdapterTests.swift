@@ -99,4 +99,11 @@ class AppMetricaLibraryAdapterTests: XCTestCase {
         XCTAssertTrue(MockAppMetrica.reportEventCalled)
     }
     
+    func testSubscribeForAutocollectedData() {
+        let apiKey = "test_api_key"
+        
+        adapter.subscribeForAutocollectedData(apiKey: apiKey)
+        wait(for: [MockAppMetrica.subscribeForAutocollectedDataExpectation], timeout: 1)
+        XCTAssertEqual(MockAppMetrica.autocollectedData, apiKey)
+    }
 }

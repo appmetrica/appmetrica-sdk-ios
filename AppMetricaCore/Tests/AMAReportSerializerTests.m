@@ -26,6 +26,7 @@ describe(@"AMAReportSerializer", ^{
     NSString *const apiKey = @"API_KEY";
     NSString *const attributionID = @"ATTRIBUTION_ID";
     NSDictionary *const appEnvironment = @{ @"app": @"environment" };
+    __block NSArray<NSString *> *currentAdditionalAPIKeys = nil;
 
     CLLocation *const location = [[CLLocation alloc] initWithCoordinate:CLLocationCoordinate2DMake(53.891059, 27.526119)
                                                                altitude:295.0
@@ -62,6 +63,8 @@ describe(@"AMAReportSerializer", ^{
         sizeLimit = NSUIntegerMax;
         filledError = nil;
         reportData = NULL;
+        
+        currentAdditionalAPIKeys = @[@"additional_api_key_1", @"additional_api_key_2"];
 
         fillReport = ^{
             NSData *data = [serializer dataForRequestModel:model
@@ -75,6 +78,11 @@ describe(@"AMAReportSerializer", ^{
 
     NSString *(^convertString)(char *) = ^(char *cString) {
         return cString == NULL ? nil : [NSString stringWithUTF8String:cString];
+    };
+    
+    NSString* (^bytesToString)(ProtobufCBinaryData *) = ^NSString* (ProtobufCBinaryData *bin) {
+        if (bin == NULL || bin->len == 0 || bin->data == NULL) return nil;
+        return [[NSString alloc] initWithBytes:bin->data length:bin->len encoding:NSUTF8StringEncoding];
     };
 
     AMAReportRequestModel *(^modelWithSessionAndEvent)(AMASession *, AMAEvent *) = ^(AMASession *session, AMAEvent *event) {
@@ -91,6 +99,7 @@ describe(@"AMAReportSerializer", ^{
                                                     appEnvironment:appEnvironment
                                                           appState:appState
                                                   inMemoryDatabase:NO
+                                                 additionalAPIKeys:currentAdditionalAPIKeys
                                                      eventsBatches:batches];
     };
 
@@ -663,6 +672,34 @@ describe(@"AMAReportSerializer", ^{
                                                                                  has:eventData->has_profile_id];
                         [[result should] equal:value];
                     });
+                });
+            });
+            
+            context(@"Additional api keys", ^{
+                it(@"Should serialize provided keys", ^{
+                    fillReport();
+                    
+                    [[theValue(reportData->n_additional_api_keys) should] equal:theValue(2)];
+                    [[bytesToString(&reportData->additional_api_keys[0]) should] equal:@"additional_api_key_1"];
+                    [[bytesToString(&reportData->additional_api_keys[1]) should] equal:@"additional_api_key_2"];
+                });
+                
+                it(@"Should deduplicate, keep insertion order and ignore empty", ^{
+                    currentAdditionalAPIKeys = @[ @"A", @"", @"B", @"A", @"B", @"C", @"" ];
+                    fillReport();
+                    
+                    [[theValue(reportData->n_additional_api_keys) should] equal:theValue(3)];
+                    [[bytesToString(&reportData->additional_api_keys[0]) should] equal:@"A"];
+                    [[bytesToString(&reportData->additional_api_keys[1]) should] equal:@"B"];
+                    [[bytesToString(&reportData->additional_api_keys[2]) should] equal:@"C"];
+                });
+                
+                it(@"Should be empty when no keys provided", ^{
+                    currentAdditionalAPIKeys = @[];
+                    fillReport();
+                    
+                    [[theValue(reportData->n_additional_api_keys) should] equal:theValue(0)];
+                    [[thePointerValue(reportData->additional_api_keys) should] equal:thePointerValue(NULL)];
                 });
             });
         });

@@ -14,6 +14,7 @@ describe(@"AMARequestModelSplitter", ^{
     AMAReportRequestModel __block *requestModel = nil;
     NSArray<NSArray <AMAEvent *> *> __block *expectedSplit = nil;
     NSArray<AMAReportRequestModel *> __block *splittedUpModels = nil;
+    NSArray *const additionalAPIKeys = @[@"additional_api_key_1", @"additional_api_key_2"];
 
     context(@"Request of 2 EventsBatches of 3 Events split into 3 parts", ^{
 
@@ -44,6 +45,7 @@ describe(@"AMARequestModelSplitter", ^{
                                                                 appEnvironment:@{ @"foo": @"bar" }
                                                                       appState:[AMAApplicationState new]
                                                               inMemoryDatabase:NO
+                                                             additionalAPIKeys:additionalAPIKeys
                                                                  eventsBatches:@[ firstEventBatch, secondEventBatch ]];
 
             splittedUpModels = [AMARequestModelSplitter splitRequestModel:requestModel
@@ -194,6 +196,7 @@ describe(@"AMARequestModelSplitter", ^{
                                                                 appEnvironment:@{ @"foo": @"bar" }
                                                                       appState:[AMAApplicationState new]
                                                               inMemoryDatabase:NO
+                                                             additionalAPIKeys:additionalAPIKeys
                                                                  eventsBatches:@[ firstEventBatch, secondEventBatch ]];
 
             splittedUpModels = [AMARequestModelSplitter splitRequestModel:requestModel
@@ -327,6 +330,7 @@ describe(@"AMARequestModelSplitter", ^{
                                                                 appEnvironment:@{ @"foo": @"bar" }
                                                                       appState:[AMAApplicationState new]
                                                               inMemoryDatabase:NO
+                                                             additionalAPIKeys:additionalAPIKeys
                                                                  eventsBatches:@[
                                                                      firstEventBatch,
                                                                      secondEventBatch,
@@ -482,6 +486,7 @@ describe(@"AMARequestModelSplitter", ^{
                                                                 appEnvironment:@{ @"foo": @"bar" }
                                                                       appState:[AMAApplicationState new]
                                                               inMemoryDatabase:NO
+                                                             additionalAPIKeys:additionalAPIKeys
                                                                  eventsBatches:@[ firstEventBatch ]];
 
             splittedUpModels = [AMARequestModelSplitter splitRequestModel:requestModel
@@ -555,6 +560,7 @@ describe(@"AMARequestModelSplitter", ^{
                                                                 appEnvironment:@{ @"foo": @"bar" }
                                                                       appState:[AMAApplicationState new]
                                                               inMemoryDatabase:NO
+                                                             additionalAPIKeys:additionalAPIKeys
                                                                  eventsBatches:@[]];
 
             splittedUpModels = [AMARequestModelSplitter splitRequestModel:requestModel
@@ -618,6 +624,7 @@ describe(@"AMARequestModelSplitter", ^{
                                                                 appEnvironment:@{ @"foo": @"bar" }
                                                                       appState:[AMAApplicationState new]
                                                               inMemoryDatabase:NO
+                                                             additionalAPIKeys:additionalAPIKeys
                                                                  eventsBatches:@[ firstEventBatch, secondEventBatch ]];
         });
         

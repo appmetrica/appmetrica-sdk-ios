@@ -12,6 +12,7 @@
 #import "AMAFileEventValue.h"
 #import "AMAEvent.h"
 #import "AMAMetricaConfigurationTestUtilities.h"
+#import "AMAReporterAutocollectedDataProviding.h"
 
 SPEC_BEGIN(AMAReportRequestProviderTests)
 
@@ -136,6 +137,28 @@ describe(@"AMAReportRequestProvider", ^{
                 requestModels = [requestProvider requestModels];
                 // one for events with fizz:buzz
                 [[requestModels should] haveCountOf:1];
+            });
+        });
+        context(@"Should add additional api keys", ^{
+            NSArray * __block requestModels = nil;
+            NSArray *const additionalAPIKeys = @[@"additional_api_key_1", @"additional_api_key_2"];
+            NSObject<AMAReporterAutocollectedDataProviding> *__block autocollectedDataProvider = nil;
+            
+            beforeEach(^{
+                [reporterTestHelper initReporterAndSendEventWithParameters:nil];
+                
+                autocollectedDataProvider = [KWMock nullMockForProtocol:@protocol(AMAReporterAutocollectedDataProviding)];
+                [autocollectedDataProvider stub:@selector(additionalAPIKeys) andReturn:additionalAPIKeys];
+            });
+            
+            it(@"Should add additional api keys for request", ^{
+                [[reporterTestHelper appReporter].reporterStorage setupAutocollectedDataProvider:autocollectedDataProvider];
+                requestProvider = [reporterTestHelper appReporter].reporterStorage.reportRequestProvider;
+                
+                requestModels = [requestProvider requestModels];
+                AMAReportRequestModel *requestModel = requestModels.firstObject;
+                [[requestModel.additionalAPIKeys should] equal:additionalAPIKeys];
+                
             });
         });
     });

@@ -42,6 +42,8 @@ typedef NSDictionary<AMAAttributionSource, AMAExternalAttributionConfiguration *
 
 @property (nonatomic, strong) AMAAppMetricaConfiguration *appMetricaClientConfiguration;
 
+@property (nonatomic, copy) NSDictionary<NSString *, NSNumber *> *autocollectedData;
+
 - (instancetype)init NS_UNAVAILABLE;
 + (instancetype)new NS_UNAVAILABLE;
 
