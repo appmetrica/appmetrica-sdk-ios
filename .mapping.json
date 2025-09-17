@@ -1712,6 +1712,8 @@
   "AppMetricaLogSwift.podspec":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaLogSwift.podspec",
   "AppMetricaLogSwift/Sources/Log.swift":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaLogSwift/Sources/Log.swift",
   "AppMetricaLogSwift/Sources/Resources/PrivacyInfo.xcprivacy":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaLogSwift/Sources/Resources/PrivacyInfo.xcprivacy",
+  "AppMetricaLogSwift/Tests/LoggerTests.swift":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaLogSwift/Tests/LoggerTests.swift",
+  "AppMetricaLogSwift/Tests/Mocks/LogFacadeMock.swift":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaLogSwift/Tests/Mocks/LogFacadeMock.swift",
   "AppMetricaNetwork.podspec":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaNetwork.podspec",
   "AppMetricaNetwork/Sources/AMAGenericRequest.m":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaNetwork/Sources/AMAGenericRequest.m",
   "AppMetricaNetwork/Sources/AMAHTTPRequestor.m":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaNetwork/Sources/AMAHTTPRequestor.m",

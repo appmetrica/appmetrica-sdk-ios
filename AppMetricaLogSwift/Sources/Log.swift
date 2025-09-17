@@ -11,13 +11,22 @@ public enum LogLevel {
 
 public final class Logger {
     let channel: LogChannel
-    let facade: LogFacade = .sharedLog()
+    var facade: LogFacade
     
-    public init(channel: LogChannel) {
-        self.channel = channel
+    public convenience init(channel: LogChannel) {
+        self.init(channel: channel, facade: LogFacade.sharedLog())
     }
     
-    func message(_ str: String, level: LogLevel, file: StaticString = #fileID, line: UInt = #line, function: StaticString = #function) {
+    public init(channel: LogChannel, facade: LogFacade) {
+        self.channel = channel
+        self.facade = facade
+    }
+    
+    func message(_ str: String,
+                 level: LogLevel,
+                 file: StaticString = #fileID,
+                 line: UInt = #line,
+                 function: StaticString = #function) {
         facade.logMessage(toChannel: channel as String,
                           level: level.appMetricaLogLevel,
                           file: file.utf8Start,
@@ -27,23 +36,38 @@ public final class Logger {
                           message: str)
     }
     
-    public func info(_ str: String, file: StaticString = #fileID, line: UInt = #line, function: StaticString = #function) {
+    public func info(_ str: String,
+                     file: StaticString = #fileID,
+                     line: UInt = #line,
+                     function: StaticString = #function) {
         message(str, level: .info, file: file, line: line, function: function)
     }
     
-    public func warning(_ str: String, file: StaticString = #fileID, line: UInt = #line, function: StaticString = #function) {
+    public func warning(_ str: String,
+                        file: StaticString = #fileID,
+                        line: UInt = #line,
+                        function: StaticString = #function) {
         message(str, level: .warning, file: file, line: line, function: function)
     }
     
-    public func error(_ str: String, file: StaticString = #fileID, line: UInt = #line, function: StaticString = #function) {
+    public func error(_ str: String,
+                      file: StaticString = #fileID,
+                      line: UInt = #line,
+                      function: StaticString = #function) {
         message(str, level: .error, file: file, line: line, function: function)
     }
     
-    public func notify(_ str: String, file: StaticString = #fileID, line: UInt = #line, function: StaticString = #function) {
+    public func notify(_ str: String,
+                       file: StaticString = #fileID,
+                       line: UInt = #line,
+                       function: StaticString = #function) {
         message(str, level: .notify, file: file, line: line, function: function)
     }
     
-    public func error(_ error: Error, file: StaticString = #fileID, line: UInt = #line, function: StaticString = #function) {
+    public func error(_ error: Error,
+                      file: StaticString = #fileID,
+                      line: UInt = #line,
+                      function: StaticString = #function) {
         message(String(describing: error), level: .error, file: file, line: line, function: function)
     }
 }

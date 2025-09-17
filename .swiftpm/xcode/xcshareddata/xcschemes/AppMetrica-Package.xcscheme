@@ -448,9 +448,51 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
+               BlueprintIdentifier = "AppMetricaLogSwiftTests"
+               BuildableName = "AppMetricaLogSwiftTests"
+               BlueprintName = "AppMetricaLogSwiftTests"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
                BlueprintIdentifier = "AppMetricaScreenshot"
                BuildableName = "AppMetricaScreenshot"
                BlueprintName = "AppMetricaScreenshot"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "AppMetricaScreenshotTests"
+               BuildableName = "AppMetricaScreenshotTests"
+               BlueprintName = "AppMetricaScreenshotTests"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "AppMetricaSynchronizationTests"
+               BuildableName = "AppMetricaSynchronizationTests"
+               BlueprintName = "AppMetricaSynchronizationTests"
                ReferencedContainer = "container:">
             </BuildableReference>
          </BuildActionEntry>
@@ -630,6 +672,16 @@
                BlueprintIdentifier = "AppMetricaScreenshotTests"
                BuildableName = "AppMetricaScreenshotTests"
                BlueprintName = "AppMetricaScreenshotTests"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "AppMetricaLogSwiftTests"
+               BuildableName = "AppMetricaLogSwiftTests"
+               BlueprintName = "AppMetricaLogSwiftTests"
                ReferencedContainer = "container:">
             </BuildableReference>
          </TestableReference>

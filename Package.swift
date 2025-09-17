@@ -168,9 +168,14 @@ let package = Package(
             dependencies: [.log]
         ),
 
+        //MARK: - AppMetrica Log Swift
         .target(
             target: .logSwift,
             dependencies: [.log]
+        ),
+        .testTarget(
+            target: .logSwift,
+            dependencies: [.logSwift]
         ),
 
         //MARK: - AppMetrica Protobuf
