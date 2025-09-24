@@ -118,17 +118,24 @@ describe(@"AMACrashReportDecoder", ^{
                 [[decodedCrash(root).info.identifier should] equal:report[KSCrashField_ID]];
             });
             
-            it(@"Should decode 3.2.0 timestamp fromat", ^{
+            it(@"Should decode 3.2.0 timestamp format", ^{
                 report[KSCrashField_Version] = @"3.2.0";
                 report[KSCrashField_Timestamp] = @"2019-03-11T12:56:51Z";
                 [[decodedCrash(root).info.timestamp should] equal:[[NSDate alloc]
                                                                    initWithTimeIntervalSince1970:1552309011]];
             });
             
-            it(@"Should decode 3.3.0 timestamp fromat", ^{
+            it(@"Should decode 3.3.0 timestamp format", ^{
+                report[KSCrashField_Version] = @"3.3.0";
+                report[KSCrashField_Timestamp] = @"2019-03-11T12:56:51.123Z";
+                [[decodedCrash(root).info.timestamp should] equal:[[NSDate alloc]
+                                                                   initWithTimeIntervalSince1970:1552309011.123]];
+            });
+            
+            it(@"Should only decode last 3 significant digits of fractional seconds for 3.3.0 timestamp format", ^{
                 report[KSCrashField_Version] = @"3.3.0";
                 report[KSCrashField_Timestamp] = @"2019-03-11T12:56:51.123456Z";
-                [[decodedCrash(root).info.timestamp should] equal:[[NSDate alloc]
+                [[decodedCrash(root).info.timestamp shouldNot] equal:[[NSDate alloc]
                                                                    initWithTimeIntervalSince1970:1552309011.123456]];
             });
             

@@ -195,13 +195,7 @@ NSString *const kAMASysInfoUsableMemory = @"usableMemory";
     NSString *version = [self version:report[KSCrashField_Version]];
     NSString *timestampString = report[KSCrashField_Timestamp];
     
-    NSDate *timestamp = nil;
-    if ([AMAVersionMatcher isVersion:version matchesPessimisticConstraint:@"3.3"]) {
-        timestamp = [self dateFromMicrosecondsString:timestampString];
-    }
-    else {
-        timestamp = [[[self class] dateFormatter] dateFromString:timestampString];
-    }
+    NSDate *timestamp = [self timestamp:timestampString];
     
     return [[AMAInfo alloc] initWithVersion:version
                                  identifier:report[KSCrashField_ID]
@@ -525,11 +519,14 @@ NSString *const kAMASysInfoUsableMemory = @"usableMemory";
 
 - (NSDate *)timestamp:(NSString *)timestamp
 {
-    NSDate *crashDateTime = nil;
-    if (timestamp.length != 0) {
-        crashDateTime = [[[self class] dateFormatter] dateFromString:timestamp];
-        AMALogInfo(@"Fetched crash time from report: %@", crashDateTime);
+    if (timestamp.length == 0) {
+        return [self.dateProvider currentDate];
     }
+    NSDate *crashDateTime =
+        [[[self class] ISO8601DateFormatter] dateFromString:timestamp]
+        ?: [[[self class] legacyDateFormatter] dateFromString:timestamp];
+    
+    AMALogInfo(@"Fetched crash timestamp from report: %@", crashDateTime);
     return crashDateTime ?: [self.dateProvider currentDate];
 }
 
@@ -552,7 +549,7 @@ NSString *const kAMASysInfoUsableMemory = @"usableMemory";
     return [contents copy];
 }
 
-+ (NSDateFormatter *)dateFormatter
++ (NSDateFormatter *)legacyDateFormatter
 {
     static NSDateFormatter *formatter = nil;
     static dispatch_once_t onceToken;
@@ -566,32 +563,15 @@ NSString *const kAMASysInfoUsableMemory = @"usableMemory";
     return formatter;
 }
 
-/**
- @param string Format: `yyyy-MM-dd'T'HH:mm:ssZZZZZ`
- */
-- (NSDate *)dateFromMicrosecondsString:(NSString *)string
++ (NSISO8601DateFormatter *)ISO8601DateFormatter
 {
-    static NSString *const microsecondsPrefix = @".";
-    
-    NSRange microsecondsPrefixRange = [string rangeOfString:microsecondsPrefix];
-    if (microsecondsPrefixRange.location == NSNotFound) { return nil; }
-    NSString *microsecondsWithTimeZoneString = [string substringFromIndex:NSMaxRange(microsecondsPrefixRange)];
-
-    NSCharacterSet *nonDigitsCharacterSet = NSCharacterSet.decimalDigitCharacterSet.invertedSet;
-    NSRange timeZoneRangePrefixRange = [microsecondsWithTimeZoneString rangeOfCharacterFromSet:nonDigitsCharacterSet];
-    if (timeZoneRangePrefixRange.location == NSNotFound) { return nil; }
-    
-    NSString *microsecondsString = [microsecondsWithTimeZoneString substringToIndex:timeZoneRangePrefixRange.location];
-    if (microsecondsString == nil) { return nil; }
-    double microsecondsCount = [microsecondsString doubleValue];
-    
-    NSString *dateStringExludingMicroseconds =
-        [[string stringByReplacingOccurrencesOfString:microsecondsString withString:@""]
-         stringByReplacingOccurrencesOfString:microsecondsPrefix withString:@""];
-    NSDate *date = [[[self class] dateFormatter] dateFromString:dateStringExludingMicroseconds];
-    NSDate *dateWithMicroseconds = [date dateByAddingTimeInterval:microsecondsCount / 1000000.0];
-    
-    return dateWithMicroseconds;
+    static NSISO8601DateFormatter *formatter = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        formatter = [[NSISO8601DateFormatter alloc] init];
+        formatter.formatOptions = NSISO8601DateFormatWithInternetDateTime | NSISO8601DateFormatWithFractionalSeconds;
+    });
+    return formatter;
 }
 
 @end
