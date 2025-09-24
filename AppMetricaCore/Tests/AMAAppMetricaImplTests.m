@@ -243,7 +243,7 @@ describe(@"AMAAppMetricaImpl", ^{
             [impl activateWithConfiguration:configuration];
         });
         
-        it(@"Should add events and appState from delegate to session", ^{
+        it(@"Should add events and appState to previous session from delegate to session", ^{
             AMASessionStorage *sessionStorage = reporterTestHelper.appReporter.reporterStorage.sessionStorage;
             AMAEventStorage *eventsStorage = reporterTestHelper.appReporter.reporterStorage.eventStorage;
             
@@ -259,8 +259,9 @@ describe(@"AMAAppMetricaImpl", ^{
             [[theValue([eventStorage totalCountOfEventsWithTypes:@[ @(AMAEventTypeProtobufError) ]]) should] equal:theValue(1)];
             
             AMASession *session = [sessionStorage lastSessionWithError:nil];
+            AMASession *previousSession = [sessionStorage previousSessionForSession:session error:nil];
             
-            [[theValue([session.appState isEqual:appState]) should] beYes];
+            [[theValue([previousSession.appState isEqual:appState]) should] beYes];
         });
         
         it(@"Should setup app environment events", ^{

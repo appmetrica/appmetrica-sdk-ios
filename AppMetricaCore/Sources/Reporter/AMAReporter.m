@@ -320,6 +320,38 @@
     }
 }
 
+- (void)reportEventToPastSessionWithBlock:(AMAEvent *(^)(NSError **error))eventCreationBlock
+                                createdAt:(NSDate *)createdAt
+                                 appState:(AMAApplicationState *)appState
+                                onFailure:(void (^)(NSError *error))onFailure
+{
+    AMAEvent *event = [self buildEventWithBlock:eventCreationBlock onFailure:onFailure];
+    if (event == nil) {
+        return;
+    }
+    
+    NSDate *eventCreationDate = createdAt ?: [NSDate date];
+    NSError *error = nil;
+    AMASession *eventSession = [self finishedSessionForEventCreatedAt:eventCreationDate
+                                                             appState:appState
+                                                                error:&error
+                                                         onNewSession:^(AMASession *eventSession) {
+        [self addStartEventWithDate:eventCreationDate toSession:eventSession];
+    }];
+    
+    if (eventSession == nil) {
+        NSString *errorDescription = [NSString stringWithFormat:@"Failed to report event(%@) to previous session: %@",
+                                      event, error];
+        AMALogError(@"%@", errorDescription);
+        [AMAFailureDispatcher dispatchError:[AMAErrorsFactory internalInconsistencyError:errorDescription]
+                                  withBlock:onFailure];
+        return;
+    }
+    
+    [self applyAppStateToSessionIfNeeded:eventSession appState:appState];
+    [self reportPastEvent:event createdAt:createdAt toSession:eventSession onFailure:onFailure];
+}
+
 - (void)endCurrentSession
 {
     AMASession *currentSession = [self lastSession];
@@ -479,8 +511,7 @@
                          extras:(nullable NSDictionary<NSString *, NSData *> *)extras
                       onFailure:(nullable void (^)(NSError *error))onFailure
 {
-    NSDate *creationDate = date ?: [NSDate date];
-    [self reportCommonEventWithBlock:^AMAEvent *(NSError **error) {
+    AMAEvent *(^eventCreationBlock)(NSError **) = ^AMAEvent *(NSError **error) {
         return [self.eventBuilder fileEventWithType:eventType
                                                data:data
                                            fileName:fileName
@@ -491,7 +522,22 @@
                                      appEnvironment:appEnvironment
                                              extras:extras
                                               error:error];
-    } session:nil date:creationDate appState:appState onFailure:onFailure];
+    };
+        
+    if (date == nil) { // TODO: Use separate method for past reporting later
+        [self stampedExecute:^(NSDate *date) {
+            [self reportCommonEventWithBlock:eventCreationBlock
+                                     session:nil
+                                        date:date
+                                    appState:appState
+                                   onFailure:onFailure];
+        }];
+    } else {
+        [self reportEventToPastSessionWithBlock:eventCreationBlock
+                                      createdAt:date
+                                       appState:appState
+                                      onFailure:onFailure];
+    }
 }
 
 - (void)reportSystemEvent:(NSString *)name onFailure:(void (^)(NSError *))onFailure
@@ -781,7 +827,7 @@
 
 - (void)reportExternalAttribution:(NSDictionary *)attribution
                            source:(AMAAttributionSource)source
-                        onFailure:(nullable void (^)(NSError *))onFailure 
+                        onFailure:(nullable void (^)(NSError *))onFailure
 {
     if (AMAAppMetrica.isActivated == NO) {
         [AMAErrorLogger logAppMetricaNotStartedErrorWithOnFailure:onFailure];
@@ -795,13 +841,14 @@
     } onFailure:onFailure];
 }
 
-- (void)reportPollingEvent:(AMAEventPollingParameters *)event
+- (void)reportPollingEvent:(AMAEventPollingParameters *)pollingEvent
                  onFailure:(void (^)(NSError *error))onFailure
 {
-    NSDate *creationDate = event.creationDate ?: [NSDate date];
-    [self reportCommonEventWithBlock:^AMAEvent *(NSError **error) {
-        return [self.eventBuilder eventWithPollingParameters:event error:error];
-    } session:nil date:creationDate appState:event.appState onFailure:onFailure];
+    NSDate *creationDate = pollingEvent.creationDate;
+    AMAApplicationState *appState = pollingEvent.appState;
+    [self reportEventToPastSessionWithBlock:^AMAEvent *(NSError **error) {
+        return [self.eventBuilder eventWithPollingParameters:pollingEvent error:error];
+    } createdAt:creationDate appState:appState onFailure:onFailure];
 }
 
 #pragma mark - Execution -
@@ -932,14 +979,14 @@
                                     onNewSession:(void (^)(AMASession *eventSession))onNewSession
 {
     AMASession *currentSession = [self lastSession];
-    if ([self isSessionValid:currentSession forEventCreatedAt:creationDate appState:appState]) {
+    if ([self isSessionValid:currentSession forPastEventCreatedAt:creationDate appState:appState]) {
         AMALogInfo(@"Reporter %@ picked current session <%@> for past event reporting", self, currentSession);
         return currentSession;
     }
 
     AMASession *previousSession = [self.reporterStorage.sessionStorage previousSessionForSession:currentSession
                                                                                            error:nil];
-    if ([self isSessionValid:previousSession forEventCreatedAt:creationDate appState:appState]) {
+    if ([self isSessionValid:previousSession forPastEventCreatedAt:creationDate appState:appState]) {
         AMALogInfo(@"Reporter %@ picked previous session <%@> for past event reporting", self, previousSession);
         return previousSession;
     }
@@ -966,7 +1013,7 @@
 }
 
 - (BOOL)isSessionValid:(AMASession *)session
-     forEventCreatedAt:(NSDate *)creationDate
+ forPastEventCreatedAt:(NSDate *)creationDate
               appState:(AMAApplicationState *)appState
 {
     AMASessionExpirationType type = [self.sessionExpirationHandler expirationTypeForSession:session
@@ -984,6 +1031,7 @@
     else if (expirationType == AMASessionExpirationTypeTimeout
         && currentSession.type == AMASessionTypeGeneral
         && self.isActive) {
+        // Foreground(General) session does not expire by timeout while reporter is active
         return NO;
     }
     return YES;

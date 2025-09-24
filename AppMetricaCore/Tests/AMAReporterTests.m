@@ -1605,7 +1605,102 @@ describe(@"AMAReporter", ^{
         it(@"Should update event creation date", ^{
             AMAEventPollingParameters *params = [[AMAEventPollingParameters alloc] initWithEventType:eventType];
             params.creationDate = creationDate;
+
+            [reporter reportPollingEvent:params onFailure:nil];
             
+            event = [eventStorage() amatest_savedEventWithType:eventType];
+            [[event.createdAt should] equal:creationDate];
+        });
+    });
+    
+    context(@"Past event reporting", ^{
+        let(reporter, ^{ return [reporterTestHelper appReporterForApiKey:apiKey]; });
+        NSDate *const creationDate = [NSDate date];
+        NSUInteger const eventType = 99;
+        
+        __block AMAEvent *event = nil;
+        
+        it(@"Should add polling event to last finished valid session", ^{
+            AMAEventPollingParameters *params = [[AMAEventPollingParameters alloc] initWithEventType:eventType];
+            params.creationDate = creationDate;
+            
+            // add finished background session
+            AMASession *bgSession = [sessionStorage() newFinishedBackgroundSessionCreatedAt:creationDate
+                                                                                   appState:nil
+                                                                                      error:nil];
+            // add finished foreground session
+            AMASession *fgSession = [sessionStorage() newGeneralSessionCreatedAt:creationDate error:nil];
+            [sessionStorage() finishSession:fgSession atDate:creationDate error:nil];
+
+            [reporter reportPollingEvent:params onFailure:nil];
+            
+            event = [eventStorage() amatest_savedEventWithType:eventType];
+            [[event.sessionOid should] equal:fgSession.oid];
+        });
+        
+        it(@"Should add file type event to last finished valid session", ^{
+            NSDate *creationDate = [NSDate dateWithTimeIntervalSince1970:1];
+            
+            // add finished background session
+            AMASession *bgSession = [sessionStorage() newFinishedBackgroundSessionCreatedAt:creationDate
+                                                                                   appState:nil
+                                                                                      error:nil];
+            // add finished foreground session
+            AMASession *fgSession = [sessionStorage() newGeneralSessionCreatedAt:creationDate error:nil];
+            [sessionStorage() finishSession:fgSession atDate:creationDate error:nil];
+            
+            [reporter reportFileEventWithType:99
+                                         data:NSData.data
+                                     fileName:@""
+                                         date:creationDate
+                                      gZipped:YES
+                                    encrypted:YES
+                                    truncated:YES
+                             eventEnvironment:nil
+                               appEnvironment:nil
+                                     appState:nil
+                                       extras:nil
+                                    onFailure:nil];
+            event = [eventStorage() amatest_savedEventWithType:99];
+            
+            [[event.sessionOid should] equal:fgSession.oid];
+            [[event.createdAt should] equal:creationDate];
+            NSTimeInterval timeSinceSession = [creationDate timeIntervalSinceDate:fgSession.startDate.deviceDate];
+            [[theValue(event.timeSinceSession) should] equal:theValue(timeSinceSession)];
+        });
+        
+        it(@"Should add file type event to last active valid session if no date provided", ^{
+            NSDate *creationDate = [NSDate dateWithTimeIntervalSince1970:1];
+            
+            // add finished background session
+            AMASession *bgSession = [sessionStorage() newFinishedBackgroundSessionCreatedAt:creationDate
+                                                                                   appState:nil
+                                                                                      error:nil];
+            // add finished foreground session
+            AMASession *fgSession = [sessionStorage() newGeneralSessionCreatedAt:creationDate error:nil];
+            [sessionStorage() finishSession:fgSession atDate:creationDate error:nil];
+            
+            [reporter reportFileEventWithType:99
+                                         data:NSData.data
+                                     fileName:@""
+                                         date:nil
+                                      gZipped:YES
+                                    encrypted:YES
+                                    truncated:YES
+                             eventEnvironment:nil
+                               appEnvironment:nil
+                                     appState:nil
+                                       extras:nil
+                                    onFailure:nil];
+            event = [eventStorage() amatest_savedEventWithType:99];
+            
+            [[theValue(event.sessionOid.integerValue) should] equal:theValue(fgSession.oid.integerValue + 1)];
+        });
+        
+        it(@"Should update event creation date", ^{
+            AMAEventPollingParameters *params = [[AMAEventPollingParameters alloc] initWithEventType:eventType];
+            params.creationDate = creationDate;
+
             [reporter reportPollingEvent:params onFailure:nil];
             
             event = [eventStorage() amatest_savedEventWithType:eventType];
