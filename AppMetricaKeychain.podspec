@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name = "AppMetricaKeychain"
-  s.version = '5.13.0'
+  s.version = '5.14.0'
   s.summary = "Provides utilites for working with the keychain"
 
   s.homepage = 'https://appmetrica.io'
@@ -17,9 +17,9 @@ Pod::Spec.new do |s|
 
   s.frameworks = 'Foundation'
 
-  s.dependency 'AppMetricaLog', '= 5.13.0'
-  s.dependency 'AppMetricaStorageUtils', '= 5.13.0'
-  s.dependency 'AppMetricaCoreUtils', '= 5.13.0'
+  s.dependency 'AppMetricaLog', '= 5.14.0'
+  s.dependency 'AppMetricaStorageUtils', '= 5.14.0'
+  s.dependency 'AppMetricaCoreUtils', '= 5.14.0'
   
   s.header_dir = s.name
   s.source_files = [
