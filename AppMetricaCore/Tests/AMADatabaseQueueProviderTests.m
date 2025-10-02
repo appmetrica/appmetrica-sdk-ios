@@ -75,11 +75,6 @@ describe(@"AMADatabaseQueueProvider", ^{
         [provider queueForPath:path];
     });
 
-    it(@"Should add auto_vacuum pragma", ^{
-        [[database should] receive:@selector(executeUpdate:) withArguments:@"PRAGMA auto_vacuum=FULL"];
-        [provider queueForPath:path];
-    });
-
     context(@"Logs", ^{
         it(@"Should disable logs by default", ^{
             [[database should] receive:@selector(setLogsErrors:) withArguments:theValue(NO)];

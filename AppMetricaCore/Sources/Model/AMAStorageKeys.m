@@ -65,4 +65,5 @@ NSString *const AMAStorageStringKeyRecentMainApiKey = @"recent.main.api.key";
 NSString *const AMAStorageStringKeyDidApplyDataMigrationFor580 = @"5.8.0.migration.applied";
 NSString *const AMAStorageStringKeyDidApplyDataMigrationFor590 = @"5.9.0.migration.applied";
 NSString *const AMAStorageStringKeyDidApplyDataMigrationFor5100 = @"5.10.0.migration.applied";
+NSString *const AMAStorageStringKeyDidApplyDataMigrationFor5140 = @"5.14.0.migration.applied";
 NSString *const AMAStorageStringKeyAutocollectedData = @"autocollected.data.apikeys";

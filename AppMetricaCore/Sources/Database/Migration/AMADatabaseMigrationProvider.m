@@ -33,6 +33,7 @@
 #import "AMAReporterDataMigrationTo5100.h"
 #import "AMADataMigrationTo590.h"
 #import "AMADataMigrationTo5100.h"
+#import "AMADataMigrationTo5140.h"
 
 #import "AMALocationDatabaseSchemeMigrationTo2.h"
 
@@ -203,6 +204,7 @@ NSUInteger const kAMALocationDatabaseSchemaVersion = 2;
         [AMADataMigrationTo580 new],
         [AMADataMigrationTo590 new],
         [AMADataMigrationTo5100 new],
+        [AMADataMigrationTo5140 new],
     ];
 }
 
@@ -213,6 +215,7 @@ NSUInteger const kAMALocationDatabaseSchemaVersion = 2;
         [[AMAReporterDataMigrationTo500 alloc] initWithApiKey:apiKey main:main],
         [[AMAReporterDataMigrationTo580 alloc] initWithApiKey:apiKey main:main],
         [[AMAReporterDataMigrationTo5100 alloc] initWithApiKey:apiKey],
+        [AMADataMigrationTo5140 new],
     ];
 }
 
@@ -221,6 +224,7 @@ NSUInteger const kAMALocationDatabaseSchemaVersion = 2;
     return @[
         [AMALocationDataMigrationTo500 new],
         [AMALocationDataMigrationTo5100 new],
+        [AMADataMigrationTo5140 new],
     ];
 }
 

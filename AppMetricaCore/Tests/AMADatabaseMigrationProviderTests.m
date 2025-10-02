@@ -28,6 +28,7 @@
 #import "AMADataMigrationTo580.h"
 #import "AMADataMigrationTo590.h"
 #import "AMADataMigrationTo5100.h"
+#import "AMADataMigrationTo5140.h"
 
 #import "AMAReporterDataMigrationTo500.h"
 #import "AMAReporterDataMigrationTo580.h"
@@ -75,11 +76,12 @@
 {
     AMADatabaseMigrationProvider *provider = [[AMADatabaseMigrationProvider alloc] initWithContentType:AMADatabaseContentTypeConfiguration];
     NSArray *migrations = [provider dataMigrationsWithAPIKey:nil main:YES];
-    XCTAssertEqual(migrations.count, 4);
+    XCTAssertEqual(migrations.count, 5);
     XCTAssertTrue([[migrations[0] class] isSubclassOfClass:[AMADataMigrationTo500 class]]);
     XCTAssertTrue([[migrations[1] class] isSubclassOfClass:[AMADataMigrationTo580 class]]);
     XCTAssertTrue([[migrations[2] class] isSubclassOfClass:[AMADataMigrationTo590 class]]);
     XCTAssertTrue([[migrations[3] class] isSubclassOfClass:[AMADataMigrationTo5100 class]]);
+    XCTAssertTrue([[migrations[4] class] isSubclassOfClass:[AMADataMigrationTo5140 class]]);
 }
 
 - (void)testConfigurationApiKeyMigrations
@@ -119,10 +121,11 @@
 {
     AMADatabaseMigrationProvider *provider = [[AMADatabaseMigrationProvider alloc] initWithContentType:AMADatabaseContentTypeReporter];
     NSArray *migrations = [provider dataMigrationsWithAPIKey:nil main:YES];
-    XCTAssertEqual(migrations.count, 3);
+    XCTAssertEqual(migrations.count, 4);
     XCTAssertTrue([[migrations[0] class] isSubclassOfClass:[AMAReporterDataMigrationTo500 class]]);
     XCTAssertTrue([[migrations[1] class] isSubclassOfClass:[AMAReporterDataMigrationTo580 class]]);
     XCTAssertTrue([[migrations[2] class] isSubclassOfClass:[AMAReporterDataMigrationTo5100 class]]);
+    XCTAssertTrue([[migrations[3] class] isSubclassOfClass:[AMADataMigrationTo5140 class]]);
 }
 
 - (void)testReporterApiKeyMigrationsEmpty
@@ -151,9 +154,10 @@
 {
     AMADatabaseMigrationProvider *provider = [[AMADatabaseMigrationProvider alloc] initWithContentType:AMADatabaseContentTypeLocation];
     NSArray *migrations = [provider dataMigrationsWithAPIKey:nil main:NO];
-    XCTAssertEqual(migrations.count, 2);
+    XCTAssertEqual(migrations.count, 3);
     XCTAssertTrue([[migrations[0] class] isSubclassOfClass:[AMALocationDataMigrationTo500 class]]);
     XCTAssertTrue([[migrations[1] class] isSubclassOfClass:[AMALocationDataMigrationTo5100 class]]);
+    XCTAssertTrue([[migrations[2] class] isSubclassOfClass:[AMADataMigrationTo5140 class]]);
 }
 
 - (void)testLocationApiKeyMigrationsEmpty

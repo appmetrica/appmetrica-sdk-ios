@@ -65,6 +65,7 @@
 #import "AMAAppMetricaUUIDMigrator.h"
 #import "AMAReporterStateStorage.h"
 #import "AMAIdentifierProviderMock.h"
+#import "AMADataMigrationTo5140.h"
 
 @import AppMetricaIdentifiers;
 
@@ -493,6 +494,26 @@ describe(@"AMADataMigrationsTests",
                     id<AMAKeyValueStoring> storage = [migratedDB.storageProvider storageForDB:db];
                     
                     [[[storage dateForKey:AMAStorageStringKeyStartupUpdatedAt error:nil] should] equal:[NSDate distantPast]];
+                    [[[storage stringForKey:migration.migrationKey error:nil] should] equal:@"1"];
+                }];
+            });
+        });
+        
+        context(@"Migration to 5.14.0", ^{
+            beforeEach(^{
+                basePath = [AMAFileUtility persistentPath];
+                migration = [AMADataMigrationTo5140 new];
+                migrationDatabase = [AMADatabaseMigrationTestsUtils configurationDatabase:basePath];
+                
+                [AMADatabaseMigrationTestsUtils includeDataMigration:migration
+                                                         contentType:AMADatabaseContentTypeConfiguration
+                                                          inDatabase:migrationDatabase];
+            });
+            
+            it(@"Should return migration key", ^{
+                id<AMADatabaseProtocol> migratedDB = [AMADatabaseFactory configurationDatabase];
+                [migratedDB inDatabase:^(AMAFMDatabase *db) {
+                    id<AMAKeyValueStoring> storage = [migratedDB.storageProvider storageForDB:db];
                     [[[storage stringForKey:migration.migrationKey error:nil] should] equal:@"1"];
                 }];
             });

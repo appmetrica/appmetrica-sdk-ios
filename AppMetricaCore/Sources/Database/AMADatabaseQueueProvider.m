@@ -53,7 +53,6 @@
 
     [dbQueue inDatabase:^(AMAFMDatabase *db) {
         db.logsErrors = self.logsEnabled;
-        [db executeUpdate:@"PRAGMA auto_vacuum=FULL"];
     }];
 
     @synchronized (self) {

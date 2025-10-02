@@ -13,6 +13,9 @@
 + (id<AMADatabaseProtocol>)databaseForName:(NSString *)databaseName
                           migrationManager:(AMADatabaseMigrationManager *)migrationManager;
 
++ (id<AMADatabaseProtocol>)databaseWithPath:(NSString *)path
+                           migrationManager:(AMADatabaseMigrationManager *)migrationManager;
+
 + (id<AMADatabaseProtocol>)databaseForBackupName:(NSString *)backupName
                                 migrationManager:(AMADatabaseMigrationManager *)migrationManager;
 
