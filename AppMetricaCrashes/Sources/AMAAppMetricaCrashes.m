@@ -285,6 +285,11 @@
 - (void)enableANRWatchdogWithWatchdogInterval:(NSTimeInterval)watchdogInterval
                                  pingInterval:(NSTimeInterval)pingInterval
 {
+    // disable ANR for extension https://nda.ya.ru/t/gg-V18Dh7KJ7zu
+    if ([AMAPlatformDescription isExtension]) {
+        return;
+    }
+    
     [self execute:^{
         [self.ANRDetector cancel];
         self.ANRDetector = [[AMAANRWatchdog alloc] initWithWatchdogInterval:watchdogInterval

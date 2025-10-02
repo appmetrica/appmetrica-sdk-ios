@@ -1,6 +1,7 @@
 #import <Kiwi/Kiwi.h>
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
 #import <AppMetricaCoreExtension/AppMetricaCoreExtension.h>
+#import <AppMetricaPlatform/AppMetricaPlatform.h>
 #import "AMAAppMetricaCrashes.h"
 #import "AMAAppMetricaCrashes+Private.h"
 #import "AMAANRWatchdog.h"
@@ -205,6 +206,25 @@ describe(@"AMAAppMetricaCrashes", ^{
                         [crashes hostStateDidChange:AMAHostAppStateForeground];
                     });
                 });
+            });
+            
+            context(@"ANR in extension", ^{
+                
+                beforeEach(^{
+                    [AMAPlatformDescription stub:@selector(isExtension) andReturn:theValue(YES)];
+                });
+                afterEach(^{
+                    [AMAPlatformDescription clearStubs];
+                });
+                
+                it(@"Should not have ANR watchdog enabled if it's enabled in configuration", ^{
+                    initialConfig.applicationNotRespondingDetection = YES;
+                    [crashes setConfiguration:initialConfig];
+
+                    [[anrDetectorMock shouldNot] receive:@selector(start)];
+                    [crashes activate];
+                });
+                
             });
 
             it(@"Should initialize crash processor with provided ignored signals and serializer", ^{
