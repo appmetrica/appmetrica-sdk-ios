@@ -3,17 +3,26 @@
 #import "AMAKSCrash.h"
 #import "AMAANRWatchdog.h"
 #import <AppMetricaPlatform/AppMetricaPlatform.h>
+#import <atomic>
 
-@interface AMAANRWatchdog ()
+static const useconds_t AMAANRSleepStartInterval = 50000;
+static const useconds_t AMAANRMaxSleepInterval = 1000000;
+
+enum class AMAANRState: int {
+    initial,
+    observed,
+};
+
+@interface AMAANRWatchdog () {
+    std::atomic<AMAANRState> predicate;
+}
 
 @property (atomic, assign, getter = isOperating) BOOL operating;
 @property (nonatomic, assign) NSTimeInterval ANRDuration;
 @property (nonatomic, assign) NSTimeInterval checkPeriod;
 
-@property (nonatomic, strong) NSCondition *condition;
 @property (nonatomic, strong) id<AMAAsyncExecuting> watchingExecutor;
 @property (nonatomic, strong) id<AMAAsyncExecuting> observedExecutor;
-@property (nonatomic, assign) BOOL predicate;
 
 @end
 
@@ -41,8 +50,10 @@
 {
     self = [super init];
     if (self != nil) {
-        _condition = [[NSCondition alloc] init];
-        _predicate = NO;
+        if (predicate.is_lock_free() == false) {
+            AMALogWarn(@"std::atomic<AMAANRState>predicate.is_lock_free() == false");
+        }
+        predicate.store(AMAANRState::initial);
         _watchingExecutor = watchingExecutor;
         _observedExecutor = observedExecutor;
         
@@ -56,7 +67,6 @@
 - (void)dealloc
 {
     _operating = NO;
-    [_condition unlock];
 }
 
 # pragma mark - Public
@@ -83,33 +93,47 @@
 
 - (void)startMonitoring
 {
+    int64_t inputMinSleepTime = (int64_t)(self.ANRDuration * USEC_PER_SEC);
+    useconds_t maxSleepTime = (useconds_t)MIN(inputMinSleepTime, (int64_t)AMAANRMaxSleepInterval);
+    
     while (self.isOperating) {
-        [self.condition lock];
+        useconds_t sleepTime = AMAANRSleepStartInterval;
+        // predicate == AMAAnrState::initial
         
         __weak typeof(self) weakSelf = self;
         [self.observedExecutor execute:^{
-            if (weakSelf != nil) {
-                [weakSelf.condition lock];
-                weakSelf.predicate = YES;
-                [weakSelf.condition signal];
-                [weakSelf.condition unlock];
+            typeof(self) strongSelf = weakSelf;
+            if (strongSelf != nil) {
+                strongSelf->predicate.store(AMAANRState::observed, std::memory_order_release);
             }
         }];
 
-        NSDate *untilDate = [NSDate dateWithTimeIntervalSinceNow:self.ANRDuration];
-        while ([self.condition waitUntilDate:untilDate] && self.predicate == NO) {
-            // Pass in case of spurious wakeups
+        CFTimeInterval currentTime = CFAbsoluteTimeGetCurrent();
+        CFTimeInterval untilTime = currentTime + (CFTimeInterval)self.ANRDuration;
+        
+        // wait until observedExecutor changes stored value
+        while (currentTime <= untilTime && predicate.load(std::memory_order_acquire) == AMAANRState::initial) {
+            sleepTime = MIN(sleepTime * 2, maxSleepTime);
+            int64_t remainTime = ((int64_t)untilTime - (int64_t)currentTime) * USEC_PER_SEC;
+            useconds_t usleepArg = (useconds_t)MIN(remainTime, (int64_t)sleepTime);
+            usleep(usleepArg);
+            
+            currentTime = CFAbsoluteTimeGetCurrent();
         }
-
-        if (self.predicate == NO) {
+        // if observedExecutor is not finished yet notify ANR
+        if (predicate.load(std::memory_order_acquire) == AMAANRState::initial) {
             if (self.isOperating) {
                 [self notifyOfANR];
             }
-            [self.condition wait]; // Wait forever not to report the same suspension twice
+            
+            // Wait forever for observedExecutor
+            // not to report the same suspension twice
+            while (predicate.load(std::memory_order_acquire) != AMAANRState::observed) {
+                usleep(sleepTime);
+            }
         }
 
-        self.predicate = NO;
-        [self.condition unlock];
+        predicate.store(AMAANRState::initial);
 
         [NSThread sleepForTimeInterval:self.checkPeriod];
     }

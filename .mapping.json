@@ -1335,7 +1335,7 @@
   "AppMetricaCrashes.podspec":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCrashes.podspec",
   "AppMetricaCrashes/Protos/Crash.proto":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCrashes/Protos/Crash.proto",
   "AppMetricaCrashes/Sources/AMAANRWatchdog.h":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCrashes/Sources/AMAANRWatchdog.h",
-  "AppMetricaCrashes/Sources/AMAANRWatchdog.m":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCrashes/Sources/AMAANRWatchdog.m",
+  "AppMetricaCrashes/Sources/AMAANRWatchdog.mm":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCrashes/Sources/AMAANRWatchdog.mm",
   "AppMetricaCrashes/Sources/AMAAppMetricaCrashes+Private.h":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCrashes/Sources/AMAAppMetricaCrashes+Private.h",
   "AppMetricaCrashes/Sources/AMAAppMetricaCrashes.m":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCrashes/Sources/AMAAppMetricaCrashes.m",
   "AppMetricaCrashes/Sources/AMAAppMetricaCrashesConfiguration.m":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCrashes/Sources/AMAAppMetricaCrashesConfiguration.m",
