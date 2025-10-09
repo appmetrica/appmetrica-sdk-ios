@@ -32,6 +32,14 @@ NS_SWIFT_NAME(CancelableExecuting)
 
 @end
 
+NS_SWIFT_NAME(ThreadProviding)
+@protocol AMAThreadProviding<NSObject>
+
+@property (nonatomic, strong, readonly) NSThread *thread;
+
+@end
+
+
 #pragma mark - AMAExecutor
 
 NS_SWIFT_NAME(AsyncExecutor)

@@ -62,6 +62,11 @@
     return block();
 }
 
+- (NSThread *)thread
+{
+    return NSThread.currentThread;
+}
+
 @end
 
 #pragma mark - manual

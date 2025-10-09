@@ -1,6 +1,7 @@
 
 #import <CoreLocation/CoreLocation.h>
 #import <AppMetricaPlatform/AppMetricaPlatform.h>
+
 #import "AMACore.h"
 #import "AMALocationManager.h"
 #import "AMAStartupPermissionController.h"
@@ -8,21 +9,16 @@
 #import "AMALocationCollectingConfiguration.h"
 #import "AMAMetricaConfiguration.h"
 #import "AMAMetricaPersistentConfiguration.h"
+#import "AMALocationManagerState.h"
 
 @interface AMALocationManager () <CLLocationManagerDelegate>
 
-@property (nonatomic, strong) CLLocationManager *locationManager;
-@property (nonatomic, strong) NSNumber *authorizationStatus;
-@property (nonatomic, strong) CLLocation *externalLocation;
-@property (nonatomic, assign) BOOL locationManagerStartedInitialization;
+@property (atomic, strong) CLLocationManager *locationManager;
 @property (nonatomic, assign) BOOL locationUpdateInProgress;
 
-@property (nonatomic, assign) BOOL currentTrackLocationEnabled;
-@property (nonatomic, assign) BOOL currentAccurateLocationEnabled;
-@property (nonatomic, assign) BOOL currentAllowsBackgroundLocationUpdates;
+@property (atomic, copy) AMALocationManagerState *state;
 
-@property (nonatomic, strong, readonly) id<AMAAsyncExecuting, AMASyncExecuting> executor;
-@property (nonatomic, strong, readonly) id<AMAAsyncExecuting> mainQueueExecutor;
+@property (nonatomic, strong, readonly) id<AMASyncExecuting, AMAAsyncExecuting, AMAThreadProviding> executor;
 @property (nonatomic, strong, readonly) AMAStartupPermissionController *startupPermissionController;
 @property (nonatomic, strong, readonly) AMALocationCollectingController *locationCollectingController;
 @property (nonatomic, strong, readonly) AMALocationCollectingConfiguration *configuration;
@@ -33,23 +29,22 @@
 
 - (instancetype)init
 {
-    AMAExecutor *executor = [[AMAExecutor alloc] initWithIdentifier:self];
-    id<AMAAsyncExecuting> mainQueueExecutor = [[AMAExecutor alloc] initWithQueue:dispatch_get_main_queue()];
+    AMARunLoopExecutor *executor = [[AMARunLoopExecutor alloc] initWithName:@"AMALocationManager"];
     AMAStartupPermissionController *startupPermissionController = [[AMAStartupPermissionController alloc] init];
     AMALocationCollectingConfiguration *configuration = [[AMALocationCollectingConfiguration alloc] init];
     AMAPersistentTimeoutConfiguration *timeoutConfiguration =
         [AMAMetricaConfiguration sharedInstance].persistent.timeoutConfiguration;
+    AMALocationCollectingController *locationController =
+        [[AMALocationCollectingController alloc] initWithConfiguration:configuration
+                                                  timeoutConfiguration:timeoutConfiguration];
 
     return [self initWithExecutor:executor
-                mainQueueExecutor:mainQueueExecutor
       startupPermissionController:startupPermissionController
                     configuration:configuration
-     locationCollectingController:[[AMALocationCollectingController alloc] initWithConfiguration:configuration
-                                                                            timeoutConfiguration:timeoutConfiguration]];
+     locationCollectingController:locationController];
 }
 
-- (instancetype)initWithExecutor:(id<AMAAsyncExecuting, AMASyncExecuting>)executor
-               mainQueueExecutor:(id<AMAAsyncExecuting>)mainQueueExecutor
+- (instancetype)initWithExecutor:(id<AMASyncExecuting, AMAAsyncExecuting, AMAThreadProviding>)executor
      startupPermissionController:(AMAStartupPermissionController *)startupPermissionController
                    configuration:(AMALocationCollectingConfiguration *)configuration
     locationCollectingController:(AMALocationCollectingController *)locationCollectingController
@@ -57,11 +52,17 @@
     self = [super init];
     if (self != nil) {
         _executor = executor;
-        _mainQueueExecutor = mainQueueExecutor;
         _startupPermissionController = startupPermissionController;
         _configuration = configuration;
         _locationCollectingController = locationCollectingController;
-        _currentTrackLocationEnabled = YES;
+        
+        AMALocationManagerMutableState *initialState = [AMALocationManagerMutableState new];
+        initialState.currentTrackLocationEnabled = YES;
+        _state = [[AMALocationManagerState alloc] initWithAuthorizationStatus:nil
+                                                             externalLocation:nil
+                                                  currentTrackLocationEnabled:YES
+                                               currentAccurateLocationEnabled:NO
+                                       currentAllowsBackgroundLocationUpdates:NO];
     }
 
     return self;
@@ -81,14 +82,17 @@
 
 - (CLLocation *)currentLocation
 {
+    AMALocationManagerState *state = self.state;
     CLLocation *currentLocation = nil;
-    @synchronized (self) {
-        if ([self isExternalLocationAvailable]) {
-            currentLocation = self.externalLocation;
-        } else if (self.currentTrackLocationEnabled && [self isLocationSystemPermissionGranted]) {
-            currentLocation = self.locationManager.location;
-        }
+    
+    if ([state isExternalLocationAvailable]) {
+        currentLocation = state.externalLocation;
+    } else if (state.currentTrackLocationEnabled && state.isLocationSystemPermissionGranted) {
+        currentLocation = [self.executor syncExecute:^id _Nullable {
+            return self.locationManager.location;
+        }];
     }
+    
     AMALogInfo(@"Current location is: %@", currentLocation);
     return currentLocation;
 }
@@ -103,8 +107,11 @@
 - (void)setLocation:(CLLocation *)location
 {
     @synchronized (self) {
-        self.externalLocation = location;
+        AMALocationManagerMutableState *newState = [self.state mutableCopy];
+        newState.externalLocation = location;
+        self.state = newState;
     }
+    
     [self.executor execute:^{
         AMALogInfo(@"External location is set: %@", location);
         [self syncUpdateLocationUpdatesForCurrentStatus];
@@ -113,41 +120,43 @@
 
 - (CLLocation *)location
 {
-    CLLocation *result = nil;
-    @synchronized (self) {
-        result = self.externalLocation;
-    }
-    return result;
+    return self.state.externalLocation;
 }
 
 - (void)setAccurateLocationEnabled:(BOOL)preciseLocationNeeded
 {
+    @synchronized (self) {
+        AMALocationManagerMutableState *newState = [self.state mutableCopy];
+        newState.currentAccurateLocationEnabled = preciseLocationNeeded;
+        self.state = newState;
+    }
+    
     [self.executor execute:^{
-        self.currentAccurateLocationEnabled = preciseLocationNeeded;
         [self configureLocationManager];
     }];
 }
 
 - (BOOL)accurateLocationEnabled
 {
-    return [[self.executor syncExecute:^id {
-        return @(self.currentAccurateLocationEnabled);
-    }] boolValue];
+    return self.state.currentAccurateLocationEnabled;
 }
 
 - (void)setAllowsBackgroundLocationUpdates:(BOOL)allowsBackgroundLocationUpdates
 {
+    @synchronized (self) {
+        AMALocationManagerMutableState *newState = [self.state mutableCopy];
+        newState.currentAllowsBackgroundLocationUpdates = allowsBackgroundLocationUpdates;
+        self.state = newState;
+    }
+    
     [self.executor execute:^{
-        self.currentAllowsBackgroundLocationUpdates = allowsBackgroundLocationUpdates;
         [self configureLocationManager];
     }];
 }
 
 - (BOOL)allowsBackgroundLocationUpdates
 {
-    return [[self.executor syncExecute:^id {
-        return @(self.currentAllowsBackgroundLocationUpdates);
-    }] boolValue];
+    return self.state.currentAllowsBackgroundLocationUpdates;
 }
 
 - (void)start
@@ -160,9 +169,7 @@
 - (void)updateAuthorizationStatus
 {
     [self.executor execute:^{
-        @synchronized (self) {
-            [self updateAuthorizationStatusFromLocationManager];
-        }
+        [self updateAuthorizationStatusFromLocationManager];
         [self syncUpdateLocationManagerForCurrentStatus];
     }];
 }
@@ -176,15 +183,15 @@
 
 - (BOOL)trackLocationEnabled
 {
-    @synchronized (self) {
-        return self.currentTrackLocationEnabled;
-    }
+    return self.state.currentTrackLocationEnabled;
 }
 
 - (void)setTrackLocationEnabled:(BOOL)locationTrackingEnabled
 {
     @synchronized (self) {
-        self.currentTrackLocationEnabled = locationTrackingEnabled;
+        AMALocationManagerMutableState *newState = [self.state mutableCopy];
+        newState.currentTrackLocationEnabled = locationTrackingEnabled;
+        self.state = newState;
     }
     [self.executor execute:^{
         AMALogInfo(@"Location tracking flag is changed to: %@", locationTrackingEnabled ? @"YES" : @"NO");
@@ -193,37 +200,6 @@
 }
 
 #pragma mark - Private -
-
-- (CLAuthorizationStatus)currentAuthorizationStatus {
-    CLAuthorizationStatus authorizationStatus = kCLAuthorizationStatusNotDetermined;
-    @synchronized (self) {
-        // wait for change authorizationStatus via delegate
-        if (self.authorizationStatus != nil) {
-            authorizationStatus = (CLAuthorizationStatus)[self.authorizationStatus intValue];
-        }
-    }
-    return authorizationStatus;
-}
-
-- (BOOL)isLocationSystemPermissionGranted
-{
-    CLAuthorizationStatus authorizationStatus = [self currentAuthorizationStatus];
-    BOOL result = authorizationStatus == kCLAuthorizationStatusAuthorizedWhenInUse ||
-                  authorizationStatus == kCLAuthorizationStatusAuthorizedAlways;
-    return result;
-}
-
-- (BOOL)isVisitsSystemPermissionGranted
-{
-    return [self currentAuthorizationStatus] == kCLAuthorizationStatusAuthorizedAlways;
-}
-
-- (BOOL)isExternalLocationAvailable
-{
-    @synchronized (self) {
-        return self.externalLocation != nil;
-    }
-}
 
 - (BOOL)isLocationCollectingGranted
 {
@@ -240,10 +216,10 @@
 - (BOOL)shouldUseLocationManagerForAction:(NSString *)action
 {
     BOOL result = NO;
-    if ([self isExternalLocationAvailable]) {
+    if (self.state.isExternalLocationAvailable) {
         [self logPreventionOfAction:action reason:@"external location is available"];
     }
-    else if (self.currentTrackLocationEnabled == NO) {
+    else if (self.state.currentTrackLocationEnabled == NO) {
         [self logPreventionOfAction:action reason:@"location tracking is disabled"];
     }
     else if ([self isLocationCollectingGranted] == NO) {
@@ -278,7 +254,7 @@
     if ([self isLocationManagerAvailableForAction:action] == NO) {
         // Already logged
     }
-    else if ([self isLocationSystemPermissionGranted] == NO) {
+    else if (self.state.isLocationSystemPermissionGranted == NO) {
         [self logPreventionOfAction:action reason:@"location permission is not granted"];
     }
     else {
@@ -294,7 +270,7 @@
     if ([self isLocationManagerAvailableForAction:action] == NO) {
         // Already logged
     }
-    else if ([self isVisitsSystemPermissionGranted] == NO) {
+    else if (self.state.isVisitsSystemPermissionGranted == NO) {
         [self logPreventionOfAction:action reason:@"always system permission for visits is not granted"];
     }
     else if (self.configuration.visitsCollectingEnabled == NO) {
@@ -309,7 +285,7 @@
 - (BOOL)isLocationManagerAvailableForAction:(NSString *)action
 {
     BOOL result = NO;
-    if (self.locationManagerStartedInitialization == NO) {
+    if (self.locationManager == nil) {
         [self logPreventionOfAction:action reason:@"location manager is not initialized"];
     }
     else if ([self shouldUseLocationManagerForAction:action] == NO) {
@@ -358,39 +334,31 @@
 
 - (void)initializeLocationManager
 {
-    if (self.locationManagerStartedInitialization == NO) {
-        @synchronized (self) {
-            if (self.locationManagerStartedInitialization == NO) {
-                self.locationManagerStartedInitialization = YES;
-
-                __weak __typeof(self) weakSelf = self;
-
-                [self.mainQueueExecutor execute:^{
-                    __strong __typeof(weakSelf) strongSelf = weakSelf;
-
-                    CLLocationManager *manager = [[CLLocationManager alloc] init];
-                    AMALogInfo(@"location manager is created: %@", manager);
-
-                    strongSelf.locationManager = manager;
-                    strongSelf.locationManager.delegate = strongSelf;
-                }];
-            }
-        }
+    if (self.locationManager == nil) {
+        CLLocationManager *manager = [[CLLocationManager alloc] init];
+        AMALogInfo(@"location manager is created: %@", manager);
+        self.locationManager = manager;
+        
+        manager.delegate = self;
     }
 }
 
-- (void)updateAuthorizationStatusFromLocationManager {
+- (void)updateAuthorizationStatusFromLocationManager
+{
+    CLAuthorizationStatus status = kCLAuthorizationStatusNotDetermined;
     if (@available(iOS 14.0, tvOS 14.0, *)) {
         if (self.locationManager != nil) {
-            @synchronized (self) {
-                self.authorizationStatus = @(self.locationManager.authorizationStatus);
-            }
+            status = self.locationManager.authorizationStatus;
         }
     }
     else {
-        @synchronized (self) {
-            self.authorizationStatus = @([CLLocationManager authorizationStatus]);
-        }
+        status = [CLLocationManager authorizationStatus];
+    }
+    
+    @synchronized (self) {
+        AMALocationManagerMutableState *newState = [self.state mutableCopy];
+        newState.authorizationStatus = @(status);
+        self.state = newState;
     }
 }
 
@@ -401,49 +369,44 @@
     }
 
     self.locationUpdateInProgress = YES;
-    [self.mainQueueExecutor execute:^{
-        AMALogInfo(@"Start location manager");
-        [self configureLocationManager];
+    AMALogInfo(@"Start location manager");
+    
+    [self configureLocationManager];
 #if TARGET_OS_TV
-        [self.locationManager requestLocation];
+    [self.locationManager requestLocation];
 #else
-        [self.locationManager startUpdatingLocation];
+    [self.locationManager startUpdatingLocation];
 #endif
-    }];
 }
 
 - (void)stopLocationUpdates
 {
     self.locationUpdateInProgress = NO;
-    [self.mainQueueExecutor execute:^{
-        AMALogInfo(@"Stop location manager");
-        [self.locationManager stopUpdatingLocation];
-    }];
+    
+    AMALogInfo(@"Stop location manager");
+    [self.locationManager stopUpdatingLocation];
 }
 
 - (void)startVisitsMonitoring
 {
 #if TARGET_OS_IOS
-    [self.mainQueueExecutor execute:^{
-        AMALogInfo(@"Start monitoring visits");
-        [self.locationManager startMonitoringVisits];
-    }];
+    AMALogInfo(@"Start monitoring visits");
+    [self.locationManager startMonitoringVisits];
 #endif
 }
 
 - (void)stopVisitsMonitoring
 {
 #if TARGET_OS_IOS
-    [self.mainQueueExecutor execute:^{
-        AMALogInfo(@"Stop monitoring visits");
-        [self.locationManager stopMonitoringVisits];
-    }];
+    AMALogInfo(@"Stop monitoring visits");
+    [self.locationManager stopMonitoringVisits];
 #endif
 }
 
 - (void)configureLocationManager
 {
-    if (self.currentAccurateLocationEnabled) {
+    AMALocationManagerState *state = self.state;
+    if (state.currentAccurateLocationEnabled) {
         AMALogInfo(@"Use accurate location");
         self.locationManager.desiredAccuracy = self.configuration.accurateDesiredAccuracy;
         self.locationManager.distanceFilter = self.configuration.accurateDistanceFilter;
@@ -458,7 +421,7 @@
         self.locationManager.pausesLocationUpdatesAutomatically = self.configuration.pausesLocationUpdatesAutomatically;
     }
     AMALogInfo(@"Allow background location updates");
-    self.locationManager.allowsBackgroundLocationUpdates = self.currentAllowsBackgroundLocationUpdates;
+    self.locationManager.allowsBackgroundLocationUpdates = state.currentAllowsBackgroundLocationUpdates;
 #endif
 }
 

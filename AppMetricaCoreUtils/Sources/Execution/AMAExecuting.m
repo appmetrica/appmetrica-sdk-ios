@@ -1,8 +1,7 @@
 
 #import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
 #import "AMACoreUtilsLogging.h"
-
-static NSString *const kAppMetricaCoreUtilsDomain = @"io.appmetrica.CoreUtils";
+#import "AMACoreUtilsDomain.h"
 
 #pragma mark - async queue
 

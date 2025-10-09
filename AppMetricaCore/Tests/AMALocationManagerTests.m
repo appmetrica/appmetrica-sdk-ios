@@ -47,10 +47,10 @@ describe(@"AMALocationManager", ^{
             stubSystemLocationManagerWithBlock(nil);
         };
     
-        NSObject<AMAAsyncExecuting> *__block mainQueueExecutor = nil;
         AMAStartupPermissionController *__block startupPermissionController = nil;
         AMALocationCollectingController *__block locationCollectingController = nil;
         AMALocationCollectingConfiguration *__block configurationMock = nil;
+        AMACurrentQueueExecutor *__block executor = nil;
     
         beforeEach(^{
 #if TARGET_OS_TV
@@ -59,18 +59,16 @@ describe(@"AMALocationManager", ^{
             stubLocationManager = [CLLocationManager nullMock];
             systemLocationManager = nil;
             delegate = nil;
-            mainQueueExecutor = [[AMACurrentQueueExecutor alloc] init];
             startupPermissionController = [AMAStartupPermissionController nullMock];
             [startupPermissionController stub:@selector(isLocationCollectingGranted) andReturn:theValue(YES)];
             locationCollectingController = [AMALocationCollectingController nullMock];
             configurationMock = [AMALocationCollectingConfiguration nullMock];
             [AMAPlatformDescription stub:@selector(isExtension) andReturn:theValue(NO)];
             
-            AMACurrentQueueExecutor *executor = [[AMACurrentQueueExecutor alloc] init];
+            executor = [[AMACurrentQueueExecutor alloc] init];
             
             AMALocationManager *locationManager =
                 [[AMALocationManager alloc] initWithExecutor:executor
-                                           mainQueueExecutor:mainQueueExecutor
                                  startupPermissionController:startupPermissionController
                                                configuration:configurationMock
                                 locationCollectingController:locationCollectingController];
@@ -127,45 +125,27 @@ describe(@"AMALocationManager", ^{
             [[delegate shouldNot] beNil];
         });
         it(@"Should start CLLocationManager on main thread if started from background thread", ^{
-            NSUInteger executionCount = 2;
-#if TARGET_OS_IOS
-            executionCount = 3;
-#endif
             stubSystemLocationManager();
             setAuthorizationStatus(kCLAuthorizationStatusAuthorizedAlways, YES);
-            [[mainQueueExecutor should] receive:@selector(execute:) withCount:executionCount];
+            [[executor should] receive:@selector(execute:) withCount:1];
             [[AMALocationManager sharedManager] start];
         });
         it(@"Should receive correct block if started from background thread", ^{
             stubSystemLocationManagerWithBlock(^(CLLocationManager *manager) {
                 [[manager should] receive:startUpdatingLocationSelector];
             });
-            [mainQueueExecutor stub:@selector(execute:) withBlock:^id(NSArray *params) {
-                dispatch_block_t block = params[0];
-                block();
-                return nil;
-            }];
             [[AMALocationManager sharedManager] start];
             setAuthorizationStatus(kCLAuthorizationStatusAuthorizedAlways, YES);
         });
         it(@"Should stop CLLocationManager on main thread if started from background thread", ^{
-            NSUInteger executionCount = 2;
-#if TARGET_OS_IOS
-            executionCount = 3;
-#endif
             stubSystemLocationManager();
-            [[mainQueueExecutor should] receive:@selector(execute:) withCount:executionCount];
+            [[executor should] receive:@selector(execute:) withCount:1];
             [[AMALocationManager sharedManager] start];
         });
         it(@"Should receive correct block if stopped from background thread", ^{
             stubSystemLocationManagerWithBlock(^(CLLocationManager *manager) {
                 [[manager should] receive:@selector(stopUpdatingLocation)];
             });
-            [mainQueueExecutor stub:@selector(execute:) withBlock:^id(NSArray *params) {
-                dispatch_block_t block = params[0];
-                block();
-                return nil;
-            }];
             [[AMALocationManager sharedManager] start];
         });
         it(@"Should dispatch locations update to collecting controller", ^{

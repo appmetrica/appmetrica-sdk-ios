@@ -4,9 +4,13 @@
 
 @protocol AMAAsyncExecuting;
 @protocol AMASyncExecuting;
+@protocol AMAThreadProviding;
 @class AMAStartupPermissionController;
 @class AMALocationCollectingController;
 @class AMALocationCollectingConfiguration;
+@class AMARunLoopExecutor;
+
+NS_ASSUME_NONNULL_BEGIN
 
 @interface AMALocationManager : NSObject
 
@@ -17,8 +21,7 @@
 
 + (instancetype)sharedManager;
 
-- (instancetype)initWithExecutor:(id<AMAAsyncExecuting, AMASyncExecuting>)executor
-               mainQueueExecutor:(id<AMAAsyncExecuting>)mainQueueExecutor
+- (instancetype)initWithExecutor:(id<AMASyncExecuting, AMAAsyncExecuting, AMAThreadProviding>)executor
      startupPermissionController:(AMAStartupPermissionController *)startupPermissionController
                    configuration:(AMALocationCollectingConfiguration *)configuration
     locationCollectingController:(AMALocationCollectingController *)locationCollectingController;
@@ -33,3 +36,5 @@
 - (void)updateLocationManagerForCurrentStatus;
 
 @end
+
+NS_ASSUME_NONNULL_END

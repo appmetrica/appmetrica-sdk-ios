@@ -30,6 +30,7 @@
     #import "AMAPair.h"
     #import "AMAPermissiveTruncator.h"
     #import "AMAQueuesFactory.h"
+    #import "AMARunLoopExecutor.h"
     #import "AMATimeUtilities.h"
     #import "AMATimer.h"
     #import "AMATruncating.h"
@@ -37,7 +38,6 @@
     #import "AMAURLUtilities.h"
     #import "AMAValidationUtilities.h"
     #import "AMAVersionUtils.h"
-    #import "AMAMultiTimer.h"
 #else
     #import <AppMetricaCoreUtils/AppMetricaCoreUtilsDefines.h>
     #import <AppMetricaCoreUtils/AMAArrayIterator.h>
@@ -73,6 +73,7 @@
     #import <AppMetricaCoreUtils/AMATimer.h>
     #import <AppMetricaCoreUtils/AMATruncating.h>
     #import <AppMetricaCoreUtils/AMATruncatorsFactory.h>
+    #import <AppMetricaCoreUtils/AMARunLoopExecutor.h>
     #import <AppMetricaCoreUtils/AMAURLUtilities.h>
     #import <AppMetricaCoreUtils/AMAValidationUtilities.h>
     #import <AppMetricaCoreUtils/AMAVersionUtils.h>

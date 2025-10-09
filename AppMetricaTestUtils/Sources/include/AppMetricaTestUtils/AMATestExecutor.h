@@ -11,7 +11,7 @@ NS_SWIFT_NAME(TestDelayedManualExecutor)
 @end
 
 NS_SWIFT_NAME(CurrentQueueExecutor)
-@interface AMACurrentQueueExecutor : NSObject <AMACancelableExecuting, AMASyncExecuting>
+@interface AMACurrentQueueExecutor : NSObject <AMACancelableExecuting, AMASyncExecuting, AMAThreadProviding>
 
 @end
 
