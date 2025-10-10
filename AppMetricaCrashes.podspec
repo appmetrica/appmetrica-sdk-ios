@@ -27,7 +27,7 @@ Pod::Spec.new do |s|
   s.dependency 'AppMetricaStorageUtils', '= 5.14.0'
   s.dependency 'AppMetricaEncodingUtils', '= 5.14.0'
 
-  s.dependency 'KSCrash/Recording', '>= 2.1.0', '< 2.2.0'
+  s.dependency 'KSCrash/Recording', '>= 2.3.0', '< 2.5.0'
 
   s.header_dir = s.name
   s.source_files = "#{s.name}/Sources/**/*.{h,m,mm,c}"
