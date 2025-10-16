@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name = "AppMetricaProtobuf"
-  s.version = '5.14.0'
+  s.version = '5.15.0'
   s.summary = "AppMetrica's adaptation of the original protobuf-c, tailored for efficient analytics data handling on iOS."
 
   s.homepage = 'https://appmetrica.io'
