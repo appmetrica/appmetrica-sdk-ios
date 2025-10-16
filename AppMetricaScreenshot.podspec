@@ -19,6 +19,7 @@ Pod::Spec.new do |s|
 
   s.dependency 'AppMetricaCore', '= 5.14.0'
   s.dependency 'AppMetricaCoreExtension', '= 5.14.0'
+  s.dependency 'AppMetricaStorageUtils', '= 5.14.0'
   
   s.header_dir = s.name
   s.source_files = "#{s.name}/Sources/**/*.{h,m}"

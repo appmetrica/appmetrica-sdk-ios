@@ -307,7 +307,7 @@ let package = Package(
         .testTarget(target: .libraryAdapter, dependencies: [.libraryAdapter]),
         
         //MARK: - AppMetricaScreenshot
-        .target(target: .screenshot, dependencies: [.core, .coreExtension]),
+        .target(target: .screenshot, dependencies: [.core, .coreExtension, .storageUtils]),
         .testTarget(
             target: .screenshot,
             dependencies: [.screenshot, .core, .testUtils],
