@@ -16,6 +16,7 @@ NS_SWIFT_NAME(UserDefaultsStorage)
 - (void)setObject:(id)object forKey:(id)key;
 - (void)setBool:(BOOL)flag forKey:(id)key;
 
+- (nullable id)objectForKey:(NSString *)key;
 - (NSString *)stringForKey:(NSString *)key;
 - (BOOL)boolForKey:(NSString *)key;
 

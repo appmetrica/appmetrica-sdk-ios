@@ -1,10 +1,11 @@
 
 #import <Foundation/Foundation.h>
+#import <AppMetricaStorageUtils/AppMetricaStorageUtils.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
 NS_SWIFT_NAME(UserDefaultsMock)
-@interface AMAUserDefaultsMock : NSObject
+@interface AMAUserDefaultsMock : AMAUserDefaultsStorage
 
 @property (nonatomic, assign, readonly) BOOL synchronized;
 @property (nonatomic, strong, readonly) NSMutableDictionary *store;

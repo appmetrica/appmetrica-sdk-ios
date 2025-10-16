@@ -37,6 +37,11 @@ static NSString *const kAMAUserDefaultsKeyPrefix =  @"io.appmetrica.sdk.";
     return [[self defaults] boolForKey:[self prefixedKey:key]];
 }
 
+- (nullable id)objectForKey:(NSString *)key
+{
+    return [[self defaults] objectForKey:[self prefixedKey:key]];
+}
+
 #pragma mark - Setters
 
 - (void)setObject:(id)object forKey:(id)key

@@ -1,6 +1,7 @@
 
 #if __has_include("AppMetricaNetwork.h")
     #import "AMAGenericRequest.h"
+    #import "AMAGenericRequestProcessor.h"
     #import "AMAHTTPRequestor.h"
     #import "AMAHTTPRequestsFactory.h"
     #import "AMAHTTPSessionProvider.h"
@@ -15,6 +16,7 @@
     #import "AMARequestParameters.h"
 #else
     #import <AppMetricaNetwork/AMAGenericRequest.h>
+    #import <AppMetricaNetwork/AMAGenericRequestProcessor.h>
     #import <AppMetricaNetwork/AMAHTTPRequestor.h>
     #import <AppMetricaNetwork/AMAHTTPRequestsFactory.h>
     #import <AppMetricaNetwork/AMAHTTPSessionProvider.h>

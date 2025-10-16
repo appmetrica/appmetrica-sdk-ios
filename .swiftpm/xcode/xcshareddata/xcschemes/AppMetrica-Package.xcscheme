@@ -496,6 +496,34 @@
                ReferencedContainer = "container:">
             </BuildableReference>
          </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "AppMetricaIDSync"
+               BuildableName = "AppMetricaIDSync"
+               BlueprintName = "AppMetricaIDSync"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "AppMetricaIDSyncTests"
+               BuildableName = "AppMetricaIDSyncTests"
+               BlueprintName = "AppMetricaIDSyncTests"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </BuildActionEntry>
       </BuildActionEntries>
    </BuildAction>
    <TestAction
@@ -682,6 +710,16 @@
                BlueprintIdentifier = "AppMetricaLogSwiftTests"
                BuildableName = "AppMetricaLogSwiftTests"
                BlueprintName = "AppMetricaLogSwiftTests"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "AppMetricaIDSyncTests"
+               BuildableName = "AppMetricaIDSyncTests"
+               BlueprintName = "AppMetricaIDSyncTests"
                ReferencedContainer = "container:">
             </BuildableReference>
          </TestableReference>

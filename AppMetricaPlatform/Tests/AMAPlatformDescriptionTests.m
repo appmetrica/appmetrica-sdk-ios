@@ -5,6 +5,7 @@
 #import "AMAAppVersionProvider.h"
 #import "Mocks/AMAAppVersionProviderMock.h"
 #import "AMADeviceDescription.h"
+#import "AMANetworkInterfaceTypeResolver.h"
 
 @interface AMAPlatformDescription (Tests)
 
@@ -358,6 +359,20 @@ describe(@"AMAPlatformDescription", ^{
             [AMADeviceDescription stub:@selector(isDeviceModelOfType:) andReturn:theValue(YES) withArguments:@"simulator"];
             
             [[theValue([AMAPlatformDescription deviceTypeIsSimulator]) should] beYes];
+        });
+        
+        it(@"Should return network interface type resolver state", ^{
+            [AMANetworkInterfaceTypeResolver stub:@selector(isCellularConnection:) withBlock:^id(NSArray *params) {
+                void (^completion)(BOOL) = params.firstObject;
+                if (completion) {
+                    completion(YES);
+                }
+                return nil;
+            }];
+            
+            [AMAPlatformDescription isCellularConnection:^(BOOL isCellular) {
+                [[theValue(isCellular) should] beYes];
+            }];
         });
     });
 });

@@ -20,4 +20,5 @@ Pod::Spec.new do |s|
   s.dependency 'AppMetricaWebKit', '= 5.14.0'
   s.dependency 'AppMetricaCrashes', '= 5.14.0'
   s.dependency 'AppMetricaScreenshot', '= 5.14.0'
+  s.dependency 'AppMetricaIDSync', '= 5.14.0'
 end

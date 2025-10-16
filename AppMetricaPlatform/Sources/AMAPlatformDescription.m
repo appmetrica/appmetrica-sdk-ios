@@ -5,6 +5,7 @@
 #import "AMAAppVersionProvider.h"
 #import "AMADeviceDescription.h"
 #import "AMAEntitlementsExtractor.h"
+#import "AMANetworkInterfaceTypeResolver.h"
 
 static NSString *const kAMANativeAppFramework = @"native";
 static NSString *const kAMAUnityAppFramework = @"unity";
@@ -255,6 +256,11 @@ NSString *const kAMADeviceTypeWatch = @"watch";
 {
     return [AMADeviceDescription isDeviceModelOfType:@"simulator"] ||
            [NSProcessInfo processInfo].environment[@"SIMULATOR_DEVICE_NAME"] != nil;
+}
+
++ (void)isCellularConnection:(void (^)(BOOL))completion
+{
+    return [AMANetworkInterfaceTypeResolver isCellularConnection:completion];
 }
 
 #pragma mark - AppVersionProvider

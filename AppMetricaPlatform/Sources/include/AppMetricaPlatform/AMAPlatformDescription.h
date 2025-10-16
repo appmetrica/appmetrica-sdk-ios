@@ -72,6 +72,8 @@ NS_SWIFT_NAME(PlatformDescription)
 
 + (BOOL)deviceTypeIsSimulator;
 
++ (void)isCellularConnection:(void (^)(BOOL isCellular))completion;
+
 - (instancetype)init NS_UNAVAILABLE;
 + (instancetype)new NS_UNAVAILABLE;
 

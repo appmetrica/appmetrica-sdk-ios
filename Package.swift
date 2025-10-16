@@ -24,6 +24,7 @@ enum AppMetricaTarget: String {
     case identifiers = "AppMetricaIdentifiers"
     case synchronization = "AppMetricaSynchronization"
     case screenshot = "AppMetricaScreenshot"
+    case idSync = "AppMetricaIDSync"
 
     case protobuf = "AppMetricaProtobuf"
     case fmdb = "AppMetricaFMDB"
@@ -42,6 +43,7 @@ enum AppMetricaProduct: String, CaseIterable {
     case webKit = "AppMetricaWebKit"
     case libraryAdapter = "AppMetricaLibraryAdapter"
     case screenshot = "AppMetricaScreenshot"
+    case idSync = "AppMetricaIDSync"
 
     static var allProducts: [Product] { allCases.map { $0.product } }
 
@@ -53,6 +55,7 @@ enum AppMetricaProduct: String, CaseIterable {
         case .webKit: return [.webKit]
         case .libraryAdapter: return [.libraryAdapter]
         case .screenshot: return [.screenshot]
+        case .idSync: return [.idSync]
         }
     }
     
@@ -316,6 +319,14 @@ let package = Package(
 
         //MARK: - AppMetrica FMDB
         .target(target: .fmdb),
+        
+        //MARK: - AppMetricaIDSync
+        .target(target: .idSync, dependencies: [.core, .coreExtension, .storageUtils, .coreUtils, .log, .platform]),
+        .testTarget(
+            target: .idSync,
+            dependencies: [.idSync, .core, .testUtils],
+            externalDependencies: [.kiwi]
+        ),
     ]
 )
 
@@ -495,6 +506,13 @@ extension AppMetricaTarget {
                 "./Reporter",
                 "./Configuration",
             ]
+        case .idSync:
+            return [
+                "./IDSync",
+                "./Startup",
+                "./Configuration",
+                "./Network",
+            ]
         case .adSupport, .coreExtension, .encodingUtils, .fmdb, .hostState, .log, .network, .platform,
                 .protobuf, .protobufUtils, .storageUtils, .webKit, .testUtils, .libraryAdapter, .keychain, .identifiers, .logSwift, .synchronization:
             return []
@@ -513,7 +531,7 @@ extension AppMetricaTarget {
             return [
                 "Utilities",
             ]
-        case .platform, .protobufUtils, .log:
+        case .platform, .protobufUtils, .log, .idSync:
             return [
                 "Mocks",
             ]
