@@ -85,7 +85,7 @@ NSString *const kAMASysInfoUsableMemory = @"usableMemory";
     if (self) {
         _crashID = crashID;
         _dateProvider = dateProvider;
-        _supportedVersionsConstaints = @[ @"3.2", @"3.3", @"3.4", @"3.5", @"3.6" ];
+        _supportedVersionsConstaints = @[ @"3.2", @"3.3", @"3.4" ];
     }
 
     return self;

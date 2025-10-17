@@ -5,7 +5,6 @@
 #import <objc/runtime.h>
 #import <dlfcn.h>
 #import <mach-o/dyld.h>
-#import "AMAKSCrashImports.h"
 
 @interface AMABinaryImageExtractor (Tests)
 
@@ -24,8 +23,6 @@ describe(@"AMABinaryImageExtractor", ^{
         NSUInteger __block imageCount = 0;
 
         beforeEach(^{
-            ksbic_init(); // Supposed to be called before crash handling
-            
             imageCount = (NSUInteger)_dyld_image_count();
         });
         
