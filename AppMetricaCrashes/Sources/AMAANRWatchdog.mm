@@ -76,7 +76,7 @@ enum class AMAANRState: int {
     @synchronized (self) {
         if (self.operating == NO) {
             self.operating = YES;
-            __weak typeof(self) weakSelf = self;
+            __weak __typeof(self) weakSelf = self;
             [self.watchingExecutor execute:^{
                 [weakSelf startMonitoring];
             }];
@@ -100,9 +100,9 @@ enum class AMAANRState: int {
         useconds_t sleepTime = AMAANRSleepStartInterval;
         // predicate == AMAAnrState::initial
         
-        __weak typeof(self) weakSelf = self;
+        __weak __typeof(self) weakSelf = self;
         [self.observedExecutor execute:^{
-            typeof(self) strongSelf = weakSelf;
+            __strong __typeof(self) strongSelf = weakSelf;
             if (strongSelf != nil) {
                 strongSelf->predicate.store(AMAANRState::observed, std::memory_order_release);
             }
