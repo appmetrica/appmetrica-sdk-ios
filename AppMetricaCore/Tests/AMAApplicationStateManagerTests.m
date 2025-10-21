@@ -60,6 +60,7 @@ describe(@"AMAApplicationStateManager", ^{
             [[theValue(quickState.isRooted) should] equal:theValue(testHelper.isRooted)];
             [[quickState.appBuildNumber should] equal:@(testHelper.appBuildNumber).stringValue];
             [[theValue(quickState.appDebuggable) should] equal:theValue(testHelper.appDebuggable)];
+            [[theValue(quickState.LAT) should] equal:theValue(testHelper.LAT)];
         });
     });
 
@@ -92,6 +93,17 @@ describe(@"AMAApplicationStateManager", ^{
             [[filledState.appVersionName should] equal:@"2.00"];
             [[filledState.kitVersionName should] equal:@"2.0.0"];
             [[filledState.locale should] equal:@"en_GB"];
+        });
+        
+        it(@"quick state MUST contain LAT", ^{
+            testHelper.LAT = YES;
+            [testHelper stubApplicationState];
+            
+            AMAApplicationState *quickState = AMAApplicationStateManager.quickApplicationState;
+            
+            AMAApplicationState *filledState = [AMAApplicationStateManager stateWithFilledEmptyValues:quickState];
+            
+            [[theValue(filledState.LAT) should] beYes];
         });
     });
 });

@@ -19,6 +19,7 @@
     return mutableState.copy;
 }
 
+// TODO: Consider whether quick update is still necessary?
 + (AMAApplicationState *)quickApplicationState
 {
     AMAMutableApplicationState *mutableState = [AMAMutableApplicationState new];
@@ -48,7 +49,6 @@
     
     mutableState.IFV = startupClientID.IFV;
     mutableState.IFA = [[[AMAAdProvider sharedInstance] advertisingIdentifier] UUIDString];
-    mutableState.LAT = [AMAAdProvider sharedInstance].isAdvertisingTrackingEnabled == NO;
 }
 
 + (void)quickUpdateApplicationState:(AMAMutableApplicationState *)mutableState
@@ -65,6 +65,8 @@
 
     uint32_t appBuildNumber = [AMAMetricaConfiguration sharedInstance].inMemory.appBuildNumber;
     mutableState.appBuildNumber = @(appBuildNumber).stringValue;
+    
+    mutableState.LAT = [AMAAdProvider sharedInstance].isAdvertisingTrackingEnabled == NO;
 }
 
 @end
