@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name = "AppMetricaCrashes"
-  s.version = '5.15.0'
+  s.version = '5.16.0'
   s.summary = "Provides essential utilities for efficient crash and error handling and reporting"
 
   s.homepage = 'https://appmetrica.io'
@@ -17,15 +17,15 @@ Pod::Spec.new do |s|
 
   s.frameworks = 'Foundation'
 
-  s.dependency 'AppMetricaCore', '= 5.15.0'
-  s.dependency 'AppMetricaCoreExtension', '= 5.15.0'
-  s.dependency 'AppMetricaCoreUtils', '= 5.15.0'
-  s.dependency 'AppMetricaHostState', '= 5.15.0'
-  s.dependency 'AppMetricaProtobufUtils', '= 5.15.0'
-  s.dependency 'AppMetricaLog', '= 5.15.0'
-  s.dependency 'AppMetricaPlatform', '= 5.15.0'
-  s.dependency 'AppMetricaStorageUtils', '= 5.15.0'
-  s.dependency 'AppMetricaEncodingUtils', '= 5.15.0'
+  s.dependency 'AppMetricaCore', '= 5.16.0'
+  s.dependency 'AppMetricaCoreExtension', '= 5.16.0'
+  s.dependency 'AppMetricaCoreUtils', '= 5.16.0'
+  s.dependency 'AppMetricaHostState', '= 5.16.0'
+  s.dependency 'AppMetricaProtobufUtils', '= 5.16.0'
+  s.dependency 'AppMetricaLog', '= 5.16.0'
+  s.dependency 'AppMetricaPlatform', '= 5.16.0'
+  s.dependency 'AppMetricaStorageUtils', '= 5.16.0'
+  s.dependency 'AppMetricaEncodingUtils', '= 5.16.0'
 
   s.dependency 'KSCrash/Recording', '>= 2.1.0', '< 2.2.0'
 
