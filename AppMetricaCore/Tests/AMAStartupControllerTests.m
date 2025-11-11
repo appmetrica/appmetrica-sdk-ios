@@ -1,5 +1,5 @@
 
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import <AppMetricaNetwork/AppMetricaNetwork.h>
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
 #import <AppMetricaPlatform/AppMetricaPlatform.h>

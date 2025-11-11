@@ -1,5 +1,5 @@
 
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import "AMAAdRevenueInfoModel.h"
 
 SPEC_BEGIN(AMAAdRevenueInfoModelTests)

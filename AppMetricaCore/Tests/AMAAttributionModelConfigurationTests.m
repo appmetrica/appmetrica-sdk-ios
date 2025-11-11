@@ -1,6 +1,6 @@
 
 #import <Foundation/Foundation.h>
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import "AMAAttributionModelConfiguration.h"
 #import "AMAConversionAttributionModelConfiguration.h"
 #import "AMAEngagementAttributionModelConfiguration.h"

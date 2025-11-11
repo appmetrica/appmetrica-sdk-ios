@@ -1,5 +1,5 @@
 
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import "AMARevenueInfoModel.h"
 #import "AMASubscriptionInfoModel.h"
 #import "AMATransactionInfoModel.h"

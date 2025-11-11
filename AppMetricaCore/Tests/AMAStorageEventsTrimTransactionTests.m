@@ -1,6 +1,6 @@
 
 
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import "AMAStorageEventsTrimTransaction.h"
 #import "AMAEventsCleaner.h"
 #import "AMAEventsCleanupInfo.h"

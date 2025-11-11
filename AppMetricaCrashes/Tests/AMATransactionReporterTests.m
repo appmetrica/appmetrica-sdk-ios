@@ -1,5 +1,5 @@
 
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import <AppMetricaCore/AppMetricaCore.h>
 #import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
 #import "AMATransactionReporter.h"

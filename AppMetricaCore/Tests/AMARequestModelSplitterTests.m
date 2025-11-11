@@ -1,5 +1,5 @@
 
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import <AppMetricaPlatform/AppMetricaPlatform.h>
 #import "AMAReportRequestModel.h"
 #import "AMAReportEventsBatch.h"

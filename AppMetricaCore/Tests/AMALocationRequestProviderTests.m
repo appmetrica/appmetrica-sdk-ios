@@ -1,5 +1,5 @@
 
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import "AMALocationRequestProvider.h"
 #import "AMALocationStorage.h"
 #import "AMALocationCollectingConfiguration.h"

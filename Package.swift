@@ -65,17 +65,25 @@ enum AppMetricaProduct: String, CaseIterable {
 let useSpmExternal = false
 
 enum ExternalPackage: String, CaseIterable {
-    case kiwi = "Kiwi"
+    case kiwi = "AppMetricaKiwi"
     case ksCrash = "KSCrash"
 
-    var name: String { useSpmExternal ? ("spm-external." + rawValue) : rawValue }
+    var name: String {
+        var githubPackageName: String {
+            switch self {
+            case .kiwi: return "Kiwi"
+            default: return rawValue
+            }
+        }
+        return useSpmExternal ? ("spm-external." + rawValue) : githubPackageName
+    }
 
     var package: Package.Dependency {
         switch self {
         case .ksCrash:
             return package(url: "https://github.com/kstenerud/KSCrash", "2.1.0"..<"2.2.0")
         case .kiwi:
-            return package(url: "https://github.com/appmetrica/Kiwi", exact: "3.0.1-spm")
+            return package(url: "https://github.com/appmetrica/Kiwi", "3.0.2"..<"4.0.0")
         }
     }
 
@@ -92,7 +100,7 @@ enum ExternalPackage: String, CaseIterable {
     }
 
     enum ExternalDependency: String {
-        case kiwi = "Kiwi"
+        case kiwi = "AppMetricaKiwi"
         case ksCrashRecording = "Recording"
 
         var parentPackage: ExternalPackage {

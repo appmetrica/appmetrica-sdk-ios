@@ -1,4 +1,4 @@
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import <StoreKit/StoreKit.h>
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
 #import "AMAProductRequestor.h"

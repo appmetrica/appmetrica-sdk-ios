@@ -1,5 +1,5 @@
 
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import "AMAEventComposerProvider.h"
 #import "AMAReporterStateStorage.h"
 #import "AMAEventTypes.h"

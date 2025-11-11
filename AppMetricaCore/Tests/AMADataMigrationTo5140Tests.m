@@ -1,5 +1,5 @@
 #import <XCTest/XCTest.h>
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import "AMADataMigrationTo5140.h"
 #import "AMADatabaseProtocol.h"
 #import "AMADatabaseQueryRecorderMock.h"

@@ -1,5 +1,5 @@
 
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import "AMAReporterDatabaseMigrationTo500EncodersFactory.h"
 #import "AMAReporterDatabaseEncryptionDefaults.h"
 #import "AMAAESUtility+Migration.h"

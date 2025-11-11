@@ -1,5 +1,5 @@
 
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import "AMAFirstActivationDetector.h"
 #import "AMACore.h"
 #import "AMAMigrationTo500Utils.h"

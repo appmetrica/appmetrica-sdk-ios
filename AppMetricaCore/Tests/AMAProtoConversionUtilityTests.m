@@ -1,4 +1,4 @@
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import "AMAProtoConversionUtility.h"
 
 SPEC_BEGIN(AMAProtoConversionUtilityTests)

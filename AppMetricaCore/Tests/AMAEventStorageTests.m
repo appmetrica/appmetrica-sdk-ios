@@ -1,5 +1,5 @@
 
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import <AppMetricaStorageUtils/AppMetricaStorageUtils.h>
 #import "AMAEventStorage.h"
 #import "AMAEventSerializer.h"

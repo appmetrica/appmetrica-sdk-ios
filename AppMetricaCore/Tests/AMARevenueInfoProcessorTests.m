@@ -1,5 +1,5 @@
 
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import "AMARevenueInfoProcessor.h"
 #import "AMARevenueInfoModelFormatter.h"
 #import "AMARevenueInfoModelValidator.h"

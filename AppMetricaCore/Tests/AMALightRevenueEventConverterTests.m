@@ -1,5 +1,5 @@
 
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import "AMALightRevenueEventConverter.h"
 #import "AMARevenueInfoModel.h"
 #import "AMALightRevenueEvent.h"

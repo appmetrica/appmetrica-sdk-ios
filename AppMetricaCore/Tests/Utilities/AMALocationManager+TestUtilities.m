@@ -1,7 +1,7 @@
 
 #import <CoreLocation/CoreLocation.h>
 #import "AMALocationManager+TestUtilities.h"
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 
 @implementation AMALocationManager (TestUtilities)
 

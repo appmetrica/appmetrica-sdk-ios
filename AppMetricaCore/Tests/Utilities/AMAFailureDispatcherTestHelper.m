@@ -1,7 +1,7 @@
 
 #import "AMAFailureDispatcherTestHelper.h"
 #import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 
 @implementation AMAFailureDispatcherTestHelper
 

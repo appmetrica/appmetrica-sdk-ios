@@ -1,5 +1,5 @@
 
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import <sys/stat.h>
 #import <AppMetricaWebKit/AppMetricaWebKit.h>
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>

@@ -1,5 +1,5 @@
 
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import "AMAStringDatabaseKeyValueStorageConverter.h"
 
 SPEC_BEGIN(AMAStringDatabaseKeyValueStorageConverterTests)

@@ -1,5 +1,5 @@
 
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import "AMAExtensionsReportExecutionConditionProvider.h"
 #import "AMAMetricaConfigurationTestUtilities.h"
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>

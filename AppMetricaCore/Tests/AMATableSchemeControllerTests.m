@@ -1,5 +1,5 @@
 
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import "AMATableSchemeController.h"
 #import "AMADatabaseConstants.h"
 #import "AMATableDescriptionProvider.h"

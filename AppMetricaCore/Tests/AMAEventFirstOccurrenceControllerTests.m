@@ -1,5 +1,5 @@
 
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import "AMAEventFirstOccurrenceController.h"
 #import "AMAEventNameHashesCollection.h"
 #import "AMAEventNameHashesStorage.h"

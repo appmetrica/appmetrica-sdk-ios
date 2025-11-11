@@ -13,7 +13,7 @@
 #import "AMAApplicationStatistics.h"
 #import "AMABacktraceFrame.h"
 
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 
 SPEC_BEGIN(AMADecodedCrashValidatorTests)
 

@@ -1,5 +1,5 @@
 
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import <AppMetricaEncodingUtils/AppMetricaEncodingUtils.h>
 #import "AMALocationMigrationTo500EncoderFactory.h"
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>

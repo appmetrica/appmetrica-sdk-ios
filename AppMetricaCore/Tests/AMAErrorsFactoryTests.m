@@ -1,5 +1,5 @@
 
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import <AppMetricaLog/AppMetricaLog.h>
 #import "AMACore.h"
 #import "AMAErrorsFactory.h"

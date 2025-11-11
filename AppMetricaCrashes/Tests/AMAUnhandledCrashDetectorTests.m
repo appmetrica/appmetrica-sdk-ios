@@ -1,4 +1,4 @@
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
 #import <AppMetricaHostState/AppMetricaHostState.h>
 #import <AppMetricaPlatform/AppMetricaPlatform.h>

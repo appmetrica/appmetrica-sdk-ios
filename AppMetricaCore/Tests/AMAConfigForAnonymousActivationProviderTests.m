@@ -1,5 +1,5 @@
 
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import "AMAConfigForAnonymousActivationProvider.h"
 #import "AMADefaultAnonymousConfigProvider.h"
 #import "AMAMetricaPersistentConfiguration.h"

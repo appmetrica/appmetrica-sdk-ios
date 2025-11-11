@@ -1,4 +1,4 @@
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import <AppMetricaPlatform/AppMetricaPlatform.h>
 #import "AMAApplicationStateManager.h"
 #import "AMAAppStateManagerTestHelper.h"

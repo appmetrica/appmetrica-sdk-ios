@@ -1,5 +1,5 @@
 
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import <AppMetricaAdSupport/AppMetricaAdSupport.h>
 #import <AppMetricaCore/AppMetricaCore.h>
 #import "AMAATTStatusProvider.h"

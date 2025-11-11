@@ -1,5 +1,5 @@
 
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import "AMARequestParametersTestHelper.h"
 #import "AMABundleInfoProviderMock.h"
 #import <AppMetricaPlatform/AppMetricaPlatform.h>

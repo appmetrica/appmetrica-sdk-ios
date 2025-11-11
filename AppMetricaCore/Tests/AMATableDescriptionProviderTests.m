@@ -1,5 +1,5 @@
 
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import "AMATableDescriptionProvider.h"
 
 SPEC_BEGIN(AMATableDescriptionProviderTests)

@@ -3,7 +3,7 @@
 #import "AMAIdentifiersTestUtilities.h"
 #import "AMAStartupClientIdentifier.h"
 #import <AdSupport/AdSupport.h>
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import "AMAMetricaConfiguration.h"
 #import "AMAMetricaPersistentConfiguration.h"
 #import "AMAStartupClientIdentifierFactory.h"

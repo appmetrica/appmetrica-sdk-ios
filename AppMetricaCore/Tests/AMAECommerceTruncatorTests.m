@@ -1,5 +1,5 @@
 
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import "AMAECommerceTruncator.h"
 #import "AMAECommerce+Internal.h"
 

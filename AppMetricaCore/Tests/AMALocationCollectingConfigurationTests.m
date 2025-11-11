@@ -1,5 +1,5 @@
 
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import <CoreLocation/CoreLocation.h>
 #import "AMALocationCollectingConfiguration.h"
 #import "AMAMetricaConfigurationTestUtilities.h"

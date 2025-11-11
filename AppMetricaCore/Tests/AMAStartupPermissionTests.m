@@ -1,5 +1,5 @@
 
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import "AMAStartupPermission.h"
 
 SPEC_BEGIN(AMAStartupPermissionTests)

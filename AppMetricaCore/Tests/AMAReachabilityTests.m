@@ -1,5 +1,5 @@
 
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import "AMAReachability+TestUtilities.h"
 
 SPEC_BEGIN(AMAReachabilityTests)

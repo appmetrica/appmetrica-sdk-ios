@@ -1,5 +1,5 @@
 
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import <AppMetricaHostState/AppMetricaHostState.h>
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
 #import "AMAHostStateControllerFactory.h"

@@ -1,5 +1,5 @@
 
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import "AMABacktraceSymbolicator.h"
 #import "AMABacktrace.h"
 #import "AMABacktraceFrame.h"

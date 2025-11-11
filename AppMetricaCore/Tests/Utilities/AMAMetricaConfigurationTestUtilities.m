@@ -2,7 +2,7 @@
 #import "AMAMetricaConfigurationTestUtilities.h"
 #import "AMAMockDatabase.h"
 #import "AMAKeychainBridgeMock.h"
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import "AMAInstantFeaturesConfiguration.h"
 #import "AMAAppGroupIdentifierProvider.h"
 #import <AppMetricaPlatform/AppMetricaPlatform.h>

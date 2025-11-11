@@ -1,5 +1,5 @@
 
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import "AMAMainReportExecutionConditionChecker.h"
 #import "AMAStartupController.h"
 #import "AMAMetricaPersistentConfiguration.h"

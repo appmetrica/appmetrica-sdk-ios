@@ -1,5 +1,5 @@
 
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import "AMACrashReportingStateNotifier.h"
 
 SPEC_BEGIN(AMACrashReportingStateNotifierTests)

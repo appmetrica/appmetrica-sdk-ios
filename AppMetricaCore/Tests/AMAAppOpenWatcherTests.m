@@ -1,5 +1,5 @@
 
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import "AMAReporter.h"
 #import "AMAAppOpenWatcher.h"
 #import "AMAStartupParametersConfiguration.h"

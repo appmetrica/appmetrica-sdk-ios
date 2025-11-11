@@ -1,4 +1,4 @@
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import "AMAEventTypeResolver.h"
 
 SPEC_BEGIN(AMAEventTypeResolverTests)

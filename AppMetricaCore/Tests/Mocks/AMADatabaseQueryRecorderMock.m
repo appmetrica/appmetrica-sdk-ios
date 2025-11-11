@@ -1,5 +1,5 @@
 #import "AMADatabaseQueryRecorderMock.h"
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import "AMAFMDatabaseQueryRecorderMock.h"
 
 @interface AMADatabaseQueryRecorderMock ()

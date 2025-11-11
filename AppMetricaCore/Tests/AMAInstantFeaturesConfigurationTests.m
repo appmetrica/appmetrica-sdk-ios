@@ -1,5 +1,5 @@
 
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 
 #import "AMAInstantFeaturesConfiguration.h"
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>

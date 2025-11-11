@@ -1,5 +1,5 @@
 
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import "AMAECommerceSerializer.h"
 #import "AMALightECommerceEventConverter.h"
 #import "AMAECommerce+Internal.h"

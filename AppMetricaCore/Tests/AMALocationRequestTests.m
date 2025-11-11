@@ -1,5 +1,5 @@
 
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import "AMALocationRequest.h"
 #import "AMALocationRequestParameters.h"
 #import <AppMetricaPlatform/AppMetricaPlatform.h>

@@ -1,6 +1,6 @@
 
 #import <Foundation/Foundation.h>
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import "AMAAppMetricaUUIDMigrator.h"
 #import "AMAInstantFeaturesConfiguration+Migration.h"
 #import "AMAMetricaConfiguration.h"

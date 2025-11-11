@@ -1,6 +1,6 @@
 
 #import <XCTest/XCTest.h>
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import "NSBundle+ApplicationBundle.h"
 
 static NSString *const kAMAAppPath = @"/path/to/appmetrica.app";

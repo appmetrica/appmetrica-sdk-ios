@@ -1,6 +1,6 @@
 
 #import <UIKit/UIKit.h>
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
 #import <AppMetricaStorageUtils/AppMetricaStorageUtils.h>
 #import "AMAMetricaConfiguration.h"

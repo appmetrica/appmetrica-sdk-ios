@@ -1,6 +1,6 @@
 
 #import "AMAAppStateManagerTestHelper.h"
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
 #import "AMAMetricaConfigurationTestUtilities.h"
 #import "AMAIdentifiersTestUtilities.h"

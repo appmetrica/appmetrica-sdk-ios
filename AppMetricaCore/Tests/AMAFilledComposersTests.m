@@ -1,5 +1,5 @@
 
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import "AMAFilledAppEnvironmentComposer.h"
 #import "AMAFilledEventEnvironmentComposer.h"
 #import "AMAFilledLocationComposer.h"

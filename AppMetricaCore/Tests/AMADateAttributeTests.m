@@ -1,5 +1,5 @@
 
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import "AMADateAttribute.h"
 #import "AMAStringAttribute.h"
 #import "AMAInvalidUserProfileUpdateFactory.h"

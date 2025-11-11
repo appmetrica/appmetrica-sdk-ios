@@ -1,5 +1,5 @@
 
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import "AMAStringAttribute.h"
 #import "AMACategoricalAttributeValueUpdateFactory.h"
 #import "AMAStringAttributeValueUpdate.h"

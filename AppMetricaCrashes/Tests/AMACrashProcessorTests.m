@@ -1,4 +1,4 @@
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import "AMACrashProcessor.h"
 #import "AMAExtendedCrashProcessing.h"
 #import "AMACrashReportCrash.h"

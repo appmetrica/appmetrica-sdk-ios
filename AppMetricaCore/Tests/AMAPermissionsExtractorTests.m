@@ -1,6 +1,6 @@
 
 #import <CoreLocation/CoreLocation.h>
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import "AMACore.h"
 #import "AMAPermissionsExtractor.h"
 #import "AMAPermission.h"

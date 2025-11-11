@@ -1,5 +1,5 @@
 
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import "AMADatabaseHelper.h"
 #import <AppMetricaFMDB/AppMetricaFMDB.h>
 

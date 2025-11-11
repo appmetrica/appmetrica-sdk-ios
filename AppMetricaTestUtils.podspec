@@ -9,7 +9,8 @@ Pod::Spec.new do |s|
   s.source = { :git => "https://github.com/appmetrica/appmetrica-sdk-ios.git", :tag=>s.version.to_s }
 
   s.ios.deployment_target = '13.0'
-  
+  s.tvos.deployment_target = '13.0'
+
   s.swift_versions = '5.7'
   
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES' }
@@ -17,7 +18,7 @@ Pod::Spec.new do |s|
   s.frameworks = 'Foundation'
   
   #TODO: https://nda.ya.ru/t/MqweN1VA6niXzF
-  s.dependency 'Kiwi', '~> 3.0.0'
+  s.dependency 'AppMetricaKiwi', '~> 3.0.2'
   s.dependency 'AppMetricaCoreUtils', '= 5.16.0'
   s.dependency 'AppMetricaStorageUtils', '= 5.16.0'
   s.dependency 'AppMetricaNetwork', '= 5.16.0'

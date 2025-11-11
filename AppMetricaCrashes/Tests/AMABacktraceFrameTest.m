@@ -1,5 +1,5 @@
 
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import "AMABacktraceFrame.h"
 
 SPEC_BEGIN(AMABacktraceFrameTest)

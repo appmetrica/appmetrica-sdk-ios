@@ -1,4 +1,4 @@
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import "AMABuildUID.h"
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
 #import "AMACrashSafeTransactor.h"

@@ -1,6 +1,6 @@
 #import <Foundation/Foundation.h>
 #import <XCTest/XCTest.h>
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 
 #import "AMARunLoopThread.h"
 #import "AMARunLoopExecutor.h"

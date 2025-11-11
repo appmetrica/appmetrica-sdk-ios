@@ -1,4 +1,4 @@
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import "AMADefaultStartupHostsProvider.h"
 
 SPEC_BEGIN(AMADefaultStartupHostsProviderTests)

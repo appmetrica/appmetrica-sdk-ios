@@ -1,5 +1,5 @@
 
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import "AMAAttributionModelConfiguration.h"
 #import "AMARevenueDeduplicator.h"
 #import "AMAMetricaPersistentConfiguration.h"

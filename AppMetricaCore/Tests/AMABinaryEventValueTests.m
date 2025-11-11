@@ -1,5 +1,5 @@
 
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import "AMABinaryEventValue.h"
 
 SPEC_BEGIN(AMABinaryEventValueTests)

@@ -1,5 +1,5 @@
 
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import "AMAEventFilter.h"
 #import "AMAClientEventCondition.h"
 #import "AMARevenueEventCondition.h"

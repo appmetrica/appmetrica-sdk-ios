@@ -1,5 +1,5 @@
 
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import "AMAReporterStorage.h"
 #import "AMADatabaseFactory.h"
 #import "AMADatabaseProtocol.h"

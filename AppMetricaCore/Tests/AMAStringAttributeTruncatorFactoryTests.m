@@ -1,5 +1,5 @@
 
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import "AMAStringAttributeTruncatorFactory.h"
 #import "AMAStringAttributeTruncationProvider.h"
 #import "AMAStringAttributeTruncator.h"

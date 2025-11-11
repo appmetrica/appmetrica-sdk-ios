@@ -1,5 +1,5 @@
 
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import "AMABinaryImageExtractor.h"
 #import "AMABinaryImage.h"
 #import <objc/runtime.h>

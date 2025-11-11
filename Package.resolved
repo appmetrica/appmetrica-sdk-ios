@@ -5,8 +5,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/appmetrica/Kiwi",
       "state" : {
-        "revision" : "a265276ad551a65c9b2e3762b0363e007b16f10e",
-        "version" : "3.0.1-spm"
+        "revision" : "dbae101c06decd6710f0eb6fa93717e026161c11",
+        "version" : "3.0.2"
       }
     },
     {

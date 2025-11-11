@@ -1,5 +1,5 @@
 
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import "AMAEventCountByKeyHelper.h"
 #import "AMAConversionAttributionModel.h"
 #import "AMAConversionAttributionModelConfiguration.h"

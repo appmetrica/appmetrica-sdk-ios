@@ -5,7 +5,7 @@
 #import <AppMetricaFMDB/AppMetricaFMDB.h>
 #import <sqlite3.h>
 #import "AMATableSchemeController.h"
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import <AppMetricaStorageUtils/AppMetricaStorageUtils.h>
 #import "AMAStringDatabaseKeyValueStorageConverter.h"
 #import "AMADatabaseKeyValueStorageProvider.h"

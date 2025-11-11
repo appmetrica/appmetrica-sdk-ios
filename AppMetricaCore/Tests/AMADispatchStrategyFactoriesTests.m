@@ -1,5 +1,5 @@
 
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import "AMADispatchStrategiesFactory.h"
 #import "AMAUrgentEventCountDispatchStrategy.h"
 #import "AMAReporterStorage.h"

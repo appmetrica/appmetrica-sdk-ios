@@ -1,5 +1,5 @@
 
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import "AMAStartupPermissionController.h"
 #import "AMAMetricaConfigurationTestUtilities.h"
 #import "AMAStartupPermission.h"

@@ -1,5 +1,5 @@
 
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import "AMAStorageTrimManager.h"
 #import "AMANotificationsListener.h"
 #import "AMAReporterNotifications.h"

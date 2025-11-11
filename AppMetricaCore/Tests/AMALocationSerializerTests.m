@@ -1,6 +1,6 @@
 
 #import <CoreLocation/CoreLocation.h>
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import <AppMetricaProtobufUtils/AppMetricaProtobufUtils.h>
 #import "LocationMessage.pb-c.h"
 #import "AMALocationSerializer.h"

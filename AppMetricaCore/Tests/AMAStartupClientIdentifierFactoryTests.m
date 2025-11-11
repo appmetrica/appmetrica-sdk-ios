@@ -1,5 +1,5 @@
 
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import <UIKit/UIKit.h>
 #import "AMAStartupClientIdentifierFactory.h"
 #import "AMAStartupClientIdentifier.h"

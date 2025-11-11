@@ -1,5 +1,5 @@
 
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import <AdSupport/AdSupport.h>
 #import "AMAIDFAProvider.h"
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>

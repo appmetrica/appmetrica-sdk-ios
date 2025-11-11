@@ -1,5 +1,5 @@
 
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import <AppMetricaWebKit/AppMetricaWebKit.h>
 #import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
 #if !TARGET_OS_TV

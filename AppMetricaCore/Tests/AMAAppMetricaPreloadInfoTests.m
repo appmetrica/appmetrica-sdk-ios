@@ -1,5 +1,5 @@
 
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import "AMAAppMetricaPreloadInfo+JSONSerializable.h"
 
 @interface AMAAppMetricaPreloadInfo () <AMAJSONSerializable>

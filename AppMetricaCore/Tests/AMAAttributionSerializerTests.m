@@ -1,6 +1,6 @@
 
 #import <Foundation/Foundation.h>
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
 #import <AppMetricaStorageUtils/AppMetricaStorageUtils.h>
 #import "AMAAttributionSerializer.h"

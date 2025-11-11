@@ -1,5 +1,5 @@
 
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import <AppMetricaLog/AppMetricaLog.h>
 #import "AMAUserProfileLogger.h"
 #import "AMALogSpy.h"

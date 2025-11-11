@@ -1,7 +1,7 @@
 
 #import "AMACancelableExecutingUtils.h"
 #import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
-#import <Kiwi/Kiwi.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 
 @implementation AMACancelableExecutingUtils
 
