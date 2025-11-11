@@ -1,6 +1,7 @@
 
 import Foundation
 
+// If the data storage format and location change, you must notify https://nda.ya.ru/t/94XNTaaf7LkVFu
 @objc(AMAAppMetricaIdentifiersKeys)
 @objcMembers
 final public class AppMetricaIdentifiersKeys: NSObject {

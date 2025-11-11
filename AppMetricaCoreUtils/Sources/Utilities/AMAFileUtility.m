@@ -158,6 +158,7 @@ static NSString *const kAMAFilePath = @"io.appmetrica";
 
 + (NSString *)persistentPathForApiKey:(NSString *)apiKey
 {
+    // If the data storage format and location change, you must notify https://nda.ya.ru/t/94XNTaaf7LkVFu
 #if TARGET_OS_TV
     NSString *path = self.cacheDirectoryPath;
 #else
@@ -173,6 +174,7 @@ static NSString *const kAMAFilePath = @"io.appmetrica";
 
 + (NSString *)persistentPathForApplicationGroup:(NSString *)applicationGroupIdentifier
 {
+    // If the data storage format and location change, you must notify https://nda.ya.ru/t/94XNTaaf7LkVFu
     NSFileManager *fm = [NSFileManager defaultManager];
     NSURL *url = [fm containerURLForSecurityApplicationGroupIdentifier:applicationGroupIdentifier];
     NSURL *appMetricaURL = [url URLByAppendingPathComponent:kAMAFilePath isDirectory:YES];

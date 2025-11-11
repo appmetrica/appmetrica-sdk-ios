@@ -1,4 +1,5 @@
 
+// If the data storage format and location change, you must notify https://nda.ya.ru/t/94XNTaaf7LkVFu
 private struct RawJSONIdentifierStorageData: Codable {
     var deviceID: String?
     var deviceIDHash: String?
@@ -29,6 +30,7 @@ final class JSONIdentifiersStorage: MutableIdentifiersStorable {
     }
     
     func fetchIdentifiers() throws -> KeychainValueState<IdentifiersStorageData> {
+        // If the data storage format and location change, you must notify https://nda.ya.ru/t/94XNTaaf7LkVFu
         do {
             let result = try jsonProvider.read(type: RawJSONIdentifierStorageData.self)?.loadedIdentifiers
             if let result = result, !result.isEmpty {
@@ -42,6 +44,7 @@ final class JSONIdentifiersStorage: MutableIdentifiersStorable {
     }
     
     func saveIdentifiers(_ ids: IdentifiersStorageData) throws {
+        // If the data storage format and location change, you must notify https://nda.ya.ru/t/94XNTaaf7LkVFu
         let rawIdentifiers = RawJSONIdentifierStorageData(loadedIdentifiers: ids)
         do {
             try jsonProvider.write(rawIdentifiers)

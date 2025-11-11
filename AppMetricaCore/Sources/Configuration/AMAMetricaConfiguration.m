@@ -17,6 +17,7 @@
 
 // Keychain identifiers
 // Declared without `static` keywords (e.g. extern by default) in order to be used in Sample Application
+// If the data storage format and location change, you must notify https://nda.ya.ru/t/94XNTaaf7LkVFu
 NSString *const kAMAMetricaKeychainAccessGroup = @"io.appmetrica";
 NSString *const kAMAMetricaKeychainAppServiceIdentifier = @"io.appmetrica.service.application";
 NSString *const kAMAMetricaKeychainGroupServiceIdentifier = @"io.appmetrica.service.group";
@@ -279,6 +280,7 @@ static NSString *const kAMAMetricaFallbackPrefix = @"fallback-keychain";
 
 - (AMAIdentifierProviderConfiguration*)createIdentifierProviderConfiguration
 {
+    // If the data storage format and location change, you must notify https://nda.ya.ru/t/94XNTaaf7LkVFu
     AMAIdentifierProviderConfiguration *config =
         [[AMAIdentifierProviderConfiguration alloc] initWithPrivateKeychain:[self privateKeychain]
                                                          privateFileStorage:self.privateIdentifiersFileStorage
@@ -305,6 +307,7 @@ static NSString *const kAMAMetricaFallbackPrefix = @"fallback-keychain";
 
 - (AMAKeychain *)privateKeychain
 {
+    // If the data storage format and location change, you must notify https://nda.ya.ru/t/94XNTaaf7LkVFu
     return [[AMAKeychain alloc] initWithService:kAMAMetricaKeychainAppServiceIdentifier
                                     accessGroup:@""
                                          bridge:self.keychainBridge];;
@@ -312,6 +315,8 @@ static NSString *const kAMAMetricaFallbackPrefix = @"fallback-keychain";
 
 - (AMAKeychain *)vendorKeychain
 {
+    // If the data storage format and location change, you must notify https://nda.ya.ru/t/94XNTaaf7LkVFu
+    
     // Apps that are built for the simulator aren't signed, so there's no keychain access group
     // for the simulator to check. This means that all apps can see all keychain items when run
     // on the simulator.
@@ -336,6 +341,7 @@ static NSString *const kAMAMetricaFallbackPrefix = @"fallback-keychain";
 
 - (id<AMAFileStorage>)privateIdentifiersFileStorage
 {
+    // If the data storage format and location change, you must notify https://nda.ya.ru/t/94XNTaaf7LkVFu
     if (_privateIdentifiersFileStorage == nil) {
         @synchronized (self.privateIdentifiersFileStorageLock) {
             if (_privateIdentifiersFileStorage == nil) {
@@ -366,6 +372,7 @@ static NSString *const kAMAMetricaFallbackPrefix = @"fallback-keychain";
 
 - (id<AMAFileStorage>)groupIdentifiersFileStorage
 {
+    // If the data storage format and location change, you must notify https://nda.ya.ru/t/94XNTaaf7LkVFu
     NSString *appGroupId = self.appGroupIdentifierProvider.appGroupIdentifier;
     if (appGroupId.length == 0) {
         return nil;
@@ -388,6 +395,7 @@ static NSString *const kAMAMetricaFallbackPrefix = @"fallback-keychain";
 
 - (AMAKeychain *)groupKeychain
 {
+    // If the data storage format and location change, you must notify https://nda.ya.ru/t/94XNTaaf7LkVFu
     NSString *appGroupId = self.appGroupIdentifierProvider.appGroupIdentifier;
     if (appGroupId.length == 0) {
         return nil;
