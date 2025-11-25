@@ -5,6 +5,7 @@
 NSString *const kAMAAppMetricaErrorDomain = @"io.appmetrica";
 
 NSString *const kAMAAppMetricaInternalErrorDomain = @"AppMetricaInternalErrorDomain";
+NSString *const kAMAAppMetricaDatabaseErrorDomain = @"AppMetricaDatabaseErrorDomain";
 NSString *const kAMAAppMetricaInternalErrorResultObjectKey = @"kAppMetricaInternalErrorResultObjectKey";
 
 @implementation AMAErrorUtilities
@@ -57,6 +58,13 @@ NSString *const kAMAAppMetricaInternalErrorResultObjectKey = @"kAppMetricaIntern
 + (NSError *)internalErrorWithCode:(NSInteger)code description:(NSString *)description
 {
     return [[self class] errorWithDomain:kAMAAppMetricaInternalErrorDomain
+                                    code:code
+                             description:description];
+}
+
++ (NSError *)databaseErrorWithCode:(NSInteger)code description:(NSString *)description
+{
+    return [[self class] errorWithDomain:kAMAAppMetricaDatabaseErrorDomain
                                     code:code
                              description:description];
 }

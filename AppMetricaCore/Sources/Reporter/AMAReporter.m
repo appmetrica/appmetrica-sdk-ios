@@ -49,6 +49,7 @@
 #import "AMAMutableAdRevenueInfo+AdRevenueHelper.h"
 #import "NSMutableDictionary+AdRevenueHelper.h"
 #import "AMAAdRevenueSourceContainer.h"
+#import "AMASQLiteIntegrityIssue.h"
 
 @interface AMAReporter () <AMAPrivacyTimerDelegate>
 
@@ -1306,8 +1307,13 @@
                                   session.sessionID,
                                   error ? [NSString stringWithFormat:@" with error: %@", error] : @""];
     AMALogError(@"%@", errorDescription);
-    [AMAFailureDispatcher dispatchError:[AMAErrorsFactory internalInconsistencyError:errorDescription]
-                              withBlock:onFailure];
+    NSError *resultError = nil;
+    if ([kAMAFMDBErrorDomain isEqualToString:error.domain]) {
+        resultError = [AMAErrorsFactory internalDatabaseError:errorDescription];
+    } else {
+        resultError = [AMAErrorsFactory internalInconsistencyError:errorDescription];
+    }
+    [AMAFailureDispatcher dispatchError:resultError withBlock:onFailure];
 }
 
 - (void)applyAppStateToSessionIfNeeded:(AMASession *)session

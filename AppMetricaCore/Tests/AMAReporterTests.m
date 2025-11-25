@@ -60,6 +60,7 @@
 #import "AMAIdentifiersTestUtilities.h"
 #import "AMAPrivacyTimer.h"
 #import "AMAAdRevenueSourceContainerMock.h"
+#import "AMASQLiteIntegrityIssue.h"
 
 @interface AMAReporterStorage (Test)
 
@@ -241,6 +242,30 @@ describe(@"AMAReporter", ^{
                 
                 [[error.domain should] equal:kAMAAppMetricaInternalErrorDomain];
                 [[theValue(error.code) should] equal:theValue(AMAAppMetricaInternalEventErrorCodeInternalInconsistency)];
+                
+                [[error.localizedDescription should] equal:expectedDescription];
+            }];
+        });
+        it(@"Should dispatch AMAFMDatabase error", ^{
+            [reporterTestHelper initReporterAndSendEventWithParameters:nil];
+            AMAReporter *reporter = [reporterTestHelper appReporterForApiKey:apiKey];
+            
+            NSString *const errorFormat = @"Internal database error: Failed to save event: %@ session: %@ with error: %@";
+            NSError *const errorMock = [NSError errorWithDomain:kAMAFMDBErrorDomain
+                                                           code:AMASQLiteIntegrityIssueTypeOther
+                                                       userInfo:nil];
+            
+            [eventStorage() stub:@selector(addEvent:toSession:error:) withBlock:^id(NSArray *params) {
+                [AMATestUtilities fillObjectPointerParameter:params[2] withValue:errorMock];
+                return NO;
+            }];
+            
+            [reporter reportEvent:eventName onFailure:^(NSError * _Nonnull error) {
+                NSNumber *expectedSessionID = [sessionStorage() lastSessionWithError:nil].sessionID;
+                NSString *expectedDescription = [NSString stringWithFormat:errorFormat, eventName, expectedSessionID, errorMock];
+                
+                [[error.domain should] equal:kAMAAppMetricaDatabaseErrorDomain];
+                [[theValue(error.code) should] equal:theValue(AMAAppMetricaDatabaseEventErrorCodeOperationFailed)];
                 
                 [[error.localizedDescription should] equal:expectedDescription];
             }];

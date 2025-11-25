@@ -27,6 +27,13 @@
                                         description:errorMsg];
 }
 
++ (NSError *)internalDatabaseError:(NSString *)description
+{
+    NSString *errorMsg = [NSString stringWithFormat:@"Internal database error: %@", description];
+    return [AMAErrorUtilities databaseErrorWithCode:AMAAppMetricaDatabaseEventErrorCodeOperationFailed
+                                                 description:errorMsg];
+}
+
 #pragma mark - Session's errors
 
 + (NSError *)badEventNameError:(NSString *)name

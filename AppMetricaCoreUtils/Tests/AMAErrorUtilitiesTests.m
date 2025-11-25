@@ -90,4 +90,16 @@
     XCTAssertEqualObjects(result.userInfo, @{ NSLocalizedDescriptionKey: description }, @"Should fill error userInfo");
 }
 
+- (void)testDatabaseErrorWithValidCodeAndDescription
+{
+    NSInteger errorCode = 3000;
+    NSString *description = @"Database connection failed";
+    
+    NSError *error = [AMAErrorUtilities databaseErrorWithCode:errorCode description:description];
+    
+    XCTAssertEqual(error.code, errorCode, @"Error code should match input");
+    XCTAssertEqualObjects(error.domain, kAMAAppMetricaDatabaseErrorDomain, @"Error domain should be AMAErrorDomain");
+    XCTAssertEqualObjects(error.userInfo, @{ NSLocalizedDescriptionKey: description}, @"Should fill error userInfo");
+}
+
 @end

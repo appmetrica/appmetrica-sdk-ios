@@ -4,6 +4,7 @@
 extern NSErrorDomain const kAMAAppMetricaErrorDomain NS_SWIFT_NAME(AppMetricaErrorDomain);
 
 extern NSErrorDomain const kAMAAppMetricaInternalErrorDomain NS_SWIFT_NAME(AppMetricaInternalErrorDomain);
+extern NSErrorDomain const kAMAAppMetricaDatabaseErrorDomain NS_SWIFT_NAME(AMAAppMetricaDatabaseErrorDomain);
 extern NSString *const kAMAAppMetricaInternalErrorResultObjectKey NS_SWIFT_NAME(AppMetricaInternalErrorResultObjectKey);
 
 typedef NS_ERROR_ENUM(kAMAAppMetricaErrorDomain, AMAAppMetricaEventErrorCode) {
@@ -26,6 +27,10 @@ typedef NS_ERROR_ENUM(kAMAAppMetricaInternalErrorDomain, AMAAppMetricaInternalEv
     AMAAppMetricaInternalEventErrorCodeNamedError = 3000,
 } NS_SWIFT_NAME(AppMetricaInternalEventErrorCode);
 
+typedef NS_ERROR_ENUM(kAMAAppMetricaDatabaseErrorDomain, AMAAppMetricaDatabaseEventErrorCode) {
+    AMAAppMetricaDatabaseEventErrorCodeOperationFailed = 3000
+} NS_SWIFT_NAME(AppMetricaDatabaseEventErrorCode);
+
 NS_SWIFT_NAME(ErrorUtilities)
 @interface AMAErrorUtilities : NSObject
 
@@ -36,6 +41,7 @@ NS_SWIFT_NAME(ErrorUtilities)
 
 + (NSError *)errorWithCode:(NSInteger)code description:(NSString *)description;
 + (NSError *)internalErrorWithCode:(NSInteger)code description:(NSString *)description;
++ (NSError *)databaseErrorWithCode:(NSInteger)code description:(NSString *)description;
 
 - (instancetype)init NS_UNAVAILABLE;
 + (instancetype)new NS_UNAVAILABLE;

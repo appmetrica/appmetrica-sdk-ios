@@ -231,6 +231,20 @@ describe(@"AMAErrorsFactory", ^{
             });
         });
 
+        context(@"internalDatabaseError", ^{
+            NSString *const internalErrorDescription = @"internal";
+            beforeEach(^{
+                error = [AMAErrorsFactory internalDatabaseError:internalErrorDescription];
+            });
+            
+            it(@"Should use correct code", ^{
+                [[theValue(error.code) should] equal:theValue(AMAAppMetricaDatabaseEventErrorCodeOperationFailed)];
+            });
+            it(@"Should use correct description", ^{
+                NSString *description = [NSString stringWithFormat:@"Internal database error: %@", internalErrorDescription];
+                [[error.localizedDescription should] equal:description];
+            });
+        });
     });
 
 });
