@@ -24,6 +24,10 @@ describe(@"AMAPredefinedAttributeUserProfileUpdateProvider", ^{
         attributeUpdate = [AMAAttributeUpdate stubbedNullMockForInit:@selector(initWithName:type:custom:valueUpdate:)];
         provider = [[AMAPredefinedAttributeUserProfileUpdateProvider alloc] init];
     });
+    afterEach(^{
+        [AMAUserProfileUpdate clearStubs];
+        [AMAAttributeUpdate clearStubs];
+    });
 
     it(@"Should create attribute update", ^{
         [[attributeUpdate should] receive:@selector(initWithName:type:custom:valueUpdate:)

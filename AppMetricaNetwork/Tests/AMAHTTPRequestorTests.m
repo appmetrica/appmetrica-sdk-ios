@@ -25,6 +25,10 @@ describe(@"AMAHTTPRequestor", ^{
         requestor = [[AMAHTTPRequestor alloc] initWithRequest:request sessionProvider:sessionProvider];
         requestor.delegate = delegate;
     });
+    afterEach(^{
+        [[NSAssertionHandler currentHandler] clearStubs];
+    });
+    
     it(@"Should not start cancelled request", ^{
         [[NSAssertionHandler currentHandler] stub:@selector(handleFailureInMethod:object:file:lineNumber:description:)];
         [[sessionProvider shouldNot] receive:@selector(session)];

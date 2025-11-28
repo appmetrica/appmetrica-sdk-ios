@@ -36,6 +36,8 @@ describe(@"AMAAttributionMapping", ^{
             [[theValue(result.requiredCount) should] equal:theValue(5)];
             [[theValue(result.conversionValueDiff) should] equal:theValue(8)];
             [[result.eventFilters should] equal:@[ firstEventFilter, secondEventFilter ]];
+            
+            [AMAEventFilter clearStubs];
         });
     });
     context(@"JSON", ^{

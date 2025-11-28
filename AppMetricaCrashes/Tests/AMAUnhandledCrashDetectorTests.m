@@ -30,6 +30,10 @@ describe(@"AMAUnhandledCrashDetector", ^{
                                                  hostStateProvider:hostAppStateProvider
                                                           executor:executor];
     });
+    
+    afterEach(^{
+        [AMAUnhandledCrashDetector clearStubs];
+    });
 
     context(@"Should initialize correctly", ^{
 
@@ -139,6 +143,10 @@ describe(@"AMAUnhandledCrashDetector", ^{
         });
 
         context(@"Should store state snapshot", ^{
+            
+            afterEach(^{
+                [AMAPlatformDescription clearStubs];
+            });
 
             it(@"Should store current bundle version", ^{
                 [AMAPlatformDescription stub:@selector(appBuildNumber) andReturn:@"0"];

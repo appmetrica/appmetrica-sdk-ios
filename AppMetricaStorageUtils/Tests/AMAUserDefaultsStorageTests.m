@@ -18,6 +18,9 @@ describe(@"AMAUserDefaultsStorage", ^{
         defaults = [NSUserDefaults nullMock];
         [NSUserDefaults stub:@selector(standardUserDefaults) andReturn:defaults];
     });
+    afterEach(^{
+        [NSUserDefaults clearStubs];
+    });
 
     it(@"Should call synchronize", ^{
         [[defaults should] receive:@selector(synchronize)];

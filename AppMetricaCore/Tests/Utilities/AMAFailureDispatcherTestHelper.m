@@ -17,4 +17,9 @@
     }];
 }
 
++ (void)destub
+{
+    [AMAFailureDispatcher clearStubs];
+}
+
 @end

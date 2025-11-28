@@ -18,6 +18,10 @@ describe(@"AMAAppIdentifierProvider", ^{
     NSString *const queryAttrAccount = @"AMAAppIdentifierPrefix";
     NSString *const queryAttrService = @"AMADeviceDescription";
     
+    afterEach(^{
+        [AMAAppIdentifierProvider clearStubs];
+    });
+    
     context(@"Provides application identifier prefix", ^{
         NSString *prefix = @"X9DCYK36Q2.";
         NSString *accessGroup = [prefix stringByAppendingString:@"io.appmetrica.shared-device-id"];

@@ -61,6 +61,7 @@
 #import "AMAPrivacyTimer.h"
 #import "AMAAdRevenueSourceContainerMock.h"
 #import "AMASQLiteIntegrityIssue.h"
+#import "AMAReporterStoragesContainer.h"
 
 @interface AMAReporterStorage (Test)
 
@@ -117,6 +118,21 @@ describe(@"AMAReporter", ^{
     });
     afterEach(^{
         [AMAMetricaConfigurationTestUtilities destubConfiguration];
+        [AMAFailureDispatcherTestHelper destub];
+        [reporterTestHelper destub];
+        [NSDate clearStubs];
+        
+        [AMAMetricaConfiguration clearStubs];
+        [AMAMetricaConfiguration.sharedInstance clearStubs];
+        [AMAMetricaConfiguration.sharedInstance.inMemory clearStubs];
+        [AMAMetricaConfiguration.sharedInstance.persistent clearStubs];
+        [AMAMetricaConfiguration.sharedInstance.startup clearStubs];
+        
+        [AMAApplicationStateManager clearStubs];
+        
+        [AMAAppMetrica clearStubs];
+
+        [AMAReporterStoragesContainer clearStubs];
     });
     context(@"ApiKey update", ^{
         it(@"Should update apiKey", ^{
@@ -249,24 +265,24 @@ describe(@"AMAReporter", ^{
         it(@"Should dispatch AMAFMDatabase error", ^{
             [reporterTestHelper initReporterAndSendEventWithParameters:nil];
             AMAReporter *reporter = [reporterTestHelper appReporterForApiKey:apiKey];
-            
+
             NSString *const errorFormat = @"Internal database error: Failed to save event: %@ session: %@ with error: %@";
             NSError *const errorMock = [NSError errorWithDomain:kAMAFMDBErrorDomain
                                                            code:AMASQLiteIntegrityIssueTypeOther
                                                        userInfo:nil];
-            
+
             [eventStorage() stub:@selector(addEvent:toSession:error:) withBlock:^id(NSArray *params) {
                 [AMATestUtilities fillObjectPointerParameter:params[2] withValue:errorMock];
                 return NO;
             }];
-            
+
             [reporter reportEvent:eventName onFailure:^(NSError * _Nonnull error) {
                 NSNumber *expectedSessionID = [sessionStorage() lastSessionWithError:nil].sessionID;
                 NSString *expectedDescription = [NSString stringWithFormat:errorFormat, eventName, expectedSessionID, errorMock];
-                
+
                 [[error.domain should] equal:kAMAAppMetricaDatabaseErrorDomain];
                 [[theValue(error.code) should] equal:theValue(AMAAppMetricaDatabaseEventErrorCodeOperationFailed)];
-                
+
                 [[error.localizedDescription should] equal:expectedDescription];
             }];
         });
@@ -1162,6 +1178,10 @@ describe(@"AMAReporter", ^{
             [serializer stub:@selector(dataWithModel:) andReturn:serializedData];
             reporter = [reporterTestHelper appReporterForApiKey:apiKey];
         });
+        afterEach(^{
+            [AMAUserProfileModelSerializer clearStubs];
+        });
+        
         it(@"Should have correct data in event", ^{
             AMAMutableUserProfile *profile = [[AMAMutableUserProfile alloc] init];
             [profile applyFromArray:@[
@@ -1209,6 +1229,10 @@ describe(@"AMAReporter", ^{
             [serializer stub:@selector(dataWithRevenueInfoModel:) andReturn:serializedData];
             reporter = [reporterTestHelper appReporterForApiKey:apiKey];
         });
+        afterEach(^{
+            [AMARevenueInfoModelSerializer clearStubs];
+        });
+        
         it(@"Should have correct data in event", ^{
             AMARevenueInfo *revenueInfo = [[AMARevenueInfo alloc] initWithPriceDecimal:[NSDecimalNumber one]
                                                                               currency:@"USD"];
@@ -1293,6 +1317,10 @@ describe(@"AMAReporter", ^{
 
                 reporter = [reporterTestHelper appReporterForApiKey:apiKey];
             });
+            afterEach(^{
+                [AMAAdRevenueInfoProcessor clearStubs];
+            });
+            
             it(@"Should have correct data in event", ^{
                 [reporter reportAdRevenue:adRevenueInfo onFailure:nil];
                 events = [eventStorage() amatest_allSavedEventsWithType:AMAEventTypeAdRevenue name:nil];
@@ -1762,6 +1790,10 @@ describe(@"AMAReporter", ^{
     });
 
     context(@"Sends events", ^{
+        afterEach(^{
+            [AMAAppMetrica clearStubs];
+        });
+        
         it(@"Invokes delegates sendEventsBuffer method", ^{
             AMAAppMetricaImpl *impl = [AMAAppMetricaImpl nullMock];
             [AMAAppMetrica stub:@selector(sharedImpl) andReturn:impl];
@@ -1868,6 +1900,10 @@ describe(@"AMAReporter", ^{
         
         beforeEach(^{
             jsController = [AMAJSController stubbedNullMockForInit:@selector(initWithUserContentController:)];
+        });
+        afterEach(^{
+            [AMAJSController clearStubs];
+            [AMAAppMetrica clearStubs];
         });
         
         it(@"Should init web view reporting", ^{

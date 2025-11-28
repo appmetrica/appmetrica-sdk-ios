@@ -28,6 +28,9 @@ describe(@"AMAAttributeUpdateCountValidator", ^{
         model.attributes = [NSMutableDictionary dictionary];
         validator = [[AMAAttributeUpdateCountValidator alloc] initWithCountLimit:countLimit];
     });
+    afterEach(^{
+        [AMAUserProfileLogger clearStubs];
+    });
     
     it(@"Should use valid arguments in default initializer", ^{
         validator = [AMAAttributeUpdateCountValidator alloc];

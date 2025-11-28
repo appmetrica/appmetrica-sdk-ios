@@ -25,6 +25,11 @@ describe(@"AMAAdController", ^{
         [AMAAdController stub:@selector(alloc) andReturn:allocedAdController];
         [allocedAdController stub:@selector(init) andReturn:adController];
     });
+    afterEach(^{
+        [AMAAdController clearStubs];
+        [AMAATTStatusProvider clearStubs];
+        [AMAIDFAProvider clearStubs];
+    });
     
     context(@"AMAAdController", ^{
         it(@"Should register on load", ^{

@@ -22,6 +22,9 @@ describe(@"AMAVersionUtils", ^{
             return theValue(result);
         }];
     });
+    afterEach(^{
+        [NSProcessInfo.processInfo clearStubs];
+    });
 
     describe(@"iOS 10", ^{
 

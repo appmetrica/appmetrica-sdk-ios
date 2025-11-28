@@ -1563,6 +1563,10 @@ describe(@"AMADecodedCrashSerializer", ^{
             [AMADecodedCrashValidator stub:@selector(alloc) andReturn:validator];
             return validator;
         });
+        
+        afterEach(^{
+            [AMADecodedCrashValidator clearStubs];
+        });
 
         it(@"Should return nil and set critical NSError", ^{
             NSError *criticalError = [NSError errorWithDomain:@"test.error.domain"
@@ -1618,6 +1622,7 @@ describe(@"AMADecodedCrashSerializer", ^{
         __block NSError *error = nil;
         
         afterEach(^{
+            [AMADecodedCrashValidator clearStubs];
             report = NULL;
         });
 

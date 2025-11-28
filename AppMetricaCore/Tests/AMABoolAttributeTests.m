@@ -31,7 +31,10 @@ describe(@"AMABoolAttribute", ^{
                                  userProfileUpdateProvider:updateProvider
                                   categoricalUpdateFactory:factory];
     });
-
+    afterEach(^{
+        [AMABoolAttributeValueUpdate clearStubs];
+    });
+    
     context(@"Update with value", ^{
         beforeEach(^{
             [factory stub:@selector(updateWithUnderlyingUpdate:) andReturn:categoricalValueUpdate];

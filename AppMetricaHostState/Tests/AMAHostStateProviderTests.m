@@ -27,7 +27,11 @@ describe(@"AMAHostStateProvider", ^{
         factory = [AMAHostStateControllerFactory stubbedNullMockForDefaultInit];
         
         [factory stub:@selector(hostStateController) andReturn:hostStateController];
-        
+ 
+    });
+    afterEach(^{
+        [AMAApplicationHostStateProvider clearStubs];
+        [AMAHostStateControllerFactory clearStubs];
     });
     
     it(@"Should call state provider factory on load", ^{

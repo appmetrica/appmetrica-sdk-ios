@@ -11,6 +11,14 @@ describe(@"AMAATTStatusProvider", ^{
     let(attStatusProvider, ^id{
         return [[AMAATTStatusProvider alloc] init];
     });
+    
+    afterEach(^{
+        if (@available(tvOS 14, *)) {
+            [ATTrackingManager clearStubs];
+        }
+        [ASIdentifierManager clearStubs];
+        [[ASIdentifierManager sharedManager] clearStubs];
+    });
 
     if (@available(iOS 14.0, tvOS 14.0, *)) {
         it(@"Should return ATTStatus", ^{

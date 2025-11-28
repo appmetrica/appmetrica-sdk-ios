@@ -59,6 +59,9 @@ describe(@"AMAEventStorage", ^{
         event.sessionOid = session.oid;
         event.type = AMAEventTypeAlive;
     });
+    afterEach(^{
+        [AMADatabaseHelper clearStubs];
+    });
 
     id (^fetchSessionField)(NSString *field) = ^(NSString *field) {
         id __block result = nil;

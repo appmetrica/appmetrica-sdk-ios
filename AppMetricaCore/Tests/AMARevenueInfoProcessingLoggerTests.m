@@ -15,6 +15,9 @@ describe(@"AMARevenueInfoProcessingLogger", ^{
         [AMALogFacade stub:@selector(sharedLog) andReturn:log];
         logger = [[AMARevenueInfoProcessingLogger alloc] init];
     });
+    afterEach(^{
+        [AMALogFacade clearStubs];
+    });
 
     AMALogMessageSpy *(^messageWithText)(NSString *) = ^(NSString *text) {
         return [AMALogMessageSpy messageWithText:text channel:@"AppMetricaCore" level:AMALogLevelWarning];

@@ -34,12 +34,23 @@ describe(@"AMAProfileAttribute", ^{
             [AMAStringAttribute stubbedNullMockForInit:@selector(initWithName:userProfileUpdateProvider:truncationProvider:)];
         boolAttribute = [AMABoolAttribute stubbedNullMockForInit:@selector(initWithName:userProfileUpdateProvider:)];
     });
+    afterEach(^{
+        [AMAPredefinedAttributeUserProfileUpdateProvider clearStubs];
+        [AMACustomAttributeUserProfileUpdateProvider clearStubs];
+        [AMAStringAttribute clearStubs];
+        [AMABoolAttribute clearStubs];
+    });
 
     context(@"Name", ^{
         beforeEach(^{
             [AMAAttributeNameProvider stub:@selector(name) andReturn:attributeName];
             [AMAStringAttributeTruncatorFactory stub:@selector(nameTruncationProvider) andReturn:truncationProvider];
         });
+        afterEach(^{
+            [AMAAttributeNameProvider clearStubs];
+            [AMAStringAttributeTruncatorFactory clearStubs];
+        });
+        
         it(@"Should create string attribute", ^{
             [[stringAttribute should] receive:@selector(initWithName:userProfileUpdateProvider:truncationProvider:)
                                 withArguments:attributeName, predefinedUpdateProvider, truncationProvider];
@@ -56,6 +67,12 @@ describe(@"AMAProfileAttribute", ^{
             [AMAAttributeNameProvider stub:@selector(gender) andReturn:attributeName];
             [AMAStringAttributeTruncatorFactory stub:@selector(genderTruncationProvider) andReturn:truncationProvider];
         });
+        afterEach(^{
+            [AMAGenderAttribute clearStubs];
+            [AMAAttributeNameProvider clearStubs];
+            [AMAStringAttributeTruncatorFactory clearStubs];
+        });
+        
         it(@"Should create string attribute", ^{
             [[stringAttribute should] receive:@selector(initWithName:userProfileUpdateProvider:truncationProvider:)
                                 withArguments:attributeName, predefinedUpdateProvider, truncationProvider];
@@ -77,6 +94,12 @@ describe(@"AMAProfileAttribute", ^{
             [AMAStringAttributeTruncatorFactory stub:@selector(birthDateTruncationProvider)
                                            andReturn:truncationProvider];
         });
+        afterEach(^{
+            [AMADateAttribute clearStubs];
+            [AMAAttributeNameProvider clearStubs];
+            [AMAStringAttributeTruncatorFactory clearStubs];
+        });
+        
         it(@"Should create string attribute", ^{
             [[stringAttribute should] receive:@selector(initWithName:userProfileUpdateProvider:truncationProvider:)
                                 withArguments:attributeName, predefinedUpdateProvider, truncationProvider];
@@ -94,6 +117,10 @@ describe(@"AMAProfileAttribute", ^{
         beforeEach(^{
             [AMAAttributeNameProvider stub:@selector(notificationsEnabled) andReturn:attributeName];
         });
+        afterEach(^{
+            [AMAAttributeNameProvider clearStubs];
+        });
+        
         it(@"Should create bool attribute", ^{
             [[boolAttribute should] receive:@selector(initWithName:userProfileUpdateProvider:)
                               withArguments:attributeName, predefinedUpdateProvider];
@@ -111,6 +138,11 @@ describe(@"AMAProfileAttribute", ^{
                 [AMAStringAttributeTruncatorFactory stub:@selector(customStringTruncationProvider)
                                                andReturn:truncationProvider];
             });
+            afterEach(^{
+                [AMAAttributeNameProvider clearStubs];
+                [AMAStringAttributeTruncatorFactory clearStubs];
+            });
+            
             it(@"Should request attribute name", ^{
                 [[AMAAttributeNameProvider should] receive:@selector(customStringWithName:) withArguments:customName];
                 [AMAProfileAttribute customString:customName];
@@ -131,6 +163,11 @@ describe(@"AMAProfileAttribute", ^{
                     [AMANumberAttribute stubbedNullMockForInit:@selector(initWithName:userProfileUpdateProvider:)];
                 [AMAAttributeNameProvider stub:@selector(customNumberWithName:) andReturn:attributeName];
             });
+            afterEach(^{
+                [AMANumberAttribute clearStubs];
+                [AMAAttributeNameProvider clearStubs];
+            });
+            
             it(@"Should request attribute name", ^{
                 [[AMAAttributeNameProvider should] receive:@selector(customNumberWithName:) withArguments:customName];
                 [AMAProfileAttribute customNumber:customName];
@@ -151,6 +188,11 @@ describe(@"AMAProfileAttribute", ^{
                     [AMACounterAttribute stubbedNullMockForInit:@selector(initWithName:userProfileUpdateProvider:)];
                 [AMAAttributeNameProvider stub:@selector(customCounterWithName:) andReturn:attributeName];
             });
+            afterEach(^{
+                [AMACounterAttribute clearStubs];
+                [AMAAttributeNameProvider clearStubs];
+            });
+            
             it(@"Should request attribute name", ^{
                 [[AMAAttributeNameProvider should] receive:@selector(customCounterWithName:) withArguments:customName];
                 [AMAProfileAttribute customCounter:customName];
@@ -168,6 +210,10 @@ describe(@"AMAProfileAttribute", ^{
             beforeEach(^{
                 [AMAAttributeNameProvider stub:@selector(customBoolWithName:) andReturn:attributeName];
             });
+            afterEach(^{
+                [AMAAttributeNameProvider clearStubs];
+            });
+            
             it(@"Should request attribute name", ^{
                 [[AMAAttributeNameProvider should] receive:@selector(customBoolWithName:) withArguments:customName];
                 [AMAProfileAttribute customBool:customName];

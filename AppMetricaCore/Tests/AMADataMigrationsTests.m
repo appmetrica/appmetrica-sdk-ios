@@ -77,8 +77,7 @@
 
 SPEC_BEGIN(AMADataMigrationsTests)
 
-describe(@"AMADataMigrationsTests",
- ^{
+describe(@"AMADataMigrationsTests", ^{
     AMAReporterTestHelper *__block reporterTestHelper = nil;
     AMAMetricaPersistentConfiguration *__block persistentMock = nil;
     AMAMetricaConfiguration *__block configuration = nil;
@@ -105,7 +104,10 @@ describe(@"AMADataMigrationsTests",
         [AMAMetricaConfiguration stub:@selector(sharedInstance) andReturn:configuration];
     });
     afterEach(^{
+        [AMAPlatformDescription clearStubs];
+        [AMAInstantFeaturesConfiguration clearStubs];
         [AMAMetricaConfiguration clearStubs];
+        [reporterTestHelper destub];
     });
     
     AMAReporterStorage *(^reporterStorage)(id<AMADatabaseProtocol>, NSString *, BOOL) = ^(id<AMADatabaseProtocol> database,
@@ -120,8 +122,7 @@ describe(@"AMADataMigrationsTests",
                                                      main:main];
     };
     
-    context(@"Configuration database",
- ^{
+    context(@"Configuration database", ^{
         id<AMADatabaseProtocol> __block migrationDatabase = nil;
         id<AMADatabaseDataMigration> __block migration = nil;
         NSString *__block basePath = nil;
@@ -232,6 +233,9 @@ describe(@"AMADataMigrationsTests",
                     [AMAPlatformDescription stub:@selector(appIdentifierPrefix) andReturn:appIdentifierPrefix];
                     keychainBridge = [[AMAKeychainBridge alloc] init];
                 });
+                afterEach(^{
+                    [AMAKeychain clearStubs];
+                });
                 
                 void (^stubKeychain)(NSString *, NSString *, AMAKeychain *) = ^(NSString *serviceIdentifier,
                                                                                 NSString *accessGroup,
@@ -240,9 +244,7 @@ describe(@"AMADataMigrationsTests",
                     [AMAKeychain stub:@selector(alloc) andReturn:allocedKeychain];
                     [allocedKeychain stub:@selector(initWithService:accessGroup:bridge:)
                                 andReturn:mockedKeychain
-                            withArguments:serviceIdentifier,
- accessGroup,
- kw_any()];
+                            withArguments:serviceIdentifier, accessGroup, kw_any()];
                 };
                 
                 it(@"Should migrate deviceID with storage", ^{
@@ -398,8 +400,7 @@ describe(@"AMADataMigrationsTests",
             });
         });
         
-        context(@"Migration to 5.9.0",
- ^{
+        context(@"Migration to 5.9.0", ^{
             AMAAppMetricaUUIDMigrator *__block migrator = nil;
             NSObject<AMAIdentifierProviding> *__block identifierProviderMock = nil;
             
@@ -414,6 +415,9 @@ describe(@"AMADataMigrationsTests",
                 
                 identifierProviderMock = [KWMock nullMockForProtocol:@protocol(AMAIdentifierProviding)];
                 [configuration stub:@selector(identifierProvider) andReturn:identifierProviderMock];
+            });
+            afterEach(^{
+                [AMAAppMetricaUUIDMigrator clearStubs];
             });
             
             it(@"Should migrate uuid to identifier provider", ^{
@@ -434,10 +438,11 @@ describe(@"AMADataMigrationsTests",
                     [[[storage stringForKey:migration.migrationKey error:nil] should] equal:@"1"];
                 }];
                 [[resultUUID should] equal:expectedUUID];
+                
+                [AMAAppMetricaUUIDMigrator clearStubs];
             });
             
-            it(@"Should migrate deviceID to identifier provider",
- ^{
+            it(@"Should migrate deviceID to identifier provider", ^{
                 NSString *const expectedDeviceID = @"appmetrica_deviceID";
                 NSString *const expectedDeviceIDHash = @"appmetrica_deviceIDHash";
                 NSString *__block resultDeviceID = nil;
@@ -458,13 +463,11 @@ describe(@"AMADataMigrationsTests",
                 
                 [(NSObject *)dbStorage stub:@selector(stringForKey:error:)
                                   andReturn:expectedDeviceID
-                              withArguments:dbStorageKey(AMAAppMetricaIdentifiersKeys.deviceID),
- kw_any()];
+                              withArguments:dbStorageKey(AMAAppMetricaIdentifiersKeys.deviceID), kw_any()];
                 
                 [(NSObject *)dbStorage stub:@selector(stringForKey:error:)
                                   andReturn:expectedDeviceIDHash
-                              withArguments:dbStorageKey(AMAAppMetricaIdentifiersKeys.deviceIDHash),
- kw_any()];
+                              withArguments:dbStorageKey(AMAAppMetricaIdentifiersKeys.deviceIDHash), kw_any()];
                 
                 [migratedDB inDatabase:^(AMAFMDatabase *db) {
                     id<AMAKeyValueStoring> storage = [migratedDB.storageProvider storageForDB:db];

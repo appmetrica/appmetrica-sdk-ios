@@ -65,6 +65,9 @@ describe(@"AMADatabaseMigrationTests", ^{
     beforeEach(^{
         reporterTestHelper = [[AMAReporterTestHelper alloc] init];
     });
+    afterEach(^{
+        [reporterTestHelper destub];
+    });
 
     context(@"Migration", ^{
         NSString *apiKey = @"1111"; // this key is hardcoded in storage backups

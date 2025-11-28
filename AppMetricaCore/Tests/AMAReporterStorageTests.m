@@ -61,6 +61,19 @@ describe(@"AMAReporterStorage", ^{
         sessionCleaner = [AMASessionsCleaner stubbedNullMockForInit:@selector(initWithDatabase:eventsCleaner:apiKey:)];
         autocollectedDataProvider = [KWMock nullMockForProtocol:@protocol(AMAReporterAutocollectedDataProviding)];
     });
+    afterEach(^{
+        [AMASessionsCleaner clearStubs];
+        [AMAEventsCleaner clearStubs];
+        [AMAReportRequestProvider clearStubs];
+        [AMAEventStorage clearStubs];
+        [AMASessionStorage clearStubs];
+        [AMAReporterStateStorage clearStubs];
+        [AMASessionSerializer clearStubs];
+        [AMAEventSerializer clearStubs];
+        [AMASharedReporterProvider clearStubs];
+        [AMAReporterStoragesContainer clearStubs];
+        [AMADatabaseFactory clearStubs];
+    });
 
     void (^createStorage)(void) = ^{
         storage = [[AMAReporterStorage alloc] initWithApiKey:apiKey eventEnvironment:eventEnvironment main:YES];

@@ -11,6 +11,9 @@ describe(@"AMAIDFAProvider", ^{
     let(idfaProvider, ^id{
         return [[AMAIDFAProvider alloc] init];
     });
+    afterEach(^{
+        [ASIdentifierManager clearStubs];
+    });
 
     it(@"Should return idfa", ^{
         NSUUID *uuid = [NSUUID nullMock];

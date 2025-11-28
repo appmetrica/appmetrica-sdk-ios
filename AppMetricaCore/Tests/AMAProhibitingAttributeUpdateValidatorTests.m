@@ -18,6 +18,9 @@ describe(@"AMAProhibitingAttributeUpdateValidator", ^{
         attributeUpdate = [AMAAttributeUpdate nullMock];
         model = [AMAUserProfileModel nullMock];
     });
+    afterEach(^{
+        [AMAUserProfileLogger clearStubs];
+    });
 
     context(@"Non-nil block", ^{
         AMAAttributeUpdate *__block loggedUpdate = nil;

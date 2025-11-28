@@ -84,4 +84,6 @@
 + (void)cycleReporterWithStubbedDateFromNow:(AMAReporter *)reporter interval:(NSTimeInterval)sinceNow;
 + (void)reportDelayedEvent:(AMAReporter *)reporter delay:(NSTimeInterval)delaySec;
 
+- (void)destub;
+
 @end

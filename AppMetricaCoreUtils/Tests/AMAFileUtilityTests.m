@@ -16,6 +16,9 @@ describe(@"AMAFileUtility", ^{
         originalFileManager = [NSFileManager defaultManager];
         [NSFileManager stub:@selector(defaultManager) andReturn:fileManager];
     });
+    afterEach(^{
+        [NSFileManager clearStubs];
+    });
 
     context(@"Paths for files with extension", ^{
 
@@ -34,6 +37,9 @@ describe(@"AMAFileUtility", ^{
             [fileURLsMock stub:@selector(sortedArrayUsingComparator:) andReturn:fileURLs];
             [fileManager stub:@selector(contentsOfDirectoryAtURL:includingPropertiesForKeys:options:error:)
                     andReturn:fileURLsMock];
+        });
+        afterEach(^{
+            [AMAFileUtility clearStubs];
         });
 
         it(@"Should return valid paths", ^{
@@ -69,8 +75,9 @@ describe(@"AMAFileUtility", ^{
     });
 
     context(@"Skip backup flag", ^{
-         NSDictionary *const expectedExtendedAttributes =
-             @{ @"com.apple.metadata:com_apple_backup_excludeItem" : [@"com.apple.MobileBackup" dataUsingEncoding:NSASCIIStringEncoding] };
+        NSString *const excludeItemKey = @"com.apple.metadata:com_apple_backup_excludeItem";
+        NSData *const excludeItemData = [@"com.apple.MobileBackup" dataUsingEncoding:NSASCIIStringEncoding];
+        NSDictionary *const expectedExtendedAttributes = @{ excludeItemKey : excludeItemData };
 
         NSString *__block tempFilePath = nil;
         beforeEach(^{
@@ -78,6 +85,8 @@ describe(@"AMAFileUtility", ^{
             [NSFileManager clearStubs];
 
             tempFilePath = [NSTemporaryDirectory() stringByAppendingPathComponent:[[NSUUID UUID] UUIDString]];
+            [originalFileManager removeItemAtPath:tempFilePath error:NULL];
+            
             [[@"DATA" dataUsingEncoding:NSUTF8StringEncoding] writeToFile:tempFilePath atomically:YES];
         });
         afterEach(^{
@@ -86,13 +95,17 @@ describe(@"AMAFileUtility", ^{
 
         it(@"Should not have attribute before", ^{
             NSDictionary *attributes = [originalFileManager attributesOfItemAtPath:tempFilePath error:NULL];
-            [[attributes[@"NSFileExtendedAttributes"] should] beNil];
+            NSDictionary *extendedAttributes = attributes[@"NSFileExtendedAttributes"];
+            
+            [[extendedAttributes[excludeItemKey] should] beNil];
         });
 
         it(@"Should have valid attribute", ^{
             [AMAFileUtility setSkipBackupAttributesOnPath:tempFilePath];
             NSDictionary *attributes = [originalFileManager attributesOfItemAtPath:tempFilePath error:NULL];
-            [[attributes[@"NSFileExtendedAttributes"] should] equal:expectedExtendedAttributes];
+            NSDictionary *extendedAttributes = attributes[@"NSFileExtendedAttributes"];
+            
+            [[extendedAttributes[excludeItemKey] should] equal:excludeItemData];
         });
         
         it(@"Should preserve attributes while writing files", ^{

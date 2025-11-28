@@ -47,6 +47,7 @@ describe(@"AMAStartupClientIdentifierFactory", ^{
     });
     afterEach(^{
         [AMAMetricaConfiguration clearStubs];
+        [UIDevice clearStubs];
     });
     
     context(@"When all identifiers are available", ^{

@@ -22,6 +22,9 @@ describe(@"AMAStartupRequest", ^{
             request = [[AMAStartupRequest alloc] init];
             request.host = startupHost;
         });
+        afterEach(^{
+            [AMAPlatformDescription clearStubs];
+        });
         
         it(@"Should request for json", ^{
             stubPlatformDescription();
@@ -37,6 +40,8 @@ describe(@"AMAStartupRequest", ^{
             NSDictionary *exprectedParameters = @{ @"expected" : @"parameters" };
             [AMAStartupParameters stub:@selector(parameters) andReturn:exprectedParameters];
             [[[request GETParameters][@"expected"] should] equal:@"parameters"];
+            
+            [AMAStartupParameters clearStubs];
         });
         
         it(@"Should set correct User-Agent header", ^{

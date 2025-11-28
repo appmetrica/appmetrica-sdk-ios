@@ -39,6 +39,10 @@ describe(@"AMACrashSafeTransactor", ^{
         [AMABuildUID stub:@selector(buildUID) andReturn:buildUIDMock];
         [buildUIDMock stub:@selector(stringValue) andReturn:buildUID];
     });
+    afterEach(^{
+        [NSUserDefaults clearStubs];
+        [AMABuildUID clearStubs];
+    });
     
     it(@"Should remove lock-flag on transaction success", ^{
         [transactor processTransactionWithID:transactionID name:transactionName transaction:^{

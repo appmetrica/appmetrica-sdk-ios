@@ -46,6 +46,11 @@ describe(@"AMADatabaseIntegrityManager", ^{
                                                                   processor:processor];
         manager.delegate = delegate;
     });
+    afterEach(^{
+        [AMAFileUtility clearStubs];
+        [AMADatabaseQueueProvider clearStubs];
+        [AMADatabaseIntegrityReport clearStubs];
+    });
 
     __auto_type stubProcessor = ^(SEL selector, BOOL(^block)(AMADatabaseIntegrityReport *)) {
         [processor stub:selector withBlock:^id(NSArray *params) {
@@ -61,6 +66,10 @@ describe(@"AMADatabaseIntegrityManager", ^{
                 return YES;
             });
         });
+        afterEach(^{
+            [AMAFileUtility clearStubs];
+        });
+        
         it(@"Should return valid queue", ^{
             [[[manager databaseWithEnsuredIntegrityWithIsNew:NULL] should] equal:database];
         });

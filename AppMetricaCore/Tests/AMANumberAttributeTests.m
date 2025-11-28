@@ -32,6 +32,9 @@ describe(@"AMANumberAttribute", ^{
                                    userProfileUpdateProvider:updateProvider
                                     categoricalUpdateFactory:factory];
     });
+    afterEach(^{
+        [AMANumberAttributeValueUpdate clearStubs];
+    });
 
     context(@"Update with value", ^{
         beforeEach(^{

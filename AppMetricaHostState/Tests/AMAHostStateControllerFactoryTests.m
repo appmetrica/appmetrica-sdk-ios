@@ -12,6 +12,10 @@ describe(@"AMAHostStateControllerFactory", ^{
     AMAHostStateControllerFactory *__block factory = nil;
     NSBundle *__block bundle = [NSBundle mainBundle];
     
+    afterEach(^{
+        [bundle clearStubs];
+    });
+    
     it(@"App host state", ^{
         [bundle stub:@selector(executablePath) andReturn:@".app"];
         factory = [[AMAHostStateControllerFactory alloc] initWithBundle:bundle];

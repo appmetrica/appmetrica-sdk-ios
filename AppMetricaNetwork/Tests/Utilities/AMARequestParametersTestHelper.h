@@ -25,5 +25,6 @@
 @property (nonatomic) id<AMABundleInfoProvider> extensionAppInfoProvider;
 
 - (void)configureStubs;
+- (void)destubs;
 
 @end

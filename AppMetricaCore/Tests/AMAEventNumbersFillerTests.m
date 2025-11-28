@@ -44,6 +44,9 @@ describe(@"AMAEventNumbersFiller", ^{
         rollbackHolder = [AMARollbackHolder nullMock];
         filler = [[AMAEventNumbersFiller alloc] init];
     });
+    afterEach(^{
+        [AMAIncrementableValueStorageFactory clearStubs];
+    });
 
     context(@"Generic event", ^{
         beforeEach(^{

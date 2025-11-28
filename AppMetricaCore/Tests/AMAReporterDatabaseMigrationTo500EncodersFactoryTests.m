@@ -29,6 +29,12 @@ describe(@"AMAReporterDatabaseMigrationTo500EncodersFactory", ^{
 
         encoderFactory = [[AMAReporterDatabaseMigrationTo500EncodersFactory alloc] init];
     });
+    afterEach(^{
+        [AMACompositeDataEncoder clearStubs];
+        [AMAGZipDataEncoder clearStubs];
+        [AMAAESCrypter clearStubs];
+        [AMAAESUtility clearStubs];
+    });
     
     context(@"AES", ^{
         NSObject<AMADataEncoding> *(^encoder)(void) = ^{

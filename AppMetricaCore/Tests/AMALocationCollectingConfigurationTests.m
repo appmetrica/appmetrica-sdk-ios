@@ -17,6 +17,11 @@ describe(@"AMALocationCollectingConfiguration", ^{
         metricaCofiguration = [AMAMetricaConfiguration sharedInstance];
         configuration = [[AMALocationCollectingConfiguration alloc] initWithMetricaConfiguration:metricaCofiguration];
     });
+    afterEach(^{
+        [AMAMetricaConfigurationTestUtilities destubConfiguration];
+        [metricaCofiguration clearStubs];
+        [metricaCofiguration.startup clearStubs];
+    });
 
     context(@"Collecting enabled", ^{
         it(@"Should retrun NO if disabled", ^{

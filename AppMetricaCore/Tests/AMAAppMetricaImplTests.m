@@ -143,10 +143,27 @@ describe(@"AMAAppMetricaImpl", ^{
         [AMADataSendingRestrictionController stub:@selector(sharedInstance) andReturn:restrictionController];
     });
     afterEach(^{
+        [AMAReporterStoragesContainer clearStubs];
+        [AMAExternalAttributionController clearStubs];
+        [AMAReporterAutocollectedDataProvider clearStubs];
+        [AMAAdServicesReportingController clearStubs];
+        [AMADeepLinkController clearStubs];
+        [AMAAutoPurchasesWatcher clearStubs];
+        [AMAPermissionsController clearStubs];
+        [AMAStartupController clearStubs];
+        [AMAStartupItemsChangedNotifier clearStubs];
+        [AMAFirstActivationDetector clearStubs];
+        [AMAAppOpenWatcher clearStubs];
+        [AMADispatchStrategiesContainer clearStubs];
+        [AMADataSendingRestrictionController clearStubs];
+        [AMAMetricaConfigurationTestUtilities destubConfiguration];
         [AMALocationManager clearStubs];
         [AMAAppMetrica clearStubs];
+        [AMAMetricaConfiguration clearStubs];
+        [[AMAMetricaConfiguration sharedInstance] clearStubs];
+        [AMAReporterStoragesContainer clearStubs];
+        [reporterTestHelper destub];
         appMetricaImpl = nil;
-        [AMAAppMetrica clearStubs];
     });
     
     void (^activationBlock)(BOOL) = ^(BOOL anonymous) {
@@ -167,6 +184,10 @@ describe(@"AMAAppMetricaImpl", ^{
         beforeEach(^{
             reporter = [AMAInternalEventsReporter nullMock];
             [AMAAppMetrica stub:@selector(sharedInternalEventsReporter) andReturn:reporter];
+        });
+        afterEach(^{
+            [AMAAppMetrica clearStubs];
+            [[AMAMetricaConfiguration sharedInstance] clearStubs];
         });
 
         it(@"Should report event to database if inconsistency detected", ^{
@@ -381,6 +402,9 @@ describe(@"AMAAppMetricaImpl", ^{
             controller = [AMAAttributionController nullMock];
             [AMAAttributionController stub:@selector(sharedInstance) andReturn:controller];
         });
+        afterEach(^{
+            [AMAAttributionController clearStubs];
+        });
         it(@"Should set main reporter", ^{
             KWCaptureSpy *reporterCaptor = [controller captureArgument:@selector(setMainReporter:) atIndex:0];
             [appMetricaImpl activateWithConfiguration:configuration];
@@ -526,6 +550,9 @@ describe(@"AMAAppMetricaImpl", ^{
 
         beforeEach(^{
             jsController = [AMAJSController stubbedNullMockForInit:@selector(initWithUserContentController:)];
+        });
+        afterEach(^{
+            [AMAJSController clearStubs];
         });
 
         it(@"Should init web view reporting", ^{
@@ -1112,10 +1139,16 @@ describe(@"AMAAppMetricaImpl", ^{
                                                           @"hosts": @[@"host_1", @1, @"host_2", @""],
                 };
                 NSArray *__block observers = nil;
+                
                 beforeEach(^{
                     observers = @[[KWMock nullMockForProtocol:@protocol(AMAExtendedStartupObserving)],
                                   [KWMock nullMockForProtocol:@protocol(AMAExtendedStartupObserving)]];
                 });
+                afterEach(^{
+                    [AMAStartupStorageProvider clearStubs];
+                    [AMACachingStorageProvider clearStubs];
+                });
+                
                 it(@"Should setup startup observers", ^{
                     id startupStorageProvider = [AMAStartupStorageProvider stubbedNullMockForDefaultInit];
                     id cachingStorageProvider = [AMACachingStorageProvider stubbedNullMockForDefaultInit];

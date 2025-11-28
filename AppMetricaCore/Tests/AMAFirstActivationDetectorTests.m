@@ -21,6 +21,11 @@ describe(@"AMAFirstActivationDetector", ^{
         return [[AMAFirstActivationDetector alloc] init];
     };
     
+    afterEach(^{
+        [AMAMigrationTo500Utils clearStubs];
+        [AMAFileUtility clearStubs];
+    });
+    
     context(@"isFirstLibraryReporterActivation", ^{
         NSString *const persistentPathForApiKey = [persistentPath stringByAppendingPathComponent:kAMAMetricaLibraryApiKey];
         NSString *const migrationPathForApiKey = [migrationPath stringByAppendingPathComponent:kAMAMetricaLibraryApiKey];

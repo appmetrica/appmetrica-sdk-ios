@@ -59,7 +59,19 @@ describe(@"AMAReportRequestTests", ^{
         [AMAPlatformDescription stub:@selector(currentAppInfo) andReturn:extensionMock];
     });
     afterEach(^{
+        [AMAMetricaConfigurationTestUtilities destubConfiguration];
         [AMAPlatformDescription clearStubs];
+        [reporterTestHelper destub];
+        [AMAReportPayloadEncoderFactory clearStubs];
+        
+        [AMALocationManager clearStubs];
+        [AMALocationManager.sharedManager clearStubs];
+        
+        [AMAMetricaConfiguration clearStubs];
+        [AMAMetricaConfiguration.sharedInstance clearStubs];
+        [AMAMetricaConfiguration.sharedInstance.inMemory clearStubs];
+        
+        [AMAEncryptedFileStorageFactory clearStubs];
     });
     AMAReportEventsBatch *(^createEventBatch)(void) = ^AMAReportEventsBatch *(void) {
         AMASession *session =
@@ -104,6 +116,10 @@ describe(@"AMAReportRequestTests", ^{
             [helper stubApplicationState];
             AMAReportRequest *request = createReportRequest();
             GETParameters = [request GETParameters];
+        });
+        afterEach(^{
+            [AMAPlatformDescription clearStubs];
+            [helper destubApplicationState];
         });
 
         it(@"Should add app_platform to GET parameters", ^{
@@ -187,9 +203,10 @@ describe(@"AMAReportRequestTests", ^{
 
     context(@"Resets headers", ^{
         AMAReportRequest *__block request = nil;
-
+        AMAAppStateManagerTestHelper *__block helper = nil;
+        
         beforeEach(^{
-            AMAAppStateManagerTestHelper *helper = [[AMAAppStateManagerTestHelper alloc] init];
+            helper = [[AMAAppStateManagerTestHelper alloc] init];
             helper.UUID = @"";
             [helper stubApplicationState];
             [reporterTestHelper initReporterAndSendEventWithParameters:nil];
@@ -205,7 +222,12 @@ describe(@"AMAReportRequestTests", ^{
                                         requestParametersOptions:AMARequestParametersDefault];
             request.host = host;
         });
-
+        afterEach(^{
+            [helper destubApplicationState];
+            [reporterTestHelper destub];
+            [AMAPlatformDescription clearStubs];
+        });
+        
         it(@"Should fill send time headers", ^{
             NSURLRequest *urlRequest = [request buildURLRequest];
 
@@ -224,6 +246,10 @@ describe(@"AMAReportRequestTests", ^{
     context(@"Generates correct payload", ^{
         beforeEach(^{
             [[reporterTestHelper appReporter].reporterStorage.stateStorage.appEnvironment clearEnvironment];
+        });
+        afterEach(^{
+            [AMALocationManager.sharedManager clearStubs];
+            [AMAPlatformDescription clearStubs];
         });
         Ama__ReportMessage * __block message = NULL;
         NSDictionary * __block GETParameters = nil;
@@ -557,13 +583,18 @@ describe(@"AMAReportRequestTests", ^{
                 NSURLRequest *URLRequest = [request buildURLRequest];
                 NSString *expectedString = [NSString stringWithFormat:@"uuid=%@", UUID];
                 [[[[URLRequest URL] query] should] containString:expectedString];
+                
+                [helper destubApplicationState];
+                [AMAPlatformDescription clearStubs];
+                [AMALocationManager.sharedManager clearStubs];
             });
         });
         context(@"No file for file storage type event", ^{
             AMAReportPayloadProvider *__block payloadProvider = nil;
             AMAReportRequestModel *__block requestModel = nil;
+            AMAAppStateManagerTestHelper *__block helper = nil;
             beforeEach(^{
-                AMAAppStateManagerTestHelper *helper = [[AMAAppStateManagerTestHelper alloc] init];
+                helper = [[AMAAppStateManagerTestHelper alloc] init];
                 [helper stubApplicationState];
                 
                 [reporterTestHelper.appReporter reportEvent:@"EVENT" onFailure:nil];
@@ -597,6 +628,9 @@ describe(@"AMAReportRequestTests", ^{
                 NSArray *requestModels = [requestProvider requestModels];
                 requestModel = requestModels[0];
                 payloadProvider = [[AMAReportPayloadProvider alloc] init];
+            });
+            afterEach(^{
+                [helper destubApplicationState];
             });
             it(@"Should have nil payload", ^{
                 AMAReportPayload *payload = [payloadProvider generatePayloadWithRequestModel:requestModel error:nil];

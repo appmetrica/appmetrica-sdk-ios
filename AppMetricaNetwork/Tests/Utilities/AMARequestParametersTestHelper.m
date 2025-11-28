@@ -50,4 +50,9 @@
     [AMAPlatformDescription stub:@selector(extensionAppInfo) andReturn:self.extensionAppInfoProvider];
 }
 
+- (void)destubs
+{
+    [AMAPlatformDescription clearStubs];
+}
+
 @end

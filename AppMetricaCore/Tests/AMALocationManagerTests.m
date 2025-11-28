@@ -76,8 +76,11 @@ describe(@"AMALocationManager", ^{
             [AMALocationManager stub:@selector(sharedManager) andReturn:locationManager];
         });
         afterEach(^{
+            [AMAPlatformDescription clearStubs];
+            [CLLocationManager clearStubs];
             [AMALocationManager clearStubs];
         });
+        
         it(@"Should create location manager on start if location permission not granted", ^{
             stubSystemLocationManager();
             [[AMALocationManager sharedManager] start];
@@ -361,6 +364,10 @@ describe(@"AMALocationManager", ^{
                         }];
                     });
                 });
+                afterEach(^{
+                    [AMAPlatformDescription clearStubs];
+                });
+                
                 it(@"Should set proper value", ^{
                     [[AMALocationManager sharedManager] start];
                     setAuthorizationStatus(kCLAuthorizationStatusAuthorizedAlways, YES);

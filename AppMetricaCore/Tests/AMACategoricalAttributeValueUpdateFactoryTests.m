@@ -22,6 +22,10 @@ describe(@"AMACategoricalAttributeValueUpdateFactory", ^{
             [AMAUndefinedAwareAttributeValueUpdate stubbedNullMockForInit:@selector(initWithIsUndefined:underlyingValueUpdate:)];
         factory = [[AMACategoricalAttributeValueUpdateFactory alloc] init];
     });
+    afterEach(^{
+        [AMAResetAwareAttributeValueUpdate clearStubs];
+        [AMAUndefinedAwareAttributeValueUpdate clearStubs];
+    });
 
     context(@"Value update", ^{
         it(@"Should create valid reset update", ^{

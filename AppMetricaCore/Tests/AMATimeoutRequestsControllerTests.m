@@ -32,6 +32,9 @@ describe(@"AMATimeoutRequestsController", ^{
                                                                   configuration:timeoutConfigurationMock 
                                                                    dateProvider:dateProviderMock];
     });
+    afterEach(^{
+        [[AMAMetricaConfiguration sharedInstance] clearStubs];
+    });
     
     context(@"Asking of access", ^{
         

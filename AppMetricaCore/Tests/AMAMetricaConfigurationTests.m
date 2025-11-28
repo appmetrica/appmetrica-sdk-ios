@@ -64,6 +64,9 @@ describe(@"AMAMetricaConfiguration", ^{
         beforeEach(^{
             [[[UIDevice currentDevice] identifierForVendor] stub:@selector(UUIDString) andReturn:invalidIFV];
         });
+        afterEach(^{
+            [[[UIDevice currentDevice] identifierForVendor] clearStubs];
+        });
 
         it(@"should return default value in case of invalid ifv", ^{
             [[configuration.persistent.deviceID shouldNot] equal:invalidIFV];
@@ -124,10 +127,15 @@ describe(@"AMAMetricaConfiguration", ^{
         context(@"Persistent configuration", ^{
                 AMAMetricaPersistentConfiguration *__block persistent = [AMAMetricaPersistentConfiguration nullMock];
                 AMAMetricaPersistentConfiguration *__block allocedPersistent = [AMAMetricaPersistentConfiguration nullMock];
+            
             beforeEach(^{
                 [AMAMetricaPersistentConfiguration stub:@selector(alloc) andReturn:allocedPersistent];
                 [allocedPersistent stub:@selector(initWithStorage:identifierManager:inMemoryConfiguration:) andReturn:persistent];
             });
+            afterEach(^{
+                [AMAMetricaPersistentConfiguration clearStubs];
+            });
+            
             it(@"Should return persistent configuration with valid storage", ^{
                 id<AMAKeyValueStoring> storage = database.storageProvider.cachingStorage;
                 
@@ -150,10 +158,15 @@ describe(@"AMAMetricaConfiguration", ^{
         context(@"Startup configuration", ^{
             AMAStartupParametersConfiguration *__block startup = [AMAStartupParametersConfiguration nullMock];
             AMAStartupParametersConfiguration *__block allocedStartup = [AMAStartupParametersConfiguration nullMock];
+            
             beforeEach(^{
                 [AMAStartupParametersConfiguration stub:@selector(alloc) andReturn:allocedStartup];
                 [allocedStartup stub:@selector(initWithStorage:) andReturn:startup];
             });
+            afterEach(^{
+                [AMAStartupParametersConfiguration clearStubs];
+            });
+            
             it(@"Should return startup configuration with storage", ^{
                 id<AMAKeyValueStoring> storage = [KWMock nullMockForProtocol:@protocol(AMAKeyValueStoring)];
                 [(NSObject *)database.storageProvider stub:@selector(nonPersistentStorageForKeys:error:) andReturn:storage];
@@ -292,6 +305,7 @@ describe(@"AMAMetricaConfiguration", ^{
         });
         
         afterEach(^{
+            [AMAIdentifierProvider clearStubs];
             [configuration clearStubs];
         });
         

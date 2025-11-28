@@ -17,6 +17,14 @@ SPEC_BEGIN(AMAPlatformDescriptionTests)
 
 describe(@"AMAPlatformDescription", ^{
     
+    afterEach(^{
+        [AMADeviceDescription clearStubs];
+        [AMAPlatformDescription clearStubs];
+        [NSFileManager clearStubs];
+        [NSBundle clearStubs];
+        [[NSBundle mainBundle] clearStubs];
+    });
+
     context(@"Build type", ^{
         void (^stubAppStoreReceiptURL)(NSString *path, BOOL exists) = ^(NSString *path, BOOL exists) {
             NSURL *appStoreReceiptURL = [NSURL URLWithString:path];
@@ -196,7 +204,10 @@ describe(@"AMAPlatformDescription", ^{
                 [AMAAppVersionProvider stub:@selector(alloc) andReturn:allocedProvider];
                 [allocedProvider stub:@selector(init) andReturn:provider];
             });
-            
+            afterEach(^{
+                [AMAAppVersionProvider clearStubs];
+            });
+
             it(@"Should return app version", ^{
                 [[[AMAPlatformDescription appVersion] should] equal:[provider appVersion]];
             });
@@ -373,6 +384,8 @@ describe(@"AMAPlatformDescription", ^{
             [AMAPlatformDescription isCellularConnection:^(BOOL isCellular) {
                 [[theValue(isCellular) should] beYes];
             }];
+
+            [AMANetworkInterfaceTypeResolver clearStubs];
         });
     });
 });

@@ -34,6 +34,9 @@ describe(@"AMAExtensionReportProvider", ^{
 
         provider = [[AMAExtensionReportProvider alloc] init];
     });
+    afterEach(^{
+        [NSBundle clearStubs];
+    });
 
     context(@"Application", ^{
         beforeEach(^{
@@ -55,6 +58,10 @@ describe(@"AMAExtensionReportProvider", ^{
             fileManager = [NSFileManager nullMock];
             [fileManager stub:@selector(contentsOfDirectoryAtPath:error:) andReturn:@[ extensionFileName ]];
             [NSFileManager stub:@selector(defaultManager) andReturn:fileManager];
+        });
+        afterEach(^{
+            [NSBundle clearStubs];
+            [NSFileManager clearStubs];
         });
 
         it(@"Should return valid type", ^{
@@ -112,6 +119,10 @@ describe(@"AMAExtensionReportProvider", ^{
             fileManager = [NSFileManager nullMock];
             [fileManager stub:@selector(contentsOfDirectoryAtPath:error:) andReturn:@[ extensionFileName ]];
             [NSFileManager stub:@selector(defaultManager) andReturn:fileManager];
+        });
+        afterEach(^{
+            [NSBundle clearStubs];
+            [NSFileManager clearStubs];
         });
 
         it(@"Should return valid type", ^{

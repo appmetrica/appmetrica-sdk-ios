@@ -32,6 +32,10 @@ describe(@"AMADateAttribute", ^{
                 NSDate *date = [NSDate dateWithTimeIntervalSince1970:1515114000]; // 2018-01-05 01:00:00
                 [NSDate stub:@selector(date) andReturn:date];
             });
+            afterEach(^{
+                [NSDate clearStubs];
+            });
+            
             it(@"Should request valid string attribute update", ^{
                 [[stringAttribute should] receive:@selector(withValue:) withArguments:expectedDateString];
                 [attribute withAge:age];

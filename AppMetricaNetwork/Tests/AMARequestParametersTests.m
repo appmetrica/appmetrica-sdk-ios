@@ -26,6 +26,10 @@ describe(@"AMARequestParameters", ^{
                                                                                     options:AMARequestParametersDefault];
             parametersDictionary = [parameters dictionaryRepresentation];
         });
+        afterEach(^{
+            [requestParametersHelper destubs];
+        });
+        
         it(@"Should provide device_type in dictionary representation", ^{
             requestParametersHelper.deviceType = device;
             [requestParametersHelper configureStubs];
@@ -118,6 +122,10 @@ describe(@"AMARequestParameters", ^{
                                                               options:AMARequestParametersAllowIDFA];
             parametersDictionary = [parameters dictionaryRepresentation];
         });
+        afterEach(^{
+            [requestParametersHelper destubs];
+        });
+        
         context(@"Provides application state in request parameters", ^{
             it(@"Should provide app state keys in request parameters", ^{
                 NSArray *requestParametersKeys = [parametersDictionary allKeys];
@@ -148,6 +156,10 @@ describe(@"AMARequestParameters", ^{
                                                               options:AMARequestParametersDefault];
             parametersDictionary = [parameters dictionaryRepresentation];
         });
+        afterEach(^{
+            [requestParametersHelper destubs];
+        });
+        
         context(@"Provides application state in request parameters", ^{
             it(@"Should provide app state keys in request parameters", ^{
                 NSMutableDictionary *appStateDictionary = appState.dictionaryRepresentation.mutableCopy;

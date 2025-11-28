@@ -44,6 +44,13 @@ describe(@"AMADatabaseQueueProvider", ^{
 
         provider = [[AMADatabaseQueueProvider alloc] init];
     });
+    afterEach(^{
+        [AMAPlatformDescription clearStubs];
+        [NSFileManager clearStubs];
+        [AMAFMDatabaseQueue clearStubs];
+        [AMAAppMetrica clearStubs];
+        [AMAFileUtility clearStubs];
+    });
 
     it(@"Should create path", ^{
         [[AMAFileUtility should] receive:@selector(createPathIfNeeded:) withArguments:@"/path/to"];

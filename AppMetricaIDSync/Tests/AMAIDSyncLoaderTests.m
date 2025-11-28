@@ -28,6 +28,9 @@ describe(@"AMAIDSyncLoader", ^{
         [AMAIDSyncStartupController stub:@selector(sharedInstance) andReturn:startupController];
         [loader stub:@selector(idSyncManager) andReturn:manager];
     });
+    afterEach(^{
+        [AMAIDSyncStartupController clearStubs];
+    });
 
     
     context(@"Load", ^{
@@ -36,6 +39,9 @@ describe(@"AMAIDSyncLoader", ^{
         beforeEach(^{
             moduleConfiguration = [AMAServiceConfiguration stubbedNullMockForInit:@selector(initWithStartupObserver:
                                                                                             reporterStorageController:)];
+        });
+        afterEach(^{
+            [AMAServiceConfiguration clearStubs];
         });
         
         it(@"Should register on load", ^{

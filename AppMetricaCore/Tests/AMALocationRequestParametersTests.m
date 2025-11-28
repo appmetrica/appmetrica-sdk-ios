@@ -38,6 +38,14 @@ describe(@"AMALocationRequestParameters", ^{
         
         [AMAIdentifiersTestUtilities stubIdfaWithEnabled:YES value:ifa];
     });
+    afterEach(^{
+        [AMAPlatformDescription clearStubs];
+        [AMAIdentifiersTestUtilities destubAll];
+        [AMAMetricaConfigurationTestUtilities destubConfiguration];
+        [AMAMetricaConfiguration clearStubs];
+        [AMAMetricaConfiguration.sharedInstance clearStubs];
+        [AMAMetricaConfiguration.sharedInstance.inMemory clearStubs];
+    });
 
     it(@"Should return valid parameters", ^{
         NSDictionary *parameters = [AMALocationRequestParameters parametersWithRequestIdentifier:identifier];

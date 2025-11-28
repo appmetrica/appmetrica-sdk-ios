@@ -11,14 +11,27 @@ SPEC_BEGIN(AMADeviceDescriptionTests)
 describe(@"AMADeviceDescription", ^{
     
     context(@"Application", ^{
+        
+        afterEach(^{
+            [[UIDevice currentDevice] clearStubs];
+            [[UIScreen mainScreen] clearStubs];
+        });
+        
         it(@"Should return appIdentifierPrefix", ^{
             NSString *prefix = @"prefix";
             [AMAAppIdentifierProvider stub:@selector(appIdentifierPrefix) andReturn:prefix];
             
             [[[AMADeviceDescription appIdentifierPrefix] should] equal:prefix];
+            
+            [AMAAppIdentifierProvider clearStubs];
         });
         
         context(@"Jailbreak", ^{
+            
+            afterEach(^{
+                [AMAJailbreakCheck clearStubs];
+            });
+            
             it(@"Should return device root status", ^{
                 NSUInteger rand = arc4random_uniform(2) + 1;
                 if (rand == 1) {

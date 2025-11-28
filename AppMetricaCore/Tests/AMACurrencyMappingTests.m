@@ -79,6 +79,8 @@ describe(@"AMACurrencyMapping", ^{
                     currency:@"USD"
                        scale:1000000
                        error:nil];
+            
+            [AMADecimalUtils clearStubs];
         });
         it(@"Scale is 1 for USD", ^{
             NSError *error = nil;

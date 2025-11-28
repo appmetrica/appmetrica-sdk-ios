@@ -58,6 +58,12 @@ describe(@"AMAStartupItemsChangedNotifier", ^{
                  return nil;
              }];
     });
+    afterEach(^{
+        [AMAMetricaConfigurationTestUtilities destubConfiguration];
+        [AMAMetricaConfiguration.sharedInstance clearStubs];
+        [AMAMetricaConfiguration.sharedInstance.persistent clearStubs];
+        [AMAMetricaConfiguration.sharedInstance.startup clearStubs];
+    });
 
     it(@"Should have proper identifier keys", ^{
         [[[AMAStartupItemsChangedNotifier allIdentifiersKeys] should] equal:allIdentifiersKeys];

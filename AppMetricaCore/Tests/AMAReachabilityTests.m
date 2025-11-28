@@ -5,6 +5,10 @@
 SPEC_BEGIN(AMAReachabilityTests)
 
 describe(@"AMAReachabilityTests", ^{
+    afterEach(^{
+        [AMAReachability clearStubs];
+    });
+    
 	context(@"Provides correct network status", ^{
         it(@"Should return unknown status initially", ^{
             [AMAReachability amatest_stubSharedInstance];

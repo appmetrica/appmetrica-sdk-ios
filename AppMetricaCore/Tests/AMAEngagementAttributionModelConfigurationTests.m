@@ -9,6 +9,12 @@ SPEC_BEGIN(AMAEngagementAttributionModelConfigurationTests)
 describe(@"AMAEngagementAttributionModelConfiguration", ^{
 
     context(@"Init with JSON", ^{
+        
+        afterEach(^{
+            [AMAEventFilter clearStubs];
+            [AMABoundMapping clearStubs];
+        });
+        
         it(@"Should be nil for nil json", ^{
             [[[[AMAEngagementAttributionModelConfiguration alloc] initWithJSON:nil] should] beNil];
         });
@@ -37,6 +43,9 @@ describe(@"AMAEngagementAttributionModelConfiguration", ^{
             AMAEngagementAttributionModelConfiguration *config = [[AMAEngagementAttributionModelConfiguration alloc] initWithJSON:json];
             [[config.eventFilters should] equal:@[ firstFilter, secondFilter ]];
             [[config.boundMappings should] equal:@[ firstMapping, secondMapping ]];
+            
+            [AMAEventFilter clearStubs];
+            [AMABoundMapping clearStubs];
         });
     });
     context(@"JSON", ^{

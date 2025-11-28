@@ -42,6 +42,7 @@ describe(@"AMAEventLogger", ^{
         logger = [[AMAEventLogger alloc] initWithApiKey:apiKey];
     });
     afterEach(^{
+        [AMALogFacade clearStubs];
         [AMAMetricaConfiguration clearStubs];
     });
 

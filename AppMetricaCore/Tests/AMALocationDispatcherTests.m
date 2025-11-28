@@ -73,6 +73,10 @@ describe(@"AMALocationDispatcher", ^{
                                                      responseParser:responseParser
                                                   timeoutController:timeoutController];
     });
+    afterEach(^{
+        [AMAArrayIterator clearStubs];
+        [AMAHostExchangeRequestProcessor clearStubs];
+    });
 
     context(@"Strategy passed", ^{
         it(@"Should start timer after location add", ^{

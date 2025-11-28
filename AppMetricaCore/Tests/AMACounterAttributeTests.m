@@ -25,6 +25,9 @@ describe(@"AMACustomCounterAttribute", ^{
         valueUpdate = [AMACounterAttributeValueUpdate stubbedNullMockForInit:@selector(initWithDeltaValue:)];
         attribute = [[AMACounterAttribute alloc] initWithName:name userProfileUpdateProvider:updateProvider];
     });
+    afterEach(^{
+        [AMACounterAttributeValueUpdate clearStubs];
+    });
 
     context(@"Update with delta", ^{
         double const delta = 23;

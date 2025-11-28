@@ -62,6 +62,10 @@ describe(@"AMAIDSyncStartupController", ^{
             loader = [AMAIDSyncLoader nullMock];
             [AMAIDSyncLoader stub:@selector(sharedInstance) andReturn:loader];
         });
+        afterEach(^{
+            [AMAIDSyncLoader clearStubs];
+        });
+        
         it(@"Should return startup request parameters", ^{
             [[[controller startupParameters] should] equal:@{@"request" : [AMAIDSyncStartupRequestParameters parameters]}];
         });
@@ -76,6 +80,9 @@ describe(@"AMAIDSyncStartupController", ^{
             beforeEach(^{
                 parser = [AMAIDSyncStartupResponseParser stubbedNullMockForDefaultInit];
                 controller = [[AMAIDSyncStartupController alloc] init];
+            });
+            afterEach(^{
+                [AMAIDSyncStartupResponseParser clearStubs];
             });
             it(@"Should parse startup response", ^{
                 NSDictionary *response = [NSDictionary dictionary];

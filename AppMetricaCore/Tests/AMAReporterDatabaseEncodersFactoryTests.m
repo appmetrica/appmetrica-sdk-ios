@@ -28,6 +28,12 @@ describe(@"AMAReporterDatabaseEncodersFactory", ^{
         
         encoderFactory = [[AMAReporterDatabaseEncodersFactory alloc] init];
     });
+    afterEach(^{
+        [AMACompositeDataEncoder clearStubs];
+        [AMAGZipDataEncoder clearStubs];
+        [AMAAESCrypter clearStubs];
+        [AMAAESUtility clearStubs];
+    });
     
     context(@"AES", ^{
         NSObject<AMADataEncoding> *(^encoder)(void) = ^{

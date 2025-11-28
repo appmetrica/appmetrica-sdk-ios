@@ -15,6 +15,10 @@ describe(@"AMAPermissionsExtractor", ^{
     beforeEach(^{
         extractor = [[AMAPermissionsExtractor alloc] init];
     });
+    afterEach(^{
+        [CLLocationManager clearStubs];
+        [[AMAAdProvider sharedInstance] clearStubs];
+    });
 
     AMAPermission *__block permission = nil;
 

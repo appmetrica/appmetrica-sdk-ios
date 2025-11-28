@@ -30,6 +30,9 @@ describe(@"AMAExponentialBackoff", ^{
         strategy.lastDelayRequestDate = date;
 
     });
+    afterEach(^{
+        [NSDate clearStubs];
+    });
 
     context(@"Delay generation algorithm check", ^{
         beforeEach(^{

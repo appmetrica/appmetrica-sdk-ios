@@ -41,6 +41,9 @@ describe(@"AMAStringAttribute", ^{
                                           truncationProvider:truncationProvider
                                     categoricalUpdateFactory:factory];
     });
+    afterEach(^{
+        [AMAStringAttributeValueUpdate clearStubs];
+    });
 
     context(@"Update with value", ^{
         beforeEach(^{

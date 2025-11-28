@@ -17,6 +17,11 @@ describe(@"AMAStartupResponseEncoderFactory", ^{
         aesCrypter = [AMADynamicVectorAESCrypter stubbedNullMockForInit:@selector(initWithKey:)];
         compositeEncoder = [AMACompositeDataEncoder stubbedNullMockForInit:@selector(initWithEncoders:)];
     });
+    afterEach(^{
+        [AMAGZipDataEncoder clearStubs];
+        [AMADynamicVectorAESCrypter clearStubs];
+        [AMACompositeDataEncoder clearStubs];
+    });
 
     it(@"Should create valid AES crypter", ^{
         [[aesCrypter should] receive:@selector(initWithKey:)

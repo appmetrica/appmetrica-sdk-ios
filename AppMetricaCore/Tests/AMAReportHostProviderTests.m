@@ -15,6 +15,10 @@ describe(@"AMAReportHostProvider", ^{
         [AMAMetricaConfigurationTestUtilities stubConfigurationWithNullMock];
         configuration = [AMAMetricaConfiguration sharedInstance];
     });
+    afterEach(^{
+        [AMAMetricaConfigurationTestUtilities destubConfiguration];
+        [configuration.startup clearStubs];
+    });
     
     context(@"No hosts", ^{
 

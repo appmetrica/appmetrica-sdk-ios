@@ -14,6 +14,7 @@
 #import "AMAEventsCleaner.h"
 #import "AMAEventsCleanupInfo.h"
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
+#import "AMAReporterStoragesContainer.h"
 
 SPEC_BEGIN(AMASessionsCleanerTests)
 
@@ -46,6 +47,11 @@ describe(@"AMASessionsCleaner", ^{
         firstSession = [sessionStorage previousSessionForSession:previousSession error:nil];
 
         cleaner = reporterStorage.sessionsCleaner;
+    });
+    afterEach(^{
+        [AMAMetricaConfigurationTestUtilities destubConfiguration];
+        [AMAReporterStoragesContainer clearStubs];
+        [reporterTestHelper destub];
     });
 
     NSArray *(^oidsArray)(NSArray *dbObjects) = ^NSArray *(NSArray *dbObjects) {
@@ -132,6 +138,10 @@ describe(@"AMASessionsCleaner", ^{
 
                 batch = [[AMAReportEventsBatch alloc] initWithSession:lastSession appEnvironment:@{} events:@[ event ]];
             });
+            afterEach(^{
+                [AMAEventLogger clearStubs];
+            });
+            
             it(@"Should request valid logger", ^{
                 [[AMAEventLogger should] receive:@selector(sharedInstanceForApiKey:) withArguments:apiKey];
                 [cleaner purgeSessionWithEventsBatches:@[ batch ] reason:AMAEventsCleanupReasonTypeSuccessfulReport];
@@ -145,6 +155,9 @@ describe(@"AMASessionsCleaner", ^{
                 AMAEventsCleanupInfo *__block cleanupInfo = nil;
                 beforeEach(^{
                     cleanupInfo = [AMAEventsCleanupInfo stubbedNullMockForInit:@selector(initWithReasonType:)];
+                });
+                afterEach(^{
+                    [AMAEventsCleanupInfo clearStubs];
                 });
 
                 context(@"Reason", ^{

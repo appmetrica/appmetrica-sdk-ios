@@ -20,6 +20,9 @@ describe(@"AMADefaultStartupHostsProvider", ^{
     beforeEach(^{
         bundle = [NSBundle nullMock];
     });
+    afterEach(^{
+        [NSBundle clearStubs];
+    });
     
     context(@"App bundle", ^{
         beforeEach(^{

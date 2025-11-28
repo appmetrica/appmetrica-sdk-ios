@@ -41,7 +41,9 @@ describe(@"AMAReporterStoragesContainer", ^{
         container = [[AMAReporterStoragesContainer alloc] init];
     });
     afterEach(^{
+        [AMAEnvironmentContainer clearStubs];
         [AMAMetricaConfiguration clearStubs];
+        [AMAReporterStorage clearStubs];
     });
 
     it(@"Should return valid error environment", ^{
@@ -61,6 +63,8 @@ describe(@"AMAReporterStoragesContainer", ^{
             AMAReporterStorage *firstReporterStorage = [container storageForApiKey:apiKey];
             reporterStorageMock = [AMAReporterStorage stubbedNullMockForInit:@selector(initWithApiKey:eventEnvironment:main:)];
             [[[container storageForApiKey:apiKey] should] equal:firstReporterStorage];
+            
+            [AMAReporterStorage clearStubs];
         });
     });
     
@@ -77,6 +81,8 @@ describe(@"AMAReporterStoragesContainer", ^{
             AMAReporterStorage *firstReporterStorage = [container mainStorageForApiKey:mainApiKey];
             mainReporterStorageMock = [AMAReporterStorage stubbedNullMockForInit:@selector(initWithApiKey:eventEnvironment:main:)];
             [[[container mainStorageForApiKey:mainApiKey] should] equal:firstReporterStorage];
+            
+            [AMAReporterStorage clearStubs];
         });
         it(@"Should return main storage for main api key", ^{
             [container mainStorageForApiKey:mainApiKey];

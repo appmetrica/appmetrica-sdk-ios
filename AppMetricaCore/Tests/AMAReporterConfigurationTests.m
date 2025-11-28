@@ -69,6 +69,11 @@ describe(@"AMAReporterConfiguration", ^{
             [AMAErrorLogger stub:@selector(logInvalidApiKeyError:)];
             [AMAIdentifierValidator stub:@selector(isValidUUIDKey:) andReturn:theValue(NO)];
         });
+        afterEach(^{
+            [AMAErrorLogger clearStubs];
+            [AMAIdentifierValidator clearStubs];
+        });
+        
         context(@"Immutable", ^{
             it(@"Should log", ^{
                 [[AMAErrorLogger should] receive:@selector(logInvalidApiKeyError:) withArguments:apiKey];

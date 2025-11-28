@@ -20,6 +20,9 @@ describe(@"AMATransactionObserver", ^{
         delegate = [KWMock mockForProtocol:@protocol(AMATransactionObserverDelegate)];
         observer = [[AMATransactionObserver alloc] initWithDelegate:delegate];
     });
+    afterEach(^{
+        [SKPaymentQueue clearStubs];
+    });
     
     context(@"Observing", ^{
         it(@"Should start observing", ^{

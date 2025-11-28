@@ -18,6 +18,9 @@ describe(@"AMAMetricaInMemoryConfiguration", ^{
 
         configuration = [[AMAMetricaInMemoryConfiguration alloc] init];
     });
+    afterEach(^{
+        [AMAPlatformDescription clearStubs];
+    });
 
     it(@"Should have valid batch size", ^{
         [[theValue(configuration.batchSize) should] equal:theValue(10000)];

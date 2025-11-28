@@ -25,6 +25,11 @@ describe(@"AMAReportRequestProvider", ^{
         reporterTestHelper = [[AMAReporterTestHelper alloc] init];
         requestProvider = [reporterTestHelper appReporter].reporterStorage.reportRequestProvider;
     });
+    afterEach(^{
+        [AMAMetricaConfigurationTestUtilities destubConfiguration];
+        [reporterTestHelper destub];
+    });
+    
 	context(@"Provides requests array each having events with same session app state", ^{
         it(@"Should provide empty array if no events exist", ^{
             NSArray *requestModels = [requestProvider requestModels];
@@ -52,8 +57,10 @@ describe(@"AMAReportRequestProvider", ^{
         context(@"Provides one request for two sessions with same state", ^{
             NSArray * __block requestModels = nil;
             AMAReportRequestModel * __block requestModel = nil;
+            AMAAppStateManagerTestHelper *__block helper = nil;
+            
             beforeEach(^{
-                AMAAppStateManagerTestHelper *helper = [[AMAAppStateManagerTestHelper alloc] init];
+                helper = [[AMAAppStateManagerTestHelper alloc] init];
                 [helper stubApplicationState];
                 [reporterTestHelper initReporterTwice];
                 for (NSUInteger i = 0; i < 10; ++i) {
@@ -62,6 +69,10 @@ describe(@"AMAReportRequestProvider", ^{
                 requestModels = [requestProvider requestModels];
                 requestModel = requestModels.firstObject;
             });
+            afterEach(^{
+                [helper destubApplicationState];
+            });
+            
             it(@"Should provide one request", ^{
                 [[requestModels should] haveCountOf:1];
             });
@@ -79,8 +90,9 @@ describe(@"AMAReportRequestProvider", ^{
         });
         context(@"Provides 2 requests for two sessions with different app states", ^{
             NSArray * __block requestModels = nil;
+            AMAAppStateManagerTestHelper *__block helper = nil;
             beforeEach(^{
-                AMAAppStateManagerTestHelper *helper = [[AMAAppStateManagerTestHelper alloc] init];
+                helper = [[AMAAppStateManagerTestHelper alloc] init];
                 [helper stubApplicationState];
                 [reporterTestHelper initReporterAndSendEventWithParameters:nil];
                 helper.kitVersionName = @"9.8.7";
@@ -89,6 +101,11 @@ describe(@"AMAReportRequestProvider", ^{
                 [reporterTestHelper sendEvent];
                 requestModels = [requestProvider requestModels];
             });
+            afterEach(^{
+                [helper destubApplicationState];
+                [reporterTestHelper destub];
+            });
+            
             it(@"Should provide 2 requests", ^{
                 [[requestModels should] haveCountOf:2];
             });
@@ -113,11 +130,15 @@ describe(@"AMAReportRequestProvider", ^{
         });
         context(@"Should group events by environment", ^{
             NSArray * __block requestModels = nil;
+            AMAAppStateManagerTestHelper *__block helper = nil;
             beforeEach(^{
-                AMAAppStateManagerTestHelper *helper = [[AMAAppStateManagerTestHelper alloc] init];
+                helper = [[AMAAppStateManagerTestHelper alloc] init];
                 [helper stubApplicationState];
-
             });
+            afterEach(^{
+                [helper destubApplicationState];
+            });
+            
             it(@"Should distinguish environment update", ^{
                 AMAReporter *reporter = [reporterTestHelper appReporter];
                 [reporter setAppEnvironmentValue:@"fizz" forKey:@"buzz"];
@@ -149,6 +170,9 @@ describe(@"AMAReportRequestProvider", ^{
                 
                 autocollectedDataProvider = [KWMock nullMockForProtocol:@protocol(AMAReporterAutocollectedDataProviding)];
                 [autocollectedDataProvider stub:@selector(additionalAPIKeys) andReturn:additionalAPIKeys];
+            });
+            afterEach(^{
+                [reporterTestHelper destub];
             });
             
             it(@"Should add additional api keys for request", ^{

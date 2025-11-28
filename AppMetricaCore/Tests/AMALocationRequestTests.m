@@ -24,6 +24,9 @@ describe(@"AMALocationRequest", ^{
                                                                    data:data];
         request.host = @"https://appmetrica.io";
     });
+    afterEach(^{
+        [AMALocationRequestParameters clearStubs];
+    });
 
     it(@"Should have valid request parameters", ^{
         [[[request GETParameters] should] equal:requestParameters];
@@ -38,6 +41,10 @@ describe(@"AMALocationRequest", ^{
         beforeAll(^{
             urlRequest = [request buildURLRequest];
         });
+        afterEach(^{
+            [AMAPlatformDescription clearStubs];
+        });
+        
         it(@"Should have valid method", ^{
             [[urlRequest.HTTPMethod should] equal:@"POST"];
         });
@@ -51,6 +58,8 @@ describe(@"AMALocationRequest", ^{
             NSURLRequest *urlRequest = [request buildURLRequest];
             NSDictionary *userAgentHeader = urlRequest.allHTTPHeaderFields;
             [[userAgentHeader[@"User-Agent"] should] equal:userAgent];
+            
+            [AMAPlatformDescription clearStubs];
         });
     });
     

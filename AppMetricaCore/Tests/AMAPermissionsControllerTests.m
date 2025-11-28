@@ -37,6 +37,9 @@ describe(@"AMAPermissionsController", ^{
     
         [AMAPermissionsSerializer stub:@selector(JSONStringForPermissions:) andReturn:expectedJSON];
     });
+    afterEach(^{
+        [AMAPermissionsSerializer clearStubs];
+    });
     
     context(@"Configuration allows", ^{
             

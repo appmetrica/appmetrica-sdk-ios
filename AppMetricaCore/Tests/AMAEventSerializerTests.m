@@ -41,6 +41,11 @@ describe(@"AMAEventSerializer", ^{
         encoder = [encoderFactory encoderForEncryptionType:AMAReporterDatabaseEncryptionTypeGZipAES];
         serializer = [[AMAEventSerializer alloc] init];
     });
+    afterEach(^{
+        [AMAReporterDatabaseEncodersFactory clearStubs];
+        [AMAReporterDatabaseMigrationTo500EncodersFactory clearStubs];
+        [AMAReporterDatabaseMigrationTo5100EncodersFactory clearStubs];
+    });
 
     context(@"Serialization", ^{
 
@@ -574,6 +579,10 @@ describe(@"AMAEventSerializer", ^{
                 now = [NSDate date];
                 [NSDate stub:@selector(date) andReturn:now];
             });
+            afterEach(^{
+                [NSDate clearStubs];
+            });
+            
             it(@"Should have valid value", ^{
                 NSDate *date = [NSDate dateWithTimeIntervalSinceNow:0.0];
                 eventDictionary[kAMAEventTableFieldCreatedAt] = @(date.timeIntervalSinceReferenceDate);

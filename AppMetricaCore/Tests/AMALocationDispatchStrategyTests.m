@@ -37,6 +37,9 @@ describe(@"AMALocationDispatchStrategy", ^{
                                                           configuration:configuration
                                                            dateProvider:dateProvider];
     });
+    afterEach(^{
+        [AMADataSendingRestrictionController clearStubs];
+    });
 
     context(@"Before limits", ^{
         beforeEach(^{

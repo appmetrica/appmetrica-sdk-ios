@@ -56,6 +56,10 @@ describe(@"AMADynamicVectorAESCrypter", ^{
                     return nil;
                 }];
             });
+            afterEach(^{
+                [AMAAESCrypter clearStubs];
+            });
+            
             it(@"Should return nil", ^{
                 NSData *encryptedData = [crypter encodeData:expectedDecryptedData error:NULL];
                 [[encryptedData should] beNil];
@@ -90,6 +94,10 @@ describe(@"AMADynamicVectorAESCrypter", ^{
                     return nil;
                 }];
             });
+            afterEach(^{
+                [AMAAESCrypter clearStubs];
+            });
+
             it(@"Should return nil", ^{
                 NSData *decryptedData = [crypter decodeData:expectedEncryptedData error:NULL];
                 [[decryptedData should] beNil];

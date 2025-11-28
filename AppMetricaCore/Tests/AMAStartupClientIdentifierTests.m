@@ -16,6 +16,7 @@ describe(@"AMAStartupClientIdentifier", ^{
     afterEach(^{
         [AMAMetricaConfigurationTestUtilities destubConfiguration];
         [AMAIdentifiersTestUtilities destubAll];
+        [AMAMetricaConfiguration.sharedInstance.persistent clearStubs];
     });
     
     it(@"Should return ifv as device id", ^{

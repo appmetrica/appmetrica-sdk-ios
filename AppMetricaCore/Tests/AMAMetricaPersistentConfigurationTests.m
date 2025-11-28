@@ -384,6 +384,10 @@ describe(@"AMAMetricaPersistentConfiguration", ^{
                 allocedModel = [AMAAttributionModelConfiguration nullMock];
                 [AMAAttributionModelConfiguration stub:@selector(alloc) andReturn:allocedModel];
             });
+            afterEach(^{
+                [AMAAttributionModelConfiguration clearStubs];
+            });
+            
             it(@"Should use valid key", ^{
                 AMAMetricaPersistentConfiguration *config = createConfig();
                 [[storage should] receive:@selector(jsonDictionaryForKey:error:) withArguments:key, kw_any()];
@@ -520,6 +524,8 @@ describe(@"AMAMetricaPersistentConfiguration", ^{
         it(@"Should return config with json", ^{
             AMAAppMetricaConfiguration *mockConfiguration = [AMAAppMetricaConfiguration stubbedNullMockForInit:@selector(initWithJSON:)];
             [[configuration.appMetricaClientConfiguration should] equal:mockConfiguration];
+            
+            [AMAAppMetricaConfiguration clearStubs];
         });
         it(@"Should save valid config", ^{
             [mockConfiguration stub:@selector(JSON) andReturn:json];

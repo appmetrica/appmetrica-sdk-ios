@@ -23,6 +23,10 @@ describe(@"AMAStringAttributeTruncator", ^{
         truncator = [[AMAStringAttributeTruncator alloc] initWithAttributeName:name
                                                            underlyingTruncator:underlyingTruncator];
     });
+    afterEach(^{
+        [AMAUserProfileLogger clearStubs];
+    });
+    
     context(@"Nil block", ^{
         beforeEach(^{
             truncationBlock = nil;

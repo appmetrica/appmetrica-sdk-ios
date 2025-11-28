@@ -43,6 +43,13 @@ describe(@"AMASessionSerializer", ^{
         encoder = (NSObject<AMADataEncoding> *)[encoderFactory encoderForEncryptionType:AMAReporterDatabaseEncryptionTypeAES];
         serializer = [[AMASessionSerializer alloc] init];
     });
+    afterEach(^{
+        [stateHelper destubApplicationState];
+        [AMAMetricaConfigurationTestUtilities clearStubs];
+        [AMAReporterDatabaseEncodersFactory clearStubs];
+        [AMAReporterDatabaseMigrationTo500EncodersFactory clearStubs];
+        [AMAReporterDatabaseMigrationTo5100EncodersFactory clearStubs];
+    });
 
     context(@"Serialization", ^{
 

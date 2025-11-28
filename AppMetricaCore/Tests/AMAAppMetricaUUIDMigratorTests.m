@@ -77,6 +77,10 @@ describe(@"AMAAppMetricaUUIDMigratorTests", ^{
                     beforeEach(^{
                         [AMAFileUtility stub:@selector(fileExistsAtPath:) andReturn:theValue(NO)];
                     });
+                    afterEach(^{
+                        [AMAFileUtility clearStubs];
+                    });
+                    
                     it(@"Should not check old database", ^{
                         [[configuration shouldNot] receive:@selector(UUIDOldStorage)];
                         [[uuidOldStorage shouldNot] receive:@selector(stringForKey:error:)];
@@ -87,6 +91,10 @@ describe(@"AMAAppMetricaUUIDMigratorTests", ^{
                     beforeEach(^{
                         [AMAFileUtility stub:@selector(fileExistsAtPath:) andReturn:theValue(YES)];
                     });
+                    afterEach(^{
+                        [AMAFileUtility clearStubs];
+                    });
+                    
                     it(@"Should check old database", ^{
                         [[configuration should] receive:@selector(UUIDOldStorage)];
                         [[uuidOldStorage should] receive:@selector(stringForKey:error:) withArguments:@"uuid", kw_any()];

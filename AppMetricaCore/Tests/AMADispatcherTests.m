@@ -94,6 +94,15 @@ describe(@"AMADispatcher", ^{
         delegate = [KWMock nullMockForProtocol:@protocol(AMADispatcherDelegate)];
         dispatcher.delegate = delegate;
     });
+    afterEach(^{
+        [AMADataSendingRestrictionController clearStubs];
+        [AMAMetricaConfigurationTestUtilities destubConfiguration];
+        [AMAReporterStoragesContainer clearStubs];
+        [AMAMetricaConfiguration clearStubs];
+        [AMAMetricaConfiguration.sharedInstance.startup clearStubs];
+        [AMAMetricaConfiguration.sharedInstance.persistent clearStubs];
+        
+    });
 
     context(@"Active", ^{
 
@@ -153,6 +162,9 @@ describe(@"AMADispatcher", ^{
             beforeEach(^{
                 reachability = [AMAReachability nullMock];
                 [AMAReachability stub:@selector(sharedInstance) andReturn:reachability];
+            });
+            afterEach(^{
+                [AMAReachability clearStubs];
             });
 
             it(@"Should not perform report", ^{

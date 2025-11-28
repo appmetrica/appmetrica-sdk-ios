@@ -12,6 +12,9 @@ describe(@"AMAIncrementableValueStorageFactory", ^{
     beforeEach(^{
         storage = [AMAIncrementableValueStorage stubbedNullMockForInit:@selector(initWithKey:defaultValue:)];
     });
+    afterEach(^{
+        [AMAIncrementableValueStorage clearStubs];
+    });
 
     it(@"Should create valid attribution ID storage", ^{
         [[storage should] receive:@selector(initWithKey:defaultValue:)

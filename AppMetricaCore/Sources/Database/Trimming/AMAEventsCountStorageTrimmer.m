@@ -52,6 +52,7 @@
 
 - (BOOL)shouldTrimDatabase:(id<AMADatabaseProtocol>)database
 {
+    
     AMAReporterConfiguration *configuration =
         [[AMAMetricaConfiguration sharedInstance] configurationForApiKey:self.apiKey];
     NSUInteger maxEventsCount = configuration.maxReportsInDatabaseCount;

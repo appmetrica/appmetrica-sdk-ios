@@ -66,6 +66,9 @@ describe(@"AMALocationRequestProvider", ^{
                                                             serializer:serializer
                                                                encoder:encoder];
     });
+    afterEach(^{
+        [AMALocationRequest clearStubs];
+    });
 
     it(@"Should request locations", ^{
         [[storage should] receive:@selector(locationsWithLimit:) withArguments:theValue(limit)];

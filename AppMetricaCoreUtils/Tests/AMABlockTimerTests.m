@@ -17,6 +17,9 @@ describe(@"AMABlockTimer", ^{
         [baseTimerMock stub:@selector(initWithTimeout:callbackQueue:) andReturn:baseTimerMock];
         [AMATimer stub:@selector(alloc) andReturn:baseTimerMock];
     });
+    afterEach(^{
+        [AMATimer clearStubs];
+    });
 
     it(@"Should create base timer with valid arguments", ^{
         [[baseTimerMock should] receive:@selector(initWithTimeout:callbackQueue:)

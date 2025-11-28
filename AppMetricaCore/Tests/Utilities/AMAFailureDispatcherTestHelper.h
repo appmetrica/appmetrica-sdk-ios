@@ -4,5 +4,6 @@
 @interface AMAFailureDispatcherTestHelper : NSObject
 
 + (void)stubFailureDispatcher;
++ (void)destub;
 
 @end

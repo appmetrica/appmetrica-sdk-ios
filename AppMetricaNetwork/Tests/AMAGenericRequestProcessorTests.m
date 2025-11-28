@@ -42,7 +42,6 @@ describe(@"AMAGenericRequestProcessor", ^{
 
         processor = [[AMAGenericRequestProcessor alloc] init];
     });
-    
     afterEach(^{
         [AMAGenericRequest clearStubs];
         [AMAHTTPRequestor clearStubs];

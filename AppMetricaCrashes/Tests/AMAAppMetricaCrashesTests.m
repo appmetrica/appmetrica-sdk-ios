@@ -76,6 +76,13 @@ describe(@"AMAAppMetricaCrashes", ^{
                                                       serializer:serializer
                                                    configuration:[AMAAppMetricaCrashesConfiguration new]];
     });
+    afterEach(^{
+        [AMAAppMetrica clearStubs];
+        [AMAPlatformDescription clearStubs];
+        [AMAAppMetricaCrashes clearStubs];
+        [AMACrashProcessor clearStubs];
+        [AMAANRWatchdog clearStubs];
+    });
 
     context(@"Initialization and Singleton", ^{
         it(@"Should correctly initialize shared instance", ^{
@@ -602,6 +609,8 @@ describe(@"AMAAppMetricaCrashes", ^{
     });
     
     context(@"Handle plugin init finished", ^{
+        [AMAAppMetrica clearStubs];
+        
         it(@"Should force update to foreground if started", ^{
             [AMAAppMetrica stub:@selector(isActivated) andReturn:theValue(YES)];
             

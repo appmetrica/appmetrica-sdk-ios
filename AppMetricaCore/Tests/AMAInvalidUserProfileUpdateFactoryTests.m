@@ -24,6 +24,10 @@ describe(@"AMAInvalidUserProfileUpdateFactory", ^{
             return validator;
         }];
     });
+    afterEach(^{
+        [AMAUserProfileUpdate clearStubs];
+        [AMAProhibitingAttributeUpdateValidator clearStubs];
+    });
 
     context(@"Date", ^{
         beforeEach(^{

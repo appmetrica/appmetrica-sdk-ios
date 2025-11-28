@@ -40,6 +40,10 @@ describe(@"AMAAttributeUpdate", ^{
             beforeEach(^{
                 value = [AMAAttributeValue stubbedNullMockForDefaultInit];
             });
+            afterEach(^{
+                [AMAAttributeValue clearStubs];
+            });
+            
             it(@"Should apply update", ^{
                 [[valueUpdate should] receive:@selector(applyToValue:) withArguments:value];
                 [update applyToModel:model];
@@ -86,6 +90,9 @@ describe(@"AMAAttributeUpdate", ^{
         context(@"New attribute", ^{
             beforeEach(^{
                 value = [AMAAttributeValue stubbedNullMockForDefaultInit];
+            });
+            afterEach(^{
+                [AMAAttributeValue clearStubs];
             });
             it(@"Should apply update", ^{
                 [[valueUpdate should] receive:@selector(applyToValue:) withArguments:value];

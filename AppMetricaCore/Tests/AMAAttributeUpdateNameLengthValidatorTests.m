@@ -22,6 +22,9 @@ describe(@"AMAAttributeUpdateNameLengthValidator", ^{
         model = [AMAUserProfileModel nullMock];
         validator = [[AMAAttributeUpdateNameLengthValidator alloc] initWithLengthLimit:limit];
     });
+    afterEach(^{
+        [AMAUserProfileLogger clearStubs];
+    });
 
     it(@"Should use valid arguments in default initializer", ^{
         validator = [AMAAttributeUpdateNameLengthValidator alloc];

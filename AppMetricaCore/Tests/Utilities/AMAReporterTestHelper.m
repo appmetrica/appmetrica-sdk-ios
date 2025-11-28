@@ -73,6 +73,13 @@
     return self;
 }
 
+- (void)destub
+{
+    [AMAFileUtility clearStubs];
+    [AMAMetricaConfiguration.sharedInstance clearStubs];
+    [NSDate clearStubs];
+}
+
 + (NSString *)defaultApiKey
 {
     return @"550e8400-e29b-41d4-a716-446655440000";

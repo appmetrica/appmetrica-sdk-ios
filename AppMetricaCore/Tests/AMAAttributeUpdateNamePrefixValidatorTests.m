@@ -22,6 +22,9 @@ describe(@"AMAAttributeUpdateNamePrefixValidator", ^{
         model = [AMAUserProfileModel nullMock];
         validator = [[AMAAttributeUpdateNamePrefixValidator alloc] initWithForbiddenPrefix:prefix];
     });
+    afterEach(^{
+        [AMAUserProfileLogger clearStubs];
+    });
 
     it(@"Should use valid arguments in default initializer", ^{
         validator = [AMAAttributeUpdateNamePrefixValidator alloc];

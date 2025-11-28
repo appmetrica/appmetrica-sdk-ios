@@ -16,6 +16,12 @@ describe(@"AMAExtensionsReportExecutionConditionProvider", ^{
         configuration = [AMAMetricaConfiguration sharedInstance];
         provider = [[AMAExtensionsReportExecutionConditionProvider alloc] initWithConfiguration:configuration];
     });
+    afterEach(^{
+        [AMAMetricaConfigurationTestUtilities destubConfiguration];
+        [AMAMetricaConfiguration.sharedInstance clearStubs];
+        [AMAMetricaConfiguration.sharedInstance.startup clearStubs];
+        [AMAMetricaConfiguration.sharedInstance.persistent clearStubs];
+    });
 
     context(@"Launch Delay", ^{
         it(@"Should return valid launch delay", ^{
@@ -43,6 +49,10 @@ describe(@"AMAExtensionsReportExecutionConditionProvider", ^{
             SEL selector = @selector(initWithLastExecuted:interval:underlyingCondition:);
             executionCondition = [AMAIntervalExecutionCondition stubbedNullMockForInit:selector];
         });
+        afterEach(^{
+            [AMAIntervalExecutionCondition clearStubs];
+        });
+        
         it(@"Should create condition with valid default parameters", ^{
             [[executionCondition should] receive:@selector(initWithLastExecuted:interval:underlyingCondition:)
                                    withArguments:nil, theValue(24.0 * 3600.0), nil];
@@ -67,6 +77,8 @@ describe(@"AMAExtensionsReportExecutionConditionProvider", ^{
             [NSDate stub:@selector(date) andReturn:now];
             [[configuration.persistent should] receive:@selector(setExtensionsLastReportDate:) withArguments:now];
             [provider executed];
+            
+            [NSDate clearStubs];
         });
     });
 

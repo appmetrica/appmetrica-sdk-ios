@@ -25,6 +25,7 @@ describe(@"AMAStartupResponseParser", ^{
     });
     afterEach(^{
         [AMAMetricaConfigurationTestUtilities destubConfiguration];
+        [AMAAttributionModelConfiguration clearStubs];
     });
 
     context(@"response", ^{
@@ -209,6 +210,9 @@ describe(@"AMAStartupResponseParser", ^{
                 [attributionModelParser stub:@selector(parse:) andReturn:parsedAttributionModelConfiguration
                                withArguments:@{ @"key" : @"value" }];
                 setResponseWithString(response);
+            });
+            afterEach(^{
+                [AMAAttributionModelConfiguration clearStubs];
             });
 
             it(@"Should parse device ID", ^{
@@ -408,6 +412,10 @@ describe(@"AMAStartupResponseParser", ^{
             });
         });
         context(@"Parses headers", ^{
+            afterEach(^{
+                [NSDate clearStubs];
+            });
+            
             AMAStartupResponse *(^responseWithDate)(NSString *) = ^AMAStartupResponse *(NSString *date) {
                 NSDictionary *headers = @{ @"Date" : date };
                 NSHTTPURLResponse *HTTPResponse = [NSHTTPURLResponse nullMock];
@@ -453,6 +461,10 @@ describe(@"AMAStartupResponseParser", ^{
                                                                     data:encryptedData
                                                                    error:nil];
             });
+            afterEach(^{
+                [AMAStartupResponseEncoderFactory clearStubs];
+            });
+            
             it(@"Should parse", ^{
                 [[parsedResponse shouldNot] beNil];
             });

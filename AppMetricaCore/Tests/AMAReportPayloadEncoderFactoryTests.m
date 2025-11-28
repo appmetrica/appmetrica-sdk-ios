@@ -17,6 +17,11 @@ describe(@"AMAReportPayloadEncoderFactory", ^{
         rsaAESCrypter = [AMARSAAESCrypter stubbedNullMockForInit:@selector(initWithPublicKey:privateKey:)];
         compositeEncoder = [AMACompositeDataEncoder stubbedNullMockForInit:@selector(initWithEncoders:)];
     });
+    afterEach(^{
+        [AMAGZipDataEncoder clearStubs];
+        [AMARSAAESCrypter clearStubs];
+        [AMACompositeDataEncoder clearStubs];
+    });
 
     context(@"RSA key", ^{
         AMARSAKey *__block key = nil;

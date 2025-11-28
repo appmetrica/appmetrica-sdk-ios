@@ -36,6 +36,12 @@ describe(@"AMAEventFirstOccurrenceController", ^{
                                                                    hashProvider:hashProvider
                                                             maxEventHashesCount:2];
     });
+    afterEach(^{
+        [AMAMetricaConfigurationTestUtilities destubConfiguration];
+        [AMAMetricaConfiguration clearStubs];
+        [AMAMetricaConfiguration.sharedInstance clearStubs];
+        [AMAMetricaConfiguration.sharedInstance.inMemory clearStubs];
+    });
 
     context(@"Collection creation", ^{
         beforeEach(^{

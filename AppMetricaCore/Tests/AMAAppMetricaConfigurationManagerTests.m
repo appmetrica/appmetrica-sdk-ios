@@ -73,6 +73,7 @@ describe(@"AMAAppMetricaConfigurationManager", ^{
     });
     afterEach(^{
         [AMAMetricaConfiguration clearStubs];
+        [[AMADataSendingRestrictionController sharedInstance] clearStubs];
     });
     
     context(@"updateMainConfiguration", ^{

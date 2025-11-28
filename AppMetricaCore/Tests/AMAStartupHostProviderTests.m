@@ -38,6 +38,9 @@ describe(@"AMAStartupHostProvider", ^{
         [AMAStartupHostProvider stub:@selector(startupHosts) andReturn:@[]];
         [AMAStartupHostProvider stub:@selector(userStartupHosts) andReturn:@[]];
     });
+    afterEach(^{
+        [AMAStartupHostProvider clearStubs];
+    });
     
     it(@"Should contain default startup host if no hosts provided by user or startup responce", ^{
         [AMAStartupHostProvider stub:@selector(startupHosts) andReturn:nil];
@@ -107,6 +110,9 @@ describe(@"AMAStartupHostProvider", ^{
         [[hostProvider.current should] equal:predefinedHosts[0]];
         [[hostProvider.next should] equal:additionalHosts[0]];
         [[hostProvider.next should] equal:additionalHosts[1]];
+        
+        [[AMAMetricaConfiguration sharedInstance].inMemory clearStubs];
+        [AMADefaultStartupHostsProvider clearStubs];
     });
 });
 

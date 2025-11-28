@@ -26,6 +26,8 @@ describe(@"AMAConversionAttributionModelConfiguration", ^{
             };
             AMAConversionAttributionModelConfiguration *config = [[AMAConversionAttributionModelConfiguration alloc] initWithJSON:json];
             [[config.mappings should] equal:@[ firstMapping, secondMapping ]];
+            
+            [AMAAttributionMapping clearStubs];
         });
     });
     context(@"JSON", ^{

@@ -51,6 +51,11 @@ describe(@"AMAAdServicesReportingController", ^{
                                                                 configuration:configurationMock
                                                                  dataProvider:dataProviderMock];
     });
+    afterEach(^{
+        [AMAMetricaConfigurationTestUtilities destubConfiguration];
+        [AMAAppMetrica clearStubs];
+        [NSDate clearStubs];
+    });
     
     context(@"Default config values", ^{
         

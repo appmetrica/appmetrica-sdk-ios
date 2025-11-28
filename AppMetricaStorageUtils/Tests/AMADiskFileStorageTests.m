@@ -15,6 +15,9 @@ describe(@"AMADiskFileStorage", ^{
     beforeEach(^{
         storage = [[AMADiskFileStorage alloc] initWithPath:path options:0];
     });
+    afterEach(^{
+        [AMAFileUtility clearStubs];
+    });
 
     context(@"File exists", ^{
         it(@"Should provide valid path", ^{

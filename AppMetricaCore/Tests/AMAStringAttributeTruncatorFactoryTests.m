@@ -19,6 +19,11 @@ describe(@"AMAStringAttributeTruncatorFactory", ^{
         truncationProvider =
             [AMAStringAttributeTruncationProvider stubbedNullMockForInit:@selector(initWithUnderlyingTruncator:)];
     });
+    afterEach(^{
+        [AMALengthStringTruncator clearStubs];
+        [AMAPermissiveTruncator clearStubs];
+        [AMAStringAttributeTruncationProvider clearStubs];
+    });
 
     context(@"Name", ^{
         it(@"Should create length truncator", ^{

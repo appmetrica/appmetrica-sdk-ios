@@ -48,6 +48,9 @@ describe(@"AMAEventsCleaner", ^{
         reporterProvider.reporter = [AMAReporter nullMock];
         cleaner = [[AMAEventsCleaner alloc] initWithReporterProvider:reporterProvider];
     });
+    afterEach(^{
+        [AMADatabaseHelper clearStubs];
+    });
 
     __auto_type purge = ^BOOL {
         filledError = nil;

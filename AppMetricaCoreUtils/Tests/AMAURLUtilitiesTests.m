@@ -7,6 +7,11 @@ SPEC_BEGIN(AMAURLUtilitiesTests)
 describe(@"AMAURLUtilities", ^{
 
     context(@"URLWithBaseURLString:pathComponents:httpGetParameters:", ^{
+        
+        afterEach(^{
+            [[NSAssertionHandler currentHandler] clearStubs];
+        });
+        
         context(@"Invalid base URL", ^{
             it(@"Should return nil for nil base URL", ^{
                 [[NSAssertionHandler currentHandler] stub:@selector(handleFailureInMethod:object:file:lineNumber:description:)];

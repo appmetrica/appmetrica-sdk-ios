@@ -28,8 +28,7 @@
 
 SPEC_BEGIN(AMAStartupControllerTests)
 
-describe(@"AMAStartupController",
- ^{
+describe(@"AMAStartupController", ^{
 
     AMATimeoutRequestsController *__block timeoutController = nil;
     AMAStartupResponseParser *__block startupResponseParser = nil;
@@ -60,6 +59,7 @@ describe(@"AMAStartupController",
     });
     afterAll(^{
         [AMATestNetwork clearStubs];
+        [AMAPlatformDescription clearStubs];
     });
     beforeEach(^{
         [AMAMetricaConfigurationTestUtilities stubConfiguration];
@@ -67,7 +67,13 @@ describe(@"AMAStartupController",
         [timeoutController stub:@selector(isAllowed) andReturn:theValue(YES)];
     });
     afterEach(^{
+        [NSDate clearStubs];
         [AMAMetricaConfigurationTestUtilities destubConfiguration];
+        [AMAAttributionController clearStubs];
+        [AMAMetricaConfiguration.sharedInstance clearStubs];
+        [(NSObject *)AMAMetricaConfiguration.sharedInstance.identifierProvider clearStubs];
+        [AMAMetricaConfiguration.sharedInstance.persistent clearStubs];
+        [AMAPlatformDescription clearStubs];
     });
 
     context(@"Handles startup response", ^{
@@ -97,6 +103,8 @@ describe(@"AMAStartupController",
 
             handleStartupResponse();
             [[[AMAMetricaConfiguration sharedInstance].persistent.firstStartupUpdateDate should] equal:firstUpdateWithOffset];
+            
+            [NSDate clearStubs];
         });
         it(@"Should save hadFirstStartup as true to configuration", ^{
             handleStartupResponse();
@@ -154,6 +162,12 @@ describe(@"AMAStartupController",
                 response = [AMAStartupResponse nullMock];
                 [response stub:@selector(attributionModelConfiguration) andReturn:attributionConfig];
             });
+            afterEach(^{
+                [AMAAttributionController clearStubs];
+                [AMAMetricaConfigurationTestUtilities destubConfiguration];
+                [AMAMetricaConfiguration.sharedInstance clearStubs];
+                [AMAMetricaConfiguration.sharedInstance.persistent clearStubs];
+            });
             context(@"Has first startup", ^{
                 beforeEach(^{
                     [configuration.persistent stub:@selector(hadFirstStartup) andReturn:theValue(YES)];
@@ -203,6 +217,7 @@ describe(@"AMAStartupController",
         afterEach(^{
             destubAppState();
             [AMAIdentifiersTestUtilities destubIdentifierProvider];
+            [AMATestNetwork clearStubs];
         });
         it(@"Should ask timeout controller for permission", ^{
             [[timeoutController should] receive:@selector(isAllowed)];
@@ -355,6 +370,7 @@ describe(@"AMAStartupController",
         });
         afterEach(^{
             destubAppState();
+            [AMAHTTPRequestor clearStubs];
         });
 
         it(@"Should not change host if if timeout permission denied", ^{

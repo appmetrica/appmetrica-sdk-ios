@@ -39,6 +39,7 @@ describe(@"AMAAttributionModelConfiguration", ^{
         AMAConversionAttributionModelConfiguration *__block allocedConversionModel = nil;
         AMAEngagementAttributionModelConfiguration *__block allocedEngagementModel = nil;
         AMARevenueAttributionModelConfiguration *__block allocedRevenueModel = nil;
+        
         beforeEach(^{
             conversionModel = [AMAConversionAttributionModelConfiguration nullMock];
             engagementModel = [AMAEngagementAttributionModelConfiguration nullMock];
@@ -53,6 +54,12 @@ describe(@"AMAAttributionModelConfiguration", ^{
             [allocedEngagementModel stub:@selector(initWithJSON:) andReturn:engagementModel];
             [allocedRevenueModel stub:@selector(initWithJSON:) andReturn:revenueModel];
         });
+        afterEach(^{
+            [AMAConversionAttributionModelConfiguration clearStubs];
+            [AMAEngagementAttributionModelConfiguration clearStubs];
+            [AMARevenueAttributionModelConfiguration clearStubs];
+        });
+        
         it(@"Should return nil for nil json", ^{
             [[[[AMAAttributionModelConfiguration alloc] initWithJSON:nil] should] beNil];
         });

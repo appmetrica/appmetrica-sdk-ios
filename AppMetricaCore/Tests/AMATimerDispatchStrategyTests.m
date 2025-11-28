@@ -39,6 +39,10 @@ describe(@"AMATimerDispatchStrategy", ^{
                                                                   executor:manualExecutor
                                                  executionConditionChecker:conditionChecker];
     });
+    afterEach(^{
+        [reporterTestHelper destub];
+        [AMAMetricaConfiguration.sharedInstance clearStubs];
+    });
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wnonnull"
     it(@"Should trigger dispatch after timeout", ^{

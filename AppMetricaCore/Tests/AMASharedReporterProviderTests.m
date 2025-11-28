@@ -8,9 +8,13 @@ SPEC_BEGIN(AMASharedReporterProviderTests)
 describe(@"AMASharedReporterProvider", ^{
     NSString *apiKey = @"API KEY";
     AMASharedReporterProvider *__block provider = nil;
+    
     beforeEach(^{
         [AMAAppMetrica stub:@selector(reporterForAPIKey:)];
         provider = [[AMASharedReporterProvider alloc] initWithApiKey:apiKey];
+    });
+    afterEach(^{
+        [AMAAppMetrica clearStubs];
     });
 
     it(@"Should pass apiKey to extended API", ^{

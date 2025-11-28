@@ -86,6 +86,7 @@ static AMAIdentifierProviderMock *identifierManagerMock;
 
 + (void)destubIdentifierProvider
 {
+    [AMAStartupClientIdentifier clearStubs];
     [[AMAMetricaConfiguration sharedInstance] clearStubs];
 }
 

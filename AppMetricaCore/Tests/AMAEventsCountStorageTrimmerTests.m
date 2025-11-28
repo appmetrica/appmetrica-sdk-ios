@@ -55,6 +55,11 @@ describe(@"AMAEventsCountStorageTrimmer", ^{
         trimmer = [[AMAEventsCountStorageTrimmer alloc] initWithApiKey:apiKey
                                                        trimTransaction:transaction];
     });
+    afterEach(^{
+        [AMAMetricaConfigurationTestUtilities destubConfiguration];
+        [AMAMetricaConfiguration.sharedInstance clearStubs];
+        [AMADatabaseHelper clearStubs];
+    });
 
     it(@"Should not trim if database is null", ^{
         [[transaction shouldNot] receive:@selector(performTransactionInDatabase:)];

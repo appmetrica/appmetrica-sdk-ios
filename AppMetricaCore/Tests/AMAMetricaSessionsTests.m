@@ -57,6 +57,15 @@ describe(@"AMAMetricaSessions", ^{
         stubSharedImpl();
         start();
     };
+    
+    afterEach(^{
+        [AMAMetricaConfigurationTestUtilities destubConfiguration];
+        [AMAAppMetrica clearStubs];
+        [reporterTestHelper destub];
+        [UIApplication clearStubs];
+        [NSDate clearStubs];
+    });
+    
 	context(@"Creates one session", ^{
         void (^startAndSendEvent)(void) = ^{
             clearAndStart();
@@ -85,6 +94,11 @@ describe(@"AMAMetricaSessions", ^{
         });
     });
     context(@"Does start session with activateWithApiKey", ^{
+        
+        afterEach(^{
+            [UIApplication clearStubs];
+        });
+        
         it(@"Should create session on first launch", ^{
             clearAndStart();
             AMASession *session = [sessionStorage amatest_sessionWithOid:@1];
@@ -201,6 +215,7 @@ describe(@"AMAMetricaSessions", ^{
         });
         afterEach(^{
             [AMAMetricaConfigurationTestUtilities destubConfiguration];
+            [NSDate clearStubs];
         });
         it(@"Should create new general session with correct date", ^{
             AMASession *session = [sessionStorage newGeneralSessionCreatedAt:date error:nil];

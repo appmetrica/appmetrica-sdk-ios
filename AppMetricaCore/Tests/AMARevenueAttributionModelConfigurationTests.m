@@ -10,6 +10,12 @@ SPEC_BEGIN(AMARevenueAttributionModelConfigurationTests)
 describe(@"AMARevenueAttributionModelConfiguration", ^{
 
     AMARevenueAttributionModelConfiguration *__block config;
+    
+    afterEach(^{
+        [AMACurrencyMapping clearStubs];
+        [AMABoundMapping clearStubs];
+        [AMAEventFilter clearStubs];
+    });
 
     context(@"Init with JSON", ^{
         AMACurrencyMapping *__block currencyMapping = nil;
@@ -20,6 +26,7 @@ describe(@"AMARevenueAttributionModelConfiguration", ^{
             [AMACurrencyMapping stub:@selector(alloc) andReturn:allocedCurrencyMapping];
             [allocedCurrencyMapping stub:@selector(initWithJSON:) andReturn:currencyMapping withArguments:currencyJSON];
         });
+        
         it(@"Should return nil for nil JSON", ^{
             [[[[AMARevenueAttributionModelConfiguration alloc] initWithJSON:nil] should] beNil];
         });

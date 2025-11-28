@@ -44,6 +44,9 @@ describe(@"AMACrashReporter", ^{
         
         [AMAAppMetrica stub:@selector(extendedReporterForApiKey:) andReturn:extendedReporter withArguments:testsAPIKey];
     });
+    afterEach(^{
+        [AMAAppMetrica clearStubs];
+    });
     
     context(@"Reporting crash", ^{
         

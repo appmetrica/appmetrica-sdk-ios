@@ -81,6 +81,9 @@ describe(@"AMACrashLoader", ^{
             mockKSCrash = [KSCrash mock];
             [KSCrash stub:@selector(sharedInstance) andReturn:mockKSCrash];
         });
+        afterEach(^{
+            [KSCrash clearStubs];
+        });
 
         NSDictionary *context = @{ @"a" : @"b" };
 
@@ -153,6 +156,10 @@ describe(@"AMACrashLoader", ^{
                                                                                  transactor:transactor];
             loader.delegate = crashLoaderDelegate;
             return loader;
+        });
+        afterEach(^{
+            [KSCrash clearStubs];
+            [AMACrashReportDecoder clearStubs];
         });
         
         NSNumber *const crashID = @23;
@@ -275,6 +282,10 @@ describe(@"AMACrashLoader", ^{
         });
         
         context(@"ANR reporting", ^{
+            
+            afterEach(^{
+                [AMACrashReportDecoder clearStubs];
+            });
             
             it(@"Should call KSCrash", ^{
                 [[ksCrash should] receive:@selector(reportUserException:
@@ -415,6 +426,9 @@ describe(@"AMACrashLoader", ^{
                 crash = [AMADecodedCrash nullMock];
                 decoder = [AMACrashReportDecoder nullMock];
                 [AMACrashReportDecoder stub:@selector(alloc) andReturn:decoder];
+            });
+            afterEach(^{
+                [AMACrashReportDecoder clearStubs];
             });
 
             it(@"Should send to delegate", ^{

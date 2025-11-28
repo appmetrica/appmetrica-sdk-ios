@@ -61,6 +61,7 @@ describe(@"AMADatabaseFactory", ^{
 #if TARGET_OS_TV
     void (^testValidDataStorageTVOS)(NSString *, void (^)(void)) = ^(NSString *suiteName,
                                                                      void(^createDatabaseBlock)(void)) {
+        
         it(@"Should create valid data storage for tvOS", ^{
             NSUserDefaults *defaultsAlloced = [NSUserDefaults nullMock];
             NSUserDefaults *defaults = [NSUserDefaults nullMock];
@@ -74,6 +75,9 @@ describe(@"AMADatabaseFactory", ^{
             KWCaptureSpy *spy = [provider captureArgument:@selector(initWithUserDefaults:) atIndex:0];
             createDatabaseBlock();
             [[spy.argument should] equal:defaults];
+            
+            [NSUserDefaults clearStubs];
+            [AMAUserDefaultsKVSDataProvider clearStubs];
         });
     };
 #endif
@@ -126,6 +130,21 @@ describe(@"AMADatabaseFactory", ^{
         migrationManager = [AMADatabaseMigrationManager stubbedNullMockForInit:migrationManagerInitSelector];
         tableSchemeController = [AMATableSchemeController stubbedNullMockForInit:@selector(initWithTableSchemes:)];
         database = [AMADatabase stubbedNullMockForInit:databaseInitSelector];
+    });
+    afterEach(^{
+        [AMAFileUtility clearStubs];
+        [AMAStringDatabaseKeyValueStorageConverter clearStubs];
+        [AMABinaryDatabaseKeyValueStorageConverter clearStubs];
+        [AMADiskFileStorage clearStubs];
+        [AMAJSONFileKVSDataProvider clearStubs];
+        [AMAProxyDataToStringKVSDataProvider clearStubs];
+        [AMADatabaseKeyValueStorageProvider clearStubs];
+        [AMAStorageTrimManager clearStubs];
+        [AMATableSchemeController clearStubs];
+        [AMADatabase clearStubs];
+        [AMADatabaseObjectProvider clearStubs];
+        [NSUserDefaults clearStubs];
+        [AMAUserDefaultsKVSDataProvider clearStubs];
     });
 
     context(@"Configuration database path", ^{

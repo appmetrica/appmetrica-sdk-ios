@@ -29,6 +29,11 @@ describe(@"AMAAppOpenWatcher", ^{
         [AMAMetricaConfigurationTestUtilities stubConfigurationWithNullMock];
         [AMAMetricaConfiguration.sharedInstance stub:@selector(startup) andReturn:startup];
     });
+    afterEach(^{
+        [AMAMetricaConfigurationTestUtilities clearStubs];
+        [AMAMetricaConfiguration.sharedInstance clearStubs];
+        [AMAMetricaConfiguration clearStubs];
+    });
 
     context(@"Start watching", ^{
         it(@"Should start watching", ^{

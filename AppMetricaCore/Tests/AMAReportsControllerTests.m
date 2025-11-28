@@ -1266,6 +1266,11 @@ void (^testBlock)() = ^{
 
 describe(@"AMAReportsControllerTests", ^{
     
+    afterEach(^{
+        [AMAApplicationStateManager clearStubs];
+        [AMAAppMetrica clearStubs];
+    });
+    
     context(@"AMAReporterController", ^{
         beforeEach(beforeEachReporter);
         testBlock();
@@ -1300,6 +1305,7 @@ describe(@"AMAReportsControllerTests", ^{
                 AMAReportsController *cntrl = [[AMAReportsController alloc] initWithExecutor:executor
                                                                    timeoutRequestsController:timeoutController
                                                                         reportRequestFactory:requestFactory];
+                [AMAReportPayloadProvider clearStubs];
             });
         });
     });

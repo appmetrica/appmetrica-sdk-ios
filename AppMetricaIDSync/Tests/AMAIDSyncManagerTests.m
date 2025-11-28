@@ -87,6 +87,8 @@ describe(@"AMAIDSyncManager", ^{
             [[timerMock should] receive:@selector(initWithTimeout:) withArguments:theValue(15)];
             
             [manager startIfNeeded];
+            
+            [AMATimer clearStubs];
         });
         
         it(@"should set firstDelayPassed and start repeated timer on timer fire", ^{

@@ -24,6 +24,10 @@ describe(@"AMAFileEventValue", ^{
         [fileStorage stub:@selector(readDataWithError:) andReturn:fileData];
         [AMAEncryptedFileStorageFactory stub:@selector(fileStorageForEncryptionType:filePath:) andReturn:fileStorage];
     });
+    afterEach(^{
+        [AMAFileUtility clearStubs];
+        [AMAEncryptedFileStorageFactory clearStubs];
+    });
 
     context(@"Empty", ^{
         beforeEach(^{

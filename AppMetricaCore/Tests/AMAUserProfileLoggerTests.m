@@ -17,6 +17,9 @@ describe(@"AMAUserProfileLogger", ^{
         logSpy = [[AMALogSpy alloc] init];
         [AMALogFacade stub:@selector(sharedLog) andReturn:logSpy];
     });
+    afterEach(^{
+        [AMALogFacade clearStubs];
+    });
 
     AMALogMessageSpy *(^messageWithText)(NSString *) = ^(NSString *text) {
         return [AMALogMessageSpy messageWithText:text channel:@"AppMetricaCore" level:AMALogLevelWarning];

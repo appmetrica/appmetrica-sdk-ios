@@ -203,6 +203,10 @@ describe(@"AMAReportSerializer", ^{
                         [NSTimeZone stub:@selector(systemTimeZone) andReturn:systemTimeZone];
                         fillReport();
                     });
+                    afterEach(^{
+                        [NSTimeZone clearStubs];
+                    });
+                    
                     it(@"Should have valid timestamp", ^{
                         [[theValue(sessionData->session_desc->start_time->timestamp) should] equal:deviceDate.timeIntervalSince1970
                                                                                          withDelta:EPSILON];
@@ -807,6 +811,10 @@ describe(@"AMAReportSerializer", ^{
                         return nil;
                     }];
                 });
+                afterEach(^{
+                    [AMAAllocationsTrackerProvider clearStubs];
+                });
+                
                 it(@"Should not fill data", ^{
                     fillReport();
                     [[thePointerValue(reportData) should] equal:thePointerValue(NULL)];

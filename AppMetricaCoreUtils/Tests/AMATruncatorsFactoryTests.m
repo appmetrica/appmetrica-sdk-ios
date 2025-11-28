@@ -12,6 +12,10 @@ describe(@"AMATruncatorsFactory", ^{
         beforeEach(^{
             truncator = [AMALengthStringTruncator stubbedNullMockForInit:@selector(initWithMaxLength:)];
         });
+        afterEach(^{
+            [AMALengthStringTruncator clearStubs];
+        });
+        
         it(@"Should create valid truncator", ^{
             [[truncator should] receive:@selector(initWithMaxLength:) withArguments:theValue(1000)];
             [AMATruncatorsFactory eventNameTruncator];
@@ -25,6 +29,10 @@ describe(@"AMATruncatorsFactory", ^{
         beforeEach(^{
             truncator = [AMABytesStringTruncator stubbedNullMockForInit:@selector(initWithMaxBytesLength:)];
         });
+        afterEach(^{
+            [AMABytesStringTruncator clearStubs];
+        });
+        
         it(@"Should create valid truncator", ^{
             [[truncator should] receive:@selector(initWithMaxBytesLength:) withArguments:theValue(230 * 1024)];
             [AMATruncatorsFactory eventStringValueTruncator];
@@ -35,9 +43,14 @@ describe(@"AMATruncatorsFactory", ^{
     });
     context(@"eventBinaryValueTruncator", ^{
         AMADataTruncator *__block truncator = nil;
+        
         beforeEach(^{
             truncator = [AMADataTruncator stubbedNullMockForInit:@selector(initWithMaxLength:)];
         });
+        afterEach(^{
+            [AMADataTruncator clearStubs];
+        });
+        
         it(@"Should create valid truncator", ^{
             [[truncator should] receive:@selector(initWithMaxLength:) withArguments:theValue(230 * 1024)];
             [AMATruncatorsFactory eventBinaryValueTruncator];
@@ -48,9 +61,14 @@ describe(@"AMATruncatorsFactory", ^{
     });
     context(@"extrasMigrationTruncator", ^{
         AMALengthStringTruncator *__block truncator = nil;
+        
         beforeEach(^{
             truncator = [AMALengthStringTruncator stubbedNullMockForInit:@selector(initWithMaxLength:)];
         });
+        afterEach(^{
+            [AMALengthStringTruncator clearStubs];
+        });
+        
         it(@"Should create valid truncator", ^{
             [[truncator should] receive:@selector(initWithMaxLength:) withArguments:theValue(10000)];
             [AMATruncatorsFactory extrasMigrationTruncator];
@@ -61,9 +79,14 @@ describe(@"AMATruncatorsFactory", ^{
     });
     context(@"profileID", ^{
         AMALengthStringTruncator *__block truncator = nil;
+        
         beforeEach(^{
             truncator = [AMALengthStringTruncator stubbedNullMockForInit:@selector(initWithMaxLength:)];
         });
+        afterEach(^{
+            [AMALengthStringTruncator clearStubs];
+        });
+        
         it(@"Should create valid truncator", ^{
             [[truncator should] receive:@selector(initWithMaxLength:) withArguments:theValue(200)];
             [AMATruncatorsFactory profileIDTruncator];

@@ -687,6 +687,10 @@ describe(@"AMAStartupParametersConfiguration", ^{
                 [AMAAttributionSerializer stub:@selector(fromJsonArray:) andReturn:deserializedValue];
                 [AMAAttributionSerializer stub:@selector(toJsonArray:) andReturn:serializedValue];
             });
+            afterEach(^{
+                [AMAAttributionSerializer clearStubs];
+            });
+            
             it(@"Should use valid key", ^{
                 [[storage should] receive:@selector(jsonArrayForKey:error:) withArguments:key, kw_any()];
                 [configuration attributionDeeplinkConditions];

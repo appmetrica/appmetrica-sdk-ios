@@ -69,6 +69,13 @@ describe(@"AMAStartupParameters", ^{
             @"exta" : @"1",
         } mutableCopy];
     });
+    afterEach(^{
+        [AMAPlatformDescription clearStubs];
+        [AMAMetricaConfigurationTestUtilities destubConfiguration];
+        [AMAStartupClientIdentifierFactory clearStubs];
+        [AMAMetricaConfiguration.sharedInstance clearStubs];
+        [AMAMetricaConfiguration.sharedInstance.startup clearStubs];
+    });
 
     it(@"Should return minimal parameters", ^{
         [[[AMAStartupParameters parameters] should] equal:expectedParameters];

@@ -18,6 +18,12 @@ describe(@"StartupPermissionController", ^{
 
         permissionController = [[AMAStartupPermissionController alloc] init];
     });
+    afterEach(^{
+        [AMAMetricaConfigurationTestUtilities destubConfiguration];
+        [AMAMetricaConfiguration.sharedInstance clearStubs];
+        [AMAMetricaConfiguration.sharedInstance.startup clearStubs];
+        [AMAMetricaConfiguration.sharedInstance.persistent clearStubs];
+    });
 
     NSString *(^locationPermissionsString)(BOOL) = ^(BOOL enabled) {
         AMAStartupPermission *permission = [[AMAStartupPermission alloc] initWithName:kAMALocationPermissionKey

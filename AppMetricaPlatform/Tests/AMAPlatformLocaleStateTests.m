@@ -20,6 +20,9 @@ describe(@"AMAPlatformLocaleState", ^{
         [NSLocale stub:@selector(currentLocale) andReturn:localeMock];
         [NSLocale stub:@selector(preferredLanguages) andReturn:@[languageAsReturnedByPrefferedLanguages]];
     });
+    afterEach(^{
+        [NSLocale clearStubs];
+    });
 
     it(@"Should return lng-script_region pattern", ^{
         NSString *expectedValue = [NSString stringWithFormat:@"%@-%@_%@",

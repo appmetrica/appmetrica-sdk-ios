@@ -26,6 +26,9 @@ describe(@"AMAUrgentEventCountDispatchStrategy", ^{
         reporterTestHelper = [[AMAReporterTestHelper alloc] init];
         reporterStorage = reporterTestHelper.appReporter.reporterStorage;
     });
+    afterEach(^{
+        [reporterTestHelper destub];
+    });
 
 
     AMAUrgentEventCountDispatchStrategy * (^mockEnv)(unsigned int) = ^ AMAUrgentEventCountDispatchStrategy *(unsigned int eventCount) {

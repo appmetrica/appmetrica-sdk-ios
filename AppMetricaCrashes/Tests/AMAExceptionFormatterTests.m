@@ -75,6 +75,9 @@ describe(@"AMAExceptionFormatter", ^{
         [ksCrash stub:@selector(systemInfo) andReturn:systemDict];
         [decoder stub:@selector(systemInfoForDictionary:) andReturn:systemInfo withArguments:systemDict];
     });
+    afterEach(^{
+        [KSCrash clearStubs];
+    });
 
     context(@"Symbolicated frame parsing", ^{
 
@@ -336,6 +339,10 @@ describe(@"AMAExceptionFormatter", ^{
             customErrorModel = [AMAErrorModel nullMock];
             [errorModelFactory stub:@selector(defaultModelForErrorDetails:bytesTruncated:) andReturn:defaultErrorModel];
             [errorModelFactory stub:@selector(customModelForErrorDetails:identifier:bytesTruncated:) andReturn:customErrorModel];
+        });
+        afterEach(^{
+            [AMAErrorModelFactory clearStubs];
+            [AMACrashObjectsFactory clearStubs];
         });
         context(@"Filled objects", ^{
             AMAVirtualMachineInfo *__block virtualMachineInfo = nil;

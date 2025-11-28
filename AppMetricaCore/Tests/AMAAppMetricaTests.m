@@ -54,10 +54,24 @@ describe(@"AMAAppMetrica", ^{
         [AMATestNetwork stubHTTPRequestWithBlock:nil];
     });
     afterEach(^{
+        [AMAMetricaConfiguration clearStubs];
+        [AMAMetricaConfiguration.sharedInstance clearStubs];
+        [AMAMetricaConfiguration.sharedInstance.inMemory clearStubs];
+        [AMAMetricaConfiguration.sharedInstance.persistent clearStubs];
+        [AMAMetricaConfiguration.sharedInstance.startup clearStubs];
+        [(NSObject *)AMAMetricaConfiguration.sharedInstance.identifierProvider clearStubs];
+        [AMADataSendingRestrictionController clearStubs];
+        
+        [AMAAppMetrica clearStubs];
+        [AMAMetricaConfigurationTestUtilities destubConfiguration];
+        [AMAFailureDispatcher clearStubs];
         [AMAAppMetrica clearStubs];
         [AMAAdProvider clearStubs];
         [AMAAdProviderResolver clearStubs];
         [AMALocationResolver clearStubs];
+        [reporterTestHelper destub];
+        [AMAIdentifiersTestUtilities destubAll];
+        [AMAFailureDispatcherTestHelper destub];
     });
     
     void (^stubMetricaDependencies)(void) = ^{
@@ -324,6 +338,9 @@ describe(@"AMAAppMetrica", ^{
             beforeEach(^{
                 restrictionController = [AMADataSendingRestrictionController stubbedNullMockForDefaultInit];
                 [AMADataSendingRestrictionController stub:@selector(sharedInstance) andReturn:restrictionController];
+            });
+            afterEach(^{
+                [AMADataSendingRestrictionController clearStubs];
             });
             
             it(@"Should set allowed restriction", ^{
@@ -920,7 +937,6 @@ describe(@"AMAAppMetrica", ^{
                 });
                 afterEach(^{
                     [AMAMetricaConfiguration clearStubs];
-                    [[AMAMetricaConfiguration sharedInstance].persistent clearStubs];
                 });
                 it(@"Should return error async", ^{
                     NSError *error = [NSError errorWithDomain:@"test_domain" code:1 userInfo:nil];
@@ -1072,6 +1088,8 @@ describe(@"AMAAppMetrica", ^{
                     [AMAPlatformDescription stub:@selector(SDKVersionName) andReturn:version];
                     
                     [[[AMAAppMetrica libraryVersion] should] equal:version];
+                    
+                    [AMAPlatformDescription clearStubs];
                 });
                 
                 context(@"Environment", ^{
@@ -1106,6 +1124,9 @@ describe(@"AMAAppMetrica", ^{
                 activationConfiguration = [AMAModuleActivationConfiguration stubbedNullMockForInit:@selector(initWithApiKey:appVersion:appBuildNumber:)];
                 
                 handler = [AMATestAssertionHandler new];
+            });
+            afterEach(^{
+                [AMAModuleActivationConfiguration clearStubs];
             });
             
             it(@"Should activate anonymously if not activated as main", ^{
@@ -1209,6 +1230,7 @@ describe(@"AMAAppMetrica", ^{
                 stubMetricaStarted(YES);
     
                 [AMAAppMetrica sendEventsBuffer];
+                [AMAModuleActivationConfiguration clearStubs];
             });
             it(@"Should not add event flushable delegate if metrica is activated", ^{
                 [handler beginAssertIgnoring];

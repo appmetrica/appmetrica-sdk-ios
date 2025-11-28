@@ -31,6 +31,8 @@ describe(@"AMANetworkingUtilities", ^{
 
             [[theValue(dict[@"Send-Timestamp"]) should] equal:theValue(timestamp)];
             [[theValue(dict[@"Send-Timezone"]) should] equal:theValue(differenceString)];
+            
+            [AMATimeUtilities clearStubs];
         });
     });
 });

@@ -63,6 +63,11 @@ describe(@"AMALocationCollectingController", ^{
                                                                            executor:executor
                                                                        dateProvider:dateProvider];
     });
+    afterEach(^{
+        [AMALocation clearStubs];
+        [AMAVisit clearStubs];
+        [AMALocationCollectingConfiguration clearStubs];
+    });
 
     context(@"Successful", ^{
         context(@"Locations", ^{

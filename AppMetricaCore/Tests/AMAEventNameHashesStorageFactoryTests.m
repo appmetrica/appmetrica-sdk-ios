@@ -24,6 +24,11 @@ describe(@"AMAEventNameHashesStorageFactory", ^{
         fileStorage = [AMADiskFileStorage stubbedNullMockForInit:@selector(initWithPath:options:)];
         storage = [AMAEventNameHashesStorage stubbedNullMockForInit:@selector(initWithFileStorage:)];
     });
+    afterEach(^{
+        [AMADiskFileStorage clearStubs];
+        [AMAEventNameHashesStorage clearStubs];
+        [AMAFileUtility clearStubs];
+    });
 
     it(@"Should create disk file storage", ^{
         AMADiskFileStorageOptions options = AMADiskFileStorageOptionNoBackup | AMADiskFileStorageOptionCreateDirectory;

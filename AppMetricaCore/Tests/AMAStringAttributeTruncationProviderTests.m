@@ -20,6 +20,10 @@ describe(@"AMAStringAttributeTruncationProvider", ^{
             [AMAStringAttributeTruncator stubbedNullMockForInit:@selector(initWithAttributeName:underlyingTruncator:)];
         provider = [[AMAStringAttributeTruncationProvider alloc] initWithUnderlyingTruncator:underlyingTruncator];
     });
+    afterEach(^{
+        [AMAStringAttributeTruncator clearStubs];
+    });
+    
     it(@"Should create valid truncator", ^{
         [[truncator should] receive:@selector(initWithAttributeName:underlyingTruncator:)
                       withArguments:name, underlyingTruncator];

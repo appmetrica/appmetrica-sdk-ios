@@ -68,6 +68,9 @@ describe(@"AMARevenueInfoModelFactory", ^{
         
         revenueFactory = [[AMARevenueInfoModelFactory alloc] init];
     });
+    afterEach(^{
+        [[NSBundle mainBundle] clearStubs];
+    });
     
     context(@"Purchase", ^{
         

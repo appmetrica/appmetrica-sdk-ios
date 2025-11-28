@@ -63,6 +63,7 @@ describe(@"AMADatabaseIntegrityProcessor", ^{
     });
 
     afterEach(^{
+        [AMADatabaseQueueProvider clearStubs];
         for (NSString *path in [additionalDatabasePaths arrayByAddingObject:databasePath]) {
             [[NSFileManager defaultManager] removeItemAtPath:path error:NULL];
         }
@@ -78,6 +79,9 @@ describe(@"AMADatabaseIntegrityProcessor", ^{
                 [AMATestUtilities fillObjectPointerParameter:params[1] withValue:error];
                 return problems;
             }];
+        });
+        afterEach(^{
+            [AMADatabaseIntegrityQueries clearStubs];
         });
 
         context(@"Nil database", ^{
@@ -241,6 +245,9 @@ describe(@"AMADatabaseIntegrityProcessor", ^{
                 return theValue(result);
             }];
         });
+        afterEach(^{
+            [AMADatabaseIntegrityQueries clearStubs];
+        });
 
         context(@"Nil DB", ^{
             it(@"Should return NO", ^{
@@ -292,6 +299,9 @@ describe(@"AMADatabaseIntegrityProcessor", ^{
             beforeEach(^{
                 [AMADatabaseIntegrityQueries stub:@selector(backupDBQueue:backupDB:error:)];
             });
+            afterEach(^{
+                [AMADatabaseIntegrityQueries clearStubs];
+            });
 
             it(@"Should return NO", ^{
                 [[theValue([processor fixWithBackupAndRestore:nil report:report]) should] beNo];
@@ -320,6 +330,9 @@ describe(@"AMADatabaseIntegrityProcessor", ^{
                         writeToFile:targetPath atomically:YES encoding:NSUTF8StringEncoding error:nil];
                     return theValue(YES);
                 }];
+            });
+            afterEach(^{
+                [AMADatabaseIntegrityQueries clearStubs];
             });
             it(@"Should return YES", ^{
                 [[theValue([processor fixWithBackupAndRestore:&database report:report]) should] beYes];
@@ -352,6 +365,10 @@ describe(@"AMADatabaseIntegrityProcessor", ^{
                     return theValue(NO);
                 }];
             });
+            afterEach(^{
+                [AMADatabaseIntegrityQueries clearStubs];
+            });
+            
             it(@"Should return NO", ^{
                 [[theValue([processor fixWithBackupAndRestore:&database report:report]) should] beNo];
             });

@@ -28,6 +28,9 @@ describe(@"AMADeepLinkController", ^{
         [AMADeepLinkPayloadFactory stub:@selector(deepLinkPayloadForURL:ofType:isAuto:error:) andReturn:payload];
 
     });
+    afterEach(^{
+        [AMADeepLinkPayloadFactory clearStubs];
+    });
 
     it(@"Should format payload", ^{
         [[AMADeepLinkPayloadFactory should] receive:@selector(deepLinkPayloadForURL:ofType:isAuto:error:)

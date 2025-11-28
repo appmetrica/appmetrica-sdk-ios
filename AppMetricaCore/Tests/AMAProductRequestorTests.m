@@ -31,6 +31,9 @@ describe(@"AMAProductRequestor", ^{
         
         createRequestor(AMATransactionStatePurchased);
     });
+    afterEach(^{
+        [SKProductsRequest clearStubs];
+    });
     
     it(@"Should create request with provided product ID", ^{
         [productRequestMock stub:@selector(initWithProductIdentifiers:) withBlock:^id(NSArray *params) {

@@ -27,6 +27,7 @@ describe(@"AMASessionExpirationHandler", ^{
     });
     afterEach(^{
         [AMAMetricaConfigurationTestUtilities destubConfiguration];
+        [AMAMetricaConfiguration.sharedInstance clearStubs];
     });
     
     let(sessionHandler, ^{ return [[AMASessionExpirationHandler alloc] initWithConfiguration:config APIKey:apiKey]; });

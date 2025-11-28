@@ -56,12 +56,19 @@ describe(@"AMAStorageEventsTrimTransaction", ^{
         cleanupInfoSpy = [cleaner captureArgument:@selector(purgeAndReportEventsForInfo:database:error:)
                                           atIndex:0];
     });
+    afterEach(^{
+        [reporterHelper destub];
+        [AMAMetricaConfiguration.sharedInstance.inMemory clearStubs];
+    });
 
     context(@"Default initialization", ^{
         SEL const initSelector = @selector(initWithCleaner:trimPercent:importantEventTypePriorities:);
         beforeEach(^{
             [AMAMetricaConfigurationTestUtilities stubConfigurationWithNullMock];
             transaction = [AMAStorageEventsTrimTransaction alloc];
+        });
+        afterEach(^{
+            [AMAMetricaConfigurationTestUtilities destubConfiguration];
         });
         it(@"Should use cleaner", ^{
             KWCaptureSpy *spy = [transaction captureArgument:initSelector atIndex:0];
@@ -75,6 +82,8 @@ describe(@"AMAStorageEventsTrimTransaction", ^{
             KWCaptureSpy *spy = [transaction captureArgument:initSelector atIndex:1];
             __unused id _ = [transaction initWithCleaner:cleaner];
             [[spy.argument should] equal:trimPercent withDelta:0.0001];
+            
+            [[AMAMetricaConfiguration sharedInstance].inMemory clearStubs];
         });
         it(@"Should have valid type priorities", ^{
             KWCaptureSpy *spy = [transaction captureArgument:initSelector atIndex:2];

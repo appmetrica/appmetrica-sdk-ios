@@ -85,6 +85,7 @@ describe(@"AMAAppMetricaConfiguration", ^{
             [handler beginAssertIgnoring];
         });
         afterEach(^{
+            [AMAIdentifierValidator clearStubs];
             [handler endAssertIgnoring];
         });
         

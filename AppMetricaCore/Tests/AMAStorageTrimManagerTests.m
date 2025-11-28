@@ -33,6 +33,9 @@ describe(@"AMAStorageTrimManager", ^{
                                                   eventsCleaner:eventsCleaner
                                           notificationsListener:listener];
     });
+    afterEach(^{
+        [AMAStorageEventsTrimTransaction clearStubs];
+    });
 
     it(@"Should unsubscribe database", ^{
         [[listener should] receive:@selector(unsubscribeObject:) withArguments:database];
@@ -45,6 +48,10 @@ describe(@"AMAStorageTrimManager", ^{
             trimmer = [AMAEventsCountStorageTrimmer stubbedNullMockForInit:@selector(initWithApiKey:trimTransaction:)];
             [database stub:@selector(databaseType) andReturn:theValue(AMADatabaseTypePersistent)];
         });
+        afterEach(^{
+            [AMAEventsCountStorageTrimmer clearStubs];
+        });
+        
         context(@"Subscribe", ^{
             it(@"Should create valid trimmer", ^{
                 [[trimmer should] receive:@selector(initWithApiKey:trimTransaction:)
@@ -118,6 +125,10 @@ describe(@"AMAStorageTrimManager", ^{
             trimmer = [AMAPlainStorageTrimmer stubbedNullMockForInit:@selector(initWithTrimTransaction:)];
             [database stub:@selector(databaseType) andReturn:theValue(AMADatabaseTypeInMemory)];
         });
+        afterEach(^{
+            [AMAPlainStorageTrimmer clearStubs];
+        });
+        
         context(@"Subscribe", ^{
             it(@"Should create valid trimmer", ^{
                 [[trimmer should] receive:@selector(initWithTrimTransaction:)

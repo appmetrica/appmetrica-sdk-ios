@@ -32,6 +32,10 @@ describe(@"AMAUserProfileUpdatesProcessor", ^{
 
         processor = [[AMAUserProfileUpdatesProcessor alloc] initWithSerializer:serializer];
     });
+    afterEach(^{
+        [AMAErrorsFactory clearStubs];
+        [AMAUserProfileModel clearStubs];
+    });
 
     context(@"No updates", ^{
         beforeEach(^{

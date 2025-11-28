@@ -127,6 +127,10 @@ describe(@"AMAEventValueFactory", ^{
             [fileStorage stub:@selector(writeData:error:) andReturn:theValue(YES)];
             [AMAFileUtility stub:@selector(pathForFullFileName:) andReturn:filePath];
         });
+        afterEach(^{
+            [AMAEncryptedFileStorageFactory clearStubs];
+            [AMAFileUtility clearStubs];
+        });
 
         AMAFileEventValue *(^eventValue)(void) = ^{
             return (AMAFileEventValue *)[factory fileEventValue:fileData

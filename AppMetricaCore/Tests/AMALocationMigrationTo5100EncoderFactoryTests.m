@@ -17,6 +17,9 @@ describe(@"AMALocationMigrationTo5100EncoderFactory", ^{
     beforeEach(^{
         crypterMock = [AMAAESCrypter stubbedNullMockForInit:@selector(initWithKey:iv:)];
     });
+    afterEach(^{
+        [AMAAESCrypter clearStubs];
+    });
     
     context(@"Encoder", ^{
         it(@"Should return encoder", ^{
@@ -28,6 +31,9 @@ describe(@"AMALocationMigrationTo5100EncoderFactory", ^{
             [[crypterMock should] receive:@selector(initWithKey:iv:) withArguments:message, iv];
 
             id<AMADataEncoding> encoder = [encoderFactory encoder];
+            
+            [AMAAESUtility clearStubs];
+            [AMALocationEncryptionDefaults clearStubs];
         });
     });
 });

@@ -44,6 +44,9 @@ describe(@"AMASessionStorage", ^{
                                                    serializer:serializer
                                                  stateStorage:stateStorage];
     });
+    afterEach(^{
+        [AMAMetricaConfigurationTestUtilities destubConfiguration];
+    });
 
     NSString *(^sid)(AMASession *) = ^(AMASession *session) {
         return [NSString stringWithFormat:@"%@_%@_%@_%@",
@@ -171,6 +174,10 @@ describe(@"AMASessionStorage", ^{
                                                                error:nil];
             [[AMAMetricaConfiguration sharedInstance].startup stub:@selector(serverTimeOffset)
                                                          andReturn:serverTimeOffset];
+        });
+        afterEach(^{
+            [[AMAMetricaConfiguration sharedInstance].startup clearStubs];
+            [stateHelper clearStubs];
         });
 
         context(@"General", ^{
@@ -574,6 +581,10 @@ describe(@"AMASessionStorage", ^{
                         return nil;
                     }];
                 });
+                afterEach(^{
+                    [AMADatabaseHelper clearStubs];
+                });
+                
                 it(@"Should be nil", ^{
                     session = [storage newSessionWithNextAttributionIDCreatedAt:date type:AMASessionTypeGeneral error:nil];
                     [[session should] beNil];

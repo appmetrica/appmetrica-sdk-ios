@@ -10,6 +10,12 @@ SPEC_BEGIN(AMAEventFilterTests)
 describe(@"AMAEventFilter", ^{
 
     context(@"Init with JSON", ^{
+        afterEach(^{
+            [AMAClientEventCondition clearStubs];
+            [AMARevenueEventCondition clearStubs];
+            [AMAECommerceEventCondition clearStubs];
+        });
+        
         it(@"Should return valid object for minimum json", ^{
             NSDictionary *json = @{ @"event.type" : @4 };
             AMAEventFilter *filter = [[AMAEventFilter alloc] initWithJSON:json];
@@ -55,6 +61,10 @@ describe(@"AMAEventFilter", ^{
             [[filter.clientEventCondition should] equal:clientEventCondition];
             [[filter.revenueEventCondition should] equal:revenueEventCondition];
             [[filter.eCommerceEventCondition should] equal:ecomEventCondition];
+            
+            [AMAClientEventCondition clearStubs];
+            [AMARevenueEventCondition clearStubs];
+            [AMAECommerceEventCondition clearStubs];
         });
     });
     context(@"JSON", ^{

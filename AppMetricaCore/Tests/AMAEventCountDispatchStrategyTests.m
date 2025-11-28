@@ -28,7 +28,10 @@ describe(@"AMAEventCountDispatchStrategy", ^{
         executionConditionChecker = [KWMock nullMockForProtocol:@protocol(AMAReportExecutionConditionChecker)];
     });
     afterEach(^{
+        [AMAMetricaConfiguration clearStubs];
+        [AMAMetricaConfiguration.sharedInstance clearStubs];
         [AMAMetricaConfigurationTestUtilities destubConfiguration];
+        [reporterTestHelper destub];
     });
 
 	context(@"Handles configuration update", ^{

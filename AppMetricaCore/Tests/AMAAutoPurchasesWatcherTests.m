@@ -38,6 +38,11 @@ describe(@"AMAAutoPurchasesWatcher", ^{
 
         createWatcher();
     });
+    afterEach(^{
+        [AMAMetricaConfigurationTestUtilities destubConfiguration];
+        [AMAMetricaConfiguration clearStubs];
+        [AMAProductRequestor clearStubs];
+    });
     
     context(@"Activation", ^{
         
@@ -54,6 +59,9 @@ describe(@"AMAAutoPurchasesWatcher", ^{
         beforeEach(^{
             requestor = [AMAProductRequestor nullMock];
             [AMAProductRequestor stubInstance:requestor forInit:@selector(initWithTransaction:transactionState:delegate:)];
+        });
+        afterEach(^{
+            [AMAProductRequestor clearStubs];
         });
         
         it(@"Should create product requestor on new transaction", ^{

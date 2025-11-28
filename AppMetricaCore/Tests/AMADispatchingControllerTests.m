@@ -34,6 +34,9 @@ describe(@"AMADispatchingController", ^{
         controller = [[AMADispatchingController alloc] initWithTimeoutConfiguration:[KWMock nullMock]];
         controller.proxyDelegate = delegate;
     });
+    afterEach(^{
+        [AMADispatcher clearStubs];
+    });
 
     context(@"Timeout controller", ^{
     
@@ -43,6 +46,9 @@ describe(@"AMADispatchingController", ^{
             timeoutMock = [AMATimeoutRequestsController mock];
             [timeoutMock stub:@selector(initWithHostType:configuration:)];
             [AMATimeoutRequestsController stub:@selector(alloc) andReturn:timeoutMock];
+        });
+        afterEach(^{
+            [AMATimeoutRequestsController clearStubs];
         });
         
         it(@"Should create timeout controller with reports host type", ^{
@@ -124,6 +130,8 @@ describe(@"AMADispatchingController", ^{
             [controller performReportForApiKey:forcedApiKey forced:YES];
             [controller start];
             [controller performReportForApiKey:apiKey forced:NO];
+            
+            [AMADispatcher clearStubs];
         });
     });
 
