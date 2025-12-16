@@ -177,6 +177,12 @@ static NSString *const kAMAFilePath = @"io.appmetrica";
     // If the data storage format and location change, you must notify https://nda.ya.ru/t/94XNTaaf7LkVFu
     NSFileManager *fm = [NSFileManager defaultManager];
     NSURL *url = [fm containerURLForSecurityApplicationGroupIdentifier:applicationGroupIdentifier];
+    
+    if (url == nil) {
+        AMALogError(@"AppGroup %@ is unavailable", applicationGroupIdentifier);
+        return nil;
+    }
+    
     NSURL *appMetricaURL = [url URLByAppendingPathComponent:kAMAFilePath isDirectory:YES];
     NSString *result = appMetricaURL.path;
     return result;

@@ -129,6 +129,17 @@ describe(@"AMAFileUtility", ^{
             [[groupIDPath should] equal:@"/test/container/io.appmetrica"];
         });
     });
+    
+    context(@"Unavailable Shared Group", ^{
+        beforeEach(^{
+            [fileManager stub:@selector(containerURLForSecurityApplicationGroupIdentifier:) andReturn:nil];
+        });
+        
+        it(@"Should return nil", ^{
+            NSString *groupIDPath = [AMAFileUtility persistentPathForApplicationGroup:@"group.io.appmetrica.test"];
+            [[groupIDPath should] beNil];
+        });
+    });
 
 });
 

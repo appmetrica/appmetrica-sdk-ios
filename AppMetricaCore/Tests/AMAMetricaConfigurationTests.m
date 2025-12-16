@@ -18,6 +18,8 @@
 @interface AMAMetricaConfiguration (TestExtension)
 - (AMAIdentifierProviderConfiguration*)createIdentifierProviderConfiguration;
 - (id<AMAIdentifierProviding>)createIdentifierProvider;
+- (NSString *)groupLockPath;
+- (id<AMAFileStorage>)groupIdentifiersFileStorage;
 @end
 
 SPEC_BEGIN(AMAMetricaConfigurationTests)
@@ -28,14 +30,17 @@ describe(@"AMAMetricaConfiguration", ^{
     AMAMetricaConfiguration *__block configuration = nil;
     id<AMADatabaseProtocol> __block database = nil;
     AMAKeychainBridge *__block keychainBridge = nil;
+    AMAAppGroupIdentifierProvider *__block appGroupIdentifierProvider = nil;
 
     beforeEach(^{
         keychainBridge = [[AMAKeychainBridgeMock alloc] init];
         database = [AMAMockDatabase configurationDatabase];
-        configuration = 
+        appGroupIdentifierProvider = [AMAAppGroupIdentifierProvider nullMock];
+        
+        configuration =
             [[AMAMetricaConfiguration alloc] initWithKeychainBridge:keychainBridge
                                                             database:database
-                                         appGroupIdentifierProvider:[AMAAppGroupIdentifierProvider new]];
+                                         appGroupIdentifierProvider:appGroupIdentifierProvider];
     });
 
     it(@"Should add nessesary backup keys", ^{
@@ -334,6 +339,73 @@ describe(@"AMAMetricaConfiguration", ^{
             [[thePointerValue(createdProv) should] equal:thePointerValue(expectedProv)];
         });
     });
+    
+    context(@"Paths in AppGroup", ^{
+        
+        NSString *const appGroupPath = NSTemporaryDirectory();
+        NSString *const appGroupName = @"io.appmetrica.appgroup";
+        
+        afterEach(^{
+            [AMAFileUtility clearStubs];
+        });
+        
+        context(@"if AppGroup is set and available", ^{
+            beforeEach(^{
+                [AMAFileUtility stub:@selector(persistentPathForApplicationGroup:) andReturn:appGroupPath];
+                [appGroupIdentifierProvider stub:@selector(appGroupIdentifier) andReturn:appGroupName];
+                [AMAFileUtility stub:@selector(createPathIfNeeded:)];
+            });
+            
+            it(@"groupLockPath", ^{
+                NSString *const expectedResultPath = [NSString stringWithFormat:@"%@%@", appGroupPath, @"identifiers.lock"];
+                
+                NSString *const resultPath = [configuration groupLockPath];
+                
+                [[resultPath should] equal:expectedResultPath];
+            });
+            
+            it(@"groupIdentifierPath", ^{
+                NSString *const expectedResultPath = [NSString stringWithFormat:@"%@%@", appGroupPath, @"identifiers.json"];
+                
+                id<AMAFileStorage> identifiersFile = [configuration groupIdentifiersFileStorage];
+                [[identifiersFile.class should] equal:AMADiskFileStorage.class];
+                AMADiskFileStorage *diskIdentifiersFile = (AMADiskFileStorage *)identifiersFile;
+                [[diskIdentifiersFile.path should] equal:expectedResultPath];
+            });
+        });
+        
+        context(@"if AppGroup is set and unavailable", ^{
+            beforeEach(^{
+                [AMAFileUtility stub:@selector(persistentPathForApplicationGroup:) andReturn:nil];
+                [appGroupIdentifierProvider stub:@selector(appGroupIdentifier) andReturn:appGroupName];
+                [AMAFileUtility stub:@selector(createPathIfNeeded:)];
+            });
+            
+            it(@"groupLockPath", ^{
+                [[configuration groupLockPath] shouldBeNil];
+            });
+            it(@"groupIdentifierPath", ^{
+                [(NSObject *)[configuration groupIdentifiersFileStorage] shouldBeNil];
+            });
+        });
+        
+        context(@"if AppGroup is not set", ^{
+            beforeEach(^{
+                [AMAFileUtility stub:@selector(persistentPathForApplicationGroup:) andReturn:appGroupPath];
+                [appGroupIdentifierProvider stub:@selector(appGroupIdentifier) andReturn:nil];
+                [AMAFileUtility stub:@selector(createPathIfNeeded:)];
+            });
+            
+            it(@"groupLockPath", ^{
+                [[configuration groupLockPath] shouldBeNil];
+            });
+            it(@"groupIdentifierPath", ^{
+                [(NSObject *)[configuration groupIdentifiersFileStorage] shouldBeNil];
+            });
+        });
+    });
+    
+    
 });
 
 SPEC_END

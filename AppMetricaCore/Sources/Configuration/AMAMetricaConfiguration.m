@@ -365,6 +365,10 @@ static NSString *const kAMAMetricaFallbackPrefix = @"fallback-keychain";
     }
 
     NSString *sharedDir = [AMAFileUtility persistentPathForApplicationGroup:appGroupId];
+    if (sharedDir == nil) {
+        return nil;
+    }
+    
     [AMAFileUtility createPathIfNeeded:sharedDir];
     NSString *lockPath = [sharedDir stringByAppendingPathComponent:kAMAMetricaIdentifierLockFileName];
     return lockPath;
@@ -382,10 +386,12 @@ static NSString *const kAMAMetricaFallbackPrefix = @"fallback-keychain";
         @synchronized (self.groupIdentifiersFileStorageLock) {
             if (_groupIdentifiersFileStorage == nil) {
                 NSString *sharedDir = [AMAFileUtility persistentPathForApplicationGroup:appGroupId];
-                [AMAFileUtility createPathIfNeeded:sharedDir];
-                NSString *identifiersPath = [sharedDir stringByAppendingPathComponent:@"identifiers.json"];
-                _groupIdentifiersFileStorage = [[AMADiskFileStorage alloc] initWithPath:identifiersPath
-                                                                        options:AMADiskFileStorageOptionNoBackup|AMADiskFileStorageOptionCreateDirectory];
+                if (sharedDir != nil) {
+                    [AMAFileUtility createPathIfNeeded:sharedDir];
+                    NSString *identifiersPath = [sharedDir stringByAppendingPathComponent:@"identifiers.json"];
+                    _groupIdentifiersFileStorage = [[AMADiskFileStorage alloc] initWithPath:identifiersPath
+                                                                                    options:AMADiskFileStorageOptionNoBackup|AMADiskFileStorageOptionCreateDirectory];
+                }
             }
         }
     }
