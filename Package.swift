@@ -471,7 +471,6 @@ extension AppMetricaTarget {
                 "./Profiles/Truncation",
                 "./Profiles/Updates",
                 "./Profiles/Updates/Factory",
-                "./Profiles/Utilities",
                 "./Profiles/Validation",
                 "./Reporter",
                 "./Reporter/FirstOccurrence",
