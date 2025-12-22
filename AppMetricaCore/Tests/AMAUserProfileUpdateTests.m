@@ -9,17 +9,17 @@ SPEC_BEGIN(AMAUserProfileUpdateTests)
 describe(@"AMAUserProfileUpdate", ^{
 
     NSArray *__block validators = nil;
-    AMAAttributeUpdate *__block attributeUpdate = nil;
+    NSArray *__block attributeUpdates = nil;
     AMAUserProfileUpdate *__block update = nil;
 
     beforeEach(^{
         validators = @[ [KWMock nullMockForProtocol:@protocol(AMAAttributeUpdateValidating)] ];
-        attributeUpdate = [AMAAttributeUpdate nullMock];
-        update = [[AMAUserProfileUpdate alloc] initWithAttributeUpdate:attributeUpdate validators:validators];
+        attributeUpdates = @[ [AMAAttributeUpdate nullMock] ];
+        update = [[AMAUserProfileUpdate alloc] initWithAttributeUpdates:attributeUpdates validators:validators];
     });
     
     it(@"Should store attribute update", ^{
-        [[update.attributeUpdate should] equal:attributeUpdate];
+        [[update.attributeUpdates should] equal:attributeUpdates];
     });
     it(@"Should store validators", ^{
         [[update.validators should] equal:validators];

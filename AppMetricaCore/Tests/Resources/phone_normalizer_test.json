@@ -1,0 +1,551 @@
+[
+    {
+        "description": "not correct, empty",
+        "initial": "",
+        "normalized": "",
+        "isValid": false
+    },
+    {
+        "description": "not correct, less than min",
+        "initial": "0",
+        "normalized": "0",
+        "isValid": false
+    },
+    {
+        "description": "not correct, negative number",
+        "initial": "-1",
+        "normalized": "-1",
+        "isValid": false
+    },
+    {
+        "description": "not correct, too long",
+        "initial": "+71234567891011",
+        "normalized": "+71234567891011",
+        "isValid": false
+    },
+    {
+        "description": "not correct, start with +8",
+        "initial": "+89160123456",
+        "normalized": "+89160123456",
+        "isValid": false
+    },
+    {
+        "description": "correct +7 as is",
+        "initial": "+79160123456",
+        "normalized": "+79160123456",
+        "isValid": true
+    },
+    {
+        "description": "correct +7 with spaces",
+        "initial": "+7 916 012 34 56",
+        "normalized": "+79160123456",
+        "isValid": true
+    },
+    {
+        "description": "correct +7 with brackets",
+        "initial": "+7(916)-012-34-56",
+        "normalized": "+79160123456",
+        "isValid": true
+    },
+    {
+        "description": "correct +7 with brackets",
+        "initial": "+7(916) 012 34 56",
+        "normalized": "+79160123456",
+        "isValid": true
+    },
+    {
+        "description": "correct 8 to +7",
+        "initial": "8 (916) 012 34 56",
+        "normalized": "+79160123456",
+        "isValid": true
+    },
+    {
+        "description": "correct 7 wo plus",
+        "initial": "79160123456",
+        "normalized": "+79160123456",
+        "isValid": true
+    },
+    {
+        "description": "allow non russian numbers",
+        "initial": "+998931868848",
+        "normalized": "+998931868848",
+        "isValid": true
+    },
+    {
+        "description": "Kazakhstan number",
+        "initial": "+77771111111",
+        "normalized": "+77771111111",
+        "isValid": true
+    },
+    {
+        "description": "Serbia number",
+        "initial": "+38111111111",
+        "normalized": "+38111111111",
+        "isValid": true
+    },
+    {
+        "description": "Belarus number",
+        "initial": "+375291111111",
+        "normalized": "+375291111111",
+        "isValid": true
+    },
+    {
+        "description": "Turkey number",
+        "initial": "+90-532-012-34-56",
+        "normalized": "+905320123456",
+        "isValid": true
+    },
+    {
+        "description": "German number",
+        "initial": "+4930123456",
+        "normalized": "+4930123456",
+        "isValid": true
+    },
+    {
+        "description": "Poland number",
+        "initial": "+48221111111",
+        "normalized": "+48221111111",
+        "isValid": true
+    },
+    {
+        "skip": true,
+        "description": "invalid phone  // validated by lib phonenumber roules",
+        "initial": "+98765432110",
+        "normalized": "+98765432110",
+        "isValid": false
+    },
+    {
+        "description": "it's a date, not phone",
+        "initial": "2022-01-01",
+        "normalized": "2022-01-01",
+        "isValid": false
+    },
+    {
+        "skip": true,
+        "description": "invalid Kazakhstan number  // validated by lib phonenumber roules",
+        "initial": "+771859539760",
+        "normalized": "+771859539760",
+        "isValid": false
+    },
+    {
+        "description": "number with forbidden chars",
+        "initial": "+7(495) 012-34-56 доб. 1003",
+        "normalized": "+7(495) 012-34-56 доб. 1003",
+        "isValid": false
+    },
+    {
+        "description": "allowed chars with correct number",
+        "initial": "+7((916))0123456",
+        "normalized": "+79160123456",
+        "isValid": true
+    },
+    {
+        "description": "allowed chars with correct number",
+        "initial": "+7--916--012--34--56",
+        "normalized": "+79160123456",
+        "isValid": true
+    },
+    {
+        "description": "allowed chars with correct number",
+        "initial": "----+79160123456-----",
+        "normalized": "+79160123456",
+        "isValid": true
+    },
+    {
+        "description": "allowed chars with correct number",
+        "initial": "+ 79160123456",
+        "normalized": "+79160123456",
+        "isValid": true
+    },
+    {
+        "skip": true,
+        "description": "allowed chars with incorrect number // validated by lib phonenumber roules",
+        "initial": "+7(000)0123456",
+        "normalized": "+7(000)0123456",
+        "isValid": false
+    },
+    {
+        "description": "allowed chars with incorrect number",
+        "initial": "+7--916--87--1--9",
+        "normalized": "+7--916--87--1--9",
+        "isValid": false
+    },
+    {
+        "description": "allowed chars with incorrect number",
+        "initial": "----+793-----",
+        "normalized": "----+793-----",
+        "isValid": false
+    },
+    {
+        "description": "start with bracket",
+        "initial": "(916) 123-45-67",
+        "normalized": "+79161234567",
+        "isValid": true
+    },
+    {
+        "description": "+7 followed by digits only",
+        "initial": "+79160123456",
+        "normalized": "+79160123456",
+        "isValid": true
+    },
+    {
+        "description": "+7 with spaces",
+        "initial": "+7 916 012 34 56",
+        "normalized": "+79160123456",
+        "isValid": true
+    },
+    {
+        "description": "+7 with brackets and dashes",
+        "initial": "+7(916)-012-34-56",
+        "normalized": "+79160123456",
+        "isValid": true
+    },
+    {
+        "description": "+7 with brackets and spaces",
+        "initial": "+7(916) 012 34 56",
+        "normalized": "+79160123456",
+        "isValid": true
+    },
+    {
+        "description": "+7 with grouped last four symbols",
+        "initial": "+7(916) 012 3456",
+        "normalized": "+79160123456",
+        "isValid": true
+    },
+    {
+        "description": "+7 with dash before bracket",
+        "initial": "+7-(916)-012-34-56",
+        "normalized": "+79160123456",
+        "isValid": true
+    },
+    {
+        "description": "+7 with dashes instead of brackets",
+        "initial": "+7-916-012-34-56",
+        "normalized": "+79160123456",
+        "isValid": true
+    },
+    {
+        "description": "7 followed by digits only",
+        "initial": "79160123456",
+        "normalized": "+79160123456",
+        "isValid": true
+    },
+    {
+        "description": "7 with spaces",
+        "initial": "7 916 012 34 56",
+        "normalized": "+79160123456",
+        "isValid": true
+    },
+    {
+        "description": "7 with brackets and dashes",
+        "initial": "7(916)-012-34-56",
+        "normalized": "+79160123456",
+        "isValid": true
+    },
+    {
+        "description": "7 with brackets and spaces",
+        "initial": "7(916) 012 34 56",
+        "normalized": "+79160123456",
+        "isValid": true
+    },
+    {
+        "description": "7 with grouped last four symbols",
+        "initial": "7(916) 012 3456",
+        "normalized": "+79160123456",
+        "isValid": true
+    },
+    {
+        "description": "7 with dash before bracket",
+        "initial": "7-(916)-012-34-56",
+        "normalized": "+79160123456",
+        "isValid": true
+    },
+    {
+        "description": "7 with dashes instead of brackets",
+        "initial": "7-916-012-34-56",
+        "normalized": "+79160123456",
+        "isValid": true
+    },
+    {
+        "description": "8 followed by digits only",
+        "initial": "89160123456",
+        "normalized": "+79160123456",
+        "isValid": true
+    },
+    {
+        "description": "8 with spaces",
+        "initial": "8 916 012 34 56",
+        "normalized": "+79160123456",
+        "isValid": true
+    },
+    {
+        "description": "8 with brackets and dashes",
+        "initial": "8(916)-012-34-56",
+        "normalized": "+79160123456",
+        "isValid": true
+    },
+    {
+        "description": "8 with brackets and spaces",
+        "initial": "8(916) 012 34 56",
+        "normalized": "+79160123456",
+        "isValid": true
+    },
+    {
+        "description": "8 with grouped last four symbols",
+        "initial": "8(916) 012 3456",
+        "normalized": "+79160123456",
+        "isValid": true
+    },
+    {
+        "description": "8 with dash before bracket",
+        "initial": "8-(916)-012-34-56",
+        "normalized": "+79160123456",
+        "isValid": true
+    },
+    {
+        "description": "8 with dashes instead of brackets",
+        "initial": "8-916-012-34-56",
+        "normalized": "+79160123456",
+        "isValid": true
+    },
+    {
+        "description": "10 digits with spaces",
+        "initial": "916 012 34 56",
+        "normalized": "+79160123456",
+        "isValid": true
+    },
+    {
+        "description": "10 digits without spaces",
+        "initial": "9160123456",
+        "normalized": "+79160123456",
+        "isValid": true
+    },
+    {
+        "description": "10 digits with brackets and dashes",
+        "initial": "(916)-012-34-56",
+        "normalized": "+79160123456",
+        "isValid": true
+    },
+    {
+        "description": "10 digits with brackets and spaces",
+        "initial": "(916) 012 34 56",
+        "normalized": "+79160123456",
+        "isValid": true
+    },
+    {
+        "description": "10 digits grouped last four symbols",
+        "initial": "(916) 012 3456",
+        "normalized": "+79160123456",
+        "isValid": true
+    },
+    {
+        "description": "10 digits when code starts with 4",
+        "initial": "416-012-34-56",
+        "normalized": "+74160123456",
+        "isValid": true
+    },
+    {
+        "description": "invalid - start with +8 with dashes and 10 digits",
+        "initial": "+8(916)-012-34-56",
+        "normalized": "+8(916)-012-34-56",
+        "isValid": false
+    },
+    {
+        "description": "invalid - starts with 0",
+        "initial": "09160123456",
+        "normalized": "09160123456",
+        "isValid": false
+    },
+    {
+        "description": "invalid - starts with +0",
+        "initial": "+09160123456",
+        "normalized": "+09160123456",
+        "isValid": false
+    },
+    {
+        "description": "invalid - starts with 00",
+        "initial": "009160123456",
+        "normalized": "009160123456",
+        "isValid": false
+    },
+    {
+        "description": "invalid - starts with +00",
+        "initial": "+009160123456",
+        "normalized": "+009160123456",
+        "isValid": false
+    },
+    {
+        "description": "invalid - <10 digits",
+        "initial": "160123456",
+        "normalized": "160123456",
+        "isValid": false
+    },
+    {
+        "description": "invalid - >13 digits",
+        "initial": "12832691601234",
+        "normalized": "12832691601234",
+        "isValid": false
+    },
+    {
+        "description": "invalid - with letters",
+        "initial": "16012d456",
+        "normalized": "16012d456",
+        "isValid": false
+    },
+    {
+        "description": "invalid - with *",
+        "initial": "*16012456",
+        "normalized": "*16012456",
+        "isValid": false
+    },
+    {
+        "description": "invalid - <10 digits with dashes",
+        "initial": "416-01-34-56",
+        "normalized": "416-01-34-56",
+        "isValid": false
+    },
+    {
+        "description": "invalid - <10 digits with brackets, spaces and dashes",
+        "initial": "(98) -012-34-56",
+        "normalized": "(98) -012-34-56",
+        "isValid": false
+    },
+    {
+        "description": "invalid - <10 digits",
+        "initial": "16012456",
+        "normalized": "16012456",
+        "isValid": false
+    },
+    {
+        "description": "invalid - 14 digits",
+        "initial": "+1482-232-232-15-45",
+        "normalized": "+1482-232-232-15-45",
+        "isValid": false
+    },
+    {
+        "description": "foreign with 1-symbol code with +",
+        "initial": "+12012083849",
+        "normalized": "+12012083849",
+        "isValid": true
+    },
+    {
+        "description": "foreign with 1-symbol code plus brackets and spaces",
+        "initial": "+1 (201) 208-38-49",
+        "normalized": "+12012083849",
+        "isValid": true
+    },
+    {
+        "description": "foreign with 1-symbol code",
+        "initial": "12012083849",
+        "normalized": "+12012083849",
+        "isValid": true
+    },
+    {
+        "description": "foreign with 1-symbol code and spaces",
+        "initial": "+1 201 208  38 49",
+        "normalized": "+12012083849",
+        "isValid": true
+    },
+    {
+        "description": "foreign with 2-symbol code with +",
+        "initial": "+201000000167",
+        "normalized": "+201000000167",
+        "isValid": true
+    },
+    {
+        "description": "foreign with 2-symbol code",
+        "initial": "201000000167",
+        "normalized": "+201000000167",
+        "isValid": true
+    },
+    {
+        "description": "foreign with 2-symbol code with spaces",
+        "initial": "20 100 000 01 67",
+        "normalized": "+201000000167",
+        "isValid": true
+    },
+    {
+        "description": "foreign with 2-symbol code with + and spaces",
+        "initial": "+81 701 188 96 11",
+        "normalized": "+817011889611",
+        "isValid": true
+    },
+    {
+        "description": "foreign with 2-symbol code with + and dashes",
+        "initial": "+81-701-188-96-11",
+        "normalized": "+817011889611",
+        "isValid": true
+    },
+    {
+        "description": "foreign with 2-symbol code with dashes",
+        "initial": "81-701-188-96-11",
+        "normalized": "+817011889611",
+        "isValid": true
+    },
+    {
+        "description": "foreign with 2-symbol code with spaces",
+        "initial": "81 701 188 96 11",
+        "normalized": "+817011889611",
+        "isValid": true
+    },
+    {
+        "description": "foreign with 2-symbol code with brackets, spaces, dashes, and +",
+        "initial": "+81(701) -188 - 96 - 11",
+        "normalized": "+817011889611",
+        "isValid": true
+    },
+    {
+        "description": "foreign with 3-symbol with + and spaces",
+        "initial": "+882 232 232 15 45",
+        "normalized": "+8822322321545",
+        "isValid": true
+    },
+    {
+        "description": "foreign with 3-symbol with brackets, spaces, dashes, and +",
+        "initial": "+882(232) 232 -15- 45",
+        "normalized": "+8822322321545",
+        "isValid": true
+    },
+    {
+        "description": "foreign with 3-symbol with plus and dashes",
+        "initial": "+882-232-232-15-45",
+        "normalized": "+8822322321545",
+        "isValid": true
+    },
+    {
+        "description": "foreign with 3-symbol with spaces",
+        "initial": "882 232 232 15 45",
+        "normalized": "+8822322321545",
+        "isValid": true
+    },
+    {
+        "description": "foreign with 3-symbol with + and spaces",
+        "initial": "+977 988 943 6282",
+        "normalized": "+9779889436282",
+        "isValid": true
+    },
+    {
+        "description": "foreign with 3-symbol with +, brackets and spaces",
+        "initial": "+977(988) 943 6282",
+        "normalized": "+9779889436282",
+        "isValid": true
+    },
+    {
+        "description": "foreign with 3-symbol with + and dashes",
+        "initial": "+977-988-943-6282",
+        "normalized": "+9779889436282",
+        "isValid": true
+    },
+    {
+        "description": "foreign with 3-symbol with spaces",
+        "initial": "977 988 943 6282",
+        "normalized": "+9779889436282",
+        "isValid": true
+    },
+    {
+        "description": "foreign with 3-symbol with brackets",
+        "initial": "977(988)9436282",
+        "normalized": "+9779889436282",
+        "isValid": true
+    }
+]

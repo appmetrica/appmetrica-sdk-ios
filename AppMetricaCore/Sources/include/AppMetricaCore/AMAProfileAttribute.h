@@ -263,6 +263,66 @@ NS_SWIFT_NAME(CustomBoolAttribute)
 
 @end
 
+/**
+ * Attribute for setting the user's phone number hash.
+ * The phone values will be normalized and hashed using SHA-256 before sending.
+ * Supports setting multiple phone values (up to 10).
+ */
+NS_SWIFT_NAME(FirstPartyDataPhoneSha256Attribute)
+@protocol AMAFirstPartyDataPhoneSha256Attribute <NSObject>
+
+/** Sets multiple phone values for the attribute.
+ The values will be normalized and hashed using SHA-256 before sending.
+ Maximum number of values is limited to 10.
+ Drops any values above the limit.
+ 
+ @param values phone values to set
+ @return The `AMAUserProfileUpdate` object
+ */
+- (AMAUserProfileUpdate *)withPhoneValues:(NSArray<NSString *> *)values;
+
+@end
+
+/**
+ * Attribute for setting the user's email address hash.
+ * The email values will be normalized and hashed using SHA-256 before sending.
+ * Supports setting multiple email values (up to 10).
+ */
+NS_SWIFT_NAME(FirstPartyDataEmailSha256Attribute)
+@protocol AMAFirstPartyDataEmailSha256Attribute <NSObject>
+
+/** Sets multiple email values for the attribute from an iterable.
+ The values will be normalized and hashed using SHA-256 before sending.
+ Maximum number of values is limited to 10.
+ Drops any values above the limit.
+ 
+ @param values email values to set
+ @return The `AMAUserProfileUpdate` object
+ */
+- (AMAUserProfileUpdate *)withEmailValues:(NSArray<NSString *> *)values;
+
+@end
+
+/**
+ * Attribute for setting the user's Telegram login hash.
+ * The Telegram login values will be normalized and hashed using SHA-256 before sending.
+ * Supports setting multiple Telegram login values (up to 10).
+ */
+NS_SWIFT_NAME(FirstPartyDataTelegramLoginSha256Attribute)
+@protocol AMAFirstPartyDataTelegramLoginSha256Attribute <NSObject>
+
+/** Sets multiple Telegram login values for the attribute.
+ The values will be normalized and hashed using SHA-256 before sending.
+ Maximum number of values is limited to 10.
+ Drops any values above the limit.
+
+ @param values Telegram login values to set
+ @return The `AMAUserProfileUpdate` object
+ */
+- (AMAUserProfileUpdate *)withTelegramLoginValues:(NSArray<NSString *> *)values;
+
+@end
+
 /** The attribute class
  Attribute is a property of the user profile.
  You can use predefined attributes (e.g. name, gender, etc.) or create your own.
@@ -295,6 +355,27 @@ NS_SWIFT_NAME(ProfileAttribute)
  @return The `AMANotificationsEnabledAttribute` object
  */
 + (id<AMANotificationsEnabledAttribute>)notificationsEnabled;
+
+/** Creates an attribute for setting the user's phone number hash.
+ The value will be normalized and hashed using SHA-256 before sending.
+
+ @return The `AMAFirstPartyDataPhoneSha256Attribute` object
+ */
++ (id<AMAFirstPartyDataPhoneSha256Attribute>)phoneHash;
+
+/** Creates an attribute for setting the user's email address hash.
+ The value will be normalized and hashed using SHA-256 before sending.
+
+ @return The `AMAFirstPartyDataEmailSha256Attribute` object
+ */
++ (id<AMAFirstPartyDataEmailSha256Attribute>)emailHash;
+
+/** Creates an attribute for setting the user's Telegram login hash.
+ The value will be normalized and hashed using SHA-256 before sending.
+
+ @return The `AMAFirstPartyDataTelegramLoginSha256Attribute` object
+ */
++ (id<AMAFirstPartyDataTelegramLoginSha256Attribute>)telegramLoginHash;
 
 /** Creates a custom string attribute.
 

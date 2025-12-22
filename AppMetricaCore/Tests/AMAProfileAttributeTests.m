@@ -12,6 +12,10 @@
 #import "AMACustomAttributeUserProfileUpdateProvider.h"
 #import "AMAStringAttributeTruncationProvider.h"
 #import "AMAStringAttributeTruncatorFactory.h"
+#import "AMAFirstPartyDataEmailSha256Attribute.h"
+#import "AMAFirstPartyDataPhoneSha256Attribute.h"
+#import "AMAFirstPartyDataTelegramLoginSha256Attribute.h"
+#import "AMAPredefinedCompositeAttributeUserProfileUpdateProvider.h"
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
 
 SPEC_BEGIN(AMAProfileAttributeTests)
@@ -225,6 +229,82 @@ describe(@"AMAProfileAttribute", ^{
             });
             it(@"Should return created attribute", ^{
                 [[(NSObject *)[AMAProfileAttribute customBool:customName] should] equal:boolAttribute];
+            });
+        });
+    });
+
+    context(@"First Party Data SHA256 Attributes", ^{
+        AMAPredefinedCompositeAttributeUserProfileUpdateProvider *__block compositeUpdateProvider = nil;
+        AMAStringAttributeTruncationProvider *__block truncationProvider = nil;
+        AMAFirstPartyDataEmailSha256Attribute *__block emailAttribute = nil;
+        AMAFirstPartyDataPhoneSha256Attribute *__block phoneAttribute = nil;
+        AMAFirstPartyDataTelegramLoginSha256Attribute *__block telegramAttribute = nil;
+
+        beforeEach(^{
+            compositeUpdateProvider = [AMAPredefinedCompositeAttributeUserProfileUpdateProvider stubbedNullMockForDefaultInit];
+            truncationProvider = [AMAStringAttributeTruncationProvider nullMock];
+            emailAttribute = [AMAFirstPartyDataEmailSha256Attribute stubbedNullMockForInit:@selector(initWithUserProfileUpdateProvider:truncationProvider:)];
+            phoneAttribute = [AMAFirstPartyDataPhoneSha256Attribute stubbedNullMockForInit:@selector(initWithUserProfileUpdateProvider:truncationProvider:)];
+            telegramAttribute = [AMAFirstPartyDataTelegramLoginSha256Attribute stubbedNullMockForInit:@selector(initWithUserProfileUpdateProvider:truncationProvider:)];
+        });
+        afterEach(^{
+            [AMAPredefinedCompositeAttributeUserProfileUpdateProvider clearStubs];
+            [AMAFirstPartyDataEmailSha256Attribute clearStubs];
+            [AMAFirstPartyDataPhoneSha256Attribute clearStubs];
+            [AMAFirstPartyDataTelegramLoginSha256Attribute clearStubs];
+        });
+        
+        context(@"Email hash", ^{
+            beforeEach(^{
+                [AMAStringAttributeTruncatorFactory stub:@selector(customStringTruncationProvider) andReturn:truncationProvider];
+            });
+            afterEach(^{
+                [AMAStringAttributeTruncatorFactory clearStubs];
+            });
+            
+            it(@"Should create email hash attribute", ^{
+                [[emailAttribute should] receive:@selector(initWithUserProfileUpdateProvider:truncationProvider:)
+                                   withArguments:compositeUpdateProvider, truncationProvider];
+                [AMAProfileAttribute emailHash];
+            });
+            it(@"Should return created attribute", ^{
+                [[(NSObject *)[AMAProfileAttribute emailHash] should] equal:emailAttribute];
+            });
+        });
+        
+        context(@"Phone hash", ^{
+            beforeEach(^{
+                [AMAStringAttributeTruncatorFactory stub:@selector(customStringTruncationProvider) andReturn:truncationProvider];
+            });
+            afterEach(^{
+                [AMAStringAttributeTruncatorFactory clearStubs];
+            });
+            
+            it(@"Should create phone hash attribute", ^{
+                [[phoneAttribute should] receive:@selector(initWithUserProfileUpdateProvider:truncationProvider:)
+                                   withArguments:compositeUpdateProvider, truncationProvider];
+                [AMAProfileAttribute phoneHash];
+            });
+            it(@"Should return created attribute", ^{
+                [[(NSObject *)[AMAProfileAttribute phoneHash] should] equal:phoneAttribute];
+            });
+        });
+        
+        context(@"Telegram login hash", ^{
+            beforeEach(^{
+                [AMAStringAttributeTruncatorFactory stub:@selector(customStringTruncationProvider) andReturn:truncationProvider];
+            });
+            afterEach(^{
+                [AMAStringAttributeTruncatorFactory clearStubs];
+            });
+            
+            it(@"Should create telegram login hash attribute", ^{
+                [[telegramAttribute should] receive:@selector(initWithUserProfileUpdateProvider:truncationProvider:)
+                                      withArguments:compositeUpdateProvider, truncationProvider];
+                [AMAProfileAttribute telegramLoginHash];
+            });
+            it(@"Should return created attribute", ^{
+                [[(NSObject *)[AMAProfileAttribute telegramLoginHash] should] equal:telegramAttribute];
             });
         });
     });

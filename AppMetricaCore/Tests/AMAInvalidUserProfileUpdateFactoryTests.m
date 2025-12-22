@@ -17,7 +17,7 @@ describe(@"AMAInvalidUserProfileUpdateFactory", ^{
     AMAProhibitingAttributeUpdateValidator *__block validator = nil;
 
     beforeEach(^{
-        update = [AMAUserProfileUpdate stubbedNullMockForInit:@selector(initWithAttributeUpdate:validators:)];
+        update = [AMAUserProfileUpdate stubbedNullMockForInit:@selector(initWithAttributeUpdates:validators:)];
         validator = [AMAProhibitingAttributeUpdateValidator stubbedNullMockForInit:@selector(initWithLogBlock:)];
         [validator stub:@selector(initWithLogBlock:) withBlock:^id(NSArray *params) {
             logBlock = params[0];
@@ -44,7 +44,7 @@ describe(@"AMAInvalidUserProfileUpdateFactory", ^{
             logBlock(nil);
         });
         it(@"Should create user profile update", ^{
-            [[update should] receive:@selector(initWithAttributeUpdate:validators:)
+            [[update should] receive:@selector(initWithAttributeUpdates:validators:)
                        withArguments:nil, @[ validator ]];
             [AMAInvalidUserProfileUpdateFactory invalidDateUpdateWithAttributeName:name];
         });
@@ -67,7 +67,7 @@ describe(@"AMAInvalidUserProfileUpdateFactory", ^{
             logBlock(nil);
         });
         it(@"Should create user profile update", ^{
-            [[update should] receive:@selector(initWithAttributeUpdate:validators:)
+            [[update should] receive:@selector(initWithAttributeUpdates:validators:)
                        withArguments:nil, @[ validator ]];
             [AMAInvalidUserProfileUpdateFactory invalidGenderTypeUpdateWithAttributeName:name];
         });

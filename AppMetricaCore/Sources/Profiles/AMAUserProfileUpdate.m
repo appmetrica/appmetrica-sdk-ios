@@ -4,12 +4,12 @@
 
 @implementation AMAUserProfileUpdate
 
-- (instancetype)initWithAttributeUpdate:(AMAAttributeUpdate *)attributeUpdate
-                             validators:(NSArray<id<AMAAttributeUpdateValidating>> *)validators
+- (instancetype)initWithAttributeUpdates:(NSArray<AMAAttributeUpdate *> *)attributeUpdates
+                              validators:(NSArray<id<AMAAttributeUpdateValidating>> *)validators
 {
     self = [super init];
     if (self != nil) {
-        _attributeUpdate = attributeUpdate;
+        _attributeUpdates = attributeUpdates;
         _validators = validators;
     }
     return self;

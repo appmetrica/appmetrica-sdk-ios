@@ -20,7 +20,7 @@ describe(@"AMAPredefinedAttributeUserProfileUpdateProvider", ^{
 
     beforeEach(^{
         valueUpdate = [KWMock nullMockForProtocol:@protocol(AMAAttributeValueUpdate)];
-        userProfileUpdate = [AMAUserProfileUpdate stubbedNullMockForInit:@selector(initWithAttributeUpdate:validators:)];
+        userProfileUpdate = [AMAUserProfileUpdate stubbedNullMockForInit:@selector(initWithAttributeUpdates:validators:)];
         attributeUpdate = [AMAAttributeUpdate stubbedNullMockForInit:@selector(initWithName:type:custom:valueUpdate:)];
         provider = [[AMAPredefinedAttributeUserProfileUpdateProvider alloc] init];
     });
@@ -35,8 +35,8 @@ describe(@"AMAPredefinedAttributeUserProfileUpdateProvider", ^{
         [provider updateWithAttributeName:name type:type valueUpdate:valueUpdate];
     });
     it(@"Should create user profile update", ^{
-        [[userProfileUpdate should] receive:@selector(initWithAttributeUpdate:validators:)
-                              withArguments:attributeUpdate, @[]];
+        [[userProfileUpdate should] receive:@selector(initWithAttributeUpdates:validators:)
+                              withArguments:@[attributeUpdate], @[]];
         [provider updateWithAttributeName:name type:type valueUpdate:valueUpdate];
     });
     it(@"Should return update", ^{

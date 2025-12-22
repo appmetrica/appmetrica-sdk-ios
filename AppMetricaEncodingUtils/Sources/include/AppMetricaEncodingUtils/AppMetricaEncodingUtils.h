@@ -5,6 +5,7 @@
     #import "AMACompositeDataEncoder.h"
     #import "AMADynamicVectorAESCrypter.h"
     #import "AMAGZipDataEncoder.h"
+    #import "AMAHashUtility.h"
     #import "AMARSAAESCrypter.h"
     #import "AMARSACrypter.h"
     #import "AMARSAKey.h"
@@ -16,6 +17,7 @@
     #import <AppMetricaEncodingUtils/AMACompositeDataEncoder.h>
     #import <AppMetricaEncodingUtils/AMADynamicVectorAESCrypter.h>
     #import <AppMetricaEncodingUtils/AMAGZipDataEncoder.h>
+    #import <AppMetricaEncodingUtils/AMAHashUtility.h>
     #import <AppMetricaEncodingUtils/AMARSAAESCrypter.h>
     #import <AppMetricaEncodingUtils/AMARSACrypter.h>
     #import <AppMetricaEncodingUtils/AMARSAKey.h>

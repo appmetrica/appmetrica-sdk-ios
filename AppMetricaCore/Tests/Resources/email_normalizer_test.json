@@ -1,0 +1,435 @@
+[
+    {
+        "description": "yandex like tld, not yandex",
+        "initial": "test@01yandex.kz",
+        "normalized": "test@01yandex.kz",
+        "isValid": true
+    },
+    {
+        "description": "Incorrect email - empty",
+        "initial": "@a.ru",
+        "normalized": "@a.ru",
+        "isValid": false
+    },
+    {
+        "description": "Incorrect email - just dot",
+        "initial": ".@a.ru",
+        "normalized": ".@a.ru",
+        "isValid": false
+    },
+    {
+        "description": "gmail alias",
+        "initial": "test@googlemail.com",
+        "normalized": "test@gmail.com",
+        "isValid": true
+    },
+    {
+        "description": "yandex tld by",
+        "initial": "test@yandex.by",
+        "normalized": "test@yandex.ru",
+        "isValid": true
+    },
+    {
+        "description": "yandex tld uz",
+        "initial": "test@yandex.uz",
+        "normalized": "test@yandex.ru",
+        "isValid": true
+    },
+    {
+        "description": "yandex tld kz",
+        "initial": "test@yandex.kz",
+        "normalized": "test@yandex.ru",
+        "isValid": true
+    },
+    {
+        "description": "yandex tld com",
+        "initial": "test@yandex.com",
+        "normalized": "test@yandex.ru",
+        "isValid": true
+    },
+    {
+        "description": "yandex tld com.tr",
+        "initial": "test@yandex.com.tr",
+        "normalized": "test@yandex.ru",
+        "isValid": true
+    },
+    {
+        "description": "yandex tld com.ge",
+        "initial": "test@yandex.com.ge",
+        "normalized": "test@yandex.ru",
+        "isValid": true
+    },
+    {
+        "description": "yandex tld fr",
+        "initial": "test@yandex.fr",
+        "normalized": "test@yandex.ru",
+        "isValid": true
+    },
+    {
+        "description": "yandex tld az",
+        "initial": "test@yandex.az",
+        "normalized": "test@yandex.ru",
+        "isValid": true
+    },
+    {
+        "description": "yandex tld com.am",
+        "initial": "test@yandex.com.am",
+        "normalized": "test@yandex.ru",
+        "isValid": true
+    },
+    {
+        "description": "yandex tld co.il",
+        "initial": "test@yandex.co.il",
+        "normalized": "test@yandex.ru",
+        "isValid": true
+    },
+    {
+        "description": "yandex tld co.il",
+        "initial": "test@yandex.co.il",
+        "normalized": "test@yandex.ru",
+        "isValid": true
+    },
+    {
+        "description": "yandex tld kg",
+        "initial": "test@yandex.kg",
+        "normalized": "test@yandex.ru",
+        "isValid": true
+    },
+    {
+        "description": "yandex tld lt",
+        "initial": "test@yandex.lt",
+        "normalized": "test@yandex.ru",
+        "isValid": true
+    },
+    {
+        "description": "yandex tld lv",
+        "initial": "test@yandex.lv",
+        "normalized": "test@yandex.ru",
+        "isValid": true
+    },
+    {
+        "description": "yandex tld md",
+        "initial": "test@yandex.md",
+        "normalized": "test@yandex.ru",
+        "isValid": true
+    },
+    {
+        "description": "yandex tld tj",
+        "initial": "test@yandex.tj",
+        "normalized": "test@yandex.ru",
+        "isValid": true
+    },
+    {
+        "description": "yandex tld tm",
+        "initial": "test@yandex.tm",
+        "normalized": "test@yandex.ru",
+        "isValid": true
+    },
+    {
+        "description": "yandex tld ee",
+        "initial": "test@yandex.ee",
+        "normalized": "test@yandex.ru",
+        "isValid": true
+    },
+    {
+        "description": "yandex short",
+        "initial": "test@ya.ru",
+        "normalized": "test@yandex.ru",
+        "isValid": true
+    },
+    {
+        "description": "yandex tld com.ru",
+        "initial": "test@yandex.com.ru",
+        "normalized": "test@yandex.ru",
+        "isValid": true
+    },
+    {
+        "description": "non ascii string",
+        "initial": "строка-с-кирилицей@яндекс.рф",
+        "normalized": "строка-с-кирилицей@яндекс.рф",
+        "isValid": false
+    },
+    {
+        "description": "plus suffix",
+        "initial": "test+suffix@email.com",
+        "normalized": "test@email.com",
+        "isValid": true
+    },
+    {
+        "description": "plus prefix",
+        "initial": "+71231234567@e.com",
+        "normalized": "71231234567@e.com",
+        "isValid": true
+    },
+    {
+        "description": "plus multi prefix",
+        "initial": "++++++++++++++++abc-def@example.com",
+        "normalized": "abc-def@example.com",
+        "isValid": true
+    },
+    {
+        "description": "dots for gmail alias",
+        "initial": "test.with.dots.g@googlemail.com",
+        "normalized": "testwithdotsg@gmail.com",
+        "isValid": true
+    },
+    {
+        "description": "dots for gmail",
+        "initial": "test.with.dots.g@gMaIl.com",
+        "normalized": "testwithdotsg@gmail.com",
+        "isValid": true
+    },
+    {
+        "description": "dots for yandex",
+        "initial": "test.with.dots.g@YaNdEx.com",
+        "normalized": "test-with-dots-g@yandex.ru",
+        "isValid": true
+    },
+    {
+        "description": "multi dots for gmail",
+        "initial": "test...with...dots...g@gMaIl.com",
+        "normalized": "test...with...dots...g@gmail.com",
+        "isValid": false
+    },
+    {
+        "description": "multi dots for yandex",
+        "initial": "test...with...dots...g@yanDex.com",
+        "normalized": "test...with...dots...g@yandex.com",
+        "isValid": false
+    },
+    {
+        "description": "invalid 1",
+        "initial": "plainaddress",
+        "normalized": "plainaddress",
+        "isValid": false
+    },
+    {
+        "description": "invalid 2",
+        "initial": "#@%^%#${'$'}@#${'$'}@#.com",
+        "normalized": "#@%^%#${'$'}@#${'$'}@#.com",
+        "isValid": false
+    },
+    {
+        "description": "invalid 3",
+        "initial": "@example.com",
+        "normalized": "@example.com",
+        "isValid": false
+    },
+    {
+        "description": "invalid 4",
+        "initial": "Joe Smith <email@example.com>",
+        "normalized": "joe smith <email@example.com>",
+        "isValid": false
+    },
+    {
+        "description": "invalid 5",
+        "initial": "email.example.com",
+        "normalized": "email.example.com",
+        "isValid": false
+    },
+    {
+        "description": "invalid 6",
+        "initial": "email@example@example.com",
+        "normalized": "email@example@example.com",
+        "isValid": false
+    },
+    {
+        "description": "invalid 7",
+        "initial": ".email@example.com",
+        "normalized": ".email@example.com",
+        "isValid": false
+    },
+    {
+        "description": "invalid 8",
+        "initial": "email.@example.com",
+        "normalized": "email.@example.com",
+        "isValid": false
+    },
+    {
+        "description": "invalid 9",
+        "initial": "email..email@example.com",
+        "normalized": "email..email@example.com",
+        "isValid": false
+    },
+    {
+        "description": "invalid 10",
+        "initial": "あいうえお@example.com",
+        "normalized": "あいうえお@example.com",
+        "isValid": false
+    },
+    {
+        "description": "invalid 11",
+        "initial": "email@example.com (Joe Smith)",
+        "normalized": "email@example.com (joe smith)",
+        "isValid": false
+    },
+    {
+        "description": "invalid 12",
+        "initial": "email@example",
+        "normalized": "email@example",
+        "isValid": false
+    },
+    {
+        "description": "invalid 13",
+        "initial": "email@-example.com",
+        "normalized": "email@-example.com",
+        "isValid": false
+    },
+    {
+        "description": "invalid 14",
+        "initial": "email@111.222.333.44444",
+        "normalized": "email@111.222.333.44444",
+        "isValid": false
+    },
+    {
+        "description": "invalid 15",
+        "initial": "email@example..com",
+        "normalized": "email@example..com",
+        "isValid": false
+    },
+    {
+        "description": "invalid 16",
+        "initial": "Abc..123@example.com",
+        "normalized": "abc..123@example.com",
+        "isValid": false
+    },
+    {
+        "description": "invalid 17",
+        "initial": "\"(),:;<>[\\]@example.com",
+        "normalized": "\"(),:;<>[\\]@example.com",
+        "isValid": false
+    },
+    {
+        "description": "invalid 18",
+        "initial": "just\"not\"right@example.com",
+        "normalized": "just\"not\"right@example.com",
+        "isValid": false
+    },
+    {
+        "description": "invalid 19",
+        "initial": "this\\ is\"really\"not\\allowed@example.com",
+        "normalized": "this\\ is\"really\"not\\allowed@example.com",
+        "isValid": false
+    },
+    {
+        "description": "valid 1",
+        "initial": "email@example.com",
+        "normalized": "email@example.com",
+        "isValid": true
+    },
+    {
+        "description": "valid 2",
+        "initial": "firstname.lastname@example.com",
+        "normalized": "firstname.lastname@example.com",
+        "isValid": true
+    },
+    {
+        "description": "valid 3",
+        "initial": "email@subdomain.example.com",
+        "normalized": "email@subdomain.example.com",
+        "isValid": true
+    },
+    {
+        "description": "valid 4",
+        "initial": "firstname+lastname@example.com",
+        "normalized": "firstname@example.com",
+        "isValid": true
+    },
+    {
+        "description": "valid 5",
+        "initial": "\"email\"@example.com",
+        "normalized": "\"email\"@example.com",
+        "isValid": true
+    },
+    {
+        "description": "valid 6",
+        "initial": "1234567890@example.com",
+        "normalized": "1234567890@example.com",
+        "isValid": true
+    },
+    {
+        "description": "valid 7",
+        "initial": "email@example-one.com",
+        "normalized": "email@example-one.com",
+        "isValid": true
+    },
+    {
+        "description": "valid 8",
+        "initial": "_______@example.com",
+        "normalized": "_______@example.com",
+        "isValid": true
+    },
+    {
+        "description": "valid 9",
+        "initial": "email@example.name",
+        "normalized": "email@example.name",
+        "isValid": true
+    },
+    {
+        "description": "valid 10",
+        "initial": "email@example.museum",
+        "normalized": "email@example.museum",
+        "isValid": true
+    },
+    {
+        "description": "valid 11",
+        "initial": "email@example.co.jp",
+        "normalized": "email@example.co.jp",
+        "isValid": true
+    },
+    {
+        "description": "valid 12",
+        "initial": "firstname-lastname@example.com",
+        "normalized": "firstname-lastname@example.com",
+        "isValid": true
+    },
+    {
+        "description": "valid 13",
+        "initial": "much.\"more\\ unusual\"@example.com",
+        "normalized": "much.\"more\\ unusual\"@example.com",
+        "isValid": true
+    },
+    {
+        "description": "valid 14",
+        "initial": "very.unusual.\"@\".unusual.com@example.com",
+        "normalized": "very.unusual.\"@\".unusual.com@example.com",
+        "isValid": true
+    },
+    {
+        "description": "valid 15",
+        "initial": "very.\"(),:;<>[]\".VERY.\"very@\\ very\".unusual@strange.example.com",
+        "normalized": "very.\"(),:;<>[]\".very.\"very@\\ very\".unusual@strange.example.com",
+        "isValid": true
+    },
+    {
+        "description": "valid 16",
+        "initial": "279341085&utm_content=test@yandex.ru",
+        "normalized": "279341085&utm_content=test@yandex.ru",
+        "isValid": true
+    },
+    {
+        "description": "valid ok domain",
+        "initial": "a@b.co",
+        "normalized": "a@b.co",
+        "isValid": true
+    },
+    {
+        "description": "invalid bad domain",
+        "initial": "a@b.c",
+        "normalized": "a@b.c",
+        "isValid": false
+    },
+    {
+        "skip": true,
+        "description": "plus inside quote no trim",
+        "initial": "much.\"more\\ unusual+with-plus-non-trim\".a+with-plus-trim@example.com",
+        "normalized": "much.\"more\\ unusual+with-plus-non-trim\".a@example.com",
+        "isValid": true
+    },
+    {
+        "description": "plus before quote will trim",
+        "initial": "much.trim+x.\"more\\ unusual+with-plus-non-trim\".a+with-plus-trim@example.com",
+        "normalized": "much.trim@example.com",
+        "isValid": true
+    }
+]

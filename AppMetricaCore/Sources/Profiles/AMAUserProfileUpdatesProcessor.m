@@ -30,11 +30,13 @@
     return self;
 }
 
-- (BOOL)validateUserProfileUpdate:(AMAUserProfileUpdate *)update model:(AMAUserProfileModel *)model
+- (BOOL)validateUserProfileAttributeUpdate:(AMAAttributeUpdate *)update
+                                validators:(NSArray <id<AMAAttributeUpdateValidating>> *)validators
+                                     model:(AMAUserProfileModel *)model
 {
     BOOL isValid = YES;
-    for (id<AMAAttributeUpdateValidating> validator in update.validators) {
-        if ([validator validateUpdate:update.attributeUpdate model:model] == NO) {
+    for (id<AMAAttributeUpdateValidating> validator in validators) {
+        if ([validator validateUpdate:update model:model] == NO) {
             isValid = NO;
             break;
         }
@@ -46,9 +48,13 @@
 {
     BOOL isAnyAttributeApplied = NO;
     for (AMAUserProfileUpdate *update in updates) {
-        if ([self validateUserProfileUpdate:update model:model]) {
-            [update.attributeUpdate applyToModel:model];
-            isAnyAttributeApplied = YES;
+        for (AMAAttributeUpdate *innerUpdate in update.attributeUpdates) {
+            if ([self validateUserProfileAttributeUpdate:innerUpdate
+                                              validators:update.validators
+                                                   model:model]) {
+                [innerUpdate applyToModel:model];
+                isAnyAttributeApplied = YES;
+            }
         }
     }
     return isAnyAttributeApplied;

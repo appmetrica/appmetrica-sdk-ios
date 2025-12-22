@@ -10,6 +10,10 @@
 #import "AMAPredefinedAttributeUserProfileUpdateProvider.h"
 #import "AMACustomAttributeUserProfileUpdateProvider.h"
 #import "AMAStringAttributeTruncatorFactory.h"
+#import "AMAFirstPartyDataPhoneSha256Attribute.h"
+#import "AMAFirstPartyDataEmailSha256Attribute.h"
+#import "AMAFirstPartyDataTelegramLoginSha256Attribute.h"
+#import "AMAPredefinedCompositeAttributeUserProfileUpdateProvider.h"
 
 @implementation AMAProfileAttribute
 
@@ -21,6 +25,11 @@
 + (id<AMAUserProfileUpdateProviding>)customAttributeUserProfileUpdateProvider
 {
     return [[AMACustomAttributeUserProfileUpdateProvider alloc] init];
+}
+
++ (id<AMACompositeUserProfileUpdateProviding>)predefinedCompositeAttributeUserProfileUpdateProvider
+{
+    return [[AMAPredefinedCompositeAttributeUserProfileUpdateProvider alloc] init];
 }
 
 + (id<AMANameAttribute>)name
@@ -52,6 +61,25 @@
 {
     return [[AMABoolAttribute alloc] initWithName:[AMAAttributeNameProvider notificationsEnabled]
                         userProfileUpdateProvider:[self predefinedAttributeUserProfileUpdateProvider]];
+}
+
+
++ (id<AMAFirstPartyDataPhoneSha256Attribute>)phoneHash
+{
+    return [[AMAFirstPartyDataPhoneSha256Attribute alloc] initWithUserProfileUpdateProvider:[self predefinedCompositeAttributeUserProfileUpdateProvider]
+                                                                         truncationProvider:[AMAStringAttributeTruncatorFactory customStringTruncationProvider]];
+}
+
++ (id<AMAFirstPartyDataEmailSha256Attribute>)emailHash
+{
+    return [[AMAFirstPartyDataEmailSha256Attribute alloc] initWithUserProfileUpdateProvider:[self predefinedCompositeAttributeUserProfileUpdateProvider]
+                                                                         truncationProvider:[AMAStringAttributeTruncatorFactory customStringTruncationProvider]];
+}
+
++ (id<AMAFirstPartyDataTelegramLoginSha256Attribute>)telegramLoginHash
+{
+    return [[AMAFirstPartyDataTelegramLoginSha256Attribute alloc] initWithUserProfileUpdateProvider:[self predefinedCompositeAttributeUserProfileUpdateProvider]
+                                                                                 truncationProvider:[AMAStringAttributeTruncatorFactory customStringTruncationProvider]];
 }
 
 + (id<AMACustomStringAttribute>)customString:(NSString *)name

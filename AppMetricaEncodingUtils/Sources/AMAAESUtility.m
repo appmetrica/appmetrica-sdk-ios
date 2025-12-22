@@ -48,10 +48,7 @@
 
 + (NSData *)sha256_ivWithSource:(NSString *)sourceString
 {
-    const char *pointer = [sourceString UTF8String];
-    unsigned char sha256Buffer[CC_SHA256_DIGEST_LENGTH];
-    CC_SHA256(pointer, (CC_LONG)strlen(pointer), sha256Buffer);
-    return [NSData dataWithBytes:sha256Buffer length:CC_SHA256_DIGEST_LENGTH];
+    return [AMAHashUtility sha256DataForString:sourceString];
 }
 
 #pragma mark - Migration -

@@ -1,9 +1,6 @@
 #import "AMAExternalAttributionController.h"
-
-#import <CommonCrypto/CommonCrypto.h>
-
 #import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
-
+#import <AppMetricaEncodingUtils/AppMetricaEncodingUtils.h>
 #import "AMAExternalAttributionConfiguration.h"
 #import "AMAMetricaConfiguration.h"
 #import "AMAMetricaPersistentConfiguration.h"
@@ -125,7 +122,7 @@ static NSTimeInterval const kAMAExternalAttributionDefaultCollectingInterval = A
         return nil;
     }
     
-    return [self hashForData:jsonData];
+    return [AMAHashUtility sha256HashForData:jsonData];
 }
 
 - (NSError *)JSONError
@@ -136,18 +133,6 @@ static NSTimeInterval const kAMAExternalAttributionDefaultCollectingInterval = A
         [AMAErrorUtilities errorWithCode:AMAAppMetricaEventErrorCodeInvalidExternalAttributionContents
                              description:errorDescription];
     return appMetricaError;
-}
-
-- (NSString *)hashForData:(NSData *)jsonData
-{
-    unsigned char hash[CC_SHA256_DIGEST_LENGTH];
-    CC_SHA256(jsonData.bytes, (CC_LONG)jsonData.length, hash);
-    NSMutableString *hashString = [NSMutableString stringWithCapacity:CC_SHA256_DIGEST_LENGTH * 2];
-    for (int i = 0; i < CC_SHA256_DIGEST_LENGTH; i++) {
-        [hashString appendFormat:@"%02x", hash[i]];
-    }
-    
-    return [hashString copy];
 }
 
 #pragma mark - AMAStartupCompletionObserving

@@ -10,7 +10,8 @@
 {
     AMAProhibitingAttributeUpdateValidator *validator =
         [[AMAProhibitingAttributeUpdateValidator alloc] initWithLogBlock:block];
-    return [[AMAUserProfileUpdate alloc] initWithAttributeUpdate:nil validators:@[ validator ]];
+    
+    return [[AMAUserProfileUpdate alloc] initWithAttributeUpdates:nil validators:@[ validator ]];
 }
 
 + (AMAUserProfileUpdate *)invalidDateUpdateWithAttributeName:(NSString *)name

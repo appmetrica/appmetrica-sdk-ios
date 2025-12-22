@@ -21,7 +21,7 @@
         [[AMAAttributeUpdateNameLengthValidator alloc] init],
         [[AMAAttributeUpdateNamePrefixValidator alloc] init],
     ];
-    return [[AMAUserProfileUpdate alloc] initWithAttributeUpdate:attributeUpdate validators:validators];
+    return [[AMAUserProfileUpdate alloc] initWithAttributeUpdates:@[attributeUpdate] validators:validators];
 }
 
 @end

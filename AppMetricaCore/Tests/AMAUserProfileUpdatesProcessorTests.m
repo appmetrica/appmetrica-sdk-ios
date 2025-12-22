@@ -55,21 +55,23 @@ describe(@"AMAUserProfileUpdatesProcessor", ^{
         NSObject<AMAAttributeUpdateValidating> *__block secondValidator = nil;
         AMAAttributeUpdate *__block firstAttributeUpdate = nil;
         AMAAttributeUpdate *__block secondAttributeUpdate = nil;
-
+        AMAAttributeUpdate *__block thirdAttributeUpdate = nil;
+        
         beforeEach(^{
             firstAttributeUpdate = [AMAAttributeUpdate nullMock];
             secondAttributeUpdate = [AMAAttributeUpdate nullMock];
+            thirdAttributeUpdate = [AMAAttributeUpdate nullMock];
             firstValidator = [KWMock nullMockForProtocol:@protocol(AMAAttributeUpdateValidating)];
             [firstValidator stub:@selector(validateUpdate:model:) andReturn:theValue(YES)];
             secondValidator = [KWMock nullMockForProtocol:@protocol(AMAAttributeUpdateValidating)];
             [secondValidator stub:@selector(validateUpdate:model:) andReturn:theValue(YES)];
-
+            
             AMAUserProfileUpdate *firstUpdate =
-                [[AMAUserProfileUpdate alloc] initWithAttributeUpdate:firstAttributeUpdate
-                                                           validators:@[firstValidator]];
+                [[AMAUserProfileUpdate alloc] initWithAttributeUpdates:@[firstAttributeUpdate, thirdAttributeUpdate]
+                                                            validators:@[firstValidator]];
             AMAUserProfileUpdate *secondUpdate =
-                [[AMAUserProfileUpdate alloc] initWithAttributeUpdate:secondAttributeUpdate
-                                                           validators:@[secondValidator]];
+                [[AMAUserProfileUpdate alloc] initWithAttributeUpdates:@[secondAttributeUpdate]
+                                                            validators:@[secondValidator]];
             updates = @[ firstUpdate, secondUpdate ];
         });
         it(@"Should apply first update", ^{
@@ -80,10 +82,22 @@ describe(@"AMAUserProfileUpdatesProcessor", ^{
             [[secondAttributeUpdate should] receive:@selector(applyToModel:) withArguments:model];
             [processor dataWithUpdates:updates error:nil];
         });
+        it(@"Should apply third update", ^{
+            [[thirdAttributeUpdate should] receive:@selector(applyToModel:) withArguments:model];
+            [processor dataWithUpdates:updates error:nil];
+        });
         context(@"Invalid first update", ^{
-            it(@"Should not apply first update", ^{
-                [firstValidator stub:@selector(validateUpdate:model:) andReturn:theValue(NO)];
+            it(@"Should not apply only first invalid update", ^{
+                [firstValidator clearStubs];
+                [firstValidator stub:@selector(validateUpdate:model:)
+                           andReturn:theValue(NO)
+                       withArguments:firstAttributeUpdate, kw_any()];
+                [firstValidator stub:@selector(validateUpdate:model:)
+                           andReturn:theValue(YES)
+                       withArguments:thirdAttributeUpdate, kw_any()];
+                
                 [[firstAttributeUpdate shouldNot] receive:@selector(applyToModel:) withArguments:model];
+                [[thirdAttributeUpdate should] receive:@selector(applyToModel:) withArguments:model];
                 [processor dataWithUpdates:updates error:nil];
             });
             it(@"Should apply second update", ^{
