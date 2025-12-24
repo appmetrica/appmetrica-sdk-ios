@@ -1,5 +1,4 @@
 #import <XCTest/XCTest.h>
-
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
 
 #import "AMAExternalAttributionConfiguration.h"
@@ -66,11 +65,11 @@ static NSDictionary *kUpdatedAttributionData = nil;
     NSDate *expectedDate = [self.dateProviderMock freeze];
     [self.controller processAttributionData:kExpectedAttributionData source:kAMAAttributionSourceAdjust onFailure:nil];
     
-    __auto_type exprectedConfig = [[AMAExternalAttributionConfiguration alloc] initWithSource:kAMAAttributionSourceAdjust
-                                                                                    timestamp:expectedDate
-                                                                                 contentsHash:kExpectedHash];
+    __auto_type expectedConfig = [[AMAExternalAttributionConfiguration alloc] initWithSource:kAMAAttributionSourceAdjust
+                                                                                   timestamp:expectedDate
+                                                                                contentsHash:kExpectedHash];
     
-    XCTAssertEqualObjects(self.persistentMock.externalAttributionConfigurations, @{kAMAAttributionSourceAdjust: exprectedConfig});
+    XCTAssertEqualObjects(self.persistentMock.externalAttributionConfigurations, @{kAMAAttributionSourceAdjust: expectedConfig});
 }
 
 #pragma mark - Within the interval
@@ -230,6 +229,32 @@ static NSTimeInterval const kUpdatedInterval = 500;
 
     XCTAssertFalse(self.reporterMock.reportExternalAttributionCalled, 
                    @"Attribution data processed after the updated interval expires should not be sent.");
+}
+
+- (void)testIdenticalDataWithDifferentKeyOrderShouldNotTriggerDuplicateEvents
+{
+    NSDictionary *attributionData1 = @{@"a": @"b",@"c": @"d",@"e": @"f"};
+    NSDictionary *attributionData2 = @{@"e": @"f",@"a": @"b",@"c": @"d"};
+
+    XCTAssertEqualObjects(attributionData1, attributionData2);
+    
+    [self.controller processAttributionData:attributionData1
+                                     source:kAMAAttributionSourceAdjust
+                                  onFailure:nil];
+    
+    XCTAssertTrue(self.reporterMock.reportExternalAttributionCalled,
+                  @"First attribution event should be sent");
+    
+    self.reporterMock.reportExternalAttributionCalled = NO;
+    
+    [self.controller processAttributionData:attributionData2
+                                     source:kAMAAttributionSourceAdjust
+                                  onFailure:nil];
+    
+    XCTAssertFalse(self.reporterMock.reportExternalAttributionCalled,
+                   @"Second attribution event with same hash should not be sent");
+    
+    XCTAssertEqual(self.persistentMock.externalAttributionConfigurations.count, 1);
 }
 
 #pragma mark - Test Errors

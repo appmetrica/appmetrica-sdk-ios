@@ -114,7 +114,9 @@ static NSTimeInterval const kAMAExternalAttributionDefaultCollectingInterval = A
     }
     
     NSError *localError = nil;
-    NSData *jsonData = [NSJSONSerialization dataWithJSONObject:dictionary options:0 error:&localError];
+    NSData *jsonData = [NSJSONSerialization dataWithJSONObject:dictionary
+                                                       options:NSJSONWritingSortedKeys
+                                                         error:&localError];
     
     if (jsonData == nil) {
         NSError *filledError = [AMAErrorUtilities errorByAddingUnderlyingError:localError toError:self.JSONError];
