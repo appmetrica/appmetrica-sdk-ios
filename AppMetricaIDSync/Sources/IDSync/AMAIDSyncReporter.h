@@ -1,7 +1,7 @@
 
 #import <Foundation/Foundation.h>
 
-@class AMAIDSyncRequest;
+@class AMAIDSyncRequestResponse;
 @protocol AMAAppMetricaReporting;
 
 NS_ASSUME_NONNULL_BEGIN
@@ -10,11 +10,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (instancetype)initWithReporter:(nullable id<AMAAppMetricaReporting>)libraryReporter;
 
-- (void)reportEventForRequest:(AMAIDSyncRequest *)request
-                         code:(NSInteger)code
-                         body:(NSString *)body
-                      headers:(NSDictionary<NSString *, NSArray<NSString *> *> *)headers
-                  responseURL:(NSString *)responseURL;
+- (void)reportEventForResponse:(AMAIDSyncRequestResponse *)response;
 
 @end
 

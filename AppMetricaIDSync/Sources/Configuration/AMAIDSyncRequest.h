@@ -10,6 +10,8 @@
 @property (nonatomic, copy, readonly) NSNumber *resendIntervalForValidResponse;
 @property (nonatomic, copy, readonly) NSNumber *resendIntervalForNotValidResponse;
 @property (nonatomic, copy, readonly) NSArray<NSNumber *> *validResponseCodes;
+@property (nonatomic, assign, readonly) BOOL reportEventEnabled;
+@property (nonatomic, copy, readonly) NSString *reportUrl;
 
 - (instancetype)init NS_UNAVAILABLE;
 + (instancetype)new NS_UNAVAILABLE;
@@ -20,6 +22,8 @@
                preconditions:(NSDictionary *)preconditions
          validResendInterval:(NSNumber *)resendIntervalForValidResponse
        invalidResendInterval:(NSNumber *)resendIntervalForNotValidResponse
-          validResponseCodes:(NSArray<NSNumber *> *)validResponseCodes;
+          validResponseCodes:(NSArray<NSNumber *> *)validResponseCodes
+          reportEventEnabled:(BOOL)reportEventEnabled
+                   reportUrl:(NSString *)reportUrl;
 
 @end

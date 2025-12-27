@@ -1,5 +1,5 @@
-@
-import XCTest;
+
+@import XCTest;
 #import "AMAIDSyncNetworkRequest.h"
 
 @interface AMAIDSyncNetworkRequestTests : XCTestCase
@@ -21,6 +21,15 @@ import XCTest;
 
     XCTAssertEqualObjects(result[@"Accept"], @"application/json, text/html");
     XCTAssertEqualObjects(result[@"User-Agent"], @"AppMetricaSDK");
+}
+
+- (void)testRequestMethod
+{
+    AMAIDSyncNetworkRequest *request =
+        [[AMAIDSyncNetworkRequest alloc] initWithURL:@""
+                                             headers:@{}];
+
+    XCTAssertEqual(request.method, @"GET");
 }
 
 @end

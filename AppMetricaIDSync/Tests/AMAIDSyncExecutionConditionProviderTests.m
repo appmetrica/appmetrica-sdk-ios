@@ -40,7 +40,9 @@ static NSInteger const kAMATestInvalidResendInterval = 45;
                                     preconditions:@{}
                               validResendInterval:@(kAMATestValidResendInterval)
                             invalidResendInterval:@(kAMATestInvalidResendInterval)
-                               validResponseCodes:@[@204]];
+                               validResponseCodes:@[@204]
+                               reportEventEnabled:NO
+                                        reportUrl:@""];
 }
 
 - (AMAIDSyncRequest *)invalidRequest
@@ -51,7 +53,9 @@ static NSInteger const kAMATestInvalidResendInterval = 45;
                                     preconditions:@{}
                               validResendInterval:nil
                             invalidResendInterval:nil
-                               validResponseCodes:@[@204]];
+                               validResponseCodes:@[@204]
+                               reportEventEnabled:NO
+                                        reportUrl:@""];
 }
 
 #pragma mark - Request interval -

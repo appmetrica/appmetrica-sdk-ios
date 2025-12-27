@@ -2,6 +2,7 @@
 #import <XCTest/XCTest.h>
 #import "AMAIDSyncReporter.h"
 #import "AMAIDSyncRequest.h"
+#import "AMAIDSyncRequestResponse.h"
 #import <AppMetricaCore/AppMetricaCore.h>
 
 @interface AMAIDSyncMockReporter : NSObject
@@ -36,23 +37,28 @@
     NSString *body = @"response body";
     NSInteger code = 200;
     NSString *responseURL = @"https://example.com";
+    
     AMAIDSyncRequest *request = [[AMAIDSyncRequest alloc] initWithType:type
                                                                    url:responseURL
                                                                headers:headers
-                                            preconditions:@{}
-                                      validResendInterval:@(99)
-                                    invalidResendInterval:@(999)
-                                       validResponseCodes:@[@502]];
-
+                                                         preconditions:@{}
+                                                   validResendInterval:@(99)
+                                                 invalidResendInterval:@(999)
+                                                    validResponseCodes:@[@502]
+                                                    reportEventEnabled:NO
+                                                             reportUrl:nil];
+    
     AMAIDSyncMockReporter *mockLibraryReporter = [[AMAIDSyncMockReporter alloc] init];
     AMAIDSyncReporter *reporter = [[AMAIDSyncReporter alloc] initWithReporter:(id<AMAAppMetricaReporting>)mockLibraryReporter];
-
-    [reporter reportEventForRequest:request
-                               code:code
-                               body:body
-                            headers:headers
-                        responseURL:responseURL];
-
+    AMAIDSyncRequestResponse *response = [[AMAIDSyncRequestResponse alloc] initWithRequest:request
+                                                                                      code:code
+                                                                                      body:body
+                                                                                   headers:headers
+                                                                               responseURL:responseURL];
+    
+    [reporter reportEventForResponse:response];
+    
+    
     XCTAssertEqualObjects(mockLibraryReporter.eventName, @"id_sync");
     XCTAssertEqualObjects(mockLibraryReporter.parameters[@"type"], type);
     XCTAssertEqualObjects(mockLibraryReporter.parameters[@"url"], responseURL);

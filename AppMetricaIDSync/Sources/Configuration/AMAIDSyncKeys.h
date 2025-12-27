@@ -10,6 +10,8 @@ extern NSString *const AMAIDSyncRequestPreconditionsKey;
 extern NSString *const AMAIDSyncRequestResendIntervalForValidResponseKey;
 extern NSString *const AMAIDSyncRequestResendIntervalForInvalidResponseKey;
 extern NSString *const AMAIDSyncRequestValidResponseCodesKey;
+extern NSString *const AMAIDSyncRequestReportEventEnabledKey;
+extern NSString *const AMAIDSyncRequestReportUrlKey;
 
 extern NSString *const AMAIDSyncStorageEnabledKey;
 extern NSString *const AMAIDSyncStorageRequestsKey;

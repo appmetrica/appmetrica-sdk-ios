@@ -1,5 +1,6 @@
 
 #import "AMAIDSyncReporter.h"
+#import "AMAIDSyncRequestResponse.h"
 #import "AMAIDSyncRequest.h"
 #import "AMAIDSyncCore.h"
 
@@ -27,23 +28,19 @@ NSString *const kAMAIDSyncAppMetricaLibraryApiKey = @"20799a27-fa80-4b36-b2db-0f
     return self;
 }
 
-- (void)reportEventForRequest:(AMAIDSyncRequest *)request
-                         code:(NSInteger)code
-                         body:(NSString *)body
-                      headers:(NSDictionary<NSString *, NSArray<NSString *> *> *)headers
-                  responseURL:(NSString *)responseURL
+- (void)reportEventForResponse:(AMAIDSyncRequestResponse *)response
 {
     NSMutableDictionary *eventValue = [NSMutableDictionary dictionary];
-    eventValue[@"type"] = request.type;
-    eventValue[@"url"] = responseURL;
-    if (code > 0) eventValue[@"responseCode"] = @(code);
-    if (body != nil) eventValue[@"responseBody"] = body;
-    if (headers != nil) eventValue[@"responseHeaders"] = headers;
-    
+    eventValue[@"type"] = response.request.type;
+    eventValue[@"url"] = response.responseURL;
+    if (response.code > 0) eventValue[@"responseCode"] = @(response.code);
+    if (response.body != nil) eventValue[@"responseBody"] = response.body;
+    if (response.headers != nil) eventValue[@"responseHeaders"] = response.headers;
+
     if (self.libraryReporter == nil) {
         self.libraryReporter = [AMAAppMetrica reporterForAPIKey:kAMAIDSyncAppMetricaLibraryApiKey];
     }
-    
+
     [self.libraryReporter reportEvent:@"id_sync" parameters:eventValue onFailure:nil];
 }
 

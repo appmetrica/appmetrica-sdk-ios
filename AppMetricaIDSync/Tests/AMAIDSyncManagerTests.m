@@ -9,6 +9,8 @@
 #import "AMAIDSyncPreconditionHandler.h"
 #import "AMAIDSyncExecutionConditionProvider.h"
 #import "AMAIDSyncRequestsConverter.h"
+#import "AMAIDSyncRequestResponse.h"
+#import "AMAIDSyncReportRequest.h"
 
 @interface AMAIDSyncManager ()<AMATimerDelegate>
 @end
@@ -27,14 +29,13 @@ describe(@"AMAIDSyncManager", ^{
     beforeEach(^{
         config = [AMAIDSyncStartupConfiguration nullMock];
         [config stub:@selector(idSyncEnabled) andReturn:theValue(YES)];
-        
+
         requestProcessor = [AMAGenericRequestProcessor nullMock];
         reporter = [AMAIDSyncReporter nullMock];
         conditionProvider = [AMAIDSyncExecutionConditionProvider nullMock];
         converter = [AMAIDSyncRequestsConverter nullMock];
         preconditionHandler = [AMAIDSyncPreconditionHandler nullMock];
-        
-        
+
         manager = [[AMAIDSyncManager alloc] initWithConditionProvider:conditionProvider
                                                             converter:converter
                                                      requestProcessor:requestProcessor
@@ -196,6 +197,7 @@ describe(@"AMAIDSyncManager", ^{
             });
             
             it(@"should report event and execute condition when network request succeeds", ^{
+                [request stub:@selector(reportEventEnabled) andReturn:theValue(YES)];
                 [condition stub:@selector(shouldExecute) andReturn:theValue(YES)];
                 stubPrecondition(YES);
                 
@@ -208,16 +210,26 @@ describe(@"AMAIDSyncManager", ^{
                 }];
                 
                 NSDictionary *expectedResponseHeaders = @{ @"Content-Type": @[@"application/json"] };
-                [[reporter should] receive:@selector(reportEventForRequest:code:body:headers:responseURL:)
-                             withArguments:request, theValue(200), jsonResponse, expectedResponseHeaders, url];
+                
+                KWCaptureSpy *spy = [reporter captureArgument:@selector(reportEventForResponse:) atIndex:0];
+                
+                [[reporter should] receive:@selector(reportEventForResponse:)];
                 
                 [[conditionProvider should] receive:@selector(execute:statusCode:)
                                       withArguments:request, theValue(200)];
                 
                 [manager timerDidFire:nil];
+                
+                AMAIDSyncRequestResponse *capturedResponse = spy.argument;
+                [[capturedResponse.request should] equal:request];
+                [[theValue(capturedResponse.code) should] equal:theValue(200)];
+                [[capturedResponse.body should] equal:jsonResponse];
+                [[capturedResponse.headers should] equal:expectedResponseHeaders];
+                [[capturedResponse.responseURL should] equal:url];
             });
             
             it(@"should not report or execute if there is network error", ^{
+                [request stub:@selector(reportEventEnabled) andReturn:theValue(YES)];
                 NSError *networkError = [NSError errorWithDomain:NSURLErrorDomain
                                                             code:-1009
                                                         userInfo:nil];
@@ -229,10 +241,114 @@ describe(@"AMAIDSyncManager", ^{
                     return nil;
                 }];
                 
-                [[reporter shouldNot] receive:@selector(reportEventForRequest:code:body:headers:responseURL:)];
+                [[reporter shouldNot] receive:@selector(reportEventForResponse:)];
                 [[conditionProvider shouldNot] receive:@selector(execute:statusCode:)];
                 
                 [manager timerDidFire:nil];
+            });
+            it(@"should not report if report disabled", ^{
+                [request stub:@selector(reportEventEnabled) andReturn:theValue(NO)];
+                [condition stub:@selector(shouldExecute) andReturn:theValue(YES)];
+                stubPrecondition(YES);
+                
+                NSData *data = [jsonResponse dataUsingEncoding:NSUTF8StringEncoding];
+                [requestProcessor stub:@selector(processRequest:callback:)
+                             withBlock:^id(NSArray *params) {
+                    void (^callback)(NSData *, NSHTTPURLResponse *, NSError *) = params[1];
+                    callback(data, response, nil);
+                    return nil;
+                }];
+                
+                NSDictionary *expectedResponseHeaders = @{ @"Content-Type": @[@"application/json"] };
+                [[reporter shouldNot] receive:@selector(reportEventForResponse:)];
+                
+                // disabling reporting do not affect condition execution
+                [[conditionProvider should] receive:@selector(execute:statusCode:)
+                                      withArguments:request, theValue(200)];
+                
+                [manager timerDidFire:nil];
+            });
+            
+            context(@"Report request", ^{
+                void (^testNoRetryRequest)(NSInteger) = ^(NSInteger statusCode) {
+                    it(@"should not retry report request", ^{
+                        NSString *const reportUrl = @"https://report.url";
+                        [request stub:@selector(reportUrl) andReturn:theValue(reportUrl)];
+                        [condition stub:@selector(shouldExecute) andReturn:theValue(YES)];
+                        stubPrecondition(YES);
+                        
+                        NSString *__block capturedReportHost = nil;
+                        
+                        response = [[NSHTTPURLResponse alloc] initWithURL:[NSURL URLWithString:reportUrl]
+                                                               statusCode:statusCode
+                                                              HTTPVersion:@""
+                                                             headerFields:@{}];
+                        
+                        NSData *data = [jsonResponse dataUsingEncoding:NSUTF8StringEncoding];
+                        [requestProcessor stub:@selector(processRequest:callback:)
+                                     withBlock:^id(NSArray *params) {
+                            void (^callback)(NSData *, NSHTTPURLResponse *, NSError *) = params[1];
+                            callback(data, response, nil);
+                            
+                            id param = params[0];
+                            if ([param isKindOfClass:[AMAIDSyncReportRequest class]]) {
+                                AMAIDSyncReportRequest *request = (AMAIDSyncReportRequest *)param;
+                                capturedReportHost = request.host;
+                            }
+                            return nil;
+                        }];
+                        
+                        [[requestProcessor should] receive:@selector(processRequest:callback:) withCount:2];
+                        
+                        [manager timerDidFire:nil];
+                        
+                        [[capturedReportHost should] equal:reportUrl];
+                        
+                    });
+                };
+                
+                context(@"No retry with code 2xx", ^{
+                    testNoRetryRequest(200);
+                });
+                context(@"No retry with code 4xx", ^{
+                    testNoRetryRequest(404);
+                });
+                
+                it(@"should retry report request with other codes", ^{
+                    NSString *const reportUrl = @"https://report.url";
+                    [request stub:@selector(reportUrl) andReturn:theValue(reportUrl)];
+                    [condition stub:@selector(shouldExecute) andReturn:theValue(YES)];
+                    stubPrecondition(YES);
+                    
+                    NSString *__block capturedReportHost = nil;
+                    
+                    response = [[NSHTTPURLResponse alloc] initWithURL:[NSURL URLWithString:reportUrl]
+                                                           statusCode:502
+                                                          HTTPVersion:@""
+                                                         headerFields:@{}];
+                    
+                    NSData *data = [jsonResponse dataUsingEncoding:NSUTF8StringEncoding];
+                    [requestProcessor stub:@selector(processRequest:callback:)
+                                 withBlock:^id(NSArray *params) {
+                        void (^callback)(NSData *, NSHTTPURLResponse *, NSError *) = params[1];
+                        callback(data, response, nil);
+                        
+                        id param = params[0];
+                        if ([param isKindOfClass:[AMAIDSyncReportRequest class]]) {
+                            AMAIDSyncReportRequest *request = (AMAIDSyncReportRequest *)param;
+                            capturedReportHost = request.host;
+                        }
+                        return nil;
+                    }];
+                    
+                    [[requestProcessor shouldEventuallyBeforeTimingOutAfter(3)] receive:@selector(processRequest:callback:)
+                                                                       withCountAtLeast:3];
+                    
+                    [manager timerDidFire:nil];
+                    
+                    [[capturedReportHost should] equal:reportUrl];
+                });
+                
             });
         });
     });

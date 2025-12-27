@@ -10,6 +10,8 @@
          validResendInterval:(NSNumber *)resendIntervalForValidResponse
        invalidResendInterval:(NSNumber *)resendIntervalForNotValidResponse
           validResponseCodes:(NSArray<NSNumber *> *)validResponseCodes
+          reportEventEnabled:(BOOL)reportEventEnabled
+                   reportUrl:(NSString *)reportUrl
 {
     self = [super init];
     if (self) {
@@ -20,6 +22,8 @@
         _resendIntervalForValidResponse = [resendIntervalForValidResponse copy];
         _resendIntervalForNotValidResponse = [resendIntervalForNotValidResponse copy];
         _validResponseCodes = [validResponseCodes copy];
+        _reportEventEnabled = reportEventEnabled;
+        _reportUrl = [reportUrl copy];
     }
     return self;
 }

@@ -33,7 +33,9 @@
         AMAIDSyncRequestPreconditionsKey: @{ @"network": @"cell" },
         AMAIDSyncRequestResendIntervalForValidResponseKey: @999,
         AMAIDSyncRequestResendIntervalForInvalidResponseKey: @777,
-        AMAIDSyncRequestValidResponseCodesKey: @[@404, @502]
+        AMAIDSyncRequestValidResponseCodesKey: @[@404, @502],
+        AMAIDSyncRequestReportEventEnabledKey: @NO,
+        AMAIDSyncRequestReportUrlKey: @"report_url",
     };
 }
 
@@ -58,6 +60,10 @@
                    validDict[AMAIDSyncRequestResendIntervalForInvalidResponseKey]);
     XCTAssertEqualObjects(req.validResponseCodes,
                           validDict[AMAIDSyncRequestValidResponseCodesKey]);
+    XCTAssertEqual(req.reportEventEnabled,
+                   [validDict[AMAIDSyncRequestReportEventEnabledKey] boolValue]);
+    XCTAssertEqual(req.reportUrl,
+                   validDict[AMAIDSyncRequestReportUrlKey]);
 }
 
 - (void)testConvertDictToRequestsWithInvalidData
@@ -89,6 +95,8 @@
     XCTAssertEqualObjects(req.resendIntervalForValidResponse, @86400);
     XCTAssertEqualObjects(req.resendIntervalForNotValidResponse, @3600);
     XCTAssertEqualObjects(req.validResponseCodes, (@[@200]));
+    XCTAssertTrue(req.reportEventEnabled);
+    XCTAssertNil(req.reportUrl);
 }
 
 - (void)testConvertDictToRequestsWithMultipleValidRequests
@@ -100,7 +108,7 @@
             AMAIDSyncRequestUrlKey: @"https://ya.ru",
         }
     ];
-    
+
     NSArray<AMAIDSyncRequest *> *result = [self.converter convertDictToRequests:input];
     XCTAssertEqual(result.count, 2);
     XCTAssertEqualObjects(result[0].type, @"novatiq_hyper_id");

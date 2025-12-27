@@ -6,6 +6,7 @@
 NSUInteger const kAMAIDSyncDefaultValidResendInterval = 86400;
 NSUInteger const kAMAIDSyncDefaultInvalidResendInterval = 3600;
 static NSUInteger const kAMAIDSyncDefaultValidResponseCode = 200;
+static BOOL const kAMAIDSyncDefaultReportEventEnabled = YES;
 
 @implementation AMAIDSyncRequestsConverter
 
@@ -40,14 +41,25 @@ static NSUInteger const kAMAIDSyncDefaultValidResponseCode = 200;
             NSArray<NSNumber *> *validResponseCodes = [request[AMAIDSyncRequestValidResponseCodesKey] isKindOfClass:[NSArray class]]
                                                     ? request[AMAIDSyncRequestValidResponseCodesKey]
                                                     : @[@(kAMAIDSyncDefaultValidResponseCode)];
-            
+
+            BOOL reportEventEnabled = kAMAIDSyncDefaultReportEventEnabled;
+            if ([request[AMAIDSyncRequestReportEventEnabledKey] isKindOfClass:[NSNumber class]]) {
+                reportEventEnabled = [request[AMAIDSyncRequestReportEventEnabledKey] boolValue];
+            }
+
+            NSString *reportUrl = [request[AMAIDSyncRequestReportUrlKey] isKindOfClass:[NSString class]]
+                                ? request[AMAIDSyncRequestReportUrlKey]
+                                : nil;
+
             AMAIDSyncRequest *req = [[AMAIDSyncRequest alloc] initWithType:type
                                                                        url:url
                                                                    headers:headers
                                                              preconditions:preconditions
                                                        validResendInterval:validResendInterval
                                                      invalidResendInterval:invalidResendInterval
-                                                        validResponseCodes:validResponseCodes];
+                                                        validResponseCodes:validResponseCodes
+                                                        reportEventEnabled:reportEventEnabled
+                                                                 reportUrl:reportUrl];
             
             [result addObject:req];
         }

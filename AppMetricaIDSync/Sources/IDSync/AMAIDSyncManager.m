@@ -9,6 +9,8 @@
 #import "AMAIDSyncNetworkRequest.h"
 #import "AMAIDSyncReporter.h"
 #import "AMAIDSyncPreconditionHandler.h"
+#import "AMAIDSyncReportRequest.h"
+#import "AMAIDSyncRequestResponse.h"
 
 static NSUInteger const kAMAIDSyncDefaultRepeatInterval = 60;
 static NSUInteger const AMAIDSyncDefaultLaunchDelaySeconds = 10;
@@ -26,6 +28,7 @@ static NSUInteger const AMAIDSyncDefaultLaunchDelaySeconds = 10;
 
 @property (nonatomic, strong) AMATimer *delayTimer;
 @property (nonatomic, strong) NSTimer *repeatedTimer;
+@property (nonatomic, strong) AMABlockTimer *reportRetryTimer;
 
 @end
 
@@ -106,6 +109,7 @@ static NSUInteger const AMAIDSyncDefaultLaunchDelaySeconds = 10;
         self.repeatedTimer = nil;
         [self.delayTimer invalidate];
         self.delayTimer = nil;
+        [self invalidateReportRetryTimer];
     }
 }
 
@@ -148,18 +152,27 @@ static NSUInteger const AMAIDSyncDefaultLaunchDelaySeconds = 10;
                                             NSHTTPURLResponse * _Nullable response,
                                             NSError * _Nullable error) {
         BOOL isNetworkError = (error != nil && [error.domain isEqualToString:NSURLErrorDomain]);
-        
+
         if (isNetworkError == NO) {
             NSInteger statusCode = response.statusCode;
             NSString *responseBody = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
             NSDictionary *responseHeaders = [self responseHeaders:response];
+            NSString *responseURLString = response.URL.absoluteString ?: request.url;
             
-            [self.reporter reportEventForRequest:request
-                                            code:statusCode
-                                            body:responseBody
-                                         headers:responseHeaders
-                                     responseURL:response.URL.absoluteString ?: request.url];
+            __auto_type *requestResponse = [[AMAIDSyncRequestResponse alloc] initWithRequest:request
+                                                                                        code:statusCode
+                                                                                        body:responseBody
+                                                                                     headers:responseHeaders
+                                                                                 responseURL:responseURLString];
             
+            if (request.reportEventEnabled) {
+                [self.reporter reportEventForResponse:requestResponse];
+            }
+
+            if (request.reportUrl != nil && request.reportUrl.length > 0) {
+                [self sendReportRequestForResponse:requestResponse];
+            }
+
             [self.conditionProvider execute:request statusCode:@(statusCode)];
         }
     }];
@@ -184,6 +197,80 @@ static NSUInteger const AMAIDSyncDefaultLaunchDelaySeconds = 10;
         self.startup = configuration;
         [self invalidateTimers];
         [self startIfNeeded];
+    }
+}
+
+#pragma mark - Report request -
+
+- (void)sendReportRequestForResponse:(AMAIDSyncRequestResponse *)response
+{
+    [self performReportRequestForResponse:response interval:1.0];
+}
+
+- (void)performReportRequestForResponse:(AMAIDSyncRequestResponse *)response
+                               interval:(NSTimeInterval)interval
+{
+    AMAIDSyncReportRequest *reportRequest = [[AMAIDSyncReportRequest alloc] initWithResponse:response];
+
+    [self.requestProcessor processRequest:reportRequest
+                                 callback:^(NSData * _Nullable responseData,
+                                            NSHTTPURLResponse * _Nullable httpResponse,
+                                            NSError * _Nullable error) {
+        [self handleReportResponse:httpResponse
+                             error:error
+                          response:response
+                          interval:interval];
+    }];
+}
+
+- (void)handleReportResponse:(NSHTTPURLResponse *)httpResponse
+                       error:(NSError *)error
+                    response:(AMAIDSyncRequestResponse *)response
+                    interval:(NSTimeInterval)interval
+{
+    NSInteger statusCode = httpResponse.statusCode;
+    
+    BOOL success = (statusCode >= 200 && statusCode < 300);
+    BOOL clientError = (statusCode >= 400 && statusCode < 500);
+    
+    BOOL shouldRetry = success == NO && clientError == NO;
+    
+    if (shouldRetry) {
+        [self launchRetryTimerWithResponse:response interval:interval];
+    }
+}
+
+- (void)launchRetryTimerWithResponse:(AMAIDSyncRequestResponse *)response
+                            interval:(NSTimeInterval)interval
+{
+    [self invalidateReportRetryTimer];
+    if (interval < 60) {
+        [self launchReportRetryTimer:interval response:response];
+    }
+}
+
+- (void)invalidateReportRetryTimer
+{
+    @synchronized (self) {
+        [self.reportRetryTimer invalidate];
+        self.reportRetryTimer = nil;
+    }
+}
+
+- (void)launchReportRetryTimer:(NSTimeInterval)interval
+                      response:(AMAIDSyncRequestResponse *)response
+{
+    @synchronized (self) {
+        __weak typeof(self) weakSelf = self;
+        self.reportRetryTimer = [[AMABlockTimer alloc] initWithTimeout:interval
+                                                         callbackQueue:nil
+                                                                 block:^(AMABlockTimer * _Nonnull sender) {
+            __strong typeof(weakSelf) strongSelf = weakSelf;
+            if (strongSelf) {
+                [strongSelf performReportRequestForResponse:response interval:interval * 2];
+            }
+        }];
+        [self.reportRetryTimer start];
     }
 }
 

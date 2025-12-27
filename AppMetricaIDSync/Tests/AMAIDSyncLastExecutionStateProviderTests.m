@@ -24,7 +24,9 @@
                                             preconditions:@{}
                                       validResendInterval:@(10)
                                     invalidResendInterval:@(20)
-                                       validResponseCodes:@[@404]];
+                                       validResponseCodes:@[@404]
+                                       reportEventEnabled:NO
+                                                reportUrl:@""];
 }
 
 - (void)testRequestExecutedStoresDateAndCode
@@ -85,14 +87,18 @@
                                                       preconditions:@{}
                                                 validResendInterval:@(10)
                                               invalidResendInterval:@(20)
-                                                 validResponseCodes:@[@200]];
+                                                 validResponseCodes:@[@200]
+                                                 reportEventEnabled:NO
+                                                          reportUrl:@""];
     AMAIDSyncRequest *req2 = [[AMAIDSyncRequest alloc] initWithType:@"second"
                                                                 url:@""
                                                             headers:@{}
                                                       preconditions:@{}
                                                 validResendInterval:@(10)
                                               invalidResendInterval:@(20)
-                                                 validResponseCodes:@[@201]];
+                                                 validResponseCodes:@[@201]
+                                                 reportEventEnabled:NO
+                                                          reportUrl:@""];
     
     [self.provider requestExecuted:req1 statusCode:@200];
     [self.provider requestExecuted:req2 statusCode:@201];

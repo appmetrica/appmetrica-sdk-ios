@@ -19,6 +19,11 @@
     return self;
 }
 
+- (NSString *)method
+{
+    return @"GET";
+}
+
 - (NSDictionary *)headerComponents
 {
     NSMutableDictionary *headers = [super headerComponents].mutableCopy;
