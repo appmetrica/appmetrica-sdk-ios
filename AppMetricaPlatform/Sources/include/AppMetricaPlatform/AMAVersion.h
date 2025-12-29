@@ -3,7 +3,7 @@
 #define __AMA_VERSION_H__
 
 #define AMA_VERSION_MAJOR 5
-#define AMA_VERSION_MINOR 16
+#define AMA_VERSION_MINOR 17
 #define AMA_VERSION_PATCH 0
 
 // This line is uncommented in pre-releases.
