@@ -7,12 +7,12 @@ import Foundation
 ///
 /// This class provides a way to interact with AppMetrica functionality,
 /// including activation and event reporting.
-@objc(AMAAppMetricaLibraryAdapter)
-public final class AppMetricaLibraryAdapter: NSObject, @unchecked Sendable {
+@objc(AMAAnalyticsLibraryAdapter)
+public final class AnalyticsLibraryAdapter: NSObject, @unchecked Sendable {
 
-    /// The shared instance of the `AppMetricaLibraryAdapter`.
+    /// The shared instance of the `LibraryAdapter`.
     @objc(sharedInstance)
-    public static let shared = AppMetricaLibraryAdapter()
+    public static let shared = AnalyticsLibraryAdapter()
 
     private let appMetrica: AppMetrica.Type
     private static let systemEventName = "appmetrica_system_event_42"
@@ -23,14 +23,14 @@ public final class AppMetricaLibraryAdapter: NSObject, @unchecked Sendable {
         self.appMetrica = appMetrica
         super.init()
     }
-
+    
     /// Activates AppMetrica without `API_KEY` in anonymous mode.
     @objc public func activate() {
         activate(config: .init())
     }
-    
+
     /// Activates AppMetrica without `API_KEY` in anonymous mode with configuration
-    @objc public func activate(configuration: LibraryAdapterConfiguration) {
+    @objc public func activate(configuration: AnalyticsLibraryAdapterConfiguration) {
         activate(config: configuration.config)
     }
     
@@ -50,14 +50,14 @@ public final class AppMetricaLibraryAdapter: NSObject, @unchecked Sendable {
     }
     
     /// Activates AppMetrica without `API_KEY` in anonymous mode.
-    public func activate(config: LibraryAdapterConfig) {
+    public func activate(config: AnalyticsLibraryAdapterConfig) {
         let cfg = AppMetricaLibraryAdapterConfiguration()
-        if let advIdentifiersTrackingEnabled = config.advIdentifiersTrackingEnabled {
-            cfg.advertisingIdentifierTrackingEnabled = advIdentifiersTrackingEnabled
+        if let advertisingIdentifiersTrackingEnabled = config.advertisingIdentifiersTrackingEnabled {
+            cfg.advertisingIdentifierTrackingEnabled = advertisingIdentifiersTrackingEnabled
         }
-//         if let locationTrackingEnabled = config.locationTrackingEnabled {
-//             cfg.locationTrackingEnabled = locationTrackingEnabled
-//         }
+        if let locationTrackingEnabled = config.locationTrackingEnabled {
+            cfg.locationTrackingEnabled = locationTrackingEnabled
+        }
         appMetrica.setupLibraryAdapterConfiguration(cfg)
         appMetrica.activate()
     }
@@ -91,3 +91,4 @@ public final class AppMetricaLibraryAdapter: NSObject, @unchecked Sendable {
         )
     }
 }
+

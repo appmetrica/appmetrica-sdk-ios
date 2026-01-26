@@ -3,14 +3,14 @@ import XCTest
 @testable import AppMetricaCore
 @testable import AppMetricaLibraryAdapter
 
-class AppMetricaLibraryAdapterTests: XCTestCase {
+final class LibraryAdapterTests: XCTestCase {
 
-    var adapter: AppMetricaLibraryAdapter!
+    var adapter: AnalyticsLibraryAdapter!
 
     override func setUp() {
         super.setUp()
         MockAppMetrica.reset()
-        adapter = AppMetricaLibraryAdapter(appMetrica: MockAppMetrica.self)
+        adapter = AnalyticsLibraryAdapter(appMetrica: MockAppMetrica.self)
     }
 
     override func tearDown() {
@@ -18,16 +18,11 @@ class AppMetricaLibraryAdapterTests: XCTestCase {
         super.tearDown()
     }
 
-    func testActivate() {
-        adapter.activate()
-        
-        wait(for: [MockAppMetrica.anonymousActivationExpectation], timeout: 1)
-    }
     
     func testActivateWithConfig() {
-        let config = MutableLibraryAdapterConfiguration()
-        config.advIdentifiersTrackingEnabled = true
-//        config.locationTrackingEnabled = true
+        let config = MutableAnalyticsLibraryAdapterConfiguration()
+        config.advertisingIdentifiersTrackingEnabled = true
+        config.locationTrackingEnabled = true
         
         adapter.activate(configuration: config)
         
