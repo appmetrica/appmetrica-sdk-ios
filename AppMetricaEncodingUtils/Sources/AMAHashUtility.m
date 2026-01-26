@@ -2,7 +2,7 @@
 #import <AppMetricaEncodingUtils/AppMetricaEncodingUtils.h>
 #import <CommonCrypto/CommonDigest.h>
 
-static const NSUInteger kSHA256DigestLength = CC_SHA256_DIGEST_LENGTH;
+#define kSHA256DigestLength CC_SHA256_DIGEST_LENGTH
 
 @implementation AMAHashUtility
 

@@ -9,7 +9,7 @@ public enum LogLevel {
     case notify
 }
 
-public final class Logger {
+public final class Logger: @unchecked Sendable {
     let channel: LogChannel
     var facade: LogFacade
     

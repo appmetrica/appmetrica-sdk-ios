@@ -1,5 +1,5 @@
 
-enum IdentifierSource: Int, CaseIterable, Hashable {
+enum IdentifierSource: Int, CaseIterable, Hashable, Sendable {
     case privateKeychain
     case privateFile
     
@@ -8,7 +8,7 @@ enum IdentifierSource: Int, CaseIterable, Hashable {
     
     case vendorKeychain
     
-    static var allSet: Set<Self> = Set(allCases)
+    static let allSet: Set<Self> = Set(allCases)
 }
 
 typealias IdentifierSourceSet = Set<IdentifierSource>

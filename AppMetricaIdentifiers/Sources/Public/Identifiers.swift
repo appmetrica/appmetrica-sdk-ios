@@ -4,7 +4,7 @@ protocol OptionalConstructable {
     init?(optionalValue: RawValue?)
 }
 
-public struct AppMetricaUUID: RawRepresentable, Hashable, OptionalConstructable {
+public struct AppMetricaUUID: RawRepresentable, Hashable, OptionalConstructable, Sendable {
     public var rawValue: String
     
     public init?(rawValue: String) {
@@ -18,7 +18,7 @@ public struct AppMetricaUUID: RawRepresentable, Hashable, OptionalConstructable 
     
 }
 
-public struct DeviceID: RawRepresentable, Hashable, OptionalConstructable {
+public struct DeviceID: RawRepresentable, Hashable, OptionalConstructable, Sendable {
     public var rawValue: String
     
     public init?(rawValue: String) {
@@ -32,7 +32,7 @@ public struct DeviceID: RawRepresentable, Hashable, OptionalConstructable {
     
 }
 
-public struct DeviceIDHash: RawRepresentable, Hashable, OptionalConstructable {
+public struct DeviceIDHash: RawRepresentable, Hashable, OptionalConstructable, Sendable {
     public var rawValue: String
     
     public init?(rawValue: String) {

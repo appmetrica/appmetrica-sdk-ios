@@ -8,7 +8,7 @@ import Foundation
 /// This class provides a way to interact with AppMetrica functionality,
 /// including activation and event reporting.
 @objc(AMAAppMetricaLibraryAdapter)
-public final class AppMetricaLibraryAdapter: NSObject {
+public final class AppMetricaLibraryAdapter: NSObject, @unchecked Sendable {
 
     /// The shared instance of the `AppMetricaLibraryAdapter`.
     @objc(sharedInstance)

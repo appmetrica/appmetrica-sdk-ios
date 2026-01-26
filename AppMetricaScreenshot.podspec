@@ -11,7 +11,7 @@ Pod::Spec.new do |s|
   s.ios.deployment_target = '13.0'
   s.tvos.deployment_target = '13.0'
   
-  s.swift_versions = '5.7'
+  s.swift_versions = '5.9.0'
   
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES' }
 
