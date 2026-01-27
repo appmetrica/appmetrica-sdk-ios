@@ -21,7 +21,7 @@
     return self;
 }
 
-- (AMAReporter *)reporterForApiKey:(NSString *)apiKey
+- (AMAReporter *)reporterForAPIKey:(NSString *)apiKey
 {
     if (apiKey == nil) {
         return nil;

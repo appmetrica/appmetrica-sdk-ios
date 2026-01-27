@@ -5,7 +5,7 @@
 
 @interface AMAReportersContainer : NSObject
 
-- (AMAReporter *)reporterForApiKey:(NSString *)apiKey;
+- (AMAReporter *)reporterForAPIKey:(NSString *)apiKey;
 
 - (void)setReporter:(AMAReporter *)reporter forApiKey:(NSString *)apiKey;
 

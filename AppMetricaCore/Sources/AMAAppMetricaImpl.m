@@ -527,7 +527,7 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
 - (AMAReporter *)reporterForConfiguration:(AMAReporterConfiguration *)configuration
 {
     @synchronized(self) {
-        AMAReporter *reporter = [self.reportersContainer reporterForApiKey:configuration.APIKey];
+        AMAReporter *reporter = [self.reportersContainer reporterForAPIKey:configuration.APIKey];
         
         if (reporter == nil) {
             AMAReporterStorage *reporterStorage =
@@ -640,7 +640,7 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
 - (BOOL)isReporterCreatedForAPIKey:(NSString *)apiKey
 {
     @synchronized (self) {
-        return [self.reportersContainer reporterForApiKey:apiKey] != nil;
+        return [self.reportersContainer reporterForAPIKey:apiKey] != nil;
     }
 }
 
@@ -793,7 +793,7 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
             }
         }
         
-        reporter = [self.reportersContainer reporterForApiKey:self.apiKey];
+        reporter = [self.reportersContainer reporterForAPIKey:self.apiKey];
         if (reporter != nil) {
             AMALogAssert(@"Synchronization error in AppMetrica class. "
                                  "Main reporter can't have other reporters' API key.");

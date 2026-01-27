@@ -873,7 +873,7 @@ describe(@"AMAAppMetrica", ^{
             beforeAll(^{
                 apiKey = @"test_api_key";
             });
-            it(@"Should invoke reporterForApiKey: for reporter", ^{
+            it(@"Should invoke reporterForAPIKey: for reporter", ^{
                 BOOL __block result = NO;
                 [AMAAppMetrica stub:@selector(reporterForAPIKey:) withBlock:^id(NSArray *params) {
                     result = YES;
@@ -883,7 +883,7 @@ describe(@"AMAAppMetrica", ^{
                 [AMAAppMetrica reporterForAPIKey:apiKey];
                 [[theValue(result) should] beYes];
             });
-            it(@"Should return the same result as reporterForApiKey:", ^{
+            it(@"Should return the same result as reporterForAPIKey:", ^{
                 NSObject *returnObject = [NSObject new];
                 [AMAAppMetrica stub:@selector(reporterForAPIKey:) andReturn:returnObject];
                 
