@@ -87,7 +87,7 @@ NS_SWIFT_NAME(reportAdRevenue(_:onFailure:));
 /**
  * Adds interface named "AppMetrica" to WKWebView's JavaScript.
  * It enabled you to report events to AppMetrica from JavaScript code.
- * For use you need an explicit import of AMAWebKit:
+ * For use you need an explicit import of AppMetricaWebKit:
  * ```
  * #import <AppMetricaWebKit/AppMetricaWebKit.h>
  * ```
@@ -113,7 +113,7 @@ NS_SWIFT_NAME(reportAdRevenue(_:onFailure:));
  * ```
  * Here eventName is any non-empty String, eventValue is a JSON String, may be null or empty.
  *
- * @param controller AMAJSController object from AMAWebKit
+ * @param controller AMAJSController object from AppMetricaWebKit
  * @param onFailure Block to be executed if an error occurs while initializing web view reporting,
  *                  the error is passed as block argument.
  */

@@ -556,7 +556,6 @@ describe(@"AMAAppMetricaImpl", ^{
         });
 
         it(@"Should init web view reporting", ^{
-            WKUserContentController *controller = [WKUserContentController nullMock];
             [appMetricaImpl activateWithConfiguration:configuration];
 
             [[jsController should] receive:@selector(setUpWebViewReporting:withReporter:)
@@ -565,7 +564,6 @@ describe(@"AMAAppMetricaImpl", ^{
             [appMetricaImpl setupWebViewReporting:jsController];
         });
         it(@"Should init web view reporting after anonymous activation", ^{
-            WKUserContentController *controller = [WKUserContentController nullMock];
             [appMetricaImpl activateAnonymously];
 
             [[jsController should] receive:@selector(setUpWebViewReporting:withReporter:)

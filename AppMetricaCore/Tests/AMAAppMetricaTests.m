@@ -820,24 +820,24 @@ describe(@"AMAAppMetrica", ^{
             beforeEach(^{
                 stubMetricaStarted(YES);
                 
-                WKUserContentController *controller = [WKUserContentController nullMock];
+                id controller = [KWMock nullMock];
                 jsController = [[AMAJSController alloc] initWithUserContentController:controller];
             });
             
             it(@"Should init", ^{
                 [[impl should] receive:@selector(setupWebViewReporting:)
                          withArguments:jsController];
-
+                
                 [AMAAppMetrica setupWebViewReporting:jsController
-                                              onFailure:nil];
+                                           onFailure:nil];
             });
             it(@"Should not init if metrica is not started", ^{
                 stubMetricaStarted(NO);
-
+                
                 [[impl shouldNot] receive:@selector(setupWebViewReporting:)];
-
+                
                 [AMAAppMetrica setupWebViewReporting:jsController
-                                              onFailure:nil];
+                                           onFailure:nil];
             });
         });
 #endif

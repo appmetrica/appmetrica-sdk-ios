@@ -3,7 +3,6 @@
 #import <AppMetricaPlatform/AppMetricaPlatform.h>
 #import "AMACore.h"
 #if !TARGET_OS_TV
-#import <WebKit/WebKit.h>
 #endif
 #import "AMAAppMetrica.h"
 #import "AMAAdProvider.h"

@@ -3,6 +3,7 @@
 #import <AppMetricaWebKit/AppMetricaWebKit.h>
 #import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
 #if !TARGET_OS_TV
+#import <WebKit/WebKit.h>
 
 SPEC_BEGIN(AMAJSControllerTests)
 

@@ -2,7 +2,6 @@
 #import <Foundation/Foundation.h>
 
 #if !TARGET_OS_TV
-#import <WebKit/WebKit.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -38,11 +37,6 @@ NS_SWIFT_NAME(reportJSInitEvent(value:));
  */
 NS_SWIFT_NAME(JSControlling)
 @protocol AMAJSControlling <NSObject>
-
-/**
- The user content controller associated with the WKWebView.
- */
-@property (nonatomic, strong, readonly) WKUserContentController *userContentController;
 
 - (instancetype)init NS_UNAVAILABLE;
 + (instancetype)new NS_UNAVAILABLE;
