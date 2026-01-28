@@ -33,23 +33,11 @@
     XCTAssertFalse(self.resolver.lastValue);
 }
 
-- (void)testAnonymousValueIfNoAnonymousSet
-{
-    self.resolver.updateExpectation = [self expectationWithDescription:@"update"];
-    
-    self.resolver.anonymousValue = @(NO);
-    
-    [self waitForExpectations:@[self.resolver.updateExpectation] timeout:1];
-    XCTAssertTrue(self.resolver.lastValue);
-}
-
 - (void)testAnonymousValue
 {
     self.resolver.updateExpectation = [self expectationWithDescription:@"update"];
-    self.resolver.updateExpectation.expectedFulfillmentCount = 2;
     
     self.resolver.anonymousValue = @(NO);
-    self.resolver.isAnonymousConfigurationActivated = YES;
     
     [self waitForExpectations:@[self.resolver.updateExpectation] timeout:1];
     XCTAssertFalse(self.resolver.lastValue);
@@ -67,17 +55,16 @@
     XCTAssertTrue(self.resolver.lastValue);
 }
 
-- (void)testUserValueOverrideAnonymousValueIfAnonymousSet
+- (void)testUserValueOverrideAnonymousWithFalse
 {
     self.resolver.updateExpectation = [self expectationWithDescription:@"update"];
-    self.resolver.updateExpectation.expectedFulfillmentCount = 3;
+    self.resolver.updateExpectation.expectedFulfillmentCount = 2;
     
-    self.resolver.anonymousValue = @(NO);
-    self.resolver.isAnonymousConfigurationActivated = YES;
-    self.resolver.userValue = @(YES);
+    self.resolver.anonymousValue = @(YES);
+    self.resolver.userValue = @(NO);
     
     [self waitForExpectations:@[self.resolver.updateExpectation] timeout:1];
-    XCTAssertTrue(self.resolver.lastValue);
+    XCTAssertFalse(self.resolver.lastValue);
 }
 
 

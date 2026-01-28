@@ -188,12 +188,6 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
     [self addStartupCompletionObserver:self.externalAttributionController];
 }
 
-- (void)updateResolversWithAnonymousConfigurationActivated:(BOOL)isAnonymousConfigurationActivated
-{
-    self.locationResolver.isAnonymousConfigurationActivated = isAnonymousConfigurationActivated;
-    self.adProviderResolver.isAnonymousConfigurationActivated = isAnonymousConfigurationActivated;
-}
-
 - (void)activateWithConfiguration:(AMAAppMetricaConfiguration *)configuration
 {
     [self.configurationManager updateMainConfiguration:configuration];
@@ -205,7 +199,6 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
     [self activateCommonComponents:configuration reporter:reporter];
     
     [[AMAMetricaConfiguration sharedInstance].inMemory markAppMetricaStarted];
-    [self updateResolversWithAnonymousConfigurationActivated:NO];
     [self logMetricaStart:configuration.APIKey];
 }
 
@@ -252,7 +245,6 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
     [self activateCommonComponents:configuration reporter:reporter];
     
     [[AMAMetricaConfiguration sharedInstance].inMemory markAppMetricaStartedAnonymously];
-    [self updateResolversWithAnonymousConfigurationActivated:YES];
 
     [self logMetricaStart:nil];
 }

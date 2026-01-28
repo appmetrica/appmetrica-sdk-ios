@@ -4,7 +4,6 @@
 
 @synthesize userValue = _userValue;
 @synthesize anonymousValue = _anonymousValue;
-@synthesize isAnonymousConfigurationActivated = _isAnonymousConfigurationActivated;
 @synthesize resultValue = _resultValue;
 
 - (instancetype)init
@@ -32,7 +31,7 @@
     if (self.userValue != nil) {
         result = self.userValue.boolValue;
     }
-    else if (self.isAnonymousConfigurationActivated && self.anonymousValue) {
+    else if (self.anonymousValue) {
         result = self.anonymousValue.boolValue;
     }
     else {
@@ -83,21 +82,6 @@
 {
     @synchronized (self) {
         return _resultValue;
-    }
-}
-
-- (void)setAnonymousConfigurationActivated:(BOOL)isAnonymousConfigurationActivated
-{
-    @synchronized (self) {
-        _isAnonymousConfigurationActivated = isAnonymousConfigurationActivated;
-        [self triggerUpdate];
-    }
-}
-
-- (BOOL)isAnonymousConfigurationActivated
-{
-    @synchronized (self) {
-        return _isAnonymousConfigurationActivated;
     }
 }
 

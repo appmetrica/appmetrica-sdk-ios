@@ -132,12 +132,8 @@
     BOOL isAnonConfiguration = [AMAActivationTypeResolver isAnonymousConfiguration:configuration];
     
     if (isAnonConfiguration) {
-        if (libraryAdapterConfiguration.locationTrackingEnabledValue != nil) {
-            configuration.locationTracking = [libraryAdapterConfiguration.locationTrackingEnabledValue boolValue];
-        }
-        if (libraryAdapterConfiguration.advertisingIdentifierTrackingEnabledValue != nil) {
-            configuration.advertisingIdentifierTrackingEnabled = [libraryAdapterConfiguration.advertisingIdentifierTrackingEnabledValue boolValue];
-        }
+        configuration.locationTracking = libraryAdapterConfiguration.locationTrackingEnabled;
+        configuration.advertisingIdentifierTrackingEnabled = libraryAdapterConfiguration.advertisingIdentifierTrackingEnabled;
     }
     
     self.savedAnonimousConfiguration = configuration;

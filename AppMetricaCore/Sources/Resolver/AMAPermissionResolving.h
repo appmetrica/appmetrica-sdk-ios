@@ -8,8 +8,6 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, copy, nullable) NSNumber *anonymousValue;
 @property (nonatomic, copy, nullable) NSNumber *userValue;
 
-@property (nonatomic, assign, setter=setAnonymousConfigurationActivated:) BOOL isAnonymousConfigurationActivated;
-
 - (void)updateBoolValue:(NSNumber *)value isAnonymous:(BOOL)isAnonymous;
 
 @end

@@ -14,7 +14,7 @@
 
 - (BOOL)advertisingIdentifierTrackingEnabled
 {
-    return [self.advertisingIdentifierTrackingEnabledValue boolValue] ?: YES;
+    return [self.advertisingIdentifierTrackingEnabledValue boolValue] ?: NO;
 }
 
 - (void)setAdvertisingIdentifierTrackingEnabled:(BOOL)advertisingIdentifierTrackingEnabled
@@ -24,7 +24,7 @@
 
 - (BOOL)locationTrackingEnabled
 {
-    return [self.locationTrackingEnabledValue boolValue] ?: YES;
+    return [self.locationTrackingEnabledValue boolValue] ?: NO;
 }
 
 - (void)setLocationTrackingEnabled:(BOOL)locationTrackingEnabled
