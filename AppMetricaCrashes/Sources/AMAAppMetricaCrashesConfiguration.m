@@ -10,7 +10,7 @@
         _autoCrashTracking = YES;
         _probablyUnhandledCrashReporting = NO;
         _ignoredCrashSignals = nil;
-        _applicationNotRespondingDetection = NO;
+        _applicationNotRespondingDetection = YES;
         _applicationNotRespondingWatchdogInterval = 4.0;
         _applicationNotRespondingPingInterval = 0.1;
     }
