@@ -102,7 +102,7 @@ describe(@"AMAAppMetricaCrashes", ^{
             [[theValue(config.autoCrashTracking) should] beYes];
             [[theValue(config.probablyUnhandledCrashReporting) should] beNo];
             [[config.ignoredCrashSignals should] beNil];
-            [[theValue(config.applicationNotRespondingDetection) should] beYes];
+            [[theValue(config.applicationNotRespondingDetection) should] beNo];
             [[theValue(config.applicationNotRespondingWatchdogInterval) should] equal:theValue(4.0)];
             [[theValue(config.applicationNotRespondingPingInterval) should] equal:theValue(0.1)];
         });

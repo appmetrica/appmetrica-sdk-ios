@@ -28,8 +28,8 @@ describe(@"AMAAppMetricaCrashesConfiguration", ^{
             [[config.ignoredCrashSignals should] beNil];
         });
         
-        it(@"Should have applicationNotRespondingDetection enabled by default", ^{
-            [[theValue(config.applicationNotRespondingDetection) should] beYes];
+        it(@"Should have applicationNotRespondingDetection disabled by default", ^{
+            [[theValue(config.applicationNotRespondingDetection) should] beNo];
         });
         
         it(@"Should have a default ANR watchdog interval of 4 seconds", ^{
