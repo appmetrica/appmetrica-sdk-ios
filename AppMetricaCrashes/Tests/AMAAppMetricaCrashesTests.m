@@ -5,7 +5,7 @@
 #import "AMAAppMetricaCrashes.h"
 #import "AMAAppMetricaCrashes+Private.h"
 #import "AMAANRWatchdog.h"
-#import "AMACrashLoader.h"
+#import "AMAKSCrashLoader.h"
 #import "AMACrashProcessor.h"
 #import "AMACrashReporter.h"
 #import "AMACrashReportingStateNotifier.h"
@@ -18,13 +18,14 @@
 #import "AMACrashReportCrash.h"
 #import "AMACrashReportError.h"
 #import "AMASignal.h"
+#import "AMACrashObserverDispatcher.h"
+#import "AMACrashObserverConfiguration.h"
+#import "AMAExternalCrashLoader.h"
+#import "AMACrashForwarder.h"
 
 @interface AMAAppMetricaCrashes () <AMAModuleActivationDelegate>
 @property (nonatomic, strong) AMAErrorEnvironment *errorEnvironment;
 @property (nonatomic, strong) AMAEnvironmentContainer *appEnvironment;
-
-// TODO: Rework after https://nda.ya.ru/t/HRd8dJIs7HaJts
-- (void)addExtendedCrashProcessor:(id<AMAExtendedCrashProcessing>)crashProcessor;
 
 - (void)handlePluginInitFinished;
 @end
@@ -41,11 +42,12 @@ describe(@"AMAAppMetricaCrashes", ^{
     AMACrashProcessor *__block crashProcessor = nil;
     AMAANRWatchdog *__block anrDetectorMock = nil;
     AMACrashReportingStateNotifier *__block stateNotifier = nil;
-    AMACrashLoader *__block crashLoader = nil;
+    AMAKSCrashLoader *__block crashLoader = nil;
+    AMAExternalCrashLoader *__block externalCrashLoader = nil;
     AMACrashReporter *__block crashReporter = nil;
     AMADecodedCrashSerializer *__block serializer = nil;
     AMAAppMetricaCrashes *__block crashes = nil;
-    
+
     AMAStubHostAppStateProvider *__block hostStateProvider = nil;
     
     beforeEach(^{
@@ -55,7 +57,7 @@ describe(@"AMAAppMetricaCrashes", ^{
         // TODO: replace with factory
         crashProcessor = [AMACrashProcessor nullMock];
         [AMACrashProcessor stub:@selector(alloc) andReturn:crashProcessor];
-        [crashProcessor stub:@selector(initWithIgnoredSignals:serializer:crashReporter:extendedProcessors:) andReturn:crashProcessor];
+        [crashProcessor stub:@selector(initWithIgnoredSignals:serializer:crashReporter:) andReturn:crashProcessor];
         
         anrDetectorMock = [AMAANRWatchdog nullMock];
         [AMAANRWatchdog stub:@selector(alloc) andReturn:anrDetectorMock];
@@ -66,15 +68,17 @@ describe(@"AMAAppMetricaCrashes", ^{
         [crashReporter stub:@selector(initWithApiKey:errorEnvironment:) andReturn:crashReporter];
         
         serializer = [AMADecodedCrashSerializer nullMock];
-        crashLoader = [AMACrashLoader nullMock];
+        crashLoader = [AMAKSCrashLoader nullMock];
+        externalCrashLoader = [AMAExternalCrashLoader nullMock];
         stateNotifier = [AMACrashReportingStateNotifier nullMock];
-        
+
         crashes = [[AMAAppMetricaCrashes alloc] initWithExecutor:executor
-                                                     crashLoader:crashLoader
+                                                   ksCrashLoader:crashLoader
                                                    stateNotifier:stateNotifier
                                                hostStateProvider:hostStateProvider
                                                       serializer:serializer
-                                                   configuration:[AMAAppMetricaCrashesConfiguration new]];
+                                                   configuration:[AMAAppMetricaCrashesConfiguration new]
+                                             externalCrashLoader:externalCrashLoader];
     });
     afterEach(^{
         [AMAAppMetrica clearStubs];
@@ -236,8 +240,8 @@ describe(@"AMAAppMetricaCrashes", ^{
 
             it(@"Should initialize crash processor with provided ignored signals and serializer", ^{
                 initialConfig.ignoredCrashSignals = @[ @SIGABRT, @SIGILL, @SIGSEGV ];
-                [[crashProcessor should] receive:@selector(initWithIgnoredSignals:serializer:crashReporter:extendedProcessors:)
-                                   withArguments:initialConfig.ignoredCrashSignals, serializer, crashReporter, kw_any()];
+                [[crashProcessor should] receive:@selector(initWithIgnoredSignals:serializer:crashReporter:)
+                                   withArguments:initialConfig.ignoredCrashSignals, serializer, crashReporter];
                 
                 [crashes setConfiguration:initialConfig];
                 [crashes activate];
@@ -245,17 +249,6 @@ describe(@"AMAAppMetricaCrashes", ^{
                 [AMAAppMetricaCrashes stub:@selector(crashes) andReturn:crashes];
                 AMAModuleActivationConfiguration *config = [[AMAModuleActivationConfiguration alloc] initWithApiKey:testsAPIKey];
                 [AMAAppMetricaCrashes willActivateWithConfiguration:config];
-            });
-            
-            it(@"Should add extended crash processor if primary is already configured", ^{
-                [AMAAppMetricaCrashes stub:@selector(crashes) andReturn:crashes];
-                AMAModuleActivationConfiguration *config = [[AMAModuleActivationConfiguration alloc] initWithApiKey:testsAPIKey];
-                [AMAAppMetricaCrashes willActivateWithConfiguration:config];
-                
-                NSObject<AMAExtendedCrashProcessing> *extendedProcessor = [KWMock nullMockForProtocol:@protocol(AMAExtendedCrashProcessing)];
-                [[crashProcessor should] receive:@selector(addExtendedCrashProcessor:) withArguments:extendedProcessor];
-                
-                [crashes addExtendedCrashProcessor:extendedProcessor];
             });
 
             context(@"CrashLoader Configuration", ^{
@@ -291,7 +284,7 @@ describe(@"AMAAppMetricaCrashes", ^{
                 });
 
                 it(@"Should update crash context asynchronously", ^{
-                    [[AMACrashLoader should] receive:@selector(addCrashContext:)]; // add context check
+                    [[AMAKSCrashLoader should] receive:@selector(addCrashContext:)];
                     [crashes activate];
                 });
 
@@ -299,7 +292,7 @@ describe(@"AMAAppMetricaCrashes", ^{
                     initialConfig.autoCrashTracking = NO;
                     [crashes setConfiguration:initialConfig];
 
-                    [[AMACrashLoader should] receive:@selector(purgeCrashesDirectory)];
+                    [[AMAKSCrashLoader should] receive:@selector(purgeCrashesDirectory)];
 
                     [crashes activate];
                 });
@@ -342,7 +335,7 @@ describe(@"AMAAppMetricaCrashes", ^{
 
         NSError *const sampleNSError = [NSError errorWithDomain:@"SampleDomain" code:100 userInfo:nil];
         let(errorRepresentableMock, ^{ return [KWMock mockForProtocol:@protocol(AMAErrorRepresentable)]; });
-        let(sampleErrorModel, ^{ return [AMAErrorModel mock]; });
+        let(sampleErrorModel, ^{ return [AMAErrorModel nullMock]; });
 
         beforeEach(^{
             [AMAAppMetricaCrashes stub:@selector(crashes) andReturn:crashes];
@@ -427,13 +420,13 @@ describe(@"AMAAppMetricaCrashes", ^{
         });
 
         it(@"Should process crash on didLoadCrash callback", ^{
-            AMADecodedCrash *sampleCrash = [AMADecodedCrash mock];
+            AMADecodedCrash *sampleCrash = [AMADecodedCrash nullMock];
             [[crashProcessor should] receive:@selector(processCrash:withError:)];
             [crashes crashLoader:crashLoader didLoadCrash:sampleCrash withError:nil];
         });
-
+        
         it(@"Should process ANR on didLoadANR callback", ^{
-            AMADecodedCrash *sampleANR = [AMADecodedCrash mock];
+            AMADecodedCrash *sampleANR = [AMADecodedCrash nullMock];
             [[crashProcessor should] receive:@selector(processANR:withError:)];
             [crashes crashLoader:crashLoader didLoadANR:sampleANR withError:nil];
         });
@@ -459,10 +452,9 @@ describe(@"AMAAppMetricaCrashes", ^{
             [AMAAppMetricaCrashes stub:@selector(crashes) andReturn:crashes];
         });
 
-        //TODO: Add tests for ignored signals filtering
         it(@"Should return events for the previous session", ^{
-            NSArray *mockedCrashes = @[[AMADecodedCrash mock], [AMADecodedCrash mock]];
-            NSArray *mockedEvents = @[[AMAEventPollingParameters mock], [AMAEventPollingParameters mock]];
+            NSArray *mockedCrashes = @[[AMADecodedCrash nullMock], [AMADecodedCrash nullMock]];
+            NSArray *mockedEvents = @[[AMAEventPollingParameters nullMock], [AMAEventPollingParameters nullMock]];
             [crashLoader stub:@selector(syncLoadCrashReports) andReturn:mockedCrashes];
 
             [[serializer should] receive:@selector(eventParametersFromDecodedData:error:)
@@ -476,7 +468,7 @@ describe(@"AMAAppMetricaCrashes", ^{
         });
 
         it(@"Should handle serialization errors gracefully", ^{
-            NSArray *mockedCrashes = @[[AMADecodedCrash mock], [AMADecodedCrash mock]];
+            NSArray *mockedCrashes = @[[AMADecodedCrash nullMock], [AMADecodedCrash nullMock]];
             [crashLoader stub:@selector(syncLoadCrashReports) andReturn:mockedCrashes];
 
             [[serializer should] receive:@selector(eventParametersFromDecodedData:error:)
@@ -487,8 +479,8 @@ describe(@"AMAAppMetricaCrashes", ^{
         });
 
         it(@"Should return events even if some crashes fail to serialize", ^{
-            NSArray *mockedCrashes = @[[AMADecodedCrash mock], [AMADecodedCrash mock]];
-            AMAEventPollingParameters *event = [AMAEventPollingParameters mock];
+            NSArray *mockedCrashes = @[[AMADecodedCrash nullMock], [AMADecodedCrash nullMock]];
+            AMAEventPollingParameters *event = [AMAEventPollingParameters nullMock];
             [crashLoader stub:@selector(syncLoadCrashReports) andReturn:mockedCrashes];
 
             [serializer stub:@selector(eventParametersFromDecodedData:error:)
@@ -500,12 +492,129 @@ describe(@"AMAAppMetricaCrashes", ^{
             [[events should] haveCountOf:1];
             [[events[0] should] equal:event];
         });
+
+        context(@"Observer and handler notifications", ^{
+
+            AMACrashObserverDispatcher *__block observerManagerMock = nil;
+            AMACrashForwarder *__block handlerManagerMock = nil;
+
+            beforeEach(^{
+                observerManagerMock = [AMACrashObserverDispatcher nullMock];
+                handlerManagerMock = [AMACrashForwarder nullMock];
+                [crashes stub:@selector(crashObserverManager) andReturn:observerManagerMock];
+                [crashes stub:@selector(crashHandlerManager) andReturn:handlerManagerMock];
+            });
+
+            it(@"Should notify observer and handler with crash on pollingEvents", ^{
+                AMACrashReportError *error = [AMACrashReportError nullMock];
+                [error stub:@selector(type) andReturn:theValue(AMACrashTypeSignal)];
+                AMACrashReportCrash *reportCrash = [AMACrashReportCrash nullMock];
+                [reportCrash stub:@selector(error) andReturn:error];
+                AMADecodedCrash *crash = [AMADecodedCrash nullMock];
+                [crash stub:@selector(crash) andReturn:reportCrash];
+
+                [crashLoader stub:@selector(syncLoadCrashReports) andReturn:@[crash]];
+
+                [[observerManagerMock should] receive:@selector(notifyCrash:) withArguments:crash];
+                [[handlerManagerMock should] receive:@selector(processCrash:) withArguments:crash];
+
+                [AMAAppMetricaCrashes pollingEvents];
+            });
+
+            it(@"Should notify observer and handler with ANR on pollingEvents", ^{
+                AMACrashReportError *error = [AMACrashReportError nullMock];
+                [error stub:@selector(type) andReturn:theValue(AMACrashTypeMainThreadDeadlock)];
+                AMACrashReportCrash *reportCrash = [AMACrashReportCrash nullMock];
+                [reportCrash stub:@selector(error) andReturn:error];
+                AMADecodedCrash *anr = [AMADecodedCrash nullMock];
+                [anr stub:@selector(crash) andReturn:reportCrash];
+
+                [crashLoader stub:@selector(syncLoadCrashReports) andReturn:@[anr]];
+
+                [[observerManagerMock should] receive:@selector(notifyANR:) withArguments:anr];
+                [[handlerManagerMock should] receive:@selector(processANR:) withArguments:anr];
+
+                [AMAAppMetricaCrashes pollingEvents];
+            });
+
+            it(@"Should not notify observer and handler when no crashes", ^{
+                [crashLoader stub:@selector(syncLoadCrashReports) andReturn:@[]];
+
+                [[observerManagerMock shouldNot] receive:@selector(notifyCrash:)];
+                [[observerManagerMock shouldNot] receive:@selector(notifyANR:)];
+                [[handlerManagerMock shouldNot] receive:@selector(processCrash:)];
+                [[handlerManagerMock shouldNot] receive:@selector(processANR:)];
+
+                [AMAAppMetricaCrashes pollingEvents];
+            });
+
+            it(@"Should not call crashProcessor from pollingEvents", ^{
+                AMACrashReportError *error = [AMACrashReportError nullMock];
+                [error stub:@selector(type) andReturn:theValue(AMACrashTypeSignal)];
+                AMACrashReportCrash *reportCrash = [AMACrashReportCrash nullMock];
+                [reportCrash stub:@selector(error) andReturn:error];
+                AMADecodedCrash *crash = [AMADecodedCrash nullMock];
+                [crash stub:@selector(crash) andReturn:reportCrash];
+
+                [crashLoader stub:@selector(syncLoadCrashReports) andReturn:@[crash]];
+
+                [[crashProcessor shouldNot] receive:@selector(processCrash:withError:)];
+                [[crashProcessor shouldNot] receive:@selector(processANR:withError:)];
+
+                [AMAAppMetricaCrashes pollingEvents];
+            });
+
+            it(@"Should not notify observer and handler for crash with ignored signal", ^{
+                AMAAppMetricaCrashesConfiguration *config = [AMAAppMetricaCrashesConfiguration new];
+                config.ignoredCrashSignals = @[ @SIGABRT ];
+                [crashes setConfiguration:config];
+
+                AMASignal *signal = [[AMASignal alloc] initWithSignal:SIGABRT code:0];
+                AMACrashReportError *error = [AMACrashReportError nullMock];
+                [error stub:@selector(type) andReturn:theValue(AMACrashTypeSignal)];
+                [error stub:@selector(signal) andReturn:signal];
+                AMACrashReportCrash *reportCrash = [AMACrashReportCrash nullMock];
+                [reportCrash stub:@selector(error) andReturn:error];
+                AMADecodedCrash *crash = [AMADecodedCrash nullMock];
+                [crash stub:@selector(crash) andReturn:reportCrash];
+
+                [crashLoader stub:@selector(syncLoadCrashReports) andReturn:@[crash]];
+
+                [[observerManagerMock shouldNot] receive:@selector(notifyCrash:)];
+                [[handlerManagerMock shouldNot] receive:@selector(processCrash:)];
+
+                NSArray *events = [AMAAppMetricaCrashes pollingEvents];
+                [[events should] beEmpty];
+            });
+
+            it(@"Should notify observer and handler for crash with non-ignored signal", ^{
+                AMAAppMetricaCrashesConfiguration *config = [AMAAppMetricaCrashesConfiguration new];
+                config.ignoredCrashSignals = @[ @SIGABRT ];
+                [crashes setConfiguration:config];
+
+                AMASignal *signal = [[AMASignal alloc] initWithSignal:SIGSEGV code:0];
+                AMACrashReportError *error = [AMACrashReportError nullMock];
+                [error stub:@selector(type) andReturn:theValue(AMACrashTypeSignal)];
+                [error stub:@selector(signal) andReturn:signal];
+                AMACrashReportCrash *reportCrash = [AMACrashReportCrash nullMock];
+                [reportCrash stub:@selector(error) andReturn:error];
+                AMADecodedCrash *crash = [AMADecodedCrash nullMock];
+                [crash stub:@selector(crash) andReturn:reportCrash];
+
+                [crashLoader stub:@selector(syncLoadCrashReports) andReturn:@[crash]];
+
+                [[observerManagerMock should] receive:@selector(notifyCrash:) withArguments:crash];
+                [[handlerManagerMock should] receive:@selector(processCrash:) withArguments:crash];
+
+                [AMAAppMetricaCrashes pollingEvents];
+            });
+        });
     });
 
     context(@"AMACrashLoaderDelegate", ^{
 
         let(sampleError, ^{ return [NSError errorWithDomain:@"test" code:123 userInfo:nil]; });
-        let(sampleCrash, ^{ return [AMADecodedCrash mock]; });
+        let(sampleCrash, ^{ return [AMADecodedCrash nullMock]; });
 
         beforeEach(^{
             [crashes activate];
@@ -535,7 +644,7 @@ describe(@"AMAAppMetricaCrashes", ^{
         });
 
         context(@"Probable unhandled crash", ^{
-            let(mockedError, ^{ return [NSError mock]; });
+            let(mockedError, ^{ return [NSError nullMock]; });
             
             beforeEach(^{
                 [crashes activate];
@@ -575,7 +684,7 @@ describe(@"AMAAppMetricaCrashes", ^{
         it(@"Should report of ANR to crash loader", ^{
             [crashes activate];
             [[crashLoader should] receive:@selector(reportANR)];
-            [crashes ANRWatchdogDidDetectANR:[AMAANRWatchdog mock]];
+            [crashes ANRWatchdogDidDetectANR:[AMAANRWatchdog nullMock]];
         });
     });
     
@@ -608,6 +717,111 @@ describe(@"AMAAppMetricaCrashes", ^{
         });
     });
     
+    context(@"Crash Observer", ^{
+
+        AMACrashObserverDispatcher *__block observerManagerMock = nil;
+
+        beforeEach(^{
+            observerManagerMock = [AMACrashObserverDispatcher nullMock];
+            [crashes stub:@selector(crashObserverManager) andReturn:observerManagerMock];
+        });
+
+        context(@"Registration before activation", ^{
+            it(@"Should register crash observer via crashObserverManager", ^{
+                AMACrashObserverConfiguration *observerConfig = [AMACrashObserverConfiguration nullMock];
+                [[observerManagerMock should] receive:@selector(registerObserverConfiguration:) withArguments:observerConfig];
+                [crashes registerCrashObserver:observerConfig];
+            });
+
+            it(@"Should register crash observer after activation", ^{
+                [crashes activate];
+                AMACrashObserverConfiguration *observerConfig = [AMACrashObserverConfiguration nullMock];
+                [[observerManagerMock should] receive:@selector(registerObserverConfiguration:)];
+                [crashes registerCrashObserver:observerConfig];
+            });
+        });
+
+        context(@"Notifications", ^{
+            beforeEach(^{
+                [crashes activate];
+
+                [AMAAppMetricaCrashes stub:@selector(crashes) andReturn:crashes];
+                AMAModuleActivationConfiguration *config = [[AMAModuleActivationConfiguration alloc] initWithApiKey:testsAPIKey];
+                [AMAAppMetricaCrashes willActivateWithConfiguration:config];
+            });
+
+            it(@"Should notify crash observer manager on didLoadCrash", ^{
+                AMADecodedCrash *sampleCrash = [AMADecodedCrash nullMock];
+                [[observerManagerMock should] receive:@selector(notifyCrash:) withArguments:sampleCrash];
+                [crashes crashLoader:crashLoader didLoadCrash:sampleCrash withError:nil];
+            });
+
+            it(@"Should notify crash observer manager on didLoadANR", ^{
+                AMADecodedCrash *sampleANR = [AMADecodedCrash nullMock];
+                [[observerManagerMock should] receive:@selector(notifyANR:) withArguments:sampleANR];
+                [crashes crashLoader:crashLoader didLoadANR:sampleANR withError:nil];
+            });
+
+            it(@"Should notify crash observer manager on didDetectProbableUnhandledCrash", ^{
+                [[observerManagerMock should] receive:@selector(notifyProbableUnhandledCrash:)];
+                [crashes crashLoader:crashLoader didDetectProbableUnhandledCrash:AMAUnhandledCrashForeground];
+            });
+        });
+    });
+
+    context(@"Crash Handler", ^{
+
+        AMACrashForwarder *__block handlerManagerMock = nil;
+
+        beforeEach(^{
+            handlerManagerMock = [AMACrashForwarder nullMock];
+            [crashes stub:@selector(crashHandlerManager) andReturn:handlerManagerMock];
+        });
+
+        it(@"Should register crash handler before activation", ^{
+            id handlerMock = [KWMock nullMockForProtocol:@protocol(AMACrashFilteringProxy)];
+            [[handlerManagerMock should] receive:@selector(registerHandler:) withArguments:handlerMock];
+            [crashes registerCrashHandler:handlerMock];
+        });
+
+        it(@"Should not register crash handler after activation", ^{
+            [crashes activate];
+            id handlerMock = [KWMock nullMockForProtocol:@protocol(AMACrashFilteringProxy)];
+            [[handlerManagerMock shouldNot] receive:@selector(registerHandler:)];
+            [crashes registerCrashHandler:handlerMock];
+        });
+
+        context(@"Processing", ^{
+            beforeEach(^{
+                [crashes activate];
+
+                [AMAAppMetricaCrashes stub:@selector(crashes) andReturn:crashes];
+                AMAModuleActivationConfiguration *config = [[AMAModuleActivationConfiguration alloc] initWithApiKey:testsAPIKey];
+                [AMAAppMetricaCrashes willActivateWithConfiguration:config];
+            });
+
+            it(@"Should call handler manager processCrash on didLoadCrash", ^{
+                AMADecodedCrash *sampleCrash = [AMADecodedCrash nullMock];
+                [[handlerManagerMock should] receive:@selector(processCrash:) withArguments:sampleCrash];
+                [crashes crashLoader:crashLoader didLoadCrash:sampleCrash withError:nil];
+            });
+
+            it(@"Should call handler manager processANR on didLoadANR", ^{
+                AMADecodedCrash *sampleANR = [AMADecodedCrash nullMock];
+                [[handlerManagerMock should] receive:@selector(processANR:) withArguments:sampleANR];
+                [crashes crashLoader:crashLoader didLoadANR:sampleANR withError:nil];
+            });
+        });
+    });
+
+    context(@"Registration after activation", ^{
+        it(@"Should not register crash provider after activation", ^{
+            [crashes activate];
+            [[externalCrashLoader shouldNot] receive:@selector(registerProvider:)];
+            [crashes registerCrashProvider:[KWMock nullMockForProtocol:@protocol(AMACrashProviding)]];
+        });
+    });
+
     context(@"Handle plugin init finished", ^{
         [AMAAppMetrica clearStubs];
         

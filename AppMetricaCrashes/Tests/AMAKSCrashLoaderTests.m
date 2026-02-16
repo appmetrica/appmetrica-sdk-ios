@@ -4,22 +4,22 @@
 #import <AppMetricaCoreExtension/AppMetricaCoreExtension.h>
 #import <KSCrashReport.h>
 
-#import "AMACrashLoader.h"
+#import "AMAKSCrashLoader.h"
 
-#import "AMACrashReportDecoder.h"
+#import "AMAKSCrashReportDecoder.h"
 #import "AMACrashSafeTransactor.h"
 #import "AMAAppMetricaCrashes.h"
 #import "AMADecodedCrash.h"
 #import "AMAUnhandledCrashDetector.h"
 
-@interface AMACrashLoader ()
+@interface AMAKSCrashLoader ()
 
 - (void)handleCrashReports:(NSArray *)reportIDs;
 - (void)decodeCrashReport:(id)crashReport withDecoder:(id)crashDecoder;
 
 @end
 
-@interface AMACrashLoader (Tests)
+@interface AMAKSCrashLoader (Tests)
 
 @property (nonatomic, strong) AMAUnhandledCrashDetector *unhandledCrashDetector;
 @property (nonatomic, strong) NSMutableDictionary *decoders;
@@ -30,7 +30,7 @@
 
 @end
 
-@implementation AMACrashLoader (Tests)
+@implementation AMAKSCrashLoader (Tests)
 
 @dynamic unhandledCrashDetector;
 @dynamic decoders;
@@ -43,9 +43,9 @@
 
 @end
 
-SPEC_BEGIN(AMACrashLoaderTests)
+SPEC_BEGIN(AMAKSCrashLoaderTests)
 
-describe(@"AMACrashLoader", ^{
+describe(@"AMAKSCrashLoader", ^{
     
     __block AMACrashSafeTransactor *transactor = nil;
     
@@ -90,10 +90,10 @@ describe(@"AMACrashLoader", ^{
         it(@"Should set context", ^{
             [mockKSCrash stub:@selector(userInfo)];
             [[mockKSCrash should] receive:@selector(setUserInfo:) withArguments:context];
-            [AMACrashLoader addCrashContext:context];
+            [AMAKSCrashLoader addCrashContext:context];
 
             [mockKSCrash stub:@selector(userInfo) andReturn:context];
-            NSDictionary *crashContext = [AMACrashLoader crashContext];
+            NSDictionary *crashContext = [AMAKSCrashLoader crashContext];
             [[crashContext should] equal:context];
         });
 
@@ -101,12 +101,12 @@ describe(@"AMACrashLoader", ^{
             [mockKSCrash stub:@selector(userInfo)];
             [mockKSCrash stub:@selector(setUserInfo:)];
             [[mockKSCrash should] receive:@selector(setUserInfo:) withArguments:context];
-            [AMACrashLoader addCrashContext:context];
+            [AMAKSCrashLoader addCrashContext:context];
         });
 
         it(@"Should return KSCrash userInfo as crash context", ^{
             [mockKSCrash stub:@selector(userInfo) andReturn:context];
-            [[[AMACrashLoader crashContext] should] equal:context];
+            [[[AMAKSCrashLoader crashContext] should] equal:context];
         });
 
         it(@"Should not overwrite userInfo, but append context data", ^{
@@ -119,12 +119,12 @@ describe(@"AMACrashLoader", ^{
 
             [[mockKSCrash should] receive:@selector(setUserInfo:) withArguments:resultDictionary];
 
-            [AMACrashLoader addCrashContext:crashContext];
+            [AMAKSCrashLoader addCrashContext:crashContext];
         });
 
         it(@"Should not modify context if nil is passed", ^{
             [[mockKSCrash shouldNot] receive:@selector(setUserInfo:)];
-            [AMACrashLoader addCrashContext:nil];
+            [AMAKSCrashLoader addCrashContext:nil];
         });
 
         it(@"Should overwrite with new values", ^{
@@ -136,7 +136,7 @@ describe(@"AMACrashLoader", ^{
 
             [[mockKSCrash should] receive:@selector(setUserInfo:) withArguments:resultDictionary];
 
-            [AMACrashLoader addCrashContext:crashContext];
+            [AMAKSCrashLoader addCrashContext:crashContext];
         });
     });
     context(@"Synchronous Load Crash Reports", ^{
@@ -152,14 +152,14 @@ describe(@"AMACrashLoader", ^{
             return mock;
         });
         let(crashLoader, ^{
-            AMACrashLoader *loader = [[AMACrashLoader alloc] initWithUnhandledCrashDetector:unhandledCrashDetector
+            AMAKSCrashLoader *loader = [[AMAKSCrashLoader alloc] initWithUnhandledCrashDetector:unhandledCrashDetector
                                                                                  transactor:transactor];
             loader.delegate = crashLoaderDelegate;
             return loader;
         });
         afterEach(^{
             [KSCrash clearStubs];
-            [AMACrashReportDecoder clearStubs];
+            [AMAKSCrashReportDecoder clearStubs];
         });
         
         NSNumber *const crashID = @23;
@@ -167,8 +167,8 @@ describe(@"AMACrashLoader", ^{
       
         it(@"Should return decoded crash reports", ^{
             [reportStore stub:@selector(reportIDs) andReturn:crashIDs];
-            AMACrashReportDecoder *decoder = [AMACrashReportDecoder nullMock];
-            [AMACrashReportDecoder stub:@selector(alloc) andReturn:decoder];
+            AMAKSCrashReportDecoder *decoder = [AMAKSCrashReportDecoder nullMock];
+            [AMAKSCrashReportDecoder stub:@selector(alloc) andReturn:decoder];
             [decoder stub:@selector(initWithCrashID:) andReturn:decoder];
             [decoder stub:@selector(decode:) withBlock:^id(NSArray *params) {
                 for (AMADecodedCrash *crash in crashReports) {
@@ -184,8 +184,8 @@ describe(@"AMACrashLoader", ^{
 
         it(@"Should handle decoding errors gracefully", ^{
             [ksCrash stub:@selector(reportIDs) andReturn:crashIDs];
-            AMACrashReportDecoder *decoder = [AMACrashReportDecoder nullMock];
-            [AMACrashReportDecoder stub:@selector(alloc) andReturn:decoder];
+            AMAKSCrashReportDecoder *decoder = [AMAKSCrashReportDecoder nullMock];
+            [AMAKSCrashReportDecoder stub:@selector(alloc) andReturn:decoder];
             [decoder stub:@selector(initWithCrashID:) andReturn:decoder];
             
             NSError *error = [NSError errorWithDomain:@"TestDomain" code:400 userInfo:nil];
@@ -219,7 +219,7 @@ describe(@"AMACrashLoader", ^{
         KSCrash __block *ksCrash;
         KSCrashReportStore __block *reportStore;
         AMAUnhandledCrashDetector __block *unhandledCrashDetector;
-        AMACrashLoader __block *crashLoader;
+        AMAKSCrashLoader __block *crashLoader;
         id __block crashLoaderDelegate;
         NSNumber *crashID = @23;
         
@@ -229,7 +229,7 @@ describe(@"AMACrashLoader", ^{
             [KSCrash stub:@selector(sharedInstance) andReturn:ksCrash];
             [ksCrash stub:@selector(reportStore) andReturn:reportStore];
             unhandledCrashDetector = [AMAUnhandledCrashDetector nullMock];
-            crashLoader = [[AMACrashLoader alloc] initWithUnhandledCrashDetector:unhandledCrashDetector
+            crashLoader = [[AMAKSCrashLoader alloc] initWithUnhandledCrashDetector:unhandledCrashDetector
                                                                       transactor:transactor];
             crashLoaderDelegate = [KWMock nullMockForProtocol:@protocol(AMACrashLoaderDelegate)];
             crashLoader.delegate = crashLoaderDelegate;
@@ -284,7 +284,7 @@ describe(@"AMACrashLoader", ^{
         context(@"ANR reporting", ^{
             
             afterEach(^{
-                [AMACrashReportDecoder clearStubs];
+                [AMAKSCrashReportDecoder clearStubs];
             });
             
             it(@"Should call KSCrash", ^{
@@ -301,29 +301,29 @@ describe(@"AMACrashLoader", ^{
             it(@"Should decode ANR crash report", ^{
                 NSNumber *expectedCrashID = @123;
                 [reportStore stub:@selector(reportIDs) andReturn:@[ expectedCrashID ]];
-                AMACrashReportDecoder *decoder = [AMACrashReportDecoder nullMock];
-                [AMACrashReportDecoder stub:@selector(alloc) andReturn:decoder];
+                AMAKSCrashReportDecoder *decoder = [AMAKSCrashReportDecoder nullMock];
+                [AMAKSCrashReportDecoder stub:@selector(alloc) andReturn:decoder];
                 [[decoder should] receive:@selector(initWithCrashID:) withArguments:expectedCrashID];
                 
                 [crashLoader reportANR];
                 
-                [AMACrashReportDecoder clearStubs];
+                [AMAKSCrashReportDecoder clearStubs];
             });
             
             context(@"Should process decoded ANR", ^{
                 __block AMADecodedCrash *crash = nil;
-                AMACrashReportDecoder __block *decoder;
+                AMAKSCrashReportDecoder __block *decoder;
 
                 beforeEach(^{
                     crash = [AMADecodedCrash nullMock];
-                    decoder = [AMACrashReportDecoder nullMock];
-                    [AMACrashReportDecoder stub:@selector(alloc) andReturn:decoder];
+                    decoder = [AMAKSCrashReportDecoder nullMock];
+                    [AMAKSCrashReportDecoder stub:@selector(alloc) andReturn:decoder];
                 });
 
                 it(@"Should send to delegate", ^{
                     [decoder stub:@selector(crashID) andReturn:crashID];
                     [[crashLoaderDelegate should] receive:@selector(crashLoader:didLoadANR:withError:)];
-                    [(id<AMACrashReportDecoderDelegate>)crashLoader crashReportDecoder:decoder
+                    [(id<AMAKSCrashReportDecoderDelegate>)crashLoader crashReportDecoder:decoder
                                                                           didDecodeANR:crash
                                                                              withError:nil];
                 });
@@ -331,7 +331,7 @@ describe(@"AMACrashLoader", ^{
                 it(@"Should send to delegate if crashID is nil", ^{
                     [decoder stub:@selector(crashID) andReturn:nil];
                     [[crashLoaderDelegate should] receive:@selector(crashLoader:didLoadANR:withError:)];
-                    [(id<AMACrashReportDecoderDelegate>)crashLoader crashReportDecoder:decoder
+                    [(id<AMAKSCrashReportDecoderDelegate>)crashLoader crashReportDecoder:decoder
                                                                           didDecodeANR:crash
                                                                              withError:nil];
                 });
@@ -340,7 +340,7 @@ describe(@"AMACrashLoader", ^{
                     [decoder stub:@selector(crashID) andReturn:crashID];
                     [[reportStore should] receive:@selector(deleteReportWithID:)
                                     withArguments:theValue(crashID.integerValue)];
-                    [(id<AMACrashReportDecoderDelegate>)crashLoader crashReportDecoder:decoder
+                    [(id<AMAKSCrashReportDecoderDelegate>)crashLoader crashReportDecoder:decoder
                                                                           didDecodeANR:crash
                                                                              withError:nil];
                 });
@@ -420,21 +420,21 @@ describe(@"AMACrashLoader", ^{
         });
         context(@"Should process decoded crash", ^{
             __block AMADecodedCrash *crash = nil;
-            AMACrashReportDecoder __block *decoder;
+            AMAKSCrashReportDecoder __block *decoder;
 
             beforeEach(^{
                 crash = [AMADecodedCrash nullMock];
-                decoder = [AMACrashReportDecoder nullMock];
-                [AMACrashReportDecoder stub:@selector(alloc) andReturn:decoder];
+                decoder = [AMAKSCrashReportDecoder nullMock];
+                [AMAKSCrashReportDecoder stub:@selector(alloc) andReturn:decoder];
             });
             afterEach(^{
-                [AMACrashReportDecoder clearStubs];
+                [AMAKSCrashReportDecoder clearStubs];
             });
 
             it(@"Should send to delegate", ^{
                 [decoder stub:@selector(crashID) andReturn:crashID];
                 [[crashLoaderDelegate should] receive:@selector(crashLoader:didLoadCrash:withError:)];
-                [(id<AMACrashReportDecoderDelegate>)crashLoader crashReportDecoder:decoder
+                [(id<AMAKSCrashReportDecoderDelegate>)crashLoader crashReportDecoder:decoder
                                                                     didDecodeCrash:crash
                                                                          withError:nil];
             });
@@ -442,7 +442,7 @@ describe(@"AMACrashLoader", ^{
             it(@"Should send to delegate if crashID is nil", ^{
                 [decoder stub:@selector(crashID) andReturn:nil];
                 [[crashLoaderDelegate should] receive:@selector(crashLoader:didLoadCrash:withError:)];
-                [(id<AMACrashReportDecoderDelegate>)crashLoader crashReportDecoder:decoder
+                [(id<AMAKSCrashReportDecoderDelegate>)crashLoader crashReportDecoder:decoder
                                                                     didDecodeCrash:crash
                                                                          withError:nil];
             });
@@ -451,7 +451,7 @@ describe(@"AMACrashLoader", ^{
                 [decoder stub:@selector(crashID) andReturn:crashID];
                 [[reportStore should] receive:@selector(deleteReportWithID:)
                                 withArguments:theValue(crashID.integerValue)];
-                [(id<AMACrashReportDecoderDelegate>)crashLoader crashReportDecoder:decoder
+                [(id<AMAKSCrashReportDecoderDelegate>)crashLoader crashReportDecoder:decoder
                                                                     didDecodeCrash:crash
                                                                          withError:nil];
             });

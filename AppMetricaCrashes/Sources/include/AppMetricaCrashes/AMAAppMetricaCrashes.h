@@ -7,6 +7,36 @@
     #import <AppMetricaCrashes/AMAErrorRepresentable.h>
 #endif
 
+#if __has_include("AMACrashObserverConfiguration.h")
+    #import "AMACrashObserverConfiguration.h"
+#else
+    #import <AppMetricaCrashes/AMACrashObserverConfiguration.h>
+#endif
+
+#if __has_include("AMACrashObserving.h")
+    #import "AMACrashObserving.h"
+#else
+    #import <AppMetricaCrashes/AMACrashObserving.h>
+#endif
+
+#if __has_include("AMACrashFilteringProxy.h")
+    #import "AMACrashFilteringProxy.h"
+#else
+    #import <AppMetricaCrashes/AMACrashFilteringProxy.h>
+#endif
+
+#if __has_include("AMACrashEvent.h")
+    #import "AMACrashEvent.h"
+#else
+    #import <AppMetricaCrashes/AMACrashEvent.h>
+#endif
+
+#if __has_include("AMACrashProviding.h")
+    #import "AMACrashProviding.h"
+#else
+    #import <AppMetricaCrashes/AMACrashProviding.h>
+#endif
+
 NS_ASSUME_NONNULL_BEGIN
 
 typedef NSString *AMACrashReportingStateKey NS_TYPED_EXTENSIBLE_ENUM NS_SWIFT_NAME(CrashReportingStateKey);
@@ -192,6 +222,25 @@ NS_SWIFT_NAME(AppMetricaCrashes)
  * @return plugin extension instance
  */
 - (id<AMAAppMetricaPlugins>)pluginExtension;
+
+/// Register a crash observer configuration
+/// This allows subscribing to crash events with custom configuration
+/// @param configuration The observer configuration containing delegate/callbacks and settings.
+/// @note This method can be called before AppMetrica activation for delayed configuration setup
+- (void)registerCrashObserver:(AMACrashObserverConfiguration *)configuration NS_SWIFT_NAME(register(crashObserver:));
+
+/// Register a crash handler for selective crash reporting to a custom API key.
+/// The handler decides per-crash whether to additionally report it.
+/// Must be called before AppMetrica activation.
+/// @param handler An object conforming to `AMACrashFilteringProxy` protocol.
+- (void)registerCrashHandler:(id<AMACrashFilteringProxy>)handler NS_SWIFT_NAME(register(crashHandler:));
+
+/// Register a crash provider.
+/// Can be called multiple times for different providers.
+/// KSCrash is registered automatically by the SDK.
+/// Must be called before AppMetrica activation.
+/// @param provider An object conforming to `AMACrashProviding` protocol.
+- (void)registerCrashProvider:(id<AMACrashProviding>)provider NS_SWIFT_NAME(register(crashProvider:));
 
 @end
 

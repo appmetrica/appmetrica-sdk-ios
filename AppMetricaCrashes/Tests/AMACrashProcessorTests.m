@@ -1,6 +1,5 @@
 #import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import "AMACrashProcessor.h"
-#import "AMAExtendedCrashProcessing.h"
 #import "AMACrashReportCrash.h"
 #import "AMACrashReportError.h"
 #import "AMACrashReporter.h"
@@ -17,12 +16,12 @@ describe(@"AMACrashProcessor", ^{
     let(serializer, ^{ return [AMADecodedCrashSerializer nullMock]; });
     let(formatterMock, ^{ return [AMAExceptionFormatter nullMock]; });
     let(crashReporterMock, ^{ return [AMACrashReporter nullMock]; });
+    
     let(crashProcessor, ^{
         return [[AMACrashProcessor alloc] initWithIgnoredSignals:nil
                                                       serializer:serializer
                                                    crashReporter:crashReporterMock
-                                                       formatter:formatterMock
-                                              extendedProcessors:@[]];
+                                                       formatter:formatterMock];
     });
     
     context(@"Initialization", ^{
@@ -30,8 +29,7 @@ describe(@"AMACrashProcessor", ^{
         it(@"Should properly initialize with default serializer when only signals are given", ^{
             AMACrashProcessor *processor = [[AMACrashProcessor alloc] initWithIgnoredSignals:@[ @SIGABRT ]
                                                                                   serializer:serializer
-                                                                               crashReporter:crashReporterMock
-                                                                          extendedProcessors:@[]];
+                                                                               crashReporter:crashReporterMock];
             [[processor.ignoredCrashSignals should] contain:@SIGABRT];
         });
         
@@ -39,8 +37,7 @@ describe(@"AMACrashProcessor", ^{
             AMACrashProcessor *processor = [[AMACrashProcessor alloc] initWithIgnoredSignals:@[ @SIGABRT ]
                                                                                   serializer:serializer
                                                                                crashReporter:crashReporterMock
-                                                                                   formatter:formatterMock
-                                                                          extendedProcessors:@[]];
+                                                                                   formatter:formatterMock];
             [[processor.ignoredCrashSignals should] contain:@SIGABRT];
         });
     });
@@ -89,8 +86,7 @@ describe(@"AMACrashProcessor", ^{
                 return [[AMACrashProcessor alloc] initWithIgnoredSignals:@[ @SIGABRT ]
                                                               serializer:serializer
                                                            crashReporter:crashReporterMock
-                                                               formatter:formatterMock
-                                                      extendedProcessors:@[]];
+                                                               formatter:formatterMock];
             });
             beforeEach(^{
                 [signalMock stub:@selector(signal) andReturn:theValue(SIGABRT)];
@@ -107,8 +103,7 @@ describe(@"AMACrashProcessor", ^{
                 return [[AMACrashProcessor alloc] initWithIgnoredSignals:@[ @SIGQUIT ]
                                                               serializer:serializer
                                                            crashReporter:crashReporterMock
-                                                               formatter:formatterMock
-                                                      extendedProcessors:@[]];
+                                                               formatter:formatterMock];
             });
             beforeEach(^{
                 [signalMock stub:@selector(signal) andReturn:theValue(SIGABRT)];
@@ -148,37 +143,6 @@ describe(@"AMACrashProcessor", ^{
                                       withArguments:errorMock, kw_any()];
                 
                 [crashProcessor processError:errorMock];
-            });
-        });
-        
-        context(@"Process Error with extended processor", ^{
-            let(errorMock, ^{ return [NSError nullMock]; });
-            
-            it(@"Should properly initialize with given extended processors", ^{
-                NSObject *extendedProcessor = [KWMock nullMockForProtocol:@protocol(AMAExtendedCrashProcessing)];
-                AMACrashProcessor *processor = [[AMACrashProcessor alloc] initWithIgnoredSignals:@[ @SIGABRT ]
-                                                                                      serializer:serializer
-                                                                                   crashReporter:crashReporterMock
-                                                                                       formatter:formatterMock
-                                                                              extendedProcessors:@[extendedProcessor]];
-                
-                [[extendedProcessor should] receive:@selector(processError:) withArguments:errorMock];
-                
-                [processor processError:errorMock];
-            });
-            it(@"Should add extended crash processor", ^{
-                NSObject<AMAExtendedCrashProcessing> *extendedProcessor = [KWMock nullMockForProtocol:@protocol(AMAExtendedCrashProcessing)];
-                AMACrashProcessor *processor = [[AMACrashProcessor alloc] initWithIgnoredSignals:@[ @SIGABRT ]
-                                                                                      serializer:serializer
-                                                                                   crashReporter:crashReporterMock
-                                                                                       formatter:formatterMock
-                                                                              extendedProcessors:@[]];
-                
-                [processor addExtendedCrashProcessor:extendedProcessor];
-                
-                [[extendedProcessor should] receive:@selector(processError:) withArguments:errorMock];
-                
-                [processor processError:errorMock];
             });
         });
     });

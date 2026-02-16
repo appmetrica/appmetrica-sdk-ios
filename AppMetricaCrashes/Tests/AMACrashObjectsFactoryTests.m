@@ -118,7 +118,7 @@ describe(@"AMACrashObjectsFactory", ^{
             [[theValue(result.frames.count) should] equal:theValue(2)];
         });
         context(@"First item", ^{
-            AMABacktraceFrame *__block frame = nil;
+            AMABacktraceFrame * __block frame = nil;
             beforeEach(^{
                 frame = result.frames[0];
             });
@@ -139,7 +139,7 @@ describe(@"AMACrashObjectsFactory", ^{
             });
         });
         context(@"second item", ^{
-            AMABacktraceFrame *__block frame = nil;
+            AMABacktraceFrame * __block frame = nil;
             beforeEach(^{
                 frame = result.frames[1];
             });
@@ -162,7 +162,7 @@ describe(@"AMACrashObjectsFactory", ^{
     });
 
     context(@"Backtrace info for nil backtrace", ^{
-        AMABacktrace *__block result;
+        AMABacktrace * __block result;
         beforeEach(^{
             result = [factory backtraceFrom:nil bytesTruncated:NULL];
         });

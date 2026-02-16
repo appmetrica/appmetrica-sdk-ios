@@ -54,7 +54,7 @@ describe(@"AMABacktraceSymbolicator", ^{
             [[backtrace.frames should] haveCountOfAtLeast:3];
         });
         context(@"Top frame", ^{
-            AMABacktraceFrame *__block frame = nil;
+            AMABacktraceFrame * __block frame = nil;
             beforeEach(^{
                 frame = backtrace.frames.firstObject;
             });
@@ -85,7 +85,7 @@ describe(@"AMABacktraceSymbolicator", ^{
             });
         });
         context(@"Second frame", ^{
-            AMABacktraceFrame *__block frame = nil;
+            AMABacktraceFrame * __block frame = nil;
             beforeEach(^{
                 frame = backtrace.frames[1];
             });
@@ -116,7 +116,7 @@ describe(@"AMABacktraceSymbolicator", ^{
             });
         });
         context(@"Third frame", ^{
-            AMABacktraceFrame *__block frame = nil;
+            AMABacktraceFrame * __block frame = nil;
             beforeEach(^{
                 frame = backtrace.frames[2];
             });
@@ -212,7 +212,7 @@ describe(@"AMABacktraceSymbolicator", ^{
             [[backtrace.frames should] haveCountOfAtLeast:3];
         });
         context(@"Top frame", ^{
-            AMABacktraceFrame *__block frame = nil;
+            AMABacktraceFrame * __block frame = nil;
             beforeEach(^{
                 frame = backtrace.frames.firstObject;
             });
@@ -254,7 +254,7 @@ describe(@"AMABacktraceSymbolicator", ^{
             [[backtrace.frames should] haveCountOfAtLeast:3];
         });
         context(@"Top frame", ^{
-            AMABacktraceFrame *__block frame = nil;
+            AMABacktraceFrame * __block frame = nil;
             beforeEach(^{
                 frame = backtrace.frames.firstObject;
             });

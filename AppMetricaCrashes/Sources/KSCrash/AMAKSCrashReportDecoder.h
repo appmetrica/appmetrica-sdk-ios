@@ -1,10 +1,10 @@
 
 #import <Foundation/Foundation.h>
 
-@protocol AMACrashReportDecoderDelegate;
+@protocol AMAKSCrashReportDecoderDelegate;
 @protocol AMADateProviding;
 @class AMADecodedCrash;
-@class AMASystem;
+@class AMASystemInfo;
 
 extern NSString *const kAMASysInfoSystemName;
 extern NSString *const kAMASysInfoSystemVersion;
@@ -38,9 +38,9 @@ extern NSString *const kAMASysInfoMemorySize;
 extern NSString *const kAMASysInfoFreeMemory;
 extern NSString *const kAMASysInfoUsableMemory;
 
-@interface AMACrashReportDecoder : NSObject
+@interface AMAKSCrashReportDecoder : NSObject
 
-@property (nonatomic, weak) id<AMACrashReportDecoderDelegate> delegate;
+@property (nonatomic, weak) id<AMAKSCrashReportDecoderDelegate> delegate;
 @property (nonatomic, strong, readonly) NSNumber *crashID;
 @property (nonatomic, strong, readonly) NSArray *supportedVersionsConstaints;
 
@@ -50,17 +50,17 @@ extern NSString *const kAMASysInfoUsableMemory;
 
 - (void)decode:(NSDictionary *)report;
 
-- (AMASystem *)systemInfoForDictionary:(NSDictionary *)system;
+- (AMASystemInfo *)systemInfoForDictionary:(NSDictionary *)system;
 
 @end
 
-@protocol AMACrashReportDecoderDelegate <NSObject>
+@protocol AMAKSCrashReportDecoderDelegate <NSObject>
 
-- (void)crashReportDecoder:(AMACrashReportDecoder *)decoder
+- (void)crashReportDecoder:(AMAKSCrashReportDecoder *)decoder
             didDecodeCrash:(AMADecodedCrash *)decodedCrash
                  withError:(NSError *)error;
 
-- (void)crashReportDecoder:(AMACrashReportDecoder *)decoder
+- (void)crashReportDecoder:(AMAKSCrashReportDecoder *)decoder
               didDecodeANR:(AMADecodedCrash *)decodedCrash
                  withError:(NSError *)error;
 

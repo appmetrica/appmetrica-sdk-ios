@@ -5,7 +5,7 @@
 
 - (NSDictionary *)crashContext
 {
-    return [AMACrashLoader crashContext];
+    return [AMAKSCrashLoader crashContext];
 }
 
 @end

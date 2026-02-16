@@ -1,18 +1,17 @@
 
 #import <Foundation/Foundation.h>
 #import "AMAUnhandledCrashDetector.h"
-#import "AMACrashReportDecoder.h"
+#import "AMAKSCrashReportDecoder.h"
+#import "AMACrashLoaderDelegate.h"
 
-@protocol AMACrashLoaderDelegate;
 @class AMACrashSafeTransactor;
 @class AMADecodedCrash;
 @class AMAUnhandledCrashDetector;
 
 extern NSString *const kAMAApplicationNotRespondingCrashType;
 
-@interface AMACrashLoader : NSObject <AMACrashReportDecoderDelegate>
+@interface AMAKSCrashLoader : NSObject <AMAKSCrashReportDecoderDelegate, AMACrashLoading>
 
-@property (nonatomic, weak) id<AMACrashLoaderDelegate> delegate;
 @property (nonatomic, assign) BOOL isUnhandledCrashDetectingEnabled;
 @property (nonatomic, assign, readonly) NSNumber *crashedLastLaunch;
 
@@ -22,7 +21,6 @@ extern NSString *const kAMAApplicationNotRespondingCrashType;
 
 - (void)enableCrashLoader;
 - (void)enableRequiredMonitoring;
-- (void)loadCrashReports;
 - (NSArray<AMADecodedCrash *> *)syncLoadCrashReports;
 
 + (void)purgeRawCrashReport:(NSNumber *)reportID;
@@ -34,17 +32,5 @@ extern NSString *const kAMAApplicationNotRespondingCrashType;
 + (NSDictionary *)crashContext;
 
 - (void)reportANR;
-
-@end
-
-@protocol AMACrashLoaderDelegate <NSObject>
-
-- (void)crashLoader:(AMACrashLoader *)crashLoader
-       didLoadCrash:(AMADecodedCrash *)decodedCrash
-          withError:(NSError *)error;
-
-- (void)crashLoader:(AMACrashLoader *)crashLoader didLoadANR:(AMADecodedCrash *)decodedCrash withError:(NSError *)error;
-
-- (void)crashLoader:(AMACrashLoader *)crashLoader didDetectProbableUnhandledCrash:(AMAUnhandledCrashType)crashType;
 
 @end

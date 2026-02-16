@@ -1,8 +1,8 @@
 #import "AMACrashLogging.h"
 #import <AppMetricaStorageUtils/AppMetricaStorageUtils.h>
 #import <AppMetricaPlatform/AppMetricaPlatform.h>
-#import "AMACrashLoader.h"
-#import "AMACrashReportDecoder.h"
+#import "AMAKSCrashLoader.h"
+#import "AMAKSCrashReportDecoder.h"
 #import "AMACrashSafeTransactor.h"
 #import "AMADecodedCrash.h"
 #import "AMAKSCrash.h"
@@ -11,7 +11,7 @@
 static NSString *const kAMALoadingCrashReportsTransactionKey = @"KSCrashLoadingReports";
 NSString *const kAMAApplicationNotRespondingCrashType = @"AMAApplicationNotRespondingCrashType";
 
-@interface AMACrashLoader () <AMACrashReportDecoderDelegate>
+@interface AMAKSCrashLoader () <AMAKSCrashReportDecoderDelegate>
 
 @property (nonatomic, strong) NSMutableDictionary *decoders;
 @property (nonatomic, strong) AMAUnhandledCrashDetector *unhandledCrashDetector;
@@ -23,7 +23,9 @@ NSString *const kAMAApplicationNotRespondingCrashType = @"AMAApplicationNotRespo
 
 @end
 
-@implementation AMACrashLoader
+@implementation AMAKSCrashLoader
+
+@synthesize delegate = _delegate;
 
 - (instancetype)initWithUnhandledCrashDetector:(AMAUnhandledCrashDetector *)unhandledCrashDetector
                                     transactor:(AMACrashSafeTransactor *)transactor
@@ -151,11 +153,11 @@ NSString *const kAMAApplicationNotRespondingCrashType = @"AMAApplicationNotRespo
     return result;
 }
 
-- (AMACrashReportDecoder *)crashReportDecoderForReportWithID:(NSNumber *)reportID
+- (AMAKSCrashReportDecoder *)crashReportDecoderForReportWithID:(NSNumber *)reportID
 {
-    AMACrashReportDecoder *decoder = self.decoders[reportID];
+    AMAKSCrashReportDecoder *decoder = self.decoders[reportID];
     if (decoder == nil) {
-        decoder = [[AMACrashReportDecoder alloc] initWithCrashID:reportID];
+        decoder = [[AMAKSCrashReportDecoder alloc] initWithCrashID:reportID];
         decoder.delegate = self;
         self.decoders[reportID] = decoder;
     }
@@ -166,7 +168,7 @@ NSString *const kAMAApplicationNotRespondingCrashType = @"AMAApplicationNotRespo
 - (BOOL)handleCrashReportWithID:(NSNumber *)reportID
 {
     __block BOOL success = YES;
-    AMACrashReportDecoder *decoder = [self crashReportDecoderForReportWithID:reportID];
+    AMAKSCrashReportDecoder *decoder = [self crashReportDecoderForReportWithID:reportID];
 
     if (decoder != nil) {
         __block KSCrashReportDictionary *crashReport = nil;
@@ -251,9 +253,9 @@ NSString *const kAMAApplicationNotRespondingCrashType = @"AMAApplicationNotRespo
     [self loadCrashReports];
 }
 
-#pragma mark - AMACrashReportDecoderDelegate Implementation
+#pragma mark - AMAKSCrashReportDecoderDelegate Implementation
 
-- (void)crashReportDecoder:(AMACrashReportDecoder *)decoder
+- (void)crashReportDecoder:(AMAKSCrashReportDecoder *)decoder
             didDecodeCrash:(AMADecodedCrash *)decodedCrash
                  withError:(NSError *)error
 {
@@ -277,7 +279,7 @@ NSString *const kAMAApplicationNotRespondingCrashType = @"AMAApplicationNotRespo
     [[self class] purgeRawCrashReport:decoder.crashID];
 }
 
-- (void)crashReportDecoder:(AMACrashReportDecoder *)decoder
+- (void)crashReportDecoder:(AMAKSCrashReportDecoder *)decoder
               didDecodeANR:(AMADecodedCrash *)decodedCrash
                  withError:(NSError *)error
 {

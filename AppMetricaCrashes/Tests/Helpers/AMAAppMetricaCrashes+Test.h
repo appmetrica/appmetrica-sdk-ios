@@ -1,6 +1,6 @@
 
 #import "AMAAppMetricaCrashes.h"
-#import "AMACrashLoader.h"
+#import "AMAKSCrashLoader.h"
 
 @interface AMAAppMetricaCrashes (Private) <AMACrashLoaderDelegate>
 

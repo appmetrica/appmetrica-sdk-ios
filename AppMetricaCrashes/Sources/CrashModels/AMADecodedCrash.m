@@ -15,7 +15,7 @@
                   appEnvironment:(NSDictionary *)appEnvironment
                             info:(AMAInfo *)info
                     binaryImages:(NSArray<AMABinaryImage *> *)binaryImages
-                          system:(AMASystem *)system
+                          system:(AMASystemInfo *)system
                            crash:(AMACrashReportCrash *)crash
 {
     self = [super init];
@@ -39,7 +39,7 @@
                    appEnvironment:(NSDictionary *)appEnvironment
                              info:(AMAInfo *)info
                      binaryImages:(NSArray<AMABinaryImage *> *)binaryImages
-                           system:(AMASystem *)system
+                           system:(AMASystemInfo *)system
                             crash:(AMACrashReportCrash *)crash
 {
     return [[self alloc] initWithAppState:appState

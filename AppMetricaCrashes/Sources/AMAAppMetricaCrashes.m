@@ -8,10 +8,9 @@
 #import "AMAANRWatchdog.h"
 #import "AMACrashContext.h"
 #import "AMACrashEventType.h"
-#import "AMACrashLoader.h"
+#import "AMAKSCrashLoader.h"
 #import "AMACrashLogger.h"
 #import "AMACrashLogging.h"
-#import "AMAExtendedCrashProcessing.h"
 #import "AMACrashProcessor.h"
 #import "AMACrashReporter.h"
 #import "AMACrashReportingStateNotifier.h"
@@ -27,9 +26,14 @@
 #import "AMACrashReportCrash.h"
 #import "AMACrashReportError.h"
 #import "AMASignal.h"
-#import "AMAAppMetricaPluginsImpl.h"
 #import "AMABuildUID.h"
 #import "AMATransactionReporter.h"
+#import "AMACrashObserverDispatcher.h"
+#import "AMACrashObserverConfiguration.h"
+#import "AMACrashEvent.h"
+#import "AMAExternalCrashLoader.h"
+#import "AMACrashEventConverter.h"
+#import "AMACrashForwarder.h"
 
 @interface AMAAppMetricaCrashes ()
 
@@ -46,8 +50,6 @@
 @property (nonatomic, strong, readonly) id<AMAHostStateProviding> hostStateProvider;
 @property (nonatomic, strong, readonly) AMADecodedCrashSerializer *serializer;
 @property (nonatomic, strong, readwrite) NSString *apiKey;
-
-@property (nonatomic, strong) NSMutableSet<id<AMAExtendedCrashProcessing>> *extendedCrashProcessors;
 
 @property (nonatomic, strong) AMAAppMetricaPluginsImpl *pluginsImpl;
 
@@ -89,22 +91,31 @@
                                                                                     executor:executor];
     AMATransactionReporter *transactionReporter = [[AMATransactionReporter alloc] init];
     AMACrashSafeTransactor *transactor = [[AMACrashSafeTransactor alloc] initWithReporter:transactionReporter];
-
+    AMAKSCrashLoader *loader = [[AMAKSCrashLoader alloc] initWithUnhandledCrashDetector:detector
+                                                                             transactor:transactor];
+    AMACrashEventConverter *converter = [[AMACrashEventConverter alloc] init];
+    AMAExecutor *externalLoaderExecutor = [[AMAExecutor alloc] initWithIdentifier:@"ExternalCrashLoader"];
+    AMAExternalCrashLoader *externalLoader =
+        [[AMAExternalCrashLoader alloc] initWithExecutor:externalLoaderExecutor
+                                              transactor:transactor
+                                               converter:converter];
+    
     return [self initWithExecutor:executor
-                      crashLoader:[[AMACrashLoader alloc] initWithUnhandledCrashDetector:detector
-                                                                              transactor:transactor]
+                    ksCrashLoader:loader
                     stateNotifier:[[AMACrashReportingStateNotifier alloc] init]
                 hostStateProvider:[[AMAHostStateProvider alloc] init]
                        serializer:[[AMADecodedCrashSerializer alloc] init]
-                    configuration:[[AMAAppMetricaCrashesConfiguration alloc] init]];
+                    configuration:[[AMAAppMetricaCrashesConfiguration alloc] init]
+              externalCrashLoader:externalLoader];
 }
 
 - (instancetype)initWithExecutor:(id<AMAAsyncExecuting, AMASyncExecuting>)executor
-                     crashLoader:(AMACrashLoader *)crashLoader
+                   ksCrashLoader:(AMAKSCrashLoader *)ksCrashLoader
                    stateNotifier:(AMACrashReportingStateNotifier *)stateNotifier
                hostStateProvider:(id<AMAHostStateProviding>)hostStateProvider
                       serializer:(AMADecodedCrashSerializer *)serializer
                    configuration:(AMAAppMetricaCrashesConfiguration *)configuration
+             externalCrashLoader:(AMAExternalCrashLoader *)externalCrashLoader
 {
     self = [super init];
     if (self != nil) {
@@ -112,15 +123,17 @@
         _crashProcessor = nil;
         _apiKey = nil;
         _reportersContainer = [[AMACrashReportersContainer alloc] init];
-        _crashLoader = crashLoader;
+        _ksCrashLoader = ksCrashLoader;
         _stateNotifier = stateNotifier;
         _hostStateProvider = hostStateProvider;
         _hostStateProvider.delegate = self;
-        _extendedCrashProcessors = [NSMutableSet new];
         _serializer = serializer;
         _internalConfiguration = configuration;
         _errorEnvironment = [AMAErrorEnvironment new];
         _pluginsImpl = [[AMAAppMetricaPluginsImpl alloc] init];
+        _crashObserverManager = [[AMACrashObserverDispatcher alloc] init];
+        _crashHandlerManager = [[AMACrashForwarder alloc] initWithSerializer:serializer];
+        _externalCrashLoader = externalCrashLoader;
     }
     return self;
 }
@@ -227,6 +240,14 @@
     }
 }
 
+- (void)registerCrashProvider:(id<AMACrashProviding>)provider
+{
+    if (self.isActivated) {
+        return;
+    }
+    [self.externalCrashLoader registerProvider:provider];
+}
+
 #pragma mark - Internal -
 
 - (void)activate
@@ -270,8 +291,7 @@
     [self execute:^{
         self.crashProcessor = [[AMACrashProcessor alloc] initWithIgnoredSignals:ignoredSignals
                                                                      serializer:self.serializer
-                                                                  crashReporter:crashReporter
-                                                             extendedProcessors:[self.extendedCrashProcessors allObjects]];
+                                                                  crashReporter:crashReporter];
     }];
 }
 
@@ -343,14 +363,16 @@ them while retaining external immutability. Needed for testability. */
 
 - (void)setupCrashLoaderWithDetection:(BOOL)enabled
 {
-    [self.crashLoader setDelegate:self];
-    self.crashLoader.isUnhandledCrashDetectingEnabled = enabled;
-    [self.crashLoader enableCrashLoader];
+    [self.ksCrashLoader setDelegate:self];
+    self.ksCrashLoader.isUnhandledCrashDetectingEnabled = enabled;
+    [self.ksCrashLoader enableCrashLoader];
+    
+    [self.externalCrashLoader setDelegate:self];
 }
 
 - (void)setupRequiredMonitoring
 {
-    [self.crashLoader enableRequiredMonitoring];
+    [self.ksCrashLoader enableRequiredMonitoring];
 }
 
 - (void)updateCrashContextAsync
@@ -363,14 +385,15 @@ them while retaining external immutability. Needed for testability. */
 - (void)cleanupCrashes
 {
     [self execute:^{
-        [AMACrashLoader purgeCrashesDirectory];
+        [AMAKSCrashLoader purgeCrashesDirectory];
     }];
 }
 
 - (void)loadCrashReports
 {
     [self execute:^{
-        [self.crashLoader loadCrashReports];
+        [self.ksCrashLoader loadCrashReports];
+        [self.externalCrashLoader loadCrashReports];
     }];
 }
 
@@ -387,7 +410,7 @@ them while retaining external immutability. Needed for testability. */
         kAMACrashContextAppEnvironmentKey : self.appEnvironment.dictionaryEnvironment ?: @{},
     };
 
-    [AMACrashLoader addCrashContext:context];
+    [AMAKSCrashLoader addCrashContext:context];
 }
 
 - (void)notifyState
@@ -395,7 +418,7 @@ them while retaining external immutability. Needed for testability. */
     [self execute:^{
         if (self.isActivated) {
             [self.stateNotifier notifyWithEnabled:self.internalConfiguration.autoCrashTracking
-                                crashedLastLaunch:self.crashLoader.crashedLastLaunch];
+                                crashedLastLaunch:self.ksCrashLoader.crashedLastLaunch];
         }
     }];
 }
@@ -407,17 +430,33 @@ them while retaining external immutability. Needed for testability. */
 
 - (NSArray<AMAEventPollingParameters *> *)pollingEvents
 {
+    // TODO: Workaround to remove polling events
     __weak typeof(self) weakSelf = self;
     return [self.executor syncExecute:^id{
         __strong typeof(weakSelf) strongSelf = weakSelf;
-        NSArray<AMADecodedCrash *> *crashes = [AMACollectionUtilities filteredArray:[strongSelf.crashLoader syncLoadCrashReports]
+        NSArray<AMADecodedCrash *> *crashes = [AMACollectionUtilities filteredArray:[strongSelf.ksCrashLoader syncLoadCrashReports]
                                                                       withPredicate:^BOOL(AMADecodedCrash *crash) {
-            if (self.internalConfiguration.ignoredCrashSignals != nil) {
-                return [self.internalConfiguration.ignoredCrashSignals containsObject:@(crash.crash.error.signal.signal)];
+            if (strongSelf.internalConfiguration.ignoredCrashSignals != nil) {
+                return [strongSelf.internalConfiguration.ignoredCrashSignals containsObject:@(crash.crash.error.signal.signal)] == NO;
             }
             return YES;
         }];
         
+        if (crashes.count > 0) {
+            [strongSelf execute:^{
+                for (AMADecodedCrash *crash in crashes) {
+                    if (crash.crash.error.type == AMACrashTypeMainThreadDeadlock) {
+                        [strongSelf.crashObserverManager notifyANR:crash];
+                        [strongSelf.crashHandlerManager processANR:crash];
+                    }
+                    else {
+                        [strongSelf.crashObserverManager notifyCrash:crash];
+                        [strongSelf.crashHandlerManager processCrash:crash];
+                    }
+                }
+            }];
+        }
+
         return [AMACollectionUtilities mapArray:crashes withBlock:^AMAEventPollingParameters *(AMADecodedCrash *item) {
             return [strongSelf.serializer eventParametersFromDecodedData:item error:NULL];
         }];
@@ -467,7 +506,7 @@ them while retaining external immutability. Needed for testability. */
 
 #pragma mark - AMACrashLoaderDelegate
 
-- (void)crashLoader:(AMACrashLoader *)crashLoader
+- (void)crashLoader:(id<AMACrashLoading>)crashLoader
        didLoadCrash:(AMADecodedCrash *)decodedCrash
           withError:(NSError *)error
 {
@@ -475,10 +514,15 @@ them while retaining external immutability. Needed for testability. */
     [self execute:^{
         __strong typeof(weakSelf) strongSelf = weakSelf;
         [strongSelf.crashProcessor processCrash:decodedCrash withError:error];
+
+        if (decodedCrash != nil) {
+            [strongSelf.crashObserverManager notifyCrash:decodedCrash];
+            [strongSelf.crashHandlerManager processCrash:decodedCrash];
+        }
     }];
 }
 
-- (void)crashLoader:(AMACrashLoader *)crashLoader
+- (void)crashLoader:(id<AMACrashLoading>)crashLoader
          didLoadANR:(AMADecodedCrash *)decodedCrash
           withError:(NSError *)error
 {
@@ -486,10 +530,15 @@ them while retaining external immutability. Needed for testability. */
     [self execute:^{
         __strong typeof(weakSelf) strongSelf = weakSelf;
         [strongSelf.crashProcessor processANR:decodedCrash withError:error];
+
+        if (decodedCrash != nil) {
+            [strongSelf.crashObserverManager notifyANR:decodedCrash];
+            [strongSelf.crashHandlerManager processANR:decodedCrash];
+        }
     }];
 }
 
-- (void)crashLoader:(AMACrashLoader *)crashLoader didDetectProbableUnhandledCrash:(AMAUnhandledCrashType)crashType
+- (void)crashLoader:(id<AMACrashLoading>)crashLoader didDetectProbableUnhandledCrash:(AMAUnhandledCrashType)crashType
 {
     if (crashType == AMAUnhandledCrashForeground || crashType == AMAUnhandledCrashBackground) {
         AMALogInfo(@"Reporting probably unhandled crash");
@@ -497,6 +546,8 @@ them while retaining external immutability. Needed for testability. */
         NSError *error = [AMAErrorUtilities internalErrorWithCode:AMAAppMetricaInternalEventErrorCodeProbableUnhandledCrash
                                                       description:errorMessage];
         [self.crashProcessor processError:error];
+
+        [self.crashObserverManager notifyProbableUnhandledCrash:errorMessage];
     }
 }
 
@@ -520,7 +571,7 @@ them while retaining external immutability. Needed for testability. */
 {
     [self execute:^{
         AMALogInfo(@"Reporting of ANR crash.");
-        [self.crashLoader reportANR];
+        [self.ksCrashLoader reportANR];
     }];
 }
 
@@ -540,21 +591,24 @@ them while retaining external immutability. Needed for testability. */
     }
 }
 
-#pragma mark - ExtendedCrashProcessors
+#pragma mark - Crash Observer Methods
 
-- (void)addExtendedCrashProcessor:(id<AMAExtendedCrashProcessing>)crashProcessor
+- (void)registerCrashObserver:(AMACrashObserverConfiguration *)configuration
 {
-    if (crashProcessor != nil) {
-        [self execute:^{
-            // TODO: Rework within https://nda.ya.ru/t/HRd8dJIs7HaJts
-            if (self.crashProcessor == nil) {
-                [self.extendedCrashProcessors addObject:crashProcessor];
-            }
-            else {
-                [self.crashProcessor addExtendedCrashProcessor:crashProcessor];
-            }
-        }];
+    if (configuration == nil) {
+        return;
     }
+
+    [self.crashObserverManager registerObserverConfiguration:configuration];
+}
+
+- (void)registerCrashHandler:(id<AMACrashFilteringProxy>)handler
+{
+    if (handler == nil || self.isActivated) {
+        return;
+    }
+
+    [self.crashHandlerManager registerHandler:handler];
 }
 
 @end

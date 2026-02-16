@@ -5,7 +5,7 @@
 @class AMAApplicationState;
 @class AMAInfo;
 @class AMABinaryImage;
-@class AMASystem;
+@class AMASystemInfo;
 @class AMACrashReportCrash;
 @class AMABacktrace;
 
@@ -15,11 +15,11 @@
 @property (nonatomic, copy, readonly) AMABuildUID *appBuildUID;
 @property (nonatomic, copy, readonly) NSDictionary *errorEnvironment;
 @property (nonatomic, copy, readonly) NSDictionary *appEnvironment;
-@property (nonatomic, copy, readonly) AMABacktrace *crashedThreadBacktrace;
+@property (nonatomic, readonly) AMABacktrace *crashedThreadBacktrace;
 
 @property (nonatomic, strong, readonly) AMAInfo *info;
 @property (nonatomic, copy, readonly) NSArray<AMABinaryImage *> *binaryImages;
-@property (nonatomic, strong, readonly) AMASystem *system;
+@property (nonatomic, strong, readonly) AMASystemInfo *system;
 @property (nonatomic, strong, readonly) AMACrashReportCrash *crash;
 
 - (instancetype)init NS_UNAVAILABLE;
@@ -30,7 +30,7 @@
                   appEnvironment:(NSDictionary *)appEnvironment
                             info:(AMAInfo *)info
                     binaryImages:(NSArray<AMABinaryImage *> *)binaryImages
-                          system:(AMASystem *)system
+                          system:(AMASystemInfo *)system
                            crash:(AMACrashReportCrash *)crash;
 
 + (instancetype)crashWithAppState:(AMAApplicationState *)appState
@@ -39,7 +39,7 @@
                    appEnvironment:(NSDictionary *)appEnvironment
                              info:(AMAInfo *)info
                      binaryImages:(NSArray<AMABinaryImage *> *)binaryImages
-                           system:(AMASystem *)system
+                           system:(AMASystemInfo *)system
                             crash:(AMACrashReportCrash *)crash;
 
 @end

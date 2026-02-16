@@ -25,7 +25,7 @@
 #import "AMARegistersContainer.h"
 #import "AMASignal.h"
 #import "AMAStack.h"
-#import "AMASystem.h"
+#import "AMASystemInfo.h"
 #import "AMAThread.h"
 #import "AMAVirtualMachineCrash.h"
 #import "AMAVirtualMachineError.h"
@@ -71,23 +71,23 @@ describe(@"AMADecodedCrashSerializer", ^{
                                                                                      activeTimeSinceLaunch:6543
                                                                                  backgroundTimeSinceLaunch:3];
 
-    AMASystem *const system = [[AMASystem alloc] initWithKernelVersion:@"XNU"
-                                                         osBuildNumber:@"1234"
-                                                         bootTimestamp:[NSDate date]
-                                                     appStartTimestamp:[NSDate dateWithTimeIntervalSinceNow:2]
-                                                        executablePath:@"/path/to/executable"
-                                                               cpuArch:@"arm64"
-                                                               cpuType:12
-                                                            cpuSubtype:0
-                                                         binaryCpuType:13
-                                                      binaryCpuSubtype:0
-                                                           processName:@"Process name"
-                                                             processId:123
-                                                       parentProcessId:122
-                                                             buildType:AMABuildTypeAppStore
-                                                               storage:345678956
-                                                                memory:memory
-                                                      applicationStats:appStats];
+    AMASystemInfo *const system = [[AMASystemInfo alloc] initWithKernelVersion:@"XNU"
+                                                                 osBuildNumber:@"1234"
+                                                                 bootTimestamp:[NSDate date]
+                                                             appStartTimestamp:[NSDate dateWithTimeIntervalSinceNow:2]
+                                                                executablePath:@"/path/to/executable"
+                                                                       cpuArch:@"arm64"
+                                                                       cpuType:12
+                                                                    cpuSubtype:0
+                                                                 binaryCpuType:13
+                                                              binaryCpuSubtype:0
+                                                                   processName:@"Process name"
+                                                                     processId:123
+                                                               parentProcessId:122
+                                                                     buildType:AMABuildTypeAppStore
+                                                                       storage:345678956
+                                                                        memory:memory
+                                                              applicationStats:appStats];
 
     AMAMach *const mach = [[AMAMach alloc] initWithExceptionType:1 code:2 subcode:3];
 
@@ -557,7 +557,7 @@ describe(@"AMADecodedCrashSerializer", ^{
                                                                   appEnvironment:nil
                                                                             info:info
                                                                     binaryImages:@[ binaryImage ]
-                                                                          system:[AMASystem nullMock]
+                                                                          system:[AMASystemInfo nullMock]
                                                                            crash:crash];
             });
 

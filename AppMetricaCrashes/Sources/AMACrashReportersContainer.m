@@ -1,6 +1,5 @@
 
 #import "AMACrashReportersContainer.h"
-#import "AMAAppMetricaCrashReporting.h"
 
 @interface AMACrashReportersContainer ()
 

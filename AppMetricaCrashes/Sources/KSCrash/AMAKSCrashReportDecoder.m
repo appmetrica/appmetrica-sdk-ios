@@ -1,13 +1,13 @@
 
 #import "AMACrashLogging.h"
-#import "AMACrashReportDecoder.h"
+#import "AMAKSCrashReportDecoder.h"
 #import "AMACrashContext.h"
 #import "AMADecodedCrash.h"
 #import "AMABacktraceFrame.h"
 #import "AMABinaryImage.h"
-#import "AMACrashLoader.h"
+#import "AMAKSCrashLoader.h"
 #import "AMAInfo.h"
-#import "AMASystem.h"
+#import "AMASystemInfo.h"
 #import "AMAMemory.h"
 #import "AMAApplicationStatistics.h"
 #import "AMACrashReportCrash.h"
@@ -59,13 +59,13 @@ NSString *const kAMASysInfoMemorySize = @"memorySize";
 NSString *const kAMASysInfoFreeMemory = @"freeMemory";
 NSString *const kAMASysInfoUsableMemory = @"usableMemory";
 
-@interface AMACrashReportDecoder ()
+@interface AMAKSCrashReportDecoder ()
 
 @property (nonatomic, copy, readonly) id<AMADateProviding> dateProvider;
 
 @end
 
-@implementation AMACrashReportDecoder
+@implementation AMAKSCrashReportDecoder
 
 #pragma mark - Public
 
@@ -131,7 +131,7 @@ NSString *const kAMASysInfoUsableMemory = @"usableMemory";
     }
 }
 
-- (AMASystem *)systemInfoForDictionary:(NSDictionary *)system
+- (AMASystemInfo *)systemInfoForDictionary:(NSDictionary *)system
 {
     return [self createSystem:system];
 }
@@ -174,7 +174,7 @@ NSString *const kAMASysInfoUsableMemory = @"usableMemory";
     
     AMAInfo *info = [self createInfo:crashReport[KSCrashField_Report]];
     NSArray<AMABinaryImage *> *binaryImages = [self createBinaryImages:crashReport[KSCrashField_BinaryImages]];
-    AMASystem *system = [self createSystem:crashReport[KSCrashField_System]];
+    AMASystemInfo *system = [self createSystem:crashReport[KSCrashField_System]];
     AMACrashReportCrash *crash = [self createCrash:crashReport[KSCrashField_Crash]];
 
     AMADecodedCrash *decodedCrash = [[AMADecodedCrash alloc] initWithAppState:appState
@@ -254,26 +254,26 @@ NSString *const kAMASysInfoUsableMemory = @"usableMemory";
 
 #pragma mark - System
 
-- (AMASystem *)createSystem:(NSDictionary *)system
+- (AMASystemInfo *)createSystem:(NSDictionary *)system
 {
-    return [[AMASystem alloc]
-        initWithKernelVersion:system[KSCrashField_KernelVersion] ?: system[kAMASysInfoKernelVersion]
-                osBuildNumber:system[KSCrashField_OSVersion] ?: system[kAMASysInfoOsVersion]
-                bootTimestamp:[self timestamp:system[KSCrashField_BootTime] ?: system[kAMASysInfoBootTime]]
+    return [[AMASystemInfo alloc]
+            initWithKernelVersion:system[KSCrashField_KernelVersion] ?: system[kAMASysInfoKernelVersion]
+            osBuildNumber:system[KSCrashField_OSVersion] ?: system[kAMASysInfoOsVersion]
+            bootTimestamp:[self timestamp:system[KSCrashField_BootTime] ?: system[kAMASysInfoBootTime]]
             appStartTimestamp:[self timestamp:system[KSCrashField_AppStartTime] ?: system[kAMASysInfoAppStartTime]]
-               executablePath:system[KSCrashField_ExecutablePath] ?: system[kAMASysInfoExecutablePath]
-                      cpuArch:system[KSCrashField_CPUArch] ?: system[kAMASysInfoCpuArchitecture]
-                      cpuType:[system[KSCrashField_CPUType] ?: system[kAMASysInfoCpuType] intValue]
-                   cpuSubtype:[system[KSCrashField_CPUSubType] ?: system[kAMASysInfoCpuSubType] intValue]
-                binaryCpuType:[system[KSCrashField_BinaryCPUType] ?: system[kAMASysInfoBinaryCPUType] intValue]
-             binaryCpuSubtype:[system[KSCrashField_BinaryCPUSubType] ?: system[kAMASysInfoBinaryCPUSubType] intValue]
-                  processName:system[KSCrashField_ProcessName] ?: system[kAMASysInfoProcessName]
-                    processId:[system[KSCrashField_ProcessID] ?: system[kAMASysInfoProcessID] longLongValue]
-              parentProcessId:[system[KSCrashField_ParentProcessID] ?: system[kAMASysInfoParentProcessID] longLongValue]
-                    buildType:[self buildType:system[KSCrashField_BuildType] ?: system[kAMASysInfoBuildType]]
-                      storage:[system[KSCrashField_Storage] ?: system[kAMASysInfoStorageSize] longLongValue]
-                       memory:[self createMemory:system[KSCrashField_Memory] ?: system]
-             applicationStats:[self createApplicationStats:system[KSCrashField_AppStats]]];
+            executablePath:system[KSCrashField_ExecutablePath] ?: system[kAMASysInfoExecutablePath]
+            cpuArch:system[KSCrashField_CPUArch] ?: system[kAMASysInfoCpuArchitecture]
+            cpuType:[system[KSCrashField_CPUType] ?: system[kAMASysInfoCpuType] intValue]
+            cpuSubtype:[system[KSCrashField_CPUSubType] ?: system[kAMASysInfoCpuSubType] intValue]
+            binaryCpuType:[system[KSCrashField_BinaryCPUType] ?: system[kAMASysInfoBinaryCPUType] intValue]
+            binaryCpuSubtype:[system[KSCrashField_BinaryCPUSubType] ?: system[kAMASysInfoBinaryCPUSubType] intValue]
+            processName:system[KSCrashField_ProcessName] ?: system[kAMASysInfoProcessName]
+            processId:[system[KSCrashField_ProcessID] ?: system[kAMASysInfoProcessID] longLongValue]
+            parentProcessId:[system[KSCrashField_ParentProcessID] ?: system[kAMASysInfoParentProcessID] longLongValue]
+            buildType:[self buildType:system[KSCrashField_BuildType] ?: system[kAMASysInfoBuildType]]
+            storage:[system[KSCrashField_Storage] ?: system[kAMASysInfoStorageSize] longLongValue]
+            memory:[self createMemory:system[KSCrashField_Memory] ?: system]
+            applicationStats:[self createApplicationStats:system[KSCrashField_AppStats]]];
 }
 
 - (AMAMemory *)createMemory:(NSDictionary *)memory

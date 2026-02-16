@@ -5,9 +5,22 @@
     #import "AMAAppMetricaCrashesConfiguration.h"
     #import "AMAAppMetricaPluginReporting.h"
     #import "AMAAppMetricaPlugins.h"
+    #import "AMACrashBacktrace.h"
+    #import "AMACrashBacktraceFrame.h"
+    #import "AMACrashEvent.h"
+    #import "AMACrashEventError.h"
+    #import "AMACrashFilteringProxy.h"
+    #import "AMACrashInfo.h"
+    #import "AMACrashMach.h"
+    #import "AMACrashObserverConfiguration.h"
+    #import "AMACrashObserving.h"
+    #import "AMACrashProviderDelegate.h"
+    #import "AMACrashProviding.h"
+    #import "AMACrashSignal.h"
+    #import "AMACrashThreadInfo.h"
+    #import "AMACrashType.h"
     #import "AMAError.h"
     #import "AMAErrorRepresentable.h"
-    #import "AMAExtendedCrashProcessing.h"
     #import "AMAPluginErrorDetails.h"
     #import "AMAStackTraceElement.h"
 #else
@@ -16,9 +29,22 @@
     #import <AppMetricaCrashes/AMAAppMetricaCrashesConfiguration.h>
     #import <AppMetricaCrashes/AMAAppMetricaPluginReporting.h>
     #import <AppMetricaCrashes/AMAAppMetricaPlugins.h>
+    #import <AppMetricaCrashes/AMACrashBacktrace.h>
+    #import <AppMetricaCrashes/AMACrashBacktraceFrame.h>
+    #import <AppMetricaCrashes/AMACrashEvent.h>
+    #import <AppMetricaCrashes/AMACrashEventError.h>
+    #import <AppMetricaCrashes/AMACrashFilteringProxy.h>
+    #import <AppMetricaCrashes/AMACrashInfo.h>
+    #import <AppMetricaCrashes/AMACrashMach.h>
+    #import <AppMetricaCrashes/AMACrashObserverConfiguration.h>
+    #import <AppMetricaCrashes/AMACrashObserving.h>
+    #import <AppMetricaCrashes/AMACrashProviderDelegate.h>
+    #import <AppMetricaCrashes/AMACrashProviding.h>
+    #import <AppMetricaCrashes/AMACrashSignal.h>
+    #import <AppMetricaCrashes/AMACrashThreadInfo.h>
+    #import <AppMetricaCrashes/AMACrashType.h>
     #import <AppMetricaCrashes/AMAError.h>
     #import <AppMetricaCrashes/AMAErrorRepresentable.h>
-    #import <AppMetricaCrashes/AMAExtendedCrashProcessing.h>
     #import <AppMetricaCrashes/AMAPluginErrorDetails.h>
     #import <AppMetricaCrashes/AMAStackTraceElement.h>
 #endif

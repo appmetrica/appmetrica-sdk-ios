@@ -23,7 +23,7 @@
 #import "AMARegistersContainer.h"
 #import "AMASignal.h"
 #import "AMAStack.h"
-#import "AMASystem.h"
+#import "AMASystemInfo.h"
 #import "AMAThread.h"
 #import "AMAVirtualMachineCrash.h"
 #import "AMAVirtualMachineError.h"
@@ -158,7 +158,7 @@
     return images;
 }
 
-- (Ama__IOSCrashReport__System *)createSystemWithObject:(AMASystem *)system
+- (Ama__IOSCrashReport__System *)createSystemWithObject:(AMASystemInfo *)system
                                       allocationTracker:(id<AMAAllocationsTracking>)tracker
                                               validator:(AMADecodedCrashValidator *)validator
 {

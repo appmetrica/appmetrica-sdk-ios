@@ -2,9 +2,9 @@
 #import <mach/exception.h>
 #import <AppMetricaPlatform/AppMetricaPlatform.h>
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
-#import <KSCrash.h>
 #import "AMADecodedCrashSerializer.h"
 #import "AMAExceptionFormatter.h"
+#import "AMASystemInfoProviding.h"
 #import "AMADecodedCrash.h"
 #import "AMABacktraceFrame.h"
 #import "AMACrashReportCrash.h"
@@ -25,8 +25,7 @@
 #import "AMAStackTraceElement.h"
 #import "AMAInfo.h"
 #import "AMAVirtualMachineInfo.h"
-#import "AMACrashReportDecoder.h"
-#import "AMASystem.h"
+#import "AMASystemInfo.h"
 #import "AMACppException.h"
 #import "AMAVirtualMachineCrash.h"
 #import "AMARegistersContainer.h"
@@ -53,12 +52,13 @@ describe(@"AMAExceptionFormatter", ^{
     __block AMAExceptionFormatter *formatter = nil;
     __block AMADateProviderMock *dateProvider = nil;
     __block AMABacktraceSymbolicator *symbolicator = nil;
-    __block AMACrashReportDecoder *decoder = nil;
-    __block AMASystem *systemInfo = nil;
+    __block NSObject<AMASystemInfoProviding> *systemInfoProvider = nil;
+    __block AMASystemInfo *systemInfo = nil;
 
     beforeEach(^{
-        decoder = [AMACrashReportDecoder nullMock];
-        systemInfo = [AMASystem nullMock];
+        systemInfo = [AMASystemInfo nullMock];
+        systemInfoProvider = [KWMock nullMockForProtocol:@protocol(AMASystemInfoProviding)];
+        [systemInfoProvider stub:@selector(currentSystemInfo) andReturn:systemInfo];
         serializer = [[AMADecodedCrashSerializer alloc] init];
         serializerSpy = [serializer captureArgument:@selector(dataForCrash:error:) atIndex:0];
         serializerErrorSpy = [serializer captureArgument:@selector(dataForCrash:error:) atIndex:1];
@@ -68,15 +68,7 @@ describe(@"AMAExceptionFormatter", ^{
         formatter = [[AMAExceptionFormatter alloc] initWithDateProvider:dateProvider
                                                              serializer:serializer
                                                            symbolicator:symbolicator
-                                                                decoder:decoder];
-        KSCrash *ksCrash = [KSCrash nullMock];
-        [KSCrash stub:@selector(sharedInstance) andReturn:ksCrash];
-        NSDictionary *systemDict = @{ @"key" : @"value" };
-        [ksCrash stub:@selector(systemInfo) andReturn:systemDict];
-        [decoder stub:@selector(systemInfoForDictionary:) andReturn:systemInfo withArguments:systemDict];
-    });
-    afterEach(^{
-        [KSCrash clearStubs];
+                                                    systemInfoProvider:systemInfoProvider];
     });
 
     context(@"Symbolicated frame parsing", ^{

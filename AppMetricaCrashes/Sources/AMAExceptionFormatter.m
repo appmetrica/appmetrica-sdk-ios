@@ -7,7 +7,8 @@
 #import "AMABinaryImage.h"
 #import "AMACrashObjectsFactory.h"
 #import "AMACrashReportCrash.h"
-#import "AMACrashReportDecoder.h"
+#import "AMASystemInfoProviding.h"
+#import "AMAKSCrashSystemInfoProvider.h"
 #import "AMACrashReportError.h"
 #import "AMADecodedCrash.h"
 #import "AMADecodedCrashSerializer.h"
@@ -15,7 +16,6 @@
 #import "AMAErrorModel.h"
 #import "AMAErrorModelFactory.h"
 #import "AMAInfo.h"
-#import "AMAKSCrash.h"
 #import "AMAMach.h"
 #import "AMANSException.h"
 #import "AMANonFatal.h"
@@ -25,7 +25,6 @@
 #import "AMAVirtualMachineCrash.h"
 #import "AMAVirtualMachineError.h"
 #import "AMAVirtualMachineInfo.h"
-#import "AMAKSCrashImports.h"
 #import <mach/exception.h>
 
 static NSString *const kAMAKSCrashReporterVersion = @"3.2.0";
@@ -35,7 +34,7 @@ static NSString *const kAMAKSCrashReporterVersion = @"3.2.0";
 @property (nonatomic, strong, readonly) id<AMADateProviding> dateProvider;
 @property (nonatomic, strong, readonly) AMADecodedCrashSerializer *serializer;
 @property (nonatomic, strong, readonly) AMABacktraceSymbolicator *symbolicator;
-@property (nonatomic, strong, readonly) AMACrashReportDecoder *decoder;
+@property (nonatomic, strong, readonly) id<AMASystemInfoProviding> systemInfoProvider;
 
 @end
 
@@ -46,20 +45,20 @@ static NSString *const kAMAKSCrashReporterVersion = @"3.2.0";
     return [self initWithDateProvider:[[AMADateProvider alloc] init]
                            serializer:[[AMADecodedCrashSerializer alloc] init]
                          symbolicator:[[AMABacktraceSymbolicator alloc] init]
-                              decoder:[[AMACrashReportDecoder alloc] init]];
+                   systemInfoProvider:[[AMAKSCrashSystemInfoProvider alloc] init]];
 }
 
 - (instancetype)initWithDateProvider:(id<AMADateProviding>)dateProvider
                           serializer:(AMADecodedCrashSerializer *)serializer
                         symbolicator:(AMABacktraceSymbolicator *)symbolicator
-                             decoder:(AMACrashReportDecoder *)decoder
+                  systemInfoProvider:(id<AMASystemInfoProviding>)systemInfoProvider
 {
     self = [super init];
     if (self != nil) {
         _serializer = serializer;
         _dateProvider = dateProvider;
         _symbolicator = symbolicator;
-        _decoder = decoder;
+        _systemInfoProvider = systemInfoProvider;
     }
     return self;
 }
@@ -256,8 +255,7 @@ static NSString *const kAMAKSCrashReporterVersion = @"3.2.0";
                                            timestamp:[self.dateProvider currentDate]
                                   virtualMachineInfo:virtualMachineInfo];
 
-    NSDictionary *systemInfo = KSCrash.sharedInstance.systemInfo;
-    AMASystem *system = [self.decoder systemInfoForDictionary:systemInfo];
+    AMASystemInfo *system = [self.systemInfoProvider currentSystemInfo];
 
     NSArray *threads = nil;
     if (backtrace != nil) {

@@ -3,14 +3,14 @@
 #import "AMAExceptionFormatting.h"
 
 @protocol AMADateProviding;
+@protocol AMASystemInfoProviding;
 @class AMADecodedCrashSerializer;
 @class AMABacktraceSymbolicator;
-@class AMACrashReportDecoder;
 
 @interface AMAExceptionFormatter : NSObject <AMAExceptionFormatting>
 
 - (instancetype)initWithDateProvider:(id<AMADateProviding>)dateProvider
                           serializer:(AMADecodedCrashSerializer *)serializer
                         symbolicator:(AMABacktraceSymbolicator *)symbolicator
-                             decoder:(AMACrashReportDecoder *)decoder;
+                  systemInfoProvider:(id<AMASystemInfoProviding>)systemInfoProvider;
 @end

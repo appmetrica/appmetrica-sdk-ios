@@ -1,7 +1,7 @@
 
-#import "AMASystem.h"
+#import "AMASystemInfo.h"
 
-@implementation AMASystem
+@implementation AMASystemInfo
 
 - (instancetype)initWithKernelVersion:(NSString *)kernelVersion
                         osBuildNumber:(NSString *)osBuildNumber

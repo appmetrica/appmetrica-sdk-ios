@@ -4,7 +4,7 @@
 @class AMADecodedCrash;
 @class AMAInfo;
 @class AMABinaryImage;
-@class AMASystem;
+@class AMASystemInfo;
 @class AMACrashReportCrash;
 @class AMACrashReportError;
 @class AMANSException;
@@ -39,7 +39,7 @@ typedef NS_ENUM(NSInteger, AMACrashValidatorErrorCode) {
 
 - (BOOL)validateBinaryImage:(AMABinaryImage *)image;
 
-- (BOOL)validateSystem:(AMASystem *)system;
+- (BOOL)validateSystem:(AMASystemInfo *)system;
 
 - (BOOL)validateCrash:(AMACrashReportCrash *)crash;
 

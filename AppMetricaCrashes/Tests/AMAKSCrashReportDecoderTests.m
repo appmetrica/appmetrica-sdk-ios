@@ -3,12 +3,12 @@
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
 #import <AppMetricaPlatform/AppMetricaPlatform.h>
 #import "AMABuildUID.h"
-#import "AMACrashReportDecoder.h"
+#import "AMAKSCrashReportDecoder.h"
 #import "KSCrashReportFields.h"
 #import "AMADecodedCrash.h"
 #import "AMAInfo.h"
 #import "AMABinaryImage.h"
-#import "AMASystem.h"
+#import "AMASystemInfo.h"
 #import "AMAMemory.h"
 #import "AMAApplicationStatistics.h"
 #import "AMACrashReportCrash.h"
@@ -26,29 +26,29 @@
 #import "AMACrashContext.h"
 #import "AMAVirtualMachineInfo.h"
 
-SPEC_BEGIN(AMACrashReportDecoderTests)
+SPEC_BEGIN(AMAKSCrashReportDecoderTests)
 
-describe(@"AMACrashReportDecoder", ^{
+describe(@"AMAKSCrashReportDecoder", ^{
 
     NSNumber *const crashID = @42;
     
     NSMutableDictionary *__block root = nil;
     KWCaptureSpy *__block decodedCrashSpy = nil;
     KWCaptureSpy *__block errorSpy = nil;
-    NSObject<AMACrashReportDecoderDelegate> *__block delegateMock = nil;
-    AMACrashReportDecoder *__block decoder = nil;
+    NSObject<AMAKSCrashReportDecoderDelegate> *__block delegateMock = nil;
+    AMAKSCrashReportDecoder *__block decoder = nil;
     AMADateProviderMock *__block dateProvider = nil;
     
     NSString *const kNormalReportFileName = @"8980AE83-1607-4566-BC5E-7D0DAF3414C9-SHORT";
     NSString *const kANRErrorFileName = @"anr_error";
 
     beforeEach(^{
-        delegateMock = [KWMock mockForProtocol:@protocol(AMACrashReportDecoderDelegate)];
+        delegateMock = [KWMock mockForProtocol:@protocol(AMAKSCrashReportDecoderDelegate)];
         SEL callbackSelector = @selector(crashReportDecoder:didDecodeCrash:withError:);
         decodedCrashSpy = [delegateMock captureArgument:callbackSelector atIndex:1];
         errorSpy = [delegateMock captureArgument:callbackSelector atIndex:2];
         dateProvider = [[AMADateProviderMock alloc] init];
-        decoder = [[AMACrashReportDecoder alloc] initWithCrashID:crashID dateProvider:dateProvider];
+        decoder = [[AMAKSCrashReportDecoder alloc] initWithCrashID:crashID dateProvider:dateProvider];
         decoder.delegate = delegateMock;
 
         NSString *path = [AMAModuleBundleProvider.moduleBundle pathForResource:kNormalReportFileName ofType:@"plist"];
@@ -307,7 +307,7 @@ describe(@"AMACrashReportDecoder", ^{
 
         context(@"Should decode system dict", ^{
 
-            AMASystem *__block system = nil;
+            AMASystemInfo *__block system = nil;
 
             NSMutableDictionary *const systemExample = [@{
                 @"appID" : @"10AC2E2D-150C-3C60-9D21-D209F47E11C2",
@@ -741,7 +741,8 @@ describe(@"AMACrashReportDecoder", ^{
                         });
                         
                         it(@"Should decode all frames", ^{
-                            [[[decodedCrash(root).crash.threads.firstObject.backtrace should] have:frames.count] frames];
+                            [[[decodedCrash(root).crash.threads.firstObject.backtrace should]
+                              have:frames.count] frames];
                         });
                         
                         context(@"Should decode frames", ^{
@@ -755,55 +756,55 @@ describe(@"AMACrashReportDecoder", ^{
                             });
                             
                             it(@"Should decode instruction address", ^{
-                                AMABacktraceFrame *backtraceFrame =
+                                AMABacktraceFrame * backtraceFrame =
                                     decodedCrash(root).crash.threads.firstObject.backtrace.frames.firstObject;
                                 [[backtraceFrame.instructionAddress should] equal:firstFrame[KSCrashField_InstructionAddr]];
                             });
                             
                             it(@"Should decode object name", ^{
-                                AMABacktraceFrame *backtraceFrame =
+                                AMABacktraceFrame * backtraceFrame =
                                     decodedCrash(root).crash.threads.firstObject.backtrace.frames.firstObject;
                                 [[backtraceFrame.objectName should] equal:firstFrame[KSCrashField_ObjectName]];
                             });
                             
                             it(@"Should decode object address", ^{
-                                AMABacktraceFrame *backtraceFrame =
+                                AMABacktraceFrame * backtraceFrame =
                                     decodedCrash(root).crash.threads.firstObject.backtrace.frames.firstObject;
                                 [[backtraceFrame.objectAddress should] equal:firstFrame[KSCrashField_ObjectAddr]];
                             });
                             
                             it(@"Should decode object address", ^{
-                                AMABacktraceFrame *backtraceFrame =
+                                AMABacktraceFrame * backtraceFrame =
                                 decodedCrash(root).crash.threads.firstObject.backtrace.frames.firstObject;
                                 [[backtraceFrame.objectAddress should] equal:firstFrame[KSCrashField_ObjectAddr]];
                             });
                             
                             it(@"Should decode symbol name", ^{
-                                AMABacktraceFrame *backtraceFrame =
+                                AMABacktraceFrame * backtraceFrame =
                                 decodedCrash(root).crash.threads.firstObject.backtrace.frames.firstObject;
                                 [[backtraceFrame.symbolName should] equal:firstFrame[KSCrashField_SymbolName]];
                             });
                             
                             it(@"Should decode symbol address", ^{
-                                AMABacktraceFrame *backtraceFrame =
+                                AMABacktraceFrame * backtraceFrame =
                                 decodedCrash(root).crash.threads.firstObject.backtrace.frames.firstObject;
                                 [[backtraceFrame.symbolAddress should] equal:firstFrame[KSCrashField_SymbolAddr]];
                             });
                             
                             it(@"Should decode line of code", ^{
-                                AMABacktraceFrame *backtraceFrame =
+                                AMABacktraceFrame * backtraceFrame =
                                 decodedCrash(root).crash.threads.firstObject.backtrace.frames.firstObject;
                                 [[backtraceFrame.lineOfCode should] equal:firstFrame[KSCrashField_LineOfCode]];
                             });
                             
                             it(@"The first frame should not be stripped", ^{
-                                AMABacktraceFrame *backtraceFrame =
+                                AMABacktraceFrame * backtraceFrame =
                                 decodedCrash(root).crash.threads.firstObject.backtrace.frames.firstObject;
                                 [[theValue(backtraceFrame.stripped) should] beNo];
                             });
                             
                             it(@"The second frame should be stripped", ^{
-                                AMABacktraceFrame *backtraceFrame =
+                                AMABacktraceFrame * backtraceFrame =
                                 decodedCrash(root).crash.threads.firstObject.backtrace.frames.lastObject;
                                 [[theValue(backtraceFrame.stripped) should] beYes];
                             });

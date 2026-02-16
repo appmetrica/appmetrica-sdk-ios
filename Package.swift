@@ -499,6 +499,7 @@ extension AppMetricaTarget {
             return [
                 ".",
                 "./CrashModels",
+                "./CrashModels/API",
                 "./CrashModels/Crash",
                 "./CrashModels/Crash/Error",
                 "./CrashModels/Crash/Thread",
@@ -506,9 +507,11 @@ extension AppMetricaTarget {
                 "./Error",
                 "./Generated",
                 "./LibraryCrashes",
+                "./KSCrash",
                 "./include",
                 "./include/AppMetricaCrashes",
                 "./Plugins",
+                "./ExternalCrashes",
                 "./Resources",
             ]
         case .screenshot:
@@ -548,6 +551,7 @@ extension AppMetricaTarget {
         case .crashes:
             return [
                 "Helpers",
+                "Mocks",
             ]
         case .coreExtension, .adSupport, .webKit, .testUtils, .hostState, .storageUtils,
                 .protobuf, .fmdb, .libraryAdapter, .keychain, .identifiers, .logSwift, .synchronization:

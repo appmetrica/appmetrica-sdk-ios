@@ -2,7 +2,7 @@
 #import "AMADecodedCrashValidator.h"
 #import "AMAInfo.h"
 #import "AMABinaryImage.h"
-#import "AMASystem.h"
+#import "AMASystemInfo.h"
 #import "AMACrashReportCrash.h"
 #import "AMARegister.h"
 #import "AMACrashReportError.h"
@@ -129,7 +129,7 @@ static NSString *const kAMAUserInfoEmpty = @"empty";
     return errorFound;
 }
 
-- (BOOL)validateSystem:(AMASystem *)system
+- (BOOL)validateSystem:(AMASystemInfo *)system
 {
     BOOL errorFound = NO;
 

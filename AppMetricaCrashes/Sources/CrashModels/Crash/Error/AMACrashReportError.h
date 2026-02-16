@@ -1,5 +1,6 @@
 
 #import <Foundation/Foundation.h>
+#import "AMACrashType.h"
 
 @class AMAMach;
 @class AMASignal;
@@ -7,19 +8,6 @@
 @class AMACppException;
 @class AMANonFatal;
 @class AMAVirtualMachineCrash;
-
-typedef NS_ENUM(NSInteger, AMACrashType) {
-    AMACrashTypeMachException,
-    AMACrashTypeSignal,
-    AMACrashTypeCppException,
-    AMACrashTypeNsException,
-    AMACrashTypeMainThreadDeadlock,
-    AMACrashTypeUserReported,
-    AMACrashTypeNonFatal,
-    AMACrashTypeVirtualMachineCrash,
-    AMACrashTypeVirtualMachineError,
-    AMACrashTypeVirtualMachineCustomError,
-};
 
 @interface AMACrashReportError : NSObject
 

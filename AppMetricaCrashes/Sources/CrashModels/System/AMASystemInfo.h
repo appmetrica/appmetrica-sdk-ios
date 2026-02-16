@@ -12,7 +12,7 @@ typedef NS_ENUM(NSInteger, AMABuildType) {
     AMABuildTypeAppStore,
 };
 
-@interface AMASystem : NSObject
+@interface AMASystemInfo : NSObject
 
 @property (nonatomic, copy, readonly) NSString *kernelVersion;
 @property (nonatomic, copy, readonly) NSString *osBuildNumber;
