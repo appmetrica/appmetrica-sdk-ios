@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name = "AppMetricaSynchronization"
-  s.version = '6.1.0'
+  s.version = '6.2.0'
   s.summary = "Provides a comprehensive set of utilities for synchronization"
 
   s.homepage = 'https://appmetrica.io'
@@ -15,7 +15,7 @@ Pod::Spec.new do |s|
 
   s.frameworks = 'Foundation'
 
-  s.dependency 'AppMetricaLogSwift', '= 6.1.0'
+  s.dependency 'AppMetricaLogSwift', '= 6.2.0'
   
   s.header_dir = s.name
   s.source_files = [

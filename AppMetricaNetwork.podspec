@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name = "AppMetricaNetwork"
-  s.version = '6.1.0'
+  s.version = '6.2.0'
   s.summary = "AppMetricaNetwork offers convenient utilities for network and session management"
 
   s.homepage = 'https://appmetrica.io'
@@ -17,9 +17,9 @@ Pod::Spec.new do |s|
 
   s.frameworks = 'Foundation'
 
-  s.dependency 'AppMetricaLog', '= 6.1.0'
-  s.dependency 'AppMetricaCoreUtils', '= 6.1.0'
-  s.dependency 'AppMetricaPlatform', '= 6.1.0'
+  s.dependency 'AppMetricaLog', '= 6.2.0'
+  s.dependency 'AppMetricaCoreUtils', '= 6.2.0'
+  s.dependency 'AppMetricaPlatform', '= 6.2.0'
   
   s.header_dir = s.name
   s.source_files = "#{s.name}/Sources/**/*.{h,m}"

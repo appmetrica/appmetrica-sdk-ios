@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name = "AppMetricaAdSupport"
-  s.version = '6.1.0'
+  s.version = '6.2.0'
   s.summary = "Offers seamless access to advertising identifiers, leveraging AdSupport and AppTrackingTransparency for enhanced ad tracking and analytics."
 
   s.homepage = 'https://appmetrica.io'
@@ -17,8 +17,8 @@ Pod::Spec.new do |s|
 
   s.frameworks = 'Foundation', 'AdSupport', 'AppTrackingTransparency'
 
-  s.dependency 'AppMetricaCore', '= 6.1.0'
-  s.dependency 'AppMetricaCoreExtension', '= 6.1.0'
+  s.dependency 'AppMetricaCore', '= 6.2.0'
+  s.dependency 'AppMetricaCoreExtension', '= 6.2.0'
   
   s.header_dir = s.name
   s.source_files = "#{s.name}/Sources/**/*.{h,m}"
