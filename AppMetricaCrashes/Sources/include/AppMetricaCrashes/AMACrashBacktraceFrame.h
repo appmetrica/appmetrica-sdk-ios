@@ -4,7 +4,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 NS_SWIFT_NAME(CrashBacktraceFrame)
-@interface AMACrashBacktraceFrame : NSObject <NSCopying>
+@interface AMACrashBacktraceFrame : NSObject <NSCopying, NSMutableCopying>
 
 @property (nonatomic, strong, readonly, nullable) NSNumber *lineOfCode;
 @property (nonatomic, strong, readonly, nullable) NSNumber *columnOfCode;
