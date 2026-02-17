@@ -38,6 +38,23 @@
     return self;
 }
 
+- (id)mutableCopyWithZone:(NSZone *)zone
+{
+    AMAMutableCrashBacktraceFrame *copy =
+        [[AMAMutableCrashBacktraceFrame alloc] initWithClassName:self.className
+                                                     methodName:self.methodName
+                                                     lineOfCode:self.lineOfCode
+                                                   columnOfCode:self.columnOfCode
+                                                 sourceFileName:self.sourceFileName];
+    copy.instructionAddress = self.instructionAddress;
+    copy.symbolAddress = self.symbolAddress;
+    copy.objectAddress = self.objectAddress;
+    copy.symbolName = self.symbolName;
+    copy.objectName = self.objectName;
+    copy.stripped = self.stripped;
+    return copy;
+}
+
 @end
 
 @implementation AMAMutableCrashBacktraceFrame

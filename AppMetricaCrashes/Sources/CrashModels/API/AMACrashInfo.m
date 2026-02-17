@@ -24,6 +24,14 @@
     return self;
 }
 
+- (id)mutableCopyWithZone:(NSZone *)zone
+{
+    AMAMutableCrashInfo *copy = [[AMAMutableCrashInfo alloc] initWithCrashReportVersion:self.crashReportVersion];
+    copy.identifier = self.identifier;
+    copy.timestamp = self.timestamp;
+    return copy;
+}
+
 @end
 
 @implementation AMAMutableCrashInfo

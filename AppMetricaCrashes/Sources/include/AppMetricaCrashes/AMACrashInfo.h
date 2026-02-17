@@ -4,7 +4,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 NS_SWIFT_NAME(CrashInfo)
-@interface AMACrashInfo : NSObject <NSCopying>
+@interface AMACrashInfo : NSObject <NSCopying, NSMutableCopying>
 
 /** Version of the KSCrash report format. */
 @property (nonatomic, copy, readonly, nullable) NSString *crashReportVersion;

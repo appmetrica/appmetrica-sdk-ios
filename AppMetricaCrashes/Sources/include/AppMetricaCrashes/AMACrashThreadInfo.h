@@ -6,7 +6,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 NS_SWIFT_NAME(CrashThreadInfo)
-@interface AMACrashThreadInfo : NSObject <NSCopying>
+@interface AMACrashThreadInfo : NSObject <NSCopying, NSMutableCopying>
 
 @property (nonatomic, strong, readonly, nullable) AMACrashBacktrace *backtrace;
 @property (nonatomic, assign, readonly) uint32_t index;

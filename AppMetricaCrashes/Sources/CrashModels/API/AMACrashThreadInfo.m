@@ -27,6 +27,16 @@
     return self;
 }
 
+- (id)mutableCopyWithZone:(NSZone *)zone
+{
+    AMAMutableCrashThreadInfo *copy = [[AMAMutableCrashThreadInfo alloc] initWithBacktrace:self.backtrace
+                                                                                   crashed:self.crashed];
+    copy.index = self.index;
+    copy.threadName = self.threadName;
+    copy.queueName = self.queueName;
+    return copy;
+}
+
 @end
 
 @implementation AMAMutableCrashThreadInfo
