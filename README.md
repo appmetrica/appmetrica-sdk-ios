@@ -22,7 +22,7 @@ AppMetrica is a one-stop marketing platform for install attribution, app analyti
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/appmetrica/appmetrica-sdk-ios", from: "5.0.0")
+    .package(url: "https://github.com/appmetrica/appmetrica-sdk-ios", from: "6.0.0")
 ],
 ```
 
@@ -46,10 +46,10 @@ dependencies: [
 ```ruby
 target 'YourAppName' do
     # For all analytics features, add this umbrella module:
-    pod 'AppMetricaAnalytics', '~> 5.0.0'
+    pod 'AppMetricaAnalytics', '~> 6.0.0'
 
     # If you need specific integration, skip 'AppMetricaAnalytics' and add specific modules:
-    pod 'AppMetricaCore', '~> 5.0.0'
+    pod 'AppMetricaCore', '~> 6.0.0'
     # Add other modules like 'AppMetricaCrashes', 'AppMetricaWebKit' or 'AppMetricaAdSupport' if needed.
 end
 ```
@@ -66,9 +66,9 @@ To meet Apple's App Store rules regarding children's privacy (like COPPA), add A
 - **CocoaPods**:
 
   ```ruby
-  pod 'AppMetricaCore', '~> 5.0.0'
-  pod 'AppMetricaCrashes', '~> 5.0.0'
-  pod 'AppMetricaWebKit', '~> 5.0.0'
+  pod 'AppMetricaCore', '~> 6.0.0'
+  pod 'AppMetricaCrashes', '~> 6.0.0'
+  pod 'AppMetricaWebKit', '~> 6.0.0'
   ```
 
 - **SPM**: Don't include `AppMetricaAdSupport`. Either choose **None** for this module when selecting packages in Xcode or specify dependencies in `Package.swift`.
