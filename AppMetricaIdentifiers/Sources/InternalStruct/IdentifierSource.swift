@@ -1,5 +1,11 @@
 
 enum IdentifierSource: Int, CaseIterable, Hashable, Sendable {
+    
+    // on update see also
+    // - IdentifierSource.sourcesStoringOnlyDeviceID
+    // - IdentifierSource.deviceIDSources
+    // - IdentifierSource.appMetricaUUIDSources
+    
     case privateKeychain
     case privateFile
     
@@ -8,6 +14,15 @@ enum IdentifierSource: Int, CaseIterable, Hashable, Sendable {
     
     case vendorKeychain
     
+    case migrationData
+    
+    static let allActualSet: Set<Self> = [
+        .privateKeychain,
+        .privateFile,
+        .groupKeychain,
+        .groupFile,
+        .vendorKeychain,
+    ]
     static let allSet: Set<Self> = Set(allCases)
 }
 
@@ -35,7 +50,13 @@ extension IdentifierSource {
 
 extension IdentifierSource {
     
-    static let deviceIDSources: Set<Self> = allSet
+    static let deviceIDSources: Set<Self> = [
+        .privateKeychain,
+        .privateFile,
+        .groupKeychain,
+        .groupFile,
+        .vendorKeychain,
+    ]
     static let appMetricaUUIDSources: Set<Self> = [.privateFile, .groupFile]
     
 }

@@ -1777,6 +1777,7 @@
   "AppMetricaIdentifiers/Tests/Mock/DeviceIDGeneratorMock.swift":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaIdentifiers/Tests/Mock/DeviceIDGeneratorMock.swift",
   "AppMetricaIdentifiers/Tests/Mock/IdentifiersStorageMock.swift":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaIdentifiers/Tests/Mock/IdentifiersStorageMock.swift",
   "AppMetricaIdentifiers/Tests/RandomAppMetricaUUIDGeneratorTests.swift":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaIdentifiers/Tests/RandomAppMetricaUUIDGeneratorTests.swift",
+  "AppMetricaIdentifiers/Tests/SyncManagerPriorityTests.swift":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaIdentifiers/Tests/SyncManagerPriorityTests.swift",
   "AppMetricaIdentifiers/Tests/SyncManagerTests.swift":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaIdentifiers/Tests/SyncManagerTests.swift",
   "AppMetricaIdentifiers/Tests/UIDeviceGeneratorTests.swift":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaIdentifiers/Tests/UIDeviceGeneratorTests.swift",
   "AppMetricaIdentifiers/Tests/Utils/CustomError.swift":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaIdentifiers/Tests/Utils/CustomError.swift",

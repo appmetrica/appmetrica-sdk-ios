@@ -180,8 +180,7 @@ NSErrorDomain const AMAStartupRequestsErrorDomain = @"AMAStartupRequestsErrorDom
     
     if (deviceID.length > 0) {
         [idProvider updateWithDeviceID:deviceID
-                          deviceIDHash:startupResponse.deviceIDHash
-                           useFileLock:NO];
+                          deviceIDHash:startupResponse.deviceIDHash];
     }
     
     if (persistent.hadFirstStartup == NO) {

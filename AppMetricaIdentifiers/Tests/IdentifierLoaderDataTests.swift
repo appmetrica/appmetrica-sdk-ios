@@ -18,7 +18,7 @@ final class IdentifierLoaderDataTests: XCTestCase {
         var data = IdentifierLoaderData(identifierSet: dataSet.map { .data($0) })
         data.update(deviceID: lid2.deviceID!, deviceIDHash: lid2.deviceIDHash)
         
-        data.identifierSet.forEach {
+        data.identifierSet.actualSet.forEach {
             XCTAssertEqual($0?.data?.withoutAppMetricaUUID, lid2.withoutAppMetricaUUID)
         }
     }

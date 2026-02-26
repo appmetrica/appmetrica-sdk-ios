@@ -119,14 +119,14 @@ describe(@"AMAStartupController", ^{
         it(@"Should not replace deviceId when deviceId from startup is nil", ^{
             NSObject *idProvider = (NSObject *)[AMAMetricaConfiguration sharedInstance].identifierProvider;
             [idProvider stub:@selector(deviceID) andReturn:deviceID];
-            [idProvider stub:@selector(updateWithDeviceID:deviceIDHash:useFileLock:)];
+            [idProvider stub:@selector(updateWithDeviceID:deviceIDHash:)];
 
             AMAStartupController *controller = currentQueueStartupController();
             AMAStartupResponse *response = [AMAStartupResponse nullMock];
             [response stub:@selector(deviceID) andReturn:nil];
             [response stub:@selector(deviceIDHash) andReturn:deviceIDHash];
             
-            [[idProvider should] receive:@selector(updateWithDeviceID:deviceIDHash:useFileLock:)
+            [[idProvider should] receive:@selector(updateWithDeviceID:deviceIDHash:)
                            withArguments:deviceID, deviceIDHash, theValue(NO)];
             
             [controller handleStartupResponse:response];
@@ -136,14 +136,14 @@ describe(@"AMAStartupController", ^{
             
             NSObject *idProvider = (NSObject *)[AMAMetricaConfiguration sharedInstance].identifierProvider;
             [idProvider stub:@selector(deviceID) andReturn:deviceID];
-            [idProvider stub:@selector(updateWithDeviceID:deviceIDHash:useFileLock:)];
+            [idProvider stub:@selector(updateWithDeviceID:deviceIDHash:)];
 
             AMAStartupController *controller = currentQueueStartupController();
             AMAStartupResponse *response = [AMAStartupResponse nullMock];
             [response stub:@selector(deviceID) andReturn:deviceID2];
             [response stub:@selector(deviceIDHash) andReturn:deviceIDHash];
             
-            [[idProvider should] receive:@selector(updateWithDeviceID:deviceIDHash:useFileLock:)
+            [[idProvider should] receive:@selector(updateWithDeviceID:deviceIDHash:)
                            withArguments:deviceID2, deviceIDHash, theValue(NO)];
             
             [controller handleStartupResponse:response];

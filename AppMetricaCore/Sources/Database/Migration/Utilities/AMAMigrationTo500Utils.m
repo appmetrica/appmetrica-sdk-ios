@@ -141,7 +141,9 @@ NSString *const kAMAMigrationDeviceIDHashStorageKey = @"YMMMetricaPersistentConf
     
     id<AMAIdentifierProviding> idProvider = [AMAMetricaConfiguration sharedInstance].identifierProvider;
     
-    [idProvider updateIfMissingWithDeviceID:storageDeviceID deviceIDHash:deviceIDHash];
+    if ([storageDeviceID length] > 0) {
+        [idProvider updateAppMigrationDataWithDeviceID:storageDeviceID deviceIDHash:deviceIDHash];
+    }
 }
 
 + (void)migrateUUID
@@ -151,8 +153,8 @@ NSString *const kAMAMigrationDeviceIDHashStorageKey = @"YMMMetricaPersistentConf
     
     NSString *uuid = [migrationConfiguration UUID];
     
-    if (uuid != nil) {
-        [idProvider updateIfMissingWithUuid:uuid];
+    if ([uuid length] > 0) {
+        [idProvider updateAppMigrationDataWithUuid:uuid];
     }
 }
 

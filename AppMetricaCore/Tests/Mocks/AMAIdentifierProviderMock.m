@@ -49,7 +49,7 @@
     return self.mockMetricaUUID;
 }
 
-- (void)updateIfMissingWithDeviceID:(NSString *)deviceID deviceIDHash:(NSString *)deviceIDHash
+- (void)updateAppMigrationDataWithDeviceID:(NSString *)deviceID deviceIDHash:(NSString *)deviceIDHash
 {
     if (self.mockDeviceID == nil) {
         self.mockDeviceID = deviceID;
@@ -57,7 +57,7 @@
     }
 }
 
-- (void)updateIfMissingWithUuid:(NSString *)uuid
+- (void)updateAppMigrationDataWithUuid:(NSString *)uuid
 {
     if (self.mockMetricaUUID == nil) {
         self.mockMetricaUUID = uuid;
@@ -66,7 +66,6 @@
 
 - (void)updateWithDeviceID:(NSString * _Nonnull)deviceID
               deviceIDHash:(NSString * _Nullable)deviceIDHash
-               useFileLock:(BOOL)useFileLock
 {
     self.mockDeviceID = deviceID;
     self.mockDeviceHashID = deviceIDHash;

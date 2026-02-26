@@ -49,6 +49,10 @@ struct IdentifierSet<T>: Sequence {
         set { elements[index.rawValue] = newValue }
     }
     
+    var actualSet: InternalArray.SubSequence {
+        return elements[..<IdentifierSource.migrationData.rawValue]
+    }
+    
     func makeIterator() -> InternalArray.Iterator {
         return elements.makeIterator()
     }

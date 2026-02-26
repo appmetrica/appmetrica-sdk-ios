@@ -11,6 +11,7 @@ final class IdentifierLoaderTests: XCTestCase {
     var groupKeychain: IdentifiersStorageMock!
     var groupSettings: IdentifiersStorageMock!
     var vendorKeychain: IdentifiersStorageMock!
+    var migrationData: IdentifiersStorageMock!
     
     var sourcesSet: IdentifierSet<IdentifiersStorageMock>!
     var providers: IdentifierSet<MutableIdentifiersStorable>!
@@ -23,6 +24,7 @@ final class IdentifierLoaderTests: XCTestCase {
         groupKeychain = IdentifiersStorageMock()
         groupSettings = IdentifiersStorageMock()
         vendorKeychain = IdentifiersStorageMock()
+        migrationData = IdentifiersStorageMock()
         
         sourcesSet = IdentifierSet<IdentifiersStorageMock>()
         sourcesSet[.privateKeychain] = appKeychain
@@ -30,6 +32,7 @@ final class IdentifierLoaderTests: XCTestCase {
         sourcesSet[.groupKeychain] = groupKeychain
         sourcesSet[.groupFile] = groupSettings
         sourcesSet[.vendorKeychain] = vendorKeychain
+        sourcesSet[.migrationData] = migrationData
         
         providers = sourcesSet.map { $0 }
     }
@@ -41,6 +44,7 @@ final class IdentifierLoaderTests: XCTestCase {
         dataSet[.groupKeychain] = .generateISD().withoutAppMetricaUUID
         dataSet[.groupFile] = .generateISD()
         dataSet[.vendorKeychain] = .generateISD().withoutAppMetricaUUID
+        dataSet[.migrationData] = .generateISD()
         
         for i in IdentifierSource.allCases {
             sourcesSet[i]!.value = .data(dataSet[i]!)
@@ -62,6 +66,7 @@ final class IdentifierLoaderTests: XCTestCase {
         dataSet[.groupKeychain] = .generateISD().withoutAppMetricaUUID
         dataSet[.groupFile] = .generateISD()
         dataSet[.vendorKeychain] = .generateISD().withoutAppMetricaUUID
+        dataSet[.migrationData] = .generateISD()
         
         for i in IdentifierSource.allCases {
             sourcesSet[i]!.fetchError = IdentifierStorageError.underlying(CustomError())
@@ -82,6 +87,7 @@ final class IdentifierLoaderTests: XCTestCase {
         dataSet[.groupKeychain] = .locked
         dataSet[.groupFile] = .data(.generateISD())
         dataSet[.vendorKeychain] = .locked
+        dataSet[.migrationData] = .data(.generateISD())
         
         for i in IdentifierSource.allCases {
             sourcesSet[i]!.value = dataSet[i]!

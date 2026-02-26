@@ -66,7 +66,7 @@ final class IdentifierUpdaterTests: XCTestCase {
         
         wait(for: Array(sourcesSet).compactMap { $0?.saveExpectation })
         
-        sourcesSet.forEach {
+        sourcesSet.actualSet.forEach {
             XCTAssertEqual($0?.value.data, lid)
         }
     }
@@ -81,7 +81,16 @@ final class IdentifierUpdaterTests: XCTestCase {
         
         let lid = IdentifiersStorageData.generateISD()
         
-        XCTAssertThrowsError(try IdentifierUpdater.updateIdentifiers(providers: providerSet, id: lid, sourcesToUpdate: IdentifierSource.allSet, handleVendorError: true)) {
+        func updateIndentifiers() throws {
+            try IdentifierUpdater.updateIdentifiers(
+                providers: providerSet,
+                id: lid,
+                sourcesToUpdate: IdentifierSource.allActualSet,
+                handleVendorError: true
+            )
+        }
+        
+        XCTAssertThrowsError(try updateIndentifiers()) {
             if let err = $0 as? IdentifierUpdateError, case .writingToAllStorage = err {
                 return
             }

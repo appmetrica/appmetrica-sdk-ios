@@ -104,7 +104,7 @@ class SyncManagerTests: XCTestCase {
     func testMigration() throws {
         let lid = IdentifiersStorageData.generateISD()
         
-        syncManager.migrationData = lid
+        syncManager.appMigrationData = lid
         
         let syncId = try syncManager.loadAndSyncIfNeeded()
         XCTAssertEqual(lid.deviceID, syncId.deviceID)
@@ -120,7 +120,7 @@ class SyncManagerTests: XCTestCase {
         
         appKeychain.value = .data(lid.withoutAppMetricaUUID)
         appSettings.value = .data(lid)
-        syncManager.migrationData = lid2
+        syncManager.appMigrationData = lid2
         
         let syncId = try syncManager.loadAndSyncIfNeeded()
         XCTAssertEqual(lid.deviceID, syncId.deviceID)
@@ -156,38 +156,10 @@ class SyncManagerTests: XCTestCase {
         checkISD(idSet: sourcesSet, isd: newLid, sources: IdentifierSource.allSet.subtracting([.vendorKeychain]))
     }
     
-    func testUpdateDeviceID() throws {
-        let lid = IdentifiersStorageData.generateISD()
-        let lid2 = IdentifiersStorageData.generateISD()
-        let newDeviceID = DeviceID(nonEmptyString: UUID().uuidString)
-        
-        appKeychain.value = .data(lid.withoutAppMetricaUUID)
-        appSettings.value = .data(lid)
-        vendorKeychain.value = .data(lid2.withoutAppMetricaUUID)
-        
-        let syncId = try syncManager.loadAndSyncIfNeeded()
-        XCTAssertEqual(lid.deviceID, syncId.deviceID)
-        XCTAssertEqual(lid.deviceIDHash, syncId.deviceHashID)
-        XCTAssertEqual(lid.appMetricaUUID, syncId.appMetricaUUID)
-        
-        let newSyncId = syncManager.updateDeviceID(newDeviceID)
-        XCTAssertEqual(newSyncId.deviceID, newDeviceID)
-        XCTAssertEqual(newSyncId.deviceHashID, lid.deviceIDHash)
-        XCTAssertEqual(newSyncId.appMetricaUUID, lid.appMetricaUUID)
-        
-        let newLid = IdentifiersStorageData(
-            deviceID: newSyncId.deviceID,
-            deviceIDHash: newSyncId.deviceHashID,
-            appMetricaUUID: newSyncId.appMetricaUUID
-        )
-        
-        checkISD(idSet: sourcesSet, isd: newLid, sources: IdentifierSource.allSet.subtracting([.vendorKeychain]))
-    }
-    
     func testMigrationData() throws {
         let lid = IdentifiersStorageData.generateISD().withoutAppMetricaUUID
         
-        syncManager.migrationData = lid
+        syncManager.appMigrationData = lid
         
         let syncId = try syncManager.loadAndSyncIfNeeded()
         XCTAssertEqual(syncId.deviceID, lid.deviceID)
@@ -205,7 +177,7 @@ class SyncManagerTests: XCTestCase {
         appKeychain.value = .data(lid2.withoutAppMetricaUUID)
         groupKeychain.value = .data(lid2.withoutAppMetricaUUID)
         
-        syncManager.migrationData = lid
+        syncManager.appMigrationData = lid
         
         let syncId = try syncManager.loadAndSyncIfNeeded()
         XCTAssertEqual(syncId.deviceID, lid2.deviceID)

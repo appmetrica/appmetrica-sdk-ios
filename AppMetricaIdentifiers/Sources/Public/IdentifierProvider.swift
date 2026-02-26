@@ -13,10 +13,10 @@ public protocol IdentifierProviding: NSObjectProtocol {
     var deviceIDHash: String? { get }
     var appMetricaUUID: String? { get }
     
-    func update(deviceID: String, deviceIDHash: String?, useFileLock: Bool)
+    func update(deviceID: String, deviceIDHash: String?)
     
-    func updateIfMissing(uuid: String?)
-    func updateIfMissing(deviceID: String, deviceIDHash: String?)
+    func updateAppMigrationData(deviceID: String, deviceIDHash: String?)
+    func updateAppMigrationData(uuid: String?)
 }
 
 public let identifierErrorDomain = "io.appmetrica.identifier.error"
@@ -167,57 +167,65 @@ public final class IdentifierProvider: NSObject, IdentifierProviding {
         return id.appMetricaUUID.rawValue
     }
     
-    public func update(deviceID: String, deviceIDHash: String?, useFileLock: Bool) {
+    public func update(deviceID: String, deviceIDHash: String?) {
         guard let deviceIDValue = DeviceID(rawValue: deviceID) else { return }
         let deviceIDHashValue = deviceIDHash.flatMap { DeviceIDHash(rawValue: $0) }
 
         loadIdentifiersLock.lock()
         defer { loadIdentifiersLock.unlock() }
         
-        func doWithFileLockIfNeeded<T>(closure: () throws -> T) rethrows -> T {
-            if useFileLock {
-                return try withFileLock(closure)
-            } else {
-                return try closure()
-            }
-        }
-        
-        let result: Identifiers = doWithFileLockIfNeeded {
-            syncManager.update(deviceID: deviceIDValue, deviceIDHash: deviceIDHashValue)
-        }
+        // this method is used in startup handling, don't use file lock due to ios kill app going to suspend with active flock
+        // this method are expected to call with current DeviceID and new(maybe) DeviceIDHash
+        let result: Identifiers = syncManager.update(deviceID: deviceIDValue, deviceIDHash: deviceIDHashValue)
         
         if result.isValid {
             identifierData.value = result
         }
     }
-
-    public func updateIfMissing(uuid: String?) {
-        guard let uuid = uuid, !uuid.isEmpty else { return }
-        loadIdentifiersLock.lock()
-        defer { loadIdentifiersLock.unlock() }
-
-        var md = syncManager.migrationData ?? IdentifiersStorageData()
-        if let uuid = AppMetricaUUID(rawValue: uuid) {
-            md.appMetricaUUID = uuid
+    
+    private func updateMigrationData(
+        currentData: IdentifiersStorageData?,
+        deviceID: String?,
+        deviceIDHash: String?,
+        uuid: String?
+    ) -> IdentifiersStorageData {
+        var md = currentData ?? IdentifiersStorageData()
+        
+        if let d = deviceID, let did = DeviceID(rawValue: d) {
+            md.deviceID = did
+        }
+        if deviceID != nil, let hash = deviceIDHash, let dih = DeviceIDHash(rawValue: hash) {
+            md.deviceIDHash = dih
+        }
+        if let u = uuid, let appMetricaUUID = AppMetricaUUID(rawValue: u) {
+            md.appMetricaUUID = appMetricaUUID
         }
         
-        syncManager.migrationData = md
+        return md
     }
     
-    public func updateIfMissing(deviceID: String, deviceIDHash: String?) {
+    public func updateAppMigrationData(deviceID: String, deviceIDHash: String?) {
         loadIdentifiersLock.lock()
         defer { loadIdentifiersLock.unlock() }
         
-        var md = syncManager.migrationData ?? IdentifiersStorageData()
-        
-        if let deviceID = DeviceID(rawValue: deviceID) {
-            md.deviceID = deviceID
-        }
-        if let deviceIDHash = deviceIDHash.flatMap({ DeviceIDHash(rawValue: $0) }) {
-            md.deviceIDHash = deviceIDHash
-        }
-        
-        syncManager.migrationData = md
+        syncManager.appMigrationData = updateMigrationData(
+            currentData: syncManager.appMigrationData,
+            deviceID: deviceID,
+            deviceIDHash: deviceIDHash,
+            uuid: nil
+        )
+    }
+    
+    public func updateAppMigrationData(uuid: String?) {
+        loadIdentifiersLock.lock()
+        defer { loadIdentifiersLock.unlock() }
+
+        syncManager.appMigrationData = updateMigrationData(
+            currentData: syncManager.appMigrationData,
+            deviceID: nil,
+            deviceIDHash: nil,
+            uuid: uuid
+        )
     }
     
 }

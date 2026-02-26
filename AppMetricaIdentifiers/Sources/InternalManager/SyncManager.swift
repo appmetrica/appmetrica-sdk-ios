@@ -33,7 +33,7 @@ final class SyncManager {
     
     private var syncData: IdentifiersSyncData?
     
-    var migrationData: IdentifiersStorageData?
+    var appMigrationData: IdentifiersStorageData?
     
     init(
         providers: IdentifierSet<MutableIdentifiersStorable>, 
@@ -64,25 +64,6 @@ extension SyncManager {
     
     func loadIfNeeded() -> Identifiers {
         internalLoadIfNeeded().identifiers
-    }
-    
-    func updateDeviceID(_ deviceID: DeviceID) -> Identifiers {
-        var syncData = internalLoadIfNeeded()
-        syncData.identifiers.deviceID = deviceID
-        
-        do {
-            try IdentifierUpdater.updateIdentifiers(
-                providers: providers,
-                id: syncData.storageData,
-                sourcesToUpdate: IdentifierSource.deviceIDSources,
-                handleVendorError: false
-            )
-            self.syncData = syncData
-        } catch let e {
-            logger.error(e)
-        }
-        
-        return syncData.identifiers
     }
     
     func update(deviceID: DeviceID, deviceIDHash: DeviceIDHash?) -> Identifiers {
@@ -123,19 +104,13 @@ private extension SyncManager {
     @discardableResult
     func internalLoad() -> IdentifiersSyncData {
         let ids = IdentifierLoader.loadIdentifiers(providers: providers)
-        var result = IdentifierResolver.resolve(runEnvionment: runEnv, input: ids.identifierSet)
+        var idsData = ids.identifierSet
+        if let appIdentifiersData = appMigrationData {
+            idsData[.migrationData] = .data(appIdentifiersData)
+        }
+        var result = IdentifierResolver.resolve(runEnvionment: runEnv, input: idsData)
         
         let rUUID: AppMetricaUUID
-        
-        if let migrationData = migrationData {
-            if result.resultDeviceID == nil {
-                result.resultDeviceID = migrationData.deviceID
-                result.resultDeviceIDHash = migrationData.deviceIDHash
-            }
-            if result.resultAppMetricaUUID == nil {
-                result.resultAppMetricaUUID = migrationData.appMetricaUUID
-            }
-        }
         
         //TODO: https://nda.ya.ru/t/lb6gBoj_7AACua
         if result.resultDeviceID == nil {

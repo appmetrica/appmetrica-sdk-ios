@@ -263,7 +263,7 @@ describe(@"AMADataMigrationsTests", ^{
                     }];
                     
                     
-                    [[idProvider should] receive:@selector(updateIfMissingWithDeviceID:deviceIDHash:)
+                    [[idProvider should] receive:@selector(updateAppMigrationDataWithDeviceID:deviceIDHash:)
                                    withArguments:deviceID, deviceIDHash];
                     
                     id<AMADatabaseProtocol> migratedDB = [AMADatabaseFactory configurationDatabase];
@@ -294,7 +294,7 @@ describe(@"AMADataMigrationsTests", ^{
                          withArguments:kAMAMigrationDeviceIDHashStorageKey, kw_any()];
                     
                     
-                    [[idProvider should] receive:@selector(updateIfMissingWithDeviceID:deviceIDHash:)
+                    [[idProvider should] receive:@selector(updateAppMigrationDataWithDeviceID:deviceIDHash:)
                                    withArguments:deviceID, deviceIDHash];
                     
                     id<AMADatabaseProtocol> migratedDB = [AMADatabaseFactory configurationDatabase];
@@ -321,7 +321,7 @@ describe(@"AMADataMigrationsTests", ^{
                          withArguments:kAMAMigrationDeviceIDHashStorageKey, kw_any()];
                     
                     
-                    [[idProvider should] receive:@selector(updateIfMissingWithDeviceID:deviceIDHash:)
+                    [[idProvider should] receive:@selector(updateAppMigrationDataWithDeviceID:deviceIDHash:)
                                    withArguments:deviceID, deviceIDHash];
                     
                     id<AMADatabaseProtocol> migratedDB = [AMADatabaseFactory configurationDatabase];
@@ -342,7 +342,7 @@ describe(@"AMADataMigrationsTests", ^{
                          withArguments:kAMAMigrationDeviceIDHashStorageKey, kw_any()];
                     
                     
-                    [[idProvider should] receive:@selector(updateIfMissingWithDeviceID:deviceIDHash:)
+                    [[idProvider should] receive:@selector(updateAppMigrationDataWithDeviceID:deviceIDHash:)
                                    withArguments:deviceID, deviceIDHash];
                     
                     id<AMADatabaseProtocol> migratedDB = [AMADatabaseFactory configurationDatabase];
@@ -427,7 +427,7 @@ describe(@"AMADataMigrationsTests", ^{
                 migrator = [AMAAppMetricaUUIDMigrator stubbedNullMockForDefaultInit];
                 [migrator stub:@selector(migrateAppMetricaUUID) andReturn:expectedUUID];
                 
-                [identifierProviderMock stub:@selector(updateIfMissingWithUuid:) withBlock:^id(NSArray *params) {
+                [identifierProviderMock stub:@selector(updateAppMigrationDataWithUuid:) withBlock:^id(NSArray *params) {
                     resultUUID = params[0];
                     return nil;
                 }];
@@ -448,7 +448,7 @@ describe(@"AMADataMigrationsTests", ^{
                 NSString *__block resultDeviceID = nil;
                 NSString *__block resultDeviceIDHash = nil;
                 
-                [identifierProviderMock stub:@selector(updateIfMissingWithDeviceID:deviceIDHash:) withBlock:^id(NSArray *params) {
+                [identifierProviderMock stub:@selector(updateAppMigrationDataWithDeviceID:deviceIDHash:) withBlock:^id(NSArray *params) {
                     resultDeviceID = params[0];
                     resultDeviceIDHash = params[1];
                     return nil;
