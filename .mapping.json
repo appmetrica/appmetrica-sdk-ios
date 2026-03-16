@@ -19,6 +19,8 @@
   "AppMetricaAdSupport/Tests/AMAAdControllerTests.m":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaAdSupport/Tests/AMAAdControllerTests.m",
   "AppMetricaAdSupport/Tests/AMAIDFAProviderTests.m":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaAdSupport/Tests/AMAIDFAProviderTests.m",
   "AppMetricaAnalytics.podspec":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaAnalytics.podspec",
+  "AppMetricaAnalytics/Sources/Core.swift":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaAnalytics/Sources/Core.swift",
+  "AppMetricaAnalytics/Sources/Resources/PrivacyInfo.xcprivacy":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaAnalytics/Sources/Resources/PrivacyInfo.xcprivacy",
   "AppMetricaCore.podspec":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCore.podspec",
   "AppMetricaCore/Protos/AdRevenue.proto":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCore/Protos/AdRevenue.proto",
   "AppMetricaCore/Protos/AppMetrica.proto":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCore/Protos/AppMetrica.proto",

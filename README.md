@@ -32,8 +32,13 @@ dependencies: [
 .target(
     name: "YourTargetName",
     dependencies: [
-        .product(name: "AppMetricaCore", package: "appmetrica-sdk-ios"),
-        // Add other modules like AppMetricaCrashes if needed.
+        // For all analytics features, add this umbrella module:
+        .product(name: "AppMetricaAnalytics", package: "appmetrica-sdk-ios"),
+
+        // Or add specific modules:
+        // .product(name: "AppMetricaCore", package: "appmetrica-sdk-ios"),
+        // .product(name: "AppMetricaCrashes", package: "appmetrica-sdk-ios"),
+        // .product(name: "AppMetricaAdSupport", package: "appmetrica-sdk-ios"),
     ]
 )
 ```
@@ -75,10 +80,13 @@ To meet Apple's App Store rules regarding children's privacy (like COPPA), add A
 
 ### Modules Overview
 
+- `AppMetricaAnalytics`: Umbrella module that includes all analytics features (Core, Crashes, AdSupport, WebKit, etc).
 - `AppMetricaCore`: Required for basic SDK use.
 - `AppMetricaCrashes`: Enables crash reports.
 - `AppMetricaWebKit`: Used for handling events from WebKit.
 - `AppMetricaAdSupport`: Needed for IDFA collection, don't include for children's apps.
+- `AppMetricaScreenshot`: Allows AppMetrica SDK to collect screenshot taken events.
+- `AppMetricaIDSync`: Enhances integration capabilities and improves overall system performance in cross-platform environments.
 
 ## Integration Quickstart
 

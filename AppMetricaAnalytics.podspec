@@ -14,11 +14,17 @@ Pod::Spec.new do |s|
   s.swift_versions = '5.9.0'
 
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES' }
-  
+
+  s.frameworks = 'Foundation'
+
   s.dependency 'AppMetricaCore', '= 6.2.0'
   s.dependency 'AppMetricaAdSupport', '= 6.2.0'
   s.dependency 'AppMetricaWebKit', '= 6.2.0'
   s.dependency 'AppMetricaCrashes', '= 6.2.0'
   s.dependency 'AppMetricaScreenshot', '= 6.2.0'
   s.dependency 'AppMetricaIDSync', '= 6.2.0'
+
+  s.source_files = "#{s.name}/Sources/**/*.swift"
+
+  s.resource_bundles = { s.name => "#{s.name}/Sources/Resources/PrivacyInfo.xcprivacy" }
 end

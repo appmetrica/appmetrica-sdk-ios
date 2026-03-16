@@ -15,7 +15,7 @@ enum AppMetricaTarget: String {
     case testUtils = "AppMetricaTestUtils"
     case network = "AppMetricaNetwork"
     case hostState = "AppMetricaHostState"
-    case platform = "AppMetricaPlatform"
+    case platform = "AppMetricaPlatform"    
     case protobufUtils = "AppMetricaProtobufUtils"
     case storageUtils = "AppMetricaStorageUtils"
     case encodingUtils = "AppMetricaEncodingUtils"
@@ -25,6 +25,7 @@ enum AppMetricaTarget: String {
     case synchronization = "AppMetricaSynchronization"
     case screenshot = "AppMetricaScreenshot"
     case idSync = "AppMetricaIDSync"
+    case analytics = "AppMetricaAnalytics"
 
     case protobuf = "AppMetricaProtobuf"
     case fmdb = "AppMetricaFMDB"
@@ -44,6 +45,7 @@ enum AppMetricaProduct: String, CaseIterable {
     case libraryAdapter = "AppMetricaLibraryAdapter"
     case screenshot = "AppMetricaScreenshot"
     case idSync = "AppMetricaIDSync"
+    case analytics = "AppMetricaAnalytics"
 
     static var allProducts: [Product] { allCases.map { $0.product } }
 
@@ -56,6 +58,7 @@ enum AppMetricaProduct: String, CaseIterable {
         case .libraryAdapter: return [.libraryAdapter]
         case .screenshot: return [.screenshot]
         case .idSync: return [.idSync]
+        case .analytics: return [.analytics]
         }
     }
     
@@ -128,6 +131,9 @@ let package = Package(
     dependencies: ExternalPackage.allDependencies,
     targets: [
         //MARK: - AppMetrica SDK -
+        .target(target: .analytics, dependencies: [.core, .crashes, .adSupport, .webKit, .screenshot, .idSync]),
+        
+        //MARK: - AppMetrica Core
         .target(
             target: .core,
             dependencies: [
@@ -527,7 +533,7 @@ extension AppMetricaTarget {
                 "./Network",
             ]
         case .adSupport, .coreExtension, .encodingUtils, .fmdb, .hostState, .log, .network, .platform,
-                .protobuf, .protobufUtils, .storageUtils, .webKit, .testUtils, .libraryAdapter, .keychain, .identifiers, .logSwift, .synchronization:
+                .protobuf, .protobufUtils, .storageUtils, .webKit, .testUtils, .libraryAdapter, .keychain, .identifiers, .logSwift, .synchronization, .analytics:
             return []
         }
     }
@@ -554,7 +560,7 @@ extension AppMetricaTarget {
                 "Mocks",
             ]
         case .coreExtension, .adSupport, .webKit, .testUtils, .hostState, .storageUtils,
-                .protobuf, .fmdb, .libraryAdapter, .keychain, .identifiers, .logSwift, .synchronization:
+                .protobuf, .fmdb, .libraryAdapter, .keychain, .identifiers, .logSwift, .synchronization, .analytics:
             return []
         }
     }
