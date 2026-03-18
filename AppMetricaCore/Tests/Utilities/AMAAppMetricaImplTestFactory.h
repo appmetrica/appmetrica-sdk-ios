@@ -5,6 +5,8 @@
 @class AMAReporterTestHelper;
 @protocol AMAHostStateProviding;
 
+NS_ASSUME_NONNULL_BEGIN
+
 @interface AMAAppMetricaImplTestFactory : NSObject
 
 + (AMAAppMetricaImpl *)createNoQueueImplWithReporterHelper:(AMAReporterTestHelper *)reporterTestHelper;
@@ -18,4 +20,10 @@
 
 @interface AMAAppMetricaImplStub : AMAAppMetricaImpl
 
+- (instancetype)initWithHostStateProvider:(nullable id<AMAHostStateProviding>)hostStateProvider
+                                 executor:(id<AMAAsyncExecuting, AMASyncExecuting>)executor
+                       reporterTestHelper:(AMAReporterTestHelper *)reporterTestHelper;
+
 @end
+
+NS_ASSUME_NONNULL_END
