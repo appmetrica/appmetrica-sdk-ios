@@ -660,7 +660,7 @@ describe(@"AMAAppMetricaCrashes", ^{
                 NSError *receivedError = spy.argument;
                 
                 [[theValue(receivedError.code) should] equal:theValue(AMAAppMetricaInternalEventErrorCodeProbableUnhandledCrash)];
-                [[receivedError.domain should] equal:kAMAAppMetricaInternalErrorDomain];
+                [[receivedError.domain should] equal:AMAAppMetricaInternalErrorDomain];
                 [[receivedError.localizedDescription should] equal:errorMessage];
             });
             
@@ -674,7 +674,7 @@ describe(@"AMAAppMetricaCrashes", ^{
                 NSError *receivedError = spy.argument;
                 
                 [[theValue(receivedError.code) should] equal:theValue(AMAAppMetricaInternalEventErrorCodeProbableUnhandledCrash)];
-                [[receivedError.domain should] equal:kAMAAppMetricaInternalErrorDomain];
+                [[receivedError.domain should] equal:AMAAppMetricaInternalErrorDomain];
                 [[receivedError.localizedDescription should] equal:errorMessage];
             });
         });

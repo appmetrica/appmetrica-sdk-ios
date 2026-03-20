@@ -1315,6 +1315,7 @@
   "AppMetricaCoreUtils/Sources/include/AppMetricaCoreUtils/AMADecimalUtils.h":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCoreUtils/Sources/include/AppMetricaCoreUtils/AMADecimalUtils.h",
   "AppMetricaCoreUtils/Sources/include/AppMetricaCoreUtils/AMADictionaryRepresentation.h":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCoreUtils/Sources/include/AppMetricaCoreUtils/AMADictionaryRepresentation.h",
   "AppMetricaCoreUtils/Sources/include/AppMetricaCoreUtils/AMAErrorUtilities.h":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCoreUtils/Sources/include/AppMetricaCoreUtils/AMAErrorUtilities.h",
+  "AppMetricaCoreUtils/Sources/include/AppMetricaCoreUtils/AMAErrorUtilitiesDeprecated.h":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCoreUtils/Sources/include/AppMetricaCoreUtils/AMAErrorUtilitiesDeprecated.h",
   "AppMetricaCoreUtils/Sources/include/AppMetricaCoreUtils/AMAExecuting.h":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCoreUtils/Sources/include/AppMetricaCoreUtils/AMAExecuting.h",
   "AppMetricaCoreUtils/Sources/include/AppMetricaCoreUtils/AMAExecutionCondition.h":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCoreUtils/Sources/include/AppMetricaCoreUtils/AMAExecutionCondition.h",
   "AppMetricaCoreUtils/Sources/include/AppMetricaCoreUtils/AMAFailureDispatcher.h":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCoreUtils/Sources/include/AppMetricaCoreUtils/AMAFailureDispatcher.h",

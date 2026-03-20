@@ -101,7 +101,7 @@
 {
     NSString *errorMsg =
     [NSString stringWithFormat:@"Passed dictionary is not a valid serializable JSON object: %@", params];
-    return [AMAErrorUtilities internalErrorWithCode:AMAAppMetricaInternalEventJsonSerializationError
+    return [AMAErrorUtilities internalErrorWithCode:AMAAppMetricaInternalEventErrorCodeJsonSerialization
                                         description:errorMsg];
 }
 
@@ -111,7 +111,7 @@
     if (result != nil) {
         userInfo = @{ kAMAAppMetricaInternalErrorResultObjectKey : result };
     }
-    return [NSError errorWithDomain:kAMAAppMetricaInternalErrorDomain
+    return [NSError errorWithDomain:AMAAppMetricaInternalErrorDomain
                                code:AMAAppMetricaInternalEventErrorCodeUnexpectedDeserialization
                            userInfo:userInfo];
 }

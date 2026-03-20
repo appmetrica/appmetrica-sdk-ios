@@ -32,7 +32,7 @@ describe(@"AMACrashErrorsFactory", ^{
                 error = [AMACrashErrorsFactory crashReportRecrashError];
             });
             it(@"Should use correct domain", ^{
-                [[error.domain should] equal:kAMAAppMetricaInternalErrorDomain];
+                [[error.domain should] equal:AMAAppMetricaInternalErrorDomain];
             });
             it(@"Should use correct code", ^{
                 [[theValue(error.code) should] equal:theValue(2000)];
@@ -51,7 +51,7 @@ describe(@"AMACrashErrorsFactory", ^{
                 error = [AMACrashErrorsFactory crashUnsupportedReportVersionError:kAMAExpectedVersion];
             });
             it(@"Should use correct domain", ^{
-                [[error.domain should] equal:kAMAAppMetricaInternalErrorDomain];
+                [[error.domain should] equal:AMAAppMetricaInternalErrorDomain];
             });
             it(@"Should use correct code", ^{
                 [[theValue(error.code) should] equal:theValue(2002)];

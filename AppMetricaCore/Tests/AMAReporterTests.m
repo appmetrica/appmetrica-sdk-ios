@@ -234,7 +234,7 @@ describe(@"AMAReporter", ^{
                 NSNumber *expectedSessionID = [sessionStorage() lastSessionWithError:nil].sessionID;
                 NSString *expectedDescription = [NSString stringWithFormat:errorFormat, eventName, expectedSessionID];
                 
-                [[error.domain should] equal:kAMAAppMetricaInternalErrorDomain];
+                [[error.domain should] equal:AMAAppMetricaInternalErrorDomain];
                 [[theValue(error.code) should] equal:theValue(AMAAppMetricaInternalEventErrorCodeInternalInconsistency)];
                 
                 [[error.localizedDescription should] equal:expectedDescription];
@@ -256,7 +256,7 @@ describe(@"AMAReporter", ^{
                 NSNumber *expectedSessionID = [sessionStorage() lastSessionWithError:nil].sessionID;
                 NSString *expectedDescription = [NSString stringWithFormat:errorFormat, eventName, expectedSessionID, errorMock];
                 
-                [[error.domain should] equal:kAMAAppMetricaInternalErrorDomain];
+                [[error.domain should] equal:AMAAppMetricaInternalErrorDomain];
                 [[theValue(error.code) should] equal:theValue(AMAAppMetricaInternalEventErrorCodeInternalInconsistency)];
                 
                 [[error.localizedDescription should] equal:expectedDescription];
@@ -280,7 +280,7 @@ describe(@"AMAReporter", ^{
                 NSNumber *expectedSessionID = [sessionStorage() lastSessionWithError:nil].sessionID;
                 NSString *expectedDescription = [NSString stringWithFormat:errorFormat, eventName, expectedSessionID, errorMock];
 
-                [[error.domain should] equal:kAMAAppMetricaDatabaseErrorDomain];
+                [[error.domain should] equal:AMAAppMetricaDatabaseErrorDomain];
                 [[theValue(error.code) should] equal:theValue(AMAAppMetricaDatabaseEventErrorCodeOperationFailed)];
 
                 [[error.localizedDescription should] equal:expectedDescription];

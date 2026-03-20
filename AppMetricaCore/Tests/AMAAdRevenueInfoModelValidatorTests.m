@@ -86,7 +86,7 @@ describe(@"AMAAdRevenueInfoModelValidator", ^{
             });
             it(@"Should fill error", ^{
                 NSString *description = expectedErrorDescription();
-                NSError *expectedError = [NSError errorWithDomain:kAMAAppMetricaErrorDomain
+                NSError *expectedError = [NSError errorWithDomain:AMAAppMetricaEventErrorDomain
                                                              code:AMAAppMetricaEventErrorCodeInvalidAdRevenueInfo
                                                          userInfo:@{ NSLocalizedDescriptionKey: description}];
                 NSError *error = nil;
@@ -108,7 +108,7 @@ describe(@"AMAAdRevenueInfoModelValidator", ^{
             });
             it(@"Should fill error", ^{
                 NSString *description = expectedErrorDescription();
-                NSError *expectedError = [NSError errorWithDomain:kAMAAppMetricaErrorDomain
+                NSError *expectedError = [NSError errorWithDomain:AMAAppMetricaEventErrorDomain
                                                              code:AMAAppMetricaEventErrorCodeInvalidAdRevenueInfo
                                                          userInfo:@{ NSLocalizedDescriptionKey: description}];
                 NSError *error = nil;
@@ -130,7 +130,7 @@ describe(@"AMAAdRevenueInfoModelValidator", ^{
             });
             it(@"Should fill error", ^{
                 NSString *description = expectedErrorDescription();
-                NSError *expectedError = [NSError errorWithDomain:kAMAAppMetricaErrorDomain
+                NSError *expectedError = [NSError errorWithDomain:AMAAppMetricaEventErrorDomain
                                                              code:AMAAppMetricaEventErrorCodeInvalidAdRevenueInfo
                                                          userInfo:@{ NSLocalizedDescriptionKey: description}];
                 NSError *error = nil;

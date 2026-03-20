@@ -433,7 +433,7 @@ describe(@"AMAAppMetrica", ^{
                     };
                     
                     it(@"Should call onFailure with error of actual domain", ^{
-                        [[errorFromReporting().domain should] equal:kAMAAppMetricaErrorDomain];
+                        [[errorFromReporting().domain should] equal:AMAAppMetricaEventErrorDomain];
                     });
                     it(@"Should call onFailure with error of actual code", ^{
                         [[theValue(errorFromReporting().code) should] equal:theValue(AMAAppMetricaEventErrorCodeInitializationError)];
@@ -508,7 +508,7 @@ describe(@"AMAAppMetrica", ^{
                     };
                     
                     it(@"Should call onFailure with error of actual domain", ^{
-                        [[errorFromReporting().domain should] equal:kAMAAppMetricaErrorDomain];
+                        [[errorFromReporting().domain should] equal:AMAAppMetricaEventErrorDomain];
                     });
                     it(@"Should call onFailure with error of actual code", ^{
                         [[theValue(errorFromReporting().code) should] equal:theValue(AMAAppMetricaEventErrorCodeInitializationError)];
@@ -591,7 +591,7 @@ describe(@"AMAAppMetrica", ^{
                     };
                     
                     it(@"Should call onFailure with error of actual domain", ^{
-                        [[errorFromReporting().domain should] equal:kAMAAppMetricaErrorDomain];
+                        [[errorFromReporting().domain should] equal:AMAAppMetricaEventErrorDomain];
                     });
                     it(@"Should call onFailure with error of actual code", ^{
                         [[theValue(errorFromReporting().code) should] equal:theValue(AMAAppMetricaEventErrorCodeInitializationError)];

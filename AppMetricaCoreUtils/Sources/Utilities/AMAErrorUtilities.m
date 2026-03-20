@@ -2,10 +2,14 @@
 #import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
 #import "AMACoreUtilsLogging.h"
 
-NSString *const kAMAAppMetricaErrorDomain = @"io.appmetrica";
+NSErrorDomain const kAMAAppMetricaErrorDomain = @"io.appmetrica";
+NSErrorDomain const kAMAAppMetricaInternalErrorDomain = @"AppMetricaInternalErrorDomain";
+NSErrorDomain const kAMAAppMetricaDatabaseErrorDomain = @"AppMetricaDatabaseErrorDomain";
 
-NSString *const kAMAAppMetricaInternalErrorDomain = @"AppMetricaInternalErrorDomain";
-NSString *const kAMAAppMetricaDatabaseErrorDomain = @"AppMetricaDatabaseErrorDomain";
+NSErrorDomain const AMAAppMetricaEventErrorDomain = @"io.appmetrica";
+NSErrorDomain const AMAAppMetricaInternalErrorDomain = @"AppMetricaInternalErrorDomain";
+NSErrorDomain const AMAAppMetricaDatabaseErrorDomain = @"AppMetricaDatabaseErrorDomain";
+
 NSString *const kAMAAppMetricaInternalErrorResultObjectKey = @"kAppMetricaInternalErrorResultObjectKey";
 
 @implementation AMAErrorUtilities
@@ -22,7 +26,7 @@ NSString *const kAMAAppMetricaInternalErrorResultObjectKey = @"kAppMetricaIntern
 
 + (void)fillError:(NSError *__autoreleasing *)placeholderError withInternalErrorName:(NSString *)errorName
 {
-    NSError *internalError = [NSError errorWithDomain:kAMAAppMetricaInternalErrorDomain
+    NSError *internalError = [NSError errorWithDomain:AMAAppMetricaInternalErrorDomain
                                                  code:AMAAppMetricaInternalEventErrorCodeNamedError
                                              userInfo:@{ NSLocalizedDescriptionKey: errorName ?: @"" }];
     [self fillError:placeholderError withError:internalError];
@@ -50,21 +54,21 @@ NSString *const kAMAAppMetricaInternalErrorResultObjectKey = @"kAppMetricaIntern
 
 + (NSError *)errorWithCode:(NSInteger)code description:(NSString *)description
 {
-    return [[self class] errorWithDomain:kAMAAppMetricaErrorDomain
+    return [[self class] errorWithDomain:AMAAppMetricaEventErrorDomain
                                     code:code
                              description:description];
 }
 
 + (NSError *)internalErrorWithCode:(NSInteger)code description:(NSString *)description
 {
-    return [[self class] errorWithDomain:kAMAAppMetricaInternalErrorDomain
+    return [[self class] errorWithDomain:AMAAppMetricaInternalErrorDomain
                                     code:code
                              description:description];
 }
 
 + (NSError *)databaseErrorWithCode:(NSInteger)code description:(NSString *)description
 {
-    return [[self class] errorWithDomain:kAMAAppMetricaDatabaseErrorDomain
+    return [[self class] errorWithDomain:AMAAppMetricaDatabaseErrorDomain
                                     code:code
                              description:description];
 }

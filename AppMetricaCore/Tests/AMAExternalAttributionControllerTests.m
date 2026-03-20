@@ -271,7 +271,7 @@ static NSTimeInterval const kUpdatedInterval = 500;
     
     XCTAssertTrue(isFailureCalled, @"It should call error block");
     XCTAssertNotNil(testError);
-    XCTAssertEqualObjects(testError.domain, kAMAAppMetricaErrorDomain);
+    XCTAssertEqualObjects(testError.domain, AMAAppMetricaEventErrorDomain);
     XCTAssertEqual(testError.code, AMAAppMetricaEventErrorCodeInvalidExternalAttributionContents);
 }
 

@@ -24,7 +24,7 @@
     NSError *result = nil;
     [AMAErrorUtilities fillError:&result withInternalErrorName:errorName];
 
-    XCTAssertEqualObjects(result.domain, kAMAAppMetricaInternalErrorDomain, @"Should fill internal error domain");
+    XCTAssertEqualObjects(result.domain, AMAAppMetricaInternalErrorDomain, @"Should fill internal error domain");
     XCTAssertEqual(result.code, AMAAppMetricaInternalEventErrorCodeNamedError, @"Should fill internal error code");
     XCTAssertEqualObjects(result.userInfo, @{ NSLocalizedDescriptionKey: errorName }, @"Should fill internal error userInfo");
 }
@@ -72,7 +72,7 @@
     NSError *result = nil;
     result = [AMAErrorUtilities errorWithCode:code description:description];
     
-    XCTAssertEqualObjects(result.domain, kAMAAppMetricaErrorDomain, @"Should fill error domain");
+    XCTAssertEqualObjects(result.domain, AMAAppMetricaEventErrorDomain, @"Should fill error domain");
     XCTAssertEqual(result.code, code, @"Should fill error code");
     XCTAssertEqualObjects(result.userInfo, @{ NSLocalizedDescriptionKey: description }, @"Should fill error userInfo");
 }
@@ -85,7 +85,7 @@
     NSError *result = nil;
     result = [AMAErrorUtilities internalErrorWithCode:code description:description];
     
-    XCTAssertEqualObjects(result.domain, kAMAAppMetricaInternalErrorDomain, @"Should fill internal error domain");
+    XCTAssertEqualObjects(result.domain, AMAAppMetricaInternalErrorDomain, @"Should fill internal error domain");
     XCTAssertEqual(result.code, code, @"Should fill error code");
     XCTAssertEqualObjects(result.userInfo, @{ NSLocalizedDescriptionKey: description }, @"Should fill error userInfo");
 }
@@ -98,7 +98,7 @@
     NSError *error = [AMAErrorUtilities databaseErrorWithCode:errorCode description:description];
     
     XCTAssertEqual(error.code, errorCode, @"Error code should match input");
-    XCTAssertEqualObjects(error.domain, kAMAAppMetricaDatabaseErrorDomain, @"Error domain should be AMAErrorDomain");
+    XCTAssertEqualObjects(error.domain, AMAAppMetricaDatabaseErrorDomain, @"Error domain should be AMAErrorDomain");
     XCTAssertEqualObjects(error.userInfo, @{ NSLocalizedDescriptionKey: description}, @"Should fill error userInfo");
 }
 

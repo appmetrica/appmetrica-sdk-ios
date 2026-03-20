@@ -127,7 +127,7 @@ describe(@"AMARevenueInfoModelValidator", ^{
         });
         it(@"Should fill error", ^{
             NSString *description = @"Quantity can't be zero.";
-            NSError *expectedError = [NSError errorWithDomain:kAMAAppMetricaErrorDomain
+            NSError *expectedError = [NSError errorWithDomain:AMAAppMetricaEventErrorDomain
                                                          code:AMAAppMetricaEventErrorCodeInvalidRevenueInfo
                                                      userInfo:@{ NSLocalizedDescriptionKey: description}];
             NSError *error = nil;
@@ -168,7 +168,7 @@ describe(@"AMARevenueInfoModelValidator", ^{
             });
             it(@"Should fill error", ^{
                 NSString *description = expectedErrorDescription();
-                NSError *expectedError = [NSError errorWithDomain:kAMAAppMetricaErrorDomain
+                NSError *expectedError = [NSError errorWithDomain:AMAAppMetricaEventErrorDomain
                                                              code:AMAAppMetricaEventErrorCodeInvalidRevenueInfo
                                                          userInfo:@{ NSLocalizedDescriptionKey: description}];
                 NSError *error = nil;
@@ -190,7 +190,7 @@ describe(@"AMARevenueInfoModelValidator", ^{
             });
             it(@"Should fill error", ^{
                 NSString *description = expectedErrorDescription();
-                NSError *expectedError = [NSError errorWithDomain:kAMAAppMetricaErrorDomain
+                NSError *expectedError = [NSError errorWithDomain:AMAAppMetricaEventErrorDomain
                                                              code:AMAAppMetricaEventErrorCodeInvalidRevenueInfo
                                                          userInfo:@{ NSLocalizedDescriptionKey: description}];
                 NSError *error = nil;
@@ -212,7 +212,7 @@ describe(@"AMARevenueInfoModelValidator", ^{
             });
             it(@"Should fill error", ^{
                 NSString *description = expectedErrorDescription();
-                NSError *expectedError = [NSError errorWithDomain:kAMAAppMetricaErrorDomain
+                NSError *expectedError = [NSError errorWithDomain:AMAAppMetricaEventErrorDomain
                                                              code:AMAAppMetricaEventErrorCodeInvalidRevenueInfo
                                                          userInfo:@{ NSLocalizedDescriptionKey: description}];
                 NSError *error = nil;

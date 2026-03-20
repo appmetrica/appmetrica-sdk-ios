@@ -38,8 +38,8 @@
     NSString *invalidWithError = [AMAJSONSerialization stringWithJSONObject:@"abc" error:&error];
 
     XCTAssertNil(invalidWithError, @"Should return nil if failed to serialize");
-    XCTAssertEqualObjects(error.domain, kAMAAppMetricaInternalErrorDomain, @"Should fill error domain");
-    XCTAssertEqual(error.code, AMAAppMetricaInternalEventJsonSerializationError, @"Should fill error code");
+    XCTAssertEqualObjects(error.domain, AMAAppMetricaInternalErrorDomain, @"Should fill error domain");
+    XCTAssertEqual(error.code, AMAAppMetricaInternalEventErrorCodeJsonSerialization, @"Should fill error code");
     XCTAssertEqualObjects(error.localizedDescription,
                           @"Passed dictionary is not a valid serializable JSON object: {\n    \"Wrong JSON object\" = abc;\n}",
                           @"Should have correct description");
@@ -66,8 +66,8 @@
     NSData *invalidWithError = [AMAJSONSerialization dataWithJSONObject:@"abc" error:&error];
     
     XCTAssertNil(invalidWithError, @"Should return nil if failed to serialize");
-    XCTAssertEqualObjects(error.domain, kAMAAppMetricaInternalErrorDomain, @"Should fill error domain");
-    XCTAssertEqual(error.code, AMAAppMetricaInternalEventJsonSerializationError, @"Should fill error code");
+    XCTAssertEqualObjects(error.domain, AMAAppMetricaInternalErrorDomain, @"Should fill error domain");
+    XCTAssertEqual(error.code, AMAAppMetricaInternalEventErrorCodeJsonSerialization, @"Should fill error code");
     XCTAssertEqualObjects(error.localizedDescription,
                           @"Passed dictionary is not a valid serializable JSON object: {\n    \"Wrong JSON object\" = abc;\n}",
                           @"Should have correct description");
@@ -119,7 +119,7 @@
     NSDictionary *invalidData = [AMAJSONSerialization dictionaryWithJSONData:invalidSerialized error:&error];
     
     XCTAssertNil(invalidData, @"Should return nil if data is invalid");
-    XCTAssertEqualObjects(error.domain, kAMAAppMetricaInternalErrorDomain, @"Should fill error domain");
+    XCTAssertEqualObjects(error.domain, AMAAppMetricaInternalErrorDomain, @"Should fill error domain");
     XCTAssertEqual(error.code, AMAAppMetricaInternalEventErrorCodeUnexpectedDeserialization, @"Should fill error code");
     XCTAssertNotNil(error.userInfo[kAMAAppMetricaInternalErrorResultObjectKey], @"Should contain value in userInfo");
 }
@@ -142,7 +142,7 @@
     NSArray *invalidData = [AMAJSONSerialization arrayWithJSONData:invalidSerialized error:&error];
     
     XCTAssertNil(invalidData, @"Should return nil if data is invalid");
-    XCTAssertEqualObjects(error.domain, kAMAAppMetricaInternalErrorDomain, @"Should fill error domain");
+    XCTAssertEqualObjects(error.domain, AMAAppMetricaInternalErrorDomain, @"Should fill error domain");
     XCTAssertEqual(error.code, AMAAppMetricaInternalEventErrorCodeUnexpectedDeserialization, @"Should fill error code");
     XCTAssertNotNil(error.userInfo[kAMAAppMetricaInternalErrorResultObjectKey], @"Should contain value in userInfo");
 }
