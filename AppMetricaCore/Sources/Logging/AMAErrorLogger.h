@@ -6,7 +6,8 @@
 - (instancetype)init NS_UNAVAILABLE;
 + (instancetype)new NS_UNAVAILABLE;
 
-+ (void)logAppMetricaNotStartedErrorWithOnFailure:(void (^)(NSError *error))failureCallback;
++ (void)logAppMetricaNotActivatedErrorWithOnFailure:(void (^)(NSError *error))failureCallback;
+
 + (void)logInvalidApiKeyError:(NSString *)apiKey;
 + (void)logMetricaAlreadyStartedError;
 + (void)logMetricaActivationWithAlreadyPresentedKeyError;

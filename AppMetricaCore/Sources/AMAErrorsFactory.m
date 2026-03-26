@@ -4,19 +4,11 @@
 
 @implementation AMAErrorsFactory
 
-#pragma mark - Metrica's errors
-
-+ (NSError *)appMetricaNotStartedError
-{
-    return [AMAErrorUtilities errorWithCode:AMAAppMetricaEventErrorCodeInitializationError
-                                description:@"activateWithApiKey: or activateWithConfiguration: aren't called"];
-}
-
 #pragma mark - Reporter's errors
 
 + (NSError *)sessionNotLoadedError
 {
-    return [AMAErrorUtilities errorWithCode:AMAAppMetricaEventErrorCodeInitializationError
+    return [AMAErrorUtilities errorWithCode:AMAAppMetricaEventErrorCodeSessionNotLoad
                                 description:@"Session is not loaded"];
 }
 
@@ -82,10 +74,16 @@
 
 #pragma mark - Impl's errors
 
-+ (NSError *)reporterNotReadyError
++ (NSError *)mainReporterNotReadyError
 {
-    return [AMAErrorUtilities errorWithCode:AMAAppMetricaEventErrorCodeInitializationError
-                                description:@"Reporter is not ready yet"];
+    return [AMAErrorUtilities errorWithCode:AMAAppMetricaEventErrorCodeMainReporterNotReady
+                                description:@"Main Reporter is not ready yet"];
+}
+
++ (NSError *)appMetricaIsNotActivatedError
+{
+    return [AMAErrorUtilities errorWithCode:AMAAppMetricaEventErrorCodeIsNotActivated
+                                description:@"activateWithApiKey: or activateWithConfiguration: aren't called"];
 }
 
 #pragma mark - UserProfile

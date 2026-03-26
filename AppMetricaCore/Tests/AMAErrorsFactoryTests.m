@@ -14,9 +14,9 @@ describe(@"AMAErrorsFactory", ^{
         NSString *const internalDomain = @"AppMetricaInternalErrorDomain";
         NSError *__block error = nil;
 
-        context(@"appMetricaNotStartedError", ^{
+        context(@"appMetricaIsNotActivated", ^{
             beforeEach(^{
-                error = [AMAErrorsFactory appMetricaNotStartedError];
+                error = [AMAErrorsFactory appMetricaIsNotActivatedError];
             });
             it(@"Should use correct domain", ^{
                 [[error.domain should] equal:domain];
@@ -38,7 +38,7 @@ describe(@"AMAErrorsFactory", ^{
                 [[error.domain should] equal:domain];
             });
             it(@"Should use correct code", ^{
-                [[theValue(error.code) should] equal:theValue(1000)];
+                [[theValue(error.code) should] equal:theValue(1008)];
             });
             it(@"Should use correct description", ^{
                 NSString *description = @"Session is not loaded";
@@ -161,16 +161,16 @@ describe(@"AMAErrorsFactory", ^{
 
         context(@"reporterNotReadyError", ^{
             beforeEach(^{
-                error = [AMAErrorsFactory reporterNotReadyError];
+                error = [AMAErrorsFactory mainReporterNotReadyError];
             });
             it(@"Should use correct domain", ^{
                 [[error.domain should] equal:domain];
             });
             it(@"Should use correct code", ^{
-                [[theValue(error.code) should] equal:theValue(1000)];
+                [[theValue(error.code) should] equal:theValue(AMAAppMetricaEventErrorCodeMainReporterNotReady)];
             });
             it(@"Should use correct description", ^{
-                NSString *description = @"Reporter is not ready yet";
+                NSString *description = @"Main Reporter is not ready yet";
                 [[error.localizedDescription should] equal:description];
             });
         });

@@ -436,7 +436,7 @@ describe(@"AMAAppMetrica", ^{
                         [[errorFromReporting().domain should] equal:AMAAppMetricaEventErrorDomain];
                     });
                     it(@"Should call onFailure with error of actual code", ^{
-                        [[theValue(errorFromReporting().code) should] equal:theValue(AMAAppMetricaEventErrorCodeInitializationError)];
+                        [[theValue(errorFromReporting().code) should] equal:theValue(AMAAppMetricaEventErrorCodeIsNotActivated)];
                     });
                 });
                 context(@"Event with type", ^{
@@ -511,7 +511,7 @@ describe(@"AMAAppMetrica", ^{
                         [[errorFromReporting().domain should] equal:AMAAppMetricaEventErrorDomain];
                     });
                     it(@"Should call onFailure with error of actual code", ^{
-                        [[theValue(errorFromReporting().code) should] equal:theValue(AMAAppMetricaEventErrorCodeInitializationError)];
+                        [[theValue(errorFromReporting().code) should] equal:theValue(AMAAppMetricaEventErrorCodeIsNotActivated)];
                     });
                 });
                 context(@"Event with binary type", ^{
@@ -594,7 +594,7 @@ describe(@"AMAAppMetrica", ^{
                         [[errorFromReporting().domain should] equal:AMAAppMetricaEventErrorDomain];
                     });
                     it(@"Should call onFailure with error of actual code", ^{
-                        [[theValue(errorFromReporting().code) should] equal:theValue(AMAAppMetricaEventErrorCodeInitializationError)];
+                        [[theValue(errorFromReporting().code) should] equal:theValue(AMAAppMetricaEventErrorCodeIsNotActivated)];
                     });
                 });
                 context(@"Event with file type", ^{

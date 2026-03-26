@@ -404,7 +404,7 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
                    onFailure:(nullable void (^)(NSError *error))onFailure
 {
     if (self.mainReporter == nil) {
-        [AMAFailureDispatcher dispatchError:[AMAErrorsFactory reporterNotReadyError] withBlock:onFailure];
+        [AMAFailureDispatcher dispatchError:[AMAErrorsFactory mainReporterNotReadyError] withBlock:onFailure];
     }
     else {
         if (reportEvent != nil) {

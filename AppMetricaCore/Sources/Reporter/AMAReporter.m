@@ -819,7 +819,7 @@
                     onFailure:(nullable void (^)(NSError *error))onFailure
 {
     if ([AMAAppMetrica isActivated] == NO) {
-        [AMAErrorLogger logAppMetricaNotStartedErrorWithOnFailure:onFailure];
+        [AMAErrorLogger logAppMetricaNotActivatedErrorWithOnFailure:onFailure];
         return;
     }
     [controller setUpWebViewReporting:self.executor withReporter:self];
@@ -831,7 +831,7 @@
                         onFailure:(nullable void (^)(NSError *))onFailure
 {
     if (AMAAppMetrica.isActivated == NO) {
-        [AMAErrorLogger logAppMetricaNotStartedErrorWithOnFailure:onFailure];
+        [AMAErrorLogger logAppMetricaNotActivatedErrorWithOnFailure:onFailure];
         return;
     }
     [self reportCommonEventWithBlock:^AMAEvent *(NSError **error) {

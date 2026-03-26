@@ -7,7 +7,8 @@
 + (instancetype)new NS_UNAVAILABLE;
 
 //appmetrica
-+ (NSError *)appMetricaNotStartedError;
++ (NSError *)mainReporterNotReadyError;
++ (NSError *)appMetricaIsNotActivatedError;
 
 //reporter
 + (NSError *)sessionNotLoadedError;
@@ -21,9 +22,6 @@
 + (NSError *)emptyDeepLinkUrlOfTypeError:(NSString *)type;
 + (NSError *)deepLinkUrlOfUnknownTypeError:(NSString *)url;
 + (NSError *)eventTypeReservedError:(NSUInteger)eventType;
-
-//impl
-+ (NSError *)reporterNotReadyError;
 
 // UserProfile
 + (NSError *)emptyUserProfileError;

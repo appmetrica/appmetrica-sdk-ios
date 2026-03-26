@@ -14,9 +14,9 @@ static NSString *const kAMAInvalidParameterMessageForAppBuildNumberMsg = @"appBu
 
 @implementation AMAErrorLogger
 
-+ (void)logAppMetricaNotStartedErrorWithOnFailure:(void (^)(NSError *error))failureCallback
++ (void)logAppMetricaNotActivatedErrorWithOnFailure:(void (^)(NSError *error))failureCallback
 {
-    [AMAFailureDispatcher dispatchError:[AMAErrorsFactory appMetricaNotStartedError] withBlock:failureCallback];
+    [AMAFailureDispatcher dispatchError:[AMAErrorsFactory appMetricaIsNotActivatedError] withBlock:failureCallback];
     AMALogError(kAMAMetricaNotStartedMsg);
 }
 

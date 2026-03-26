@@ -856,7 +856,7 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
 
 + (BOOL)isAppMetricaStartedWithLogging:(void (^)(NSError *))onFailure {
     if ([self isActivated] == NO) {
-        [AMAErrorLogger logAppMetricaNotStartedErrorWithOnFailure:onFailure];
+        [AMAErrorLogger logAppMetricaNotActivatedErrorWithOnFailure:onFailure];
         return NO;
     }
     return YES;
