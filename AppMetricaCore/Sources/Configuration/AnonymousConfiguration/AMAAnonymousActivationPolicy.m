@@ -2,19 +2,17 @@
 #import "AMAAnonymousActivationPolicy.h"
 #import "AppMetricaCore.h"
 
-static const BOOL kAMAAnonymousActivationForReporterAllowedDefault = YES;
+static BOOL kAMAAnonymousActivationForReporterAllowedDefault = YES;
 static NSString *const kAMAActivationForReporterAllowedKey = @"io.appmetrica.library_reporter_activation_allowed";
 
 @interface AMAAnonymousActivationPolicy ()
 
-@property (nonatomic, assign) NSNumber *isAnonymousActivationAllowedForReporter;
+@property (nonatomic, copy) NSNumber *anonymousActivationAllowedForReporter;
 @property (nonatomic, strong, readonly) NSBundle *sourceBundle;
 
 @end
 
 @implementation AMAAnonymousActivationPolicy
-
-@synthesize isAnonymousActivationAllowedForReporter = _isAnonymousActivationAllowedForReporter;
 
 - (instancetype)init
 {
@@ -26,26 +24,26 @@ static NSString *const kAMAActivationForReporterAllowedKey = @"io.appmetrica.lib
     self = [super init];
     if (self) {
         _sourceBundle = bundle;
-        _isAnonymousActivationAllowedForReporter = nil;
+        _anonymousActivationAllowedForReporter = nil;
     }
     return self;
 }
 
 - (BOOL)isAnonymousActivationAllowedForReporter
 {
-    if (_isAnonymousActivationAllowedForReporter == nil) {
+    if (_anonymousActivationAllowedForReporter == nil) {
         @synchronized (self) {
-            if (_isAnonymousActivationAllowedForReporter == nil) {
+            if (_anonymousActivationAllowedForReporter == nil) {
                 id value = [self.sourceBundle objectForInfoDictionaryKey:kAMAActivationForReporterAllowedKey];
                 if ([value isKindOfClass:[NSNumber class]]) {
-                    _isAnonymousActivationAllowedForReporter = value;
+                    _anonymousActivationAllowedForReporter = value;
                 } else {
-                    _isAnonymousActivationAllowedForReporter = @(kAMAAnonymousActivationForReporterAllowedDefault);
+                    _anonymousActivationAllowedForReporter = @(kAMAAnonymousActivationForReporterAllowedDefault);
                 }
             }
         }
     }
-    return [_isAnonymousActivationAllowedForReporter boolValue];
+    return [_anonymousActivationAllowedForReporter boolValue];
 }
 
 + (instancetype)sharedInstance
