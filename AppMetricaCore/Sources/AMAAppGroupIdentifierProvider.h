@@ -11,6 +11,8 @@ extern NSString *const AMAInfoPlistAppGroupIdentifierKey;
 
 @property (readonly, nullable) NSString *appGroupIdentifier;
 
++ (instancetype)sharedInstance;
+
 @end
 
 NS_ASSUME_NONNULL_END

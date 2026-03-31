@@ -11,6 +11,7 @@
 #import "AMAAttributionModelConfiguration.h"
 #import "AMAExternalAttributionConfiguration.h"
 #import "AMAAppMetricaConfiguration+JSONSerializable.h"
+#import "AMAAppMetricaConfigurationFileStorage.h"
 
 @import AppMetricaIdentifiers;
 
@@ -21,6 +22,7 @@ static NSString *const kAMADeviceIDDefaultValue = @"";
 @property (nonatomic, strong, readonly) id<AMAKeyValueStoring> storage;
 @property (nonatomic, strong, readonly) id<AMAIdentifierProviding> identifierManager;
 @property (nonatomic, strong, readonly) AMAMetricaInMemoryConfiguration *inMemoryConfiguration;
+@property (nonatomic, strong, readonly) id<AMAAppMetricaConfigurationStoring> appMetricaConfigurationStorage;
 
 @end
 
@@ -29,12 +31,14 @@ static NSString *const kAMADeviceIDDefaultValue = @"";
 - (instancetype)initWithStorage:(id<AMAKeyValueStoring>)storage
               identifierManager:(id<AMAIdentifierProviding>)identifierManager
           inMemoryConfiguration:(AMAMetricaInMemoryConfiguration *)inMemoryConfiguration
+ appMetricaConfigurationStorage:(id<AMAAppMetricaConfigurationStoring>)appMetricaConfigurationStorage
 {
     self = [super init];
     if (self != nil) {
         _storage = storage;
         _identifierManager = identifierManager;
         _inMemoryConfiguration = inMemoryConfiguration;
+        _appMetricaConfigurationStorage = appMetricaConfigurationStorage;
 
         _timeoutConfiguration = [[AMAPersistentTimeoutConfiguration alloc] initWithStorage:_storage];
     }
@@ -186,15 +190,12 @@ LONG_PROPERTY(conversionValue, setConversionValue, AMAStorageStringKeyConversion
 
 - (AMAAppMetricaConfiguration *)appMetricaClientConfiguration
 {
-    NSDictionary *json = [self.storage jsonDictionaryForKey:AMAStorageStringKeyAppMetricaClientConfiguration error:NULL];
-    return [[AMAAppMetricaConfiguration alloc] initWithJSON:json];
+    return [self.appMetricaConfigurationStorage loadConfiguration];
 }
 
 - (void)setAppMetricaClientConfiguration:(AMAAppMetricaConfiguration *)appMetricaClientConfiguration
 {
-    [self.storage saveJSONDictionary:[appMetricaClientConfiguration JSON]
-                              forKey:AMAStorageStringKeyAppMetricaClientConfiguration
-                               error:NULL];
+    [self.appMetricaConfigurationStorage saveConfiguration:appMetricaClientConfiguration];
 }
 
 - (NSString *)recentMainApiKey

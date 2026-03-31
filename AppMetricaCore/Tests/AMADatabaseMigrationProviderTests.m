@@ -29,6 +29,7 @@
 #import "AMADataMigrationTo590.h"
 #import "AMADataMigrationTo5100.h"
 #import "AMADataMigrationTo5140.h"
+#import "AMADataMigrationTo620.h"
 
 #import "AMAReporterDataMigrationTo500.h"
 #import "AMAReporterDataMigrationTo580.h"
@@ -76,12 +77,13 @@
 {
     AMADatabaseMigrationProvider *provider = [[AMADatabaseMigrationProvider alloc] initWithContentType:AMADatabaseContentTypeConfiguration];
     NSArray *migrations = [provider dataMigrationsWithAPIKey:nil main:YES];
-    XCTAssertEqual(migrations.count, 5);
+    XCTAssertEqual(migrations.count, 6);
     XCTAssertTrue([[migrations[0] class] isSubclassOfClass:[AMADataMigrationTo500 class]]);
     XCTAssertTrue([[migrations[1] class] isSubclassOfClass:[AMADataMigrationTo580 class]]);
     XCTAssertTrue([[migrations[2] class] isSubclassOfClass:[AMADataMigrationTo590 class]]);
     XCTAssertTrue([[migrations[3] class] isSubclassOfClass:[AMADataMigrationTo5100 class]]);
     XCTAssertTrue([[migrations[4] class] isSubclassOfClass:[AMADataMigrationTo5140 class]]);
+    XCTAssertTrue([[migrations[5] class] isSubclassOfClass:[AMADataMigrationTo620 class]]);
 }
 
 - (void)testConfigurationApiKeyMigrations

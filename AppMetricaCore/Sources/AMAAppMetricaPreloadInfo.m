@@ -101,4 +101,27 @@ NSString *const kAMAAdditionalInfo = @"additional.info";
     return preloadInfo;
 }
 
+- (BOOL)isEqual:(nullable id)object
+{
+    if (self == object) {
+        return YES;
+    }
+    
+    if ([object isKindOfClass:[AMAAppMetricaPreloadInfo class]] == NO) {
+        return NO;
+    }
+    
+    return [self isEqualToPreloadInfo:(AMAAppMetricaPreloadInfo *)object];
+}
+
+- (BOOL)isEqualToPreloadInfo:(nonnull AMAAppMetricaPreloadInfo *)preloadInfo
+{
+    if (self == preloadInfo) {
+        return YES;
+    }
+    
+    return [self.trackingID isEqualToString:preloadInfo.trackingID] &&
+        [self.additionalInfo isEqualToDictionary:preloadInfo.additionalInfo];
+}
+
 @end

@@ -34,6 +34,7 @@
 #import "AMADataMigrationTo590.h"
 #import "AMADataMigrationTo5100.h"
 #import "AMADataMigrationTo5140.h"
+#import "AMADataMigrationTo620.h"
 
 #import "AMALocationDatabaseSchemeMigrationTo2.h"
 
@@ -205,6 +206,7 @@ NSUInteger const kAMALocationDatabaseSchemaVersion = 2;
         [AMADataMigrationTo590 new],
         [AMADataMigrationTo5100 new],
         [AMADataMigrationTo5140 new],
+        [AMADataMigrationTo620 new],
     ];
 }
 

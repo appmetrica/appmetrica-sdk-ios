@@ -30,6 +30,16 @@ NSString *const AMAInfoPlistAppGroupIdentifierKey = @"AMAApplicationGroupIdentif
     return self;
 }
 
++ (instancetype)sharedInstance
+{
+    static dispatch_once_t onceToken;
+    static AMAAppGroupIdentifierProvider *sharedInstance = nil;
+    dispatch_once(&onceToken, ^{
+        sharedInstance = [[AMAAppGroupIdentifierProvider alloc] init];
+    });
+    return sharedInstance;
+}
+
 
 - (NSString *)appGroupIdentifier
 {

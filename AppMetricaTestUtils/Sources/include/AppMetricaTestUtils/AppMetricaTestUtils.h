@@ -23,6 +23,7 @@
     #import "AMAKeyValueStorageDataProvidingMock.h"
     #import "AMAKeychainMock.h"
     #import "AMAKeyValueStorageMock.h"
+    #import "AMAStorageMock.h"
 #else
     #import <AppMetricaTestUtils/AMADateProviderMock.h>
     #import <AppMetricaTestUtils/AMAHTTPRequestsFactoryMock.h>
@@ -47,4 +48,5 @@
     #import <AppMetricaTestUtils/AMAKeyValueStorageDataProvidingMock.h>
     #import <AppMetricaTestUtils/AMAKeychainMoch.h>
     #import <AppMetricaTestUtils/AMAKeyValueStorageMock.h>
+    #import <AppMetricaTestUtils/AMAStorageMock.h>
 #endif

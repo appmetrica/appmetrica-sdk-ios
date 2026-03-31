@@ -74,6 +74,7 @@ describe(@"AMAAppMetricaConfigurationManager", ^{
     afterEach(^{
         [AMAMetricaConfiguration clearStubs];
         [[AMADataSendingRestrictionController sharedInstance] clearStubs];
+        [AMAPlatformDescription clearStubs];
     });
     
     context(@"updateMainConfiguration", ^{
@@ -85,17 +86,81 @@ describe(@"AMAAppMetricaConfigurationManager", ^{
             [(NSObject *)locationResolver stub:@selector(updateBoolValue:isAnonymous:)];
             [(NSObject *)adResolver stub:@selector(updateBoolValue:isAnonymous:)];
         });
-        it(@"should update last main api key in local storage", ^{
-            [mockConfig stub:@selector(APIKey) andReturn:apiKey];
-            [[persistentMock should] receive:@selector(setRecentMainApiKey:) withArguments:apiKey];
+        
+        context(@"in MainApp", ^{
             
-            [configManager updateMainConfiguration:mockConfig];
-        });
-        it(@"should update client configuration in local storage", ^{
-            [[persistentMock should] receive:@selector(setAppMetricaClientConfiguration:) withArguments:mockConfig];
+            beforeEach(^{
+                [AMAPlatformDescription stub:@selector(runEnvronment) andReturn:theValue(AMARunEnvironmentMainApp)];
+            });
             
-            [configManager updateMainConfiguration:mockConfig];
+            context(@"in normal activation", ^{
+                it(@"should update last main api key in local storage", ^{
+                    [mockConfig stub:@selector(APIKey) andReturn:apiKey];
+                    [[persistentMock should] receive:@selector(setRecentMainApiKey:) withArguments:apiKey];
+                    
+                    [configManager updateMainConfiguration:mockConfig            activatedAnonymously:NO];
+                });
+                it(@"should update client configuration in local storage", ^{
+                    [[persistentMock should] receive:@selector(setAppMetricaClientConfiguration:) withArguments:mockConfig];
+                    
+                    [configManager updateMainConfiguration:mockConfig            activatedAnonymously:NO];
+                });
+            });
+            
+            context(@"in anonymous activation", ^{
+                it(@"should update last main api key in local storage", ^{
+                    [mockConfig stub:@selector(APIKey) andReturn:apiKey];
+                    [[persistentMock should] receive:@selector(setRecentMainApiKey:) withArguments:apiKey];
+                    
+                    [configManager updateMainConfiguration:mockConfig            activatedAnonymously:YES];
+                });
+                it(@"should update client configuration in local storage", ^{
+                    [[persistentMock should] receive:@selector(setAppMetricaClientConfiguration:) withArguments:mockConfig];
+                    
+                    [configManager updateMainConfiguration:mockConfig            activatedAnonymously:YES];
+                });
+            });
+            
         });
+        
+        context(@"in extension", ^{
+            
+            beforeEach(^{
+                [AMAPlatformDescription stub:@selector(runEnvronment) andReturn:theValue(AMARunEnvironmentExtension)];
+            });
+            
+            context(@"in normal activation", ^{
+                it(@"should update last main api key in local storage", ^{
+                    [mockConfig stub:@selector(APIKey) andReturn:apiKey];
+                    [[persistentMock should] receive:@selector(setRecentMainApiKey:) withArguments:apiKey];
+                    
+                    [configManager updateMainConfiguration:mockConfig            activatedAnonymously:NO];
+                });
+                it(@"should update client configuration in local storage", ^{
+                    [[persistentMock should] receive:@selector(setAppMetricaClientConfiguration:) withArguments:mockConfig];
+                    
+                    [configManager updateMainConfiguration:mockConfig            activatedAnonymously:NO];
+                });
+            });
+            
+            context(@"in anonymous activation", ^{
+                it(@"should update last main api key in local storage", ^{
+                    [mockConfig stub:@selector(APIKey) andReturn:apiKey];
+                    [[persistentMock should] receive:@selector(setRecentMainApiKey:) withArguments:apiKey];
+                    
+                    [configManager updateMainConfiguration:mockConfig            activatedAnonymously:YES];
+                });
+                it(@"should update client configuration in local storage", ^{
+                    [[persistentMock shouldNot] receive:@selector(setAppMetricaClientConfiguration:) withArguments:mockConfig];
+                    
+                    [configManager updateMainConfiguration:mockConfig            activatedAnonymously:YES];
+                });
+            });
+            
+        });
+        
+        
+        
         context(@"CustomVersion", ^{
             NSString *const appVersion = @"app.version";
             NSString *const validBuildNumber = @"282";
@@ -105,7 +170,7 @@ describe(@"AMAAppMetricaConfigurationManager", ^{
                 [mockConfig stub:@selector(appVersion) andReturn:appVersion];
                 [mockConfig stub:@selector(appBuildNumber) andReturn:invalidAppBuildNumber];
                 
-                [configManager updateMainConfiguration:mockConfig];
+                [configManager updateMainConfiguration:mockConfig            activatedAnonymously:NO];
                 
                 [[inMemoryConfig.appVersion should] equal:appVersion];
                 [[inMemoryConfig.appBuildNumberString should] beNil];
@@ -115,7 +180,7 @@ describe(@"AMAAppMetricaConfigurationManager", ^{
                 [mockConfig stub:@selector(appVersion) andReturn:appVersion];
                 [mockConfig stub:@selector(appBuildNumber) andReturn:validBuildNumber];
                 
-                [configManager updateMainConfiguration:mockConfig];
+                [configManager updateMainConfiguration:mockConfig            activatedAnonymously:NO];
                 
                 [[inMemoryConfig.appVersion should] equal:appVersion];
                 [[inMemoryConfig.appBuildNumberString should] equal:validBuildNumber];
@@ -148,7 +213,7 @@ describe(@"AMAAppMetricaConfigurationManager", ^{
             [mockConfig stub:@selector(handleActivationAsSessionStart) andReturn:theValue(YES)];
             [mockConfig stub:@selector(sessionsAutoTracking) andReturn:theValue(NO)];
             
-            [configManager updateMainConfiguration:mockConfig];
+            [configManager updateMainConfiguration:mockConfig            activatedAnonymously:NO];
             
             [[reporterConfig.APIKey should] equal:apiKey];
             [[theValue(reporterConfig.sessionTimeout) should] equal:theValue(sessionTimeout)];
@@ -165,7 +230,7 @@ describe(@"AMAAppMetricaConfigurationManager", ^{
             AMAAppMetricaPreloadInfo *preloadInfo = [AMAAppMetricaPreloadInfo nullMock];
             [mockConfig stub:@selector(preloadInfo) andReturn:preloadInfo];
             
-            [configManager updateMainConfiguration:mockConfig];
+            [configManager updateMainConfiguration:mockConfig            activatedAnonymously:NO];
             
             [[configManager.preloadInfo should] equal:preloadInfo];
         });
@@ -175,7 +240,7 @@ describe(@"AMAAppMetricaConfigurationManager", ^{
             
             [[persistentMock should] receive:@selector(setUserStartupHosts:) withArguments:userStartupHosts];
             
-            [configManager updateMainConfiguration:mockConfig];
+            [configManager updateMainConfiguration:mockConfig            activatedAnonymously:NO];
         });
         it(@"should update data sending configuration with undefined restriction if data sending is disabled", ^{
             [mockConfig stub:@selector(APIKey) andReturn:apiKey];
@@ -185,7 +250,7 @@ describe(@"AMAAppMetricaConfigurationManager", ^{
             [[restrictionController should] receive:@selector(setMainApiKeyRestriction:)
                                       withArguments:theValue(AMADataSendingRestrictionForbidden)];
             
-            [configManager updateMainConfiguration:mockConfig];
+            [configManager updateMainConfiguration:mockConfig            activatedAnonymously:NO];
         });
         it(@"should update data sending configuration with undefined restriction if data sending is not set", ^{
             [mockConfig stub:@selector(APIKey) andReturn:apiKey];
@@ -194,7 +259,7 @@ describe(@"AMAAppMetricaConfigurationManager", ^{
             [[restrictionController should] receive:@selector(setMainApiKeyRestriction:)
                                       withArguments:theValue(AMADataSendingRestrictionUndefined)];
             
-            [configManager updateMainConfiguration:mockConfig];
+            [configManager updateMainConfiguration:mockConfig            activatedAnonymously:NO];
         });
         it(@"should update data sending configuration with allowed restriction if data sending is enabled", ^{
             [mockConfig stub:@selector(APIKey) andReturn:apiKey];
@@ -204,7 +269,7 @@ describe(@"AMAAppMetricaConfigurationManager", ^{
             [[restrictionController should] receive:@selector(setMainApiKeyRestriction:)
                                       withArguments:theValue(AMADataSendingRestrictionAllowed)];
             
-            [configManager updateMainConfiguration:mockConfig];
+            [configManager updateMainConfiguration:mockConfig            activatedAnonymously:NO];
         });
         it(@"should update location configuration", ^{
             CLLocation *customLocation = [[CLLocation alloc] init];
@@ -218,14 +283,14 @@ describe(@"AMAAppMetricaConfigurationManager", ^{
             [[locationManager should] receive:@selector(setLocation:) withArguments:customLocation];
             [[locationManager should] receive:@selector(setAccurateLocationEnabled:) withArguments:theValue(YES)];
             
-            [configManager updateMainConfiguration:mockConfig];
+            [configManager updateMainConfiguration:mockConfig            activatedAnonymously:NO];
         });
         it(@"should update adv", ^{
             [mockConfig stub:@selector(advertisingIdentifierTrackingEnabledState) andReturn:@(YES)];
             
             [[(NSObject *)adResolver should] receive:@selector(updateBoolValue:isAnonymous:)
                                        withArguments:@(YES), theValue(NO)];
-            [configManager updateMainConfiguration:mockConfig];
+            [configManager updateMainConfiguration:mockConfig            activatedAnonymously:NO];
         });
         it(@"should update log configuration", ^{
             [mockConfig stub:@selector(areLogsEnabled) andReturn:theValue(YES)];
@@ -233,18 +298,18 @@ describe(@"AMAAppMetricaConfigurationManager", ^{
             [[AMAAppMetrica should] receive:@selector(setLogs:) withArguments:theValue(YES)];
             [[[AMADatabaseQueueProvider sharedInstance] should] receive:@selector(setLogsEnabled:) withArguments:theValue(YES)];
             
-            [configManager updateMainConfiguration:mockConfig];
+            [configManager updateMainConfiguration:mockConfig            activatedAnonymously:NO];
         });
         it(@"should handle configuration update", ^{
             [[strategiesContainerMock should] receive:@selector(handleConfigurationUpdate)];
             
-            [configManager updateMainConfiguration:mockConfig];
+            [configManager updateMainConfiguration:mockConfig            activatedAnonymously:NO];
         });
         it(@"should not update configuration if nil is passed", ^{
             [[AMAAppMetrica shouldNot] receive:@selector(setLogs:)];
             [[strategiesContainerMock shouldNot] receive:@selector(handleConfigurationUpdate)];
             
-            [configManager updateMainConfiguration:nil];
+            [configManager updateMainConfiguration:nil            activatedAnonymously:NO];
         });
     });
     

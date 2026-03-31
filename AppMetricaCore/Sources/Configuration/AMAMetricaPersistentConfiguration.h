@@ -5,6 +5,7 @@
 @protocol AMAKeyValueStoring;
 @protocol AMAKeychainStoring;
 @protocol AMAIdentifierProviding;
+@protocol AMAAppMetricaConfigurationStoring;
 
 @class AMAPersistentTimeoutConfiguration;
 @class AMAMetricaInMemoryConfiguration;
@@ -49,6 +50,7 @@ typedef NSDictionary<AMAAttributionSource, AMAExternalAttributionConfiguration *
 
 - (instancetype)initWithStorage:(id<AMAKeyValueStoring>)storage
               identifierManager:(id<AMAIdentifierProviding>)identifierManager
-          inMemoryConfiguration:(AMAMetricaInMemoryConfiguration *)inMemoryConfiguration;
+          inMemoryConfiguration:(AMAMetricaInMemoryConfiguration *)inMemoryConfiguration
+ appMetricaConfigurationStorage:(id<AMAAppMetricaConfigurationStoring>)appMetricaConfigurationStoring;
 
 @end

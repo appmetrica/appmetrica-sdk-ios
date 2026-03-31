@@ -23,6 +23,11 @@
     return self;
 }
 
++ (instancetype)diskFileStorageWithPath:(NSString *)path options:(AMADiskFileStorageOptions)options
+{
+    return [[self alloc] initWithPath:path options:options];
+}
+
 - (BOOL)fileExists
 {
     return [AMAFileUtility fileExistsAtPath:self.path];

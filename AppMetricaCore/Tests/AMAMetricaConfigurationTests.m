@@ -36,11 +36,13 @@ describe(@"AMAMetricaConfiguration", ^{
         keychainBridge = [[AMAKeychainBridgeMock alloc] init];
         database = [AMAMockDatabase configurationDatabase];
         appGroupIdentifierProvider = [AMAAppGroupIdentifierProvider nullMock];
+        id<AMAAppMetricaConfigurationStoring> storingMock = [KWMock nullMockForProtocol:@protocol(AMAAppMetricaConfigurationStoring)];
         
         configuration =
             [[AMAMetricaConfiguration alloc] initWithKeychainBridge:keychainBridge
                                                             database:database
-                                         appGroupIdentifierProvider:appGroupIdentifierProvider];
+                                         appGroupIdentifierProvider:appGroupIdentifierProvider
+                                      appMetricaConfigurationStorage:storingMock];
     });
 
     it(@"Should add nessesary backup keys", ^{
@@ -50,7 +52,8 @@ describe(@"AMAMetricaConfiguration", ^{
             actualKeys = [NSSet setWithArray:params[0]];
             return nil;
         }];
-        (void)[[AMAMetricaConfiguration alloc] initWithKeychainBridge:nil database:database appGroupIdentifierProvider:[AMAAppGroupIdentifierProvider new]];
+        id<AMAAppMetricaConfigurationStoring> storingMock = [KWMock nullMockForProtocol:@protocol(AMAAppMetricaConfigurationStoring)];
+        (void)[[AMAMetricaConfiguration alloc] initWithKeychainBridge:nil database:database appGroupIdentifierProvider:[AMAAppGroupIdentifierProvider new] appMetricaConfigurationStorage:storingMock];
         [[actualKeys should] equal:[NSSet setWithArray:@[
             @"fallback-keychain-AMAMetricaPersistentConfigurationDeviceIDStorageKey",
             @"fallback-keychain-AMAMetricaPersistentConfigurationDeviceIDHashStorageKey",
@@ -113,7 +116,8 @@ describe(@"AMAMetricaConfiguration", ^{
         id __block mockedDatabase = nil;
         beforeEach(^{
             mockedDatabase = [KWMock nullMockForProtocol:@protocol(AMADatabaseProtocol)];
-            configuration = [[AMAMetricaConfiguration alloc] initWithKeychainBridge:keychainBridge database:mockedDatabase appGroupIdentifierProvider:[AMAAppGroupIdentifierProvider new]];
+            id<AMAAppMetricaConfigurationStoring> storingMock = [KWMock nullMockForProtocol:@protocol(AMAAppMetricaConfigurationStoring)];
+            configuration = [[AMAMetricaConfiguration alloc] initWithKeychainBridge:keychainBridge database:mockedDatabase appGroupIdentifierProvider:[AMAAppGroupIdentifierProvider new] appMetricaConfigurationStorage:storingMock];
         });
         it(@"Should ensure migration", ^{
             [[mockedDatabase should] receive:@selector(ensureMigrated)];
@@ -135,7 +139,7 @@ describe(@"AMAMetricaConfiguration", ^{
             
             beforeEach(^{
                 [AMAMetricaPersistentConfiguration stub:@selector(alloc) andReturn:allocedPersistent];
-                [allocedPersistent stub:@selector(initWithStorage:identifierManager:inMemoryConfiguration:) andReturn:persistent];
+                [allocedPersistent stub:@selector(initWithStorage:identifierManager:inMemoryConfiguration:appMetricaConfigurationStorage:) andReturn:persistent];
             });
             afterEach(^{
                 [AMAMetricaPersistentConfiguration clearStubs];
@@ -144,7 +148,7 @@ describe(@"AMAMetricaConfiguration", ^{
             it(@"Should return persistent configuration with valid storage", ^{
                 id<AMAKeyValueStoring> storage = database.storageProvider.cachingStorage;
                 
-                [[allocedPersistent should] receive:@selector(initWithStorage:identifierManager:inMemoryConfiguration:) withArguments:storage, kw_any(), kw_any()];
+                [[allocedPersistent should] receive:@selector(initWithStorage:identifierManager:inMemoryConfiguration:appMetricaConfigurationStorage:) withArguments:storage, kw_any(), kw_any(), kw_any()];
                 
                 [[configuration.persistent should] equal:persistent];
             });

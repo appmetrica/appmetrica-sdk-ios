@@ -16,4 +16,6 @@ NS_SWIFT_NAME(DiskFileStorage)
 
 - (instancetype)initWithPath:(NSString *)path options:(AMADiskFileStorageOptions)options;
 
++ (instancetype)diskFileStorageWithPath:(NSString *)path options:(AMADiskFileStorageOptions)options;
+
 @end

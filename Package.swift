@@ -431,6 +431,7 @@ extension AppMetricaTarget {
                 "./Attribution",
                 "./Configuration",
                 "./Configuration/AnonymousConfiguration",
+                "./Configuration/Storage",
                 "./Core",
                 "./Database",
                 "./Database/IntegrityManager",

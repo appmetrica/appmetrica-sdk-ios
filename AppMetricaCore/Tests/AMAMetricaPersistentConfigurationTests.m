@@ -12,6 +12,7 @@
 #import "AMAStartupPermission.h"
 #import "AMAStorageKeys.h"
 #import "AMAIdentifierProviderMock.h"
+#import "AMAAppMetricaConfigurationProviderMock.h"
 @import AppMetricaIdentifiers;
 
 SPEC_BEGIN(AMAMetricaPersistentConfigurationTests)
@@ -22,11 +23,13 @@ describe(@"AMAMetricaPersistentConfiguration", ^{
     AMAIdentifierProviderMock *__block idManager = nil;
     AMAMetricaInMemoryConfiguration *__block inMemory = nil;
     NSObject<AMAKeyValueStoring> *__block storage = nil;
+    AMAAppMetricaConfigurationProviderMock *__block configurationProviderMock = nil;
 
     AMAMetricaPersistentConfiguration *(^createConfig)(void) = ^{
         return [[AMAMetricaPersistentConfiguration alloc] initWithStorage:database.storageProvider.syncStorage
                                                         identifierManager:idManager
-                                                    inMemoryConfiguration:inMemory];
+                                                    inMemoryConfiguration:inMemory
+                                           appMetricaConfigurationStorage:configurationProviderMock];
     };
 
     beforeEach(^{
@@ -34,6 +37,7 @@ describe(@"AMAMetricaPersistentConfiguration", ^{
         idManager = [[AMAIdentifierProviderMock alloc] init];
         inMemory = [AMAMetricaInMemoryConfiguration nullMock];
         storage = (NSObject<AMAKeyValueStoring> *)database.storageProvider.syncStorage;
+        configurationProviderMock = [[AMAAppMetricaConfigurationProviderMock alloc] init];
     });
 
     context(@"Saves startup update date", ^{
@@ -518,18 +522,21 @@ describe(@"AMAMetricaPersistentConfiguration", ^{
         });
         
         it(@"Should use valid key", ^{
-            [[storage should] receive:@selector(jsonDictionaryForKey:error:) withArguments:key, kw_any()];
+            [[configurationProviderMock should] receive:@selector(loadConfiguration)];
             [configuration appMetricaClientConfiguration];
         });
         it(@"Should return config with json", ^{
             AMAAppMetricaConfiguration *mockConfiguration = [AMAAppMetricaConfiguration stubbedNullMockForInit:@selector(initWithJSON:)];
+            [configurationProviderMock stub:@selector(loadConfiguration) andReturn:mockConfiguration];
             [[configuration.appMetricaClientConfiguration should] equal:mockConfiguration];
             
             [AMAAppMetricaConfiguration clearStubs];
         });
         it(@"Should save valid config", ^{
             [mockConfiguration stub:@selector(JSON) andReturn:json];
-            [[storage should] receive:@selector(saveJSONDictionary:forKey:error:) withArguments:json, key, kw_any()];
+            [mockConfiguration stub:@selector(copy) andReturn:mockConfiguration];
+            
+            [[configurationProviderMock should] receive:@selector(saveConfiguration:) withArguments:mockConfiguration];
             configuration.appMetricaClientConfiguration = mockConfiguration;
         });
     });

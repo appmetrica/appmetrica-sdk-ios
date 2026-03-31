@@ -6,6 +6,7 @@
 #import "AMAInstantFeaturesConfiguration.h"
 #import "AMAAppGroupIdentifierProvider.h"
 #import <AppMetricaPlatform/AppMetricaPlatform.h>
+#import "AMAAppMetricaConfigurationProviderMock.h"
 @import AppMetricaIdentifiers;
 
 @implementation AMAMetricaConfigurationTestUtilities
@@ -21,10 +22,13 @@
 {
     AMAKeychainBridge *keychainBridge = [[AMAKeychainBridgeMock alloc] init];
     id<AMADatabaseProtocol> database = [AMAMockDatabase configurationDatabase];
-    AMAMetricaConfiguration *config = 
+    AMAAppMetricaConfigurationProviderMock *storingMock = [AMAAppMetricaConfigurationProviderMock new];
+    
+    AMAMetricaConfiguration *config =
         [[AMAMetricaConfiguration alloc] initWithKeychainBridge:keychainBridge
                                                        database:database
-                                     appGroupIdentifierProvider:[AMAAppGroupIdentifierProvider new]];
+                                     appGroupIdentifierProvider:[AMAAppGroupIdentifierProvider new]
+                                 appMetricaConfigurationStorage:storingMock];
     [AMAMetricaConfiguration stub:@selector(sharedInstance) andReturn:config];
 }
 

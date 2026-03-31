@@ -17,7 +17,8 @@
     id<AMADatabaseProtocol> database = AMADatabaseFactory.configurationDatabase;
     __auto_type *configuration = [[AMAMetricaConfiguration alloc] initWithKeychainBridge:[AMAKeychainBridge new]
                                                                                 database:database
-                                                              appGroupIdentifierProvider:nil];
+                                                              appGroupIdentifierProvider:nil
+                                                          appMetricaConfigurationStorage:nil];
     
     AMAStartupStorageProvider *provider = [[AMAStartupStorageProvider alloc] initWithConfiguration:configuration];
     NSString *key = @"foo";

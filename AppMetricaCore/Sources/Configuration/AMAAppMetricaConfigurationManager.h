@@ -14,10 +14,14 @@
 @class AMAAppMetricaLibraryAdapterConfiguration;
 @protocol AMAPermissionResolvingInput;
 @class AMALocationManager;
+@protocol AMAAppMetricaConfigurationStoring;
+
+NS_ASSUME_NONNULL_BEGIN
 
 @interface AMAAppMetricaConfigurationManager : NSObject
 
-@property (nonatomic, copy) AMAAppMetricaPreloadInfo *preloadInfo;
+@property (nonatomic, copy, nullable) AMAAppMetricaPreloadInfo *preloadInfo;
+@property (nonatomic, readonly) AMAAppMetricaConfiguration *anonymousConfiguration;
 
 - (instancetype)init NS_UNAVAILABLE;
 + (instancetype)new NS_UNAVAILABLE;
@@ -36,10 +40,11 @@
               adProviderResolver:(id<AMAPermissionResolvingInput>)adProviderResolver;
 
 
-- (void)updateMainConfiguration:(AMAAppMetricaConfiguration *)configuration;
+- (void)updateMainConfiguration:(nullable AMAAppMetricaConfiguration *)configuration
+               activatedAnonymously:(BOOL)calledFromActivateAnonymous;
 - (void)updateReporterConfiguration:(AMAReporterConfiguration *)configuration;
-- (AMAAppMetricaPreloadInfo *)preloadInfo;
-- (AMAAppMetricaConfiguration *)anonymousConfiguration;
 - (void)updateAnonymousConfigurationWithLibraryAdapterConfiguration:(AMAAppMetricaLibraryAdapterConfiguration *)libraryAdapterConfiguration;
 
 @end
+
+NS_ASSUME_NONNULL_END

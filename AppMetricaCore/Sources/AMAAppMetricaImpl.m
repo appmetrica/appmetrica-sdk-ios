@@ -63,6 +63,8 @@
 #import "AMAAdProviderResolver.h"
 #import "AMAActivationTypeResolver.h"
 #import "AMAReporterAutocollectedDataProvider.h"
+#import "AMAAppMetricaConfigurationFileStorage.h"
+#import "AMAAppGroupIdentifierProvider.h"
 
 static NSTimeInterval const kAMAAnonymousActivationDelay = 0.1;
 static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
@@ -139,7 +141,8 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
         _adProvider = [AMAAdProvider sharedInstance];
         _locationManager = [AMALocationManager sharedManager];
 
-        AMAMetricaPersistentConfiguration *persistent = [AMAMetricaConfiguration sharedInstance].persistent;
+        AMAMetricaConfiguration *metricaConfiguration = [AMAMetricaConfiguration sharedInstance];
+        AMAMetricaPersistentConfiguration *persistent = metricaConfiguration.persistent;
         AMAPersistentTimeoutConfiguration *configuration = persistent.timeoutConfiguration;
         _dispatchingController = [[AMADispatchingController alloc] initWithTimeoutConfiguration:configuration];
         _dispatchingController.proxyDelegate = self;
@@ -190,7 +193,7 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
 
 - (void)activateWithConfiguration:(AMAAppMetricaConfiguration *)configuration
 {
-    [self.configurationManager updateMainConfiguration:configuration];
+    [self.configurationManager updateMainConfiguration:configuration            activatedAnonymously:NO];
     self.apiKey = configuration.APIKey;
 
     [self migrate];
@@ -236,7 +239,7 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
 - (void)activateAnonymously
 {
     AMAAppMetricaConfiguration *configuration = [self.configurationManager anonymousConfiguration];
-    [self.configurationManager updateMainConfiguration:configuration];
+    [self.configurationManager updateMainConfiguration:configuration            activatedAnonymously:YES];
     self.apiKey = configuration.APIKey;
 
     [self migrate];

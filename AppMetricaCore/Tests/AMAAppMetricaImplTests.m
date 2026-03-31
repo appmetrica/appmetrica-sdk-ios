@@ -1358,7 +1358,9 @@ describe(@"AMAAppMetricaImpl", ^{
     
     context(@"Update configuration", ^{
         it(@"Should update main configuration", ^{
-            [[appMetricaImpl.configurationManager should] receive:@selector(updateMainConfiguration:) withArguments:configuration];
+            [[appMetricaImpl.configurationManager should]
+             receive:@selector(updateMainConfiguration:           activatedAnonymously:)
+             withArguments:configuration, theValue(NO)];
             
             [appMetricaImpl activateWithConfiguration:configuration];
         });
@@ -1415,7 +1417,9 @@ describe(@"AMAAppMetricaImpl", ^{
             it(@"Should import anonymous configuration", ^{
                 AMAAppMetricaConfiguration *config = [[AMAAppMetricaConfiguration alloc] initWithAPIKey:apiKey];
                 [appMetricaImpl.configurationManager stub:@selector(anonymousConfiguration) andReturn:config];
-                [[appMetricaImpl.configurationManager should] receive:@selector(updateMainConfiguration:) withArguments:config];
+                [[appMetricaImpl.configurationManager should]
+                 receive:@selector(updateMainConfiguration:           activatedAnonymously:)
+                 withArguments:config, theValue(YES)];
                 
                 [appMetricaImpl activateAnonymously];
             });

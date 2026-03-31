@@ -12,6 +12,7 @@
 @protocol AMAKeyValueStoring;
 @protocol AMAIdentifierProviding;
 @protocol AMAKeyValueStorageProviding;
+@protocol AMAAppMetricaConfigurationStoring;
 
 @interface AMAMetricaConfiguration : NSObject
 
@@ -23,12 +24,14 @@
 @property (nonatomic, strong, readonly) AMAInstantFeaturesConfiguration *instant;
 @property (nonatomic, strong, readonly) id<AMAKeyValueStoring> UUIDOldStorage;
 @property (nonatomic, strong, readonly) id<AMAIdentifierProviding> identifierProvider;
+@property (nonatomic, strong, readonly) AMAAppGroupIdentifierProvider *appGroupIdentifierProvider;
 
 @property (atomic, assign, readonly) BOOL persistentConfigurationCreated;
 
 - (instancetype)initWithKeychainBridge:(AMAKeychainBridge *)keychainBridge
                               database:(id<AMADatabaseProtocol>)database
-            appGroupIdentifierProvider:(AMAAppGroupIdentifierProvider*)appGroupIdentifierProvider;
+            appGroupIdentifierProvider:(AMAAppGroupIdentifierProvider*)appGroupIdentifierProvider
+        appMetricaConfigurationStorage:(id<AMAAppMetricaConfigurationStoring>)appMetricaConfigurationStorage;
 
 - (AMAStartupParametersConfiguration *)startupCopy;
 - (void)updateStartupConfiguration:(AMAStartupParametersConfiguration *)startup;

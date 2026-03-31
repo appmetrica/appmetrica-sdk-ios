@@ -17,7 +17,8 @@
     id<AMADatabaseProtocol> database = AMADatabaseFactory.configurationDatabase;
     __auto_type *configuration = [[AMAMetricaConfiguration alloc] initWithKeychainBridge:[AMAKeychainBridge new]
                                                                                 database:database
-                                                              appGroupIdentifierProvider:nil];
+                                                              appGroupIdentifierProvider:nil
+                                                          appMetricaConfigurationStorage:nil];
     
     AMACachingStorageProvider *provider = [[AMACachingStorageProvider alloc] initWithConfiguration:configuration];
     id<AMAKeyValueStoring> expectedStorage = database.storageProvider.cachingStorage;

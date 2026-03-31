@@ -23,7 +23,7 @@
 
 - (instancetype)init 
 {
-    self = [super initWithStorage:nil identifierManager:nil inMemoryConfiguration:nil];
+    self = [super initWithStorage:nil identifierManager:nil inMemoryConfiguration:nil appMetricaConfigurationStorage:nil];
     if (self != nil) {
         
     }

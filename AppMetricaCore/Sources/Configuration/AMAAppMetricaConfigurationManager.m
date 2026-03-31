@@ -20,6 +20,7 @@
 #import "AMALocationResolver.h"
 #import "AMAAdProviderResolver.h"
 #import "AMAActivationTypeResolver.h"
+#import <AppMetricaPlatform/AppMetricaPlatform.h>
 
 @interface AMAAppMetricaConfigurationManager ()
 
@@ -28,7 +29,7 @@
 @property (nonatomic, strong) AMAMetricaConfiguration *metricaConfiguration;
 @property (nonatomic, strong) AMADataSendingRestrictionController *restrictionController;
 @property (nonatomic, strong) AMADispatchStrategiesContainer *strategiesContainer;
-@property (nonatomic, strong) AMAAppMetricaConfiguration *savedAnonimousConfiguration;
+@property (nonatomic, strong) AMAAppMetricaConfiguration *savedAnonymousConfiguration;
 @property (nonatomic, strong) AMALocationManager *locationManager;
 @property (nonatomic, strong) id<AMAPermissionResolvingInput> adProvidingResolver;
 @property (nonatomic, strong) id<AMAPermissionResolvingInput> locationResolver;
@@ -80,6 +81,7 @@
 }
 
 - (void)updateMainConfiguration:(AMAAppMetricaConfiguration *)configuration
+           activatedAnonymously:(BOOL)calledFromActivateAnonymous
 {
     if (configuration == nil) {
         return;
@@ -98,8 +100,9 @@
     [self importReporterConfiguration:configuration];
     [self importCustomVersionConfiguration:configuration];
     
-    self.metricaConfiguration.persistent.appMetricaClientConfiguration = configuration;
-    
+    if ([AMAPlatformDescription runEnvronment] == AMARunEnvironmentMainApp || calledFromActivateAnonymous == NO) {
+        self.metricaConfiguration.persistent.appMetricaClientConfiguration = configuration;
+    }
     self.metricaConfiguration.persistent.recentMainApiKey = configuration.APIKey;
     
     [self handleConfigurationUpdate];
@@ -123,7 +126,7 @@
 
 - (AMAAppMetricaConfiguration *)anonymousConfiguration
 {
-    return self.savedAnonimousConfiguration ?: [self.anonymousConfigProvider configuration];
+    return self.savedAnonymousConfiguration ?: [self.anonymousConfigProvider configuration];
 }
 
 - (void)updateAnonymousConfigurationWithLibraryAdapterConfiguration:(AMAAppMetricaLibraryAdapterConfiguration *)libraryAdapterConfiguration
@@ -136,7 +139,7 @@
         configuration.advertisingIdentifierTrackingEnabled = libraryAdapterConfiguration.advertisingIdentifierTrackingEnabled;
     }
     
-    self.savedAnonimousConfiguration = configuration;
+    self.savedAnonymousConfiguration = configuration;
 }
 
 #pragma mark - Handle configuration

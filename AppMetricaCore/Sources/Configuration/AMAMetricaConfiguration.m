@@ -13,7 +13,10 @@
 #import "AMAKeyValueStorageProvidersFactory.h"
 #import "AMAAppMetricaUUIDMigrator.h"
 #import "AMAAppGroupIdentifierProvider.h"
+#import "AMAAppMetricaConfigurationStorageFactory.h"
+
 @import AppMetricaIdentifiers;
+#import <AppMetricaPlatform/AppMetricaPlatform.h>
 
 // Keychain identifiers
 // Declared without `static` keywords (e.g. extern by default) in order to be used in Sample Application
@@ -34,6 +37,7 @@ static NSString *const kAMAMetricaFallbackPrefix = @"fallback-keychain";
 @property (nonatomic, strong, readonly) id<AMAFileStorage> privateIdentifiersFileStorage;
 @property (nonatomic, strong, readonly) id<AMAFileStorage> groupIdentifiersFileStorage;
 @property (nonatomic, strong, readonly) NSMutableDictionary *apiConfigs;
+@property (nonatomic, strong, readonly) id<AMAAppMetricaConfigurationStoring> appMetricaConfigurationStorage;
 
 @property (nonatomic, strong, readonly) NSObject *reporterConfigurationLock;
 @property (nonatomic, strong, readonly) NSObject *startupConfigurationLock;
@@ -43,7 +47,6 @@ static NSString *const kAMAMetricaFallbackPrefix = @"fallback-keychain";
 @property (nonatomic, strong, readonly) NSObject *identifierProviderLock;
 
 @property (nonatomic, strong, readwrite) AMAStartupParametersConfiguration *startup;
-@property (nonatomic, strong, readonly) AMAAppGroupIdentifierProvider *appGroupIdentifierProvider;
 
 @end
 
@@ -68,14 +71,20 @@ static NSString *const kAMAMetricaFallbackPrefix = @"fallback-keychain";
 
 - (instancetype)init
 {
+    AMAAppGroupIdentifierProvider *appGroupIdentifierProvider = [AMAAppGroupIdentifierProvider sharedInstance];
+    
+    id<AMAAppMetricaConfigurationStoring> configurationStorage = [AMAAppMetricaConfigurationStorageFactory configurationStorage];
+    
     return [self initWithKeychainBridge:[[AMAKeychainBridge alloc] init]
                                database:AMADatabaseFactory.configurationDatabase
-             appGroupIdentifierProvider:[AMAAppGroupIdentifierProvider new]];
+             appGroupIdentifierProvider:appGroupIdentifierProvider
+         appMetricaConfigurationStorage:configurationStorage];
 }
 
 - (instancetype)initWithKeychainBridge:(AMAKeychainBridge *)keychainBridge
                               database:(id<AMADatabaseProtocol>)database
             appGroupIdentifierProvider:(AMAAppGroupIdentifierProvider*)appGroupIdentifierProvider
+        appMetricaConfigurationStorage:(id<AMAAppMetricaConfigurationStoring>)appMetricaConfigurationStorage
 {
     self = [super init];
     if (self != nil) {
@@ -90,6 +99,7 @@ static NSString *const kAMAMetricaFallbackPrefix = @"fallback-keychain";
         _inMemory = [[AMAMetricaInMemoryConfiguration alloc] init];
         _apiConfigs = [[NSMutableDictionary alloc] init];
         _appGroupIdentifierProvider = appGroupIdentifierProvider;
+        _appMetricaConfigurationStorage = appMetricaConfigurationStorage;
 
         _reporterConfigurationLock = [[NSObject alloc] init];
         _startupConfigurationLock = [[NSObject alloc] init];
@@ -115,6 +125,7 @@ static NSString *const kAMAMetricaFallbackPrefix = @"fallback-keychain";
     return _identifierProvider;
 }
 
+
 - (AMAMetricaPersistentConfiguration *)persistent
 {
     if (_persistent == nil) {
@@ -124,7 +135,8 @@ static NSString *const kAMAMetricaFallbackPrefix = @"fallback-keychain";
 
                 _persistent = [[AMAMetricaPersistentConfiguration alloc] initWithStorage:appDatabase
                                                                        identifierManager:self.identifierProvider
-                                                                   inMemoryConfiguration:self.inMemory];
+                                                                   inMemoryConfiguration:self.inMemory
+                                                            appMetricaConfigurationStorage:self.appMetricaConfigurationStorage];
             }
         }
 
