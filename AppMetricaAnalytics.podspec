@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name = "AppMetricaAnalytics"
-  s.version = '6.2.0'
+  s.version = '6.3.0'
   s.summary = "Comprehensive suite for mobile analytics, including tracking, web interactions, crash reporting, and advertising functionalities."
 
   s.homepage = 'https://appmetrica.io'
@@ -17,12 +17,12 @@ Pod::Spec.new do |s|
 
   s.frameworks = 'Foundation'
 
-  s.dependency 'AppMetricaCore', '= 6.2.0'
-  s.dependency 'AppMetricaAdSupport', '= 6.2.0'
-  s.dependency 'AppMetricaWebKit', '= 6.2.0'
-  s.dependency 'AppMetricaCrashes', '= 6.2.0'
-  s.dependency 'AppMetricaScreenshot', '= 6.2.0'
-  s.dependency 'AppMetricaIDSync', '= 6.2.0'
+  s.dependency 'AppMetricaCore', '= 6.3.0'
+  s.dependency 'AppMetricaAdSupport', '= 6.3.0'
+  s.dependency 'AppMetricaWebKit', '= 6.3.0'
+  s.dependency 'AppMetricaCrashes', '= 6.3.0'
+  s.dependency 'AppMetricaScreenshot', '= 6.3.0'
+  s.dependency 'AppMetricaIDSync', '= 6.3.0'
 
   s.source_files = "#{s.name}/Sources/**/*.swift"
 
