@@ -1,11 +1,9 @@
 
 #import "AMATransactionObserver.h"
-#import "AMAMetricaDynamicFrameworks.h"
 
 @interface AMATransactionObserver ()
 
 @property (nonatomic, assign) BOOL isObserving;
-@property (nonatomic, strong, readonly) AMAFramework *storeKit;
 
 @end
 
@@ -17,7 +15,6 @@
     if (self != nil) {
         _delegate = delegate;
         _isObserving = NO;
-        _storeKit = AMAMetricaDynamicFrameworks.storeKit;
     }
     return self;
 }
@@ -57,7 +54,7 @@
 
 - (SKPaymentQueue *)defaultPaymentQueue
 {
-    return [[self.storeKit classFromString:@"SKPaymentQueue"] defaultQueue];
+    return [SKPaymentQueue defaultQueue];
 }
 
 #pragma mark - SKPaymentTransactionObserver

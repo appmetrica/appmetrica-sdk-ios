@@ -6,24 +6,8 @@
 #import "AMATransactionInfoModel.h"
 #import "AMASubscriptionInfoModel.h"
 #import "AMARevenueInfoModel.h"
-#import "AMAMetricaDynamicFrameworks.h"
-
-@interface AMARevenueInfoModelFactory ()
-
-@property (nonatomic, strong, readonly) AMAFramework *storeKit;
-
-@end
 
 @implementation AMARevenueInfoModelFactory
-
-- (instancetype)init
-{
-    self = [super init];
-    if (self != nil) {
-        _storeKit = AMAMetricaDynamicFrameworks.storeKit;
-    }
-    return self;
-}
 
 - (AMARevenueInfoModel *)revenueInfoModelWithTransaction:(SKPaymentTransaction *)transaction
                                                    state:(AMATransactionState)state
@@ -102,7 +86,7 @@
     NSString *introductoryID = product.introductoryPrice.identifier;
     SKProductDiscount *discount = product.introductoryPrice;
     AMASubscriptionPeriod *introductoryPeriod = [self convertSubscriptionPeriod:discount.subscriptionPeriod];
-    
+
     model = [[AMASubscriptionInfoModel alloc] initWithIsAutoRenewing:YES
                                                   subscriptionPeriod:[self convertSubscriptionPeriod:product.subscriptionPeriod]
                                                       introductoryID:introductoryID
@@ -117,33 +101,28 @@
     return product.subscriptionPeriod != nil && product.subscriptionPeriod.numberOfUnits > 0;
 }
 
-- (AMASubscriptionPeriod *)convertSubscriptionPeriod:(id)object
+- (AMASubscriptionPeriod *)convertSubscriptionPeriod:(SKProductSubscriptionPeriod *)period
 {
-    if ([object isKindOfClass:[self.storeKit classFromString:@"SKProductSubscriptionPeriod"]]) {
-        SKProductSubscriptionPeriod *period = (SKProductSubscriptionPeriod *)object;
-        
-        AMATimeUnit timeUnit = AMATimeUnitUndefined;
-        switch (period.unit) {
-            case SKProductPeriodUnitDay:
-                timeUnit = AMATimeUnitDay;
-                break;
-            case SKProductPeriodUnitWeek:
-                timeUnit = AMATimeUnitWeek;
-                break;
-            case SKProductPeriodUnitMonth:
-                timeUnit = AMATimeUnitMonth;
-                break;
-            case SKProductPeriodUnitYear:
-                timeUnit = AMATimeUnitYear;
-                break;
-            default:
-                break;
-        }
-        
-        return [[AMASubscriptionPeriod alloc] initWithCount:period.numberOfUnits
-                                                   timeUnit:timeUnit];
+    AMATimeUnit timeUnit = AMATimeUnitUndefined;
+    switch (period.unit) {
+        case SKProductPeriodUnitDay:
+            timeUnit = AMATimeUnitDay;
+            break;
+        case SKProductPeriodUnitWeek:
+            timeUnit = AMATimeUnitWeek;
+            break;
+        case SKProductPeriodUnitMonth:
+            timeUnit = AMATimeUnitMonth;
+            break;
+        case SKProductPeriodUnitYear:
+            timeUnit = AMATimeUnitYear;
+            break;
+        default:
+            break;
     }
-    return nil;
+    
+    return [[AMASubscriptionPeriod alloc] initWithCount:period.numberOfUnits
+                                               timeUnit:timeUnit];
 }
 
 @end

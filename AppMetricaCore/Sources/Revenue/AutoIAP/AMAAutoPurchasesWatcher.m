@@ -44,8 +44,10 @@
     @synchronized (self) {
         AMALogInfo(@"reporter: %@", reporter);
         self.reporter = reporter;
-        [self.observer startObservingTransactions];
     }
+    [self.executor execute:^{
+        [self.observer startObservingTransactions];
+    }];
 }
 
 #pragma mark - Private -

@@ -1,13 +1,6 @@
 
 #import "AMACore.h"
 #import "AMAProductRequestor.h"
-#import "AMAMetricaDynamicFrameworks.h"
-
-@interface AMAProductRequestor ()
-
-@property (nonatomic, strong, readonly) AMAFramework *storeKit;
-
-@end
 
 @implementation AMAProductRequestor
 
@@ -18,7 +11,6 @@
     self = [super init];
     if (self != nil) {
         _transaction = transaction;
-        _storeKit = AMAMetricaDynamicFrameworks.storeKit;
         _transactionState = state;
         _delegate = delegate;
     }
@@ -35,8 +27,7 @@
 - (void)requestProductInformation
 {
     NSSet *productIdentifiers = [NSSet setWithObject:self.transaction.payment.productIdentifier];
-    SKProductsRequest *productsRequest =
-        [(SKProductsRequest *)[self.productRequest alloc] initWithProductIdentifiers:productIdentifiers];
+    SKProductsRequest *productsRequest = [[SKProductsRequest alloc] initWithProductIdentifiers:productIdentifiers];
     if (productsRequest != nil) {
         productsRequest.delegate = self;
         [productsRequest start];
@@ -48,11 +39,6 @@
 }
 
 #pragma mark - Private -
-
-- (Class)productRequest
-{
-    return [self.storeKit classFromString:@"SKProductsRequest"];
-}
 
 - (void)handleProduct:(SKProduct *)product
 {

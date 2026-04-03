@@ -157,7 +157,9 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
         
         _autocollectedDataProvider = [[AMAReporterAutocollectedDataProvider alloc] initWithPersistentConfiguration:persistent];
 
+#if !TARGET_OS_TV
         [[AMASKAdNetworkRequestor sharedInstance] registerForAdNetworkAttribution];
+#endif
 
         [self initializeStartupController];
         [self initializeIdentifierChangedNotifier];

@@ -16,6 +16,8 @@ Pod::Spec.new do |s|
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES' }
   
   s.frameworks = 'UIKit', 'Foundation', 'CoreLocation', 'CoreGraphics', 'SystemConfiguration'
+  s.ios.weak_frameworks = 'AdServices'
+  s.weak_frameworks = 'StoreKit'
   s.libraries = 'z', 'sqlite3', 'c++'
 
   s.dependency 'AppMetricaLog', '= 6.3.0'

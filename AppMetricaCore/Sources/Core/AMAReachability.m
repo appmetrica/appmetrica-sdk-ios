@@ -1,7 +1,6 @@
 
 #import "AMACore.h"
 #import "AMAReachability.h"
-#import "AMAMetricaDynamicFrameworks.h"
 #import <SystemConfiguration/SystemConfiguration.h>
 #import <AppMetricaPlatform/AppMetricaPlatform.h>
 
@@ -9,24 +8,12 @@ NSString *const kAMAReachabilityStatusDidChange = @"kAMAReachabilityStatusDidCha
 
 static NSString *const kAMAReachabilityHost = @"itunes.apple.com";
 
-typedef SCNetworkReachabilityRef (*amaCreateWithName)(CFAllocatorRef, const char *);
-typedef Boolean (*amaSetCallback)(SCNetworkReachabilityRef,
-                                  SCNetworkReachabilityCallBack,
-                                  SCNetworkReachabilityContext *);
-typedef Boolean (*amaSetDispatchQueue)(SCNetworkReachabilityRef, dispatch_queue_t);
-
-
 @interface AMAReachability ()
 
 @property (nonatomic, assign) SCNetworkReachabilityRef reachabilityRef;
 @property (nonatomic, assign) SCNetworkReachabilityFlags flags;
 @property (nonatomic, assign) AMAReachabilityStatus status;
 @property (nonatomic, strong) dispatch_queue_t callbackQueue;
-@property (nonatomic, strong, readonly) AMAFramework *framework;
-
-@property (nonatomic, assign, readonly) amaCreateWithName createWithName;
-@property (nonatomic, assign, readonly) amaSetCallback setCallback;
-@property (nonatomic, assign, readonly) amaSetDispatchQueue setDispatchQueue;
 
 @end
 
@@ -55,11 +42,6 @@ static void AMAReachabilityCallback(SCNetworkReachabilityRef __unused target, SC
     if (self != nil) {
         _status = AMAReachabilityStatusUnknown;
         _callbackQueue = [AMAQueuesFactory serialQueueForIdentifierObject:self domain:[AMAPlatformDescription SDKBundleName]];
-
-        _framework = [AMAMetricaDynamicFrameworks sConfiguration];
-        _createWithName = [self.framework functionFromString:@"SCNetworkReachabilityCreateWithName"];
-        _setCallback = [self.framework functionFromString:@"SCNetworkReachabilitySetCallback"];
-        _setDispatchQueue = [self.framework functionFromString:@"SCNetworkReachabilitySetDispatchQueue"];
     }
     return self;
 }
@@ -95,7 +77,7 @@ static void AMAReachabilityCallback(SCNetworkReachabilityRef __unused target, SC
         return _status;
     }
 }
- 
+
 - (BOOL)isNetworkReachable
 {
     AMAReachabilityStatus status = self.status;
@@ -104,25 +86,15 @@ static void AMAReachabilityCallback(SCNetworkReachabilityRef __unused target, SC
 
 #pragma mark - Private -
 
-- (BOOL)canMakeReachabilityFunctionsCall
-{
-    return self.createWithName != NULL && self.setCallback != NULL && self.setDispatchQueue != NULL;
-}
-
 - (void)scheduleReachabilityStatusUpdates
 {
-    if ([self canMakeReachabilityFunctionsCall] == NO) {
-        AMALogInfo(@"Can't make reachability functions");
-        return;
-    }
-
     const char *host = [kAMAReachabilityHost UTF8String];
-    self.reachabilityRef = self.createWithName(NULL, host);
+    self.reachabilityRef = SCNetworkReachabilityCreateWithName(NULL, host);
     AMALogInfo(@"Reachability host: %s", host);
 
     if (self.reachabilityRef != NULL &&
-        self.setCallback(self.reachabilityRef, AMAReachabilityCallback, NULL)) {
-        self.setDispatchQueue(self.reachabilityRef, self.callbackQueue);
+        SCNetworkReachabilitySetCallback(self.reachabilityRef, AMAReachabilityCallback, NULL)) {
+        SCNetworkReachabilitySetDispatchQueue(self.reachabilityRef, self.callbackQueue);
         AMALogInfo(@"Reachability checks started");
     }
     else {
@@ -132,8 +104,8 @@ static void AMAReachabilityCallback(SCNetworkReachabilityRef __unused target, SC
 
 - (void)unscheduleReachabilityStatusUpdates
 {
-    if (_reachabilityRef != NULL  && [self canMakeReachabilityFunctionsCall]) {
-        self.setDispatchQueue(_reachabilityRef, NULL);
+    if (_reachabilityRef != NULL) {
+        SCNetworkReachabilitySetDispatchQueue(_reachabilityRef, NULL);
         CFRelease(_reachabilityRef);
         _reachabilityRef = NULL;
         AMALogInfo(@"Reachability checks stopped");

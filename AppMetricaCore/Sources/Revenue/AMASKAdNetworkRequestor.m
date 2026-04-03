@@ -2,18 +2,14 @@
 #import <StoreKit/StoreKit.h>
 #import "AMACore.h"
 #import "AMASKAdNetworkRequestor.h"
-#import "AMAMetricaDynamicFrameworks.h"
 #import "AMAMetricaConfiguration.h"
 #import "AMAMetricaPersistentConfiguration.h"
 
 @interface AMASKAdNetworkRequestor ()
 
-@property (nonatomic, strong, readonly) AMAFramework *storeKit;
 @property (nonatomic, strong, readonly) id<AMADateProviding> dateProvider;
 
 @end
-
-static NSString *const kAMASKAdNetworkClass = @"SKAdNetwork";
 
 @implementation AMASKAdNetworkRequestor
 
@@ -36,7 +32,6 @@ static NSString *const kAMASKAdNetworkClass = @"SKAdNetwork";
 {
     self = [super init];
     if (self != nil) {
-        _storeKit = AMAMetricaDynamicFrameworks.storeKit;
         _dateProvider = dateProvider;
     }
     return self;
@@ -46,39 +41,31 @@ static NSString *const kAMASKAdNetworkClass = @"SKAdNetwork";
 
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "UnavailableInDeploymentTarget"
+#if !TARGET_OS_TV
 - (void)registerForAdNetworkAttribution
 {
-    if (@available(iOS 11.3, *)) {
-        if (self.isFirstExecution) {
-            Class adNetwork = [self.storeKit classFromString:kAMASKAdNetworkClass];
-            if (adNetwork != Nil) {
-                [adNetwork registerAppForAdNetworkAttribution];
-                [AMAMetricaConfiguration sharedInstance].persistent.registerForAttributionTime = self.dateProvider.currentDate;
-                AMALogNotify(@"Registered for SKAdNetwork attribution");
-            }
-            else {
-                AMALogNotify(@"SKAdNetwork is unavailable");
-            }
-        }
-        else {
-            AMALogNotify(@"Not a first execution of an app. Skipping registering");
-        }
+    if (self.isFirstExecution) {
+        [SKAdNetwork registerAppForAdNetworkAttribution];
+        [AMAMetricaConfiguration sharedInstance].persistent.registerForAttributionTime = self.dateProvider.currentDate;
+        AMALogNotify(@"Registered for SKAdNetwork attribution");
     }
     else {
-        AMALogNotify(@"SKAdNetwork attribution is unavailable. OS version is lower than iOS 11.3");
+        AMALogNotify(@"Not a first execution of an app. Skipping registering");
     }
 }
+#endif
 
 - (BOOL)updateConversionValue:(NSInteger)value
 {
+#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 140000
+#if !TARGET_OS_TV
     if (@available(iOS 14.0, *)) {
-        Class adNetwork = [self.storeKit classFromString:kAMASKAdNetworkClass];
-        if (adNetwork != Nil) {
-            AMALogInfo(@"Updating conversion value: %ld", (long) value);
-            [adNetwork updateConversionValue:value];
-            return YES;
-        }
+        AMALogInfo(@"Updating conversion value: %ld", (long) value);
+        [SKAdNetwork updateConversionValue:value];
+        return YES;
     }
+#endif
+#endif
     return NO;
 }
 #pragma clang diagnostic pop
