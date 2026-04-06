@@ -28,10 +28,16 @@
 
 - (instancetype)initWithName:(NSString *)name
 {
+    return [self initWithName:name qualityOfService:NSQualityOfServiceUserInitiated];
+}
+
+- (instancetype)initWithName:(NSString *)name qualityOfService:(NSQualityOfService)qualityOfService
+{
     self = [super init];
     if (self) {
         _thread = [AMARunLoopThread new];
         _thread.name = name ?: [self.class runLoopNameWithDomain:kAppMetricaCoreUtilsDomain identifier:NSStringFromClass(self.class)];
+        _thread.qualityOfService = qualityOfService;
     }
     return self;
 }

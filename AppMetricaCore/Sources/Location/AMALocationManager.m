@@ -29,7 +29,8 @@
 
 - (instancetype)init
 {
-    AMARunLoopExecutor *executor = [[AMARunLoopExecutor alloc] initWithName:@"AMALocationManager"];
+    AMARunLoopExecutor *executor = [[AMARunLoopExecutor alloc] initWithName:@"AMALocationManager"
+                                                           qualityOfService:NSQualityOfServiceBackground];
     AMAStartupPermissionController *startupPermissionController = [[AMAStartupPermissionController alloc] init];
     AMALocationCollectingConfiguration *configuration = [[AMALocationCollectingConfiguration alloc] init];
     AMAPersistentTimeoutConfiguration *timeoutConfiguration =

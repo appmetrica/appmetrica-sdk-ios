@@ -11,6 +11,8 @@ NS_ASSUME_NONNULL_BEGIN
 @interface AMARunLoopExecutor : NSObject<AMASyncExecuting, AMAAsyncExecuting, AMAThreadProviding>
 
 - (instancetype)initWithName:(nullable NSString *)name;
+- (instancetype)initWithName:(nullable NSString *)name
+              qualityOfService:(NSQualityOfService)qualityOfService;
 
 @end
 
