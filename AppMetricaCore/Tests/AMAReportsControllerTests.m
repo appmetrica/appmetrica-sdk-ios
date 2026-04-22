@@ -81,6 +81,7 @@ void (^beforeEachReporter)() = ^{
                                                                    appEnvironment:@{}
                                                                          appState:appstate
                                                                  inMemoryDatabase:NO
+                                                                             main:NO
                                                                 additionalAPIKeys:additionalAPIKeys
                                                                     eventsBatches:@[ firstEventBatch, secondEventBatch ]];
 
@@ -161,6 +162,7 @@ void (^beforeEachProxyReporter)() = ^{
                                                                    appEnvironment:@{}
                                                                          appState:appstate
                                                                  inMemoryDatabase:NO
+                                                                             main:NO
                                                                 additionalAPIKeys:additionalAPIKeys
                                                                     eventsBatches:@[ firstEventBatch, secondEventBatch ]];
 

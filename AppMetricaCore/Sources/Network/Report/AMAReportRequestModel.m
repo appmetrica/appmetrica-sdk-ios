@@ -10,6 +10,7 @@
                               appEnvironment:(NSDictionary *)appEnvironment
                                     appState:(AMAApplicationState *)appState
                             inMemoryDatabase:(BOOL)inMemoryDatabase
+                                        main:(BOOL)main
                            additionalAPIKeys:(NSArray<NSString *> *)additionalAPIKeys
                                eventsBatches:(NSArray<AMAReportEventsBatch *> *)eventsBatches
 {
@@ -18,6 +19,7 @@
                                           appEnvironment:appEnvironment
                                                 appState:appState
                                         inMemoryDatabase:inMemoryDatabase
+                                                    main:main
                                        additionalAPIKeys:additionalAPIKeys
                                            eventsBatches:eventsBatches];
 }
@@ -27,6 +29,7 @@
                 appEnvironment:(NSDictionary *)appEnvironment
                       appState:(AMAApplicationState *)appState
               inMemoryDatabase:(BOOL)inMemoryDatabase
+                          main:(BOOL)main
              additionalAPIKeys:(NSArray<NSString *> *)additionalAPIKeys
                  eventsBatches:(NSArray<AMAReportEventsBatch *> *)eventsBatches
 {
@@ -37,6 +40,7 @@
         _appEnvironment = [appEnvironment copy];
         _appState = appState;
         _inMemoryDatabase = inMemoryDatabase;
+        _main = main;
         _eventsBatches = [eventsBatches copy];
         _additionalAPIKeys = [additionalAPIKeys copy];
     }
@@ -50,6 +54,7 @@
                                           appEnvironment:self.appEnvironment
                                                 appState:self.appState
                                         inMemoryDatabase:self.inMemoryDatabase
+                                                    main:self.main
                                        additionalAPIKeys:self.additionalAPIKeys
                                            eventsBatches:eventsBatches];
 }
@@ -61,6 +66,7 @@
                                           appEnvironment:self.appEnvironment
                                                 appState:appState
                                         inMemoryDatabase:self.inMemoryDatabase
+                                                    main:self.main
                                        additionalAPIKeys:self.additionalAPIKeys
                                            eventsBatches:self.eventsBatches];
 }
@@ -94,6 +100,7 @@
         && [self.appEnvironment isEqualToDictionary:other.appEnvironment]
         && [self.appState isEqual:other.appState]
         && self.inMemoryDatabase == other.inMemoryDatabase
+        && self.main == other.main
         && [self.additionalAPIKeys isEqualToArray:other.additionalAPIKeys]
         && [self.eventsBatches isEqualToArray:other.eventsBatches];
 }
@@ -108,6 +115,7 @@
     result = prime * result + self.appEnvironment.hash;
     result = prime * result + self.appState.hash;
     result = prime * result + (self.inMemoryDatabase ? 1231 : 1237);
+    result = prime * result + (self.main ? 1249 : 1259);
     result = prime * result + self.additionalAPIKeys.hash;
     result = prime * result + self.eventsBatches.hash;
     

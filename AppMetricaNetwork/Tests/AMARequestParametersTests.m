@@ -23,13 +23,14 @@ describe(@"AMARequestParameters", ^{
                                                                                   requestID:requestID
                                                                            applicationState:nil
                                                                            inMemoryDatabase:NO
+                                                                                       main:NO
                                                                                     options:AMARequestParametersDefault];
             parametersDictionary = [parameters dictionaryRepresentation];
         });
         afterEach(^{
             [requestParametersHelper destubs];
         });
-        
+
         it(@"Should provide device_type in dictionary representation", ^{
             requestParametersHelper.deviceType = device;
             [requestParametersHelper configureStubs];
@@ -39,6 +40,7 @@ describe(@"AMARequestParameters", ^{
                                                requestID:requestID
                                         applicationState:nil
                                         inMemoryDatabase:NO
+                                                    main:NO
                                                  options:AMARequestParametersDefault];
             parametersDictionary = [parameters dictionaryRepresentation];
             [[parametersDictionary[@"device_type"] should] equal:device];
@@ -85,6 +87,9 @@ describe(@"AMARequestParameters", ^{
         it(@"Should provide request_id in dictionary representation", ^{
             [[parametersDictionary[@"request_id"] should] equal:requestID];
         });
+        it(@"Should have no is_main", ^{
+            [[parametersDictionary[@"is_main"] should] equal:@"0"];
+        });
         context(@"Storage type", ^{
             it(@"Should have no storage_type", ^{
                 [[parametersDictionary[@"storage_type"] should] beNil];
@@ -96,6 +101,7 @@ describe(@"AMARequestParameters", ^{
                                                                                           requestID:requestID
                                                                                    applicationState:nil
                                                                                    inMemoryDatabase:YES
+                                                                                               main:NO
                                                                                             options:AMARequestParametersDefault];
                     parametersDictionary = [parameters dictionaryRepresentation];
                 });
@@ -119,6 +125,7 @@ describe(@"AMARequestParameters", ^{
                                                             requestID:requestID
                                                      applicationState:appState
                                                      inMemoryDatabase:NO
+                                                                 main:NO
                                                               options:AMARequestParametersAllowIDFA];
             parametersDictionary = [parameters dictionaryRepresentation];
         });
@@ -153,6 +160,7 @@ describe(@"AMARequestParameters", ^{
                                                             requestID:requestID
                                                      applicationState:appState
                                                      inMemoryDatabase:NO
+                                                                 main:NO
                                                               options:AMARequestParametersDefault];
             parametersDictionary = [parameters dictionaryRepresentation];
         });
@@ -177,6 +185,34 @@ describe(@"AMARequestParameters", ^{
             });
         });
     });
+    context(@"Provides parameter for main reporter", ^{
+        NSDictionary * __block parametersDictionary = nil;
+        AMARequestParametersTestHelper * __block requestParametersHelper;
+        
+        beforeEach(^{
+            requestParametersHelper = [[AMARequestParametersTestHelper alloc] init];
+            [requestParametersHelper configureStubs];
+            
+            AMARequestParameters *parameters = [[AMARequestParameters alloc] initWithApiKey:apiKey
+                                                                              attributionID:attributionID
+                                                                                  requestID:requestID
+                                                                           applicationState:nil
+                                                                           inMemoryDatabase:NO
+                                                                                       main:YES
+                                                                                    options:AMARequestParametersDefault];
+            parametersDictionary = [parameters dictionaryRepresentation];
+        });
+        afterEach(^{
+            [requestParametersHelper destubs];
+        });
+        
+        context(@"Main reporter", ^{
+            it(@"Should have is_main equal to 1", ^{
+                [[parametersDictionary[@"is_main"] should] equal:@"1"];
+            });
+        });
+    });
+    
 });
 
 SPEC_END

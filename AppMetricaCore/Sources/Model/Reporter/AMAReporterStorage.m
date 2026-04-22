@@ -20,6 +20,7 @@
 @property (nonatomic, strong, readonly) AMAEventSerializer *eventSerializer;
 @property (nonatomic, strong, readonly) AMASessionSerializer *sessionSerializer;
 @property (nonatomic, copy, readwrite) NSString *apiKey;
+@property (nonatomic, assign, readonly) BOOL main;
 @property (nonatomic, strong, readwrite) id<AMAReporterAutocollectedDataProviding> autocollectedDataProvider;
 
 @end
@@ -51,6 +52,7 @@
     self = [super init];
     if (self != nil) {
         _apiKey = [apiKey copy];
+        _main = main;
         _database = database;
 
         _eventSerializer = [[AMAEventSerializer alloc] init];
@@ -114,7 +116,8 @@
                                                    database:self.database
                                             eventSerializer:self.eventSerializer
                                           sessionSerializer:self.sessionSerializer
-                                          additionalAPIKeys:additionalKeys];
+                                          additionalAPIKeys:additionalKeys
+                                                       main:self.main];
 }
 
 @end

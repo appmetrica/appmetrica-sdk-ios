@@ -19,6 +19,7 @@ static NSString *const kAMARequestIDKey = @"request_id";
 static NSString *const kAMAAppFrameworkKey = @"app_framework";
 static NSString *const kAMAEncryptedRequestKey = @"encrypted_request";
 static NSString *const kAMAStorageTypeKey = @"storage_type";
+static NSString *const kAMAIsMainKey = @"is_main";
 
 static NSString *const kAMAStorageTypeInmemoryValue = @"inmemory";
 
@@ -42,6 +43,7 @@ static NSString *const kAMAStorageTypeInmemoryValue = @"inmemory";
 @property (nonatomic, copy) NSString *appFramework;
 @property (nonatomic, assign) BOOL encryptedRequest;
 @property (nonatomic, assign) BOOL inMemoryDatabase;
+@property (nonatomic, assign) BOOL main;
 
 @end
 
@@ -49,11 +51,12 @@ static NSString *const kAMAStorageTypeInmemoryValue = @"inmemory";
 
 - (instancetype)init
 {
-    return [self initWithApiKey:nil 
+    return [self initWithApiKey:nil
                   attributionID:nil
                       requestID:nil
                applicationState:nil
                inMemoryDatabase:NO
+                           main:NO
                         options:AMARequestParametersDefault];
 }
 
@@ -62,6 +65,7 @@ static NSString *const kAMAStorageTypeInmemoryValue = @"inmemory";
                      requestID:(NSString *)requestID
               applicationState:(AMAApplicationState *)appState
               inMemoryDatabase:(BOOL)inMemoryDatabase
+                          main:(BOOL)main
                        options:(AMARequestParametersOptions)options
 {
     self = [super init];
@@ -84,6 +88,7 @@ static NSString *const kAMAStorageTypeInmemoryValue = @"inmemory";
         _appFramework = [[AMAPlatformDescription appFramework] copy];
         _encryptedRequest = YES;
         _inMemoryDatabase = inMemoryDatabase;
+        _main = main;
         _options = options;
     }
     return self;
@@ -112,6 +117,7 @@ static NSString *const kAMAStorageTypeInmemoryValue = @"inmemory";
     parameters.appFramework = [dictionary[kAMAAppFrameworkKey] copy];
     parameters.encryptedRequest = [dictionary[kAMAEncryptedRequestKey] isEqual:@"1"];
     parameters.inMemoryDatabase = [dictionary[kAMAStorageTypeKey] isEqual:kAMAStorageTypeInmemoryValue];
+    parameters.main = [dictionary[kAMAIsMainKey] isEqual:@"1"];
     return parameters;
 }
 
@@ -135,7 +141,8 @@ static NSString *const kAMAStorageTypeInmemoryValue = @"inmemory";
     parameters[kAMAAppFrameworkKey] = self.appFramework;
     parameters[kAMAEncryptedRequestKey] = self.encryptedRequest ? @"1" : @"0";
     parameters[kAMAStorageTypeKey] = self.inMemoryDatabase ? kAMAStorageTypeInmemoryValue : nil;
-    
+    parameters[kAMAIsMainKey] = self.main ? @"1" : @"0";
+
     NSDictionary *appStateDictionary = [self.appState dictionaryRepresentation];
     if (appStateDictionary != nil) {
         if (self.options & AMARequestParametersAllowIDFA) {

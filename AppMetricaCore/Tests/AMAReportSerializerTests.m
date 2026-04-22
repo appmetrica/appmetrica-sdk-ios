@@ -99,6 +99,7 @@ describe(@"AMAReportSerializer", ^{
                                                     appEnvironment:appEnvironment
                                                           appState:appState
                                                   inMemoryDatabase:NO
+                                                              main:NO
                                                  additionalAPIKeys:currentAdditionalAPIKeys
                                                      eventsBatches:batches];
     };

@@ -55,6 +55,7 @@
                                                requestID:self.requestIdentifier
                                         applicationState:self.reportPayload.model.appState
                                         inMemoryDatabase:self.reportPayload.model.inMemoryDatabase
+                                                    main:self.reportPayload.model.main
                                                  options:self.requestParametersOptions];
     return [[requestParameters dictionaryRepresentation] mutableCopy];
 }

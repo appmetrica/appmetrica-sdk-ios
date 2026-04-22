@@ -21,6 +21,7 @@ NS_SWIFT_NAME(RequestParameters)
                      requestID:(NSString *)requestID
               applicationState:(AMAApplicationState *)appState
               inMemoryDatabase:(BOOL)inMemoryDatabase
+                          main:(BOOL)main
                        options:(AMARequestParametersOptions)options;
 
 @end

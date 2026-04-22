@@ -56,7 +56,7 @@ describe(@"AMAReporterStorage", ^{
         sessionStorage = [AMASessionStorage stubbedNullMockForInit:@selector(initWithDatabase:serializer:stateStorage:)];
         eventStorage = [AMAEventStorage stubbedNullMockForInit:@selector(initWithDatabase:eventSerializer:)];
         reportRequestProvider =
-            [AMAReportRequestProvider stubbedNullMockForInit:@selector(initWithApiKey:database:eventSerializer:sessionSerializer:additionalAPIKeys:)];
+            [AMAReportRequestProvider stubbedNullMockForInit:@selector(initWithApiKey:database:eventSerializer:sessionSerializer:additionalAPIKeys:main:)];
         eventsCleaner = [AMAEventsCleaner stubbedNullMockForInit:@selector(initWithReporterProvider:)];
         sessionCleaner = [AMASessionsCleaner stubbedNullMockForInit:@selector(initWithDatabase:eventsCleaner:apiKey:)];
         autocollectedDataProvider = [KWMock nullMockForProtocol:@protocol(AMAReporterAutocollectedDataProviding)];
@@ -115,8 +115,9 @@ describe(@"AMAReporterStorage", ^{
                                                           database:
                                                           eventSerializer:
                                                           sessionSerializer:
-                                                          additionalAPIKeys:)
-                                  withArguments:apiKey, database, eventSerializer, sessionSerializer, apiKeys];
+                                                          additionalAPIKeys:
+                                                          main:)
+                                  withArguments:apiKey, database, eventSerializer, sessionSerializer, apiKeys, theValue(YES)];
         createStorage();
         
         [autocollectedDataProvider stub:@selector(additionalAPIKeys) andReturn:apiKeys];

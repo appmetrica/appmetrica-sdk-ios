@@ -45,6 +45,7 @@ describe(@"AMARequestModelSplitter", ^{
                                                                 appEnvironment:@{ @"foo": @"bar" }
                                                                       appState:[AMAApplicationState new]
                                                               inMemoryDatabase:NO
+                                                                          main:NO
                                                              additionalAPIKeys:additionalAPIKeys
                                                                  eventsBatches:@[ firstEventBatch, secondEventBatch ]];
 
@@ -196,6 +197,7 @@ describe(@"AMARequestModelSplitter", ^{
                                                                 appEnvironment:@{ @"foo": @"bar" }
                                                                       appState:[AMAApplicationState new]
                                                               inMemoryDatabase:NO
+                                                                          main:NO
                                                              additionalAPIKeys:additionalAPIKeys
                                                                  eventsBatches:@[ firstEventBatch, secondEventBatch ]];
 
@@ -330,6 +332,7 @@ describe(@"AMARequestModelSplitter", ^{
                                                                 appEnvironment:@{ @"foo": @"bar" }
                                                                       appState:[AMAApplicationState new]
                                                               inMemoryDatabase:NO
+                                                                          main:NO
                                                              additionalAPIKeys:additionalAPIKeys
                                                                  eventsBatches:@[
                                                                      firstEventBatch,
@@ -486,6 +489,7 @@ describe(@"AMARequestModelSplitter", ^{
                                                                 appEnvironment:@{ @"foo": @"bar" }
                                                                       appState:[AMAApplicationState new]
                                                               inMemoryDatabase:NO
+                                                                          main:NO
                                                              additionalAPIKeys:additionalAPIKeys
                                                                  eventsBatches:@[ firstEventBatch ]];
 
@@ -560,6 +564,7 @@ describe(@"AMARequestModelSplitter", ^{
                                                                 appEnvironment:@{ @"foo": @"bar" }
                                                                       appState:[AMAApplicationState new]
                                                               inMemoryDatabase:NO
+                                                                          main:NO
                                                              additionalAPIKeys:additionalAPIKeys
                                                                  eventsBatches:@[]];
 
@@ -624,6 +629,7 @@ describe(@"AMARequestModelSplitter", ^{
                                                                 appEnvironment:@{ @"foo": @"bar" }
                                                                       appState:[AMAApplicationState new]
                                                               inMemoryDatabase:NO
+                                                                          main:NO
                                                              additionalAPIKeys:additionalAPIKeys
                                                                  eventsBatches:@[ firstEventBatch, secondEventBatch ]];
         });

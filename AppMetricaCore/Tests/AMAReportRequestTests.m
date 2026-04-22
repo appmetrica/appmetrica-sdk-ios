@@ -90,6 +90,7 @@ describe(@"AMAReportRequestTests", ^{
                                                                                    appEnvironment:@{}
                                                                                          appState:state
                                                                                  inMemoryDatabase:YES
+                                                                                             main:NO
                                                                                 additionalAPIKeys:additionalAPIKeys
                                                                                     eventsBatches:@[eventBatch]];
         requestModel = [requestModel copyWithAppState:AMAApplicationStateManager.applicationState];
