@@ -887,6 +887,7 @@
   "AppMetricaCore/Tests/AMAAppGroupIdentifierProviderTests.m":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCore/Tests/AMAAppGroupIdentifierProviderTests.m",
   "AppMetricaCore/Tests/AMAAppMetricaAsyncTests.m":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCore/Tests/AMAAppMetricaAsyncTests.m",
   "AppMetricaCore/Tests/AMAAppMetricaConfigurationFileStorageTests.m":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCore/Tests/AMAAppMetricaConfigurationFileStorageTests.m",
+  "AppMetricaCore/Tests/AMAAppMetricaConfigurationJsonSeriazableTests.m":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCore/Tests/AMAAppMetricaConfigurationJsonSeriazableTests.m",
   "AppMetricaCore/Tests/AMAAppMetricaConfigurationManagerTests.m":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCore/Tests/AMAAppMetricaConfigurationManagerTests.m",
   "AppMetricaCore/Tests/AMAAppMetricaConfigurationStorageCoordinatorTests.m":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCore/Tests/AMAAppMetricaConfigurationStorageCoordinatorTests.m",
   "AppMetricaCore/Tests/AMAAppMetricaConfigurationStorageFactoryTests.m":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCore/Tests/AMAAppMetricaConfigurationStorageFactoryTests.m",
