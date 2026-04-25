@@ -874,6 +874,7 @@
   "AppMetricaCore/Tests/AMAAnonymousActivationPolicyTests.m":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCore/Tests/AMAAnonymousActivationPolicyTests.m",
   "AppMetricaCore/Tests/AMAAppEnvironmentValidatorTests.m":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCore/Tests/AMAAppEnvironmentValidatorTests.m",
   "AppMetricaCore/Tests/AMAAppGroupIdentifierProviderTests.m":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCore/Tests/AMAAppGroupIdentifierProviderTests.m",
+  "AppMetricaCore/Tests/AMAAppMetricaConfigurationJsonSeriazableTests.m":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCore/Tests/AMAAppMetricaConfigurationJsonSeriazableTests.m",
   "AppMetricaCore/Tests/AMAAppMetricaConfigurationManagerTests.m":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCore/Tests/AMAAppMetricaConfigurationManagerTests.m",
   "AppMetricaCore/Tests/AMAAppMetricaConfigurationTests.m":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCore/Tests/AMAAppMetricaConfigurationTests.m",
   "AppMetricaCore/Tests/AMAAppMetricaImplTests.m":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCore/Tests/AMAAppMetricaImplTests.m",

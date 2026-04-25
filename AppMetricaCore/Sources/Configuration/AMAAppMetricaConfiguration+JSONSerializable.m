@@ -39,7 +39,7 @@ NSString *const kAMAAdvertisingIdentifierTracking = @"adv.tracking";
     }
     
     NSString *apiKey = json[kAMAAPIKey];
-    if (apiKey == nil) {
+    if ([apiKey isKindOfClass:[NSString class]] == NO) {
         return nil;
     }
 
@@ -89,8 +89,9 @@ NSString *const kAMAAdvertisingIdentifierTracking = @"adv.tracking";
             self.logsEnabled = [json[kAMALogsEnabled] boolValue];
         }
         
-        if (json[kAMAPreloadInfo] != nil) {
-            self.preloadInfo = [[AMAAppMetricaPreloadInfo alloc] initWithJSON:json[kAMAPreloadInfo]];
+        NSDictionary *preloadInfo = json[kAMAPreloadInfo];
+        if ([preloadInfo isKindOfClass:[NSDictionary class]]) {
+            self.preloadInfo = [[AMAAppMetricaPreloadInfo alloc] initWithJSON:preloadInfo];
         }
         
         if (json[kAMARevenueAutoTrackingEnabled] != nil) {
@@ -110,7 +111,7 @@ NSString *const kAMAAdvertisingIdentifierTracking = @"adv.tracking";
         }
         
         NSDictionary *locationDict = json[kAMACustomLocation];
-        if (locationDict) {
+        if ([locationDict isKindOfClass:[NSDictionary class]]) {
             double latitude = [locationDict[kAMALatitude] doubleValue];
             double longitude = [locationDict[kAMALongitude] doubleValue];
             self.customLocation = [[CLLocation alloc] initWithLatitude:latitude longitude:longitude];
@@ -127,7 +128,7 @@ NSString *const kAMAAdvertisingIdentifierTracking = @"adv.tracking";
         }
         
         NSString *appBuildNumber = json[kAMAAppBuildNumber];
-        if ([userProfileID isKindOfClass:[NSString class]]) {
+        if ([appBuildNumber isKindOfClass:[NSString class]]) {
             self.appBuildNumber = appBuildNumber;
         }
         
