@@ -5,6 +5,8 @@
 #import "AMAMetricaConfiguration.h"
 #import "AMAMetricaPersistentConfiguration.h"
 #import "AMAStartupParametersConfiguration.h"
+#import "AMAMetricaConfiguration.h"
+#import "AMAMetricaInMemoryConfiguration.h"
 #import <AppMetricaPlatform/AppMetricaPlatform.h>
 
 @implementation AMAStartupParameters
@@ -26,6 +28,9 @@
 
 + (void)fillAppParameters:(NSMutableDictionary *)parameters
 {
+    AMAMetricaConfiguration *metricaConfiguration = [AMAMetricaConfiguration sharedInstance];
+    parameters[@"app_version_name"] = metricaConfiguration.inMemory.appVersion;
+    parameters[@"app_build_number"] = [NSString stringWithFormat:@"%ld", (long)metricaConfiguration.inMemory.appBuildNumber];
     parameters[@"app_platform"] = [AMAPlatformDescription appPlatform];
     parameters[@"app_debuggable"] = [AMAPlatformDescription appDebuggable] ? @"1" : @"0";
     parameters[@"app_id"] = [AMAPlatformDescription appID];

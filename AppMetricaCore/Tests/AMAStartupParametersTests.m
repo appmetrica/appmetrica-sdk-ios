@@ -30,8 +30,11 @@ describe(@"AMAStartupParameters", ^{
 
         startupIdentifier = [AMAStartupClientIdentifier nullMock];
         [AMAStartupClientIdentifierFactory stub:@selector(startupClientIdentifier) andReturn:startupIdentifier];
-
+        
         [AMAMetricaConfigurationTestUtilities stubConfigurationWithNullMock];
+        AMAMetricaConfiguration *metricaConfiguration = [AMAMetricaConfiguration sharedInstance];
+        [metricaConfiguration.inMemory stub:@selector(appVersion) andReturn:@"APP_VERSION"];
+        [metricaConfiguration.inMemory stub:@selector(appBuildNumber) andReturn:theValue(23)];
         
         NSString *appPlatform = @"iphone";
         NSString *deviceType = @"phone";
@@ -43,6 +46,8 @@ describe(@"AMAStartupParameters", ^{
         expectedParameters = [@{
             @"app_debuggable": @"0",
             @"app_platform": appPlatform,
+            @"app_version_name": @"APP_VERSION",
+            @"app_build_number": @"23",
             @"atc": @"1",
             @"b": @"1",
             @"device_type": deviceType,
