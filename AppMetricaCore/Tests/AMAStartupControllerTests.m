@@ -511,11 +511,22 @@ describe(@"AMAStartupController", ^{
             }];
             
             id observer = [KWMock nullMockForProtocol:@protocol(AMAExtendedStartupObservingDelegate)];
-            
+
             startupController.extendedDelegate = observer;
-            
+
             [[(NSObject *)observer should] receive:@selector(startupUpdatedWithResponse:)
                                      withArguments:extendedResponse];
+            [startupController update];
+        });
+
+        it(@"Should notify extendedDelegate with error on startup failure", ^{
+            NSError *error = [NSError errorWithDomain:@"test error" code:400 userInfo:nil];
+            [AMATestNetwork stubHTTPRequestToFinishWithError:error];
+
+            id observer = [KWMock nullMockForProtocol:@protocol(AMAExtendedStartupObservingDelegate)];
+            startupController.extendedDelegate = observer;
+
+            [[(NSObject *)observer should] receive:@selector(startupUpdateFailedWithError:)];
             [startupController update];
         });
 

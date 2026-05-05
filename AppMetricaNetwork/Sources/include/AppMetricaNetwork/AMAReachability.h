@@ -1,6 +1,6 @@
 
 #import <Foundation/Foundation.h>
-#import "AMAReachabilityStatus.h"
+#import <AppMetricaNetwork/AMAReachabilityStatus.h>
 
 extern NSString *const kAMAReachabilityStatusDidChange;
 

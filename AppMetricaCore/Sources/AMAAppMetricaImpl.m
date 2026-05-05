@@ -37,7 +37,7 @@
 #import "AMAPermissionsController.h"
 #import "AMAPersistentTimeoutConfiguration.h"
 #import "AMAPreactivationActionHistory.h"
-#import "AMAReachability.h"
+#import <AppMetricaNetwork/AppMetricaNetwork.h>
 #import "AMAReporter.h"
 #import "AMAReporterConfiguration+Internal.h"
 #import "AMAReporterConfiguration.h"
@@ -1027,6 +1027,11 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
     [self notifyOnAdditionalStartupCompleted:response];
 }
 
+- (void)startupUpdateFailedWithError:(NSError *)error
+{
+    [self notifyOnAdditionalStartupFailedWithError:error];
+}
+
 #pragma mark - Startup observing -
 
 - (void)notifyOnStartupCompleted
@@ -1063,6 +1068,19 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
                        (unsigned long)self.extendedStartupCompletionObservers.count);
             for (id<AMAExtendedStartupObserving> observer in self.extendedStartupCompletionObservers) {
                 [observer startupUpdatedWithParameters:response];
+            }
+        }
+    }];
+}
+
+- (void)notifyOnAdditionalStartupFailedWithError:(NSError *)error
+{
+    [self execute:^{
+        AMALogInfo(@"Notify about extended startup failure %lu observers",
+                   (unsigned long)self.extendedStartupCompletionObservers.count);
+        for (id<AMAExtendedStartupObserving> observer in self.extendedStartupCompletionObservers) {
+            if ([observer respondsToSelector:@selector(startupUpdateFailedWithError:)]) {
+                [observer startupUpdateFailedWithError:error];
             }
         }
     }];

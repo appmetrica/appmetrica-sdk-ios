@@ -29,6 +29,10 @@ NS_SWIFT_NAME(ExtendedStartupObserving)
 - (void)setupStartupProvider:(id<AMAStartupStorageProviding>)startupStorageProvider
       cachingStorageProvider:(id<AMACachingStorageProviding>)cachingStorageProvider;
 
+@optional
+
+- (void)startupUpdateFailedWithError:(NSError *)error;
+
 @end
 
 NS_ASSUME_NONNULL_END

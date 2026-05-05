@@ -246,6 +246,7 @@ NSErrorDomain const AMAStartupRequestsErrorDomain = @"AMAStartupRequestsErrorDom
 
     if (reportError) {
         [self.delegate startupController:self didFailWithError:error];
+        [self.extendedDelegate startupUpdateFailedWithError:error];
     }
 }
 

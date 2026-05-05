@@ -11,7 +11,7 @@
 #import "AMAStartupParametersConfiguration.h"
 #import "AMAReportRequestModel.h"
 #import "AMADataSendingRestrictionController.h"
-#import "AMAReachability.h"
+#import <AppMetricaNetwork/AppMetricaNetwork.h>
 #import "AMAReporterStoragesContainer.h"
 #import "AMAReporterStorage.h"
 #import "AMAReporterStateStorage.h"

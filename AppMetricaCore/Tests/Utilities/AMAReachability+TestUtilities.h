@@ -1,6 +1,6 @@
 
 #import <SystemConfiguration/SystemConfiguration.h>
-#import "AMAReachability.h"
+#import <AppMetricaNetwork/AppMetricaNetwork.h>
 
 @interface AMAReachability ()
 

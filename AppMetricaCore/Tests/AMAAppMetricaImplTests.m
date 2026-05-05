@@ -1210,11 +1210,21 @@ describe(@"AMAAppMetricaImpl", ^{
                         [[observer should] receive:@selector(startupUpdatedWithParameters:)
                                      withArguments:startupParameters];
                     }
-                    
+
                     [appMetricaImpl setExtendedStartupObservers:[NSSet setWithArray:observers]];
                     [appMetricaImpl startupUpdatedWithResponse:startupParameters];
                 });
-                
+                it(@"Should dispatch startup failure to observers that respond to startupUpdateFailedWithError:", ^{
+                    NSError *error = [NSError errorWithDomain:@"test" code:1 userInfo:nil];
+                    for (NSObject<AMAExtendedStartupObserving> *observer in observers) {
+                        [observer stub:@selector(startupParameters) andReturn:startupParameters];
+                        [[observer should] receive:@selector(startupUpdateFailedWithError:) withArguments:error];
+                    }
+
+                    [appMetricaImpl setExtendedStartupObservers:[NSSet setWithArray:observers]];
+                    [appMetricaImpl startupUpdateFailedWithError:error];
+                });
+
             };
             context(@"Manual activation", ^{
                 testStartupObserver(NO, activationBlock);

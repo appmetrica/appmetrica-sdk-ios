@@ -15,7 +15,6 @@
 #import "AMASession.h"
 #import "AMASessionStorage+AMATestUtilities.h"
 #import "AMADatabaseProtocol.h"
-#import "AMAReachability.h"
 #import "AMAMetricaConfigurationTestUtilities.h"
 #import "AMAReporterConfiguration+Internal.h"
 #import "AMAAppMetrica.h"

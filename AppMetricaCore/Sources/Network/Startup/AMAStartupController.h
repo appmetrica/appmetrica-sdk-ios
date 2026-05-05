@@ -24,6 +24,7 @@ typedef NS_ERROR_ENUM(AMAStartupRequestsErrorDomain, AMAStartupRequestsErrorCode
 
 @required
 - (void)startupUpdatedWithResponse:(NSDictionary *)response;
+- (void)startupUpdateFailedWithError:(NSError *)error;
 
 @end
 

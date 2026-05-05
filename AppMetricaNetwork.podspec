@@ -15,7 +15,7 @@ Pod::Spec.new do |s|
   
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES' }
 
-  s.frameworks = 'Foundation'
+  s.frameworks = 'Foundation', 'SystemConfiguration'
 
   s.dependency 'AppMetricaLog', '= 6.3.0'
   s.dependency 'AppMetricaCoreUtils', '= 6.3.0'

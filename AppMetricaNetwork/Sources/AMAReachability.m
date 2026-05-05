@@ -1,8 +1,10 @@
 
-#import "AMACore.h"
-#import "AMAReachability.h"
+#import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
+#import <AppMetricaLog/AppMetricaLog.h>
+#import <AppMetricaNetwork/AMAReachability.h>
 #import <SystemConfiguration/SystemConfiguration.h>
 #import <AppMetricaPlatform/AppMetricaPlatform.h>
+#import "AMANetworkCore.h"
 
 NSString *const kAMAReachabilityStatusDidChange = @"kAMAReachabilityStatusDidChange";
 
