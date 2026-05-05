@@ -197,17 +197,20 @@
     }
     
     if (self.locationTrackingState != configuration.locationTrackingState &&
-        ![self.locationTrackingState isEqualToNumber:configuration.locationTrackingState]) {
+        !(self.locationTrackingState && configuration.locationTrackingState &&
+          [self.locationTrackingState isEqualToNumber:configuration.locationTrackingState])) {
         return NO;
     }
-    
+
     if (self.dataSendingEnabledState != configuration.dataSendingEnabledState &&
-        ![self.dataSendingEnabledState isEqualToNumber:configuration.dataSendingEnabledState]) {
+        !(self.dataSendingEnabledState && configuration.dataSendingEnabledState &&
+          [self.dataSendingEnabledState isEqualToNumber:configuration.dataSendingEnabledState])) {
         return NO;
     }
-    
+
     if (self.advertisingIdentifierTrackingEnabledState != configuration.advertisingIdentifierTrackingEnabledState &&
-        ![self.advertisingIdentifierTrackingEnabledState isEqualToNumber:configuration.advertisingIdentifierTrackingEnabledState]) {
+        !(self.advertisingIdentifierTrackingEnabledState && configuration.advertisingIdentifierTrackingEnabledState &&
+          [self.advertisingIdentifierTrackingEnabledState isEqualToNumber:configuration.advertisingIdentifierTrackingEnabledState])) {
         return NO;
     }
     

@@ -391,6 +391,40 @@ describe(@"AMAAppMetricaConfiguration", ^{
             });
         });
     });
+
+    context(@"Equality", ^{
+        __block AMAAppMetricaConfiguration *configA = nil;
+        __block AMAAppMetricaConfiguration *configB = nil;
+        beforeEach(^{
+            configA = [[AMAAppMetricaConfiguration alloc] initWithAPIKey:apiKey];
+            configB = [[AMAAppMetricaConfiguration alloc] initWithAPIKey:apiKey];
+        });
+
+        it(@"Should be equal when both locationTrackingState are nil", ^{
+            [[theValue([configA isEqual:configB]) should] beYes];
+        });
+        it(@"Should not be equal when one locationTrackingState is nil and other is not", ^{
+            configB.locationTracking = NO;
+            [[theValue([configA isEqual:configB]) should] beNo];
+        });
+        it(@"Should not be equal when one dataSendingEnabledState is nil and other is not", ^{
+            configB.dataSendingEnabled = NO;
+            [[theValue([configA isEqual:configB]) should] beNo];
+        });
+        it(@"Should not be equal when one advertisingIdentifierTrackingEnabledState is nil and other is not", ^{
+            configB.advertisingIdentifierTrackingEnabled = NO;
+            [[theValue([configA isEqual:configB]) should] beNo];
+        });
+        it(@"Should be equal when all nullable states have the same non-nil value", ^{
+            configA.locationTracking = NO;
+            configB.locationTracking = NO;
+            configA.dataSendingEnabled = NO;
+            configB.dataSendingEnabled = NO;
+            configA.advertisingIdentifierTrackingEnabled = NO;
+            configB.advertisingIdentifierTrackingEnabled = NO;
+            [[theValue([configA isEqual:configB]) should] beYes];
+        });
+    });
 });
 
 SPEC_END
