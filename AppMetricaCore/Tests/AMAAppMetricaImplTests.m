@@ -378,6 +378,24 @@ describe(@"AMAAppMetricaImpl", ^{
                 [[resultProfileID() should] equal:profileIDDuringActivation];
             });
         });
+        context(@"Anonymous activation then normal activation", ^{
+            NSString *(^resultProfileID)(void) = ^{
+                return [reporterTestHelper appReporterForApiKey:apiKey].reporterStorage.stateStorage.profileID;
+            };
+            it(@"Set during normal activation after anonymous", ^{
+                [impl activateAnonymously];
+                [configuration stub:@selector(userProfileID) andReturn:profileIDDuringActivation];
+                [impl activateWithConfiguration:configuration];
+                [[resultProfileID() should] equal:profileIDDuringActivation];
+            });
+            it(@"Set before and during normal activation after anonymous", ^{
+                [impl setUserProfileID:profileIDBeforeActivation];
+                [impl activateAnonymously];
+                [configuration stub:@selector(userProfileID) andReturn:profileIDDuringActivation];
+                [impl activateWithConfiguration:configuration];
+                [[resultProfileID() should] equal:profileIDDuringActivation];
+            });
+        });
     });
 
     context(@"Starting AppMetrica on internal queue", ^{

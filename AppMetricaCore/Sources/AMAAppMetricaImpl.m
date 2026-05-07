@@ -783,6 +783,8 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
                 [self.reportersContainer setReporter:reporter forApiKey:apiKey];
                 AMAReporterStorage *mainStorage = [[AMAReporterStoragesContainer sharedInstance] mainStorageForApiKey:apiKey];
                 [mainStorage setupAutocollectedDataProvider:self.autocollectedDataProvider];
+                [self applyUserProfileIDWithStorage:mainStorage
+                                      userProfileID:[self mergeUserProfileIDs:configuration.userProfileID]];
                 [self postSetupReporterWithStorage:mainStorage
                                               main:YES
                          executionConditionChecker:[self getExecutionConditionCheckerForApiKey:apiKey main:YES]];
