@@ -8,6 +8,12 @@
 #import "AMAMetricaConfiguration.h"
 #import "AMAStartupParametersConfiguration.h"
 
+@interface AMADeepLinkController (Unprivate)
+
+@property (nonatomic, nonatomic, strong) AMAReporter *reporter;
+
+@end
+
 SPEC_BEGIN(AMADeepLinkControllerTests)
 
 describe(@"AMADeepLinkController", ^{
@@ -23,7 +29,9 @@ describe(@"AMADeepLinkController", ^{
     beforeEach(^{
         id<AMAAsyncExecuting> executor = [[AMACurrentQueueExecutor alloc] init];
         reporter = [AMAReporter nullMock];
-        controller = [[AMADeepLinkController alloc] initWithReporter:reporter executor:executor];
+        [reporter stub:@selector(apiKey) andReturn:@"base-key"];
+        controller = [[AMADeepLinkController alloc] initWithExecutor:executor];
+        [controller updateReporter:reporter];
 
         [AMADeepLinkPayloadFactory stub:@selector(deepLinkPayloadForURL:ofType:isAuto:error:) andReturn:payload];
 
@@ -55,6 +63,75 @@ describe(@"AMADeepLinkController", ^{
         [[reporter should] receive:@selector(reportOpenEvent:reattribution:onFailure:)
                      withArguments:payload, theValue(NO), kw_any()];
         [controller reportUrl:URL ofType:type isAuto:NO];
+    });
+
+    context(@"updateReporter", ^{
+
+        it(@"Should update reporter property", ^{
+            AMAReporter *newReporter = [AMAReporter nullMock];
+            [newReporter stub:@selector(apiKey) andReturn:@"new-key"];
+            [controller updateReporter:newReporter];
+            [[controller.reporter should] equal:newReporter];
+        });
+
+        it(@"Should update reporter property to nil", ^{
+            [controller updateReporter:nil];
+            [[controller.reporter should] beNil];
+        });
+
+        it(@"Should clear reportedURLs when new reporter has different apiKey", ^{
+            [controller reportUrl:URL ofType:type isAuto:YES];
+
+            AMAReporter *newReporter = [AMAReporter nullMock];
+            [newReporter stub:@selector(apiKey) andReturn:@"new-key"];
+            [controller updateReporter:newReporter];
+
+            [[newReporter should] receive:@selector(reportOpenEvent:reattribution:onFailure:)];
+            [controller reportUrl:URL ofType:type isAuto:YES];
+        });
+
+        it(@"Should NOT clear reportedURLs when new reporter has the same apiKey", ^{
+            [controller reportUrl:URL ofType:type isAuto:YES];
+
+            AMAReporter *newReporter = [AMAReporter nullMock];
+            [newReporter stub:@selector(apiKey) andReturn:@"base-key"];
+            [controller updateReporter:newReporter];
+
+            [[newReporter shouldNot] receive:@selector(reportOpenEvent:reattribution:onFailure:)];
+            [controller reportUrl:URL ofType:type isAuto:YES];
+        });
+
+        it(@"Should clear reportedURLs after updating with nil and then non-nil reporter (same apiKey)", ^{
+            [controller reportUrl:URL ofType:type isAuto:YES];
+
+            [controller updateReporter:nil];
+
+            AMAReporter *newReporter = [AMAReporter nullMock];
+            [newReporter stub:@selector(apiKey) andReturn:@"base-key"];
+            [controller updateReporter:newReporter];
+
+            [[newReporter should] receive:@selector(reportOpenEvent:reattribution:onFailure:)];
+            [controller reportUrl:URL ofType:type isAuto:YES];
+        });
+
+        it(@"Should clear reportedURLs after updating with nil and then non-nil reporter (different apiKey)", ^{
+            [controller reportUrl:URL ofType:type isAuto:YES];
+
+            [controller updateReporter:nil];
+
+            AMAReporter *newReporter = [AMAReporter nullMock];
+            [newReporter stub:@selector(apiKey) andReturn:@"new-key"];
+            [controller updateReporter:newReporter];
+
+            [[newReporter should] receive:@selector(reportOpenEvent:reattribution:onFailure:)];
+            [controller reportUrl:URL ofType:type isAuto:YES];
+        });
+
+        it(@"Should not report URL when reporter is nil", ^{
+            [controller updateReporter:nil];
+            [[reporter shouldNot] receive:@selector(reportOpenEvent:reattribution:onFailure:)];
+            [controller reportUrl:URL ofType:type isAuto:YES];
+        });
     });
 
     context(@"Reattribution", ^{

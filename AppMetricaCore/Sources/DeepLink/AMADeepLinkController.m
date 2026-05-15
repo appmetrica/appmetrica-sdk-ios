@@ -10,7 +10,7 @@ NSString *const kAMADLControllerUrlTypeOpen = @"open";
 
 @interface AMADeepLinkController ()
 
-@property (nonatomic, strong, readonly) AMAReporter *reporter;
+@property (nonatomic, strong, readwrite) AMAReporter *reporter;
 @property (nonatomic, strong, readonly) id<AMAAsyncExecuting> executor;
 @property (nonatomic, strong, readonly) NSMutableSet<NSString *> *reportedURLs;
 
@@ -18,11 +18,10 @@ NSString *const kAMADLControllerUrlTypeOpen = @"open";
 
 @implementation AMADeepLinkController
 
-- (instancetype)initWithReporter:(AMAReporter *)reporter executor:(id<AMAAsyncExecuting>)executor
+- (instancetype)initWithExecutor:(id<AMAAsyncExecuting>)executor
 {
     self = [super init];
     if (self != nil) {
-        _reporter = reporter;
         _executor = executor;
         _reportedURLs = [NSMutableSet set];
     }
@@ -31,9 +30,25 @@ NSString *const kAMADLControllerUrlTypeOpen = @"open";
 
 #pragma mark - Public -
 
+- (void)updateReporter:(AMAReporter *)reporter
+{
+    [self.executor execute:^{
+        if (self.reporter == nil || [reporter.apiKey isEqualToString:self.reporter.apiKey] == NO) {
+            [self.reportedURLs removeAllObjects];
+        }
+        
+        self.reporter = reporter;
+    }];
+}
+
 - (void)reportUrl:(NSURL *)url ofType:(NSString *)type isAuto:(BOOL)isAuto
 {
     [self.executor execute:^{
+        if (self.reporter == nil) {
+            AMALogWarn(@"reporter is nil");
+            return;
+        }
+        
         NSError *error = nil;
         NSDictionary *payload =
             [AMADeepLinkPayloadFactory deepLinkPayloadForURL:url ofType:type isAuto:isAuto error:&error];

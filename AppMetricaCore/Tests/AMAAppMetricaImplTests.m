@@ -111,7 +111,7 @@ describe(@"AMAAppMetricaImpl", ^{
         
         appOpenWatcher = [AMAAppOpenWatcher stubbedNullMockForDefaultInit];
         autoPurchasesWatcher = [AMAAutoPurchasesWatcher stubbedNullMockForInit:@selector(initWithExecutor:)];
-        deeplinkController = [AMADeepLinkController stubbedNullMockForInit:@selector(initWithReporter:executor:)];
+        deeplinkController = [AMADeepLinkController stubbedNullMockForInit:@selector(initWithExecutor:)];
         adServicesReportingController = [AMAAdServicesReportingController stubbedNullMockForInit:@selector(initWithApiKey:
                                                                                                            reporterStateStorage:)];
         dispatchingController = [AMADispatchingController stubbedNullMockForInit:@selector(initWithTimeoutConfiguration:)];
@@ -455,6 +455,16 @@ describe(@"AMAAppMetricaImpl", ^{
             [configuration stub:@selector(appOpenTrackingEnabled) andReturn:theValue(NO)];
             [[appOpenWatcher shouldNot] receive:@selector(startWatchingWithDeeplinkController:)];
             [appMetricaImpl activateWithConfiguration:configuration];
+        });
+    });
+
+    context(@"activateCommonComponents deeplinkController", ^{
+        it(@"Should call updateReporter on activateCommonComponents", ^{
+            [appMetricaImpl activateWithConfiguration:configuration];
+            AMAReporter *reporter = appMetricaImpl.mainReporter;
+
+            [[deeplinkController should] receive:@selector(updateReporter:) withArguments:reporter];
+            [appMetricaImpl activateCommonComponents:configuration reporter:reporter];
         });
     });
 

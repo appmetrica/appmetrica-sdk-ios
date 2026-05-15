@@ -8,6 +8,7 @@
 
 @property (nonatomic, strong, readonly) NSNotificationCenter *notificationCenter;
 @property (atomic, strong) AMADeepLinkController *deepLinkController;
+@property (atomic, assign) BOOL isObserving;
 
 @end
 
@@ -34,10 +35,13 @@
 {
     AMALogInfo(@"Start");
     self.deepLinkController = controller;
-    [self.notificationCenter addObserver:self
-                                selector:@selector(didFinishLaunching:)
-                                    name:UIApplicationDidFinishLaunchingNotification
-                                  object:nil];
+    if (self.isObserving == NO) {
+        self.isObserving = YES;
+        [self.notificationCenter addObserver:self
+                                    selector:@selector(didFinishLaunching:)
+                                        name:UIApplicationDidFinishLaunchingNotification
+                                      object:nil];
+    }
 }
 
 #pragma mark - NSNotificationCenter callback

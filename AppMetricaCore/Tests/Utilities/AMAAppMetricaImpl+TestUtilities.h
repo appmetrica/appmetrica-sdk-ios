@@ -3,6 +3,7 @@
 #import "AMADispatcherDelegate.h"
 #import "AMADispatchStrategyDelegate.h"
 
+@class AMAAppMetricaConfiguration;
 @class AMAEventCountDispatchStrategy;
 @class AMATimerDispatchStrategy;
 @class AMADispatchStrategiesContainer;
@@ -23,6 +24,9 @@
 - (void)notifyOnStartupCompleted;
 - (void)reportDatabaseInconsistencyStateIfNeeded;
 - (void)start;
+
+- (void)activateCommonComponents:(AMAAppMetricaConfiguration *)configuration
+                        reporter:(AMAReporter *)reporter;
 
 @end
 

@@ -11,9 +11,9 @@ extern NSString *const kAMADLControllerUrlTypeOpen;
 - (instancetype)init NS_UNAVAILABLE;
 + (instancetype)new NS_UNAVAILABLE;
 
-- (instancetype)initWithReporter:(AMAReporter *)reporter
-                        executor:(id<AMAAsyncExecuting>)executor NS_DESIGNATED_INITIALIZER;
+- (instancetype)initWithExecutor:(id<AMAAsyncExecuting>)executor NS_DESIGNATED_INITIALIZER;
 
 - (void)reportUrl:(NSURL *)url ofType:(NSString *)type isAuto:(BOOL)isAuto;
+- (void)updateReporter:(AMAReporter *)reporter;
 
 @end

@@ -3,7 +3,6 @@
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
 
 @class AMAAppMetricaImpl;
-@class AMADeepLinkController;
 @protocol AMAEventPollingDelegate;
 
 @interface AMAAppMetrica ()

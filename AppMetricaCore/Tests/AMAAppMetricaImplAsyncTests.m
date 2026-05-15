@@ -111,7 +111,7 @@ static NSString *const anonymousApiKey = @"629a824d-c717-4ba5-bc0f-3f3968554d01"
     
     self.appOpenWatcher = [AMAAppOpenWatcher stubbedNullMockForDefaultInit];
     self.autoPurchasesWatcher = [AMAAutoPurchasesWatcher stubbedNullMockForInit:@selector(initWithExecutor:)];
-    self.deeplinkController = [AMADeepLinkController stubbedNullMockForInit:@selector(initWithReporter:executor:)];
+    self.deeplinkController = [AMADeepLinkController stubbedNullMockForInit:@selector(initWithExecutor:)];
     self.adServicesReportingController = [AMAAdServicesReportingController stubbedNullMockForInit:@selector(initWithApiKey:
                                                                                                        reporterStateStorage:)];
     self.dispatchingController = [AMADispatchingController stubbedNullMockForInit:@selector(initWithTimeoutConfiguration:)];

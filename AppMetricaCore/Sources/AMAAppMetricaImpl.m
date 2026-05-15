@@ -91,7 +91,7 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
 @property (nonatomic, strong) AMAExtensionsReportController *extensionsReportController;
 @property (nonatomic, strong) AMAPermissionsController *permissionsController;
 @property (nonatomic, strong, readonly) AMAAppOpenWatcher *appOpenWatcher;
-@property (atomic, strong) AMADeepLinkController *deeplinkController;
+@property (nonatomic, strong, readonly) AMADeepLinkController *deeplinkController;
 @property (atomic, strong) AMAExternalAttributionController *externalAttributionController;
 @property (nonatomic, strong, readonly) AMAAutoPurchasesWatcher *autoPurchasesWatcher;
 @property (nonatomic, strong, readonly) AMAFirstActivationDetector *firstActivationDetector;
@@ -136,6 +136,7 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
         _extensionsReportController = [[AMAExtensionsReportController alloc] init];
         _permissionsController = [[AMAPermissionsController alloc] init];
         _appOpenWatcher = [[AMAAppOpenWatcher alloc] init];
+        _deeplinkController = [[AMADeepLinkController alloc] initWithExecutor:executor];
         // auto in app reporting executor should be the same as usual events reporting executor for conversion value flow to work
         _autoPurchasesWatcher = [[AMAAutoPurchasesWatcher alloc] initWithExecutor:executor];
         _adProvider = [AMAAdProvider sharedInstance];
@@ -263,7 +264,7 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
 - (void)activateCommonComponents:(AMAAppMetricaConfiguration *)configuration
                         reporter:(AMAReporter *)reporter
 {
-    self.deeplinkController = [[AMADeepLinkController alloc] initWithReporter:reporter executor:self.executor];
+    [self.deeplinkController updateReporter:reporter];
     [self setupExternalAttributionControllerWithReporter:reporter];
     if (configuration.appOpenTrackingEnabled) {
         [self.appOpenWatcher startWatchingWithDeeplinkController:self.deeplinkController];
