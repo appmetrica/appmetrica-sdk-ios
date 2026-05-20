@@ -561,10 +561,51 @@ describe(@"AMAStartupController", ^{
             NSDictionary *parameters = @{@"er":@"ee"};
             AMAStartupRequest *request = [AMAStartupRequest stubbedNullMockForDefaultInit];
             AMAStartupController *controller = currentQueueStartupController();
-            
+
             [[request should] receive:@selector(addAdditionalStartupParameters:)
                         withArguments:parameters];
             [controller addAdditionalStartupParameters:parameters];
+        });
+    });
+
+    context(@"Thread safety", ^{
+        AMAStartupController *__block controller = nil;
+
+        beforeEach(^{
+            stubAppState();
+            AMAIdentifierProviderMock *idProvider = [AMAIdentifiersTestUtilities stubIdentifierProviderIfNeeded];
+            [idProvider fillRandom];
+
+            id<AMACancelableExecuting> executor = [[AMACurrentQueueExecutor alloc] init];
+            id<AMAResettableIterable> hostProvider = [[AMAHostProviderMock alloc] initWithItems:@[@"h1"]];
+            startupResponseParser = [AMAStartupResponseParser nullMock];
+            controller = [[AMAStartupController alloc] initWithExecutor:executor
+                                                           hostProvider:hostProvider
+                                              timeoutRequestsController:timeoutController
+                                                  startupResponseParser:startupResponseParser];
+        });
+        afterEach(^{
+            destubAppState();
+            [AMAIdentifiersTestUtilities destubIdentifierProvider];
+            [AMATestNetwork clearStubs];
+        });
+
+        it(@"Should not start a second request when update is called concurrently", ^{
+            NSUInteger __block count = 0;
+            [AMATestNetwork stubHTTPRequestWithBlock:^id(NSArray *params) {
+                ++count;
+                return nil;
+            }];
+
+            dispatch_queue_t q = dispatch_queue_create("test.concurrent", DISPATCH_QUEUE_CONCURRENT);
+            dispatch_group_t group = dispatch_group_create();
+
+            for (int i = 0; i < 10; i++) {
+                dispatch_group_async(group, q, ^{ [controller update]; });
+            }
+            dispatch_group_wait(group, DISPATCH_TIME_FOREVER);
+
+            [[theValue(count) should] equal:theValue(1)];
         });
     });
 });

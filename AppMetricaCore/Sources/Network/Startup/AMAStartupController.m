@@ -79,12 +79,10 @@ NSErrorDomain const AMAStartupRequestsErrorDomain = @"AMAStartupRequestsErrorDom
 
 - (void)update
 {
-    if (self.upToDate == NO && self.currentHTTPRequestor == nil) {
-        @synchronized (self) {
-            if (self.upToDate == NO && self.currentHTTPRequestor == nil) {
-                [self.hostProvider reset];
-                [self executeRequest];
-            }
+    @synchronized (self) {
+        if (self.upToDate == NO && self.currentHTTPRequestor == nil) {
+            [self.hostProvider reset];
+            [self executeRequest];
         }
     }
 }
@@ -127,11 +125,11 @@ NSErrorDomain const AMAStartupRequestsErrorDomain = @"AMAStartupRequestsErrorDom
         if (strongSelf != nil) {
             @synchronized (strongSelf) {
                 if (httpRequestor == strongSelf.currentHTTPRequestor) {
-                    if ([self.timeoutRequestsController isAllowed]) {
+                    if ([strongSelf.timeoutRequestsController isAllowed]) {
                         [httpRequestor start];
                     }
                     else {
-                        [self reportOfTimeoutWithRequest:httpRequestor];
+                        [strongSelf reportOfTimeoutWithRequest:httpRequestor];
                     }
                 }
             }
@@ -213,33 +211,31 @@ NSErrorDomain const AMAStartupRequestsErrorDomain = @"AMAStartupRequestsErrorDom
 {
     BOOL reportError = NO;
 
-    if (self.currentHTTPRequestor == request) {
-        @synchronized (self) {
-            if (self.currentHTTPRequestor == request) {
-                BOOL isTimeoutError = [error.domain isEqualToString:AMAStartupRequestsErrorDomain] &&
-                                      error.code == AMAStartupRequestsErrorTimeout;
+    @synchronized (self) {
+        if (self.currentHTTPRequestor == request) {
+            BOOL isTimeoutError = [error.domain isEqualToString:AMAStartupRequestsErrorDomain] &&
+                                  error.code == AMAStartupRequestsErrorTimeout;
 
-                if (isTimeoutError) {
+            if (isTimeoutError) {
+                reportError = YES;
+            }
+            else {
+                if (error.code == NSURLErrorNotConnectedToInternet) {
                     reportError = YES;
                 }
                 else {
-                    if (error.code == NSURLErrorNotConnectedToInternet) {
-                        reportError = YES;
-                    }
-                    else {
-                        reportError = [self.hostProvider next] == nil;
-                        if (reportError) {
-                            [self.timeoutRequestsController reportOfFailure];
-                        }
+                    reportError = [self.hostProvider next] == nil;
+                    if (reportError) {
+                        [self.timeoutRequestsController reportOfFailure];
                     }
                 }
+            }
 
-                if (reportError) {
-                    [self cancel];
-                }
-                else {
-                    [self executeRequestAfterDelay:0.0];
-                }
+            if (reportError) {
+                [self cancel];
+            }
+            else {
+                [self executeRequestAfterDelay:0.0];
             }
         }
     }
@@ -267,23 +263,21 @@ NSErrorDomain const AMAStartupRequestsErrorDomain = @"AMAStartupRequestsErrorDom
     AMAStartupResponse *startupResponse = nil;
     NSDictionary *extendedStartupResponse = nil;
 
-    if (self.currentHTTPRequestor == requestor) {
-        if (response.statusCode == 200) {
-            [self.timeoutRequestsController reportOfSuccess];
-            startupResponse = [self parseResponse:response data:data];
-            extendedStartupResponse = [self parseExtendedResponse:response data:data];
-        }
+    @synchronized (self) {
+        if (self.currentHTTPRequestor == requestor) {
+            if (response.statusCode == 200) {
+                [self.timeoutRequestsController reportOfSuccess];
+                startupResponse = [self parseResponse:response data:data];
+                extendedStartupResponse = [self parseExtendedResponse:response data:data];
+            }
 
-        if (startupResponse == nil) {
-            [self httpRequestor:requestor didFinishWithError:[AMAErrorsFactory badServerResponseError] response:response];
-        }
-        else {
-            @synchronized (self) {
-                if (self.currentHTTPRequestor == requestor) {
-                    canAcceptResponse = YES;
-                    [self handleStartupResponse:startupResponse];
-                    [self cancel];
-                }
+            if (startupResponse == nil) {
+                [self httpRequestor:requestor didFinishWithError:[AMAErrorsFactory badServerResponseError] response:response];
+            }
+            else {
+                canAcceptResponse = YES;
+                [self handleStartupResponse:startupResponse];
+                [self cancel];
             }
         }
     }
