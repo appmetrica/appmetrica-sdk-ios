@@ -1162,11 +1162,18 @@
 {
     NSTimeInterval timeout = [AMAMetricaConfiguration sharedInstance].inMemory.updateSessionStampInterval;
     __typeof(self) __weak weakSelf = self;
+    [self.executor cancelDelayed];
     [self.executor executeAfterDelay:timeout block:^{
         __typeof(self) strongSelf = weakSelf;
-        if (strongSelf.isActive) {
-            [strongSelf resumeSessionWithDate:[NSDate date]];
+        if (strongSelf == nil || !strongSelf.isActive) {
+            return;
         }
+        NSError *error = nil;
+        AMASession *session = [strongSelf.reporterStorage.sessionStorage lastGeneralSessionWithError:&error];
+        if (![strongSelf isSessionFinished:session]) {
+            [strongSelf updateStampOfSession:session withDate:[NSDate date]];
+        }
+        [strongSelf restartSessionUpdateTimer];
     }];
 }
 

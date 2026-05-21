@@ -41,7 +41,8 @@
     dispatch_time_t dispatchTime = dispatch_time(DISPATCH_TIME_NOW,
                                                  (int64_t)(self.timeout * NSEC_PER_SEC));
 
-    dispatch_source_set_timer(self.timerSource, dispatchTime, DISPATCH_TIME_FOREVER, 0);
+    uint64_t leeway = (uint64_t)(MIN(self.timeout * 0.1, 1.0) * NSEC_PER_SEC);
+    dispatch_source_set_timer(self.timerSource, dispatchTime, DISPATCH_TIME_FOREVER, leeway);
 
     __weak typeof(self) wself = self;
 
@@ -71,6 +72,7 @@
         @synchronized(self) {
             if (self.timerSource != nil) {
                 dispatch_source_cancel(self.timerSource);
+                self.timerSource = nil;
                 AMALogInfo(@"Timer canceled");
             }
         }

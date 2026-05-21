@@ -993,6 +993,18 @@ describe(@"AMAReporter", ^{
 
                 [[theValue(pauteTimeInterval) should] equal:shutdownInterval withDelta:floatingComparisonDelta];
             });
+            it(@"Should not create new session when timer callback fires", ^{
+                AMAReporter *reporter = createReporterAndStubUpdateInterval();
+                [reporter.executor execute:nil];
+                AMASession *secondSession = [sessionStorage() amatest_sessionWithOid:@2];
+                [[secondSession should] beNil];
+            });
+            it(@"Should reschedule timer after callback fires", ^{
+                AMAReporter *reporter = createReporterAndStubUpdateInterval();
+                AMATestDelayedManualExecutor *executor = (AMATestDelayedManualExecutor *)reporter.executor;
+                [executor execute:nil];
+                [[theValue(executor.delayInterval) should] equal:updateSessionInterval withDelta:floatingComparisonDelta];
+            });
 #pragma clang diagnostic pop
         });
     });
@@ -1511,7 +1523,7 @@ describe(@"AMAReporter", ^{
             [reporter reportEvent:testEventName parameters:@{ @"key" : condition } onFailure:^(NSError *error) {
                 reportError = error;
             }];
-            [[theValue(reportError.code) should] equal:theValue(AMAAppMetricaInternalEventJsonSerializationError)];
+            [[theValue(reportError.code) should] equal:theValue(AMAAppMetricaInternalEventErrorCodeJsonSerialization)];
         });
         it(@"Should not call block if there's no error", ^{
             BOOL __block didCallBlock = NO;
