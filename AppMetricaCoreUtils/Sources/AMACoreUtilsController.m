@@ -7,7 +7,7 @@
 
 @implementation AMACoreUtilsController
 
-+ (void)load
++ (void)initialize
 {
     if (self == [AMACoreUtilsController class]) {
         [[[self class] logConfigurator] setupLogWithChannel:AMA_LOG_CHANNEL];

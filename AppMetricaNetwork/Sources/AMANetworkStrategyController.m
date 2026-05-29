@@ -21,14 +21,6 @@
     return self;
 }
 
-+ (void)initialize
-{
-    if (self == [AMANetworkStrategyController class]) {
-        [[[self class] logConfigurator] setupLogWithChannel:AMA_LOG_CHANNEL];
-        [[[self class] logConfigurator] setChannel:AMA_LOG_CHANNEL enabled:NO];
-    }
-}
-
 - (void)registerSessionProvider:(id<AMANetworkSessionProviding>)sessionProvider
 {
     @synchronized (self) {
@@ -65,6 +57,8 @@
     static AMANetworkStrategyController *controller = nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
+        [[[self class] logConfigurator] setupLogWithChannel:AMA_LOG_CHANNEL];
+        [[[self class] logConfigurator] setChannel:AMA_LOG_CHANNEL enabled:NO];
         controller = [[[self class] alloc] init];
     });
     return controller;

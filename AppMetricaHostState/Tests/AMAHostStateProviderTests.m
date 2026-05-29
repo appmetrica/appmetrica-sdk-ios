@@ -34,12 +34,6 @@ describe(@"AMAHostStateProvider", ^{
         [AMAHostStateControllerFactory clearStubs];
     });
     
-    it(@"Should call state provider factory on load", ^{
-        [[factory should] receive:@selector(hostStateController)];
-        
-        [AMAHostStateProvider load];
-    });
-    
     it(@"Should add controller observer on init", ^{
         [[hostStateController should] receive:@selector(addAMAObserver:)];
         

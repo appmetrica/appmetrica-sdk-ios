@@ -3,7 +3,6 @@
 #import "AMAApplicationHostStateProvider.h"
 #import "AMAHostStateControllerFactory.h"
 
-static id<AMAHostStateControlling> hostStateController = nil;
 
 @interface AMAHostStateProvider () <AMAHostStateProviderObserver>
 
@@ -15,17 +14,22 @@ static id<AMAHostStateControlling> hostStateController = nil;
 
 @synthesize delegate = _delegate;
 
-+ (void)load
++ (id<AMAHostStateControlling>)sharedHostStateController
 {
-    AMAHostStateControllerFactory *factory = [[AMAHostStateControllerFactory alloc] init];
-    hostStateController = [factory hostStateController];
+    static id<AMAHostStateControlling> controller = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        AMAHostStateControllerFactory *factory = [[AMAHostStateControllerFactory alloc] init];
+        controller = [factory hostStateController];
+    });
+    return controller;
 }
 
 - (instancetype)init
 {
     self = [super init];
     if (self != nil) {
-        _hostStateController = hostStateController;
+        _hostStateController = [[self class] sharedHostStateController];
         
         [_hostStateController addAMAObserver:self];
     }

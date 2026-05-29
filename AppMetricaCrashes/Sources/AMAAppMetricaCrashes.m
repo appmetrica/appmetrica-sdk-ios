@@ -65,13 +65,6 @@
     [AMAAppMetrica addEventPollingDelegate:self];
 }
 
-+ (void)initialize
-{
-    if (self == [AMAAppMetricaCrashes class]) {
-        [AMAAppMetrica.sharedLogConfigurator setupLogWithChannel:AMA_LOG_CHANNEL];
-        [AMAAppMetrica.sharedLogConfigurator setChannel:AMA_LOG_CHANNEL enabled:NO];
-    }
-}
 
 + (instancetype)crashes
 {
@@ -467,6 +460,8 @@ them while retaining external immutability. Needed for testability. */
 
 + (void)willActivateWithConfiguration:(__unused AMAModuleActivationConfiguration *)configuration
 {
+    [AMAAppMetrica.sharedLogConfigurator setupLogWithChannel:AMA_LOG_CHANNEL];
+    [AMAAppMetrica.sharedLogConfigurator setChannel:AMA_LOG_CHANNEL enabled:NO];
     // Initialize reporter before activation to ensure it is available when crashes are loaded.
     [[[self class] crashes] setupReporterWithConfiguration:configuration];
     [[[self class] crashes] activate];

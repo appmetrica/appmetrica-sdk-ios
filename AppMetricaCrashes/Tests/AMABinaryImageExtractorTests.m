@@ -30,13 +30,17 @@ describe(@"AMABinaryImageExtractor", ^{
         });
         
         it(@"Should call image extraction images count times", ^{
-            [[AMABinaryImageExtractor should] receive:@selector(imageForImageIndex:) withCount:imageCount];
+            uint32_t currentCount = 0;
+            ksbic_getImages(&currentCount);
+            [[AMABinaryImageExtractor should] receive:@selector(imageForImageIndex:) withCount:currentCount];
             [AMABinaryImageExtractor images];
         });
 
         it(@"Should extract all images", ^{
+            uint32_t currentCount = 0;
+            ksbic_getImages(&currentCount);
             NSArray *images = [AMABinaryImageExtractor images];
-            [[images should] haveCountOf:imageCount];
+            [[images should] haveCountOf:currentCount];
         });
 
         it(@"Should extract main executable image", ^{

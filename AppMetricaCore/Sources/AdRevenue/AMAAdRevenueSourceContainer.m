@@ -3,8 +3,6 @@
 #import "AMACore.h"
 
 static NSString *const kAdRevenuePluginSourcesKey = @"io.appmetrica.analytics.plugin_supported_ad_revenue_sources";
-static NSArray<NSString *> *kAdRevenueDefaultValues;
-
 @interface AMAAdRevenueSourceContainer ()
 
 @property (nonatomic, strong, readonly) NSBundle *pluginSourceBundle;
@@ -16,18 +14,11 @@ static NSArray<NSString *> *kAdRevenueDefaultValues;
 @synthesize pluginSupportedSources = _pluginSupportedSources;
 @synthesize nativeSupportedSources = _nativeSupportedSources;
 
-+ (void)load
-{
-    kAdRevenueDefaultValues = @[
-        @"yandex"
-    ];
-}
-
 - (instancetype)initWithPluginSourceBundle:(NSBundle*)pluginSourceBundle
 {
     self = [super init];
     if (self) {
-        _nativeSupportedSources = [kAdRevenueDefaultValues copy];
+        _nativeSupportedSources = @[@"yandex"];
         _pluginSourceBundle = pluginSourceBundle;
     }
     return self;

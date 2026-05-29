@@ -53,14 +53,6 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
 
 @implementation AMAAppMetrica
 
-+ (void)initialize
-{
-    if (self == [AMAAppMetrica class]) {
-        [[self sharedLogConfigurator] setupLogWithChannel:AMA_LOG_CHANNEL];
-        [[self class] setLogs:NO];
-    }
-}
-
 #pragma mark - Shared Singletons -
 
 + (AMALocationManager *)sharedLocationManager
@@ -832,6 +824,8 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
     dispatch_once(&onceToken, ^{
         @autoreleasepool {
             logConfigurator = [AMALogConfigurator new];
+            [logConfigurator setupLogWithChannel:AMA_LOG_CHANNEL];
+            [logConfigurator setChannel:AMA_LOG_CHANNEL enabled:NO];
         }
     });
     return logConfigurator;
