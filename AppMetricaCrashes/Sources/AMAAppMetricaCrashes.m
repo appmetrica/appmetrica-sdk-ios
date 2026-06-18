@@ -59,13 +59,6 @@
 
 @synthesize activated = _activated;
 
-+ (void)load
-{
-    [AMAAppMetrica addActivationDelegate:self];
-    [AMAAppMetrica addEventPollingDelegate:self];
-}
-
-
 + (instancetype)crashes
 {
     static AMAAppMetricaCrashes *sharedInstance = nil;

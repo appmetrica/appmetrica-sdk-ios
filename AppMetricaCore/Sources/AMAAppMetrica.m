@@ -43,13 +43,6 @@ NSString *const kAMAAttributionSourceTenjin = @"tenjin";
 NSString *const kAMAAttributionSourceAirbridge = @"airbridge";
 NSString *const kAMAAttributionSourceSingular = @"singular";
 
-static NSMutableSet<Class<AMAModuleActivationDelegate>> *activationDelegates = nil;
-static NSMutableSet<Class<AMAEventFlushableDelegate>> *eventFlushableDelegates = nil;
-static NSMutableSet<Class<AMAEventPollingDelegate>> *eventPollingDelegates = nil;
-
-static id<AMAAdProviding> adProvider = nil;
-static NSMutableSet<id<AMAExtendedStartupObserving>> *startupObservers = nil;
-static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControllers = nil;
 
 @implementation AMAAppMetrica
 
@@ -82,116 +75,6 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
 
 #pragma mark - Core Extension -
 
-+ (void)addActivationDelegate:(Class<AMAModuleActivationDelegate>)delegate
-{
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        activationDelegates = [[NSMutableSet alloc] init];
-    });
-    @synchronized(self) {
-        if ([self isActivated] == NO) {
-            [activationDelegates addObject:delegate];
-        }
-    }
-}
-
-+ (void)addEventFlushableDelegate:(Class<AMAEventFlushableDelegate>)delegate
-{
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        eventFlushableDelegates = [[NSMutableSet alloc] init];
-    });
-    @synchronized(self) {
-        if ([self isActivated] == NO) {
-            [eventFlushableDelegates addObject:delegate];
-        }
-    }
-}
-
-+ (void)addEventPollingDelegate:(Class<AMAEventPollingDelegate>)delegate
-{
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        eventPollingDelegates = [[NSMutableSet alloc] init];
-    });
-    @synchronized(self) {
-        if ([self isActivated] == NO) {
-            [eventPollingDelegates addObject:delegate];
-        }
-    }
-}
-
-+ (void)willActivateDelegates:(AMAAppMetricaConfiguration *)configuration
-{
-    [[self sharedExecutor] execute:^{
-        __auto_type moduleConfig = [[AMAModuleActivationConfiguration alloc] initWithApiKey:configuration.APIKey
-                                                                                 appVersion:configuration.appVersion
-                                                                             appBuildNumber:configuration.appBuildNumber];
-        for (Class<AMAModuleActivationDelegate> delegate in activationDelegates) {
-            [delegate willActivateWithConfiguration:moduleConfig];
-        }
-    }];
-}
-
-+ (void)didActivateDelegates:(AMAAppMetricaConfiguration *)configuration
-{
-    [[self sharedExecutor] execute:^{
-        __auto_type moduleConfig = [[AMAModuleActivationConfiguration alloc] initWithApiKey:configuration.APIKey
-                                                                                 appVersion:configuration.appVersion
-                                                                             appBuildNumber:configuration.appBuildNumber];
-        for (Class<AMAModuleActivationDelegate> delegate in activationDelegates) {
-            [delegate didActivateWithConfiguration:moduleConfig];
-        }
-    }];
-}
-
-+ (void)registerExternalService:(AMAServiceConfiguration *)configuration
-{
-    @synchronized(self) {
-        if (configuration.startupObserver != nil) {
-            [[self class] addStartupObserver:configuration.startupObserver];
-        }
-        if (configuration.reporterStorageController != nil) {
-            [[self class] addReporterStorageController:configuration.reporterStorageController];
-        }
-    }
-}
-
-+ (void)addStartupObserver:(id<AMAExtendedStartupObserving>)observer
-{
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        startupObservers = [[NSMutableSet alloc] init];
-    });
-    @synchronized(self) {
-        __weak __typeof(id<AMAExtendedStartupObserving>) weakObserver = observer;
-        [startupObservers addObject:weakObserver];
-    }
-}
-
-+ (void)addReporterStorageController:(id<AMAReporterStorageControlling>)controller
-{
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        reporterStorageControllers = [[NSMutableSet alloc] init];
-    });
-    @synchronized(self) {
-        __weak __typeof(id<AMAReporterStorageControlling>) weakController = controller;
-        [reporterStorageControllers addObject:weakController];
-    }
-}
-
-+ (void)registerAdProvider:(id<AMAAdProviding>)provider
-{
-    @synchronized (self) {
-        if ([self isActivated] == NO) {
-            adProvider = provider;
-        } else {
-            [[AMAAdProvider sharedInstance] setupAdProvider:provider];
-        }
-    }
-}
-
 + (void)setAdProviderEnabled:(BOOL)newValue
 {
     [self setAdvertisingIdentifierTrackingEnabled:newValue];
@@ -208,27 +91,6 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
     AMALogInfo(@"Set track advertising enabled %i", enabled);
 }
 
-+ (void)setupExternalServices
-{
-    @synchronized (self) {
-        if ([self metricaConfiguration].inMemory.externalServicesConfigured) {
-            return;
-        }
-        if (startupObservers != nil) {
-            [[self sharedImpl] setExtendedStartupObservers:startupObservers];
-        }
-        if (reporterStorageControllers != nil) {
-            [[self sharedImpl] setExtendedReporterStorageControllers:reporterStorageControllers];
-        }
-        if (adProvider != nil) {
-            [[AMAAdProvider sharedInstance] setupAdProvider:adProvider];
-        }
-        if (eventPollingDelegates != nil) {
-            [[self sharedImpl] setEventPollingDelegates:eventPollingDelegates];
-        }
-        [[self metricaConfiguration].inMemory markExternalServicesConfigured];
-    }
-}
 
 + (void)setSessionExtras:(nullable NSData *)data forKey:(NSString *)key
 {
@@ -379,28 +241,21 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
 + (void)activateWithConfiguration:(AMAAppMetricaConfiguration *)configuration
 {
     @synchronized (self) {
-        NSString *apiKey = configuration.APIKey;
-
         if ([self isActivatedAsMain]) {
             [AMAErrorLogger logMetricaAlreadyStartedError];
             return;
         }
-        if ([self isAPIKeyValid:apiKey] == NO) {
-            [AMAErrorLogger logInvalidApiKeyError:apiKey];
+        if ([self isAPIKeyValid:configuration.APIKey] == NO) {
+            [AMAErrorLogger logInvalidApiKeyError:configuration.APIKey];
             return;
         }
-        if ([self isReporterCreatedForAPIKey:apiKey]) {
+        if ([self isReporterCreatedForAPIKey:configuration.APIKey]) {
             [AMAErrorLogger logMetricaActivationWithAlreadyPresentedKeyError];
             return;
         }
-        
-        [[self class] setupExternalServices];
-        
-        [[self class] willActivateDelegates:configuration];
-        
+
+        [[self sharedImpl] ensureModulesLoaded];
         [[self sharedImpl] activateWithConfiguration:configuration];
-        
-        [[self class] didActivateDelegates:configuration];
     }
 }
 
@@ -411,16 +266,9 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
             [AMAErrorLogger logMetricaAlreadyStartedError];
             return;
         }
-        
-        [[self class] setupExternalServices];
-        
-        AMAAppMetricaConfiguration *anonymousConfiguration = [[self sharedImpl].configurationManager anonymousConfiguration];
-        
-        [[self class] willActivateDelegates:anonymousConfiguration];
-        
+
+        [[self sharedImpl] ensureModulesLoaded];
         [[self sharedImpl] scheduleAnonymousActivationIfNeeded];
-        
-        [[self class] didActivateDelegates:anonymousConfiguration];
     }
 }
 
@@ -457,6 +305,7 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
          parameters:(NSDictionary *)params
           onFailure:(void (^)(NSError *error))onFailure
 {
+    [[self sharedImpl] ensureModulesLoaded];
     if ([self isAppMetricaStartedWithLogging:onFailure]) {
         [[self sharedImpl] reportEvent:[name copy] parameters:[params copy] onFailure:onFailure];
     }
@@ -473,6 +322,7 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
 
 + (void)reportUserProfile:(AMAUserProfile *)userProfile onFailure:(nullable void (^)(NSError *error))onFailure
 {
+    [[self sharedImpl] ensureModulesLoaded];
     if ([self isAppMetricaStartedWithLogging:onFailure]) {
         [[self sharedImpl] reportUserProfile:[userProfile copy] onFailure:onFailure];
     }
@@ -480,6 +330,7 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
 
 + (void)reportRevenue:(AMARevenueInfo *)revenueInfo onFailure:(nullable void (^)(NSError *error))onFailure
 {
+    [[self sharedImpl] ensureModulesLoaded];
     if ([self isAppMetricaStartedWithLogging:onFailure]) {
         [[self sharedImpl] reportRevenue:revenueInfo onFailure:onFailure];
     }
@@ -487,6 +338,7 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
 
 + (void)reportECommerce:(AMAECommerce *)eCommerce onFailure:(void (^)(NSError *))onFailure
 {
+    [[self sharedImpl] ensureModulesLoaded];
     if ([self isAppMetricaStartedWithLogging:onFailure]) {
         [[self sharedImpl] reportECommerce:eCommerce onFailure:onFailure];
     }
@@ -496,6 +348,7 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
                            source:(AMAAttributionSource)source
                         onFailure:(nullable void (^)(NSError *error))onFailure
 {
+    [[self sharedImpl] ensureModulesLoaded];
     if ([self isAppMetricaStartedWithLogging:onFailure]) {
         [[self sharedImpl] reportExternalAttribution:attribution source:source onFailure:onFailure];
     }
@@ -510,6 +363,7 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
         isAutocollected:(BOOL)isAutocollected
               onFailure:(nullable void (^)(NSError *error))onFailure
 {
+    [[self sharedImpl] ensureModulesLoaded];
     if ([self isAppMetricaStartedWithLogging:onFailure]) {
         [[self sharedImpl] reportAdRevenue:adRevenue isAutocollected:isAutocollected onFailure:onFailure];
     }
@@ -520,6 +374,7 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
 + (void)setupWebViewReporting:(id<AMAJSControlling>)controller
                     onFailure:(nullable void (^)(NSError *error))onFailure
 {
+    [[self sharedImpl] ensureModulesLoaded];
     if ([self isAppMetricaStartedWithLogging:onFailure]) {
         [[self sharedImpl] setupWebViewReporting:controller];
     }
@@ -528,6 +383,7 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
 
 + (void)setUserProfileID:(NSString *)userProfileID
 {
+    [[self sharedImpl] ensureModulesLoaded];
     [[self sharedImpl] setUserProfileID:[userProfileID copy]];
 }
 
@@ -585,6 +441,7 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
 
 + (void)trackOpeningURL:(NSURL *)URL
 {
+    [[self sharedImpl] ensureModulesLoaded];
     if ([self isActivated] == NO) {
         AMALogWarn(@"Metrica is not started");
         return;
@@ -594,6 +451,7 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
 
 + (void)setErrorEnvironmentValue:(NSString *)value forKey:(NSString *)key
 {
+    [[self sharedImpl] ensureModulesLoaded];
     @synchronized(self) {
         if ([self isMetricaImplCreated]) {
             [[self sharedImpl] setErrorEnvironmentValue:value forKey:key];
@@ -606,28 +464,26 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
 
 + (void)setAppEnvironmentValue:(NSString *)value forKey:(NSString *)key
 {
+    [[self sharedImpl] ensureModulesLoaded];
     [[self sharedImpl] setAppEnvironmentValue:value forKey:key];
 }
 
 + (void)clearAppEnvironment
 {
+    [[self sharedImpl] ensureModulesLoaded];
     [[self sharedImpl] clearAppEnvironment];
 }
 
 + (void)sendEventsBuffer
 {
+    [[self sharedImpl] ensureModulesLoaded];
     if ([self isAppMetricaStartedWithLogging:nil] == NO) { return; }
     [[self sharedImpl] sendEventsBuffer];
-
-    @synchronized(self) {
-        for (Class<AMAEventFlushableDelegate> delegate in eventFlushableDelegates) {
-            [delegate sendEventsBuffer];
-        }
-    }
 }
 
 + (void)pauseSession
 {
+    [[self sharedImpl] ensureModulesLoaded];
     if ([self isAppMetricaStartedWithLogging:nil] == NO) { return; }
     if ([self metricaConfiguration].inMemory.sessionsAutoTracking) {
         [AMAErrorLogger logMetricaActivationWithAutomaticSessionsTracking];
@@ -638,6 +494,7 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
 
 + (void)resumeSession
 {
+    [[self sharedImpl] ensureModulesLoaded];
     if ([self isAppMetricaStartedWithLogging:nil] == NO) { return; }
     if ([self metricaConfiguration].inMemory.sessionsAutoTracking) {
         [AMAErrorLogger logMetricaActivationWithAutomaticSessionsTracking];
@@ -668,6 +525,7 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
 
 + (void)activateReporterWithConfiguration:(AMAReporterConfiguration *)configuration
 {
+    [[self sharedImpl] ensureModulesLoaded];
     if ([self isAPIKeyValid:configuration.APIKey] == NO) {
         [AMAErrorLogger logInvalidApiKeyError:configuration.APIKey];
         return;
@@ -678,7 +536,6 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
             [AMAErrorLogger logMetricaActivationWithAlreadyPresentedKeyError];
         }
         else {
-            [[self class] setupExternalServices];
             [[self sharedImpl] activateReporterWithConfiguration:configuration];
         }
     }
@@ -691,6 +548,7 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
 
 + (id<AMAAppMetricaExtendedReporting>)extendedReporterForApiKey:(NSString *)apiKey
 {
+    [[self sharedImpl] ensureModulesLoaded];
     if ([self isAPIKeyValid:apiKey] == NO) {
         [AMAErrorLogger logInvalidApiKeyError:apiKey];
         return nil;
@@ -701,7 +559,6 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
             [[self sharedRestrictionController] setReporterRestriction:AMADataSendingRestrictionUndefined
                                                              forApiKey:apiKey];
         }
-        [[self class] setupExternalServices];
         AMAReporterConfiguration *configuration = [[AMAReporterConfiguration alloc] initWithAPIKey:apiKey];
         id<AMAAppMetricaExtendedReporting> reporter = [[self sharedImpl] manualReporterForConfiguration:configuration];
         return reporter;
@@ -711,6 +568,7 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
 + (void)requestStartupIdentifiersWithCompletionQueue:(nullable dispatch_queue_t)queue
                                      completionBlock:(AMAIdentifiersCompletionBlock)block
 {
+    [[self sharedImpl] ensureModulesLoaded];
     [[self sharedImpl] requestStartupIdentifiersWithCompletionQueue:queue
                                                     completionBlock:block
                                                       notifyOnError:YES];
@@ -720,6 +578,7 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
                           completionQueue:(nullable dispatch_queue_t)queue
                           completionBlock:(AMAIdentifiersCompletionBlock)block
 {
+    [[self sharedImpl] ensureModulesLoaded];
     [[self sharedImpl] requestStartupIdentifiersWithKeys:keys
                                          completionQueue:queue
                                          completionBlock:block
@@ -833,6 +692,7 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
 
 + (void)subscribeForAutocollectedDataForApiKey:(NSString *)apiKey
 {
+    [[self sharedImpl] ensureModulesLoaded];
     [[self sharedImpl] addAutocollectedData:apiKey];
 }
 
@@ -843,10 +703,6 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
     return [AMAMetricaConfiguration sharedInstance];
 }
 
-+ (NSArray<Class<AMAEventPollingDelegate>> *)eventPollingDelegates
-{
-    return eventPollingDelegates.allObjects;
-}
 
 + (BOOL)isAppMetricaStartedWithLogging:(void (^)(NSError *))onFailure {
     if ([self isActivated] == NO) {
@@ -893,6 +749,21 @@ static NSMutableSet<id<AMAReporterStorageControlling>> *reporterStorageControlle
 + (void)registerAdRevenueNativeSource:(NSString *)source
 {
     [[self sharedAdRevenueSourceContainer] addNativeSupportedSource:source];
+}
+
+#pragma mark - Deprecated module registration
+
+// These methods are no-ops kept for binary compatibility.
+// Use AMAModuleContext in AMAModuleEntryPoint.initModuleWithContext: instead.
+
++ (void)addActivationDelegate:(Class<AMAModuleActivationDelegate>)delegate
+{
+    [[self sharedImpl] addActivationDelegate:delegate];
+}
+
++ (void)registerExternalService:(AMAServiceConfiguration *)configuration
+{
+    [[self sharedImpl] registerExternalService:configuration];
 }
 
 @end

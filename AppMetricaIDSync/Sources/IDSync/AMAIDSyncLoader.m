@@ -35,15 +35,6 @@
     return idSyncLoader;
 }
 
-+ (void)load
-{
-    AMAServiceConfiguration *config = [[AMAServiceConfiguration alloc]
-                                       initWithStartupObserver:[AMAIDSyncStartupController sharedInstance]
-                                       reporterStorageController:[AMAIDSyncStartupController sharedInstance]
-    ];
-    [AMAAppMetrica registerExternalService:config];
-}
-
 // TODO: Refactor startup update handling later
 - (void)start
 {

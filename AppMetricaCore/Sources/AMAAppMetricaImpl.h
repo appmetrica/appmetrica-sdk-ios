@@ -5,6 +5,7 @@
 #import "AMAStartupController.h"
 
 @class AMAAdRevenueInfo;
+@class AMAModulesController;
 @class AMAAppMetricaConfiguration;
 @class AMAECommerce;
 @class AMARevenueInfo;
@@ -129,13 +130,22 @@ NS_ASSUME_NONNULL_BEGIN
 #endif
 - (void)reportUrl:(NSURL *)url ofType:(NSString *)type isAuto:(BOOL)isAuto;
 
-- (void)setExtendedStartupObservers:(NSSet<id<AMAExtendedStartupObserving>> *)observers;
-- (void)setExtendedReporterStorageControllers:(NSSet<id<AMAReporterStorageControlling>> *)controllers;
-- (void)setEventPollingDelegates:(NSSet<Class<AMAEventPollingDelegate>> *)delegates;
+- (void)ensureModulesLoaded;
 
 - (BOOL)isAllowedToSendData:(NSString *)apiKey;
 
 - (void)addAutocollectedData:(NSString *)apiKey;
+
+
+
+#pragma mark - Deprecated module registration
+
+// These methods are no-ops kept for binary compatibility.
+// Use AMAModuleContext in AMAModuleEntryPoint.initModuleWithContext: instead.
+
+- (void)addActivationDelegate:(Class<AMAModuleActivationDelegate>)delegate;
+
+- (void)registerExternalService:(AMAServiceConfiguration *)configuration;
 
 @end
 

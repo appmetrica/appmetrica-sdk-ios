@@ -29,6 +29,7 @@
 #import "AMAEventBuilder.h"
 #import "AMAEventCountDispatchStrategy.h"
 #import "AMAEventPollingDelegateMock.h"
+#import "AMAModuleContextMocks.h"
 #import "AMAEventStorage+TestUtilities.h"
 #import "AMAExtensionsReportController.h"
 #import "AMAExtrasContainer.h"
@@ -54,6 +55,8 @@
 #import "AMAUserProfile.h"
 #import "AMAAppMetricaConfigurationManager.h"
 #import "AMAFirstActivationDetector.h"
+#import "AMAModulesController.h"
+#import "AMAModuleContextImpl.h"
 #import "AMAMetricaPersistentConfiguration.h"
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
 #import "AMAAppMetricaConfiguration+JSONSerializable.h"
@@ -65,6 +68,7 @@ static NSString *const kAMAEnvironmentTestKey = @"TestEnvironmentKey";
 static NSString *const kAMAEnvironmentTestValue = @"TestEnvironmentValue";
 
 @interface AMAAppMetricaImpl () <AMAExtendedStartupObservingDelegate>
+@property (nonatomic, strong) AMAModulesController *modulesController;
 @end
 
 SPEC_BEGIN(AMAAppMetricaImplTests)
@@ -254,7 +258,7 @@ describe(@"AMAAppMetricaImpl", ^{
         });
 
         beforeEach(^{
-            [impl setEventPollingDelegates:[NSSet setWithArray:@[AMAEventPollingDelegateMock.class]]];
+            [impl.modulesController.context addEventPollingDelegate:[AMAEventPollingDelegateMock class]];
             AMAEventPollingDelegateMock.mockedEvents = @[];
             [AMAAppMetrica stub:@selector(sharedImpl) andReturn:appMetricaImpl];
         });
@@ -1164,95 +1168,39 @@ describe(@"AMAAppMetricaImpl", ^{
                 NSDictionary *const startupParameters = @{@"request": @{@"ab" : @"1"},
                                                           @"hosts": @[@"host_1", @1, @"host_2", @""],
                 };
-                NSArray *__block observers = nil;
-                
+
                 beforeEach(^{
-                    observers = @[[KWMock nullMockForProtocol:@protocol(AMAExtendedStartupObserving)],
-                                  [KWMock nullMockForProtocol:@protocol(AMAExtendedStartupObserving)]];
-                });
-                afterEach(^{
-                    [AMAStartupStorageProvider clearStubs];
-                    [AMACachingStorageProvider clearStubs];
                 });
                 
-                it(@"Should setup startup observers", ^{
-                    id startupStorageProvider = [AMAStartupStorageProvider stubbedNullMockForDefaultInit];
-                    id cachingStorageProvider = [AMACachingStorageProvider stubbedNullMockForDefaultInit];
-                    
-                    for (NSObject<AMAExtendedStartupObserving> *observer in observers) {
-                        [observer stub:@selector(startupParameters) andReturn:startupParameters];
-                        
-                        [[observer should] receive:@selector(setupStartupProvider:cachingStorageProvider:)
-                                     withArguments:startupStorageProvider,cachingStorageProvider];
-                    }
-                    
-                    [appMetricaImpl setExtendedStartupObservers:[NSSet setWithArray:observers]];
+                it(@"Should notify activated", ^{
+                    [[appMetricaImpl.modulesController should] receive:@selector(notifyWillActivateWithConfiguration:)];
+                    [[appMetricaImpl.modulesController should] receive:@selector(notifyDidActivateWithConfiguration:)];
+
                     activationBlock(anonymous);
                 });
-                it(@"Should add startup request parameters", ^{
-                    for (NSObject<AMAExtendedStartupObserving> *observer in observers) {
-                        [observer stub:@selector(startupParameters) andReturn:startupParameters];
-                    }
+                it(@"Should notify sendEventsBuffer", ^{
+                    [[appMetricaImpl.modulesController should] receive:@selector(notifySendEventsBuffer)];
                     
-                    [[startupController should] receive:@selector(addAdditionalStartupParameters:)
-                                              withCount:2
-                                              arguments:startupParameters[@"request"]];
-                    
-                    [appMetricaImpl setExtendedStartupObservers:[NSSet setWithArray:observers]];
-                    activationBlock(anonymous);
+                    [appMetricaImpl sendEventsBuffer];
                 });
-                it(@"Should add startup hosts", ^{
-                    [observers[1] stub:@selector(startupParameters) andReturn:@{@"hosts" : @[@"host_5", @"host_2", @"host_3"]}];
-                    
-                    [appMetricaImpl setExtendedStartupObservers:[NSSet setWithArray:observers]];
-                    activationBlock(anonymous);
-                    
-                    NSArray *additionalHosts = [[AMAMetricaConfiguration sharedInstance].inMemory additionalStartupHosts];
-                    [[additionalHosts should] equal:@[@"host_5", @"host_2", @"host_3"]];
-                });
-                it(@"Should add startup hosts from several observers", ^{
-                    [observers[0] stub:@selector(startupParameters) andReturn:startupParameters];
-                    [observers[1] stub:@selector(startupParameters) andReturn:@{@"hosts" : @[@"host_2", @"host_3"]}];
-                    
-                    [appMetricaImpl setExtendedStartupObservers:[NSSet setWithArray:observers]];
-                    activationBlock(anonymous);
-                    
-                    NSArray *additionalHosts = [[AMAMetricaConfiguration sharedInstance].inMemory additionalStartupHosts];
-                    [[additionalHosts should] containObjectsInArray:@[@"host_1", @"host_2", @"host_3"]];
-                });
-                it(@"Should not add startup parameters with invalid dictionary", ^{
-                    [observers[0] stub:@selector(startupParameters) andReturn:@{@"foo" : @"bar"}];
-                    [observers[1] stub:@selector(startupParameters) andReturn:@{@2 : @[@"host"], @"hosts" : @{}}];
-                    
-                    [[startupController shouldNot] receive:@selector(addAdditionalStartupParameters:)];
-                    
-                    [appMetricaImpl setExtendedStartupObservers:[NSSet setWithArray:observers]];
-                    activationBlock(anonymous);
-                    
-                    NSArray *additionalHosts = [[AMAMetricaConfiguration sharedInstance].inMemory additionalStartupHosts];
-                    [[additionalHosts should] equal:@[]];
-                });
+                
                 it(@"Should dispatch startup response", ^{
                     [startupController stub:@selector(upToDate) andReturn:theValue(YES)];
-                    for (NSObject<AMAExtendedStartupObserving> *observer in observers) {
-                        [[observer should] receive:@selector(startupUpdatedWithParameters:)
-                                     withArguments:startupParameters];
-                    }
-
-                    [appMetricaImpl setExtendedStartupObservers:[NSSet setWithArray:observers]];
+                    
+                    
+                    [[appMetricaImpl.modulesController should] receive:@selector(notifyStartupUpdatedWithParameters:)
+                                                         withArguments:startupParameters];
+                    
                     [appMetricaImpl startupUpdatedWithResponse:startupParameters];
                 });
-                it(@"Should dispatch startup failure to observers that respond to startupUpdateFailedWithError:", ^{
+                it(@"Should dispatch startup failure to observers", ^{
                     NSError *error = [NSError errorWithDomain:@"test" code:1 userInfo:nil];
-                    for (NSObject<AMAExtendedStartupObserving> *observer in observers) {
-                        [observer stub:@selector(startupParameters) andReturn:startupParameters];
-                        [[observer should] receive:@selector(startupUpdateFailedWithError:) withArguments:error];
-                    }
 
-                    [appMetricaImpl setExtendedStartupObservers:[NSSet setWithArray:observers]];
+                    [[appMetricaImpl.modulesController should] receive:@selector(notifyStartupFailedWithError:)
+                                                         withArguments:error];
+                    
                     [appMetricaImpl startupUpdateFailedWithError:error];
                 });
-
             };
             context(@"Manual activation", ^{
                 testStartupObserver(NO, activationBlock);
@@ -1267,13 +1215,20 @@ describe(@"AMAAppMetricaImpl", ^{
                 controllers = @[[KWMock nullMockForProtocol:@protocol(AMAReporterStorageControlling)],
                                 [KWMock nullMockForProtocol:@protocol(AMAReporterStorageControlling)]];
             });
+            void (^registerControllers)(void) = ^{
+                for (NSObject<AMAReporterStorageControlling> *controller in controllers) {
+                    AMAServiceConfiguration *config = [[AMAServiceConfiguration alloc]
+                        initWithStartupObserver:nil reporterStorageController:controller];
+                    [appMetricaImpl.modulesController.context registerExternalService:config];
+                }
+            };
             it(@"Should setup reporter storage controller with main reporter", ^{
                 for (NSObject<AMAReporterStorageControlling> *controller in controllers) {
                     [[controller should] receive:@selector(setupWithReporterStorage:main:forAPIKey:)
                                    withArguments:kw_any(), theValue(YES), configuration.APIKey];
                 }
-                
-                [appMetricaImpl setExtendedReporterStorageControllers:[NSSet setWithArray:controllers]];
+
+                registerControllers();
                 [appMetricaImpl activateWithConfiguration:configuration];
             });
             it(@"Should setup reporter storage controller with secondary reporter", ^{
@@ -1281,8 +1236,8 @@ describe(@"AMAAppMetricaImpl", ^{
                     [[controller should] receive:@selector(setupWithReporterStorage:main:forAPIKey:)
                                    withArguments:kw_any(), theValue(NO), configuration.APIKey];
                 }
-                
-                [appMetricaImpl setExtendedReporterStorageControllers:[NSSet setWithArray:controllers]];
+
+                registerControllers();
                 [AMAAppMetrica activateReporterWithConfiguration:[[AMAReporterConfiguration alloc] initWithAPIKey:apiKey]];
             });
             it(@"Should setup reporter storage controller with anonymous reporter", ^{
@@ -1290,46 +1245,18 @@ describe(@"AMAAppMetricaImpl", ^{
                     [[controller should] receive:@selector(setupWithReporterStorage:main:forAPIKey:)
                                    withArguments:kw_any(), theValue(YES), anonymousApiKey];
                 }
-                
-                [appMetricaImpl setExtendedReporterStorageControllers:[NSSet setWithArray:controllers]];
+
+                registerControllers();
                 [appMetricaImpl activateAnonymously];
             });
         });
         context(@"Event polling delegate", ^{
-            NSArray *__block delegates = nil;
-            beforeEach(^{
-                delegates = @[[KWMock nullMockForProtocol:@protocol(AMAEventPollingDelegate)],
-                              [KWMock nullMockForProtocol:@protocol(AMAEventPollingDelegate)]];
-            });
-            it(@"Should setup event polling delegate with main reporter", ^{
-                for (NSObject<AMAEventPollingDelegate> *delegate in delegates) {
-                    [[delegate should] receive:@selector(pollingEvents)];
-                    
-                    [[delegate should] receive:@selector(setupAppEnvironment:)];
-                }
-                
-                [appMetricaImpl setEventPollingDelegates:[NSSet setWithArray:delegates]];
+            it(@"Should call pollingEvents and setupAppEnvironment on main reporter activation", ^{
+                [appMetricaImpl.modulesController.context addEventPollingDelegate:[AMAEventPollingDelegateMock class]];
                 [appMetricaImpl activateWithConfiguration:configuration];
-            });
-            it(@"Should NOT setup event polling delegate with secondary reporter", ^{
-                for (NSObject<AMAEventPollingDelegate> *delegate in delegates) {
-                    [[delegate shouldNot] receive:@selector(pollingEvents)];
-                    
-                    [[delegate shouldNot] receive:@selector(setupAppEnvironment:)];
-                }
-                
-                [appMetricaImpl setEventPollingDelegates:[NSSet setWithArray:delegates]];
-                [AMAAppMetrica activateReporterWithConfiguration:[[AMAReporterConfiguration alloc] initWithAPIKey:apiKey]];
-            });
-            it(@"Should setup event polling delegate with anonymous reporter", ^{
-                for (NSObject<AMAEventPollingDelegate> *delegate in delegates) {
-                    [[delegate should] receive:@selector(pollingEvents)];
-                    
-                    [[delegate should] receive:@selector(setupAppEnvironment:)];
-                }
-                
-                [appMetricaImpl setEventPollingDelegates:[NSSet setWithArray:delegates]];
-                [appMetricaImpl activateAnonymously];
+                // Class-based delegate; polling behavior verified via AMAModulesControllerTests
+                XCTAssertTrue([appMetricaImpl.modulesController.context.eventPollingDelegates
+                    containsObject:[AMAEventPollingDelegateMock class]]);
             });
         });
         

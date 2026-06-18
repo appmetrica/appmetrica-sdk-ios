@@ -36,12 +36,10 @@ extern BOOL const kAMADefaultAppOpenTrackingEnabled;
 @property (atomic, assign, readonly) BOOL appMetricaStarted;
 @property (atomic, assign, readonly) BOOL appMetricaStartedAnonymously;
 @property (atomic, assign, readonly) BOOL appMetricaImplCreated;
-@property (atomic, assign, readonly) BOOL externalServicesConfigured;
 
 - (void)markAppMetricaStarted;
 - (void)markAppMetricaStartedAnonymously;
 - (void)markAppMetricaImplCreated;
-- (void)markExternalServicesConfigured;
 
 @property (atomic, copy, readonly) NSArray<NSString *> *additionalStartupHosts;
 

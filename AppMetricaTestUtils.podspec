@@ -24,6 +24,7 @@ Pod::Spec.new do |s|
   s.dependency 'AppMetricaNetwork', '= 6.4.0'
   s.dependency 'AppMetricaHostState', '= 6.4.0'
   s.dependency 'AppMetricaKeychain', '= 6.4.0'
+  s.dependency 'AppMetricaCoreExtension', '= 6.4.0'
   
   s.header_dir = s.name
   s.source_files = "#{s.name}/Sources/**/*.{h,m}"

@@ -31,27 +31,6 @@ describe(@"AMAIDSyncLoader", ^{
     afterEach(^{
         [AMAIDSyncStartupController clearStubs];
     });
-
-    
-    context(@"Load", ^{
-        AMAServiceConfiguration *__block moduleConfiguration = nil;
-        
-        beforeEach(^{
-            moduleConfiguration = [AMAServiceConfiguration stubbedNullMockForInit:@selector(initWithStartupObserver:
-                                                                                            reporterStorageController:)];
-        });
-        afterEach(^{
-            [AMAServiceConfiguration clearStubs];
-        });
-        
-        it(@"Should register on load", ^{
-            [[AMAAppMetrica should] receive:@selector(registerExternalService:) withArguments:moduleConfiguration];
-            [[moduleConfiguration should] receive:@selector(initWithStartupObserver:reporterStorageController:)
-                                    withArguments:startupController, startupController];
-            
-            [AMAIDSyncLoader load];
-        });
-    });
     
     context(@"id sync", ^{
         AMAIDSyncStartupConfiguration *__block startupConfiguration = nil;

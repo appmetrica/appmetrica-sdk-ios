@@ -35,15 +35,6 @@ static NSString *const AMAScreenshotVersion = @"1";
     return loader;
 }
 
-+ (void)load
-{
-    AMAServiceConfiguration *config = [[AMAServiceConfiguration alloc]
-                                       initWithStartupObserver:[self sharedInstance]
-                                       reporterStorageController:[self sharedInstance]
-    ];
-    [AMAAppMetrica registerExternalService:config];
-}
-
 - (void)setupWithReporterStorage:(id<AMAKeyValueStorageProviding>)stateStorageProvider
                             main:(BOOL)main
                        forAPIKey:(NSString *)apiKey

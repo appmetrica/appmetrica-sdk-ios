@@ -22,17 +22,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface AMAAppMetrica ()
 
-// Activation and Event Delegates
-+ (void)addActivationDelegate:(Class<AMAModuleActivationDelegate>)delegate;
-+ (void)addEventFlushableDelegate:(Class<AMAEventFlushableDelegate>)delegate;
-+ (void)addEventPollingDelegate:(Class<AMAEventPollingDelegate>)delegate;
-
-// Registration Methods
-+ (void)registerExternalService:(AMAServiceConfiguration *)configuration;
-
-// Ad related methods
-+ (void)registerAdProvider:(id<AMAAdProviding>)provider;
-
 // AdRevenue methods
 + (void)registerAdRevenueNativeSource:(NSString *)source;
 + (void)reportLibraryAdapterAdRevenueRelatedEvent:(NSString *)name
@@ -62,6 +51,12 @@ NS_SWIFT_NAME(reportLibraryAdapterAdRevenueRelatedEvent(name:parameters:onFailur
 + (void)setLibraryAdapterLocationTracking:(BOOL)locationTracking;
 
 + (void)subscribeForAutocollectedDataForApiKey:(NSString *)apiKey NS_SWIFT_NAME(subscribeForAutocollectedData(apiKey:));
+
+// Module registration (deprecated — use AMAModuleContext in AMAModuleEntryPoint instead)
++ (void)addActivationDelegate:(Class<AMAModuleActivationDelegate>)delegate
+    DEPRECATED_MSG_ATTRIBUTE("Use AMAModuleContext.addActivationDelegate: in AMAModuleEntryPoint.initModuleWithContext:");
++ (void)registerExternalService:(AMAServiceConfiguration *)configuration
+    DEPRECATED_MSG_ATTRIBUTE("Use AMAModuleContext.registerExternalService: in AMAModuleEntryPoint.initModuleWithContext:");
 
 // Reporting
 + (nullable id<AMAAppMetricaExtendedReporting>)extendedReporterForApiKey:(NSString *)apiKey

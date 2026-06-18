@@ -3,6 +3,7 @@
 #import <AppMetricaPlatform/AppMetricaPlatform.h>
 #import <AppMetricaHostState/AppMetricaHostState.h>
 #import "AMAAppMetricaImpl.h"
+#import "AMAModulesController.h"
 #import "AMAAdServicesDataProvider.h"
 #import "AMAAdServicesReportingController.h"
 #import "AMAAppMetrica+Internal.h"
@@ -65,6 +66,7 @@
 #import "AMAReporterAutocollectedDataProvider.h"
 #import "AMAAppMetricaConfigurationFileStorage.h"
 #import "AMAAppGroupIdentifierProvider.h"
+#import "AMAModuleContextImpl.h"
 
 static NSTimeInterval const kAMAAnonymousActivationDelay = 0.1;
 static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
@@ -98,11 +100,9 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
 @property (nonatomic, strong, readonly) AMAAdProvider *adProvider;
 @property (nonatomic, strong, readonly) AMALocationManager *locationManager;
 
-@property (nonatomic, strong) NSHashTable *startupCompletionObservers;
+@property (nonatomic, strong) AMAModulesController *modulesController;
 
-@property (nonatomic, strong) NSHashTable *extendedStartupCompletionObservers;
-@property (nonatomic, strong) NSHashTable *extendedReporterStorageControllersTable;
-@property (nonatomic, strong) NSHashTable *eventPollingDelegatesTable;
+@property (nonatomic, strong) NSHashTable *startupCompletionObservers;
 
 @property (nonatomic, strong) AMALocationResolver *locationResolver;
 @property (nonatomic, strong) AMAAdProviderResolver *adProviderResolver;
@@ -129,10 +129,12 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
         _reportersContainer = [AMAReportersContainer new];
         _strategiesContainer = [AMADispatchStrategiesContainer new];
         _preactivationActionHistory = [[AMAPreactivationActionHistory alloc] init];
+        _modulesController = [[AMAModulesController alloc] init];
+        __weak typeof(self) weakSelf = self;
+        _modulesController.startupParametersHandler = ^(NSDictionary *params) {
+            [weakSelf addAdditionalStartupParameters:params];
+        };
         _startupCompletionObservers = [NSHashTable weakObjectsHashTable];
-        _extendedStartupCompletionObservers = [NSHashTable weakObjectsHashTable];
-        _extendedReporterStorageControllersTable = [NSHashTable weakObjectsHashTable];
-        _eventPollingDelegatesTable = [NSHashTable weakObjectsHashTable];
         _extensionsReportController = [[AMAExtensionsReportController alloc] init];
         _permissionsController = [[AMAPermissionsController alloc] init];
         _appOpenWatcher = [[AMAAppOpenWatcher alloc] init];
@@ -196,16 +198,22 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
 
 - (void)activateWithConfiguration:(AMAAppMetricaConfiguration *)configuration
 {
-    [self.configurationManager updateMainConfiguration:configuration            activatedAnonymously:NO];
+    [self setupAdProvider];
+    
+    [self notifyModulesWillActivate:configuration];
+
+    [self.configurationManager updateMainConfiguration:configuration activatedAnonymously:NO];
     self.apiKey = configuration.APIKey;
 
     [self migrate];
-    
+
     AMAReporter *reporter = [self setupMainReporterWithConfiguration:configuration];
     [self activateCommonComponents:configuration reporter:reporter];
-    
+
     [[AMAMetricaConfiguration sharedInstance].inMemory markAppMetricaStarted];
     [self logMetricaStart:configuration.APIKey];
+
+    [self notifyModulesDidActivate:configuration];
 }
 
 - (void)scheduleAnonymousActivationIfNeeded
@@ -244,6 +252,10 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
     AMAAppMetricaConfiguration *configuration = [self.configurationManager anonymousConfiguration];
     [self.configurationManager updateMainConfiguration:configuration            activatedAnonymously:YES];
     self.apiKey = configuration.APIKey;
+    
+    [self setupAdProvider];
+    
+    [self notifyModulesWillActivate:configuration];
 
     [self migrate];
     
@@ -253,6 +265,8 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
     [[AMAMetricaConfiguration sharedInstance].inMemory markAppMetricaStartedAnonymously];
 
     [self logMetricaStart:nil];
+    
+    [self notifyModulesDidActivate:configuration];
 }
 
 - (void)activateReporterWithConfiguration:(AMAReporterConfiguration *)configuration
@@ -274,6 +288,36 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
     }
     if (configuration.appEnvironment != nil) {
         [self applyAppEnvironment:configuration.appEnvironment];
+    }
+}
+
+
+- (void)notifyModulesWillActivate:(AMAAppMetricaConfiguration *)configuration
+{
+    AMAModuleActivationConfiguration *moduleConfig =
+            [[AMAModuleActivationConfiguration alloc] initWithApiKey:configuration.APIKey
+                                                          appVersion:configuration.appVersion
+                                                      appBuildNumber:configuration.appBuildNumber];
+
+    [self.modulesController notifyWillActivateWithConfiguration:moduleConfig];
+}
+
+- (void)notifyModulesDidActivate:(AMAAppMetricaConfiguration *)configuration
+{
+    AMAModuleActivationConfiguration *moduleConfig =
+            [[AMAModuleActivationConfiguration alloc] initWithApiKey:configuration.APIKey
+                                                          appVersion:configuration.appVersion
+                                                      appBuildNumber:configuration.appBuildNumber];
+
+    [self.modulesController notifyDidActivateWithConfiguration:moduleConfig];
+}
+
+
+- (void)setupAdProvider
+{
+    id<AMAAdProviding> adProvider = self.modulesController.adProvider;
+    if (adProvider != nil) {
+        [self.adProvider setupAdProvider:adProvider];
     }
 }
 
@@ -501,6 +545,7 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
     [self execute:^{
         [self.mainReporter sendEventsBuffer];
     }];
+    [self.modulesController notifySendEventsBuffer];
 }
 
 - (void)pauseSession
@@ -830,15 +875,7 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
 
 - (void)addEventsFromPollingDelegates:(AMAReporter *)reporter
 {
-    NSArray<AMAEventPollingParameters *> *events =
-        [AMACollectionUtilities flatMapArray:self.eventPollingDelegatesTable.allObjects
-                                   withBlock:^NSArray *(Class<AMAEventPollingDelegate> delegate) {
-            return [delegate pollingEvents];
-        }];
-    
-    for (AMAEventPollingParameters *parameters in events) {
-        [reporter reportPollingEvent:parameters onFailure:nil];
-    }
+    [self.modulesController addPollingEventsToReporter:reporter];
 }
 
 - (void)applyDeferredAppEnvironmentUpdatesWithStorage:(AMAReporterStorage *)reporterStorage
@@ -1067,11 +1104,7 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
 {
     [self execute:^{
         if (self.startupController.upToDate) {
-            AMALogInfo(@"Notify about extended startup %lu observers",
-                       (unsigned long)self.extendedStartupCompletionObservers.count);
-            for (id<AMAExtendedStartupObserving> observer in self.extendedStartupCompletionObservers) {
-                [observer startupUpdatedWithParameters:response];
-            }
+            [self.modulesController notifyStartupUpdatedWithParameters:response];
         }
     }];
 }
@@ -1079,34 +1112,16 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
 - (void)notifyOnAdditionalStartupFailedWithError:(NSError *)error
 {
     [self execute:^{
-        AMALogInfo(@"Notify about extended startup failure %lu observers",
-                   (unsigned long)self.extendedStartupCompletionObservers.count);
-        for (id<AMAExtendedStartupObserving> observer in self.extendedStartupCompletionObservers) {
-            if ([observer respondsToSelector:@selector(startupUpdateFailedWithError:)]) {
-                [observer startupUpdateFailedWithError:error];
-            }
-        }
+        [self.modulesController notifyStartupFailedWithError:error];
     }];
 }
 
-- (void)setExtendedStartupObservers:(NSSet<id<AMAExtendedStartupObserving>> *)observers
+- (void)ensureModulesLoaded
 {
-    AMALogInfo(@"Setup extended startup observers: %@", observers);
-    [self execute:^{
-        if (observers != nil) {
-            for (id<AMAExtendedStartupObserving> observer in observers) {
-                [self.extendedStartupCompletionObservers addObject:observer];
-                
-                AMAStartupStorageProvider *startupStorageProvider = [[AMAStartupStorageProvider alloc] init];
-                AMACachingStorageProvider *cachingStorageProvider = [[AMACachingStorageProvider alloc] init];
-                [observer setupStartupProvider:startupStorageProvider
-                        cachingStorageProvider:cachingStorageProvider];
-                
-                [self addAdditionalStartupParameters:observer.startupParameters];
-            }
-        }
-    }];
+    [self.modulesController ensureLoaded];
 }
+
+#pragma mark - Module registration
 
 - (void)addAdditionalStartupParameters:(NSDictionary *)parameters
 {
@@ -1145,54 +1160,18 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
 
 #pragma mark - Reporter Storage controlling -
 
-- (void)setExtendedReporterStorageControllers:(NSSet<id<AMAReporterStorageControlling>> *)controllers
-{
-    AMALogInfo(@"Register extended reporter storage controllers: %@", controllers);
-    [self execute:^{
-        if (controllers != nil) {
-            for (id<AMAReporterStorageControlling> controller in controllers) {
-                [self.extendedReporterStorageControllersTable addObject:controller];
-            }
-        }
-    }];
-}
-
 - (void)setupReporterWithExtendedReporterStorage:(id<AMAKeyValueStorageProviding>)storageProvider
                                             main:(BOOL)main
                                           apiKey:(NSString *)apiKey
 {
-    [self execute:^{
-        AMALogInfo(@"Setup main reporter for extended reporter storage %lu controllers",
-                   (unsigned long)self.extendedReporterStorageControllersTable.count);
-        for (id<AMAReporterStorageControlling> controller in self.extendedReporterStorageControllersTable) {
-            [controller setupWithReporterStorage:storageProvider main:main forAPIKey:apiKey];
-        }
-    }];
+    [self.modulesController setupReporterStorageWithProvider:storageProvider main:main apiKey:apiKey];
 }
 
 #pragma mark - Event polling -
 
-- (void)setEventPollingDelegates:(NSSet<Class<AMAEventPollingDelegate>> *)delegates
-{
-    AMALogInfo(@"Register event polling delegates: %@", delegates);
-    [self execute:^{
-        if (delegates != nil) {
-            for (Class<AMAReporterStorageControlling> delegate in delegates) {
-                [self.eventPollingDelegatesTable addObject:delegate];
-            }
-        }
-    }];
-}
-
 - (void)setupAppEnvironmentPollingDelegatesWithStorage:(AMAReporterStorage *)reporterStorage
 {
-    [self execute:^{
-        AMALogInfo(@"Setup app environment for extended event polling %lu delegates",
-                   (unsigned long)self.eventPollingDelegatesTable.count);
-        for (id<AMAEventPollingDelegate> delegate in self.eventPollingDelegatesTable) {
-            [delegate setupAppEnvironment:reporterStorage.stateStorage.appEnvironment];
-        }
-    }];
+    [self.modulesController setupAppEnvironmentWithContainer:reporterStorage.stateStorage.appEnvironment];
 }
 
 #pragma mark - Environment -
@@ -1314,6 +1293,23 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
 {
     [self.autocollectedDataProvider addAutocollectedData:apiKey];
     [self scheduleReporterAnonymousActivationIfNeeded];
+}
+
+
+
+#pragma mark - Deprecated module registration - Remove within next major release
+
+// These methods are no-ops kept for binary compatibility.
+// Use AMAModuleContext in AMAModuleEntryPoint.initModuleWithContext: instead.
+
+- (void)addActivationDelegate:(Class<AMAModuleActivationDelegate>)delegate
+{
+    [self.modulesController.context addActivationDelegate:delegate];
+}
+
+- (void)registerExternalService:(AMAServiceConfiguration *)configuration
+{
+    [self.modulesController.context registerExternalService:configuration];
 }
 
 @end

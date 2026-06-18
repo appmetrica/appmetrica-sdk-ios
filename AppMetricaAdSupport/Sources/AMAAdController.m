@@ -23,11 +23,6 @@
     return self;
 }
 
-+ (void)load
-{
-    [AMAAppMetrica registerAdProvider:[[[self class] alloc] init]];
-}
-
 - (NSUUID *)advertisingIdentifier
 {
     return [self.idfaProvider advertisingIdentifier];

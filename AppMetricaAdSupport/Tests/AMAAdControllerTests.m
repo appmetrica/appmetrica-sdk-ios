@@ -32,11 +32,6 @@ describe(@"AMAAdController", ^{
     });
     
     context(@"AMAAdController", ^{
-        it(@"Should register on load", ^{
-            [[AMAAppMetrica should] receive:@selector(registerAdProvider:) withArguments:adController];
-            
-            [AMAAdController load];
-        });
         
         it(@"Should call AMAIDFAProvider on advertisingIdentifier", ^{
             NSUUID *advertisingIdentifier = [NSUUID nullMock];

@@ -46,10 +46,6 @@ describe(@"AMAAppMetrica", ^{
     AMAIdentifierProviderMock *__block identifierManagerMock = nil;
     
     beforeEach(^{
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wnonnull"
-        [AMAAppMetrica registerAdProvider:nil]; // reset adProvider
-#pragma clang diagnostic pop
         [[AMAMetricaConfiguration sharedInstance] stub:@selector(identifierProvider) andReturn:identifierManagerMock];
         [AMATestNetwork stubHTTPRequestWithBlock:nil];
     });
@@ -1151,116 +1147,6 @@ describe(@"AMAAppMetrica", ^{
                 
                 activateAnonymously();
             });
-            it(@"Should activate delegate for anonymous activation", ^{
-                id activationDelegate = [KWMock nullMock];
-    
-                [AMAAppMetrica addActivationDelegate:activationDelegate];
-                
-                [[activationConfiguration should] receive:@selector(initWithApiKey:appVersion:appBuildNumber:)
-                                                withCount:2
-                                                arguments:anonymousApiKey, kw_any(), kw_any()];
-                
-                [[activationDelegate should] receive:@selector(didActivateWithConfiguration:) withArguments:activationConfiguration];
-                [[activationDelegate should] receive:@selector(willActivateWithConfiguration:) withArguments:activationConfiguration];
-                
-                activateAnonymously();
-            });
-            it(@"Should register activation delegate", ^{
-                id activationDelegate = [KWMock nullMock];
-    
-                [AMAAppMetrica addActivationDelegate:activationDelegate];
-    
-                [[activationDelegate should] receive:@selector(didActivateWithConfiguration:) withArguments:activationConfiguration];
-                [[activationDelegate should] receive:@selector(willActivateWithConfiguration:) withArguments:activationConfiguration];
-                
-                activate();
-            });
-            it(@"Should activate delegate for anonymous activation on shared executor", ^{
-                [AMAAppMetrica stub:@selector(sharedExecutor) andReturn:nil];
-                
-                id activationDelegate = [KWMock nullMock];
-                
-                [AMAAppMetrica addActivationDelegate:activationDelegate];
-                
-                [[activationConfiguration shouldNot] receive:@selector(initWithApiKey:appVersion:appBuildNumber:)
-                                                   withCount:2
-                                                   arguments:anonymousApiKey, kw_any(), kw_any()];
-                
-                [[activationDelegate shouldNot] receive:@selector(didActivateWithConfiguration:) withArguments:activationConfiguration];
-                [[activationDelegate shouldNot] receive:@selector(willActivateWithConfiguration:) withArguments:activationConfiguration];
-                
-                activateAnonymously();
-            });
-            it(@"Should register activation delegate on shared executor", ^{
-                [AMAAppMetrica stub:@selector(sharedExecutor) andReturn:nil];
-                
-                id activationDelegate = [KWMock nullMock];
-    
-                [AMAAppMetrica addActivationDelegate:activationDelegate];
-    
-                [[activationDelegate shouldNot] receive:@selector(didActivateWithConfiguration:) withArguments:activationConfiguration];
-                [[activationDelegate shouldNot] receive:@selector(willActivateWithConfiguration:) withArguments:activationConfiguration];
-                
-                activate();
-            });
-            it(@"Should not add activation delegate if metrica is activated", ^{
-                [handler beginAssertIgnoring];
-                
-                stubMetricaStarted(YES);
-
-                id activationDelegate = [KWMock nullMock];
-
-                [AMAAppMetrica addActivationDelegate:activationDelegate];
-
-                [[activationDelegate shouldNot] receive:@selector(didActivateWithConfiguration:)];
-                [[activationDelegate shouldNot] receive:@selector(willActivateWithConfiguration:)];
-
-                activate();
-                
-                [handler endAssertIgnoring];
-            });
-            it(@"Should register event flushable delegate", ^{
-                AMAModuleActivationConfiguration *configuration = [AMAModuleActivationConfiguration stubbedNullMockForInit:@selector(initWithApiKey:appVersion:appBuildNumber:)];
-                id eventFlushableDelegate = [KWMock nullMock];
-    
-                [AMAAppMetrica addEventFlushableDelegate:eventFlushableDelegate];
-                
-                [[eventFlushableDelegate should] receive:@selector(sendEventsBuffer)];
-                
-                stubMetricaStarted(YES);
-    
-                [AMAAppMetrica sendEventsBuffer];
-                [AMAModuleActivationConfiguration clearStubs];
-            });
-            it(@"Should not add event flushable delegate if metrica is activated", ^{
-                [handler beginAssertIgnoring];
-                
-                stubMetricaStarted(YES);
-
-                id eventFlushableDelegate = [KWMock nullMock];
-
-                [AMAAppMetrica addEventFlushableDelegate:eventFlushableDelegate];
-
-                [[eventFlushableDelegate shouldNot] receive:@selector(sendEventsBuffer)];
-
-                activate();
-                
-                [handler endAssertIgnoring];
-            });
-            it(@"Should register event polling delegate", ^{
-                id delegate = [KWMock nullMock];
-                
-                [AMAAppMetrica addEventPollingDelegate:delegate];
-                [[AMAAppMetrica.eventPollingDelegates should] contain:delegate];
-            });
-            it(@"Should not add event polling delegate if metrica is activated", ^{
-                stubMetricaStarted(YES);
-                
-                id delegate = [KWMock nullMock];
-                
-                [AMAAppMetrica addEventPollingDelegate:delegate];
-                [[AMAAppMetrica.eventPollingDelegates shouldNot] contain:delegate];
-            });
             it(@"Should return extended reporter", ^{
                 stubMetricaStarted(NO);
                 
@@ -1272,178 +1158,7 @@ describe(@"AMAAppMetrica", ^{
                 [[extendedReporter should] beNonNil];
                 [[extendedReporter should] equal:reporter];
             });
-            it(@"Should mark external services configured on main reporter activation", ^{
-                stubMetricaStarted(NO);
-                [[AMAMetricaConfiguration sharedInstance].inMemory stub:@selector(externalServicesConfigured) andReturn:theValue(NO)];
-    
-                [[[AMAMetricaConfiguration sharedInstance].inMemory should] receive:@selector(markExternalServicesConfigured)];
-                
-                activate();
-            });
-            it(@"Should mark external services configured on secondary reporter activation", ^{
-                stubMetricaStarted(NO);
-                [[AMAMetricaConfiguration sharedInstance].inMemory stub:@selector(externalServicesConfigured) andReturn:theValue(NO)];
-    
-                [[[AMAMetricaConfiguration sharedInstance].inMemory should] receive:@selector(markExternalServicesConfigured)];
-                
-                [AMAAppMetrica activateReporterWithConfiguration:[[AMAReporterConfiguration alloc] initWithAPIKey:apiKey]];
-            });
-            it(@"Should not setup external services on main activation if already configured", ^{
-                stubMetricaStarted(NO);
-                [[AMAMetricaConfiguration sharedInstance].inMemory stub:@selector(externalServicesConfigured) andReturn:theValue(YES)];
-    
-                [[[AMAMetricaConfiguration sharedInstance].inMemory shouldNot] receive:@selector(markExternalServicesConfigured)];
-                [[impl shouldNot] receive:@selector(setExtendedStartupObservers:)];
-                [[impl shouldNot] receive:@selector(setExtendedReporterStorageControllers:)];
-//                [[adResolver shouldNot] receive:@selector(setAdProvider:)];
-                
-                activate();
-            });
-            it(@"Should not setup external services on secondary reporter activation if already configured", ^{
-                stubMetricaStarted(NO);
-                [[AMAMetricaConfiguration sharedInstance].inMemory stub:@selector(externalServicesConfigured) andReturn:theValue(YES)];
-    
-                [[[AMAMetricaConfiguration sharedInstance].inMemory shouldNot] receive:@selector(markExternalServicesConfigured)];
-                [[impl shouldNot] receive:@selector(setExtendedStartupObservers:)];
-                [[impl shouldNot] receive:@selector(setExtendedReporterStorageControllers:)];
-//                [[adResolver shouldNot] receive:@selector(setAdProvider:)];
-                
-                [AMAAppMetrica activateReporterWithConfiguration:[[AMAReporterConfiguration alloc] initWithAPIKey:apiKey]];
-            });
-            context(@"Service Configuration", ^{
-                context(@"Startup observer", ^{
-                    id<AMAExtendedStartupObserving> __block startupObserver = nil;
-                    AMAServiceConfiguration *__block config = nil;
-                    beforeAll(^{
-                        startupObserver = [KWMock nullMockForProtocol:@protocol(AMAExtendedStartupObserving)];
-                        config = [[AMAServiceConfiguration alloc] initWithStartupObserver:startupObserver
-                                                                reporterStorageController:nil];
-                    });
-                    it(@"Should register Startup observer on activation main reporter", ^{
-                        [AMAAppMetrica registerExternalService:config];
-                        
-                        KWCaptureSpy *spy = [impl captureArgument:@selector(setExtendedStartupObservers:) atIndex:0];
-                        
-                        [[impl should] receive:@selector(setExtendedStartupObservers:)];
-                        
-                        activate();
-                        
-                        [[spy.argument should] equal:[NSMutableSet setWithObject:startupObserver]];
-                    });
-                    it(@"Should register Startup observer on activation secondary reporter", ^{
-                        [AMAAppMetrica registerExternalService:config];
-                        
-                        KWCaptureSpy *spy = [impl captureArgument:@selector(setExtendedStartupObservers:) atIndex:0];
-                        
-                        [[impl should] receive:@selector(setExtendedStartupObservers:)];
-                        
-                        [AMAAppMetrica activateReporterWithConfiguration:[[AMAReporterConfiguration alloc] initWithAPIKey:apiKey]];
-                        
-                        [[spy.argument should] equal:[NSMutableSet setWithObject:startupObserver]];
-                    });
-                    it(@"Should register Startup observer on activation anonymous reporter", ^{
-                        [AMAAppMetrica registerExternalService:config];
-                        
-                        KWCaptureSpy *spy = [impl captureArgument:@selector(setExtendedStartupObservers:) atIndex:0];
-                        
-                        [[impl should] receive:@selector(setExtendedStartupObservers:)];
-                        
-                        activateAnonymously();
-                        
-                        [[spy.argument should] equal:[NSMutableSet setWithObject:startupObserver]];
-                    });
-                    it(@"Should register Startup observer on activation anonymous reporter", ^{
-                        [AMAAppMetrica registerExternalService:config];
-                        
-                        KWCaptureSpy *spy = [impl captureArgument:@selector(setExtendedStartupObservers:) atIndex:0];
-                        
-                        [[impl should] receive:@selector(setExtendedStartupObservers:)];
-                        
-                        id reporter = [AMAAppMetrica reporterForAPIKey:apiKey];
-                        
-                        [[spy.argument should] equal:[NSMutableSet setWithObject:startupObserver]];
-                    });
-                });
-                context(@"Reporter storage controller", ^{
-                    id<AMAReporterStorageControlling> __block reporterStorageController = nil;
-                    AMAServiceConfiguration *__block config = nil;
-                    beforeAll(^{
-                        reporterStorageController = [KWMock nullMockForProtocol:@protocol(AMAReporterStorageControlling)];
-                        config = [[AMAServiceConfiguration alloc] initWithStartupObserver:nil
-                                                                reporterStorageController:reporterStorageController];
-                    });
-                    it(@"Should register reporter storage controller when activating main reporter", ^{
-                        [AMAAppMetrica registerExternalService:config];
-                        
-                        KWCaptureSpy *spy = [impl captureArgument:@selector(setExtendedReporterStorageControllers:) atIndex:0];
-                        
-                        [[impl should] receive:@selector(setExtendedReporterStorageControllers:)];
-                        
-                        activate();
-                        
-                        [[spy.argument should] equal:[NSMutableSet setWithObject:reporterStorageController]];
-                    });
-                    it(@"Should register reporter storage controller when activating secondary reporter", ^{
-                        [AMAAppMetrica registerExternalService:config];
-                        
-                        KWCaptureSpy *spy = [impl captureArgument:@selector(setExtendedReporterStorageControllers:) atIndex:0];
-                        
-                        [[impl should] receive:@selector(setExtendedReporterStorageControllers:)];
-                        
-                        [AMAAppMetrica activateReporterWithConfiguration:[[AMAReporterConfiguration alloc] initWithAPIKey:apiKey]];
-                        
-                        [[spy.argument should] equal:[NSMutableSet setWithObject:reporterStorageController]];
-                    });
-                    it(@"Should register reporter storage controller when activating anonymous reporter", ^{
-                        [AMAAppMetrica registerExternalService:config];
-                        
-                        KWCaptureSpy *spy = [impl captureArgument:@selector(setExtendedReporterStorageControllers:) atIndex:0];
-                        
-                        [[impl should] receive:@selector(setExtendedReporterStorageControllers:)];
-                        
-                        activateAnonymously();
-                        
-                        [[spy.argument should] equal:[NSMutableSet setWithObject:reporterStorageController]];
-                    });
-                    it(@"Should register reporter storage controller when create reporter", ^{
-                        [AMAAppMetrica registerExternalService:config];
-                        
-                        KWCaptureSpy *spy = [impl captureArgument:@selector(setExtendedReporterStorageControllers:) atIndex:0];
-                        
-                        [[impl should] receive:@selector(setExtendedReporterStorageControllers:)];
-                        
-                        id reporter = [AMAAppMetrica reporterForAPIKey:apiKey];
-                        
-                        [[spy.argument should] equal:[NSMutableSet setWithObject:reporterStorageController]];
-                    });
-                });
-            });
-            it(@"Should register external AdController when activating main reporter", ^{
-                id adController = [KWMock nullMockForProtocol:@protocol(AMAAdProviding)];
-                
-                [AMAAppMetrica registerAdProvider:adController];
-                [[adProvider should] receive:@selector(setupAdProvider:) withArguments:adController];
-                
-                activate();
-            });
-            it(@"Should register external AdController when activating secondary reporter", ^{
-                id adController = [KWMock nullMockForProtocol:@protocol(AMAAdProviding)];
-
-                [AMAAppMetrica registerAdProvider:adController];
-
-//                [[adResolver should] receive:@selector(setAdProvider:) withArguments:adController];
-
-                [AMAAppMetrica activateReporterWithConfiguration:[[AMAReporterConfiguration alloc] initWithAPIKey:apiKey]];
-            });
-            it(@"Should register external AdController when activating anonymous reporter", ^{
-                id adController = [KWMock nullMockForProtocol:@protocol(AMAAdProviding)];
-
-                [AMAAppMetrica registerAdProvider:adController];
-
-//                [[adResolver should] receive:@selector(setAdProvider:) withArguments:adController];
-
-                activateAnonymously();
-            });
+            
             it(@"Should return yes if api key is valid", ^{
                 [AMAIdentifierValidator stub:@selector(isValidUUIDKey:) andReturn:theValue(YES)];
                 
@@ -1532,10 +1247,116 @@ describe(@"AMAAppMetrica", ^{
         it(@"subscribeForAutocollectedData", ^{
             NSString *data = @"data";
             stubMetrica();
-            
+
             [[impl should] receive:@selector(addAutocollectedData:) withArguments:data];
-            
+
             [AMAAppMetrica subscribeForAutocollectedDataForApiKey:data];
+        });
+    });
+
+    context(@"ensureModulesLoaded", ^{
+        beforeEach(^{
+            stubMetrica();
+        });
+
+        it(@"activateWithConfiguration:", ^{
+            [[impl should] receive:@selector(ensureModulesLoaded)];
+            activate();
+        });
+        it(@"activate", ^{
+            [[impl should] receive:@selector(ensureModulesLoaded)];
+            activateAnonymously();
+        });
+        it(@"reportEvent:parameters:onFailure:", ^{
+            [[impl should] receive:@selector(ensureModulesLoaded)];
+            [AMAAppMetrica reportEvent:@"event" parameters:nil onFailure:nil];
+        });
+        it(@"reportUserProfile:onFailure:", ^{
+            [[impl should] receive:@selector(ensureModulesLoaded)];
+            [AMAAppMetrica reportUserProfile:[AMAMutableUserProfile new] onFailure:nil];
+        });
+        it(@"reportRevenue:onFailure:", ^{
+            AMARevenueInfo *revenue = [AMARevenueInfo nullMock];
+            [revenue stub:@selector(copy) andReturn:revenue];
+            [[impl should] receive:@selector(ensureModulesLoaded)];
+            [AMAAppMetrica reportRevenue:revenue onFailure:nil];
+        });
+        it(@"reportECommerce:onFailure:", ^{
+            AMAECommerce *ecommerce = [AMAECommerce nullMock];
+            [ecommerce stub:@selector(copy) andReturn:ecommerce];
+            [[impl should] receive:@selector(ensureModulesLoaded)];
+            [AMAAppMetrica reportECommerce:ecommerce onFailure:nil];
+        });
+        it(@"reportExternalAttribution:source:onFailure:", ^{
+            [[impl should] receive:@selector(ensureModulesLoaded)];
+            [AMAAppMetrica reportExternalAttribution:@{} source:kAMAAttributionSourceAppsflyer onFailure:nil];
+        });
+        it(@"reportAdRevenue:onFailure:", ^{
+            AMAAdRevenueInfo *adRevenue = [AMAAdRevenueInfo nullMock];
+            [adRevenue stub:@selector(copy) andReturn:adRevenue];
+            [[impl should] receive:@selector(ensureModulesLoaded)];
+            [AMAAppMetrica reportAdRevenue:adRevenue onFailure:nil];
+        });
+#if !TARGET_OS_TV
+        it(@"setupWebViewReporting:onFailure:", ^{
+            id controller = [KWMock nullMockForProtocol:@protocol(AMAJSControlling)];
+            [[impl should] receive:@selector(ensureModulesLoaded)];
+            [AMAAppMetrica setupWebViewReporting:controller onFailure:nil];
+        });
+#endif
+        it(@"setUserProfileID:", ^{
+            [[impl should] receive:@selector(ensureModulesLoaded)];
+            [AMAAppMetrica setUserProfileID:@"uid"];
+        });
+        it(@"trackOpeningURL:", ^{
+            [[impl should] receive:@selector(ensureModulesLoaded)];
+            [AMAAppMetrica trackOpeningURL:[NSURL URLWithString:@"https://example.com"]];
+        });
+        it(@"setAppEnvironmentValue:forKey:", ^{
+            [[impl should] receive:@selector(ensureModulesLoaded)];
+            [AMAAppMetrica setAppEnvironmentValue:@"v" forKey:@"k"];
+        });
+        it(@"clearAppEnvironment", ^{
+            [[impl should] receive:@selector(ensureModulesLoaded)];
+            [AMAAppMetrica clearAppEnvironment];
+        });
+        it(@"sendEventsBuffer", ^{
+            [[impl should] receive:@selector(ensureModulesLoaded)];
+            [AMAAppMetrica sendEventsBuffer];
+        });
+        it(@"pauseSession", ^{
+            [[impl should] receive:@selector(ensureModulesLoaded)];
+            [AMAAppMetrica pauseSession];
+        });
+        it(@"resumeSession", ^{
+            [[impl should] receive:@selector(ensureModulesLoaded)];
+            [AMAAppMetrica resumeSession];
+        });
+        it(@"activateReporterWithConfiguration:", ^{
+            [[impl should] receive:@selector(ensureModulesLoaded)];
+            [AMAAppMetrica activateReporterWithConfiguration:
+                [[AMAReporterConfiguration alloc] initWithAPIKey:apiKey]];
+        });
+        it(@"extendedReporterForApiKey:", ^{
+            [[impl should] receive:@selector(ensureModulesLoaded)];
+            [AMAAppMetrica extendedReporterForApiKey:apiKey];
+        });
+        it(@"requestStartupIdentifiersWithCompletionQueue:completionBlock:", ^{
+            [[impl should] receive:@selector(ensureModulesLoaded)];
+            [AMAAppMetrica requestStartupIdentifiersWithCompletionQueue:nil
+                                                        completionBlock:^(NSDictionary<AMAStartupKey,id> * _Nullable identifiers,
+                                                                          NSError * _Nullable error) {}];
+        });
+        it(@"requestStartupIdentifiersWithKeys:completionQueue:completionBlock:", ^{
+            [[impl should] receive:@selector(ensureModulesLoaded)];
+            [AMAAppMetrica requestStartupIdentifiersWithKeys:@[]
+                                             completionQueue:nil
+                                             completionBlock:^(NSDictionary<AMAStartupKey,id> * _Nullable identifiers,
+                                                               NSError * _Nullable error) {}];
+        });
+        it(@"subscribeForAutocollectedDataForApiKey:", ^{
+            [[impl should] receive:@selector(ensureModulesLoaded)];
+            [AMAAppMetrica subscribeForAutocollectedDataForApiKey:apiKey];
         });
     });
 });
