@@ -25,6 +25,7 @@
 #endif
 @class AMAAppMetricaConfigurationManager;
 @class AMAApplicationState;
+@class AMAServiceConfiguration;
 
 NS_ASSUME_NONNULL_BEGIN
 

@@ -6,7 +6,6 @@
 #import "AMAAdProvider.h"
 #import "AMAAppMetricaImplTestFactory.h"
 #import "AMAAppMetrica+Internal.h"
-#import "AMALocationManager.h"
 #import "AMAAppStateManagerTestHelper.h"
 #import "AMADataSendingRestrictionController.h"
 #import "AMAEventPollingDelegate.h"
@@ -44,6 +43,7 @@ describe(@"AMAAppMetrica", ^{
     AMAAppMetricaImpl *__block impl = nil;
     AMAAdProvider *__block adProvider = nil;
     AMAIdentifierProviderMock *__block identifierManagerMock = nil;
+    AMALocationManager *__block locationManager = nil;
     
     beforeEach(^{
         [[AMAMetricaConfiguration sharedInstance] stub:@selector(identifierProvider) andReturn:identifierManagerMock];
@@ -68,6 +68,9 @@ describe(@"AMAAppMetrica", ^{
         [reporterTestHelper destub];
         [AMAIdentifiersTestUtilities destubAll];
         [AMAFailureDispatcherTestHelper destub];
+        
+        locationManager = [AMALocationManager stubbedNullMockForDefaultInit];
+        [AMALocationManager stub:@selector(sharedManager) andReturn:locationManager];
     });
     
     void (^stubMetricaDependencies)(void) = ^{
@@ -161,9 +164,8 @@ describe(@"AMAAppMetrica", ^{
         it(@"Should set location to location manager", ^{
             stubMetrica();
             CLLocation *location = [[CLLocation alloc] initWithLatitude:11.0 longitude:12.0];
+            [[locationManager should] receive:@selector(setLocation:) withArguments:location];
             [AMAAppMetrica setCustomLocation:location];
-            AMALocationManager *locationManager = [AMALocationManager sharedManager];
-            [[theValue([location test_isEqualToLocation:[locationManager currentLocation]]) should] beYes];
         });
         
         it(@"Should set location tracking enabled", ^{

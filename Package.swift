@@ -465,6 +465,8 @@ extension AppMetricaTarget {
                 "./Model/Session",
                 "./Model/Truncation",
                 "./ModulesAPI",
+                "./ModulesAPI/AdRevenue",
+                "./ModulesAPI/AdRevenue/IronSource",
                 "./Network",
                 "./Network/File",
                 "./Network/Report",

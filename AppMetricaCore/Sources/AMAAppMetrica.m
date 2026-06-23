@@ -254,6 +254,7 @@ NSString *const kAMAAttributionSourceSingular = @"singular";
             return;
         }
 
+        [self setupExternalServices];
         [[self sharedImpl] ensureModulesLoaded];
         [[self sharedImpl] activateWithConfiguration:configuration];
     }
@@ -267,6 +268,7 @@ NSString *const kAMAAttributionSourceSingular = @"singular";
             return;
         }
 
+        [self setupExternalServices];
         [[self sharedImpl] ensureModulesLoaded];
         [[self sharedImpl] scheduleAnonymousActivationIfNeeded];
     }
@@ -525,6 +527,7 @@ NSString *const kAMAAttributionSourceSingular = @"singular";
 
 + (void)activateReporterWithConfiguration:(AMAReporterConfiguration *)configuration
 {
+    [[self class] setupExternalServices];
     [[self sharedImpl] ensureModulesLoaded];
     if ([self isAPIKeyValid:configuration.APIKey] == NO) {
         [AMAErrorLogger logInvalidApiKeyError:configuration.APIKey];
@@ -548,6 +551,7 @@ NSString *const kAMAAttributionSourceSingular = @"singular";
 
 + (id<AMAAppMetricaExtendedReporting>)extendedReporterForApiKey:(NSString *)apiKey
 {
+    [[self class] setupExternalServices];
     [[self sharedImpl] ensureModulesLoaded];
     if ([self isAPIKeyValid:apiKey] == NO) {
         [AMAErrorLogger logInvalidApiKeyError:apiKey];
@@ -756,14 +760,51 @@ NSString *const kAMAAttributionSourceSingular = @"singular";
 // These methods are no-ops kept for binary compatibility.
 // Use AMAModuleContext in AMAModuleEntryPoint.initModuleWithContext: instead.
 
+static NSMutableSet<Class<AMAModuleActivationDelegate>> *sActivationDelegates = nil;
+static NSMutableArray<AMAServiceConfiguration *> *sExternalServices = nil;
+
 + (void)addActivationDelegate:(Class<AMAModuleActivationDelegate>)delegate
 {
-    [[self sharedImpl] addActivationDelegate:delegate];
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        sActivationDelegates = [[NSMutableSet alloc] init];
+    });
+    @synchronized(self) {
+        if ([self isActivated] == NO) {
+            [sActivationDelegates addObject:delegate];
+        }
+    }
 }
 
 + (void)registerExternalService:(AMAServiceConfiguration *)configuration
 {
-    [[self sharedImpl] registerExternalService:configuration];
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        sExternalServices = [[NSMutableArray alloc] init];
+    });
+    @synchronized(self) {
+        if ([self isActivated] == NO) {
+            [sExternalServices addObject:configuration];
+        }
+    }
+}
+
++ (void)setupExternalServices
+{
+    NSSet *delegates = nil;
+    NSArray *services = nil;
+    @synchronized(self) {
+        delegates = [sActivationDelegates copy];
+        services = [sExternalServices copy];
+        [sActivationDelegates removeAllObjects];
+        [sExternalServices removeAllObjects];
+    }
+    for (Class<AMAModuleActivationDelegate> delegate in delegates) {
+        [[self sharedImpl] addActivationDelegate:delegate];
+    }
+    for (AMAServiceConfiguration *config in services) {
+        [[self sharedImpl] registerExternalService:config];
+    }
 }
 
 @end

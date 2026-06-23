@@ -12,6 +12,14 @@ NS_ASSUME_NONNULL_BEGIN
 @property (class, nonatomic) AMAAppMetricaImpl *sharedImpl;
 @property (class, nonatomic) AMAMetricaConfiguration *metricaConfiguration;
 
+// MARK: - Ad revenue capture
+
+@property (class, nonatomic, strong, readonly) NSMutableArray<AMAAdRevenueInfo *> *capturedAdRevenues;
+@property (class, nonatomic, strong, readonly) NSMutableArray<NSNumber *> *capturedIsAutocollected;
+@property (class, nonatomic, strong, readonly) NSMutableArray<NSString *> *capturedNativeSources;
+
++ (void)resetCaptures;
+
 @end
 
 NS_ASSUME_NONNULL_END
