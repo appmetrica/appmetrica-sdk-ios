@@ -784,10 +784,10 @@ describe(@"AMAAppMetricaCrashes", ^{
             [crashes registerCrashHandler:handlerMock];
         });
 
-        it(@"Should not register crash handler after activation", ^{
+        it(@"Should register crash handler after activation", ^{
             [crashes activate];
             id handlerMock = [KWMock nullMockForProtocol:@protocol(AMACrashFilteringProxy)];
-            [[handlerManagerMock shouldNot] receive:@selector(registerHandler:)];
+            [[handlerManagerMock should] receive:@selector(registerHandler:)];
             [crashes registerCrashHandler:handlerMock];
         });
 

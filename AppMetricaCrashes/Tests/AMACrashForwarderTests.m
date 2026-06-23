@@ -198,4 +198,60 @@
     XCTAssertNil([self reporters][@"key"]);
 }
 
+#pragma mark - Replay Buffer
+
+- (void)testHandlerRegisteredAfterProcessCrashReceivesCrashViaReplay
+{
+    [self.manager processCrash:[self sampleDecodedCrash]];
+
+    MockCrashHandler *handler = [self handlerWithAPIKey:@"key" crashResult:YES anrResult:NO];
+    [self.manager registerHandler:handler];
+
+    XCTAssertEqual(handler.crashCallCount, 1u);
+    XCTAssertNotNil([self reporters][@"key"]);
+}
+
+- (void)testHandlerRegisteredAfterProcessANRReceivesANRViaReplay
+{
+    [self.manager processANR:[self sampleDecodedCrash]];
+
+    MockCrashHandler *handler = [self handlerWithAPIKey:@"key" crashResult:NO anrResult:YES];
+    [self.manager registerHandler:handler];
+
+    XCTAssertEqual(handler.anrCallCount, 1u);
+    XCTAssertNotNil([self reporters][@"key"]);
+}
+
+- (void)testHandlerRegisteredBeforeProcessCrashReceivesCrashOnce
+{
+    MockCrashHandler *handler = [self handlerWithAPIKey:@"key" crashResult:YES anrResult:NO];
+    [self.manager registerHandler:handler];
+
+    [self.manager processCrash:[self sampleDecodedCrash]];
+
+    XCTAssertEqual(handler.crashCallCount, 1u);
+}
+
+- (void)testHandlerRegisteredTwiceReceivesReplayOnce
+{
+    [self.manager processCrash:[self sampleDecodedCrash]];
+
+    MockCrashHandler *handler = [self handlerWithAPIKey:@"key" crashResult:YES anrResult:NO];
+    [self.manager registerHandler:handler];
+    [self.manager registerHandler:handler];
+
+    XCTAssertEqual(handler.crashCallCount, 1u);
+}
+
+- (void)testReplayDoesNotDeliverCrashAsANR
+{
+    [self.manager processCrash:[self sampleDecodedCrash]];
+
+    MockCrashHandler *handler = [self handlerWithAPIKey:@"key" crashResult:YES anrResult:YES];
+    [self.manager registerHandler:handler];
+
+    XCTAssertEqual(handler.crashCallCount, 1u);
+    XCTAssertEqual(handler.anrCallCount, 0u);
+}
+
 @end

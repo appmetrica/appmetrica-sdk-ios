@@ -592,7 +592,7 @@ them while retaining external immutability. Needed for testability. */
 
 - (void)registerCrashHandler:(id<AMACrashFilteringProxy>)handler
 {
-    if (handler == nil || self.isActivated) {
+    if (handler == nil) {
         return;
     }
 

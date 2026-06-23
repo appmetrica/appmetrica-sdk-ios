@@ -8,6 +8,16 @@
 #import "AMADecodedCrashSerializer+CustomEventParameters.h"
 #import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
 
+
+@interface AMACrashForwarderEntry : NSObject
+@property (nonatomic, strong) AMACrashEvent *crashEvent;
+@property (nonatomic, strong) AMAEventPollingParameters *parameters;
+@property (nonatomic, assign) BOOL isANR;
+@end
+
+@implementation AMACrashForwarderEntry
+@end
+
 @interface AMACrashForwarder ()
 
 @property (nonatomic, strong) id<AMAAsyncExecuting, AMASyncExecuting> executor;
@@ -15,6 +25,7 @@
 @property (nonatomic, strong) AMADecodedCrashSerializer *serializer;
 @property (nonatomic, strong) NSHashTable *handlers;
 @property (nonatomic, strong) NSMutableDictionary<NSString *, AMACrashReporter *> *reporters;
+@property (nonatomic, strong) NSMutableArray<AMACrashForwarderEntry *> *replayBuffer;
 
 @end
 
@@ -29,6 +40,7 @@
         _serializer = serializer;
         _handlers = [NSHashTable weakObjectsHashTable];
         _reporters = [NSMutableDictionary dictionary];
+        _replayBuffer = [NSMutableArray array];
     }
     return self;
 }
@@ -41,7 +53,21 @@
         return;
     }
     [self.executor execute:^{
+        if ([self.handlers containsObject:handler]) {
+            return;
+        }
         [self.handlers addObject:handler];
+        for (AMACrashForwarderEntry *entry in self.replayBuffer) {
+            if (entry.isANR) {
+                if ([handler shouldReportANR:entry.crashEvent]) {
+                    [[self reporterForAPIKey:handler.apiKey] reportANRWithParameters:entry.parameters];
+                }
+            } else {
+                if ([handler shouldReportCrash:entry.crashEvent]) {
+                    [[self reporterForAPIKey:handler.apiKey] reportCrashWithParameters:entry.parameters];
+                }
+            }
+        }
     }];
 }
 
@@ -59,19 +85,19 @@
             return;
         }
 
-        AMAEventPollingParameters *__block parameters = nil;
+        AMAEventPollingParameters *parameters =
+            [self.serializer eventParametersFromDecodedData:decodedCrash
+                                               forEventType:AMACrashEventTypeCrash
+                                                      error:NULL];
 
         for (id<AMACrashFilteringProxy> handler in self.handlers) {
-            if ([handler shouldReportCrash:crashEvent]) {
-                if (parameters == nil) {
-                    parameters = [self.serializer eventParametersFromDecodedData:decodedCrash
-                                                                   forEventType:AMACrashEventTypeCrash
-                                                                          error:NULL];
-                }
-                if (parameters != nil) {
-                    [[self reporterForAPIKey:handler.apiKey] reportCrashWithParameters:parameters];
-                }
+            if ([handler shouldReportCrash:crashEvent] && parameters != nil) {
+                [[self reporterForAPIKey:handler.apiKey] reportCrashWithParameters:parameters];
             }
+        }
+
+        if (parameters != nil) {
+            [self bufferCrashEvent:crashEvent parameters:parameters isANR:NO];
         }
     }];
 }
@@ -88,24 +114,35 @@
             return;
         }
 
-        AMAEventPollingParameters *__block parameters = nil;
+        AMAEventPollingParameters *parameters =
+            [self.serializer eventParametersFromDecodedData:decodedCrash
+                                               forEventType:AMACrashEventTypeANR
+                                                      error:NULL];
 
         for (id<AMACrashFilteringProxy> handler in self.handlers) {
-            if ([handler shouldReportANR:crashEvent]) {
-                if (parameters == nil) {
-                    parameters = [self.serializer eventParametersFromDecodedData:decodedCrash
-                                                                   forEventType:AMACrashEventTypeANR
-                                                                          error:NULL];
-                }
-                if (parameters != nil) {
-                    [[self reporterForAPIKey:handler.apiKey] reportANRWithParameters:parameters];
-                }
+            if ([handler shouldReportANR:crashEvent] && parameters != nil) {
+                [[self reporterForAPIKey:handler.apiKey] reportANRWithParameters:parameters];
             }
+        }
+
+        if (parameters != nil) {
+            [self bufferCrashEvent:crashEvent parameters:parameters isANR:YES];
         }
     }];
 }
 
 #pragma mark - Private
+
+- (void)bufferCrashEvent:(AMACrashEvent *)crashEvent
+              parameters:(AMAEventPollingParameters *)parameters
+                   isANR:(BOOL)isANR
+{
+    AMACrashForwarderEntry *entry = [[AMACrashForwarderEntry alloc] init];
+    entry.crashEvent = crashEvent;
+    entry.parameters = parameters;
+    entry.isANR = isANR;
+    [self.replayBuffer addObject:entry];
+}
 
 - (AMACrashReporter *)reporterForAPIKey:(NSString *)apiKey
 {
