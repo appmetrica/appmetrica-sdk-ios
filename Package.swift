@@ -467,6 +467,8 @@ extension AppMetricaTarget {
                 "./ModulesAPI",
                 "./ModulesAPI/AdRevenue",
                 "./ModulesAPI/AdRevenue/IronSource",
+                "./ModulesAPI/AdRevenue/AppLovin",
+                "./ModulesAPI/AdRevenue/AppLovin/Startup",
                 "./Network",
                 "./Network/File",
                 "./Network/Report",

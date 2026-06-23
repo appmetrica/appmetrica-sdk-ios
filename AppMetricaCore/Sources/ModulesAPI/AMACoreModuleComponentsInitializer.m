@@ -11,6 +11,7 @@ static NSArray<NSString *> *knownEntryPointClassNames(void) {
         @"AMAAppMetricaCrashesEntryPoint",
         @"AMAIDSyncModuleEntryPoint",
         @"AMAScreenshotModuleEntryPoint",
+        @"AMAAppLovinMaxModuleEntryPoint",
         @"AMAIronSourceModuleEntryPoint",
     ];
 }

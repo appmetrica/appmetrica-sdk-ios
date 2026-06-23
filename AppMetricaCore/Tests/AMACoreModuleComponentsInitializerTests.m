@@ -8,7 +8,7 @@
 
 // MARK: - Tests
 
-static NSUInteger const kPublicClassCount = 5;
+static NSUInteger const kPublicClassCount = 6;
 
 static NSArray<NSString *> *publicEntryPointNames(void) {
     return @[
@@ -16,6 +16,7 @@ static NSArray<NSString *> *publicEntryPointNames(void) {
         @"AMAAppMetricaCrashesEntryPoint",
         @"AMAIDSyncModuleEntryPoint",
         @"AMAScreenshotModuleEntryPoint",
+        @"AMAAppLovinMaxModuleEntryPoint",
         @"AMAIronSourceModuleEntryPoint",
     ];
 }
