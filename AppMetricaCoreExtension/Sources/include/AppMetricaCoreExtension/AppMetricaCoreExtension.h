@@ -1,5 +1,6 @@
 #if __has_include("AppMetricaCoreExtension.h")
     #import "AMAAdProviding.h"
+    #import "AMAAppMetricaEventData.h"
     #import "AMAAppMetricaExtended.h"
     #import "AMAAppMetricaExtendedReporting.h"
     #import "AMAAppMetricaLibraryAdapterConfiguration.h"
@@ -14,8 +15,11 @@
     #import "AMAModuleEntryPoint.h"
     #import "AMAReporterStorageControlling.h"
     #import "AMAServiceConfiguration.h"
+    #import "AMAStaticEventData.h"
+    #import "AMAAppMetricaInternalEvent.h"
 #else
     #import <AppMetricaCoreExtension/AMAAdProviding.h>
+    #import <AppMetricaCoreExtension/AMAAppMetricaEventData.h>
     #import <AppMetricaCoreExtension/AMAAppMetricaExtended.h>
     #import <AppMetricaCoreExtension/AMAAppMetricaExtendedReporting.h>
     #import <AppMetricaCoreExtension/AMAAppMetricaLibraryAdapterConfiguration.h>
@@ -30,4 +34,6 @@
     #import <AppMetricaCoreExtension/AMAModuleEntryPoint.h>
     #import <AppMetricaCoreExtension/AMAReporterStorageControlling.h>
     #import <AppMetricaCoreExtension/AMAServiceConfiguration.h>
+    #import <AppMetricaCoreExtension/AMAStaticEventData.h>
+    #import <AppMetricaCoreExtension/AMAAppMetricaInternalEvent.h>
 #endif

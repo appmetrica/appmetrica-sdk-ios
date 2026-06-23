@@ -441,6 +441,16 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
     }];
 }
 
+- (void)reportWithEvent:(id<AMAAppMetricaEvent>)event
+              onFailure:(void (^)(NSError *))onFailure
+{
+    [self execute:^{
+        [self reportEventWithBlock:^{
+            [self.mainReporter reportWithEvent:event onFailure:onFailure];
+        } onFailure:onFailure];
+    }];
+}
+
 - (void)reportSystemEvent:(NSString *)name onFailure:(void (^)(NSError *))onFailure
 {
     [self execute:^{

@@ -12,6 +12,7 @@
 @class AMAUserProfile;
 @class AMAReporterConfiguration;
 @protocol AMAAppMetricaExtendedReporting;
+@protocol AMAAppMetricaEvent;
 @protocol AMAEventPollingDelegate;
 @protocol AMAAsyncExecuting;
 @protocol AMASyncExecuting;
@@ -89,6 +90,9 @@ NS_ASSUME_NONNULL_BEGIN
                        appState:(nullable AMAApplicationState *)appState
                          extras:(nullable NSDictionary<NSString *, NSData *> *)extras
                       onFailure:(nullable void (^)(NSError *error))onFailure;
+
+- (void)reportWithEvent:(id<AMAAppMetricaEvent>)event
+              onFailure:(nullable void (^)(NSError *error))onFailure;
 
 - (void)reportSystemEvent:(NSString *)name onFailure:(nullable void (^)(NSError *error))onFailure;
 

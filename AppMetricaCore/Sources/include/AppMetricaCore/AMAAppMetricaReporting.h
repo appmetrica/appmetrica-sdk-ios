@@ -40,6 +40,15 @@ NS_SWIFT_NAME(reportEvent(name:onFailure:));
           onFailure:(nullable void (^)(NSError *error))onFailure
 NS_SWIFT_NAME(reportEvent(name:parameters:onFailure:));
 
+/** Reports an event described by an `AMAAppMetricaEvent` object to the server.
+
+ @param event The event to be reported, cannot be nil.
+ @param onFailure The block to be called when the operation fails, can be nil.
+ */
+- (void)reportWithEvent:(id<AMAAppMetricaEvent>)event
+              onFailure:(nullable void (^)(NSError *error))onFailure
+NS_SWIFT_NAME(reportEvent(with:onFailure:));
+
 /** Sends information about the user profile.
 
  @param userProfile The `AMAUserProfile` object. Contains user profile information.

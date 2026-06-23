@@ -15,6 +15,8 @@
 #import "AMAMetricaConfigurationTestUtilities.h"
 #import "AMAReporter.h"
 #import "AMAReporterTestHelper.h"
+#import "AMAStaticEventData.h"
+#import "AMAAppMetricaEvent.h"
 #import "AMAStartupHostProvider.h"
 #import "AMAStartupItemsChangedNotifier+Tests.h"
 #import "AMAStartupResponseParser.h"
@@ -564,6 +566,56 @@ describe(@"AMAAppMetrica", ^{
                                                           extras:nil
                                                   bytesTruncated:0
                                                        onFailure:nil];
+                    });
+                });
+            });
+            context(@"Event object", ^{
+                NSUInteger const eventType = 1234;
+                NSString *const eventName = @"foo";
+                NSData *data = [@"payload" dataUsingEncoding:NSUTF8StringEncoding];
+
+                id<AMAAppMetricaEvent> (^buildEvent)(void) = ^id<AMAAppMetricaEvent> {
+                    AMAStaticEventData *eventData =
+                        [[AMAStaticEventData alloc] initWithName:eventName
+                                                           type:eventType
+                                                           data:data
+                                                 bytesTruncated:8];
+                    KWMock<AMAAppMetricaEvent> *event = [KWMock nullMockForProtocol:@protocol(AMAAppMetricaEvent)];
+                    [event stub:@selector(copyWithZone:) andReturn:event];
+                    [(NSObject*)event stub:@selector(eventData) andReturn:eventData];
+                    return event;
+                };
+
+                context(@"Not activated Metrica", ^{
+                    NSError *(^errorFromReporting)(void) = ^NSError * {
+                        NSError *__block resultError = nil;
+                        [AMAAppMetrica reportWithEvent:buildEvent()
+                                             onFailure:^(NSError *error) {
+                            resultError = error;
+                        }];
+                        return resultError;
+                    };
+
+                    it(@"Should call onFailure with error of actual domain", ^{
+                        [[errorFromReporting().domain should] equal:AMAAppMetricaEventErrorDomain];
+                    });
+                    it(@"Should call onFailure with error of actual code", ^{
+                        [[theValue(errorFromReporting().code) should] equal:theValue(AMAAppMetricaEventErrorCodeIsNotActivated)];
+                    });
+                });
+                context(@"Activated Metrica", ^{
+                    it(@"Should report event object", ^{
+                        activate();
+                        id<AMAAppMetricaEvent> event = buildEvent();
+                        AMAReporter *reporter = reporterTestHelper.appReporter;
+                        [[reporter should] receive:@selector(reportWithEvent:onFailure:)
+                                     withArguments:event, nil];
+                        [AMAAppMetrica reportWithEvent:event onFailure:nil];
+                    });
+                    it(@"Should not report event object if metrica is not activated", ^{
+                        AMAReporter *reporter = reporterTestHelper.appReporter;
+                        [[reporter shouldNot] receive:@selector(reportWithEvent:onFailure:)];
+                        [AMAAppMetrica reportWithEvent:buildEvent() onFailure:nil];
                     });
                 });
             });

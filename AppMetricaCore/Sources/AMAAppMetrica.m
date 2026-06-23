@@ -200,6 +200,15 @@ NSString *const kAMAAttributionSourceSingular = @"singular";
     }
 }
 
++ (void)reportWithEvent:(id<AMAAppMetricaEvent>)event
+              onFailure:(void (^)(NSError *))onFailure
+{
+    if ([self isAppMetricaStartedWithLogging:onFailure]) {
+        id<AMAAppMetricaEvent> copied = [event copyWithZone:nil];
+        [[self sharedImpl] reportWithEvent:copied onFailure:onFailure];
+    }
+}
+
 + (void)reportFileEventWithType:(NSUInteger)eventType
                            data:(NSData *)data
                        fileName:(NSString *)fileName

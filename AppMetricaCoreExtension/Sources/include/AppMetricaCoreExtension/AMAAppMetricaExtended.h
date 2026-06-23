@@ -16,6 +16,7 @@ NS_ASSUME_NONNULL_BEGIN
 @protocol AMAAdProviding;
 @protocol AMAAppMetricaExtendedReporting;
 @protocol AMAActivationStrategy;
+@protocol AMAAppMetricaEvent;
 
 
 #pragma mark - This API is not SemVer-compliant. It may change at any time without backward compatibility. Use at your own risk.

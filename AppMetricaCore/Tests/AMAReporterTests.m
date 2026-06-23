@@ -12,6 +12,8 @@
 #import "AMAStringEventValue.h"
 #import "AMABinaryEventValue.h"
 #import "AMAFileEventValue.h"
+#import "AMAStaticEventData.h"
+#import "AMAAppMetricaEvent.h"
 #import "AMASession.h"
 #import "AMASessionStorage+AMATestUtilities.h"
 #import "AMADatabaseProtocol.h"
@@ -1977,6 +1979,32 @@ describe(@"AMAReporter", ^{
             it(@"Should save event", ^{
                 [[error should] beNil];
                 [[event shouldNot] beNil];
+            });
+        });
+        context(@"Event object", ^{
+            NSString *const eventName = @"binary.event";
+            NSData *__block data = [@"payload" dataUsingEncoding:NSUTF8StringEncoding];
+            __block AMAEvent *event;
+            beforeEach(^{
+                AMAStaticEventData *eventData =
+                    [[AMAStaticEventData alloc] initWithName:eventName
+                                                       type:AMAEventTypeClient
+                                                       data:data
+                                             bytesTruncated:7];
+                id<AMAAppMetricaEvent> appMetricaEvent =
+                    [KWMock nullMockForProtocol:@protocol(AMAAppMetricaEvent)];
+                [(NSObject*)appMetricaEvent stub:@selector(eventData) andReturn:eventData];
+
+                [reporter reportWithEvent:appMetricaEvent
+                                onFailure:^(NSError *anError) { error = anError; }];
+                event = [eventStorage() amatest_savedEventWithType:AMAEventTypeClient name:eventName];
+            });
+            it(@"Should save event with data from event object", ^{
+                [[error should] beNil];
+                [[event shouldNot] beNil];
+                [[theValue(event.type) should] equal:theValue(AMAEventTypeClient)];
+                [[event.name should] equal:eventName];
+                [[theValue(event.bytesTruncated) should] equal:theValue(7)];
             });
         });
         context(@"File events", ^{

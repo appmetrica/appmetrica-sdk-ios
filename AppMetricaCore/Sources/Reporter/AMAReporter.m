@@ -541,6 +541,22 @@
     }
 }
 
+- (void)reportWithEvent:(id<AMAAppMetricaEvent>)event
+              onFailure:(void (^)(NSError *))onFailure
+{
+    id<AMAAppMetricaInternalEvent> internalEvent = (id<AMAAppMetricaInternalEvent>)event;
+    id<AMAAppMetricaEventData> eventData = internalEvent.eventData;
+    [self reportBinaryEventWithType:eventData.type
+                               data:eventData.data
+                               name:eventData.name
+                            gZipped:NO
+                   eventEnvironment:nil
+                     appEnvironment:nil
+                             extras:nil
+                     bytesTruncated:(NSUInteger)eventData.bytesTruncated
+                          onFailure:onFailure];
+}
+
 - (void)reportSystemEvent:(NSString *)name onFailure:(void (^)(NSError *))onFailure
 {
     [self reportCommonEventWithBlock:^AMAEvent *(NSError **error) {

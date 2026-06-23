@@ -11,6 +11,8 @@
     #import "AMAReporterConfiguration.h"
     #import "AMARevenueInfo.h"
     #import "AMAUserProfile.h"
+    #import "AMAAppMetricaEvent.h"
+    #import "AMAEventFactory.h"
 #else
     #import <AppMetricaCore/AMAAdRevenueInfo.h>
     #import <AppMetricaCore/AMAAppMetrica.h>
@@ -23,4 +25,6 @@
     #import <AppMetricaCore/AMAReporterConfiguration.h>
     #import <AppMetricaCore/AMARevenueInfo.h>
     #import <AppMetricaCore/AMAUserProfile.h>
+    #import <AppMetricaCore/AMAAppMetricaEvent.h>
+    #import <AppMetricaCore/AMAEventFactory.h>
 #endif
