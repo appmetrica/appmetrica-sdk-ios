@@ -129,11 +129,6 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
         _reportersContainer = [AMAReportersContainer new];
         _strategiesContainer = [AMADispatchStrategiesContainer new];
         _preactivationActionHistory = [[AMAPreactivationActionHistory alloc] init];
-        _modulesController = [[AMAModulesController alloc] init];
-        __weak typeof(self) weakSelf = self;
-        _modulesController.startupParametersHandler = ^(NSDictionary *params) {
-            [weakSelf addAdditionalStartupParameters:params];
-        };
         _startupCompletionObservers = [NSHashTable weakObjectsHashTable];
         _extensionsReportController = [[AMAExtensionsReportController alloc] init];
         _permissionsController = [[AMAPermissionsController alloc] init];
@@ -165,6 +160,7 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
 #endif
 
         [self initializeStartupController];
+        [self initializeModulesController];
         [self initializeIdentifierChangedNotifier];
         [self startReachability];
         [self reportExtensionsReportIfNeeded];
@@ -766,6 +762,22 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
                 AMALogError(@"Can't send permissions: %@", permissionsJSON);
             }];
         }
+    }];
+}
+
+- (void)initializeModulesController
+{
+    __weak typeof(self) weakSelf = self;
+    [self execute:^{
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+        if (strongSelf == nil) { return; }
+        strongSelf.modulesController = [[AMAModulesController alloc]
+               initWithExecutor:[[AMAExecutor alloc] initWithIdentifier:strongSelf]
+        startupParametersHandler:^(NSDictionary *params) {
+                [weakSelf addAdditionalStartupParameters:params];
+            }
+       initializationExecutor:strongSelf.executor];
+        [strongSelf.modulesController ensureLoaded];
     }];
 }
 

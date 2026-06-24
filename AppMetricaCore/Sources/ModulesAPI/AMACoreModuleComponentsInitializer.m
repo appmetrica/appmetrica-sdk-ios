@@ -7,8 +7,8 @@
 
 static NSArray<NSString *> *knownEntryPointClassNames(void) {
     return @[
-        @"AMAAdSupportModuleEntryPoint",
         @"AMAAppMetricaCrashesEntryPoint",
+        @"AMAAdSupportModuleEntryPoint",
         @"AMAIDSyncModuleEntryPoint",
         @"AMAScreenshotModuleEntryPoint",
         @"AMAAppLovinMaxModuleEntryPoint",

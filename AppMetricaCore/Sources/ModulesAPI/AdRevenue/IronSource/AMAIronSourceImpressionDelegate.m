@@ -91,6 +91,9 @@ typedef NSString *(*AMAISAdUnitValueIMP)(id, SEL);
 - (void)processV8ImpressionData:(id)impressionData
 {
     NSNumber *revenueNumber = [impressionData valueForKey:@"revenue"];
+    if (revenueNumber == nil) {
+        return;
+    }
     double revenueValue = [revenueNumber doubleValue];
 
     AMAMutableAdRevenueInfo *adRevenue = [[AMAMutableAdRevenueInfo alloc]
@@ -160,6 +163,9 @@ typedef NSString *(*AMAISAdUnitValueIMP)(id, SEL);
 - (void)processV9ImpressionData:(id)impressionData
 {
     NSNumber *revenueNumber = [impressionData valueForKey:@"revenue"];
+    if (revenueNumber == nil) {
+        return;
+    }
     double revenueValue = [revenueNumber doubleValue];
 
     AMAMutableAdRevenueInfo *adRevenue = [[AMAMutableAdRevenueInfo alloc]

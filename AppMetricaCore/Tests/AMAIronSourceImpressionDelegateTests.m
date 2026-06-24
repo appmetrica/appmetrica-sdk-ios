@@ -192,4 +192,20 @@
     XCTAssertEqual(((AMAAdRevenueInfo *)AMAAppMetricaMock.capturedAdRevenues.firstObject).adType, AMAAdTypeUnknown);
 }
 
+- (void)testV8_nilRevenue_doesNotReport
+{
+    [self.v8Delegate processQueuedImpressionData];
+    AMAFakeV8ImpressionData *d = [AMAFakeV8ImpressionData new];
+    [self.v8Delegate impressionDataDidSucceed:d];
+    XCTAssertEqual(AMAAppMetricaMock.capturedAdRevenues.count, 0u);
+}
+
+- (void)testV9_nilRevenue_doesNotReport
+{
+    [self.v9Delegate processQueuedImpressionData];
+    AMAFakeV9ImpressionData *d = [AMAFakeV9ImpressionData new];
+    [self.v9Delegate impressionDataDidSucceed:d];
+    XCTAssertEqual(AMAAppMetricaMock.capturedAdRevenues.count, 0u);
+}
+
 @end

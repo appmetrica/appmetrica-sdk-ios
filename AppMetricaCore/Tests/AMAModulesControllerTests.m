@@ -16,7 +16,10 @@
 
 - (void)setUp
 {
-    self.controller = [[AMAModulesController alloc] initWithExecutor:[AMACurrentQueueExecutor new]];
+    AMACurrentQueueExecutor *executor = [AMACurrentQueueExecutor new];
+    self.controller = [[AMAModulesController alloc] initWithExecutor:executor
+                                             startupParametersHandler:nil
+                                            initializationExecutor:executor];
     [AMAModuleActivationDelegateMock reset];
     [AMAEventFlushableDelegateMock reset];
 }

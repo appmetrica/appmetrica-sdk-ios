@@ -30,7 +30,10 @@ static NSArray<NSString *> *publicEntryPointNames(void) {
 - (void)setUp
 {
     [AMAFakeEntryPoint resetCallCount];
-    self.controller = [[AMAModulesController alloc] initWithExecutor:[AMACurrentQueueExecutor new]];
+    AMACurrentQueueExecutor *executor = [AMACurrentQueueExecutor new];
+    self.controller = [[AMAModulesController alloc] initWithExecutor:executor
+                                             startupParametersHandler:nil
+                                            initializationExecutor:executor];
 }
 
 // MARK: - Public class names

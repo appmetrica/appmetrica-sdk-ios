@@ -13,6 +13,9 @@
 
 - (void)addNativeSupportedSource:(NSString*)source
 {
+    if ([self.nativeSupportedSources containsObject:source]) {
+        return;
+    }
     NSMutableArray *newSources = [self.nativeSupportedSources mutableCopy];
     [newSources addObject:source];
     self.nativeSupportedSources = newSources;

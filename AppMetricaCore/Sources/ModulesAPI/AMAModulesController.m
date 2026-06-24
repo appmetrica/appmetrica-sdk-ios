@@ -10,6 +10,7 @@
 @interface AMAModulesController ()
 @property (nonatomic, strong) NSMutableArray<id<AMAModuleEntryPoint>> *modules;
 @property (nonatomic, strong) id<AMAAsyncExecuting, AMASyncExecuting> executor;
+@property (nonatomic, strong) id<AMAAsyncExecuting> initializationExecutor;
 @property (nonatomic, assign) dispatch_once_t loadOnce;
 @property (nonatomic, strong) AMAModuleContextImpl *context;
 @end
@@ -18,16 +19,23 @@
 
 - (instancetype)init
 {
-    return [self initWithExecutor:[[AMAExecutor alloc] initWithIdentifier:self]];
+    id<AMAAsyncExecuting, AMASyncExecuting> executor = [[AMAExecutor alloc] initWithIdentifier:self];
+    return [self initWithExecutor:executor
+          startupParametersHandler:nil
+         initializationExecutor:executor];
 }
 
 - (instancetype)initWithExecutor:(id<AMAAsyncExecuting, AMASyncExecuting>)executor
+        startupParametersHandler:(AMAStartupParametersHandler)startupParametersHandler
+       initializationExecutor:(id<AMAAsyncExecuting>)initializationExecutor
 {
     self = [super init];
     if (self) {
         _modules = [NSMutableArray array];
         _executor = executor;
+        _initializationExecutor = initializationExecutor;
         _context = [[AMAModuleContextImpl alloc] init];
+        _startupParametersHandler = [startupParametersHandler copy];
     }
     return self;
 }
@@ -35,7 +43,7 @@
 - (void)ensureLoaded
 {
     dispatch_once(&_loadOnce, ^{
-        [self.executor execute:^{
+        [self.initializationExecutor execute:^{
             [AMACoreModuleComponentsInitializer discoverAndRegisterInController:self classLookup:nil];
             [self notifySetupStartupStorageProvider];
         }];
@@ -44,24 +52,22 @@
 
 - (void)registerModule:(id<AMAModuleEntryPoint>)module
 {
-    [self.executor execute:^{
-        [self.modules addObject:module];
-        [module initModuleWithContext:self.context];
-    }];
+    [self.modules addObject:module];
+    [module initModuleWithContext:self.context];
 }
 
 // MARK: - Activation lifecycle
 
 - (void)notifyWillActivateWithConfiguration:(AMAModuleActivationConfiguration *)configuration
 {
-    [self.executor execute:^{
+    [self.initializationExecutor execute:^{
         [self.context notifyWillActivateWithConfiguration:configuration];
     }];
 }
 
 - (void)notifyDidActivateWithConfiguration:(AMAModuleActivationConfiguration *)configuration
 {
-    [self.executor execute:^{
+    [self.initializationExecutor execute:^{
         [self.context notifyDidActivateWithConfiguration:configuration];
     }];
 }

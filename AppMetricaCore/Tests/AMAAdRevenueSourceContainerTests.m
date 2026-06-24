@@ -52,4 +52,21 @@
     XCTAssertEqualObjects(self.sourceContainer.nativeSupportedSources, expected);
 }
 
+- (void)testAddNativeSourceDoesNotAddDuplicate
+{
+    [self.sourceContainer addNativeSupportedSource:@"ironsource"];
+    [self.sourceContainer addNativeSupportedSource:@"applovin"];
+    [self.sourceContainer addNativeSupportedSource:@"ironsource"];
+
+    NSArray *expected = @[@"yandex", @"ironsource", @"applovin"];
+    XCTAssertEqualObjects(self.sourceContainer.nativeSupportedSources, expected);
+}
+
+- (void)testAddNativeSourceDoesNotAddDefaultSourceAgain
+{
+    [self.sourceContainer addNativeSupportedSource:@"yandex"];
+
+    XCTAssertEqualObjects(self.sourceContainer.nativeSupportedSources, @[@"yandex"]);
+}
+
 @end

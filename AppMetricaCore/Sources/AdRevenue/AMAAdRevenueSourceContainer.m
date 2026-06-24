@@ -27,6 +27,9 @@ static NSString *const kAdRevenuePluginSourcesKey = @"io.appmetrica.analytics.pl
 - (void)addNativeSupportedSource:(NSString *)source
 {
     @synchronized (self) {
+        if ([self.nativeSupportedSources containsObject:source]) {
+            return;
+        }
         NSMutableArray<NSString *> *result = [self.nativeSupportedSources mutableCopy];
         [result addObject:source];
         _nativeSupportedSources = [result copy];
