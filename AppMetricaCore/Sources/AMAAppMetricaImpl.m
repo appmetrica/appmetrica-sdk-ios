@@ -1326,12 +1326,16 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
 
 - (void)addActivationDelegate:(Class<AMAModuleActivationDelegate>)delegate
 {
-    [self.modulesController.context addActivationDelegate:delegate];
+    [self execute:^{
+        [self.modulesController.context addActivationDelegate:delegate];
+    }];
 }
 
 - (void)registerExternalService:(AMAServiceConfiguration *)configuration
 {
-    [self.modulesController.context registerExternalService:configuration];
+    [self execute:^{
+        [self.modulesController.context registerExternalService:configuration];
+    }];
 }
 
 @end
