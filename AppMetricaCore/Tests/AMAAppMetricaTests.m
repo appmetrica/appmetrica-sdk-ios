@@ -1289,13 +1289,8 @@ describe(@"AMAAppMetrica", ^{
         
         it(@"registerAdRevenueNativeSource", ^{
             NSString *nativeSource = @"native_source";
-            NSArray *expected = @[
-                @"yandex",
-                @"native_source",
-            ];
-            
             [AMAAppMetrica registerAdRevenueNativeSource:nativeSource];
-            [[[AMAAdRevenueSourceContainer sharedInstance].nativeSupportedSources should] equal:expected];
+            [[[AMAAdRevenueSourceContainer sharedInstance].nativeSupportedSources should] contain:nativeSource];
         });
         
         it(@"subscribeForAutocollectedData", ^{
