@@ -1,7 +1,6 @@
 
 #import "AMAIronSourceImpressionDelegate.h"
 #import "AMAIronSourceLog.h"
-#import <objc/message.h>
 
 static NSString *const kSourceIdentifier = @"ironsource";
 static NSString *const kOriginalSourceV8  = @"ad-revenue-ironsource-v8";
@@ -9,13 +8,12 @@ static NSString *const kOriginalSourceV9  = @"ad-revenue-ironsource-v9";
 static NSString *const kLayer    = @"native";
 static NSString *const kCurrency = @"USD";
 
-// V9 / LPMImpressionData adFormat strings
-static NSString *const kV9FormatRewarded     = @"rewarded_video";
-static NSString *const kV9FormatInterstitial = @"interstitial";
-static NSString *const kV9FormatBanner       = @"banner";
-
-typedef id        (*AMAISAdUnitClassMethodIMP)(Class, SEL);
-typedef NSString *(*AMAISAdUnitValueIMP)(id, SEL);
+// Unified IronSource adFormat strings (impression data), v8 + v9.
+static NSString *const kFormatRewardedVideo    = @"rewarded_video";
+static NSString *const kFormatRewardedVideoAlt = @"rewardedVideo";
+static NSString *const kFormatNativeAd         = @"nativeAd";
+static NSString *const kFormatInterstitial     = @"interstitial";
+static NSString *const kFormatBanner           = @"banner";
 
 @interface AMAIronSourceImpressionDelegate ()
 {
@@ -86,7 +84,7 @@ typedef NSString *(*AMAISAdUnitValueIMP)(id, SEL);
     }
 }
 
-// MARK: V8 — ISImpressionData (snake_case keys, ISAdUnit constants for adType)
+// MARK: V8 — ISImpressionData (snake_case keys)
 
 - (void)processV8ImpressionData:(id)impressionData
 {
@@ -101,7 +99,7 @@ typedef NSString *(*AMAISAdUnitValueIMP)(id, SEL);
                  currency:kCurrency];
 
     NSString *adFormat = [impressionData valueForKey:@"ad_format"];
-    adRevenue.adType        = [self v8AdTypeForFormat:adFormat];
+    adRevenue.adType        = [self adTypeForFormat:adFormat];
     adRevenue.adNetwork     = [impressionData valueForKey:@"ad_network"];
     adRevenue.adPlacementName = [impressionData valueForKey:@"placement"];
     adRevenue.precision     = [impressionData valueForKey:@"precision"];
@@ -119,46 +117,7 @@ typedef NSString *(*AMAISAdUnitValueIMP)(id, SEL);
     [AMAAppMetrica reportAdRevenue:adRevenue isAutocollected:YES onFailure:nil];
 }
 
-/// Builds the adFormat→AMAAdType map once from ISAdUnit class-method constants via runtime.
-/// Falls back to an empty map (→ AMAAdTypeOther) if ISAdUnit is not present.
-- (NSDictionary<NSString *, NSNumber *> *)v8AdUnitMap
-{
-    static NSDictionary *map = nil;
-    static dispatch_once_t once;
-    dispatch_once(&once, ^{
-        Class cls = NSClassFromString(@"ISAdUnit");
-        if (cls == nil) {
-            map = @{};
-            return;
-        }
-        NSMutableDictionary *m = [NSMutableDictionary dictionary];
-        void (^add)(NSString *, AMAAdType) = ^(NSString *selName, AMAAdType adType) {
-            SEL sel = NSSelectorFromString(selName);
-            if (![cls respondsToSelector:sel]) { return; }
-            id unit = ((AMAISAdUnitClassMethodIMP)objc_msgSend)(cls, sel);
-            if (unit == nil) { return; }
-            SEL valueSel = NSSelectorFromString(@"value");
-            if (![unit respondsToSelector:valueSel]) { return; }
-            NSString *value = ((AMAISAdUnitValueIMP)objc_msgSend)(unit, valueSel);
-            if (value.length > 0) { m[value] = @(adType); }
-        };
-        add(@"IS_AD_UNIT_REWARDED_VIDEO", AMAAdTypeRewarded);
-        add(@"IS_AD_UNIT_INTERSTITIAL",   AMAAdTypeInterstitial);
-        add(@"IS_AD_UNIT_BANNER",         AMAAdTypeBanner);
-        add(@"IS_AD_UNIT_NATIVE_AD",      AMAAdTypeNative);
-        map = [m copy];
-    });
-    return map;
-}
-
-- (AMAAdType)v8AdTypeForFormat:(nullable NSString *)adFormat
-{
-    if (adFormat == nil) { return AMAAdTypeUnknown; }
-    NSNumber *mapped = [self v8AdUnitMap][adFormat];
-    return mapped ? (AMAAdType)mapped.unsignedIntegerValue : AMAAdTypeOther;
-}
-
-// MARK: V9 — LPMImpressionData (camelCase keys, string adFormat mapping)
+// MARK: V9 — LPMImpressionData (camelCase keys)
 
 - (void)processV9ImpressionData:(id)impressionData
 {
@@ -173,7 +132,7 @@ typedef NSString *(*AMAISAdUnitValueIMP)(id, SEL);
                  currency:kCurrency];
 
     NSString *adFormat = [impressionData valueForKey:@"adFormat"];
-    adRevenue.adType          = [self v9AdTypeForFormat:adFormat];
+    adRevenue.adType          = [self adTypeForFormat:adFormat];
     adRevenue.adNetwork       = [impressionData valueForKey:@"adNetwork"];
     adRevenue.adPlacementName = [impressionData valueForKey:@"placement"];
     adRevenue.precision       = [impressionData valueForKey:@"precision"];
@@ -191,12 +150,24 @@ typedef NSString *(*AMAISAdUnitValueIMP)(id, SEL);
     [AMAAppMetrica reportAdRevenue:adRevenue isAutocollected:YES onFailure:nil];
 }
 
-- (AMAAdType)v9AdTypeForFormat:(nullable NSString *)adFormat
+- (AMAAdType)adTypeForFormat:(nullable NSString *)adFormat
 {
-    if (adFormat == nil)                              { return AMAAdTypeUnknown; }
-    if ([adFormat isEqualToString:kV9FormatRewarded]) { return AMAAdTypeRewarded; }
-    if ([adFormat isEqualToString:kV9FormatInterstitial]) { return AMAAdTypeInterstitial; }
-    if ([adFormat isEqualToString:kV9FormatBanner])   { return AMAAdTypeBanner; }
+    if (adFormat == nil) {
+        return AMAAdTypeUnknown;
+    }
+    if ([adFormat isEqualToString:kFormatRewardedVideo] ||
+        [adFormat isEqualToString:kFormatRewardedVideoAlt]) {
+        return AMAAdTypeRewarded;
+    }
+    if ([adFormat isEqualToString:kFormatInterstitial]) {
+        return AMAAdTypeInterstitial;
+    }
+    if ([adFormat isEqualToString:kFormatBanner]) {
+        return AMAAdTypeBanner;
+    }
+    if ([adFormat isEqualToString:kFormatNativeAd]) {
+        return AMAAdTypeNative;
+    }
     return AMAAdTypeOther;
 }
 

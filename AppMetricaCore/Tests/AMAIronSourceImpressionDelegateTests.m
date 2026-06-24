@@ -131,6 +131,8 @@
     [self.v9Delegate processQueuedImpressionData];
     NSDictionary<NSString *, NSNumber *> *cases = @{
         @"rewarded_video": @(AMAAdTypeRewarded),
+        @"rewardedVideo":  @(AMAAdTypeRewarded),
+        @"nativeAd":       @(AMAAdTypeNative),
         @"interstitial":   @(AMAAdTypeInterstitial),
         @"banner":         @(AMAAdTypeBanner),
         @"unknown_format": @(AMAAdTypeOther),
@@ -142,6 +144,27 @@
         [self.v9Delegate impressionDataDidSucceed:d];
         XCTAssertEqual(((AMAAdRevenueInfo *)AMAAppMetricaMock.capturedAdRevenues.firstObject).adType,
                        (AMAAdType)expected.unsignedIntegerValue, @"adFormat=%@", format);
+    }];
+}
+
+- (void)testV8_adTypeMapping
+{
+    [self.v8Delegate processQueuedImpressionData];
+    NSDictionary<NSString *, NSNumber *> *cases = @{
+        @"rewarded_video": @(AMAAdTypeRewarded),
+        @"rewardedVideo":  @(AMAAdTypeRewarded),
+        @"nativeAd":       @(AMAAdTypeNative),
+        @"interstitial":   @(AMAAdTypeInterstitial),
+        @"banner":         @(AMAAdTypeBanner),
+        @"unknown_format": @(AMAAdTypeOther),
+    };
+    [cases enumerateKeysAndObjectsUsingBlock:^(NSString *format, NSNumber *expected, BOOL *stop) {
+        [AMAAppMetricaMock resetCaptures];
+        AMAFakeV8ImpressionData *d = [AMAFakeV8ImpressionData new];
+        d.revenue = @1.0; d.ad_format = format;
+        [self.v8Delegate impressionDataDidSucceed:d];
+        XCTAssertEqual(((AMAAdRevenueInfo *)AMAAppMetricaMock.capturedAdRevenues.firstObject).adType,
+                       (AMAAdType)expected.unsignedIntegerValue, @"ad_format=%@", format);
     }];
 }
 
@@ -163,7 +186,7 @@
 
     AMAFakeV8ImpressionData *d = [AMAFakeV8ImpressionData new];
     d.revenue                = @1.25;
-    d.ad_format              = @"some_format"; // ISAdUnit absent → AMAAdTypeOther
+    d.ad_format              = @"unknown_format";
     d.ad_network             = @"ironnet";
     d.placement              = @"video_end";
     d.precision              = @"estimated";
@@ -174,14 +197,14 @@
     AMAAdRevenueInfo *info = AMAAppMetricaMock.capturedAdRevenues.firstObject;
     XCTAssertEqualObjects(info.adRevenue, [NSDecimalNumber decimalNumberWithDecimal:[@(1.25) decimalValue]]);
     XCTAssertEqualObjects(info.currency, @"USD");
-    XCTAssertEqual(info.adType, AMAAdTypeOther); // ISAdUnit not linked
+    XCTAssertEqual(info.adType, AMAAdTypeOther);
     XCTAssertEqualObjects(info.adNetwork, @"ironnet");
     XCTAssertEqualObjects(info.adPlacementName, @"video_end");
     XCTAssertEqualObjects(info.precision, @"estimated");
     XCTAssertEqualObjects(info.adUnitID, @"vid_id");
     XCTAssertEqualObjects(info.adUnitName, @"vid_name");
     XCTAssertEqualObjects(info.payload[@"original_source"], @"ad-revenue-ironsource-v8");
-    XCTAssertEqualObjects(info.payload[@"original_ad_type"], @"some_format");
+    XCTAssertEqualObjects(info.payload[@"original_ad_type"], @"unknown_format");
 }
 
 - (void)testV8_nilAdFormat_unknownAdType
