@@ -18,8 +18,7 @@
 {
     AMACurrentQueueExecutor *executor = [AMACurrentQueueExecutor new];
     self.controller = [[AMAModulesController alloc] initWithExecutor:executor
-                                             startupParametersHandler:nil
-                                            initializationExecutor:executor];
+                                             startupParametersHandler:nil];
     [AMAModuleActivationDelegateMock reset];
     [AMAEventFlushableDelegateMock reset];
 }

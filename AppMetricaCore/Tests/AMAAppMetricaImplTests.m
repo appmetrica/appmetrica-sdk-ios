@@ -1045,7 +1045,7 @@ describe(@"AMAAppMetricaImpl", ^{
                 [((NSObject<AMAReporterDelegate> *)appMetricaImpl) sendEventsBufferWithApiKey:apiKey];
             });
             it(@"Should run on queue", ^{
-                [[((NSObject *)appMetricaImpl.executor) should] receive:@selector(execute:)];
+                [[((NSObject *)appMetricaImpl.executor) should] receive:@selector(execute:) withCountAtLeast:1];
                 [appMetricaImpl sendEventsBuffer];
             });
         });
@@ -1064,7 +1064,7 @@ describe(@"AMAAppMetricaImpl", ^{
                 [((NSObject<AMAReporterDelegate> *)appMetricaImpl) sendEventsBufferWithApiKey:apiKey];
             });
             it(@"Should run on queue", ^{
-                [[((NSObject *)appMetricaImpl.executor) should] receive:@selector(execute:)];
+                [[((NSObject *)appMetricaImpl.executor) should] receive:@selector(execute:) withCountAtLeast:1];
                 [appMetricaImpl sendEventsBuffer];
             });
         });

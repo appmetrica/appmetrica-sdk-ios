@@ -10,7 +10,6 @@
 @interface AMAModulesController ()
 @property (nonatomic, strong) NSMutableArray<id<AMAModuleEntryPoint>> *modules;
 @property (nonatomic, strong) id<AMAAsyncExecuting, AMASyncExecuting> executor;
-@property (nonatomic, strong) id<AMAAsyncExecuting> initializationExecutor;
 @property (nonatomic, assign) dispatch_once_t loadOnce;
 @property (nonatomic, strong) AMAModuleContextImpl *context;
 @end
@@ -20,20 +19,16 @@
 - (instancetype)init
 {
     id<AMAAsyncExecuting, AMASyncExecuting> executor = [[AMAExecutor alloc] initWithIdentifier:self];
-    return [self initWithExecutor:executor
-          startupParametersHandler:nil
-         initializationExecutor:executor];
+    return [self initWithExecutor:executor startupParametersHandler:nil];
 }
 
 - (instancetype)initWithExecutor:(id<AMAAsyncExecuting, AMASyncExecuting>)executor
         startupParametersHandler:(AMAStartupParametersHandler)startupParametersHandler
-       initializationExecutor:(id<AMAAsyncExecuting>)initializationExecutor
 {
     self = [super init];
     if (self) {
         _modules = [NSMutableArray array];
         _executor = executor;
-        _initializationExecutor = initializationExecutor;
         _context = [[AMAModuleContextImpl alloc] init];
         _startupParametersHandler = [startupParametersHandler copy];
     }
@@ -43,7 +38,7 @@
 - (void)ensureLoaded
 {
     dispatch_once(&_loadOnce, ^{
-        [self.initializationExecutor execute:^{
+        [self.executor execute:^{
             [AMACoreModuleComponentsInitializer discoverAndRegisterInController:self classLookup:nil];
             [self notifySetupStartupStorageProvider];
         }];
@@ -60,14 +55,14 @@
 
 - (void)notifyWillActivateWithConfiguration:(AMAModuleActivationConfiguration *)configuration
 {
-    [self.initializationExecutor execute:^{
+    [self.executor execute:^{
         [self.context notifyWillActivateWithConfiguration:configuration];
     }];
 }
 
 - (void)notifyDidActivateWithConfiguration:(AMAModuleActivationConfiguration *)configuration
 {
-    [self.initializationExecutor execute:^{
+    [self.executor execute:^{
         [self.context notifyDidActivateWithConfiguration:configuration];
     }];
 }
@@ -168,7 +163,9 @@
 
 - (void)notifySendEventsBuffer
 {
-    [self.context notifySendEventsBuffer];
+    [self.executor execute:^{
+        [self.context notifySendEventsBuffer];
+    }];
 }
 
 // MARK: - Accessors

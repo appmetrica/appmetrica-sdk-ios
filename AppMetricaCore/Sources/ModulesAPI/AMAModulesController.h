@@ -17,8 +17,7 @@ typedef void (^AMAStartupParametersHandler)(NSDictionary *parameters);
 @interface AMAModulesController : NSObject
 
 - (instancetype)initWithExecutor:(id<AMAAsyncExecuting, AMASyncExecuting>)executor
-        startupParametersHandler:(nullable AMAStartupParametersHandler)startupParametersHandler
-       initializationExecutor:(id<AMAAsyncExecuting>)initializationExecutor NS_DESIGNATED_INITIALIZER;
+        startupParametersHandler:(nullable AMAStartupParametersHandler)startupParametersHandler NS_DESIGNATED_INITIALIZER;
 
 /// The module context. Available immediately after init.
 @property (nonatomic, strong, readonly) AMAModuleContextImpl *context;
