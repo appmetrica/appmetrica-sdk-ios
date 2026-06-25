@@ -772,11 +772,10 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
         __strong typeof(weakSelf) strongSelf = weakSelf;
         if (strongSelf == nil) { return; }
         strongSelf.modulesController = [[AMAModulesController alloc]
-               initWithExecutor:[[AMAExecutor alloc] initWithIdentifier:strongSelf]
+               initWithExecutor:strongSelf.executor
         startupParametersHandler:^(NSDictionary *params) {
                 [weakSelf addAdditionalStartupParameters:params];
-            }
-       initializationExecutor:strongSelf.executor];
+            }];
         [strongSelf.modulesController ensureLoaded];
     }];
 }
@@ -1124,18 +1123,14 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
 
 - (void)notifyOnAdditionalStartupCompleted:(NSDictionary *)response
 {
-    [self execute:^{
-        if (self.startupController.upToDate) {
-            [self.modulesController notifyStartupUpdatedWithParameters:response];
-        }
-    }];
+    if (self.startupController.upToDate) {
+        [self.modulesController notifyStartupUpdatedWithParameters:response];
+    }
 }
 
 - (void)notifyOnAdditionalStartupFailedWithError:(NSError *)error
 {
-    [self execute:^{
-        [self.modulesController notifyStartupFailedWithError:error];
-    }];
+    [self.modulesController notifyStartupFailedWithError:error];
 }
 
 - (void)ensureModulesLoaded
