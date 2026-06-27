@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name = "AppMetricaTestUtils"
-  s.version = '6.4.0'
+  s.version = '6.5.0'
   s.summary = "AMATestUtils offers a comprehensive set of convenient and reusable testing utilities designed to simplify unit testing for modules"
 
   s.homepage = 'https://appmetrica.io'
@@ -19,12 +19,12 @@ Pod::Spec.new do |s|
   
   #TODO: https://nda.ya.ru/t/MqweN1VA6niXzF
   s.dependency 'AppMetricaKiwi', '~> 3.0.2'
-  s.dependency 'AppMetricaCoreUtils', '= 6.4.0'
-  s.dependency 'AppMetricaStorageUtils', '= 6.4.0'
-  s.dependency 'AppMetricaNetwork', '= 6.4.0'
-  s.dependency 'AppMetricaHostState', '= 6.4.0'
-  s.dependency 'AppMetricaKeychain', '= 6.4.0'
-  s.dependency 'AppMetricaCoreExtension', '= 6.4.0'
+  s.dependency 'AppMetricaCoreUtils', '= 6.5.0'
+  s.dependency 'AppMetricaStorageUtils', '= 6.5.0'
+  s.dependency 'AppMetricaNetwork', '= 6.5.0'
+  s.dependency 'AppMetricaHostState', '= 6.5.0'
+  s.dependency 'AppMetricaKeychain', '= 6.5.0'
+  s.dependency 'AppMetricaCoreExtension', '= 6.5.0'
   
   s.header_dir = s.name
   s.source_files = "#{s.name}/Sources/**/*.{h,m}"
