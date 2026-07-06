@@ -5,6 +5,8 @@
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
 #import <AppMetricaPlatform/AppMetricaPlatform.h>
 #import "AMAAppMetricaImpl+TestUtilities.h"
+#import "AMAAdProvider.h"
+#import "AMAAdProviding.h"
 #import "AMAAdRevenueInfo.h"
 #import "AMAAdServicesReportingController.h"
 #import "AMAAppMetrica+Internal.h"
@@ -458,6 +460,40 @@ describe(@"AMAAppMetricaImpl", ^{
         it(@"Should not start if disabled", ^{
             [configuration stub:@selector(appOpenTrackingEnabled) andReturn:theValue(NO)];
             [[appOpenWatcher shouldNot] receive:@selector(startWatchingWithDeeplinkController:)];
+            [appMetricaImpl activateWithConfiguration:configuration];
+        });
+    });
+
+    context(@"Ad provider setup", ^{
+        AMAAdProvider *__block adProvider = nil;
+        id<AMAAdProviding> __block moduleAdProvider = nil;
+
+        beforeEach(^{
+            adProvider = [AMAAdProvider nullMock];
+            [AMAAdProvider stub:@selector(sharedInstance) andReturn:adProvider];
+            [appMetricaImpl stub:@selector(adProvider) andReturn:adProvider];
+            moduleAdProvider = [KWMock nullMockForProtocol:@protocol(AMAAdProviding)];
+            [appMetricaImpl.modulesController stub:@selector(adProvider) andReturn:moduleAdProvider];
+        });
+        afterEach(^{
+            [AMAAdProvider clearStubs];
+        });
+        it(@"Should setup ad provider on activation", ^{
+            [[adProvider should] receive:@selector(setupAdProvider:) withArguments:moduleAdProvider];
+            [appMetricaImpl activateWithConfiguration:configuration];
+        });
+        it(@"Should setup ad provider on anonymous activation", ^{
+            [[adProvider should] receive:@selector(setupAdProvider:) withArguments:moduleAdProvider];
+            [appMetricaImpl activateAnonymously];
+        });
+        it(@"Should setup ad provider on manual reporter creation", ^{
+            NSString *differentApiKey = @"220e8400-e29b-41d4-a716-446655440022";
+            [[adProvider should] receive:@selector(setupAdProvider:) withArguments:moduleAdProvider];
+            [appMetricaImpl manualReporterForConfiguration:[[AMAReporterConfiguration alloc] initWithAPIKey:differentApiKey]];
+        });
+        it(@"Should not setup ad provider when none registered", ^{
+            [appMetricaImpl.modulesController stub:@selector(adProvider) andReturn:nil];
+            [[adProvider shouldNot] receive:@selector(setupAdProvider:)];
             [appMetricaImpl activateWithConfiguration:configuration];
         });
     });

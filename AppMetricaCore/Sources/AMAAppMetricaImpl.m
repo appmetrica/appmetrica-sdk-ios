@@ -683,6 +683,8 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
 
 - (id<AMAAppMetricaExtendedReporting>)manualReporterForConfiguration:(AMAReporterConfiguration *)configuration
 {
+    [self setupAdProvider];
+    
     return [self reporterForConfiguration:configuration];
 }
 
