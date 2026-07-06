@@ -5,7 +5,9 @@ NS_ASSUME_NONNULL_BEGIN
 @class AMAInternalEventsReporter;
 @class AMAAppMetricaImpl;
 @class AMAMetricaConfiguration;
+@class AMAServiceConfiguration;
 @protocol AMAHostStateProviding;
+@protocol AMAModuleActivationDelegate;
 
 @interface AMAAppMetrica ()
 
@@ -16,6 +18,9 @@ NS_ASSUME_NONNULL_BEGIN
 + (AMAInternalEventsReporter *)sharedInternalEventsReporter;
 + (void)setLogs:(BOOL)enabled;
 + (BOOL)isActivatedAsMain;
+
++ (NSSet<Class<AMAModuleActivationDelegate>> *)pendingActivationDelegatesAndFlush;
++ (NSArray<AMAServiceConfiguration *> *)pendingExternalServicesAndFlush;
 
 @end
 

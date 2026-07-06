@@ -141,17 +141,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)addAutocollectedData:(NSString *)apiKey;
 
-
-
-#pragma mark - Deprecated module registration
-
-// These methods are no-ops kept for binary compatibility.
-// Use AMAModuleContext in AMAModuleEntryPoint.initModuleWithContext: instead.
-
-- (void)addActivationDelegate:(Class<AMAModuleActivationDelegate>)delegate;
-
-- (void)registerExternalService:(AMAServiceConfiguration *)configuration;
-
 @end
 
 NS_ASSUME_NONNULL_END

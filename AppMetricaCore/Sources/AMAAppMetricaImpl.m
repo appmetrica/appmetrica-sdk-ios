@@ -776,6 +776,16 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
         startupParametersHandler:^(NSDictionary *params) {
                 [weakSelf addAdditionalStartupParameters:params];
             }];
+
+        NSSet<Class<AMAModuleActivationDelegate>> *delegates = [AMAAppMetrica pendingActivationDelegatesAndFlush];
+        NSArray<AMAServiceConfiguration *> *services = [AMAAppMetrica pendingExternalServicesAndFlush];
+        for (Class<AMAModuleActivationDelegate> delegate in delegates) {
+            [strongSelf.modulesController.context addActivationDelegate:delegate];
+        }
+        for (AMAServiceConfiguration *config in services) {
+            [strongSelf.modulesController.context registerExternalService:config];
+        }
+
         [strongSelf.modulesController ensureLoaded];
     }];
 }
@@ -1310,27 +1320,6 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
 {
     [self.autocollectedDataProvider addAutocollectedData:apiKey];
     [self scheduleReporterAnonymousActivationIfNeeded];
-}
-
-
-
-#pragma mark - Deprecated module registration - Remove within next major release
-
-// These methods are no-ops kept for binary compatibility.
-// Use AMAModuleContext in AMAModuleEntryPoint.initModuleWithContext: instead.
-
-- (void)addActivationDelegate:(Class<AMAModuleActivationDelegate>)delegate
-{
-    [self execute:^{
-        [self.modulesController.context addActivationDelegate:delegate];
-    }];
-}
-
-- (void)registerExternalService:(AMAServiceConfiguration *)configuration
-{
-    [self execute:^{
-        [self.modulesController.context registerExternalService:configuration];
-    }];
 }
 
 @end

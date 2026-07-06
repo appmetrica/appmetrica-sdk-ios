@@ -263,7 +263,6 @@ NSString *const kAMAAttributionSourceSingular = @"singular";
             return;
         }
 
-        [self setupExternalServices];
         [[self sharedImpl] ensureModulesLoaded];
         [[self sharedImpl] activateWithConfiguration:configuration];
     }
@@ -277,7 +276,6 @@ NSString *const kAMAAttributionSourceSingular = @"singular";
             return;
         }
 
-        [self setupExternalServices];
         [[self sharedImpl] ensureModulesLoaded];
         [[self sharedImpl] scheduleAnonymousActivationIfNeeded];
     }
@@ -410,6 +408,7 @@ NSString *const kAMAAttributionSourceSingular = @"singular";
 
 + (void)setDataSendingEnabled:(BOOL)enabled
 {
+    [[self sharedImpl] ensureModulesLoaded];
     AMADataSendingRestriction restriction = enabled
         ? AMADataSendingRestrictionAllowed
         : AMADataSendingRestrictionForbidden;
@@ -536,7 +535,6 @@ NSString *const kAMAAttributionSourceSingular = @"singular";
 
 + (void)activateReporterWithConfiguration:(AMAReporterConfiguration *)configuration
 {
-    [[self class] setupExternalServices];
     [[self sharedImpl] ensureModulesLoaded];
     if ([self isAPIKeyValid:configuration.APIKey] == NO) {
         [AMAErrorLogger logInvalidApiKeyError:configuration.APIKey];
@@ -560,7 +558,6 @@ NSString *const kAMAAttributionSourceSingular = @"singular";
 
 + (id<AMAAppMetricaExtendedReporting>)extendedReporterForApiKey:(NSString *)apiKey
 {
-    [[self class] setupExternalServices];
     [[self sharedImpl] ensureModulesLoaded];
     if ([self isAPIKeyValid:apiKey] == NO) {
         [AMAErrorLogger logInvalidApiKeyError:apiKey];
@@ -798,22 +795,24 @@ static NSMutableArray<AMAServiceConfiguration *> *sExternalServices = nil;
     }
 }
 
-+ (void)setupExternalServices
++ (NSSet<Class<AMAModuleActivationDelegate>> *)pendingActivationDelegatesAndFlush
 {
-    NSSet *delegates = nil;
-    NSArray *services = nil;
+    NSSet *pendingDelegates = nil;
     @synchronized(self) {
-        delegates = [sActivationDelegates copy];
-        services = [sExternalServices copy];
+        pendingDelegates = [sActivationDelegates copy];
         [sActivationDelegates removeAllObjects];
+    }
+    return pendingDelegates;
+}
+
++ (NSArray<AMAServiceConfiguration *> *)pendingExternalServicesAndFlush
+{
+    NSArray *pendingServices = nil;
+    @synchronized(self) {
+        pendingServices = [sExternalServices copy];
         [sExternalServices removeAllObjects];
     }
-    for (Class<AMAModuleActivationDelegate> delegate in delegates) {
-        [[self sharedImpl] addActivationDelegate:delegate];
-    }
-    for (AMAServiceConfiguration *config in services) {
-        [[self sharedImpl] registerExternalService:config];
-    }
+    return pendingServices;
 }
 
 @end

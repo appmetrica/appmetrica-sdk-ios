@@ -71,26 +71,24 @@
 
 - (void)notifySetupStartupStorageProvider
 {
-    [self.executor execute:^{
-        NSSet *observers = self.context.startupObservers;
-
-        AMAStartupStorageProvider *startupStorageProvider = [[AMAStartupStorageProvider alloc] init];
-        AMACachingStorageProvider *cachingStorageProvider = [[AMACachingStorageProvider alloc] init];
-
-        AMALogInfo(@"Setup extended startup observers: %@", observers);
-        for (id<AMAExtendedStartupObserving> observer in observers) {
-            [observer setupStartupProvider:startupStorageProvider
-                    cachingStorageProvider:cachingStorageProvider];
-            
-            void(^handler)(NSDictionary *) = self.startupParametersHandler;
-            if (handler != nil) {
-                NSDictionary *params = [observer startupParameters];
-                if (params.count > 0) {
-                    handler(params);
-                }
+    NSSet *observers = self.context.startupObservers;
+    
+    AMAStartupStorageProvider *startupStorageProvider = [[AMAStartupStorageProvider alloc] init];
+    AMACachingStorageProvider *cachingStorageProvider = [[AMACachingStorageProvider alloc] init];
+    
+    AMALogInfo(@"Setup extended startup observers: %@", observers);
+    for (id<AMAExtendedStartupObserving> observer in observers) {
+        [observer setupStartupProvider:startupStorageProvider
+                cachingStorageProvider:cachingStorageProvider];
+        
+        void(^handler)(NSDictionary *) = self.startupParametersHandler;
+        if (handler != nil) {
+            NSDictionary *params = [observer startupParameters];
+            if (params.count > 0) {
+                handler(params);
             }
         }
-    }];
+    }
 }
 
 - (void)notifyStartupUpdatedWithParameters:(NSDictionary *)parameters

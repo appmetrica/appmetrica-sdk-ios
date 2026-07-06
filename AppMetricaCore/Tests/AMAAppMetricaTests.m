@@ -1407,6 +1407,10 @@ describe(@"AMAAppMetrica", ^{
             [[impl should] receive:@selector(ensureModulesLoaded)];
             [AMAAppMetrica subscribeForAutocollectedDataForApiKey:apiKey];
         });
+        it(@"setDataSendingEnabled:", ^{
+            [[impl should] receive:@selector(ensureModulesLoaded)];
+            [AMAAppMetrica setDataSendingEnabled:theValue(YES)];
+        });
     });
 });
 
