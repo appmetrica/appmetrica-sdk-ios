@@ -13,6 +13,7 @@
         _applicationNotRespondingDetection = NO;
         _applicationNotRespondingWatchdogInterval = 4.0;
         _applicationNotRespondingPingInterval = 0.1;
+        _crashErrorEnvironmentCallback = NULL;
     }
     return self;
 }
@@ -30,7 +31,8 @@
             [self bothValuesAreNilOrValue:self.ignoredCrashSignals isEqualToValue:config.ignoredCrashSignals] &&
             self.applicationNotRespondingDetection == config.applicationNotRespondingDetection &&
             self.applicationNotRespondingWatchdogInterval == config.applicationNotRespondingWatchdogInterval &&
-            self.applicationNotRespondingPingInterval == config.applicationNotRespondingPingInterval);
+            self.applicationNotRespondingPingInterval == config.applicationNotRespondingPingInterval &&
+            self.crashErrorEnvironmentCallback == config.crashErrorEnvironmentCallback);
 }
 
 - (NSUInteger)hash
@@ -45,6 +47,7 @@
     result = prime * result + (self.applicationNotRespondingDetection ? 1 : 0);
     result = prime * result + (NSUInteger)(self.applicationNotRespondingWatchdogInterval * 1000);
     result = prime * result + (NSUInteger)(self.applicationNotRespondingPingInterval * 1000);
+    result = prime * result + (NSUInteger)(uintptr_t)self.crashErrorEnvironmentCallback;
     
     return result;
 }
@@ -64,9 +67,9 @@
         copy->_applicationNotRespondingDetection = _applicationNotRespondingDetection;
         copy->_applicationNotRespondingWatchdogInterval = _applicationNotRespondingWatchdogInterval;
         copy->_applicationNotRespondingPingInterval = _applicationNotRespondingPingInterval;
+        copy->_crashErrorEnvironmentCallback = _crashErrorEnvironmentCallback;
     }
     return copy;
 }
 
 @end
-

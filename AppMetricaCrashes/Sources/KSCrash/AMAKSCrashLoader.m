@@ -4,12 +4,50 @@
 #import "AMAKSCrashLoader.h"
 #import "AMAKSCrashReportDecoder.h"
 #import "AMACrashSafeTransactor.h"
+#import "AMACrashContext.h"
 #import "AMADecodedCrash.h"
 #import "AMAKSCrash.h"
 #import "AMAKSCrashImports.h"
 
 static NSString *const kAMALoadingCrashReportsTransactionKey = @"KSCrashLoadingReports";
 NSString *const kAMAApplicationNotRespondingCrashType = @"AMAApplicationNotRespondingCrashType";
+
+struct AMAAppMetricaCrashErrorEnvironmentWriter {
+    const KSCrashReportWriter *ksCrashWriter;
+};
+
+static AMAAppMetricaCrashErrorEnvironmentCallback g_crashErrorEnvironmentCallback = NULL;
+
+void AMAAppMetricaCrashErrorEnvironmentWriterAddStringValue(
+    const AMAAppMetricaCrashErrorEnvironmentWriter *writer,
+    const char *key,
+    const char *value
+)
+{
+    if (writer == NULL || writer->ksCrashWriter == NULL || key == NULL || key[0] == '\0' || value == NULL) {
+        return;
+    }
+
+    writer->ksCrashWriter->addStringElement(writer->ksCrashWriter, key, value);
+}
+
+static void AMAAppMetricaKSCrashIsWritingReportCallback(
+    const KSCrash_ExceptionHandlingPlan *const plan,
+    const KSCrashReportWriter *writer
+)
+{
+    if (plan == NULL || writer == NULL || g_crashErrorEnvironmentCallback == NULL) {
+        return;
+    }
+    if (plan->crashedDuringExceptionHandling) {
+        return;
+    }
+
+    AMAAppMetricaCrashErrorEnvironmentWriter appMetricaWriter = { .ksCrashWriter = writer };
+    writer->beginObject(writer, kAMACrashContextCrashTimeErrorEnvironmentKeyCString);
+    g_crashErrorEnvironmentCallback(&appMetricaWriter);
+    writer->endContainer(writer);
+}
 
 @interface AMAKSCrashLoader () <AMAKSCrashReportDecoderDelegate>
 
@@ -92,6 +130,10 @@ NSString *const kAMAApplicationNotRespondingCrashType = @"AMAApplicationNotRespo
     config.enableQueueNameSearch = NO;
     config.enableSwapCxaThrow = NO;
     config.monitors = monitoring;
+    g_crashErrorEnvironmentCallback = self.crashErrorEnvironmentCallback;
+    if (self.crashErrorEnvironmentCallback != NULL) {
+        config.isWritingReportCallback = AMAAppMetricaKSCrashIsWritingReportCallback;
+    }
 
     NSError *installationError = nil;
     BOOL handlerInstalled = [[KSCrash sharedInstance] installWithConfiguration:config error:&installationError];

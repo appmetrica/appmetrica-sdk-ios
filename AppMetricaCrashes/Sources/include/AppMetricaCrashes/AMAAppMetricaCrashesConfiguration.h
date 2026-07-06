@@ -3,6 +3,30 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+typedef struct AMAAppMetricaCrashErrorEnvironmentWriter AMAAppMetricaCrashErrorEnvironmentWriter;
+
+/// Callback called while KSCrash is writing the crash report `user` section.
+///
+/// This callback can be called from a crash/signal handler. The implementation must be async-signal-safe:
+/// do not call Objective-C, Swift, Foundation, dispatch, logging, allocation, locks, or C++ runtime APIs.
+/// Prepare any strings in advance and keep them in static/preallocated storage.
+///
+/// Swift can assign a C/C++ callback to this property, but implementing the callback in Swift is not supported.
+/// C++ callbacks must have C ABI, for example by using `extern "C"`.
+typedef void (*AMAAppMetricaCrashErrorEnvironmentCallback)(
+    const AMAAppMetricaCrashErrorEnvironmentWriter *writer
+);
+
+/// Adds a string key-value pair to the crash-time error environment.
+///
+/// This function is async-signal-safe when `writer`, `key`, and `value` point to valid preallocated data.
+/// `key` and `value` must be NUL-terminated C strings. Invalid input is ignored.
+FOUNDATION_EXPORT void AMAAppMetricaCrashErrorEnvironmentWriterAddStringValue(
+    const AMAAppMetricaCrashErrorEnvironmentWriter *writer,
+    const char *key,
+    const char *value
+) NS_SWIFT_UNAVAILABLE("Crash-time writing must be implemented in async-signal-safe C/C++ code with C ABI.");
+
 /// `AMAAppMetricaCrashesConfiguration` provides a customizable interface for controlling how your application
 /// deals with various types of crashes and issues.
 ///
@@ -51,6 +75,17 @@ NS_SWIFT_NAME(AppMetricaCrashesConfiguration)
 /// - Warning: Setting this to a small value can lead to poor performance.
 /// - Important: Takes effect only after activation and enabling `allowsBackgroundLocationUpdates`.
 @property (nonatomic, assign) NSTimeInterval applicationNotRespondingPingInterval;
+
+/// Callback that can add key-value pairs to `errorEnvironment` while KSCrash writes a crash report.
+///
+/// The callback is optional and is not set by default. If set, it must remain valid for the lifetime of the process.
+/// Values written from the callback are merged into `errorEnvironment`; on key conflict, callback values win.
+/// The same limits as `-setErrorEnvironmentValue:forKey:` apply after merging.
+///
+/// - Important: The callback can be called from a crash/signal handler and must be async-signal-safe.
+/// Swift code may configure a C/C++ callback, but the callback implementation itself must not use Swift.
+/// C++ callbacks must have C ABI, for example by using `extern "C"`.
+@property (nonatomic, assign, nullable) AMAAppMetricaCrashErrorEnvironmentCallback crashErrorEnvironmentCallback;
 
 @end
 

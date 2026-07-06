@@ -16,6 +16,8 @@
 SPEC_BEGIN(AMAEventCountDispatchStrategyTests)
 
 describe(@"AMAEventCountDispatchStrategy", ^{
+    NSString *const apiKey = @"550e8400-e29b-41d4-a716-446655440010";
+
     AMAReporterTestHelper *__block reporterTestHelper = nil;
     AMAReporterStorage *__block reporterStorage = nil;
     AMAEventCountDispatchStrategy * __block strategy = nil;
@@ -24,14 +26,17 @@ describe(@"AMAEventCountDispatchStrategy", ^{
 
     beforeEach(^{
         reporterTestHelper = [[AMAReporterTestHelper alloc] init];
-        reporterStorage = reporterTestHelper.appReporter.reporterStorage;
+        reporterStorage = [reporterTestHelper appReporterForApiKey:apiKey].reporterStorage;
         executionConditionChecker = [KWMock nullMockForProtocol:@protocol(AMAReportExecutionConditionChecker)];
     });
     afterEach(^{
+        [strategy shutdown];
         [AMAMetricaConfiguration clearStubs];
         [AMAMetricaConfiguration.sharedInstance clearStubs];
         [AMAMetricaConfigurationTestUtilities destubConfiguration];
         [reporterTestHelper destub];
+        strategy = nil;
+        reporterTestHelper = nil;
     });
 
 	context(@"Handles configuration update", ^{
@@ -47,7 +52,7 @@ describe(@"AMAEventCountDispatchStrategy", ^{
 #pragma clang diagnostic ignored "-Wnonnull"
         void (^postNotifications)(AMAEventCountDispatchStrategy *, NSUInteger) =
         ^(AMAEventCountDispatchStrategy *strategy, NSUInteger notificationsNumber) {
-            AMAReporter *reporter = [reporterTestHelper appReporter];
+            AMAReporter *reporter = [reporterTestHelper appReporterForApiKey:apiKey];
             for (NSUInteger i = 0; i < notificationsNumber; ++i) {
                 [reporter reportEvent:@"Test" onFailure:nil];
             }
@@ -57,7 +62,7 @@ describe(@"AMAEventCountDispatchStrategy", ^{
             [strategy.executor execute:nil];
         };
         __auto_type reportCleanupEvent = ^{
-            [[reporterTestHelper appReporter] reportCleanupEvent:@{} onFailure:NULL];
+            [[reporterTestHelper appReporterForApiKey:apiKey] reportCleanupEvent:@{} onFailure:NULL];
             [strategy.executor execute:nil];
 #pragma clang diagnostic pop
         };
@@ -147,9 +152,15 @@ describe(@"AMAEventCountDispatchStrategy", ^{
             [executionConditionChecker stub:@selector(canBeExecuted:) andReturn:theValue(NO) withArguments:controller];
             [[theValue([strategy canBeExecuted:controller]) should] beNo];
         });
-	});
+    });
     
     it(@"Should be subclass of DispatchStrategy", ^{
+        delegate = [KWMock nullMockForProtocol:@protocol(AMADispatchStrategyDelegate)];
+        AMATestDelayedManualExecutor *manualExecutor = [AMATestDelayedManualExecutor new];
+        strategy = [[AMAEventCountDispatchStrategy alloc] initWithDelegate:delegate
+                                                                   storage:reporterStorage
+                                                                  executor:manualExecutor
+                                                 executionConditionChecker:executionConditionChecker];
         [[strategy should] beKindOfClass:AMADispatchStrategy.class];
     });
 });

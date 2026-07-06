@@ -75,6 +75,25 @@
 
 - (void)destub
 {
+    for (AMAReporter *reporter in self.reporters.allValues) {
+        id executor = [reporter valueForKey:@"executor"];
+        if ([executor respondsToSelector:@selector(syncExecute:)]) {
+            [executor syncExecute:^id{
+                return nil;
+            }];
+        }
+        if ([executor respondsToSelector:@selector(cancelDelayed)]) {
+            [executor cancelDelayed];
+        }
+    }
+    [self.reporters removeAllObjects];
+    [self.reporterStorages removeAllObjects];
+    [self.databases removeAllObjects];
+    [self.privacyTimers removeAllObjects];
+    [self.privacyTimerStorages removeAllObjects];
+    [self.adProviders removeAllObjects];
+    [self.adRevenueSourceStorage removeAllObjects];
+
     [AMAFileUtility clearStubs];
     [AMAMetricaConfiguration.sharedInstance clearStubs];
     [NSDate clearStubs];

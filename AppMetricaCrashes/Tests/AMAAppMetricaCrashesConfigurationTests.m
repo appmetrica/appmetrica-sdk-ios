@@ -8,6 +8,18 @@
 @implementation TestConfigSubclass
 @end
 
+static void AMAAppMetricaCrashesConfigurationTestsCrashCallback(
+    __unused const AMAAppMetricaCrashErrorEnvironmentWriter *writer
+)
+{
+}
+
+static void AMAAppMetricaCrashesConfigurationTestsAnotherCrashCallback(
+    __unused const AMAAppMetricaCrashErrorEnvironmentWriter *writer
+)
+{
+}
+
 SPEC_BEGIN(AMAAppMetricaCrashesConfigurationTests)
 
 describe(@"AMAAppMetricaCrashesConfiguration", ^{
@@ -39,6 +51,10 @@ describe(@"AMAAppMetricaCrashesConfiguration", ^{
         it(@"Should check for ANR every 0.1 second by default", ^{
             [[theValue(config.applicationNotRespondingPingInterval) should] equal:theValue(0.1)];
         });
+
+        it(@"Should not have crash error environment callback by default", ^{
+            [[theValue(config.crashErrorEnvironmentCallback == NULL) should] beYes];
+        });
     });
     
     context(@"NSCopying behavior", ^{
@@ -50,6 +66,7 @@ describe(@"AMAAppMetricaCrashesConfiguration", ^{
             config.applicationNotRespondingDetection = YES;
             config.applicationNotRespondingWatchdogInterval = 5.0;
             config.applicationNotRespondingPingInterval = 0.2;
+            config.crashErrorEnvironmentCallback = AMAAppMetricaCrashesConfigurationTestsCrashCallback;
             
             AMAAppMetricaCrashesConfiguration *configCopy = [config copy];
             
@@ -59,6 +76,8 @@ describe(@"AMAAppMetricaCrashesConfiguration", ^{
             [[theValue(configCopy.applicationNotRespondingDetection) should] beYes];
             [[theValue(configCopy.applicationNotRespondingWatchdogInterval) should] equal:theValue(5.0)];
             [[theValue(configCopy.applicationNotRespondingPingInterval) should] equal:theValue(0.2)];
+            [[theValue(configCopy.crashErrorEnvironmentCallback ==
+                       AMAAppMetricaCrashesConfigurationTestsCrashCallback) should] beYes];
         });
     });
     
@@ -82,6 +101,10 @@ describe(@"AMAAppMetricaCrashesConfiguration", ^{
             
             config.applicationNotRespondingPingInterval = 0.3;
             [[theValue(config.applicationNotRespondingPingInterval) should] equal:theValue(0.3)];
+
+            config.crashErrorEnvironmentCallback = AMAAppMetricaCrashesConfigurationTestsCrashCallback;
+            [[theValue(config.crashErrorEnvironmentCallback ==
+                       AMAAppMetricaCrashesConfigurationTestsCrashCallback) should] beYes];
         });
     });
     
@@ -101,6 +124,16 @@ describe(@"AMAAppMetricaCrashesConfiguration", ^{
             configB.autoCrashTracking = !configA.autoCrashTracking;
             
             [[configA shouldNot] equal:configB];  // Uses isEqual:
+            [[theValue([configA hash]) shouldNot] equal:theValue([configB hash])];
+        });
+
+        it(@"Should not consider two configurations with different crash callbacks as equal", ^{
+            AMAAppMetricaCrashesConfiguration *configA = [[AMAAppMetricaCrashesConfiguration alloc] init];
+            AMAAppMetricaCrashesConfiguration *configB = [[AMAAppMetricaCrashesConfiguration alloc] init];
+            configA.crashErrorEnvironmentCallback = AMAAppMetricaCrashesConfigurationTestsCrashCallback;
+            configB.crashErrorEnvironmentCallback = AMAAppMetricaCrashesConfigurationTestsAnotherCrashCallback;
+
+            [[configA shouldNot] equal:configB];
             [[theValue([configA hash]) shouldNot] equal:theValue([configB hash])];
         });
         

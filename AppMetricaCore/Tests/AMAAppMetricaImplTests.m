@@ -1497,17 +1497,18 @@ describe(@"AMAAppMetricaImpl", ^{
         
         context(@"Autocollected data", ^{
             it(@"Should add auto collected data", ^{
+                [appMetricaImpl stub:@selector(scheduleReporterAnonymousActivationIfNeeded)];
                 [[autocollectedDataProvider should] receive:@selector(addAutocollectedData:) withArguments:apiKey];
                 
                 [appMetricaImpl addAutocollectedData:apiKey];
             });
             it(@"Schedules anonymous activation on subscribe autocollected data", ^{
-                [[appMetricaImpl shouldNot] receive:@selector(activateAnonymously)];
-                [[appMetricaImpl shouldEventuallyBeforeTimingOutAfter(10.2)] receive:@selector(activateAnonymously)];
+                [[appMetricaImpl should] receive:@selector(scheduleReporterAnonymousActivationIfNeeded)];
                 
                 [appMetricaImpl addAutocollectedData:apiKey];
             });
             it(@"Should setup autocollected data for main reporter", ^{
+                [appMetricaImpl stub:@selector(scheduleReporterAnonymousActivationIfNeeded)];
                 AMAReporterStorage *storage = [[AMAReporterStoragesContainer sharedInstance] mainStorageForApiKey:apiKey];
                 
                 [[storage should] receive:@selector(setupAutocollectedDataProvider:) withArguments:autocollectedDataProvider];
@@ -1516,6 +1517,7 @@ describe(@"AMAAppMetricaImpl", ^{
                 [appMetricaImpl activateWithConfiguration:configuration];
             });
             it(@"Should not setup autocollected data for non main reporter", ^{
+                [appMetricaImpl stub:@selector(scheduleReporterAnonymousActivationIfNeeded)];
                 AMAReporterStorage *storage = [[AMAReporterStoragesContainer sharedInstance] storageForApiKey:apiKey];
                 
                 [[storage shouldNot] receive:@selector(setupAutocollectedDataProvider:)];

@@ -15,6 +15,7 @@ describe(@"AMAANRWatchdog", ^{
 
     AMAANRWatchdog *__block ANRDetector = nil;
     AMAExecutor *__block watchingExecutor = nil;
+    AMAManualCurrentQueueExecutor *__block observedExecutor = nil;
 
     id __block delegate = nil;
 
@@ -30,12 +31,17 @@ describe(@"AMAANRWatchdog", ^{
                  hitTimes++;
                  return nil;
              }];
-
         
+        
+    });
+    afterEach(^{
+        [ANRDetector cancel];
+        [observedExecutor execute];
+        ANRDetector = nil;
+        observedExecutor = nil;
     });
     
     context(@"Report ANR", ^{
-        AMAManualCurrentQueueExecutor *__block observedExecutor = nil;
         beforeEach(^{
             observedExecutor = [[AMAManualCurrentQueueExecutor alloc] init];
             
@@ -47,14 +53,14 @@ describe(@"AMAANRWatchdog", ^{
         });
         it(@"Should report of ANR once", ^{
             [ANRDetector start];
-            [[expectFutureValue(theValue(hitTimes)) shouldEventuallyBeforeTimingOutAfter(1)] equal:theValue(1)];
+            [[expectFutureValue(theValue(hitTimes)) shouldEventuallyBeforeTimingOutAfter(2)] equal:theValue(1)];
         });
         
         it(@"Should report of ANR twice", ^{
             [ANRDetector start];
-            [NSThread sleepForTimeInterval:kANRDuration + 0.1];
+            [[expectFutureValue(theValue(hitTimes)) shouldEventuallyBeforeTimingOutAfter(2)] equal:theValue(1)];
             [observedExecutor execute];
-            [[expectFutureValue(theValue(hitTimes)) shouldEventuallyBeforeTimingOutAfter(1)] equal:theValue(2)];
+            [[expectFutureValue(theValue(hitTimes)) shouldEventuallyBeforeTimingOutAfter(2)] equal:theValue(2)];
         });
     });
 

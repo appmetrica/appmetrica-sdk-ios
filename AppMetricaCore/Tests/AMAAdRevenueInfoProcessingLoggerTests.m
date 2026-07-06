@@ -16,7 +16,7 @@ describe(@"AMARevenueInfoProcessingLogger", ^{
         logger = [[AMAAdRevenueInfoProcessingLogger alloc] init];
     });
     afterEach(^{
-        [AMALogSpy clearStubs];
+        [AMALogFacade clearStubs];
     });
 
     AMALogMessageSpy *(^messageWithText)(NSString *) = ^(NSString *text) {

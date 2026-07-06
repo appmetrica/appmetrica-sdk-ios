@@ -66,6 +66,7 @@
 #import "AMAReporterStateStorage.h"
 #import "AMAIdentifierProviderMock.h"
 #import "AMADataMigrationTo5140.h"
+#import "AMAStorageTrimManager.h"
 
 @import AppMetricaIdentifiers;
 
@@ -83,6 +84,7 @@ describe(@"AMADataMigrationsTests", ^{
     AMAMetricaConfiguration *__block configuration = nil;
     AMAInstantFeaturesConfiguration *__block instantMock = nil;
     KWMock *__block idProvider = nil;
+    NSObject<AMAAppMetricaExtendedReporting> *__block extendedReporter = nil;
     
     NSString *const key = @"foo";
     NSString *const value = @"bar";
@@ -94,6 +96,9 @@ describe(@"AMADataMigrationsTests", ^{
         persistentMock = [AMAMetricaPersistentConfiguration nullMock];
         instantMock = [AMAInstantFeaturesConfiguration nullMock];
         idProvider = [KWMock nullMockForProtocol:@protocol(AMAIdentifierProviding)];
+        extendedReporter = [KWMock nullMockForProtocol:@protocol(AMAAppMetricaExtendedReporting)];
+        [AMAStorageTrimManager stubbedNullMockForInit:@selector(initWithApiKey:eventsCleaner:)];
+        [AMAAppMetrica stub:@selector(extendedReporterForApiKey:) andReturn:extendedReporter];
         [AMAInstantFeaturesConfiguration stub:@selector(sharedInstance) andReturn:instantMock];
         
         [configuration stub:@selector(persistent) andReturn:persistentMock];
@@ -104,10 +109,12 @@ describe(@"AMADataMigrationsTests", ^{
         [AMAMetricaConfiguration stub:@selector(sharedInstance) andReturn:configuration];
     });
     afterEach(^{
+        [reporterTestHelper destub];
         [AMAPlatformDescription clearStubs];
         [AMAInstantFeaturesConfiguration clearStubs];
+        [AMAStorageTrimManager clearStubs];
+        [AMAAppMetrica clearStubs];
         [AMAMetricaConfiguration clearStubs];
-        [reporterTestHelper destub];
     });
     
     AMAReporterStorage *(^reporterStorage)(id<AMADatabaseProtocol>, NSString *, BOOL) = ^(id<AMADatabaseProtocol> database,

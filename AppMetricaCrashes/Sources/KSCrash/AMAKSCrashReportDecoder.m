@@ -24,6 +24,7 @@
 #import "AMAVersionMatcher.h"
 #import "AMACrashErrorsFactory.h"
 #import "AMABuildUID.h"
+#import "AMAErrorEnvironment.h"
 #import "AMAKSCrashImports.h"
 #import <AppMetricaPlatform/AppMetricaPlatform.h>
 
@@ -169,7 +170,7 @@ NSString *const kAMASysInfoUsableMemory = @"usableMemory";
     NSDictionary *userInfo = crashReport[KSCrashField_User];
     AMAApplicationState *appState = [self createAppState:userInfo];
     AMABuildUID *appBuildUID = [[AMABuildUID alloc] initWithString:userInfo[kAMACrashContextAppBuildUIDKey]];
-    NSDictionary *errorEnvironment = userInfo[kAMACrashContextErrorEnvironmentKey];
+    NSDictionary *errorEnvironment = [self errorEnvironmentFromUserInfo:userInfo];
     NSDictionary *appEnvironment = userInfo[kAMACrashContextAppEnvironmentKey];
     
     AMAInfo *info = [self createInfo:crashReport[KSCrashField_Report]];
@@ -186,6 +187,38 @@ NSString *const kAMASysInfoUsableMemory = @"usableMemory";
                                                                        system:system
                                                                         crash:crash];
     return decodedCrash;
+}
+
+- (NSDictionary *)errorEnvironmentFromUserInfo:(NSDictionary *)userInfo
+{
+    NSDictionary *baselineEnvironment = userInfo[kAMACrashContextErrorEnvironmentKey];
+    id crashTimeEnvironment = userInfo[kAMACrashContextCrashTimeErrorEnvironmentKey];
+    if ([crashTimeEnvironment isKindOfClass:NSDictionary.class] == NO) {
+        return baselineEnvironment;
+    }
+
+    AMAErrorEnvironment *mergedEnvironment = [[AMAErrorEnvironment alloc] init];
+    __block BOOL hasCrashTimePairs = NO;
+    [(NSDictionary *)crashTimeEnvironment enumerateKeysAndObjectsUsingBlock:^(id key, id value, BOOL *stop) {
+        if ([key isKindOfClass:NSString.class] && [value isKindOfClass:NSString.class]) {
+            hasCrashTimePairs = YES;
+            [mergedEnvironment addValue:value forKey:key replaceExisting:YES];
+        }
+    }];
+
+    if (hasCrashTimePairs == NO) {
+        return baselineEnvironment;
+    }
+
+    if ([baselineEnvironment isKindOfClass:NSDictionary.class]) {
+        [baselineEnvironment enumerateKeysAndObjectsUsingBlock:^(id key, id value, BOOL *stop) {
+            if ([key isKindOfClass:NSString.class] && [value isKindOfClass:NSString.class]) {
+                [mergedEnvironment addValue:value forKey:key replaceExisting:NO];
+            }
+        }];
+    }
+
+    return [mergedEnvironment currentEnvironment];
 }
 
 #pragma mark - Info

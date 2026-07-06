@@ -23,6 +23,7 @@ describe(@"AMAJSONFileKeyValueStorageDataProvider", ^{
 
     afterEach(^{
         [fileStorage deleteFileWithError:NULL];
+        [AMAJSONSerialization clearStubs];
     });
 
     it(@"Should store value", ^{

@@ -102,6 +102,7 @@
 @interface AMALogSpy ()
 
 @property (nonatomic, strong) NSMutableArray *mutableMessages;
+@property (nonatomic, strong) NSThread *recordingThread;
 
 @end
 
@@ -112,13 +113,16 @@
     self = [super init];
     if (self != nil) {
         _mutableMessages = [NSMutableArray array];
+        _recordingThread = [NSThread currentThread];
     }
     return self;
 }
 
 - (NSArray *)messages
 {
-    return [self.mutableMessages copy];
+    @synchronized (self) {
+        return [self.mutableMessages copy];
+    }
 }
 
 - (void)logMessageToChannel:(AMALogChannel)channel
@@ -127,8 +131,12 @@
                    function:(const char *)function
                        line:(NSUInteger)line
                addBacktrace:(BOOL)addBacktrace
-                     format:(NSString *)format, ...
+                      format:(NSString *)format, ...
 {
+    if ([NSThread currentThread] != self.recordingThread) {
+        return;
+    }
+
     NSString *text = nil;
     if (format != nil) {
         va_list args;
@@ -139,10 +147,12 @@
     AMALogMessageSpy *message = [[AMALogMessageSpy alloc] initWithChannel:channel
                                                                     level:@(level)
                                                                      file:[NSString stringWithUTF8String:file]
-                                                                 function:[NSString stringWithUTF8String:function] line:@(line)
-                                                             addBacktrace:@(addBacktrace)
-                                                                     text:text];
-    [self.mutableMessages addObject:message];
+                                                                  function:[NSString stringWithUTF8String:function] line:@(line)
+                                                              addBacktrace:@(addBacktrace)
+                                                                      text:text];
+    @synchronized (self) {
+        [self.mutableMessages addObject:message];
+    }
 }
 
 @end

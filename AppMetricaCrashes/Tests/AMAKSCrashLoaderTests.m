@@ -2,15 +2,68 @@
 
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
 #import <AppMetricaCoreExtension/AppMetricaCoreExtension.h>
+#import <KSCrashConfiguration.h>
 #import <KSCrashReport.h>
+#import <KSCrashReportWriter.h>
 
 #import "AMAKSCrashLoader.h"
 
 #import "AMAKSCrashReportDecoder.h"
 #import "AMACrashSafeTransactor.h"
 #import "AMAAppMetricaCrashes.h"
+#import "AMACrashContext.h"
 #import "AMADecodedCrash.h"
 #import "AMAUnhandledCrashDetector.h"
+
+static BOOL g_AMAKSCrashLoaderTestsClientCallbackCalled = NO;
+static const char *g_AMAKSCrashLoaderTestsBeginObjectName = NULL;
+static const char *g_AMAKSCrashLoaderTestsStringKey = NULL;
+static const char *g_AMAKSCrashLoaderTestsStringValue = NULL;
+static NSUInteger g_AMAKSCrashLoaderTestsEndContainerCount = 0;
+
+static void AMAKSCrashLoaderTestsResetCallbackState(void)
+{
+    g_AMAKSCrashLoaderTestsClientCallbackCalled = NO;
+    g_AMAKSCrashLoaderTestsBeginObjectName = NULL;
+    g_AMAKSCrashLoaderTestsStringKey = NULL;
+    g_AMAKSCrashLoaderTestsStringValue = NULL;
+    g_AMAKSCrashLoaderTestsEndContainerCount = 0;
+}
+
+static void AMAKSCrashLoaderTestsClientCallback(const AMAAppMetricaCrashErrorEnvironmentWriter *writer)
+{
+    g_AMAKSCrashLoaderTestsClientCallbackCalled = YES;
+    AMAAppMetricaCrashErrorEnvironmentWriterAddStringValue(writer, "callback_key", "callback_value");
+}
+
+static void AMAKSCrashLoaderTestsInvalidInputCallback(const AMAAppMetricaCrashErrorEnvironmentWriter *writer)
+{
+    g_AMAKSCrashLoaderTestsClientCallbackCalled = YES;
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wnonnull"
+    AMAAppMetricaCrashErrorEnvironmentWriterAddStringValue(writer, NULL, "value");
+    AMAAppMetricaCrashErrorEnvironmentWriterAddStringValue(writer, "", "value");
+    AMAAppMetricaCrashErrorEnvironmentWriterAddStringValue(writer, "key", NULL);
+#pragma clang diagnostic pop
+}
+
+static void AMAKSCrashLoaderTestsBeginObject(__unused const KSCrashReportWriter *writer, const char *name)
+{
+    g_AMAKSCrashLoaderTestsBeginObjectName = name;
+}
+
+static void AMAKSCrashLoaderTestsEndContainer(__unused const KSCrashReportWriter *writer)
+{
+    g_AMAKSCrashLoaderTestsEndContainerCount += 1;
+}
+
+static void AMAKSCrashLoaderTestsAddStringElement(__unused const KSCrashReportWriter *writer,
+                                                  const char *name,
+                                                  const char *value)
+{
+    g_AMAKSCrashLoaderTestsStringKey = name;
+    g_AMAKSCrashLoaderTestsStringValue = value;
+}
 
 @interface AMAKSCrashLoader ()
 
@@ -251,6 +304,94 @@ describe(@"AMAKSCrashLoader", ^{
 
             [[theValue(capturedConfig.enableMemoryIntrospection) should] equal:theValue(NO)];
             [[theValue(capturedConfig.enableQueueNameSearch) should] equal:theValue(NO)];
+            [[theValue(capturedConfig.isWritingReportCallback == NULL) should] beYes];
+        });
+
+        context(@"Crash error environment callback", ^{
+            KSCrashConfiguration *(^installWithCallback)(AMAAppMetricaCrashErrorEnvironmentCallback callback) =
+                ^KSCrashConfiguration *(AMAAppMetricaCrashErrorEnvironmentCallback callback) {
+                    KWCaptureSpy *configSpy = [ksCrash captureArgument:@selector(installWithConfiguration:error:)
+                                                               atIndex:0];
+                    [ksCrash stub:@selector(installWithConfiguration:error:) andReturn:theValue(YES)];
+                    crashLoader.crashErrorEnvironmentCallback = callback;
+
+                    [crashLoader enableRequiredMonitoring];
+
+                    return configSpy.argument;
+                };
+
+            KSCrashReportWriter (^testWriter)(void) = ^KSCrashReportWriter {
+                KSCrashReportWriter writer = { 0 };
+                writer.beginObject = AMAKSCrashLoaderTestsBeginObject;
+                writer.endContainer = AMAKSCrashLoaderTestsEndContainer;
+                writer.addStringElement = AMAKSCrashLoaderTestsAddStringElement;
+                return writer;
+            };
+
+            KSCrash_ExceptionHandlingPlan (^testPlan)(BOOL) = ^KSCrash_ExceptionHandlingPlan(BOOL recrash) {
+                return (KSCrash_ExceptionHandlingPlan) {
+                    .shouldRecordAllThreads = YES,
+                    .shouldWriteReport = YES,
+                    .isFatal = YES,
+                    .requiresAsyncSafety = YES,
+                    .crashedDuringExceptionHandling = recrash,
+                };
+            };
+
+            beforeEach(^{
+                AMAKSCrashLoaderTestsResetCallbackState();
+            });
+
+            it(@"Should not set KSCrash callback if callback is nil", ^{
+                KSCrashConfiguration *capturedConfig = installWithCallback(NULL);
+
+                [[theValue(capturedConfig.isWritingReportCallback == NULL) should] beYes];
+            });
+
+            it(@"Should set KSCrash callback if callback is provided", ^{
+                KSCrashConfiguration *capturedConfig = installWithCallback(AMAKSCrashLoaderTestsClientCallback);
+
+                [[theValue(capturedConfig.isWritingReportCallback != NULL) should] beYes];
+            });
+
+            it(@"Should write callback values into reserved user object", ^{
+                KSCrashConfiguration *capturedConfig = installWithCallback(AMAKSCrashLoaderTestsClientCallback);
+                KSCrashReportWriter writer = testWriter();
+                KSCrash_ExceptionHandlingPlan plan = testPlan(NO);
+
+                capturedConfig.isWritingReportCallback(&plan, &writer);
+
+                [[theValue(g_AMAKSCrashLoaderTestsClientCallbackCalled) should] beYes];
+                [[[NSString stringWithUTF8String:g_AMAKSCrashLoaderTestsBeginObjectName] should]
+                    equal:kAMACrashContextCrashTimeErrorEnvironmentKey];
+                [[[NSString stringWithUTF8String:g_AMAKSCrashLoaderTestsStringKey] should] equal:@"callback_key"];
+                [[[NSString stringWithUTF8String:g_AMAKSCrashLoaderTestsStringValue] should] equal:@"callback_value"];
+                [[theValue(g_AMAKSCrashLoaderTestsEndContainerCount) should] equal:theValue(1)];
+            });
+
+            it(@"Should ignore invalid callback values", ^{
+                KSCrashConfiguration *capturedConfig = installWithCallback(AMAKSCrashLoaderTestsInvalidInputCallback);
+                KSCrashReportWriter writer = testWriter();
+                KSCrash_ExceptionHandlingPlan plan = testPlan(NO);
+
+                capturedConfig.isWritingReportCallback(&plan, &writer);
+
+                [[theValue(g_AMAKSCrashLoaderTestsClientCallbackCalled) should] beYes];
+                [[theValue(g_AMAKSCrashLoaderTestsStringKey == NULL) should] beYes];
+                [[theValue(g_AMAKSCrashLoaderTestsStringValue == NULL) should] beYes];
+            });
+
+            it(@"Should not call user callback for recrash", ^{
+                KSCrashConfiguration *capturedConfig = installWithCallback(AMAKSCrashLoaderTestsClientCallback);
+                KSCrashReportWriter writer = testWriter();
+                KSCrash_ExceptionHandlingPlan plan = testPlan(YES);
+
+                capturedConfig.isWritingReportCallback(&plan, &writer);
+
+                [[theValue(g_AMAKSCrashLoaderTestsClientCallbackCalled) should] beNo];
+                [[theValue(g_AMAKSCrashLoaderTestsBeginObjectName == NULL) should] beYes];
+                [[theValue(g_AMAKSCrashLoaderTestsEndContainerCount) should] equal:theValue(0)];
+            });
         });
 
         context(@"Crashed last launch", ^{

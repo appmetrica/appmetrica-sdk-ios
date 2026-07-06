@@ -350,6 +350,7 @@ them while retaining external immutability. Needed for testability. */
 - (void)setupCrashLoaderWithDetection:(BOOL)enabled
 {
     [self.ksCrashLoader setDelegate:self];
+    self.ksCrashLoader.crashErrorEnvironmentCallback = self.internalConfiguration.crashErrorEnvironmentCallback;
     self.ksCrashLoader.isUnhandledCrashDetectingEnabled = enabled;
     [self.ksCrashLoader enableCrashLoader];
     
@@ -358,6 +359,7 @@ them while retaining external immutability. Needed for testability. */
 
 - (void)setupRequiredMonitoring
 {
+    self.ksCrashLoader.crashErrorEnvironmentCallback = self.internalConfiguration.crashErrorEnvironmentCallback;
     [self.ksCrashLoader enableRequiredMonitoring];
 }
 

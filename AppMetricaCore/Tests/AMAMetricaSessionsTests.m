@@ -4,6 +4,7 @@
 #import "AMAAppMetrica+TestUtilities.h"
 #import "AMAAppMetricaConfiguration.h"
 #import "AMAAppMetricaImplTestFactory.h"
+#import "AMADispatchStrategiesFactory.h"
 #import "AMAEvent.h"
 #import "AMASession.h"
 #import "AMAEventStorage+TestUtilities.h"
@@ -13,8 +14,21 @@
 #import "AMAReporter.h"
 #import "AMAReporterStorage.h"
 #import "AMAReporterStateStorage.h"
+#import "AMAStartupHostProvider.h"
+#import "AMAStartupController.h"
 #import "AMASessionStorage+AMATestUtilities.h"
 #import "AMAReporterTestHelper.h"
+
+@interface AMAAppMetricaImpl ()
+@property (nonatomic, strong) AMAStartupController *startupController;
+- (void)shutdown;
+@end
+
+@interface AMAStartupHostProvider ()
++ (NSArray *)startupHosts;
++ (NSArray *)userStartupHosts;
++ (NSArray *)additionalStartupHosts;
+@end
 
 SPEC_BEGIN(AMAMetricaSessionsTests)
 
@@ -22,6 +36,7 @@ describe(@"AMAMetricaSessions", ^{
     NSString *const apiKey = [AMAReporterTestHelper defaultApiKey];
 
     AMAReporterTestHelper *__block reporterTestHelper = nil;
+    AMAAppMetricaImpl *__block appMetricaImpl = nil;
     AMAStubHostAppStateProvider *__block hostStateProvider = nil;
     AMAStubHostAppStateProvider *__block hostAppStateProvider = nil;
     AMAReporterStateStorage *__block stateStorage = nil;
@@ -34,10 +49,16 @@ describe(@"AMAMetricaSessions", ^{
         hostStateProvider.hostState = AMAHostAppStateBackground;
         hostAppStateProvider = [[AMAStubHostAppStateProvider alloc] init];
         reporterTestHelper = [[AMAReporterTestHelper alloc] init];
-        AMAAppMetricaImpl *impl =
-        [AMAAppMetricaImplTestFactory createCurrentQueueImplWithReporterHelper:reporterTestHelper
-                                                             hostStateProvider:hostAppStateProvider];
-        [AMAAppMetrica stub:@selector(sharedImpl) andReturn:impl];
+        [AMAStartupHostProvider stub:@selector(startupHosts) andReturn:@[]];
+        [AMAStartupHostProvider stub:@selector(userStartupHosts) andReturn:@[]];
+        [AMAStartupHostProvider stub:@selector(additionalStartupHosts) andReturn:@[]];
+        [AMADispatchStrategiesFactory stub:@selector(strategiesForStorage:typeMask:delegate:executionConditionChecker:)
+                                      andReturn:@[]];
+        appMetricaImpl =
+            [AMAAppMetricaImplTestFactory createCurrentQueueImplWithReporterHelper:reporterTestHelper
+                                                                   hostStateProvider:hostAppStateProvider];
+        [appMetricaImpl.startupController stub:@selector(update)];
+        [AMAAppMetrica stub:@selector(sharedImpl) andReturn:appMetricaImpl];
 
         id<AMAAsyncExecuting>executor = [AMACurrentQueueExecutor new];
         [AMAAppMetrica stub:@selector(sharedExecutor) andReturn:executor];
@@ -59,11 +80,16 @@ describe(@"AMAMetricaSessions", ^{
     };
     
     afterEach(^{
+        [appMetricaImpl shutdown];
         [AMAMetricaConfigurationTestUtilities destubConfiguration];
         [AMAAppMetrica clearStubs];
+        [AMADispatchStrategiesFactory clearStubs];
+        [AMAStartupHostProvider clearStubs];
         [reporterTestHelper destub];
         [UIApplication clearStubs];
         [NSDate clearStubs];
+        appMetricaImpl = nil;
+        reporterTestHelper = nil;
     });
     
 	context(@"Creates one session", ^{
@@ -169,13 +195,12 @@ describe(@"AMAMetricaSessions", ^{
             it(@"Should not start manual reporters on applicationDidBecomeActive", ^{
                 stubSharedImpl();
                 NSString *manualApiKey = @"550e8400-e29b-41d4-a716-446655440001";
-                id<AMAAppMetricaReporting> __unused reporter = [AMAAppMetrica reporterForAPIKey:manualApiKey];
+                AMAReporter *reporter = (AMAReporter *)[AMAAppMetrica reporterForAPIKey:manualApiKey];
                 start();
-                [[NSNotificationCenter defaultCenter] postNotificationName:UIApplicationDidBecomeActiveNotification
-                                                                    object:nil];
+                hostAppStateProvider.hostState = AMAHostAppStateForeground;
 
                 AMASession *session =
-                    [[AMAAppMetrica sharedImpl].mainReporter.reporterStorage.sessionStorage lastGeneralSessionWithError:nil];
+                    [reporter.reporterStorage.sessionStorage lastGeneralSessionWithError:nil];
                 [[session should] beNil];
             });
             it(@"Should not start new session after receiving notification before start and then starting Impl", ^{

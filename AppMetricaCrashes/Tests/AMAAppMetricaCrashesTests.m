@@ -23,6 +23,12 @@
 #import "AMAExternalCrashLoader.h"
 #import "AMACrashForwarder.h"
 
+static void AMAAppMetricaCrashesTestsCrashErrorEnvironmentCallback(
+    __unused const AMAAppMetricaCrashErrorEnvironmentWriter *writer
+)
+{
+}
+
 @interface AMAAppMetricaCrashes () <AMAModuleActivationDelegate>
 @property (nonatomic, strong) AMAErrorEnvironment *errorEnvironment;
 @property (nonatomic, strong) AMAEnvironmentContainer *appEnvironment;
@@ -279,6 +285,32 @@ describe(@"AMAAppMetricaCrashes", ^{
 
                     [[crashLoader should] receive:@selector(setIsUnhandledCrashDetectingEnabled:)
                                     withArguments:theValue(YES)];
+
+                    [crashes activate];
+                });
+
+                it(@"Should set crash error environment callback before enabling crash loader", ^{
+                    AMAAppMetricaCrashErrorEnvironmentCallback callback =
+                        AMAAppMetricaCrashesTestsCrashErrorEnvironmentCallback;
+                    initialConfig.autoCrashTracking = YES;
+                    initialConfig.crashErrorEnvironmentCallback = callback;
+                    [crashes setConfiguration:initialConfig];
+
+                    [[crashLoader should] receive:@selector(setCrashErrorEnvironmentCallback:)
+                                    withArguments:theValue(callback)];
+
+                    [crashes activate];
+                });
+
+                it(@"Should set crash error environment callback before enabling required monitoring", ^{
+                    AMAAppMetricaCrashErrorEnvironmentCallback callback =
+                        AMAAppMetricaCrashesTestsCrashErrorEnvironmentCallback;
+                    initialConfig.autoCrashTracking = NO;
+                    initialConfig.crashErrorEnvironmentCallback = callback;
+                    [crashes setConfiguration:initialConfig];
+
+                    [[crashLoader should] receive:@selector(setCrashErrorEnvironmentCallback:)
+                                    withArguments:theValue(callback)];
 
                     [crashes activate];
                 });

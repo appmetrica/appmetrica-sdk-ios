@@ -2,6 +2,7 @@
 #import <XCTest/XCTest.h>
 #import "AMAModuleContextImpl.h"
 #import "AMACore.h"
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import "Mocks/AMAAdProvidingMock.h"
 #import "Mocks/AMAModuleContextMocks.h"
 #import "Utilities/AMAEventPollingDelegateMock.h"
@@ -17,8 +18,14 @@
 {
     self.ctx = [[AMAModuleContextImpl alloc] init];
     self.config = [[AMAModuleActivationConfiguration alloc] initWithApiKey:@"test-key"];
+    [AMAAppMetrica stub:@selector(isActivated) andReturn:theValue(NO)];
     [AMAModuleActivationDelegateMock reset];
     [AMAEventFlushableDelegateMock reset];
+}
+
+- (void)tearDown
+{
+    [AMAAppMetrica clearStubs];
 }
 
 // MARK: - Initial state

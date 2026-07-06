@@ -2,7 +2,9 @@
 #import <XCTest/XCTest.h>
 #import "AMAModulesController.h"
 #import "AMAModuleContextImpl.h"
+#import "AMACoreModuleComponentsInitializer.h"
 #import <AppMetricaCoreExtension/AppMetricaCoreExtension.h>
+#import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
 #import "Mocks/AMAModuleContextMocks.h"
 
@@ -16,11 +18,17 @@
 
 - (void)setUp
 {
+    [AMACoreModuleComponentsInitializer stub:@selector(discoverAndRegisterInController:classLookup:)];
     AMACurrentQueueExecutor *executor = [AMACurrentQueueExecutor new];
     self.controller = [[AMAModulesController alloc] initWithExecutor:executor
-                                             startupParametersHandler:nil];
+                                              startupParametersHandler:nil];
     [AMAModuleActivationDelegateMock reset];
     [AMAEventFlushableDelegateMock reset];
+}
+
+- (void)tearDown
+{
+    [AMACoreModuleComponentsInitializer clearStubs];
 }
 
 // MARK: - Initial state

@@ -6,6 +6,9 @@ extern NSString *const kAMACrashContextAppBuildNumberKey;
 extern NSString *const kAMACrashContextAppBuildUIDKey;
 extern NSString *const kAMACrashContextAppStateKey;
 extern NSString *const kAMACrashContextErrorEnvironmentKey;
+extern NSString *const kAMACrashContextCrashTimeErrorEnvironmentKey;
 extern NSString *const kAMACrashContextAppEnvironmentKey;
+
+extern const char kAMACrashContextCrashTimeErrorEnvironmentKeyCString[];
 
 extern NSString *const kAMACrashContextLegacyAppStateKey;

@@ -26,6 +26,11 @@ static NSInteger const kAMAErrorEnvironmentTotalLengthLimit = 4500;
 
 - (void)addValue:(NSString *)value forKey:(NSString *)key 
 {
+    [self addValue:value forKey:key replaceExisting:YES];
+}
+
+- (void)addValue:(NSString *)value forKey:(NSString *)key replaceExisting:(BOOL)replaceExisting
+{
     if (key.length == 0) {
         return;
     }
@@ -33,6 +38,10 @@ static NSInteger const kAMAErrorEnvironmentTotalLengthLimit = 4500;
     NSString *truncatedKey = (key.length > kAMAErrorEnvironmentKeyLengthLimit)
         ? [key substringToIndex:kAMAErrorEnvironmentKeyLengthLimit]
         : key;
+    if (replaceExisting == NO && self.environment[truncatedKey] != nil) {
+        return;
+    }
+
     NSString *truncatedValue = (value.length > kAMAErrorEnvironmentValueLengthLimit) 
         ? [value substringToIndex:kAMAErrorEnvironmentValueLengthLimit]
         : value;

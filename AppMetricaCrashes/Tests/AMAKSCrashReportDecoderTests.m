@@ -248,6 +248,52 @@ describe(@"AMAKSCrashReportDecoder", ^{
             it(@"Should decode error enviroment", ^{
                 [[decodedCrash(root).errorEnvironment should] equal:userInfo[kAMACrashContextErrorEnvironmentKey]];
             });
+
+            it(@"Should decode crash-time error environment", ^{
+                userInfo[kAMACrashContextErrorEnvironmentKey] = nil;
+                userInfo[kAMACrashContextCrashTimeErrorEnvironmentKey] = @{ @"crashKey" : @"crashValue" };
+
+                [[decodedCrash(root).errorEnvironment should] equal:@{ @"crashKey" : @"crashValue" }];
+            });
+
+            it(@"Should merge error environment with crash-time values", ^{
+                userInfo[kAMACrashContextErrorEnvironmentKey] = @{ @"baseKey" : @"baseValue" };
+                userInfo[kAMACrashContextCrashTimeErrorEnvironmentKey] = @{ @"crashKey" : @"crashValue" };
+
+                NSDictionary *expected = @{ @"baseKey" : @"baseValue", @"crashKey" : @"crashValue" };
+                [[decodedCrash(root).errorEnvironment should] equal:expected];
+            });
+
+            it(@"Should prefer crash-time value on key conflict", ^{
+                userInfo[kAMACrashContextErrorEnvironmentKey] = @{ @"sameKey" : @"baseValue" };
+                userInfo[kAMACrashContextCrashTimeErrorEnvironmentKey] = @{ @"sameKey" : @"crashValue" };
+
+                [[decodedCrash(root).errorEnvironment should] equal:@{ @"sameKey" : @"crashValue" }];
+            });
+
+            it(@"Should give crash-time values priority when pairs limit is reached", ^{
+                NSMutableDictionary *baselineEnvironment = [NSMutableDictionary dictionary];
+                for (NSUInteger index = 0; index < 30; index++) {
+                    baselineEnvironment[[NSString stringWithFormat:@"base%lu", (unsigned long)index]] = @"value";
+                }
+                userInfo[kAMACrashContextErrorEnvironmentKey] = baselineEnvironment;
+                userInfo[kAMACrashContextCrashTimeErrorEnvironmentKey] = @{ @"crashKey" : @"crashValue" };
+
+                NSDictionary *result = decodedCrash(root).errorEnvironment;
+                [[result should] haveCountOf:30];
+                [[result[@"crashKey"] should] equal:@"crashValue"];
+            });
+
+            it(@"Should ignore non-string crash-time keys and values", ^{
+                userInfo[kAMACrashContextErrorEnvironmentKey] = nil;
+                userInfo[kAMACrashContextCrashTimeErrorEnvironmentKey] = @{
+                    @"valid" : @"value",
+                    @"badValue" : @1,
+                    @1 : @"badKey",
+                };
+
+                [[decodedCrash(root).errorEnvironment should] equal:@{ @"valid" : @"value" }];
+            });
         });
         
         context(@"Should decode binary images", ^{

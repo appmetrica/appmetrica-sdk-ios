@@ -145,6 +145,20 @@ describe(@"AMAErrorEnvironment", ^{
             NSDictionary *result = [sut currentEnvironment];
             [[result should] haveCountOf:2];
         });
+
+        it(@"Should not update the value for an existing key if replacing is disabled", ^{
+            [sut addValue:@"old_value" forKey:@"key"];
+            [sut addValue:@"new_value" forKey:@"key" replaceExisting:NO];
+            NSDictionary *result = [sut currentEnvironment];
+            [[[result objectForKey:@"key"] should] equal:@"old_value"];
+        });
+
+        it(@"Should update the value for an existing key if replacing is enabled", ^{
+            [sut addValue:@"old_value" forKey:@"key"];
+            [sut addValue:@"new_value" forKey:@"key" replaceExisting:YES];
+            NSDictionary *result = [sut currentEnvironment];
+            [[[result objectForKey:@"key"] should] equal:@"new_value"];
+        });
     });
 });
 

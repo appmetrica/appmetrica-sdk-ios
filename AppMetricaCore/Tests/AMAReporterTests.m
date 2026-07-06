@@ -24,6 +24,7 @@
 #import "AMALocationManager+TestUtilities.h"
 #import "AMAAppStateManagerTestHelper.h"
 #import "AMAReporterNotifications.h"
+#import "AMANotificationsListener.h"
 #import "AMADate.h"
 #import "AMAFailureDispatcherTestHelper.h"
 #import "AMAEventBuilder.h"
@@ -114,13 +115,14 @@ describe(@"AMAReporter", ^{
     beforeEach(^{
         [AMAMetricaConfigurationTestUtilities stubConfiguration];
         [AMAFailureDispatcherTestHelper stubFailureDispatcher];
+        [AMANotificationsListener stubbedNullMockForInit:@selector(init)];
 
         reporterTestHelper = [[AMAReporterTestHelper alloc] init];
     });
     afterEach(^{
+        [reporterTestHelper destub];
         [AMAMetricaConfigurationTestUtilities destubConfiguration];
         [AMAFailureDispatcherTestHelper destub];
-        [reporterTestHelper destub];
         [NSDate clearStubs];
         
         [AMAMetricaConfiguration clearStubs];
@@ -132,6 +134,7 @@ describe(@"AMAReporter", ^{
         [AMAApplicationStateManager clearStubs];
         
         [AMAAppMetrica clearStubs];
+        [AMANotificationsListener clearStubs];
 
         [AMAReporterStoragesContainer clearStubs];
     });
