@@ -179,8 +179,8 @@ describe(@"AMAPlatformDescription", ^{
         it(@"Should return build number", ^{
             [[theValue([AMAPlatformDescription SDKBuildNumber]) should] equal:theValue(AMA_BUILD_NUMBER)];
         });
-        it(@"Should return undefined build type when use SPM", ^{
-            [[[AMAPlatformDescription SDKBuildType] should] equal:@"undefined"];
+        it(@"Should return source build type by default", ^{
+            [[[AMAPlatformDescription SDKBuildType] should] equal:@"source"];
         });
         it(@"Should return bundle name", ^{
             [[[AMAPlatformDescription SDKBundleName] should] equal:@"io.appmetrica"];

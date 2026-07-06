@@ -20,7 +20,7 @@ NSString *const kAMADeviceTypePhone = @"phone";
 NSString *const kAMADeviceTypeWatch = @"watch";
 
 #ifndef AMA_BUILD_TYPE
-    #define AMA_BUILD_TYPE "undefined"
+    #define AMA_BUILD_TYPE "source"
 #endif
 
 @implementation AMAPlatformDescription

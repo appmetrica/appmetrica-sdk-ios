@@ -15,7 +15,6 @@ Pod::Spec.new do |s|
 
   s.pod_target_xcconfig = {
       'DEFINES_MODULE' => 'YES',
-      'GCC_PREPROCESSOR_DEFINITIONS' => 'AMA_BUILD_TYPE=\"source\"',
   }
 
   s.frameworks = 'Foundation', 'Security', 'UIKit'

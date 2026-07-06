@@ -13,10 +13,6 @@ Pod::Spec.new do |s|
   
   s.swift_versions = '5.9.0'
 
-  s.pod_target_xcconfig = {
-      'GCC_PREPROCESSOR_DEFINITIONS' => 'AMA_BUILD_TYPE=\"source\"',
-  }
-
   s.frameworks = 'Foundation'
 
   s.dependency 'AppMetricaCore', '= 6.5.0'
