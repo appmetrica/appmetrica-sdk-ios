@@ -33,7 +33,8 @@ describe(@"AMAStartupController", ^{
     AMATimeoutRequestsController *__block timeoutController = nil;
     AMAStartupResponseParser *__block startupResponseParser = nil;
     AMAAppStateManagerTestHelper *__block appStateManagerTestHelper;
-    
+    AMAAttributionController *__block testAttributionController = nil;
+
     void (^stubAppState)(void) = ^{
         appStateManagerTestHelper = [[AMAAppStateManagerTestHelper alloc] init];
         [appStateManagerTestHelper stubApplicationState];
@@ -49,10 +50,12 @@ describe(@"AMAStartupController", ^{
         id<AMAResettableIterable> hostProvider =
         [[AMAHostProviderMock alloc] initWithItems:@[@"1"]];
         startupResponseParser = [AMAStartupResponseParser nullMock];
+        AMAAttributionController *attributionController = testAttributionController ?: [AMAAttributionController nullMock];
         return [[AMAStartupController alloc] initWithExecutor:executor
                                                  hostProvider:hostProvider
                                     timeoutRequestsController:timeoutController
-                                        startupResponseParser:startupResponseParser];
+                                        startupResponseParser:startupResponseParser
+                                        attributionController:attributionController];
     };
     beforeAll(^{
         [AMATestNetwork stubHTTPRequestWithBlock:nil];
@@ -65,11 +68,11 @@ describe(@"AMAStartupController", ^{
         [AMAMetricaConfigurationTestUtilities stubConfiguration];
         timeoutController = [AMATimeoutRequestsController nullMock];
         [timeoutController stub:@selector(isAllowed) andReturn:theValue(YES)];
+        testAttributionController = nil;
     });
     afterEach(^{
         [NSDate clearStubs];
         [AMAMetricaConfigurationTestUtilities destubConfiguration];
-        [AMAAttributionController clearStubs];
         [AMAMetricaConfiguration.sharedInstance clearStubs];
         [(NSObject *)AMAMetricaConfiguration.sharedInstance.identifierProvider clearStubs];
         [AMAMetricaConfiguration.sharedInstance.persistent clearStubs];
@@ -158,12 +161,11 @@ describe(@"AMAStartupController", ^{
                 configuration = [AMAMetricaConfiguration sharedInstance];
                 attributionConfig = [AMAAttributionModelConfiguration nullMock];
                 attributionController = [AMAAttributionController nullMock];
-                [AMAAttributionController stub:@selector(sharedInstance) andReturn:attributionController];
+                testAttributionController = attributionController;
                 response = [AMAStartupResponse nullMock];
                 [response stub:@selector(attributionModelConfiguration) andReturn:attributionConfig];
             });
             afterEach(^{
-                [AMAAttributionController clearStubs];
                 [AMAMetricaConfigurationTestUtilities destubConfiguration];
                 [AMAMetricaConfiguration.sharedInstance clearStubs];
                 [AMAMetricaConfiguration.sharedInstance.persistent clearStubs];
@@ -366,7 +368,8 @@ describe(@"AMAStartupController", ^{
             startupController = [[AMAStartupController alloc] initWithExecutor:executor
                                                                   hostProvider:hostProvider
                                                      timeoutRequestsController:timeoutController
-                                                         startupResponseParser:startupResponseParser];
+                                                         startupResponseParser:startupResponseParser
+                                                         attributionController:[AMAAttributionController nullMock]];
         });
         afterEach(^{
             destubAppState();
@@ -582,7 +585,8 @@ describe(@"AMAStartupController", ^{
             controller = [[AMAStartupController alloc] initWithExecutor:executor
                                                            hostProvider:hostProvider
                                               timeoutRequestsController:timeoutController
-                                                  startupResponseParser:startupResponseParser];
+                                                  startupResponseParser:startupResponseParser
+                                                  attributionController:[AMAAttributionController nullMock]];
         });
         afterEach(^{
             destubAppState();

@@ -105,7 +105,7 @@ describe(@"AMAAppMetricaImpl", ^{
         [AMALocationManager stub:@selector(sharedManager)];
         configuration = [AMAAppMetricaConfiguration nullMock];
         [configuration stub:@selector(APIKey) andReturn:apiKey];
-        startupController = [AMAStartupController stubbedNullMockForInit:@selector(initWithTimeoutRequestsController:)];
+        startupController = [AMAStartupController stubbedNullMockForInit:@selector(initWithTimeoutRequestsController:attributionController:)];
         permissionsController = [AMAPermissionsController stubbedNullMockForInit:@selector(initWithConfiguration:
                                                                                            extrcator:
                                                                                            dateProvider:)];
@@ -424,10 +424,7 @@ describe(@"AMAAppMetricaImpl", ^{
         AMAAttributionController *__block controller = nil;
         beforeEach(^{
             controller = [AMAAttributionController nullMock];
-            [AMAAttributionController stub:@selector(sharedInstance) andReturn:controller];
-        });
-        afterEach(^{
-            [AMAAttributionController clearStubs];
+            [appMetricaImpl stub:@selector(attributionController) andReturn:controller];
         });
         it(@"Should set main reporter", ^{
             KWCaptureSpy *reporterCaptor = [controller captureArgument:@selector(setMainReporter:) atIndex:0];

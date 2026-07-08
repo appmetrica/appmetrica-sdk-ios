@@ -3,13 +3,15 @@
 
 @class AMAReporter;
 @class AMAAttributionModelConfiguration;
+@protocol AMAAsyncExecuting;
 
 @interface AMAAttributionController : NSObject
 
 @property (nonatomic, strong, readwrite) AMAAttributionModelConfiguration *config;
 @property (nonatomic, strong, readwrite) AMAReporter *mainReporter;
 
-+ (instancetype)sharedInstance;
-- (instancetype)initWithConfig:(AMAAttributionModelConfiguration *)config;
+- (instancetype)initWithExecutor:(id<AMAAsyncExecuting>)executor;
+- (instancetype)initWithExecutor:(id<AMAAsyncExecuting>)executor
+                           config:(AMAAttributionModelConfiguration *)config;
 
 @end

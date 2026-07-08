@@ -99,7 +99,7 @@ static NSString *const anonymousApiKey = @"629a824d-c717-4ba5-bc0f-3f3968554d01"
     [AMALocationManager stub:@selector(sharedManager)];
     self.configuration = [AMAAppMetricaConfiguration nullMock];
     [self.configuration stub:@selector(APIKey) andReturn:apiKey];
-    self.startupController = [AMAStartupController stubbedNullMockForInit:@selector(initWithTimeoutRequestsController:)];
+    self.startupController = [AMAStartupController stubbedNullMockForInit:@selector(initWithTimeoutRequestsController:attributionController:)];
     self.permissionsController = [AMAPermissionsController stubbedNullMockForInit:@selector(initWithConfiguration:
                                                                                        extrcator:
                                                                                        dateProvider:)];
@@ -175,22 +175,20 @@ static NSString *const anonymousApiKey = @"629a824d-c717-4ba5-bc0f-3f3968554d01"
 {
     AMAAppMetricaConfiguration *config = [[AMAAppMetricaConfiguration alloc] initWithAPIKey:apiKey];
     [self.appMetricaImpl activateWithConfiguration:config];
-    
-    XCTAssertNil(self.appMetricaImpl.mainReporter);
-    
-    [self.executor execute];
-    
+
     XCTAssertNotNil(self.appMetricaImpl.mainReporter);
     XCTAssertEqualObjects(self.appMetricaImpl.mainReporter.apiKey, apiKey);
+
+    [self.executor execute];
 }
 
 - (void)testReportEvent
 {
     AMAAppMetricaConfiguration *config = [[AMAAppMetricaConfiguration alloc] initWithAPIKey:apiKey];
     [self.appMetricaImpl activateWithConfiguration:config];
-    
-    XCTAssertNil(self.appMetricaImpl.mainReporter);
-    
+
+    XCTAssertNotNil(self.appMetricaImpl.mainReporter);
+
     XCTestExpectation *__block onFailureExpectation1 = [self expectationWithDescription:@"should not call onFailure"];
     XCTestExpectation *__block onFailureExpectation2 = [self expectationWithDescription:@"should not call onFailure"];
     

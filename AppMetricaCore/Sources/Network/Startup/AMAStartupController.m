@@ -26,6 +26,7 @@ NSErrorDomain const AMAStartupRequestsErrorDomain = @"AMAStartupRequestsErrorDom
 @property (nonatomic, strong, readonly) AMATimeoutRequestsController *timeoutRequestsController;
 @property (nonatomic, strong, readonly) AMAStartupResponseParser *startupResponseParser;
 @property (nonatomic, strong, readonly) AMAHTTPRequestsFactory *requestsFactory;
+@property (nonatomic, strong, readonly) AMAAttributionController *attributionController;
 
 @end
 
@@ -34,19 +35,22 @@ NSErrorDomain const AMAStartupRequestsErrorDomain = @"AMAStartupRequestsErrorDom
 @dynamic upToDate;
 
 - (instancetype)initWithTimeoutRequestsController:(AMATimeoutRequestsController *)timeoutRequestsController
+                             attributionController:(AMAAttributionController *)attributionController
 {
     id<AMACancelableExecuting> executor = [[AMACancelableDelayedExecutor alloc] initWithIdentifier:self];
     AMAStartupHostProvider *hostProvider = [[AMAStartupHostProvider alloc] init];
     return [self initWithExecutor:executor
                      hostProvider:hostProvider
         timeoutRequestsController:timeoutRequestsController
-            startupResponseParser:[[AMAStartupResponseParser alloc] init]];
+            startupResponseParser:[[AMAStartupResponseParser alloc] init]
+            attributionController:attributionController];
 }
 
 - (instancetype)initWithExecutor:(id<AMACancelableExecuting>)executor
                     hostProvider:(id<AMAResettableIterable>)hostProvider
        timeoutRequestsController:(AMATimeoutRequestsController *)timeoutRequestsController
            startupResponseParser:(AMAStartupResponseParser *)startupResponseParser
+           attributionController:(AMAAttributionController *)attributionController
 {
     self = [super init];
     if (self != nil) {
@@ -57,6 +61,7 @@ NSErrorDomain const AMAStartupRequestsErrorDomain = @"AMAStartupRequestsErrorDom
         _timeoutRequestsController = timeoutRequestsController;
         _startupResponseParser = startupResponseParser;
         _requestsFactory = [[AMAHTTPRequestsFactory alloc] init];
+        _attributionController = attributionController;
     }
 
     return self;
@@ -194,7 +199,7 @@ NSErrorDomain const AMAStartupRequestsErrorDomain = @"AMAStartupRequestsErrorDom
     }
 
     persistent.startupUpdatedAt = [NSDate date];
-    [AMAAttributionController sharedInstance].config = persistent.attributionModelConfiguration;
+    self.attributionController.config = persistent.attributionModelConfiguration;
 }
 
 #pragma mark - Errors

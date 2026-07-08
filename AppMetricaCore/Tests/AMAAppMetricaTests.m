@@ -7,6 +7,7 @@
 #import "AMAAppMetricaImplTestFactory.h"
 #import "AMAAppMetrica+Internal.h"
 #import "AMAAppStateManagerTestHelper.h"
+#import "AMAAttributionController.h"
 #import "AMADataSendingRestrictionController.h"
 #import "AMAEventPollingDelegate.h"
 #import "AMAFailureDispatcherTestHelper.h"
@@ -102,7 +103,8 @@ describe(@"AMAAppMetrica", ^{
         [[AMAStartupController alloc] initWithExecutor:executor
                                           hostProvider:hostProvider
                              timeoutRequestsController:timeoutController
-                                 startupResponseParser:[[AMAStartupResponseParser alloc] init]];
+                                 startupResponseParser:[[AMAStartupResponseParser alloc] init]
+                                 attributionController:[AMAAttributionController nullMock]];
         startupController.delegate = impl;
         [impl stub:@selector(startupController) andReturn:startupController];
         [impl stub:@selector(apiKey) andReturn:apiKey];

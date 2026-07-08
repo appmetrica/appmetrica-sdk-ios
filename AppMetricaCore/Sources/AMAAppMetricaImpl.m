@@ -109,6 +109,8 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
 
 @property (nonatomic, strong) AMAReporterAutocollectedDataProvider *autocollectedDataProvider;
 
+@property (nonatomic, strong, readonly) AMAAttributionController *attributionController;
+
 @end
 
 @implementation AMAAppMetricaImpl
@@ -154,6 +156,7 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
         _adProviderResolver = [AMAAdProviderResolver sharedInstance];
         
         _autocollectedDataProvider = [[AMAReporterAutocollectedDataProvider alloc] initWithPersistentConfiguration:persistent];
+        _attributionController = [[AMAAttributionController alloc] initWithExecutor:executor];
 
 #if !TARGET_OS_TV
         [[AMASKAdNetworkRequestor sharedInstance] registerForAdNetworkAttribution];
@@ -802,7 +805,8 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
         timeoutController = [[AMATimeoutRequestsController alloc] initWithHostType:AMAStartupHostType
                                                                      configuration:configuration];
         self.startupController =
-            [[AMAStartupController alloc] initWithTimeoutRequestsController:timeoutController];
+            [[AMAStartupController alloc] initWithTimeoutRequestsController:timeoutController
+                                                       attributionController:self.attributionController];
         self.startupController.delegate = self;
         self.startupController.extendedDelegate = self;
     }];
@@ -896,9 +900,9 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
             [weakSelf postSetupMainReporterWithStorage:reporterStorage];
         }];
 
+        self.mainReporter = reporter;
+        self.attributionController.mainReporter = reporter;
         [self execute:^{
-            self.mainReporter = reporter;
-            [AMAAttributionController sharedInstance].mainReporter = reporter;
             [self addEventsFromPollingDelegates:reporter];
             [self triggerSessionStartIfNeeded];
         }];

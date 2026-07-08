@@ -5,34 +5,29 @@
 #import "AMAAttributionChecker.h"
 #import "AMAMetricaConfiguration.h"
 #import "AMAMetricaPersistentConfiguration.h"
+#import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
 
 @interface AMAAttributionController ()
 
+@property (nonatomic, strong, readonly) id<AMAAsyncExecuting> executor;
 @property (nonatomic, assign, readwrite) BOOL inited;
 
 @end
 
 @implementation AMAAttributionController
 
-+ (instancetype)sharedInstance
+- (instancetype)initWithExecutor:(id<AMAAsyncExecuting>)executor
 {
-    static dispatch_once_t pred;
-    static AMAAttributionController *shared = nil;
-    dispatch_once(&pred, ^{
-        shared = [[self alloc] init];
-    });
-    return shared;
+    return [self initWithExecutor:executor
+                            config:[AMAMetricaConfiguration sharedInstance].persistent.attributionModelConfiguration];
 }
 
-- (instancetype)init
-{
-    return [self initWithConfig:[AMAMetricaConfiguration sharedInstance].persistent.attributionModelConfiguration];
-}
-
-- (instancetype)initWithConfig:(AMAAttributionModelConfiguration *)config
+- (instancetype)initWithExecutor:(id<AMAAsyncExecuting>)executor
+                           config:(AMAAttributionModelConfiguration *)config
 {
     self = [super init];
     if (self != nil) {
+        _executor = executor;
         _config = config;
     }
     return self;
@@ -40,24 +35,33 @@
 
 #pragma mark - Public -
 
+// NOTE: ivar set synchronously; only the heavier surveillance setup is deferred onto `executor`.
 - (void)setMainReporter:(AMAReporter *)mainReporter
 {
     @synchronized (self) {
         _mainReporter = mainReporter;
-        AMALogInfo(@"config: %@, inited: %d", self.config, self.inited);
-        [self maybeSetUpEventsSurveillanceWithReporter:mainReporter config:self.config];
     }
+    [self.executor execute:^{
+        @synchronized (self) {
+            AMALogInfo(@"config: %@, inited: %d", self.config, self.inited);
+            [self maybeSetUpEventsSurveillanceWithReporter:mainReporter config:self.config];
+        }
+    }];
 }
 
 - (void)setConfig:(AMAAttributionModelConfiguration *)config
 {
     @synchronized (self) {
         _config = config;
-        AMALogInfo(@"reporter: %@, config: %@, inited: %d", self.mainReporter, config, self.inited);
-        if (self.mainReporter != nil) {
-            [self maybeSetUpEventsSurveillanceWithReporter:self.mainReporter config:config];
-        }
     }
+    [self.executor execute:^{
+        @synchronized (self) {
+            AMALogInfo(@"reporter: %@, config: %@, inited: %d", self.mainReporter, config, self.inited);
+            if (self.mainReporter != nil) {
+                [self maybeSetUpEventsSurveillanceWithReporter:self.mainReporter config:config];
+            }
+        }
+    }];
 }
 
 #pragma mark - Private -
