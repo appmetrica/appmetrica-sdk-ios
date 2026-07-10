@@ -528,13 +528,13 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
 
 - (void)setUserProfileID:(NSString *)userProfileID
 {
-    [self execute:^{
+    @synchronized (self) {
         if (self.mainReporter != nil) {
             [self.mainReporter setUserProfileID:userProfileID];
         } else {
             self.preactivationActionHistory.userProfileID = userProfileID.copy;
         }
-    }];
+    };
 }
 
 - (NSString *)userProfileID

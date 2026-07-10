@@ -207,4 +207,29 @@ static NSString *const anonymousApiKey = @"629a824d-c717-4ba5-bc0f-3f3968554d01"
     [self waitForExpectations:@[onFailureExpectation2] timeout:1];
 }
 
+- (void)testSetUserProfileIDBeforeActivationAppliesWithoutFlushingExecutor
+{
+    NSString *profileID = @"Profile ID before activation";
+    
+    self.executor.executeNonDelayedBlocksImmediately = NO;
+    [self.appMetricaImpl setUserProfileID:profileID];
+
+    XCTAssertEqualObjects(self.appMetricaImpl.userProfileID, profileID);
+}
+
+- (void)testSetUserProfileIDAfterActivationDoesNotRequireImplExecutorFlush
+{
+    AMAAppMetricaConfiguration *config = [[AMAAppMetricaConfiguration alloc] initWithAPIKey:apiKey];
+    [self.appMetricaImpl activateWithConfiguration:config];
+
+    NSString *profileID = @"Profile ID after activation";
+    
+    self.executor.executeNonDelayedBlocksImmediately = NO;
+    [self.appMetricaImpl setUserProfileID:profileID];
+
+    AMAReporter *reporter = [self.reporterTestHelper appReporterForApiKey:apiKey];
+
+    XCTAssertEqualObjects(reporter.reporterStorage.stateStorage.profileID, profileID);
+}
+
 @end
