@@ -13,6 +13,7 @@
 @property (nonatomic, assign, readwrite) NSUInteger maxReportsInDatabaseCount;
 @property (nonatomic, assign, readwrite) BOOL logsEnabled;
 @property (nonatomic, copy, readwrite) NSString *userProfileID;
+@property (nonatomic, copy, readwrite) NSDictionary<NSString *, NSString *> *appEnvironment;
 
 @property (nonatomic, strong, nullable, readwrite) NSNumber *dataSendingEnabledState;
 
@@ -55,6 +56,7 @@
     _maxReportsInDatabaseCount = kAMAMaxReportsInDatabaseCount;
     _logsEnabled = NO;
     _userProfileID = nil;
+    _appEnvironment = nil;
 }
 
 - (id)copyWithZone:(NSZone *)zone
@@ -73,6 +75,7 @@
         mutableConfiguration.maxReportsInDatabaseCount = self.maxReportsInDatabaseCount;
         mutableConfiguration.logsEnabled = self.areLogsEnabled;
         mutableConfiguration.userProfileID = self.userProfileID;
+        mutableConfiguration.appEnvironment = self.appEnvironment;
         mutableConfiguration.dataSendingEnabledState = self.dataSendingEnabledState;
     }
     return mutableConfiguration;
@@ -89,11 +92,11 @@
 {
     return [NSString stringWithFormat:@"%@ apiKey=%@, sessionTimeout=%@, dispatchPeriod=%@, "
                                        "maxReportsCount=%@, maxReportsInDatabaseCount=%@, "
-                                       "logs=%@, userProfileID=%@, dataSendingEnabledState=%@",
+                                       "logs=%@, userProfileID=%@, dataSendingEnabledState=%@, appEnvironment=%@",
                                        [super description], self.APIKey, @(self.sessionTimeout),
                                        @(self.dispatchPeriod), @(self.maxReportsCount),
                                        @(self.maxReportsInDatabaseCount), @(self.logsEnabled), self.userProfileID,
-                                       self.dataSendingEnabledState];
+                                       self.dataSendingEnabledState, self.appEnvironment];
 }
 
 #endif
@@ -108,6 +111,7 @@
 @dynamic maxReportsCount;
 @dynamic logsEnabled;
 @dynamic userProfileID;
+@dynamic appEnvironment;
 @dynamic dispatchPeriod;
 
 - (instancetype)initWithAPIKey:(NSString *)APIKey
@@ -127,6 +131,7 @@
         configuration.maxReportsInDatabaseCount = self.maxReportsInDatabaseCount;
         configuration.logsEnabled = self.areLogsEnabled;
         configuration.userProfileID = self.userProfileID;
+        configuration.appEnvironment = self.appEnvironment;
         configuration.dataSendingEnabledState = self.dataSendingEnabledState;
     }
     return configuration;

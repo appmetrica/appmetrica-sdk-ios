@@ -54,6 +54,13 @@ NS_SWIFT_NAME(ReporterConfiguration)
  */
 @property (nonatomic, copy, nullable, readonly) NSString *userProfileID;
 
+/** Application environment to be set during reporter activation.
+
+ Setting key - value data to be used as additional information, associated with all events from the moment
+ of activation. If value is nil, previously set key-value is removed. Does nothing if key hasn't been added.
+ */
+@property (nonatomic, copy, nullable, readonly) NSDictionary<NSString *, NSString *> *appEnvironment;
+
 /** Initialize configuration with specified Application key.
 
  @param APIKey Application key that is issued during application registration in AppMetrica.
@@ -115,6 +122,13 @@ NS_SWIFT_NAME(MutableReporterConfiguration)
  @warning The value can contain up to 200 characters.
  */
 @property (nonatomic, copy, nullable) NSString *userProfileID;
+
+/** Application environment to be set during reporter activation.
+
+ Setting key - value data to be used as additional information, associated with all events from the moment
+ of activation. If value is nil, previously set key-value is removed. Does nothing if key hasn't been added.
+ */
+@property (nonatomic, copy, nullable) NSDictionary<NSString *, NSString *> *appEnvironment;
 
 - (instancetype)init NS_UNAVAILABLE;
 + (instancetype)new NS_UNAVAILABLE;

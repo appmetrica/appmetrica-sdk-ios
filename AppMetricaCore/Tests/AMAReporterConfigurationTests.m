@@ -38,6 +38,9 @@ describe(@"AMAReporterConfiguration", ^{
             it(@"Should have valid user profile ID", ^{
                 [[configuration.userProfileID should] beNil];
             });
+            it(@"Should have nil app environment", ^{
+                [[configuration.appEnvironment should] beNil];
+            });
         });
         context(@"Mutable", ^{
             AMAMutableReporterConfiguration *__block configuration = nil;
@@ -61,6 +64,9 @@ describe(@"AMAReporterConfiguration", ^{
             });
             it(@"Should have user profile ID", ^{
                 [[configuration.userProfileID should] beNil];
+            });
+            it(@"Should have nil app environment", ^{
+                [[configuration.appEnvironment should] beNil];
             });
         });
     });
@@ -120,6 +126,9 @@ describe(@"AMAReporterConfiguration", ^{
             it(@"Should have user profile ID", ^{
                 [[configuration.userProfileID should] beNil];
             });
+            it(@"Should have nil app environment", ^{
+                [[configuration.appEnvironment should] beNil];
+            });
             context(@"Immutable copy", ^{
                 it(@"Should return self", ^{
                     [[[configuration copy] should] equal:configuration];
@@ -148,6 +157,9 @@ describe(@"AMAReporterConfiguration", ^{
                 it(@"Should have user profile ID", ^{
                     [[mutableCopy.userProfileID should] beNil];
                 });
+                it(@"Should have nil app environment", ^{
+                    [[mutableCopy.appEnvironment should] beNil];
+                });
             });
         });
         context(@"Mutable", ^{
@@ -173,6 +185,9 @@ describe(@"AMAReporterConfiguration", ^{
             it(@"Should have user profile ID", ^{
                 [[configuration.userProfileID should] beNil];
             });
+            it(@"Should have nil app environment", ^{
+                [[configuration.appEnvironment should] beNil];
+            });
             context(@"Changed values", ^{
                 NSString *const newAPIKey = @"ANOTHER_API_KEY";
                 NSUInteger const newSessionTimeout = 10;
@@ -180,6 +195,7 @@ describe(@"AMAReporterConfiguration", ^{
                 NSUInteger const newMaxReportsCount = 1;
                 NSUInteger const newMaxReportsInDatabaseCount = 10000;
                 NSString *const newUserProfileID = @"profile id";
+                NSDictionary *const newAppEnvironment = @{@"key": @"value"};
                 beforeEach(^{
                     configuration.APIKey = newAPIKey;
                     configuration.sessionTimeout = newSessionTimeout;
@@ -187,6 +203,7 @@ describe(@"AMAReporterConfiguration", ^{
                     configuration.maxReportsCount = newMaxReportsCount;
                     configuration.maxReportsInDatabaseCount = newMaxReportsInDatabaseCount;
                     configuration.userProfileID = newUserProfileID;
+                    configuration.appEnvironment = newAppEnvironment;
                 });
                 context(@"Immutable copy", ^{
                     AMAReporterConfiguration *__block immutableCopy = nil;
@@ -210,6 +227,9 @@ describe(@"AMAReporterConfiguration", ^{
                     });
                     it(@"Should have valid user profile ID", ^{
                         [[immutableCopy.userProfileID should] equal:newUserProfileID];
+                    });
+                    it(@"Should have valid app environment", ^{
+                        [[immutableCopy.appEnvironment should] equal:newAppEnvironment];
                     });
                 });
                 context(@"Mutable copy", ^{
@@ -235,6 +255,9 @@ describe(@"AMAReporterConfiguration", ^{
                     it(@"Should have valid user profile ID", ^{
                         [[mutableCopy.userProfileID should] equal:newUserProfileID];
                     });
+                    it(@"Should have valid app environment", ^{
+                        [[mutableCopy.appEnvironment should] equal:newAppEnvironment];
+                    });
                     context(@"Original configuration values changed", ^{
                         beforeEach(^{
                             configuration.APIKey = apiKey;
@@ -243,6 +266,7 @@ describe(@"AMAReporterConfiguration", ^{
                             configuration.maxReportsCount = defaultMaxReportsCount;
                             configuration.maxReportsInDatabaseCount = defaultMaxReportsInDatabaseCount;
                             configuration.userProfileID = nil;
+                            configuration.appEnvironment = nil;
                         });
                         it(@"Should have valid API key", ^{
                             [[mutableCopy.APIKey should] equal:newAPIKey];
@@ -261,6 +285,9 @@ describe(@"AMAReporterConfiguration", ^{
                         });
                         it(@"Should have valid user profile ID", ^{
                             [[mutableCopy.userProfileID should] equal:newUserProfileID];
+                        });
+                        it(@"Should have valid app environment", ^{
+                            [[mutableCopy.appEnvironment should] equal:newAppEnvironment];
                         });
                     });
                 });

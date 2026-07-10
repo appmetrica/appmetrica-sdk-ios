@@ -384,6 +384,32 @@ describe(@"AMAAppMetricaImpl", ^{
                 [[resultProfileID() should] equal:profileIDDuringActivation];
             });
         });
+        context(@"App environment for manual reporter", ^{
+            NSString *differentApiKey = @"f3f8bafd-b9c2-47e5-8065-fec0f54b67d2";
+            NSDictionary *appEnvironment = @{@"key": @"value"};
+            NSDictionary *(^resultAppEnvironment)(void) = ^{
+                return [reporterTestHelper appReporterForApiKey:differentApiKey]
+                    .reporterStorage.stateStorage.appEnvironment.dictionaryEnvironment;
+            };
+
+            it(@"Should be empty when config has no app environment", ^{
+                [impl manualReporterForConfiguration:[[AMAReporterConfiguration alloc] initWithAPIKey:differentApiKey]];
+                [[resultAppEnvironment() should] beEmpty];
+            });
+            it(@"Should apply app environment from config on reporter creation", ^{
+                AMAMutableReporterConfiguration *reporterConfig = [[AMAMutableReporterConfiguration alloc] initWithAPIKey:differentApiKey];
+                reporterConfig.appEnvironment = appEnvironment;
+                [impl manualReporterForConfiguration:reporterConfig];
+                [[resultAppEnvironment() should] equal:appEnvironment];
+            });
+            it(@"Should not reapply app environment when reporter already exists", ^{
+                [impl manualReporterForConfiguration:[[AMAReporterConfiguration alloc] initWithAPIKey:differentApiKey]];
+                AMAMutableReporterConfiguration *reporterConfig = [[AMAMutableReporterConfiguration alloc] initWithAPIKey:differentApiKey];
+                reporterConfig.appEnvironment = appEnvironment;
+                [impl manualReporterForConfiguration:reporterConfig];
+                [[resultAppEnvironment() should] beEmpty];
+            });
+        });
         context(@"Anonymous activation then normal activation", ^{
             NSString *(^resultProfileID)(void) = ^{
                 return [reporterTestHelper appReporterForApiKey:apiKey].reporterStorage.stateStorage.profileID;

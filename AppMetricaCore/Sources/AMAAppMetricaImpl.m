@@ -589,6 +589,8 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
                                      onStorageRestored:^(AMAEventBuilder *eventBuilder) {
                 [self applyUserProfileIDWithStorage:reporterStorage
                                       userProfileID:configuration.userProfileID];
+                [self applyAppEnvironmentWithStorage:reporterStorage
+                                      appEnvironment:configuration.appEnvironment];
             }
                                        onSetupComplete:nil];
         }
@@ -947,6 +949,16 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
                                                               [AMAUserProfileLogger logProfileIDTooLong:userProfileID];
                                                           }];
         storage.stateStorage.profileID = truncatedProfileID;
+    }
+}
+
+- (void)applyAppEnvironmentWithStorage:(AMAReporterStorage *)storage
+                        appEnvironment:(NSDictionary<NSString *, NSString *> *)appEnvironment
+{
+    if (appEnvironment.count > 0) {
+        [appEnvironment enumerateKeysAndObjectsUsingBlock:^(NSString *key, NSString *value, BOOL *stop) {
+            [storage.stateStorage.appEnvironment addValue:value forKey:key];
+        }];
     }
 }
 
