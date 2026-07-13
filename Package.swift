@@ -15,7 +15,7 @@ enum AppMetricaTarget: String {
     case testUtils = "AppMetricaTestUtils"
     case network = "AppMetricaNetwork"
     case hostState = "AppMetricaHostState"
-    case platform = "AppMetricaPlatform"    
+    case platform = "AppMetricaPlatform"
     case protobufUtils = "AppMetricaProtobufUtils"
     case storageUtils = "AppMetricaStorageUtils"
     case encodingUtils = "AppMetricaEncodingUtils"
@@ -26,10 +26,11 @@ enum AppMetricaTarget: String {
     case screenshot = "AppMetricaScreenshot"
     case idSync = "AppMetricaIDSync"
     case analytics = "AppMetricaAnalytics"
+    case productFlow = "AppMetricaProductFlow"
 
     case protobuf = "AppMetricaProtobuf"
     case fmdb = "AppMetricaFMDB"
-    
+
     var name: String { rawValue }
     var testsName: String { rawValue + "Tests" }
     var path: String { "\(rawValue)/Sources" }
@@ -46,6 +47,7 @@ enum AppMetricaProduct: String, CaseIterable {
     case screenshot = "AppMetricaScreenshot"
     case idSync = "AppMetricaIDSync"
     case analytics = "AppMetricaAnalytics"
+    case productFlow = "AppMetricaProductFlow"
 
     static var allProducts: [Product] { allCases.map { $0.product } }
 
@@ -59,9 +61,10 @@ enum AppMetricaProduct: String, CaseIterable {
         case .screenshot: return [.screenshot]
         case .idSync: return [.idSync]
         case .analytics: return [.analytics]
+        case .productFlow: return [.productFlow]
         }
     }
-    
+
     var product: Product { .library(name: rawValue, targets: targets.map { $0.name }) }
 }
 
@@ -70,12 +73,14 @@ let useSpmExternal = false
 enum ExternalPackage: String, CaseIterable {
     case kiwi = "AppMetricaKiwi"
     case ksCrash = "KSCrash"
+    case swiftProtobuf = "SwiftProtobuf"
 
     var name: String {
         var githubPackageName: String {
             switch self {
             case .kiwi: return "Kiwi"
-            default: return rawValue
+            case .swiftProtobuf: return "swift-protobuf"
+            case .ksCrash: return "KSCrash"
             }
         }
         return useSpmExternal ? ("spm-external." + rawValue) : githubPackageName
@@ -87,6 +92,8 @@ enum ExternalPackage: String, CaseIterable {
             return package(url: "https://github.com/kstenerud/KSCrash", "2.5.1"..<"2.6.0")
         case .kiwi:
             return package(url: "https://github.com/appmetrica/Kiwi", "3.0.2"..<"4.0.0")
+        case .swiftProtobuf:
+            return package(url: "https://github.com/apple/swift-protobuf", "1.30.0"..<"2.0.0")
         }
     }
 
@@ -105,6 +112,7 @@ enum ExternalPackage: String, CaseIterable {
     enum ExternalDependency: String {
         case kiwi = "AppMetricaKiwi"
         case ksCrashRecording = "Recording"
+        case swiftProtobuf = "SwiftProtobuf"
 
         var parentPackage: ExternalPackage {
             switch self {
@@ -112,6 +120,8 @@ enum ExternalPackage: String, CaseIterable {
                 return .kiwi
             case .ksCrashRecording:
                 return .ksCrash
+            case .swiftProtobuf:
+                return .swiftProtobuf
             }
         }
 
@@ -132,7 +142,7 @@ let package = Package(
     targets: [
         //MARK: - AppMetrica SDK -
         .target(target: .analytics, dependencies: [.core, .crashes, .adSupport, .webKit, .screenshot, .idSync]),
-        
+
         //MARK: - AppMetrica Core
         .target(
             target: .core,
@@ -170,6 +180,17 @@ let package = Package(
             dependencies: [.crashes, .testUtils],
             externalDependencies: [.kiwi],
             resources: [.process("Resources")]
+        ),
+
+        //MARK: - AppMetrica ProductFlow
+        .target(
+            target: .productFlow,
+            dependencies: [.core, .coreExtension, .coreUtils, .synchronization],
+            externalDependencies: [.swiftProtobuf]
+        ),
+        .testTarget(
+            target: .productFlow,
+            dependencies: [.productFlow, .testUtils]
         ),
 
         //MARK: - AppMetrica CoreExtension
@@ -300,7 +321,7 @@ let package = Package(
             dependencies: [.storageUtils, .testUtils],
             externalDependencies: [.kiwi]
         ),
-        
+
         //MARK: - AppMetrica EncodingUtils
         .target(target: .encodingUtils, dependencies: [.log, .platform, .coreUtils]),
         .testTarget(
@@ -308,7 +329,7 @@ let package = Package(
             dependencies: [.encodingUtils, .testUtils],
             externalDependencies: [.kiwi]
         ),
-        
+
         //MARK: - AppMetrica Synchronization
         .target(
             target: .synchronization,
@@ -322,7 +343,7 @@ let package = Package(
         //MARK: - AppMetricaLibraryAdapter
         .target(target: .libraryAdapter, dependencies: [.core, .coreExtension]),
         .testTarget(target: .libraryAdapter, dependencies: [.libraryAdapter]),
-        
+
         //MARK: - AppMetricaScreenshot
         .target(target: .screenshot, dependencies: [.core, .coreExtension, .storageUtils]),
         .testTarget(
@@ -333,7 +354,7 @@ let package = Package(
 
         //MARK: - AppMetrica FMDB
         .target(target: .fmdb),
-        
+
         //MARK: - AppMetricaIDSync
         .target(target: .idSync, dependencies: [.core, .coreExtension, .storageUtils, .coreUtils, .log, .platform]),
         .testTarget(
@@ -356,7 +377,7 @@ extension Target {
         if includePrivacyManifest {
             resources.append(.copy("Resources/PrivacyInfo.xcprivacy"))
         }
-        
+
         let resultSearchPath: Set<String> = target.headerPaths.union(searchPaths)
 
         return .target(
@@ -367,16 +388,16 @@ extension Target {
             cSettings: resultSearchPath.sorted().map { .headerSearchPath($0) }
         )
     }
-    
+
     static func testTarget(target: AppMetricaTarget,
                            dependencies: [AppMetricaTarget] = [],
                            testUtils: [AppMetricaTarget] = [],
                            externalDependencies: [ExternalPackage.ExternalDependency] = [],
                            searchPaths: [String] = [],
                            resources: [Resource]? = nil) -> Target {
-        
+
         let resultSearchPath: Set<String> = target.testsHeaderPaths.union(searchPaths)
-        
+
         return .testTarget(
             name: target.testsName,
             dependencies: dependencies.map { $0.dependency } + externalDependencies.map { $0.dependency },
@@ -538,6 +559,22 @@ extension AppMetricaTarget {
                 "./Configuration",
                 "./Network",
             ]
+        case .productFlow:
+            return [
+                ".",
+                "./Generated",
+                "./Internal",
+                "./Internal/Assembler",
+                "./Internal/Converter",
+                "./Internal/Converter/Base",
+                "./Internal/Converter/Entity",
+                "./ObjC",
+                "./Public",
+                "./Public/Builders",
+                "./Public/DataType",
+                "./Public/Utils",
+                "./Resources",
+            ]
         case .adSupport, .coreExtension, .encodingUtils, .fmdb, .hostState, .log, .network, .platform,
                 .protobuf, .protobufUtils, .storageUtils, .webKit, .testUtils, .libraryAdapter, .keychain, .identifiers, .logSwift, .synchronization, .analytics:
             return []
@@ -566,7 +603,8 @@ extension AppMetricaTarget {
                 "Mocks",
             ]
         case .coreExtension, .adSupport, .webKit, .testUtils, .hostState, .storageUtils,
-                .protobuf, .fmdb, .libraryAdapter, .keychain, .identifiers, .logSwift, .synchronization, .analytics:
+                .protobuf, .fmdb, .libraryAdapter, .keychain, .identifiers, .logSwift, .synchronization, .analytics,
+                .productFlow:
             return []
         }
     }

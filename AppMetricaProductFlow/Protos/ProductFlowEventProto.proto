@@ -1,0 +1,75 @@
+syntax = "proto2";
+
+// https://nda.ya.ru/t/ndh0IwHk7fjVXN
+message ProductFlowEventProto {
+
+    // Arbitrary key-value metadata
+    message Payload {
+        message Pair {
+            optional bytes key = 1;
+            optional bytes value = 2;
+        }
+        repeated Pair pairs = 1;
+        optional uint32 truncated_pairs_count = 2 [default = 0];
+    }
+
+    // Monetary or in-game amount
+    message Amount {
+        optional bytes unit = 1; // ISO 4217 ("USD", "RUB") or internal unit ("gold", "points")
+        optional int64 mantissa = 2 [default = 0];
+        optional int32 exponent = 3 [default = 0];
+    }
+
+    // Source of the offer display
+    message Referrer {
+        optional bytes type = 1; // "banner", "button", "notification", ...
+        optional bytes identifier = 2; // element identifier
+        optional bytes screen = 3; // source screen name
+    }
+
+    // OFFER_SHOWN payload
+    message ShownInfo {
+        optional bytes offer_type = 1; // "financial_product", "insurance", "subscription", "service", ...
+        optional bytes benefit_type = 2; // "discount_percentage", "cashback", "trial", ...
+        optional Referrer referrer = 3;
+    }
+
+    // STEP payload — any step in the funnel (before or after FLOW_START)
+    message StepInfo {
+        optional bytes step_type = 1; // "parameters", "documents", "scoring", "payment", ...
+        optional bytes step_option = 2; // selected value or detail at this step (optional)
+    }
+
+    // FLOW_RESULT payload
+    message ResultInfo {
+        enum Status {
+            STATUS_UNDEFINED = 0;
+            STATUS_SUCCESS = 1; // offer fulfilled / product acquired
+            STATUS_DECLINED = 2; // rejected by third party (bank, insurer)
+            STATUS_PENDING = 3; // accepted, awaiting async decision; a second FLOW_RESULT with final status will follow via S2S
+            STATUS_CANCELLED = 4; // cancelled by user before completion
+            STATUS_EXPIRED = 5; // offer or session expired
+            STATUS_FAIL = 6; // technical error
+        }
+        optional Status status = 1 [default = STATUS_UNDEFINED];
+    }
+
+    enum ProductFlowEventType {
+        EVENT_TYPE_UNDEFINED = 0;
+        EVENT_TYPE_OFFER_SHOWN = 1; // offer displayed to user (see shown_info)
+        EVENT_TYPE_FLOW_START = 2; // product acquisition initiated; also serves as offer conversion signal
+        EVENT_TYPE_STEP = 3; // any step in the funnel (see step_info)
+        EVENT_TYPE_FLOW_RESULT = 4; // final outcome (see result_info)
+    }
+
+    // Set explicitly by developer on every event
+    optional bytes product_offer_id = 1; // offer variant identifier; absent = organic path
+    optional bytes product_id = 2; // product type: "personal_loan", "deposit_6m", ...
+
+    optional ProductFlowEventType event_type = 3 [default = EVENT_TYPE_UNDEFINED];
+    optional ShownInfo shown_info = 4; // EVENT_TYPE_OFFER_SHOWN
+    optional StepInfo step_info = 5; // EVENT_TYPE_STEP
+    optional ResultInfo result_info = 6; // EVENT_TYPE_FLOW_RESULT
+    optional Amount price = 7; // price at display time, step, or actual price for flow result
+    optional Payload payload = 8;
+}
