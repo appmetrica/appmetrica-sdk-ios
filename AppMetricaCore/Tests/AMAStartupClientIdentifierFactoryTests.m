@@ -34,12 +34,13 @@ describe(@"AMAStartupClientIdentifierFactory", ^{
         persistent = [AMAMetricaPersistentConfiguration nullMock];
         [configuration stub:@selector(persistent) andReturn:persistent];
         
-        [persistent stub:@selector(deviceID) andReturn:testDeviceID];
-        [persistent stub:@selector(deviceIDHash) andReturn:testDeviceIDHash];
+        [configuration stub:@selector(deviceID) andReturn:testDeviceID];
+        [configuration stub:@selector(deviceIDHash) andReturn:testDeviceIDHash];
         
         mockIdentifierProvider = [KWMock mockForProtocol:@protocol(AMAIdentifierProviding)];
         [mockIdentifierProvider stub:@selector(appMetricaUUID) andReturn:testUUID];
         [configuration stub:@selector(identifierProvider) andReturn:mockIdentifierProvider];
+        [configuration stub:@selector(appMetricaUUID) andReturn:testUUID];
         
         mockDevice = [KWMock mockForClass:[UIDevice class]];
         [UIDevice stub:@selector(currentDevice) andReturn:mockDevice];
@@ -62,7 +63,7 @@ describe(@"AMAStartupClientIdentifierFactory", ^{
     
     context(@"When deviceID is nil", ^{
         beforeEach(^{
-            [persistent stub:@selector(deviceID) andReturn:nil];
+            [configuration stub:@selector(deviceID) andReturn:nil];
         });
         it(@"Should return a startupClientIdentifier with nil deviceID", ^{
             AMAStartupClientIdentifier *identifier = [AMAStartupClientIdentifierFactory startupClientIdentifier];
@@ -75,7 +76,7 @@ describe(@"AMAStartupClientIdentifierFactory", ^{
     
     context(@"When deviceIDHash is nil", ^{
         beforeEach(^{
-            [persistent stub:@selector(deviceIDHash) andReturn:nil];
+            [configuration stub:@selector(deviceIDHash) andReturn:nil];
         });
         it(@"Should return a startupClientIdentifier with nil deviceIDHash", ^{
             AMAStartupClientIdentifier *identifier = [AMAStartupClientIdentifierFactory startupClientIdentifier];
@@ -89,6 +90,7 @@ describe(@"AMAStartupClientIdentifierFactory", ^{
     context(@"When UUID is nil", ^{
         beforeEach(^{
             [mockIdentifierProvider stub:@selector(appMetricaUUID) andReturn:nil];
+            [configuration stub:@selector(appMetricaUUID) andReturn:nil];
         });
         it(@"Should return a startupClientIdentifier with nil UUID", ^{
             AMAStartupClientIdentifier *identifier = [AMAStartupClientIdentifierFactory startupClientIdentifier];
@@ -114,9 +116,10 @@ describe(@"AMAStartupClientIdentifierFactory", ^{
     
     context(@"With all nil values", ^{
         beforeEach(^{
-            [persistent stub:@selector(deviceID) andReturn:nil];
-            [persistent stub:@selector(deviceIDHash) andReturn:nil];
+            [configuration stub:@selector(deviceID) andReturn:nil];
+            [configuration stub:@selector(deviceIDHash) andReturn:nil];
             [mockIdentifierProvider stub:@selector(appMetricaUUID) andReturn:nil];
+            [configuration stub:@selector(appMetricaUUID) andReturn:nil];
             [mockDevice stub:@selector(identifierForVendor) andReturn:nil];
         });
         it(@"Should return a startupClientIdentifier with all fields nil", ^{

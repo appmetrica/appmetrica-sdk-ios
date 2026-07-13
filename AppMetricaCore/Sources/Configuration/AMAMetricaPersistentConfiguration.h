@@ -4,7 +4,6 @@
 
 @protocol AMAKeyValueStoring;
 @protocol AMAKeychainStoring;
-@protocol AMAIdentifierProviding;
 @protocol AMAAppMetricaConfigurationStoring;
 
 @class AMAPersistentTimeoutConfiguration;
@@ -22,8 +21,6 @@ typedef NSDictionary<AMAAttributionSource, AMAExternalAttributionConfiguration *
 @property (nonatomic, strong) NSDate *firstStartupUpdateDate;
 @property (nonatomic, copy) NSArray *userStartupHosts;
 
-@property (nonatomic, copy, readonly) NSString *deviceID;
-@property (nonatomic, copy, readonly) NSString *deviceIDHash;
 @property (nonatomic, strong) AMAAttributionModelConfiguration *attributionModelConfiguration;
 @property (nonatomic, strong) AMAExternalAttributionConfigurationMap *externalAttributionConfigurations;
 
@@ -49,7 +46,6 @@ typedef NSDictionary<AMAAttributionSource, AMAExternalAttributionConfiguration *
 + (instancetype)new NS_UNAVAILABLE;
 
 - (instancetype)initWithStorage:(id<AMAKeyValueStoring>)storage
-              identifierManager:(id<AMAIdentifierProviding>)identifierManager
           inMemoryConfiguration:(AMAMetricaInMemoryConfiguration *)inMemoryConfiguration
  appMetricaConfigurationStorage:(id<AMAAppMetricaConfigurationStoring>)appMetricaConfigurationStoring;
 

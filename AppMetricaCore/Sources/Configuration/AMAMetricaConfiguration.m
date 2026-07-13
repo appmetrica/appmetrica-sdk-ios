@@ -125,6 +125,24 @@ static NSString *const kAMAMetricaFallbackPrefix = @"fallback-keychain";
     return _identifierProvider;
 }
 
+- (NSString *)appMetricaUUID
+{
+    [self ensureMigrated];
+    return self.identifierProvider.appMetricaUUID;
+}
+
+- (NSString *)deviceID
+{
+    [self ensureMigrated];
+    return self.identifierProvider.deviceID;
+}
+
+- (NSString *)deviceIDHash
+{
+    [self ensureMigrated];
+    return self.identifierProvider.deviceIDHash;
+}
+
 
 - (AMAMetricaPersistentConfiguration *)persistent
 {
@@ -134,7 +152,6 @@ static NSString *const kAMAMetricaFallbackPrefix = @"fallback-keychain";
                 id<AMAKeyValueStoring> appDatabase = [self storageProvider].cachingStorage;
 
                 _persistent = [[AMAMetricaPersistentConfiguration alloc] initWithStorage:appDatabase
-                                                                       identifierManager:self.identifierProvider
                                                                    inMemoryConfiguration:self.inMemory
                                                             appMetricaConfigurationStorage:self.appMetricaConfigurationStorage];
             }

@@ -21,7 +21,7 @@ describe(@"AMAStartupClientIdentifier", ^{
     
     it(@"Should return ifv as device id", ^{
         [AMAMetricaConfigurationTestUtilities stubConfiguration];
-        [[AMAMetricaConfiguration sharedInstance].persistent stub:@selector(deviceID) andReturn:IFV];
+        [AMAIdentifiersTestUtilities stubDeviceID:IFV];
 
         [AMAIdentifiersTestUtilities stubIdfaWithEnabled:NO value:UUDIDString];
         AMAStartupClientIdentifier *identifier = [AMAStartupClientIdentifierFactory startupClientIdentifier];

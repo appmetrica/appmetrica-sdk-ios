@@ -11,30 +11,25 @@
 #import "AMAMockDatabase.h"
 #import "AMAStartupPermission.h"
 #import "AMAStorageKeys.h"
-#import "AMAIdentifierProviderMock.h"
 #import "AMAAppMetricaConfigurationProviderMock.h"
-@import AppMetricaIdentifiers;
 
 SPEC_BEGIN(AMAMetricaPersistentConfigurationTests)
 
 describe(@"AMAMetricaPersistentConfiguration", ^{
     double floatingComparisonDelta = 1e-5;
     id<AMADatabaseProtocol> __block database = nil;
-    AMAIdentifierProviderMock *__block idManager = nil;
     AMAMetricaInMemoryConfiguration *__block inMemory = nil;
     NSObject<AMAKeyValueStoring> *__block storage = nil;
     AMAAppMetricaConfigurationProviderMock *__block configurationProviderMock = nil;
 
     AMAMetricaPersistentConfiguration *(^createConfig)(void) = ^{
         return [[AMAMetricaPersistentConfiguration alloc] initWithStorage:database.storageProvider.syncStorage
-                                                        identifierManager:idManager
                                                     inMemoryConfiguration:inMemory
                                            appMetricaConfigurationStorage:configurationProviderMock];
     };
 
     beforeEach(^{
         database = [AMAMockDatabase configurationDatabase];
-        idManager = [[AMAIdentifierProviderMock alloc] init];
         inMemory = [AMAMetricaInMemoryConfiguration nullMock];
         storage = (NSObject<AMAKeyValueStoring> *)database.storageProvider.syncStorage;
         configurationProviderMock = [[AMAAppMetricaConfigurationProviderMock alloc] init];

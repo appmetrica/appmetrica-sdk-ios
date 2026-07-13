@@ -77,7 +77,7 @@ describe(@"AMAMetricaConfiguration", ^{
         });
 
         it(@"should return default value in case of invalid ifv", ^{
-            [[configuration.persistent.deviceID shouldNot] equal:invalidIFV];
+            [[configuration.deviceID shouldNot] equal:invalidIFV];
         });
     });
 
@@ -132,6 +132,44 @@ describe(@"AMAMetricaConfiguration", ^{
             [[storage should] equal:cachingStorage];
         });
     });
+    context(@"Migration-safe identifiers", ^{
+        id __block mockedDatabase = nil;
+        NSObject<AMAIdentifierProviding> *__block identifierProviderMock = nil;
+        beforeEach(^{
+            mockedDatabase = [KWMock nullMockForProtocol:@protocol(AMADatabaseProtocol)];
+            id<AMAAppMetricaConfigurationStoring> storingMock = [KWMock nullMockForProtocol:@protocol(AMAAppMetricaConfigurationStoring)];
+            configuration = [[AMAMetricaConfiguration alloc] initWithKeychainBridge:keychainBridge database:mockedDatabase appGroupIdentifierProvider:[AMAAppGroupIdentifierProvider new] appMetricaConfigurationStorage:storingMock];
+            identifierProviderMock = [KWMock nullMockForProtocol:@protocol(AMAIdentifierProviding)];
+            [configuration stub:@selector(identifierProvider) andReturn:identifierProviderMock];
+        });
+        it(@"Should ensure migration before reading appMetricaUUID", ^{
+            [[mockedDatabase should] receive:@selector(ensureMigrated)];
+            [configuration appMetricaUUID];
+        });
+        it(@"Should return appMetricaUUID from identifier provider", ^{
+            NSString *const expectedUUID = @"migrated-uuid";
+            [identifierProviderMock stub:@selector(appMetricaUUID) andReturn:expectedUUID];
+            [[configuration.appMetricaUUID should] equal:expectedUUID];
+        });
+        it(@"Should ensure migration before reading deviceID", ^{
+            [[mockedDatabase should] receive:@selector(ensureMigrated)];
+            [configuration deviceID];
+        });
+        it(@"Should return deviceID from identifier provider", ^{
+            NSString *const expectedDeviceID = @"migrated-device-id";
+            [identifierProviderMock stub:@selector(deviceID) andReturn:expectedDeviceID];
+            [[configuration.deviceID should] equal:expectedDeviceID];
+        });
+        it(@"Should ensure migration before reading deviceIDHash", ^{
+            [[mockedDatabase should] receive:@selector(ensureMigrated)];
+            [configuration deviceIDHash];
+        });
+        it(@"Should return deviceIDHash from identifier provider", ^{
+            NSString *const expectedDeviceIDHash = @"migrated-device-id-hash";
+            [identifierProviderMock stub:@selector(deviceIDHash) andReturn:expectedDeviceIDHash];
+            [[configuration.deviceIDHash should] equal:expectedDeviceIDHash];
+        });
+    });
     context(@"Configuration", ^{
         context(@"Persistent configuration", ^{
                 AMAMetricaPersistentConfiguration *__block persistent = [AMAMetricaPersistentConfiguration nullMock];
@@ -139,7 +177,7 @@ describe(@"AMAMetricaConfiguration", ^{
             
             beforeEach(^{
                 [AMAMetricaPersistentConfiguration stub:@selector(alloc) andReturn:allocedPersistent];
-                [allocedPersistent stub:@selector(initWithStorage:identifierManager:inMemoryConfiguration:appMetricaConfigurationStorage:) andReturn:persistent];
+                [allocedPersistent stub:@selector(initWithStorage:inMemoryConfiguration:appMetricaConfigurationStorage:) andReturn:persistent];
             });
             afterEach(^{
                 [AMAMetricaPersistentConfiguration clearStubs];
@@ -148,7 +186,7 @@ describe(@"AMAMetricaConfiguration", ^{
             it(@"Should return persistent configuration with valid storage", ^{
                 id<AMAKeyValueStoring> storage = database.storageProvider.cachingStorage;
                 
-                [[allocedPersistent should] receive:@selector(initWithStorage:identifierManager:inMemoryConfiguration:appMetricaConfigurationStorage:) withArguments:storage, kw_any(), kw_any(), kw_any()];
+                [[allocedPersistent should] receive:@selector(initWithStorage:inMemoryConfiguration:appMetricaConfigurationStorage:) withArguments:storage, kw_any(), kw_any()];
                 
                 [[configuration.persistent should] equal:persistent];
             });

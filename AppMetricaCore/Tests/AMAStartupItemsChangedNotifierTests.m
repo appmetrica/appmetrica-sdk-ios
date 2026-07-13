@@ -43,14 +43,17 @@ describe(@"AMAStartupItemsChangedNotifier", ^{
         configMock = [AMAMetricaConfiguration sharedInstance];
         idMock = [[AMAIdentifierProviderMock alloc] init];
         [configMock stub:@selector(identifierProvider) andReturn:idMock];
-        [configMock.persistent stub:@selector(deviceID) withBlock:^id(NSArray *params) {
+        [configMock stub:@selector(appMetricaUUID) withBlock:^id(NSArray *params) {
+            return idMock.appMetricaUUID;
+        }];
+        [configMock stub:@selector(deviceID) withBlock:^id(NSArray *params) {
             return idMock.deviceID;
         }];
-        [configMock.persistent stub:@selector(deviceIDHash) withBlock:^id(NSArray *params) {
+        [configMock stub:@selector(deviceIDHash) withBlock:^id(NSArray *params) {
             return idMock.deviceIDHash;
         }];
         
-        notifier = [[AMAStartupItemsChangedNotifier alloc] init];
+        notifier = [[AMAStartupItemsChangedNotifier alloc] initWithMetricaConfiguration:configMock];
         [notifier stub:@selector(dispatchBlock:withAvailableFields:toQueue:error:)
              withBlock:^id(NSArray *params) {
                  AMAIdentifiersCompletionBlock block = params[0];
@@ -92,6 +95,21 @@ describe(@"AMAStartupItemsChangedNotifier", ^{
         it(@"Should not notify with error", ^{
             [notifier requestStartupItemsWithKeys:allKeys
                                           options:nil
+                                            queue:nil
+                                       completion:defaultBlock];
+            NSError *error = [NSError errorWithDomain:@"test_domain" code:1 userInfo:nil];
+            [notifier startupUpdateFailedWithError:error];
+
+            [[theValue(defaultBlockIsCalled) should] beNo];
+        });
+
+        it(@"Should stay pending when keys unavailable and notifyOnError NO", ^{
+            idMock.mockMetricaUUID = @"uuid";
+            idMock.mockDeviceID = @"deviceID";
+            NSDictionary *options = @{ kAMARequestIdentifiersOptionCallbackModeKey :
+                                           kAMARequestIdentifiersOptionCallbackOnSuccess };
+            [notifier requestStartupItemsWithKeys:allKeys
+                                          options:options
                                             queue:nil
                                        completion:defaultBlock];
             NSError *error = [NSError errorWithDomain:@"test_domain" code:1 userInfo:nil];
@@ -208,6 +226,59 @@ describe(@"AMAStartupItemsChangedNotifier", ^{
                                                   queue:nil
                                              completion:defaultBlock];
             [[theValue(defaultBlockIsCalled) should] beNo];
+        });
+
+        it(@"Should not notify because UUID is empty", ^{
+            idMock.mockMetricaUUID = @"";
+            idMock.mockDeviceID = @"deviceID";
+
+            [notifier requestStartupItemsWithKeys:@[ kAMAUUIDKey, kAMADeviceIDKey ]
+                                                options:nil
+                                                  queue:nil
+                                             completion:defaultBlock];
+            [[theValue(defaultBlockIsCalled) should] beNo];
+        });
+
+        it(@"Should notify without UUID key when UUID empty and startup loaded", ^{
+            idMock.mockMetricaUUID = @"";
+            idMock.mockDeviceID = @"deviceID";
+            [notifier startupUpdateCompletedWithConfiguration:nil];
+
+            [notifier requestStartupItemsWithKeys:@[ kAMAUUIDKey, kAMADeviceIDKey ]
+                                                options:nil
+                                                  queue:nil
+                                             completion:defaultBlock];
+            [[theValue(defaultBlockIsCalled) should] beYes];
+            [[receivedIdentifiers should] equal:@{ kAMADeviceIDKey: @"deviceID" }];
+            [[receivedIdentifiers[kAMAUUIDKey] should] beNil];
+        });
+
+        it(@"Should not contain empty UUID value in callback", ^{
+            idMock.mockMetricaUUID = @"";
+            [notifier startupUpdateCompletedWithConfiguration:nil];
+
+            [notifier requestStartupItemsWithKeys:@[ kAMAUUIDKey ]
+                                                options:nil
+                                                  queue:nil
+                                             completion:defaultBlock];
+            [[theValue(defaultBlockIsCalled) should] beYes];
+            [[receivedIdentifiers[kAMAUUIDKey] should] beNil];
+        });
+
+        it(@"Should notify with UUID when UUID is non-empty", ^{
+            idMock.mockMetricaUUID = @"uuid";
+            idMock.mockDeviceID = @"deviceID";
+            idMock.mockDeviceHashID = @"hash";
+
+            [notifier requestStartupItemsWithKeys:allKeys
+                                                options:nil
+                                                  queue:nil
+                                             completion:defaultBlock];
+            [[receivedIdentifiers should] equal:@{
+                kAMAUUIDKey: @"uuid",
+                kAMADeviceIDKey: @"deviceID",
+                kAMADeviceIDHashKey: @"hash",
+            }];
         });
 
         it(@"Should not notify if not all required arbitrary keys are ready", ^{

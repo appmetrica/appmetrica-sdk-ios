@@ -27,6 +27,7 @@ NSString *const kAMADispatcherErrorApiKeyUserInfoKey = @"kAMADispatcherErrorApiK
 @property (nonatomic, strong, readonly) id<AMAAsyncExecuting> executor;
 @property (nonatomic, strong, readonly) AMAReporterStorage *reporterStorage;
 @property (nonatomic, strong, readonly) id<AMAReportsControlling> reportsController;
+@property (nonatomic, strong, readonly) AMAMetricaConfiguration *metricaConfiguration;
 
 @end
 
@@ -36,6 +37,19 @@ NSString *const kAMADispatcherErrorApiKeyUserInfoKey = @"kAMADispatcherErrorApiK
                                    main:(BOOL)main
                 reportTimeoutController:(AMATimeoutRequestsController *)reportTimeoutController
               trackingTimeoutController:(AMATimeoutRequestsController *)trackingTimeoutController
+{
+    return [self initWithReporterStorage:reporterStorage
+                                    main:main
+                 reportTimeoutController:reportTimeoutController
+               trackingTimeoutController:trackingTimeoutController
+                    metricaConfiguration:[AMAMetricaConfiguration sharedInstance]];
+}
+
+- (instancetype)initWithReporterStorage:(AMAReporterStorage *)reporterStorage
+                                   main:(BOOL)main
+                reportTimeoutController:(AMATimeoutRequestsController *)reportTimeoutController
+              trackingTimeoutController:(AMATimeoutRequestsController *)trackingTimeoutController
+                   metricaConfiguration:(AMAMetricaConfiguration *)metricaConfiguration
 {
     id<AMAAsyncExecuting> executor = [[AMAExecutor alloc] initWithIdentifier:self];
 
@@ -48,7 +62,8 @@ NSString *const kAMADispatcherErrorApiKeyUserInfoKey = @"kAMADispatcherErrorApiK
     return [self initWithReporterStorage:reporterStorage
                                     main:main
                                 executor:executor
-                       reportsController:reportsController];
+                       reportsController:reportsController
+                    metricaConfiguration:metricaConfiguration];
 }
 
 - (instancetype)initWithReporterStorage:(AMAReporterStorage *)reporterStorage
@@ -56,12 +71,26 @@ NSString *const kAMADispatcherErrorApiKeyUserInfoKey = @"kAMADispatcherErrorApiK
                                executor:(id<AMAAsyncExecuting>)executor
                       reportsController:(id<AMAReportsControlling>)reportsController
 {
+    return [self initWithReporterStorage:reporterStorage
+                                    main:main
+                                executor:executor
+                       reportsController:reportsController
+                    metricaConfiguration:[AMAMetricaConfiguration sharedInstance]];
+}
+
+- (instancetype)initWithReporterStorage:(AMAReporterStorage *)reporterStorage
+                                   main:(BOOL)main
+                               executor:(id<AMAAsyncExecuting>)executor
+                      reportsController:(id<AMAReportsControlling>)reportsController
+                   metricaConfiguration:(AMAMetricaConfiguration *)metricaConfiguration
+{
     self = [super init];
     if (self != nil) {
         _reporterStorage = reporterStorage;
         _main = main;
         _executor = executor;
         _reportsController = reportsController;
+        _metricaConfiguration = metricaConfiguration;
     }
     return self;
 }
@@ -162,15 +191,15 @@ NSString *const kAMADispatcherErrorApiKeyUserInfoKey = @"kAMADispatcherErrorApiK
         AMALogWarn(@"Can't report to apiKey %@, data sending is disabled", apiKey);
         *error = [self errorWithCode:AMADispatcherReportErrorDataSendingForbidden apiKey:apiKey];
     }
-    else if ([AMAMetricaConfiguration sharedInstance].startup.reportHosts.count == 0) {
+    else if (self.metricaConfiguration.startup.reportHosts.count == 0) {
         AMALogWarn(@"Can't report to apiKey %@, reportHost is unknown", apiKey);
         *error = [self errorWithCode:AMADispatcherReportErrorNoHosts apiKey:apiKey];
     }
-    else if ([AMAMetricaConfiguration sharedInstance].persistent.deviceID.length == 0) {
+    else if (self.metricaConfiguration.deviceID.length == 0) {
         AMALogWarn(@"Can't report to apiKey %@, deviceID is unknown", apiKey);
         *error = [self errorWithCode:AMADispatcherReportErrorNoDeviceId apiKey:apiKey];
     }
-    else if (self.main && [AMAMetricaConfiguration sharedInstance].persistent.checkedInitialAttribution == NO) {
+    else if (self.main && self.metricaConfiguration.persistent.checkedInitialAttribution == NO) {
         AMALogWarn(@"Can't report to apiKey %@, did not check initial attribution", apiKey);
         *error = [self errorWithCode:AMADispatcherReportErrorDidNotCheckInitialAttribution apiKey:apiKey];
     }

@@ -26,6 +26,10 @@
 @property (nonatomic, strong, readonly) id<AMAIdentifierProviding> identifierProvider;
 @property (nonatomic, strong, readonly) AMAAppGroupIdentifierProvider *appGroupIdentifierProvider;
 
+@property (nonatomic, copy, readonly) NSString *appMetricaUUID;
+@property (nonatomic, copy, readonly) NSString *deviceID;
+@property (nonatomic, copy, readonly) NSString *deviceIDHash;
+
 @property (atomic, assign, readonly) BOOL persistentConfigurationCreated;
 
 - (instancetype)initWithKeychainBridge:(AMAKeychainBridge *)keychainBridge

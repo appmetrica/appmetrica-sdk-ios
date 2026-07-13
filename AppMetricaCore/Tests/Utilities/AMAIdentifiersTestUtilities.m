@@ -5,7 +5,6 @@
 #import <AdSupport/AdSupport.h>
 #import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import "AMAMetricaConfiguration.h"
-#import "AMAMetricaPersistentConfiguration.h"
 #import "AMAStartupClientIdentifierFactory.h"
 #import "AMAAdProvider.h"
 #import "AMAIdentifierProviderMock.h"
@@ -23,6 +22,15 @@ static AMAIdentifierProviderMock *identifierManagerMock;
     
     AMAMetricaConfiguration *cfg = [AMAMetricaConfiguration sharedInstance];
     [cfg stub:@selector(identifierProvider) andReturn:identifierManagerMock];
+    [cfg stub:@selector(appMetricaUUID) withBlock:^id(NSArray *params) {
+        return identifierManagerMock.appMetricaUUID;
+    }];
+    [cfg stub:@selector(deviceID) withBlock:^id(NSArray *params) {
+        return identifierManagerMock.deviceID;
+    }];
+    [cfg stub:@selector(deviceIDHash) withBlock:^id(NSArray *params) {
+        return identifierManagerMock.deviceIDHash;
+    }];
     return identifierManagerMock;
 }
 
@@ -43,6 +51,12 @@ static AMAIdentifierProviderMock *identifierManagerMock;
     mock.mockMetricaUUID = UUID;
 }
 
++ (void)stubDeviceID:(NSString *)deviceID
+{
+    AMAIdentifierProviderMock *mock = [self stubIdentifierProviderIfNeeded];
+    mock.mockDeviceID = deviceID;
+}
+
 + (void)stubIFV:(NSString *)UUID
 {
     id deviceMock = [UIDevice nullMock];
@@ -53,7 +67,8 @@ static AMAIdentifierProviderMock *identifierManagerMock;
 
 + (void)stubDeviceIDHash:(NSString *)deviceIDHash
 {
-    [[AMAMetricaConfiguration sharedInstance].persistent stub:@selector(deviceIDHash) andReturn:deviceIDHash];
+    AMAIdentifierProviderMock *mock = [self stubIdentifierProviderIfNeeded];
+    mock.mockDeviceHashID = deviceIDHash;
 }
 
 + (void)stubClientIdentifiersProvider:(NSString *)UUID

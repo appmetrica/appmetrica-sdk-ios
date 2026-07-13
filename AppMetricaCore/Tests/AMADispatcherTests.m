@@ -55,7 +55,7 @@ describe(@"AMADispatcher", ^{
         [AMAMetricaConfigurationTestUtilities stubConfigurationWithNullMock];
         configuration = [AMAMetricaConfiguration sharedInstance];
         [configuration.startup stub:@selector(reportHosts) andReturn:@[@"host"]];
-        [configuration.persistent stub:@selector(deviceID) andReturn:@"DeviceID"];
+        [configuration stub:@selector(deviceID) andReturn:@"DeviceID"];
         [configuration.persistent stub:@selector(checkedInitialAttribution) andReturn:theValue(YES)];
 
         [AMAReporterStoragesContainer stub:@selector(sharedInstance) andReturn:[AMAReporterStoragesContainer nullMock]];
@@ -88,7 +88,8 @@ describe(@"AMADispatcher", ^{
         dispatcher = [[AMADispatcher alloc] initWithReporterStorage:reporterStorage
                                                                main:YES
                                                            executor:executor
-                                                  reportsController:reportsController];
+                                                  reportsController:reportsController
+                                               metricaConfiguration:configuration];
 
         delegate = [KWMock nullMockForProtocol:@protocol(AMADispatcherDelegate)];
         dispatcher.delegate = delegate;
@@ -135,7 +136,7 @@ describe(@"AMADispatcher", ^{
         context(@"No DeviceId", ^{
 
             beforeEach(^{
-                [configuration.persistent stub:@selector(deviceID) andReturn:nil];
+                [configuration stub:@selector(deviceID) andReturn:nil];
             });
 
             it(@"Should not report", ^{
@@ -245,7 +246,8 @@ describe(@"AMADispatcher", ^{
                     dispatcher = [[AMADispatcher alloc] initWithReporterStorage:reporterStorage
                                                                            main:NO
                                                                        executor:executor
-                                                              reportsController:reportsController];
+                                                              reportsController:reportsController
+                                                           metricaConfiguration:configuration];
 
                     dispatcher.delegate = delegate;
                 });
@@ -263,7 +265,8 @@ describe(@"AMADispatcher", ^{
                     dispatcher = [[AMADispatcher alloc] initWithReporterStorage:reporterStorage
                                                                            main:YES
                                                                        executor:executor
-                                                              reportsController:reportsController];
+                                                              reportsController:reportsController
+                                                           metricaConfiguration:configuration];
 
                     dispatcher.delegate = delegate;
                 });

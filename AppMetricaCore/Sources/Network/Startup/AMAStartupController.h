@@ -6,6 +6,7 @@
 @protocol AMAResettableIterable;
 @protocol AMACancelableExecuting;
 @class AMAStartupResponseParser;
+@class AMAMetricaConfiguration;
 @class AMAAttributionController;
 
 extern NSErrorDomain const AMAStartupRequestsErrorDomain;
@@ -45,7 +46,8 @@ typedef NS_ERROR_ENUM(AMAStartupRequestsErrorDomain, AMAStartupRequestsErrorCode
                     hostProvider:(id<AMAResettableIterable>)hostProvider
        timeoutRequestsController:(AMATimeoutRequestsController *)timeoutRequestsController
            startupResponseParser:(AMAStartupResponseParser *)startupResponseParser
-           attributionController:(AMAAttributionController *)attributionController;
+           attributionController:(AMAAttributionController *)attributionController
+           metricaConfiguration:(AMAMetricaConfiguration *)metricaConfiguration;
 
 - (void)addAdditionalStartupParameters:(NSDictionary *)parameters;
 

@@ -25,6 +25,7 @@ typedef NSDictionary<NSString *, id> AMAIdentifierObserver;
 @interface AMAStartupItemsChangedNotifier ()
 
 @property (nonatomic, strong, readonly) NSMutableArray<AMAIdentifierObserver *> *observers;
+@property (nonatomic, strong, readonly) AMAMetricaConfiguration *metricaConfiguration;
 @property (nonatomic, assign) BOOL startupLoaded;
 
 @end
@@ -33,9 +34,15 @@ typedef NSDictionary<NSString *, id> AMAIdentifierObserver;
 
 - (instancetype)init
 {
+    return [self initWithMetricaConfiguration:[AMAMetricaConfiguration sharedInstance]];
+}
+
+- (instancetype)initWithMetricaConfiguration:(AMAMetricaConfiguration *)metricaConfiguration
+{
     self = [super init];
     if (self != nil) {
         _observers = [NSMutableArray array];
+        _metricaConfiguration = metricaConfiguration;
     }
     return self;
 }
@@ -113,12 +120,14 @@ typedef NSDictionary<NSString *, id> AMAIdentifierObserver;
 {
     NSMutableDictionary *availableFields = [NSMutableDictionary dictionary];
     AMAStartupClientIdentifier *startupClientIdentifier = AMAStartupClientIdentifierFactory.startupClientIdentifier;
-    AMAStartupParametersConfiguration *startup = [AMAMetricaConfiguration sharedInstance].startup;
+    AMAStartupParametersConfiguration *startup = self.metricaConfiguration.startup;
     
-    availableFields[kAMAUUIDKey] = startupClientIdentifier.UUID;
+    if (startupClientIdentifier.UUID.length > 0) {
+        availableFields[kAMAUUIDKey] = startupClientIdentifier.UUID;
+    }
     availableFields[kAMADeviceIDHashKey] = startupClientIdentifier.deviceIDHash;
     
-    if (startupClientIdentifier.deviceID.length != 0) {
+    if (startupClientIdentifier.deviceID.length > 0) {
         availableFields[kAMADeviceIDKey] = startupClientIdentifier.deviceID;
     }
     if (startup.SDKsCustomHosts != nil) {

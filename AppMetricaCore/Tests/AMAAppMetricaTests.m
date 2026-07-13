@@ -104,7 +104,8 @@ describe(@"AMAAppMetrica", ^{
                                           hostProvider:hostProvider
                              timeoutRequestsController:timeoutController
                                  startupResponseParser:[[AMAStartupResponseParser alloc] init]
-                                 attributionController:[AMAAttributionController nullMock]];
+                                 attributionController:[AMAAttributionController nullMock]
+                                  metricaConfiguration:[AMAMetricaConfiguration sharedInstance]];
         startupController.delegate = impl;
         [impl stub:@selector(startupController) andReturn:startupController];
         [impl stub:@selector(apiKey) andReturn:apiKey];
@@ -954,10 +955,9 @@ describe(@"AMAAppMetrica", ^{
             
             context(@"No identifiers", ^{
                 beforeEach(^{
-                    AMAMetricaPersistentConfiguration *conf = [AMAMetricaConfiguration sharedInstance].persistent;
                     identifierManagerMock.mockMetricaUUID = nil;
-                    [conf stub:@selector(deviceID) andReturn:@""];
-                    [conf stub:@selector(deviceIDHash) andReturn:nil];
+                    identifierManagerMock.mockDeviceID = @"";
+                    identifierManagerMock.mockDeviceHashID = nil;
                 });
                 it(@"Should return error async", ^{
                     NSError *error = [NSError errorWithDomain:@"test_domain" code:1 userInfo:nil];
@@ -982,10 +982,9 @@ describe(@"AMAAppMetrica", ^{
                 NSString *const uuid = @"uuid";
                 NSString *const deviceID = @"device_id";
                 beforeEach(^{
-                    AMAMetricaPersistentConfiguration *conf = [AMAMetricaConfiguration sharedInstance].persistent;
                     identifierManagerMock.mockMetricaUUID = uuid;
-                    [conf stub:@selector(deviceID) andReturn:deviceID];
-                    [conf stub:@selector(deviceIDHash) andReturn:nil];
+                    identifierManagerMock.mockDeviceID = deviceID;
+                    identifierManagerMock.mockDeviceHashID = nil;
                 });
                 afterEach(^{
                     [AMAMetricaConfiguration clearStubs];
@@ -1018,10 +1017,10 @@ describe(@"AMAAppMetrica", ^{
                 it(@"Should return uuid", ^{
                     [[[AMAAppMetrica UUID] should] equal:uuid];
                 });
-                it(@"Should migrate before return UUID", ^{
+                it(@"Should read migration-safe UUID from configuration", ^{
                     AMAMetricaConfiguration *configuration = [AMAMetricaConfiguration nullMock];
                     [AMAMetricaConfiguration stub:@selector(sharedInstance) andReturn:configuration];
-                    [[configuration should] receive:@selector(ensureMigrated)];
+                    [[configuration should] receive:@selector(appMetricaUUID)];
                     
                     [AMAAppMetrica UUID];
                 });
@@ -1034,10 +1033,9 @@ describe(@"AMAAppMetrica", ^{
                 NSString *const deviceID = @"device_id";
                 NSString *const deviceIDHash = @"device_id_hash";
                 beforeEach(^{
-                    AMAMetricaPersistentConfiguration *conf = [AMAMetricaConfiguration sharedInstance].persistent;
                     identifierManagerMock.mockMetricaUUID = uuid;
-                    [conf stub:@selector(deviceID) andReturn:deviceID];
-                    [conf stub:@selector(deviceIDHash) andReturn:deviceIDHash];
+                    identifierManagerMock.mockDeviceID = deviceID;
+                    identifierManagerMock.mockDeviceHashID = deviceIDHash;
                 });
                 it(@"Should return identifiers async", ^{
                     __block NSDictionary *result = nil;

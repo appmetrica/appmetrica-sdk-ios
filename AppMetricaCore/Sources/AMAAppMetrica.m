@@ -597,8 +597,7 @@ NSString *const kAMAAttributionSourceSingular = @"singular";
 
 + (NSString *)UUID
 {
-    [[self metricaConfiguration] ensureMigrated];
-    return [self metricaConfiguration].identifierProvider.appMetricaUUID;
+    return [self metricaConfiguration].appMetricaUUID;
 }
 
 + (NSString *)deviceID
@@ -606,7 +605,7 @@ NSString *const kAMAAttributionSourceSingular = @"singular";
     NSString *deviceID = nil;
     AMAMetricaConfiguration *configuration = [self metricaConfiguration];
     if (configuration.persistentConfigurationCreated) {
-        NSString *currentDeviceID = configuration.persistent.deviceID;
+        NSString *currentDeviceID = configuration.deviceID;
         if (currentDeviceID.length != 0) {
             deviceID = currentDeviceID;
         }
@@ -619,7 +618,7 @@ NSString *const kAMAAttributionSourceSingular = @"singular";
     NSString *deviceIDHash = nil;
     AMAMetricaConfiguration *configuration = [self metricaConfiguration];
     if (configuration.persistentConfigurationCreated) {
-        NSString *currentDeviceIDHash = configuration.persistent.deviceIDHash;
+        NSString *currentDeviceIDHash = configuration.deviceIDHash;
         if (currentDeviceIDHash.length != 0) {
             deviceIDHash = currentDeviceIDHash;
         }

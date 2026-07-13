@@ -13,14 +13,9 @@
 #import "AMAAppMetricaConfiguration+JSONSerializable.h"
 #import "AMAAppMetricaConfigurationFileStorage.h"
 
-@import AppMetricaIdentifiers;
-
-static NSString *const kAMADeviceIDDefaultValue = @"";
-
 @interface AMAMetricaPersistentConfiguration ()
 
 @property (nonatomic, strong, readonly) id<AMAKeyValueStoring> storage;
-@property (nonatomic, strong, readonly) id<AMAIdentifierProviding> identifierManager;
 @property (nonatomic, strong, readonly) AMAMetricaInMemoryConfiguration *inMemoryConfiguration;
 @property (nonatomic, strong, readonly) id<AMAAppMetricaConfigurationStoring> appMetricaConfigurationStorage;
 
@@ -29,30 +24,18 @@ static NSString *const kAMADeviceIDDefaultValue = @"";
 @implementation AMAMetricaPersistentConfiguration
 
 - (instancetype)initWithStorage:(id<AMAKeyValueStoring>)storage
-              identifierManager:(id<AMAIdentifierProviding>)identifierManager
           inMemoryConfiguration:(AMAMetricaInMemoryConfiguration *)inMemoryConfiguration
  appMetricaConfigurationStorage:(id<AMAAppMetricaConfigurationStoring>)appMetricaConfigurationStorage
 {
     self = [super init];
     if (self != nil) {
         _storage = storage;
-        _identifierManager = identifierManager;
         _inMemoryConfiguration = inMemoryConfiguration;
         _appMetricaConfigurationStorage = appMetricaConfigurationStorage;
 
         _timeoutConfiguration = [[AMAPersistentTimeoutConfiguration alloc] initWithStorage:_storage];
     }
     return self;
-}
-
-- (NSString *)deviceID
-{
-    return self.identifierManager.deviceID;
-}
-
-- (NSString *)deviceIDHash
-{
-    return self.identifierManager.deviceIDHash;
 }
 
 - (NSArray *)userStartupHosts

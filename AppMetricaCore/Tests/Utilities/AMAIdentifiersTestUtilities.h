@@ -8,6 +8,7 @@
 + (AMAIdentifierProviderMock *)stubIdentifierProviderIfNeeded;
 + (void)stubIdfaWithEnabled:(BOOL)isEnabled value:(NSString *)UUID;
 + (void)stubUUID:(NSString *)UUID;
++ (void)stubDeviceID:(NSString *)deviceID;
 + (void)stubIFV:(NSString *)UUID;
 + (void)stubDeviceIDHash:(NSString *)deviceIDHash;
 + (void)stubClientIdentifiersProvider:(NSString *)UUID

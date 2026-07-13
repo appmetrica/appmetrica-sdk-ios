@@ -55,7 +55,8 @@ describe(@"AMAStartupController", ^{
                                                  hostProvider:hostProvider
                                     timeoutRequestsController:timeoutController
                                         startupResponseParser:startupResponseParser
-                                        attributionController:attributionController];
+                                        attributionController:attributionController
+                                        metricaConfiguration:[AMAMetricaConfiguration sharedInstance]];
     };
     beforeAll(^{
         [AMATestNetwork stubHTTPRequestWithBlock:nil];
@@ -369,7 +370,8 @@ describe(@"AMAStartupController", ^{
                                                                   hostProvider:hostProvider
                                                      timeoutRequestsController:timeoutController
                                                          startupResponseParser:startupResponseParser
-                                                         attributionController:[AMAAttributionController nullMock]];
+                                                         attributionController:[AMAAttributionController nullMock]
+                                                         metricaConfiguration:[AMAMetricaConfiguration sharedInstance]];
         });
         afterEach(^{
             destubAppState();
@@ -586,7 +588,8 @@ describe(@"AMAStartupController", ^{
                                                            hostProvider:hostProvider
                                               timeoutRequestsController:timeoutController
                                                   startupResponseParser:startupResponseParser
-                                                  attributionController:[AMAAttributionController nullMock]];
+                                                  attributionController:[AMAAttributionController nullMock]
+                                                  metricaConfiguration:[AMAMetricaConfiguration sharedInstance]];
         });
         afterEach(^{
             destubAppState();

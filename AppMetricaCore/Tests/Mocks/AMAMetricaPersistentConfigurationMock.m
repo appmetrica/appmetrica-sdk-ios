@@ -6,8 +6,6 @@
 @synthesize startupUpdatedAt = _startupUpdatedAt;
 @synthesize firstStartupUpdateDate = _firstStartupUpdateDate;
 @synthesize userStartupHosts = _userStartupHosts;
-@synthesize deviceID = _deviceID;
-@synthesize deviceIDHash = _deviceIDHash;
 @synthesize attributionModelConfiguration = _attributionModelConfiguration;
 @synthesize externalAttributionConfigurations = _externalAttributionConfigurations;
 @synthesize extensionsLastReportDate = _extensionsLastReportDate;
@@ -23,7 +21,7 @@
 
 - (instancetype)init 
 {
-    self = [super initWithStorage:nil identifierManager:nil inMemoryConfiguration:nil appMetricaConfigurationStorage:nil];
+    self = [super initWithStorage:nil inMemoryConfiguration:nil appMetricaConfigurationStorage:nil];
     if (self != nil) {
         
     }

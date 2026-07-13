@@ -44,7 +44,7 @@
     [AMAPlatformLocaleState stub:@selector(fullLocaleIdentifier) andReturn:self.locale];
     [AMAPlatformDescription stub:@selector(isDeviceRooted) andReturn:theValue(self.isRooted)];
     [AMAIdentifiersTestUtilities stubIFV:self.IFV];
-    [[AMAMetricaConfiguration sharedInstance].persistent stub:@selector(deviceID) andReturn:self.deviceID];
+    [AMAIdentifiersTestUtilities stubDeviceID:self.deviceID];
     [AMAIdentifiersTestUtilities stubIdfaWithEnabled:(self.LAT == NO) value:self.IFA];
     [AMAIdentifiersTestUtilities stubUUID:self.UUID];
 }
@@ -53,7 +53,6 @@
 {
     [AMAPlatformDescription clearStubs];
     [AMAIdentifiersTestUtilities destubIFV];
-    [[AMAMetricaConfiguration sharedInstance].persistent clearStubs];
     [AMAIdentifiersTestUtilities destubIDFA];
     [AMAIdentifiersTestUtilities destubUUID];
     [AMAIdentifiersTestUtilities destubIdentifierProvider];

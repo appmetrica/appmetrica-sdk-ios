@@ -27,6 +27,7 @@ NSErrorDomain const AMAStartupRequestsErrorDomain = @"AMAStartupRequestsErrorDom
 @property (nonatomic, strong, readonly) AMAStartupResponseParser *startupResponseParser;
 @property (nonatomic, strong, readonly) AMAHTTPRequestsFactory *requestsFactory;
 @property (nonatomic, strong, readonly) AMAAttributionController *attributionController;
+@property (nonatomic, strong, readonly) AMAMetricaConfiguration *metricaConfiguration;
 
 @end
 
@@ -43,7 +44,8 @@ NSErrorDomain const AMAStartupRequestsErrorDomain = @"AMAStartupRequestsErrorDom
                      hostProvider:hostProvider
         timeoutRequestsController:timeoutRequestsController
             startupResponseParser:[[AMAStartupResponseParser alloc] init]
-            attributionController:attributionController];
+            attributionController:attributionController
+             metricaConfiguration:[AMAMetricaConfiguration sharedInstance]];
 }
 
 - (instancetype)initWithExecutor:(id<AMACancelableExecuting>)executor
@@ -51,6 +53,7 @@ NSErrorDomain const AMAStartupRequestsErrorDomain = @"AMAStartupRequestsErrorDom
        timeoutRequestsController:(AMATimeoutRequestsController *)timeoutRequestsController
            startupResponseParser:(AMAStartupResponseParser *)startupResponseParser
            attributionController:(AMAAttributionController *)attributionController
+           metricaConfiguration:(AMAMetricaConfiguration *)metricaConfiguration
 {
     self = [super init];
     if (self != nil) {
@@ -62,6 +65,7 @@ NSErrorDomain const AMAStartupRequestsErrorDomain = @"AMAStartupRequestsErrorDom
         _startupResponseParser = startupResponseParser;
         _requestsFactory = [[AMAHTTPRequestsFactory alloc] init];
         _attributionController = attributionController;
+        _metricaConfiguration = metricaConfiguration;
     }
 
     return self;
@@ -72,7 +76,7 @@ NSErrorDomain const AMAStartupRequestsErrorDomain = @"AMAStartupRequestsErrorDom
 - (BOOL)upToDate
 {
     BOOL isUpToDate = NO;
-    AMAMetricaConfiguration *configuration = [AMAMetricaConfiguration sharedInstance];
+    AMAMetricaConfiguration *configuration = self.metricaConfiguration;
     NSDate *lastUpdated = configuration.persistent.startupUpdatedAt;
     if (lastUpdated != nil && [self hasIdentifiers]) {
         NSNumber *updateInterval = configuration.startup.startupUpdateInterval ?: @(kAMAStartupDefaultRequestsInterval);
@@ -144,8 +148,8 @@ NSErrorDomain const AMAStartupRequestsErrorDomain = @"AMAStartupRequestsErrorDom
 
 - (BOOL)hasIdentifiers
 {
-    id<AMAIdentifierProviding> provider = [AMAMetricaConfiguration sharedInstance].identifierProvider;
-    return [provider.appMetricaUUID length] > 0 && [provider.deviceIDHash length] > 0;
+    AMAMetricaConfiguration *configuration = self.metricaConfiguration;
+    return [configuration.appMetricaUUID length] > 0 && [configuration.deviceIDHash length] > 0;
 }
 
 - (AMAStartupResponse *)parseResponse:(NSHTTPURLResponse *)response data:(NSData *)data
@@ -175,11 +179,11 @@ NSErrorDomain const AMAStartupRequestsErrorDomain = @"AMAStartupRequestsErrorDom
 - (void)handleStartupResponse:(AMAStartupResponse *)startupResponse
 {
     AMALogInfo(@"Handle startup response %@", startupResponse);
-    AMAMetricaConfiguration *configuration = [AMAMetricaConfiguration sharedInstance];
+    AMAMetricaConfiguration *configuration = self.metricaConfiguration;
     AMAMetricaPersistentConfiguration *persistent = configuration.persistent;
     id<AMAIdentifierProviding> idProvider = configuration.identifierProvider;
     
-    NSString *deviceID = [startupResponse.deviceID length] > 0 ? startupResponse.deviceID : idProvider.deviceID;
+    NSString *deviceID = [startupResponse.deviceID length] > 0 ? startupResponse.deviceID : configuration.deviceID;
     
     if (deviceID.length > 0) {
         [idProvider updateWithDeviceID:deviceID
@@ -288,7 +292,7 @@ NSErrorDomain const AMAStartupRequestsErrorDomain = @"AMAStartupRequestsErrorDom
     }
 
     if (canAcceptResponse) {
-        [[AMAMetricaConfiguration sharedInstance] synchronizeStartup];
+        [self.metricaConfiguration synchronizeStartup];
 
         [self.delegate startupControllerDidFinishWithSuccess:self];
         [self.extendedDelegate startupUpdatedWithResponse:extendedStartupResponse];

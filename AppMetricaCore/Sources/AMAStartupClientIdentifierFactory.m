@@ -11,9 +11,9 @@
 + (AMAStartupClientIdentifier *)startupClientIdentifier
 {
     AMAStartupClientIdentifier *identifier = [[AMAStartupClientIdentifier alloc] init];
-    identifier.deviceID = [AMAMetricaConfiguration sharedInstance].persistent.deviceID;
-    identifier.deviceIDHash = [AMAMetricaConfiguration sharedInstance].persistent.deviceIDHash;
-    identifier.UUID = [AMAMetricaConfiguration sharedInstance].identifierProvider.appMetricaUUID;
+    identifier.deviceID = [AMAMetricaConfiguration sharedInstance].deviceID;
+    identifier.deviceIDHash = [AMAMetricaConfiguration sharedInstance].deviceIDHash;
+    identifier.UUID = [AMAMetricaConfiguration sharedInstance].appMetricaUUID;
     identifier.IFV = [[[UIDevice currentDevice] identifierForVendor] UUIDString];
     return identifier;
 }
