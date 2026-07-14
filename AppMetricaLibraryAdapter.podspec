@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name = "AppMetricaLibraryAdapter"
-  s.version = '6.5.0'
+  s.version = '6.6.0'
   s.summary = "Universal adapter library for AppMetrica SDK to send ad impressions."
 
   s.homepage = 'https://appmetrica.io'
@@ -15,8 +15,8 @@ Pod::Spec.new do |s|
 
   s.frameworks = 'Foundation'
 
-  s.dependency 'AppMetricaCore', '= 6.5.0'
-  s.dependency 'AppMetricaCoreExtension', '= 6.5.0'
+  s.dependency 'AppMetricaCore', '= 6.6.0'
+  s.dependency 'AppMetricaCoreExtension', '= 6.6.0'
 
   s.header_dir = s.name
   s.source_files = "#{s.name}/Sources/**/*.swift"

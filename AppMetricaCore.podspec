@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name = "AppMetricaCore"
-  s.version = '6.5.0'
+  s.version = '6.6.0'
   s.summary = "Powerful and flexible module offering a wide range of tracking and analytics tools for your application"
 
   s.homepage = 'https://appmetrica.io'
@@ -20,18 +20,18 @@ Pod::Spec.new do |s|
   s.weak_frameworks = 'StoreKit'
   s.libraries = 'z', 'sqlite3', 'c++'
 
-  s.dependency 'AppMetricaLog', '= 6.5.0'
-  s.dependency 'AppMetricaNetwork', '= 6.5.0'
-  s.dependency 'AppMetricaCoreUtils', '= 6.5.0'
-  s.dependency 'AppMetricaHostState', '= 6.5.0'
-  s.dependency 'AppMetricaProtobufUtils', '= 6.5.0'
-  s.dependency 'AppMetricaPlatform', '= 6.5.0'
-  s.dependency 'AppMetricaStorageUtils', '= 6.5.0'
-  s.dependency 'AppMetricaEncodingUtils', '= 6.5.0'
-  s.dependency 'AppMetricaProtobuf', '= 6.5.0'
-  s.dependency 'AppMetricaFMDB', '= 6.5.0'
-  s.dependency 'AppMetricaKeychain', '= 6.5.0'
-  s.dependency 'AppMetricaIdentifiers', '= 6.5.0'
+  s.dependency 'AppMetricaLog', '= 6.6.0'
+  s.dependency 'AppMetricaNetwork', '= 6.6.0'
+  s.dependency 'AppMetricaCoreUtils', '= 6.6.0'
+  s.dependency 'AppMetricaHostState', '= 6.6.0'
+  s.dependency 'AppMetricaProtobufUtils', '= 6.6.0'
+  s.dependency 'AppMetricaPlatform', '= 6.6.0'
+  s.dependency 'AppMetricaStorageUtils', '= 6.6.0'
+  s.dependency 'AppMetricaEncodingUtils', '= 6.6.0'
+  s.dependency 'AppMetricaProtobuf', '= 6.6.0'
+  s.dependency 'AppMetricaFMDB', '= 6.6.0'
+  s.dependency 'AppMetricaKeychain', '= 6.6.0'
+  s.dependency 'AppMetricaIdentifiers', '= 6.6.0'
   
   s.header_dir = s.name
   s.source_files = [
