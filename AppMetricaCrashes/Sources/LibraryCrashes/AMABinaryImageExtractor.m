@@ -75,28 +75,15 @@
     }
 
     NSMutableArray *images = [NSMutableArray arrayWithCapacity:(NSUInteger)imageCount];
-    for (int index = 0; index < imageCount; ++index) {
-        AMABinaryImage *image = [self imageForImageIndex:index];
+    for (uint32_t index = 0; index < imageCount; ++index) {
+        ks_dyld_image_info info = imageInfo[index];
+        AMABinaryImage *image = [self imageForImageHeader:(void *)info.imageLoadAddress
+                                                     name:info.imageFilePath];
         if (image != nil) {
             [images addObject:image];
         }
     }
     return [images copy];
-}
-
-+ (AMABinaryImage *)imageForImageIndex:(int)index
-{
-    uint32_t count = 0;
-    const ks_dyld_image_info *images = ksbic_getImages(&count);
-    const struct mach_header *header = images[index].imageLoadAddress;
-    const char *name = images[index].imageFilePath;
-
-    KSBinaryImage ksImage = { 0 };
-    if (ksdl_binaryImageForHeader(header, name, &ksImage) == false) {
-        return nil;
-    }
-
-    return [self binaryImageForImage:&ksImage];
 }
 
 + (AMABinaryImage *)imageForImageHeader:(void *)machHeaderPtr name:(const char *)name
