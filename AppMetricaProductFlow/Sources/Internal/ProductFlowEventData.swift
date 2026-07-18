@@ -2,7 +2,7 @@ import Foundation
 import AppMetricaCoreExtension
 import AppMetricaSynchronization
 
-final class ProductFlowEventData: NSObject, AppMetricaEventData {
+final class ProductFlowEventData: NSObject, NSCopying, AppMetricaEventData {
     let name: String? = nil
     let type: UInt = ProductFlowConstants.eventType
     let bytesTruncated: UInt
@@ -24,4 +24,5 @@ final class ProductFlowEventData: NSObject, AppMetricaEventData {
         }
     }
 
+    func copy(with zone: NSZone? = nil) -> Any { self }
 }
