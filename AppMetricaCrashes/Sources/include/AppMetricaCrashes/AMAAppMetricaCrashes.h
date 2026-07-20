@@ -78,6 +78,7 @@ NS_SWIFT_NAME(AppMetricaCrashes)
 /// This method allows you to customize the behavior of the crash reporting mechanism.
 /// Use the properties of the `AMAAppMetricaCrashesConfiguration` class to enable or disable specific types of crash reporting, as well as customize other related settings.
 /// Once set, the configuration will control how the app deals with various types of crashes and issues.
+/// Calls after early crash monitoring initialization or normal AppMetrica activation have no effect.
 ///
 /// ## Example
 /// ```objc
@@ -91,6 +92,23 @@ NS_SWIFT_NAME(AppMetricaCrashes)
 ///
 /// - SeeAlso: `AMAAppMetricaCrashesConfiguration`
 - (void)setConfiguration:(AMAAppMetricaCrashesConfiguration *)configuration;
+
+/// Synchronously initializes native crash monitoring before normal AppMetrica activation.
+///
+/// Call this method as early as possible during application startup. The first call to this method or normal
+/// AppMetrica activation copies and freezes the supplied crash configuration; subsequent initialization and
+/// configuration calls have no effect.
+///
+/// If `autoCrashTracking` is enabled, all supported native KSCrash monitors are installed. Otherwise, only the
+/// monitors required by the SDK are installed. Normal AppMetrica activation is still required to process and send
+/// persisted reports.
+///
+/// This method does not activate AppMetrica or start ANR and probable-unhandled detection, external crash providers,
+/// report processing, state callbacks, or nonfatal error reporting.
+///
+/// - Parameter configuration: The mandatory crash configuration to copy and freeze.
+- (void)initializeCrashMonitoringWithConfiguration:(AMAAppMetricaCrashesConfiguration *)configuration
+    NS_SWIFT_NAME(initializeCrashMonitoring(with:));
 
 /// Reports an error of the `NSError` type to AppMetrica.
 ///

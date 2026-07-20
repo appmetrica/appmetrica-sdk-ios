@@ -147,6 +147,43 @@ struct YourAppNameApp: App {
 
 **Note:** Replace `"Your_API_Key"` with your actual AppMetrica API key, which is a unique identifier for your application provided in the [AppMetrica web interface](https://appmetrica.io/application/new) under **Settings**.
 
+### Early Native Crash Monitoring
+
+You can install native crash handlers before normal AppMetrica activation. The call is synchronous and does not
+activate AppMetrica. The first crash configuration supplied through early monitoring initialization or normal
+activation is copied and frozen. Normal activation is still mandatory to process and send persisted reports. Only
+native crash monitoring is started by the early call; ANR and probable-unhandled detection, report processing, state
+callbacks, and nonfatal reporting start after normal activation. Early monitoring initialization does not start or
+poll external crash providers; their existing registration and push behavior is unchanged.
+
+Swift:
+
+```swift
+import AppMetricaCore
+import AppMetricaCrashes
+
+let crashConfiguration = AppMetricaCrashesConfiguration()
+AppMetricaCrashes.crashes().initializeCrashMonitoring(with: crashConfiguration)
+
+if let configuration = AppMetricaConfiguration(apiKey: "Your_API_Key") {
+    AppMetrica.activate(with: configuration)
+}
+```
+
+Objective-C:
+
+```objc
+#import <AppMetricaCore/AppMetricaCore.h>
+#import <AppMetricaCrashes/AppMetricaCrashes.h>
+
+AMAAppMetricaCrashesConfiguration *crashConfiguration = [AMAAppMetricaCrashesConfiguration new];
+[[AMAAppMetricaCrashes crashes] initializeCrashMonitoringWithConfiguration:crashConfiguration];
+
+AMAAppMetricaConfiguration *configuration =
+    [[AMAAppMetricaConfiguration alloc] initWithAPIKey:@"Your_API_Key"];
+[AMAAppMetrica activateWithConfiguration:configuration];
+```
+
 ## Advanced Configuration
 
 ### Configure Sending of Events, Profile Attributes, and Revenue

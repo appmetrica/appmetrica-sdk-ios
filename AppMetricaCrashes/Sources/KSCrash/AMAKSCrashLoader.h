@@ -24,6 +24,7 @@ extern NSString *const kAMAApplicationNotRespondingCrashType;
                                     transactor:(AMACrashSafeTransactor *)transactor;
 
 - (void)enableCrashLoader;
+- (void)enableCrashMonitoring;
 - (void)enableRequiredMonitoring;
 - (NSArray<AMADecodedCrash *> *)syncLoadCrashReports;
 

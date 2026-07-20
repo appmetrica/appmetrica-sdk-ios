@@ -5,11 +5,14 @@
 
 @interface AMATransactionReporter ()
 
-@property (nonatomic, strong) id<AMAAppMetricaReporting> libraryReporter;
+@property (nonatomic, strong, readonly) id<AMAAppMetricaReporting> libraryReporter;
+@property (nonatomic, copy, readonly) NSString *apiKey;
 
 @end
 
 @implementation AMATransactionReporter
+
+@synthesize libraryReporter = _libraryReporter;
 
 - (instancetype)init
 {
@@ -20,9 +23,19 @@
 {
     self = [super init];
     if (self != nil) {
-        _libraryReporter = [AMAAppMetrica reporterForAPIKey:apiKey];
+        _apiKey = [apiKey copy];
     }
     return self;
+}
+
+- (id<AMAAppMetricaReporting>)libraryReporter
+{
+    @synchronized (self) {
+        if (_libraryReporter == nil) {
+            _libraryReporter = [AMAAppMetrica reporterForAPIKey:self.apiKey];
+        }
+        return _libraryReporter;
+    }
 }
 
 

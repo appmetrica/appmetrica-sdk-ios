@@ -35,6 +35,12 @@
 #import "AMACrashEventConverter.h"
 #import "AMACrashForwarder.h"
 
+typedef NS_ENUM(NSUInteger, AMAAppMetricaCrashMonitoringState) {
+    AMAAppMetricaCrashMonitoringStateNotInitialized = 0,
+    AMAAppMetricaCrashMonitoringStateInstalling,
+    AMAAppMetricaCrashMonitoringStateInstalled,
+};
+
 @interface AMAAppMetricaCrashes ()
 
 @property (nonatomic, strong) AMACrashProcessor *crashProcessor;
@@ -52,6 +58,9 @@
 @property (nonatomic, strong, readwrite) NSString *apiKey;
 
 @property (nonatomic, strong) AMAAppMetricaPluginsImpl *pluginsImpl;
+@property (nonatomic, assign) AMAAppMetricaCrashMonitoringState monitoringState;
+
++ (void)setupCrashLogging;
 
 @end
 
@@ -115,6 +124,7 @@
         _hostStateProvider.delegate = self;
         _serializer = serializer;
         _internalConfiguration = configuration;
+        _monitoringState = AMAAppMetricaCrashMonitoringStateNotInitialized;
         _errorEnvironment = [AMAErrorEnvironment new];
         _pluginsImpl = [[AMAAppMetricaPluginsImpl alloc] init];
         _crashObserverManager = [[AMACrashObserverDispatcher alloc] init];
@@ -142,13 +152,21 @@
         return;
     }
 
-    if (self.isActivated == NO) {
-        @synchronized (self) {
-            if (self.isActivated == NO) {
-                self.internalConfiguration = [configuration copy];
-            }
+    @synchronized (self) {
+        if (self.monitoringState == AMAAppMetricaCrashMonitoringStateNotInitialized) {
+            self.internalConfiguration = [configuration copy];
         }
     }
+}
+
+- (void)initializeCrashMonitoringWithConfiguration:(AMAAppMetricaCrashesConfiguration *)configuration
+{
+    if (configuration == nil) {
+        return;
+    }
+
+    [[self class] setupCrashLogging];
+    [self initializeCrashMonitoringIfNeededWithConfiguration:configuration];
 }
 
 - (void)reportNSError:(NSError *)error onFailure:(void (^)(NSError *))onFailure
@@ -238,9 +256,11 @@
 
 - (void)activate
 {
+    [self prepareCrashMonitoringForActivation];
+
     AMAAppMetricaCrashesConfiguration *config = nil;
     @synchronized (self) {
-        self.activated = YES;
+        _activated = YES;
         config = self.internalConfiguration;
     }
 
@@ -253,7 +273,6 @@
         [self loadCrashReports];
     }
     else {
-        [self setupRequiredMonitoring];
         [self cleanupCrashes];
     }
     [self notifyState];
@@ -347,20 +366,73 @@ them while retaining external immutability. Needed for testability. */
 
 #pragma mark - Activation
 
+- (void)prepareCrashMonitoringForActivation
+{
+    [[self class] setupCrashLogging];
+    @synchronized (self) {
+        [self initializeCrashMonitoringLockedWithConfiguration:self.internalConfiguration];
+    }
+}
+
++ (void)setupCrashLogging
+{
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        AMALogConfigurator *configurator = [AMALogConfigurator new];
+        [configurator setupLogWithChannel:AMA_LOG_CHANNEL];
+        [configurator setChannel:AMA_LOG_CHANNEL enabled:NO];
+    });
+}
+
+- (void)initializeCrashMonitoringIfNeededWithConfiguration:(AMAAppMetricaCrashesConfiguration *)configuration
+{
+    if (configuration == nil) {
+        return;
+    }
+
+    @synchronized (self) {
+        [self initializeCrashMonitoringLockedWithConfiguration:configuration];
+    }
+}
+
+- (void)initializeCrashMonitoringLockedWithConfiguration:(AMAAppMetricaCrashesConfiguration *)configuration
+{
+    if (configuration == nil || self.monitoringState != AMAAppMetricaCrashMonitoringStateNotInitialized) {
+        return;
+    }
+    self.monitoringState = AMAAppMetricaCrashMonitoringStateInstalling;
+
+    AMAAppMetricaCrashesConfiguration *frozenConfiguration = [configuration copy];
+    self.internalConfiguration = frozenConfiguration;
+
+    // Avoid quickApplicationState here: it initializes Core configuration and storage before activation.
+    NSDictionary *minimalAppState = @{
+        kAMAAppVersionNameKey : [AMAPlatformDescription appVersion] ?: @"",
+        kAMAAppBuildNumberKey : [AMAPlatformDescription appBuildNumber] ?: @"",
+    };
+    NSDictionary *context = @{
+        kAMACrashContextAppBuildUIDKey : AMABuildUID.buildUID.stringValue ?: @"",
+        kAMACrashContextAppStateKey : minimalAppState,
+    };
+    [AMAKSCrashLoader addCrashContext:context];
+
+    self.ksCrashLoader.crashErrorEnvironmentCallback = frozenConfiguration.crashErrorEnvironmentCallback;
+    if (frozenConfiguration.autoCrashTracking) {
+        [self.ksCrashLoader enableCrashMonitoring];
+    }
+    else {
+        [self.ksCrashLoader enableRequiredMonitoring];
+    }
+    self.monitoringState = AMAAppMetricaCrashMonitoringStateInstalled;
+}
+
 - (void)setupCrashLoaderWithDetection:(BOOL)enabled
 {
     [self.ksCrashLoader setDelegate:self];
-    self.ksCrashLoader.crashErrorEnvironmentCallback = self.internalConfiguration.crashErrorEnvironmentCallback;
     self.ksCrashLoader.isUnhandledCrashDetectingEnabled = enabled;
     [self.ksCrashLoader enableCrashLoader];
     
     [self.externalCrashLoader setDelegate:self];
-}
-
-- (void)setupRequiredMonitoring
-{
-    self.ksCrashLoader.crashErrorEnvironmentCallback = self.internalConfiguration.crashErrorEnvironmentCallback;
-    [self.ksCrashLoader enableRequiredMonitoring];
 }
 
 - (void)updateCrashContextAsync
@@ -419,13 +491,17 @@ them while retaining external immutability. Needed for testability. */
 - (NSArray<AMAEventPollingParameters *> *)pollingEvents
 {
     // TODO: Workaround to remove polling events
+    AMAAppMetricaCrashesConfiguration *configuration = nil;
+    @synchronized (self) {
+        configuration = self.internalConfiguration;
+    }
     __weak typeof(self) weakSelf = self;
     return [self.executor syncExecute:^id{
         __strong typeof(weakSelf) strongSelf = weakSelf;
         NSArray<AMADecodedCrash *> *crashes = [AMACollectionUtilities filteredArray:[strongSelf.ksCrashLoader syncLoadCrashReports]
                                                                       withPredicate:^BOOL(AMADecodedCrash *crash) {
-            if (strongSelf.internalConfiguration.ignoredCrashSignals != nil) {
-                return [strongSelf.internalConfiguration.ignoredCrashSignals containsObject:@(crash.crash.error.signal.signal)] == NO;
+            if (configuration.ignoredCrashSignals != nil) {
+                return [configuration.ignoredCrashSignals containsObject:@(crash.crash.error.signal.signal)] == NO;
             }
             return YES;
         }];
@@ -455,11 +531,11 @@ them while retaining external immutability. Needed for testability. */
 
 + (void)willActivateWithConfiguration:(__unused AMAModuleActivationConfiguration *)configuration
 {
-    [AMAAppMetrica.sharedLogConfigurator setupLogWithChannel:AMA_LOG_CHANNEL];
-    [AMAAppMetrica.sharedLogConfigurator setChannel:AMA_LOG_CHANNEL enabled:NO];
+    AMAAppMetricaCrashes *crashes = [[self class] crashes];
+    [crashes prepareCrashMonitoringForActivation];
     // Initialize reporter before activation to ensure it is available when crashes are loaded.
-    [[[self class] crashes] setupReporterWithConfiguration:configuration];
-    [[[self class] crashes] activate];
+    [crashes setupReporterWithConfiguration:configuration];
+    [crashes activate];
 }
 
 + (void)didActivateWithConfiguration:(__unused AMAModuleActivationConfiguration *)configuration

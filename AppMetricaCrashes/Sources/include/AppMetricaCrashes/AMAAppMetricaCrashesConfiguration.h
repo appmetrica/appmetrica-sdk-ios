@@ -38,6 +38,8 @@ NS_SWIFT_NAME(AppMetricaCrashesConfiguration)
 /// Controls the automated tracking of application crashes.
 ///
 /// If enabled, the crash reporter will automatically report application crashes.
+/// During early crash monitoring initialization, this selects all supported native monitors when enabled and only
+/// the monitors required by the SDK when disabled.
 /// - Note: This is enabled by default.
 /// - To disable: Set this property to `NO`.
 @property (nonatomic, assign) BOOL autoCrashTracking;
@@ -45,6 +47,7 @@ NS_SWIFT_NAME(AppMetricaCrashesConfiguration)
 /// Controls the reporting of probably unhandled crashes like 'Out Of Memory'.
 ///
 /// Use this to enable or disable the tracking of crashes that are probably unhandled by the application.
+/// Detection starts only after normal AppMetrica activation, including when native crash monitoring was initialized early.
 /// - Note: This is disabled by default.
 /// - To enable: Set this property to `YES`.
 @property (nonatomic, assign) BOOL probablyUnhandledCrashReporting;
@@ -59,6 +62,7 @@ NS_SWIFT_NAME(AppMetricaCrashesConfiguration)
 ///
 /// If enabled, it will detect if the main thread is blocked and report it accordingly.
 /// The detection automatically pauses when the application enters the background.
+/// Detection starts only after normal AppMetrica activation, including when native crash monitoring was initialized early.
 /// - Note: This is disabled by default.
 /// - To enable: Set this property to `YES`.
 @property (nonatomic, assign) BOOL applicationNotRespondingDetection;
@@ -79,6 +83,8 @@ NS_SWIFT_NAME(AppMetricaCrashesConfiguration)
 /// Callback that can add key-value pairs to `errorEnvironment` while KSCrash writes a crash report.
 ///
 /// The callback is optional and is not set by default. If set, it must remain valid for the lifetime of the process.
+/// It is applied when KSCrash is first installed and must be present in the first configuration frozen by early crash
+/// monitoring initialization or normal activation.
 /// Values written from the callback are merged into `errorEnvironment`; on key conflict, callback values win.
 /// The same limits as `-setErrorEnvironmentValue:forKey:` apply after merging.
 ///

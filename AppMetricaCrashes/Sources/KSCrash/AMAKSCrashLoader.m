@@ -56,6 +56,8 @@ static void AMAAppMetricaKSCrashIsWritingReportCallback(
 @property (nonatomic, strong, readonly) AMACrashSafeTransactor *transactor;
 
 @property (nonatomic, assign) BOOL enabled;
+@property (nonatomic, assign) BOOL monitoringInstalled;
+@property (nonatomic, assign) BOOL detectionEnabled;
 
 @property (nonatomic, strong) NSMutableArray *syncLoadedCrashes;
 
@@ -91,8 +93,27 @@ static void AMAAppMetricaKSCrashIsWritingReportCallback(
 
 - (void)enableCrashLoader
 {
-    static dispatch_once_t pred;
-    dispatch_once(&pred, ^{
+    [self enableCrashMonitoring];
+
+    @synchronized (self) {
+        if (self.detectionEnabled) {
+            return;
+        }
+        self.detectionEnabled = YES;
+
+        [self.unhandledCrashDetector startDetecting];
+        self.enabled = YES;
+    }
+}
+
+- (void)enableCrashMonitoring
+{
+    @synchronized (self) {
+        if (self.monitoringInstalled) {
+            return;
+        }
+        self.monitoringInstalled = YES;
+
         KSCrashMonitorType monitoring = (
             KSCrashMonitorTypeMachException
             | KSCrashMonitorTypeSignal
@@ -105,16 +126,19 @@ static void AMAAppMetricaKSCrashIsWritingReportCallback(
         [self installKSCrashWithMonitoring:monitoring];
         
         [self initializeKSCrashBinaryImageCache];
-
-        [self.unhandledCrashDetector startDetecting];
-
-        self.enabled = YES;
-    });
+    }
 }
 
 - (void)enableRequiredMonitoring
 {
-    [self installKSCrashWithMonitoring:KSCrashMonitorTypeRequired];
+    @synchronized (self) {
+        if (self.monitoringInstalled) {
+            return;
+        }
+        self.monitoringInstalled = YES;
+
+        [self installKSCrashWithMonitoring:KSCrashMonitorTypeRequired];
+    }
 }
 
 - (void)installKSCrashWithMonitoring:(KSCrashMonitorType)monitoring
@@ -264,18 +288,20 @@ static void AMAAppMetricaKSCrashIsWritingReportCallback(
         return;
     }
 
-    NSDictionary *existingContext = [self crashContext];
-    NSDictionary *newContext = nil;
+    @synchronized (self) {
+        NSDictionary *existingContext = [self crashContext];
+        NSDictionary *newContext = nil;
 
-    if (existingContext != nil) {
-        NSMutableDictionary *currentContext = [existingContext mutableCopy];
-        [currentContext addEntriesFromDictionary:crashContext];
-        newContext = [currentContext copy];
-    } else {
-        newContext = [crashContext copy];
+        if (existingContext != nil) {
+            NSMutableDictionary *currentContext = [existingContext mutableCopy];
+            [currentContext addEntriesFromDictionary:crashContext];
+            newContext = [currentContext copy];
+        } else {
+            newContext = [crashContext copy];
+        }
+
+        KSCrash.sharedInstance.userInfo = newContext;
     }
-
-    KSCrash.sharedInstance.userInfo = newContext;
 }
 
 + (NSDictionary *)crashContext

@@ -316,7 +316,7 @@ describe(@"AMAAppMetricaCrashes", ^{
                 });
 
                 it(@"Should update crash context asynchronously", ^{
-                    [[AMAKSCrashLoader should] receive:@selector(addCrashContext:)];
+                    [[AMAKSCrashLoader should] receive:@selector(addCrashContext:) withCount:2];
                     [crashes activate];
                 });
 
