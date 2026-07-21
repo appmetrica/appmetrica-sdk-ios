@@ -58,6 +58,15 @@ static NSMutableArray<NSString *>         *_capturedNativeSources = nil;
     os_unfair_lock_unlock(&_lock);
 }
 
++ (void)resetSharedDependencies
+{
+    os_unfair_lock_lock(&_lock);
+    _sharedExecutor = nil;
+    _sharedImpl = nil;
+    _metricaConfiguration = nil;
+    os_unfair_lock_unlock(&_lock);
+}
+
 // MARK: - Ad revenue capture
 
 + (NSMutableArray<AMAAdRevenueInfo *> *)capturedAdRevenues   { return _capturedAdRevenues; }

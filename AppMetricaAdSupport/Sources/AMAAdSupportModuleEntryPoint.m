@@ -5,9 +5,9 @@
 @implementation AMAAdSupportModuleEntryPoint
 
 
-- (void)initModuleWithContext:(id<AMAModuleContext>)context
+- (void)registerComponentsWithRegistrar:(id<AMAModuleRegistrar>)registrar
 {
-    [context registerAdProvider:[[AMAAdController alloc] init]];
+    [registrar registerAdProvider:[[AMAAdController alloc] init]];
 }
 
 

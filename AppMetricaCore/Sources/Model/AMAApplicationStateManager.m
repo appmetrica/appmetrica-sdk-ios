@@ -6,7 +6,7 @@
 #import "AMAMetricaInMemoryConfiguration.h"
 #import "AMAStartupClientIdentifierFactory.h"
 #import "AMAStartupClientIdentifier.h"
-#import "AMAAdProvider.h"
+#import "AMAAdProviderProxy.h"
 
 @implementation AMAApplicationStateManager
 
@@ -48,7 +48,7 @@
     mutableState.deviceID = startupClientID.deviceID;
     
     mutableState.IFV = startupClientID.IFV;
-    mutableState.IFA = [[[AMAAdProvider sharedInstance] advertisingIdentifier] UUIDString];
+    mutableState.IFA = [[[AMAAdProviderProxy sharedInstance] advertisingIdentifier] UUIDString];
 }
 
 + (void)quickUpdateApplicationState:(AMAMutableApplicationState *)mutableState
@@ -66,7 +66,7 @@
     uint32_t appBuildNumber = [AMAMetricaConfiguration sharedInstance].inMemory.appBuildNumber;
     mutableState.appBuildNumber = @(appBuildNumber).stringValue;
     
-    mutableState.LAT = [AMAAdProvider sharedInstance].isAdvertisingTrackingEnabled == NO;
+    mutableState.LAT = [AMAAdProviderProxy sharedInstance].isAdvertisingTrackingEnabled == NO;
 }
 
 @end

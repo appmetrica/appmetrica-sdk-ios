@@ -72,6 +72,19 @@
     XCTAssertNotNil(m.observer);
 }
 
+- (void)testSetup_reusesObserver
+{
+    AMAAppLovinManager *manager = [[AMAAppLovinManager alloc]
+        initWithExecutor:[[AMACurrentQueueExecutor alloc] init]
+          responseParser:[[AMAAppLovinStartupResponseParser alloc] init]];
+
+    [manager setup];
+    AMAAppLovinMaxIlrdObserver *observer = manager.observer;
+    [manager setup];
+
+    XCTAssertTrue(manager.observer == observer);
+}
+
 // MARK: - didActivateWithConfiguration
 
 - (void)testDidActivate_subscribesObserver
@@ -88,11 +101,11 @@
 
 // MARK: - setupStartupProvider
 
-- (void)testSetupStartupProvider_withDefaultAramEnabled_subscribes
+- (void)testSetupStartupProvider_withDefaultAramEnabled_doesNotSubscribeBeforeActivation
 {
     [self.manager setupStartupProvider:self.storageProvider
                 cachingStorageProvider:self.cachingProvider];
-    XCTAssertEqual(gALCSubscribedListeners.count, 1u);
+    XCTAssertEqual(gALCSubscribedListeners.count, 0u);
 }
 
 - (void)testSetupStartupProvider_withStoredAramDisabled_doesNotSubscribe
@@ -111,6 +124,7 @@
 {
     [self.manager setupStartupProvider:self.storageProvider
                 cachingStorageProvider:self.cachingProvider];
+    [self.manager.observer activateAndSubscribe:YES];
 
     NSDictionary *response = @{ @"features": @{ @"list": @{ @"ad_revenue_applovin_max": @{ @"enabled": @0 } } } };
     [self.manager startupUpdatedWithParameters:response];
@@ -122,6 +136,7 @@
 {
     [self.manager setupStartupProvider:self.storageProvider
                 cachingStorageProvider:self.cachingProvider];
+    [self.manager.observer activateAndSubscribe:YES];
 
     NSDictionary *response = @{ @"features": @{ @"list": @{ @"ad_revenue_applovin_max": @{ @"enabled": @1 } } } };
     [self.manager startupUpdatedWithParameters:response];

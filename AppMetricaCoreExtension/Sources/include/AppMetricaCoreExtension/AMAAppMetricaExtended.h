@@ -53,11 +53,9 @@ NS_SWIFT_NAME(reportLibraryAdapterAdRevenueRelatedEvent(name:parameters:onFailur
 
 + (void)subscribeForAutocollectedDataForApiKey:(NSString *)apiKey NS_SWIFT_NAME(subscribeForAutocollectedData(apiKey:));
 
-// Module registration (deprecated — use AMAModuleContext in AMAModuleEntryPoint instead)
-+ (void)addActivationDelegate:(Class<AMAModuleActivationDelegate>)delegate
-    DEPRECATED_MSG_ATTRIBUTE("Use AMAModuleContext.addActivationDelegate: in AMAModuleEntryPoint.initModuleWithContext:");
-+ (void)registerExternalService:(AMAServiceConfiguration *)configuration
-    DEPRECATED_MSG_ATTRIBUTE("Use AMAModuleContext.registerExternalService: in AMAModuleEntryPoint.initModuleWithContext:");
+// External module registration. AppHud uses this path because it is not discovered by Core.
++ (void)addActivationDelegate:(Class<AMAModuleActivationDelegate>)delegate;
++ (void)registerExternalService:(AMAServiceConfiguration *)configuration;
 
 // Reporting
 + (nullable id<AMAAppMetricaExtendedReporting>)extendedReporterForApiKey:(NSString *)apiKey

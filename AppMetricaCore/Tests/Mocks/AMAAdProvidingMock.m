@@ -2,17 +2,17 @@
 
 @implementation AMAAdProvidingMock
 
-- (nullable NSUUID *)advertisingIdentifier { 
-    return nil;
-}
-
-- (BOOL)isAdvertisingTrackingEnabled { 
-    return NO;
-}
-
-- (AMATrackingManagerAuthorizationStatus)ATTStatus API_AVAILABLE(ios(14.0), tvos(14.0))
+- (instancetype)init
 {
-    return AMATrackingManagerAuthorizationStatusNotDetermined;
+    self = [super init];
+    if (self != nil) {
+        _advertisingTrackingEnabled = NO;
+        _advertisingIdentifier = nil;
+        if (@available(iOS 14.0, tvOS 14.0, *)) {
+            _ATTStatus = AMATrackingManagerAuthorizationStatusNotDetermined;
+        }
+    }
+    return self;
 }
 
 @end

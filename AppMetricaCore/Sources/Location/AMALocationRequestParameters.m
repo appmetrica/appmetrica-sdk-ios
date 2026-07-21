@@ -5,7 +5,7 @@
 #import "AMAStartupClientIdentifier.h"
 #import "AMAMetricaConfiguration.h"
 #import "AMAMetricaInMemoryConfiguration.h"
-#import "AMAAdProvider.h"
+#import "AMAAdProviderProxy.h"
 
 @implementation AMALocationRequestParameters
 

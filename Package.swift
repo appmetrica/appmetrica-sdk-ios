@@ -588,6 +588,7 @@ extension AppMetricaTarget {
                 "Mocks",
                 "Resources",
                 "Utilities",
+                "Utilities/ModuleInvocationOrdering",
             ]
         case .coreUtils, .encodingUtils, .network, .screenshot:
             return [

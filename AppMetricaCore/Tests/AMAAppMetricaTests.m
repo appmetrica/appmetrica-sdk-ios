@@ -3,7 +3,7 @@
 #import <AppMetricaPlatform/AppMetricaPlatform.h>
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
 #import "AMAAppMetrica+TestUtilities.h"
-#import "AMAAdProvider.h"
+#import "AMAAdProviderProxy.h"
 #import "AMAAppMetricaImplTestFactory.h"
 #import "AMAAppMetrica+Internal.h"
 #import "AMAAppStateManagerTestHelper.h"
@@ -44,7 +44,7 @@ describe(@"AMAAppMetrica", ^{
     AMAAppStateManagerTestHelper *__block stateHelper = nil;
     AMAReporterTestHelper *__block reporterTestHelper = nil;
     AMAAppMetricaImpl *__block impl = nil;
-    AMAAdProvider *__block adProvider = nil;
+    AMAAdProviderProxy *__block adProviderProxy = nil;
     AMAIdentifierProviderMock *__block identifierManagerMock = nil;
     AMALocationManager *__block locationManager = nil;
     
@@ -65,7 +65,7 @@ describe(@"AMAAppMetrica", ^{
         [AMAMetricaConfigurationTestUtilities destubConfiguration];
         [AMAFailureDispatcher clearStubs];
         [AMAAppMetrica clearStubs];
-        [AMAAdProvider clearStubs];
+        [AMAAdProviderProxy clearStubs];
         [AMAAdProviderResolver clearStubs];
         [AMALocationResolver clearStubs];
         [reporterTestHelper destub];
@@ -83,8 +83,8 @@ describe(@"AMAAppMetrica", ^{
         [stateHelper stubApplicationState];
         identifierManagerMock = [AMAIdentifiersTestUtilities stubIdentifierProviderIfNeeded];
         [AMAFailureDispatcherTestHelper stubFailureDispatcher];
-        adProvider = [AMAAdProvider nullMock];
-        [AMAAdProvider stub:@selector(sharedInstance) andReturn:adProvider];
+        adProviderProxy = [AMAAdProviderProxy nullMock];
+        [AMAAdProviderProxy stub:@selector(sharedInstance) andReturn:adProviderProxy];
     };
     void (^stubMetrica)(void) = ^{
         stubMetricaDependencies();
@@ -1303,115 +1303,6 @@ describe(@"AMAAppMetrica", ^{
         });
     });
 
-    context(@"ensureModulesLoaded", ^{
-        beforeEach(^{
-            stubMetrica();
-        });
-
-        it(@"activateWithConfiguration:", ^{
-            [[impl should] receive:@selector(ensureModulesLoaded)];
-            activate();
-        });
-        it(@"activate", ^{
-            [[impl should] receive:@selector(ensureModulesLoaded)];
-            activateAnonymously();
-        });
-        it(@"reportEvent:parameters:onFailure:", ^{
-            [[impl should] receive:@selector(ensureModulesLoaded)];
-            [AMAAppMetrica reportEvent:@"event" parameters:nil onFailure:nil];
-        });
-        it(@"reportUserProfile:onFailure:", ^{
-            [[impl should] receive:@selector(ensureModulesLoaded)];
-            [AMAAppMetrica reportUserProfile:[AMAMutableUserProfile new] onFailure:nil];
-        });
-        it(@"reportRevenue:onFailure:", ^{
-            AMARevenueInfo *revenue = [AMARevenueInfo nullMock];
-            [revenue stub:@selector(copy) andReturn:revenue];
-            [[impl should] receive:@selector(ensureModulesLoaded)];
-            [AMAAppMetrica reportRevenue:revenue onFailure:nil];
-        });
-        it(@"reportECommerce:onFailure:", ^{
-            AMAECommerce *ecommerce = [AMAECommerce nullMock];
-            [ecommerce stub:@selector(copy) andReturn:ecommerce];
-            [[impl should] receive:@selector(ensureModulesLoaded)];
-            [AMAAppMetrica reportECommerce:ecommerce onFailure:nil];
-        });
-        it(@"reportExternalAttribution:source:onFailure:", ^{
-            [[impl should] receive:@selector(ensureModulesLoaded)];
-            [AMAAppMetrica reportExternalAttribution:@{} source:kAMAAttributionSourceAppsflyer onFailure:nil];
-        });
-        it(@"reportAdRevenue:onFailure:", ^{
-            AMAAdRevenueInfo *adRevenue = [AMAAdRevenueInfo nullMock];
-            [adRevenue stub:@selector(copy) andReturn:adRevenue];
-            [[impl should] receive:@selector(ensureModulesLoaded)];
-            [AMAAppMetrica reportAdRevenue:adRevenue onFailure:nil];
-        });
-#if !TARGET_OS_TV
-        it(@"setupWebViewReporting:onFailure:", ^{
-            id controller = [KWMock nullMockForProtocol:@protocol(AMAJSControlling)];
-            [[impl should] receive:@selector(ensureModulesLoaded)];
-            [AMAAppMetrica setupWebViewReporting:controller onFailure:nil];
-        });
-#endif
-        it(@"setUserProfileID:", ^{
-            [[impl should] receive:@selector(ensureModulesLoaded)];
-            [AMAAppMetrica setUserProfileID:@"uid"];
-        });
-        it(@"trackOpeningURL:", ^{
-            [[impl should] receive:@selector(ensureModulesLoaded)];
-            [AMAAppMetrica trackOpeningURL:[NSURL URLWithString:@"https://example.com"]];
-        });
-        it(@"setAppEnvironmentValue:forKey:", ^{
-            [[impl should] receive:@selector(ensureModulesLoaded)];
-            [AMAAppMetrica setAppEnvironmentValue:@"v" forKey:@"k"];
-        });
-        it(@"clearAppEnvironment", ^{
-            [[impl should] receive:@selector(ensureModulesLoaded)];
-            [AMAAppMetrica clearAppEnvironment];
-        });
-        it(@"sendEventsBuffer", ^{
-            [[impl should] receive:@selector(ensureModulesLoaded)];
-            [AMAAppMetrica sendEventsBuffer];
-        });
-        it(@"pauseSession", ^{
-            [[impl should] receive:@selector(ensureModulesLoaded)];
-            [AMAAppMetrica pauseSession];
-        });
-        it(@"resumeSession", ^{
-            [[impl should] receive:@selector(ensureModulesLoaded)];
-            [AMAAppMetrica resumeSession];
-        });
-        it(@"activateReporterWithConfiguration:", ^{
-            [[impl should] receive:@selector(ensureModulesLoaded)];
-            [AMAAppMetrica activateReporterWithConfiguration:
-                [[AMAReporterConfiguration alloc] initWithAPIKey:apiKey]];
-        });
-        it(@"extendedReporterForApiKey:", ^{
-            [[impl should] receive:@selector(ensureModulesLoaded)];
-            [AMAAppMetrica extendedReporterForApiKey:apiKey];
-        });
-        it(@"requestStartupIdentifiersWithCompletionQueue:completionBlock:", ^{
-            [[impl should] receive:@selector(ensureModulesLoaded)];
-            [AMAAppMetrica requestStartupIdentifiersWithCompletionQueue:nil
-                                                        completionBlock:^(NSDictionary<AMAStartupKey,id> * _Nullable identifiers,
-                                                                          NSError * _Nullable error) {}];
-        });
-        it(@"requestStartupIdentifiersWithKeys:completionQueue:completionBlock:", ^{
-            [[impl should] receive:@selector(ensureModulesLoaded)];
-            [AMAAppMetrica requestStartupIdentifiersWithKeys:@[]
-                                             completionQueue:nil
-                                             completionBlock:^(NSDictionary<AMAStartupKey,id> * _Nullable identifiers,
-                                                               NSError * _Nullable error) {}];
-        });
-        it(@"subscribeForAutocollectedDataForApiKey:", ^{
-            [[impl should] receive:@selector(ensureModulesLoaded)];
-            [AMAAppMetrica subscribeForAutocollectedDataForApiKey:apiKey];
-        });
-        it(@"setDataSendingEnabled:", ^{
-            [[impl should] receive:@selector(ensureModulesLoaded)];
-            [AMAAppMetrica setDataSendingEnabled:theValue(YES)];
-        });
-    });
 });
 
 SPEC_END

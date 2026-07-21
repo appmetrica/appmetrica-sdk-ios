@@ -2,7 +2,7 @@
 #import <Foundation/Foundation.h>
 
 @class AMAPrivacyTimer;
-@class AMAAdProvider;
+@class AMAAdProviderProxy;
 @protocol AMACancelableExecuting;
 @protocol AMAAsyncExecuting;
 @protocol AMAPrivacyTimerRetryPolicy;
@@ -20,12 +20,12 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (instancetype)initWithTimerRetryPolicy:(id<AMAPrivacyTimerRetryPolicy>)retryPolicy
                         delegateExecutor:(id<AMAAsyncExecuting>)executor
-                          adProvider:(AMAAdProvider*)adProvider;
+                          adProviderProxy:(AMAAdProviderProxy *)adProviderProxy;
 
 - (instancetype)initWithTimerRetryPolicy:(id<AMAPrivacyTimerRetryPolicy>)retryPolicy
                                 executor:(id<AMACancelableExecuting>)executor
                         delegateExecutor:(id<AMAAsyncExecuting>)executor
-                              adProvider:(AMAAdProvider*)adProvider;
+                          adProviderProxy:(AMAAdProviderProxy *)adProviderProxy;
 
 - (void)start;
 - (void)stop;

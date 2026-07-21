@@ -2,48 +2,48 @@
 #import <XCTest/XCTest.h>
 #import "AMAAdSupportModuleEntryPoint.h"
 #import "AMAAdController.h"
-#import <AppMetricaTestUtils/AMAModuleContextMock.h>
+#import <AppMetricaTestUtils/AMAModuleRegistrarMock.h>
 
 @interface AMAAdSupportModuleEntryPointTests : XCTestCase
-@property (nonatomic, strong) AMAModuleContextMock *ctx;
+@property (nonatomic, strong) AMAModuleRegistrarMock *registrar;
 @end
 
 @implementation AMAAdSupportModuleEntryPointTests
 
 - (void)setUp
 {
-    self.ctx = [[AMAModuleContextMock alloc] initWithTestCase:self];
-    [[AMAAdSupportModuleEntryPoint new] initModuleWithContext:self.ctx];
+    self.registrar = [[AMAModuleRegistrarMock alloc] initWithTestCase:self];
+    [[AMAAdSupportModuleEntryPoint new] registerComponentsWithRegistrar:self.registrar];
 }
 
-- (void)testInitModuleWithContext_registersAdProvider
+- (void)testRegisterComponentsWithRegistrar_registersAdProvider
 {
-    XCTAssertEqual(self.ctx.adProviders.count, 1u);
+    XCTAssertEqual(self.registrar.adProviders.count, 1u);
 }
 
-- (void)testInitModuleWithContext_registersAMAAdControllerInstance
+- (void)testRegisterComponentsWithRegistrar_registersAMAAdControllerInstance
 {
-    XCTAssertTrue([self.ctx.adProviders.firstObject isKindOfClass:[AMAAdController class]]);
+    XCTAssertTrue([self.registrar.adProviders.firstObject isKindOfClass:[AMAAdController class]]);
 }
 
-- (void)testInitModuleWithContext_doesNotRegisterActivationDelegate
+- (void)testRegisterComponentsWithRegistrar_doesNotRegisterActivationDelegate
 {
-    XCTAssertEqual(self.ctx.activationDelegates.count, 0u);
+    XCTAssertEqual(self.registrar.activationDelegates.count, 0u);
 }
 
-- (void)testInitModuleWithContext_doesNotRegisterEventPollingDelegate
+- (void)testRegisterComponentsWithRegistrar_doesNotRegisterEventPollingDelegate
 {
-    XCTAssertEqual(self.ctx.eventPollingDelegates.count, 0u);
+    XCTAssertEqual(self.registrar.eventPollingDelegates.count, 0u);
 }
 
-- (void)testInitModuleWithContext_doesNotRegisterEventFlushableDelegate
+- (void)testRegisterComponentsWithRegistrar_doesNotRegisterEventFlushableDelegate
 {
-    XCTAssertEqual(self.ctx.eventFlushableDelegates.count, 0u);
+    XCTAssertEqual(self.registrar.eventFlushableDelegates.count, 0u);
 }
 
-- (void)testInitModuleWithContext_doesNotRegisterExternalService
+- (void)testRegisterComponentsWithRegistrar_doesNotRegisterServiceConfiguration
 {
-    XCTAssertEqual(self.ctx.serviceConfigurations.count, 0u);
+    XCTAssertEqual(self.registrar.serviceConfigurations.count, 0u);
 }
 
 @end

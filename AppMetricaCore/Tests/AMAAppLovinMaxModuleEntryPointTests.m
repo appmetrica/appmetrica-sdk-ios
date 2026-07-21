@@ -1,18 +1,49 @@
 
 #import <XCTest/XCTest.h>
-#import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import "AMAAppLovinMaxModuleEntryPoint.h"
 #import "AMAAppLovinAdRevenuePolicy.h"
 #import "AMAAppLovinManager.h"
 #import "AMAAppLovinTestSDKStubs.h"
-#import "AMAAppMetricaMock.h"
 #import "AMABundleInfoMock.h"
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
 
 static NSString *const kPolicyKey = @"io.appmetrica.applovin_auto_ad_revenue_enabled";
 
+@interface AMAAppLovinMaxModuleEntryPoint (Testing)
+- (void)registerNativeSource;
+- (void)setupManager;
+@end
+
+@interface AMAAppLovinMaxModuleEntryPointSpy : AMAAppLovinMaxModuleEntryPoint
+@property (nonatomic, strong) NSMutableArray<NSString *> *registeredNativeSources;
+@property (nonatomic, assign) NSUInteger setupManagerCallCount;
+@end
+
+@implementation AMAAppLovinMaxModuleEntryPointSpy
+
+- (instancetype)initWithPolicy:(AMAInfoPlistPolicy *)policy
+{
+    self = [super initWithPolicy:policy];
+    if (self != nil) {
+        _registeredNativeSources = [NSMutableArray array];
+    }
+    return self;
+}
+
+- (void)registerNativeSource
+{
+    [self.registeredNativeSources addObject:@"applovin"];
+}
+
+- (void)setupManager
+{
+    ++self.setupManagerCallCount;
+}
+
+@end
+
 @interface AMAAppLovinMaxModuleEntryPointTests : XCTestCase
-@property (nonatomic, strong) AMAModuleContextMock *context;
+@property (nonatomic, strong) AMAModuleRegistrarMock *registrar;
 @end
 
 @implementation AMAAppLovinMaxModuleEntryPointTests
@@ -20,26 +51,15 @@ static NSString *const kPolicyKey = @"io.appmetrica.applovin_auto_ad_revenue_ena
 - (void)setUp
 {
     AMAAppLovinTestSDKStubsReset();
-    [AMAAppMetricaMock resetCaptures];
-    [AMAAppMetrica stub:@selector(registerAdRevenueNativeSource:)
-             withBlock:^id(NSArray *params) {
-        [AMAAppMetricaMock.capturedNativeSources addObject:params[0]];
-        return nil;
-    }];
-    self.context = [[AMAModuleContextMock alloc] initWithTestCase:self];
+    self.registrar = [[AMAModuleRegistrarMock alloc] initWithTestCase:self];
 }
 
-- (void)tearDown
-{
-    [AMAAppMetrica clearStubs];
-}
-
-- (AMAAppLovinMaxModuleEntryPoint *)entryPointWithPolicyEnabled:(BOOL)enabled
+- (AMAAppLovinMaxModuleEntryPointSpy *)entryPointWithPolicyEnabled:(BOOL)enabled
 {
     AMABundleInfoMock *bundle = [AMABundleInfoMock new];
     bundle.mockedInfo = @{ kPolicyKey: @(enabled) };
     AMAAppLovinAdRevenuePolicy *policy = [[AMAAppLovinAdRevenuePolicy alloc] initWithBundle:bundle];
-    return [[AMAAppLovinMaxModuleEntryPoint alloc] initWithPolicy:policy];
+    return [[AMAAppLovinMaxModuleEntryPointSpy alloc] initWithPolicy:policy];
 }
 
 // MARK: - Policy disabled
@@ -47,12 +67,12 @@ static NSString *const kPolicyKey = @"io.appmetrica.applovin_auto_ad_revenue_ena
 - (void)testPolicyDisabled_skipsRegistration
 {
     gALCCommunicatorAvailable = YES;
-    AMAAppLovinMaxModuleEntryPoint *ep = [self entryPointWithPolicyEnabled:NO];
+    AMAAppLovinMaxModuleEntryPointSpy *ep = [self entryPointWithPolicyEnabled:NO];
 
-    [ep initModuleWithContext:self.context];
+    [ep registerComponentsWithRegistrar:self.registrar];
 
-    XCTAssertEqual(self.context.activationDelegates.count, 0u);
-    XCTAssertEqual(AMAAppMetricaMock.capturedNativeSources.count, 0u);
+    XCTAssertEqual(self.registrar.activationDelegates.count, 0u);
+    XCTAssertEqual(ep.registeredNativeSources.count, 0u);
 }
 
 // MARK: - No SDK
@@ -60,55 +80,64 @@ static NSString *const kPolicyKey = @"io.appmetrica.applovin_auto_ad_revenue_ena
 - (void)testNoALCCommunicator_skipsRegistration
 {
     gALCCommunicatorAvailable = NO;
-    AMAAppLovinMaxModuleEntryPoint *ep = [self entryPointWithPolicyEnabled:YES];
+    AMAAppLovinMaxModuleEntryPointSpy *ep = [self entryPointWithPolicyEnabled:YES];
 
-    [ep initModuleWithContext:self.context];
+    [ep registerComponentsWithRegistrar:self.registrar];
 
-    XCTAssertEqual(self.context.activationDelegates.count, 0u);
-    XCTAssertEqual(AMAAppMetricaMock.capturedNativeSources.count, 0u);
+    XCTAssertEqual(self.registrar.activationDelegates.count, 0u);
+    XCTAssertEqual(ep.registeredNativeSources.count, 0u);
 }
 
 // MARK: - SDK present
 
-- (void)testALCCommunicatorPresent_registersNativeSource
+- (void)testRegisterComponentsWithRegistrar_registersNativeSourceAndDefersManagerSetupUntilPreActivation
 {
     gALCCommunicatorAvailable = YES;
-    AMAAppLovinMaxModuleEntryPoint *ep = [self entryPointWithPolicyEnabled:YES];
+    AMAAppLovinMaxModuleEntryPointSpy *ep = [self entryPointWithPolicyEnabled:YES];
 
-    [ep initModuleWithContext:self.context];
+    [ep registerComponentsWithRegistrar:self.registrar];
 
-    XCTAssertEqualObjects(AMAAppMetricaMock.capturedNativeSources.firstObject, @"applovin");
+    XCTAssertEqualObjects(ep.registeredNativeSources, (@[ @"applovin" ]));
+    XCTAssertEqual(ep.setupManagerCallCount, 0u);
+    XCTAssertEqualObjects(self.registrar.preActivationHandlers, (@[ ep ]));
+    [ep handlePreActivationWithConfiguration:
+        [[AMAModuleActivationConfiguration alloc] initWithApiKey:@"test-key"]];
+    [ep handlePreActivationWithConfiguration:
+        [[AMAModuleActivationConfiguration alloc] initWithApiKey:@"test-key"]];
+
+    XCTAssertEqual(ep.registeredNativeSources.count, 1u);
+    XCTAssertEqual(ep.setupManagerCallCount, 1u);
 }
 
 - (void)testALCCommunicatorPresent_registersActivationDelegate
 {
     gALCCommunicatorAvailable = YES;
-    AMAAppLovinMaxModuleEntryPoint *ep = [self entryPointWithPolicyEnabled:YES];
+    AMAAppLovinMaxModuleEntryPointSpy *ep = [self entryPointWithPolicyEnabled:YES];
 
-    [ep initModuleWithContext:self.context];
+    [ep registerComponentsWithRegistrar:self.registrar];
 
-    XCTAssertEqual(self.context.activationDelegates.count, 1u);
-    XCTAssertEqual(self.context.activationDelegates.firstObject, [AMAAppLovinManager class]);
+    XCTAssertEqual(self.registrar.activationDelegates.count, 1u);
+    XCTAssertEqual(self.registrar.activationDelegates.firstObject, [AMAAppLovinManager class]);
 }
 
-- (void)testALCCommunicatorPresent_registersExternalService
+- (void)testALCCommunicatorPresent_registersServiceConfiguration
 {
     gALCCommunicatorAvailable = YES;
-    AMAAppLovinMaxModuleEntryPoint *ep = [self entryPointWithPolicyEnabled:YES];
+    AMAAppLovinMaxModuleEntryPointSpy *ep = [self entryPointWithPolicyEnabled:YES];
 
-    [ep initModuleWithContext:self.context];
+    [ep registerComponentsWithRegistrar:self.registrar];
 
-    XCTAssertEqual(self.context.serviceConfigurations.count, 1u);
+    XCTAssertEqual(self.registrar.serviceConfigurations.count, 1u);
 }
 
 - (void)testALCCommunicatorPresent_startupObserverIsManager
 {
     gALCCommunicatorAvailable = YES;
-    AMAAppLovinMaxModuleEntryPoint *ep = [self entryPointWithPolicyEnabled:YES];
+    AMAAppLovinMaxModuleEntryPointSpy *ep = [self entryPointWithPolicyEnabled:YES];
 
-    [ep initModuleWithContext:self.context];
+    [ep registerComponentsWithRegistrar:self.registrar];
 
-    id<AMAExtendedStartupObserving> observer = self.context.serviceConfigurations.firstObject.startupObserver;
+    id<AMAExtendedStartupObserving> observer = self.registrar.serviceConfigurations.firstObject.startupObserver;
     XCTAssertTrue([observer isKindOfClass:[AMAAppLovinManager class]]);
 }
 

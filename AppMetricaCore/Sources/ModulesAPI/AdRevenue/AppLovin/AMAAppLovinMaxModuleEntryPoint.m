@@ -9,6 +9,7 @@ typedef NSString *(*AMAAppLovinVersionIMP)(Class, SEL);
 
 @interface AMAAppLovinMaxModuleEntryPoint ()
 @property (nonatomic, strong) AMAInfoPlistPolicy *policy;
+@property (nonatomic) BOOL prepared;
 @end
 
 @implementation AMAAppLovinMaxModuleEntryPoint
@@ -27,7 +28,7 @@ typedef NSString *(*AMAAppLovinVersionIMP)(Class, SEL);
     return self;
 }
 
-- (void)initModuleWithContext:(id<AMAModuleContext>)context
+- (void)registerComponentsWithRegistrar:(id<AMAModuleRegistrar>)registrar
 {
     if (self.policy.isEnabled == NO) {
         AMAAppLovinLog(@"autocollection disabled via Info.plist, skipping");
@@ -42,18 +43,37 @@ typedef NSString *(*AMAAppLovinVersionIMP)(Class, SEL);
 
     NSString *sdkVersion = [self sdkVersion];
     AMAAppLovinLog(@"AppLovin MAX detected (version=%@), registering", sdkVersion ?: @"unknown");
-    [AMAAppMetrica registerAdRevenueNativeSource:@"applovin"];
 
+    [self registerNativeSource];
     AMAAppLovinManager *manager = [AMAAppLovinManager sharedInstance];
-    [manager setup];
     AMAServiceConfiguration *config = [[AMAServiceConfiguration alloc]
         initWithStartupObserver:manager
        reporterStorageController:nil];
-    [context registerExternalService:config];
-    [context addActivationDelegate:[AMAAppLovinManager class]];
+    [registrar registerPreActivationHandler:self];
+    [registrar registerServiceConfiguration:config];
+    [registrar registerActivationDelegate:[AMAAppLovinManager class]];
+}
+
+- (void)handlePreActivationWithConfiguration:(AMAModuleActivationConfiguration *)configuration
+{
+    if (self.prepared) {
+        return;
+    }
+    self.prepared = YES;
+    [self setupManager];
 }
 
 // MARK: - Private
+
+- (void)registerNativeSource
+{
+    [AMAAppMetrica registerAdRevenueNativeSource:@"applovin"];
+}
+
+- (void)setupManager
+{
+    [[AMAAppLovinManager sharedInstance] setup];
+}
 
 - (nullable NSString *)sdkVersion
 {

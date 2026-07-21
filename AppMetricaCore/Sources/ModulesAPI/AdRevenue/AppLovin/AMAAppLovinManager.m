@@ -45,8 +45,12 @@
 
 - (void)setup
 {
-    AMAAppLovinLog(@"setup observer");
-    self.observer = [[AMAAppLovinMaxIlrdObserver alloc] initWithExecutor:self.executor];
+    @synchronized (self) {
+        if (self.observer == nil) {
+            AMAAppLovinLog(@"setup observer");
+            self.observer = [[AMAAppLovinMaxIlrdObserver alloc] initWithExecutor:self.executor];
+        }
+    }
 }
 
 // MARK: - AMAModuleActivationDelegate
@@ -80,7 +84,6 @@
         self.storageProvider = startupStorageProvider;
         [self initStartupConfiguration];
         AMAAppLovinLog(@"setupStartupProvider, aramEnabled=%@", self.startupConfig.aramEnabled ? @"YES" : @"NO");
-        [self.observer activateAndSubscribe:self.startupConfig.aramEnabled];
     }];
 }
 

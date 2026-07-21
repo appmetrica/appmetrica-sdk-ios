@@ -2,42 +2,51 @@
 #import <Foundation/Foundation.h>
 #import "AMACore.h"
 
-@class AMAModuleActivationConfiguration;
-@class AMAModuleContextImpl;
+@class AMAAppMetricaConfiguration;
+@class AMALegacyModuleRegistrationCoordinator;
 @class AMAReporter;
 @class AMAEnvironmentContainer;
 @protocol AMAAsyncExecuting;
-@protocol AMASyncExecuting;
 @protocol AMAKeyValueStorageProviding;
+@protocol AMAModuleEntryPointDiscovering;
 
 NS_ASSUME_NONNULL_BEGIN
 
 typedef void (^AMAStartupParametersHandler)(NSDictionary *parameters);
+typedef void (^AMAModuleAdProviderHandler)(id<AMAAdProviding> _Nullable moduleAdProvider);
 
 @interface AMAModulesController : NSObject
 
-- (instancetype)initWithExecutor:(id<AMAAsyncExecuting, AMASyncExecuting>)executor
-        startupParametersHandler:(nullable AMAStartupParametersHandler)startupParametersHandler NS_DESIGNATED_INITIALIZER;
+/// `executor` must execute submitted blocks serially in FIFO order.
+- (instancetype)initWithExecutor:(id<AMAAsyncExecuting>)executor
+        registrationCoordinator:
+            (nullable AMALegacyModuleRegistrationCoordinator *)registrationCoordinator
+        startupParametersHandler:(nullable AMAStartupParametersHandler)startupParametersHandler;
 
-/// The module context. Available immediately after init.
-@property (nonatomic, strong, readonly) AMAModuleContextImpl *context;
+/// `executor` must execute submitted blocks serially in FIFO order.
+- (instancetype)initWithExecutor:(id<AMAAsyncExecuting>)executor
+                       discoverer:(id<AMAModuleEntryPointDiscovering>)discoverer
+           registrationCoordinator:
+               (nullable AMALegacyModuleRegistrationCoordinator *)registrationCoordinator
+         startupParametersHandler:(nullable AMAStartupParametersHandler)startupParametersHandler
+    NS_DESIGNATED_INITIALIZER;
 
-/// Ad provider registered by a module via context.
-@property (nonatomic, strong, readonly, nullable) id<AMAAdProviding> adProvider;
+/// Schedules the handler on the modules executor after discovery.
+- (void)resolveModuleAdProviderWithHandler:(AMAModuleAdProviderHandler)handler;
 
-/// Triggers async module discovery and initialization on the first call (idempotent).
-- (void)ensureLoaded;
-
-- (void)registerModule:(id<AMAModuleEntryPoint>)module;
+/// Starts idempotent asynchronous discovery and registry publication on the modules executor.
+/// AMAAppMetricaImpl calls this once immediately after publishing the controller.
+- (void)startLoading;
 
 /// Called once per observer after modules are loaded, with that observer's startup parameters.
 /// Set by AMAAppMetricaImpl to forward to addAdditionalStartupParameters:.
 @property (nonatomic, copy, nullable) AMAStartupParametersHandler startupParametersHandler;
 
-// MARK: - Activation lifecycle
-
-- (void)notifyWillActivateWithConfiguration:(AMAModuleActivationConfiguration *)configuration;
-- (void)notifyDidActivateWithConfiguration:(AMAModuleActivationConfiguration *)configuration;
+/// Takes an immutable module configuration snapshot, enqueues pre-activation/will after
+/// asynchronous module loading, executes core activation synchronously on the caller,
+/// then enqueues did after the core block returns.
+- (void)performActivationWithAppMetricaConfiguration:(AMAAppMetricaConfiguration *)configuration
+                                     activationBlock:(nullable dispatch_block_t)activationBlock;
 
 // MARK: - Startup observers
 

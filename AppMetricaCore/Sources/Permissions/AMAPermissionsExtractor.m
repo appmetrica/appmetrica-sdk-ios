@@ -3,7 +3,7 @@
 #import <CoreLocation/CoreLocation.h>
 #import "AMAPermissionsExtractor.h"
 #import "AMAPermission.h"
-#import "AMAAdProvider.h"
+#import "AMAAdProviderProxy.h"
 
 @interface AMAPermissionsExtractor ()
 
@@ -76,7 +76,7 @@
 
 - (AMAPermissionGrantType)ATTStatus
 {
-    switch ([AMAAdProvider sharedInstance].ATTStatus) {
+    switch ([AMAAdProviderProxy sharedInstance].ATTStatus) {
         case AMATrackingManagerAuthorizationStatusAuthorized:
             return AMAPermissionGrantTypeAuthorized;
         case AMATrackingManagerAuthorizationStatusDenied:

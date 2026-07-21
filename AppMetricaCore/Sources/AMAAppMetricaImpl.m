@@ -59,14 +59,13 @@
 #import "AMAFirstActivationDetector.h"
 #import "AMAAnonymousActivationPolicy.h"
 #import "AMADataSendingRestrictionController.h"
-#import "AMAAdProvider.h"
+#import "AMAAdProviderProxy.h"
 #import "AMALocationResolver.h"
 #import "AMAAdProviderResolver.h"
 #import "AMAActivationTypeResolver.h"
 #import "AMAReporterAutocollectedDataProvider.h"
 #import "AMAAppMetricaConfigurationFileStorage.h"
 #import "AMAAppGroupIdentifierProvider.h"
-#import "AMAModuleContextImpl.h"
 
 static NSTimeInterval const kAMAAnonymousActivationDelay = 0.1;
 static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
@@ -97,7 +96,7 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
 @property (atomic, strong) AMAExternalAttributionController *externalAttributionController;
 @property (nonatomic, strong, readonly) AMAAutoPurchasesWatcher *autoPurchasesWatcher;
 @property (nonatomic, strong, readonly) AMAFirstActivationDetector *firstActivationDetector;
-@property (nonatomic, strong, readonly) AMAAdProvider *adProvider;
+@property (nonatomic, strong, readonly) AMAAdProviderProxy *adProviderProxy;
 @property (nonatomic, strong, readonly) AMALocationManager *locationManager;
 
 @property (nonatomic, strong) AMAModulesController *modulesController;
@@ -138,7 +137,7 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
         _deeplinkController = [[AMADeepLinkController alloc] initWithExecutor:executor];
         // auto in app reporting executor should be the same as usual events reporting executor for conversion value flow to work
         _autoPurchasesWatcher = [[AMAAutoPurchasesWatcher alloc] initWithExecutor:executor];
-        _adProvider = [AMAAdProvider sharedInstance];
+        _adProviderProxy = [AMAAdProviderProxy sharedInstance];
         _locationManager = [AMALocationManager sharedManager];
 
         AMAMetricaConfiguration *metricaConfiguration = [AMAMetricaConfiguration sharedInstance];
@@ -197,22 +196,21 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
 
 - (void)activateWithConfiguration:(AMAAppMetricaConfiguration *)configuration
 {
-    [self setupAdProvider];
+    [self bindModuleAdProvider];
     
-    [self notifyModulesWillActivate:configuration];
-
-    [self.configurationManager updateMainConfiguration:configuration activatedAnonymously:NO];
-    self.apiKey = configuration.APIKey;
-
-    [self migrate];
-
-    AMAReporter *reporter = [self setupMainReporterWithConfiguration:configuration];
-    [self activateCommonComponents:configuration reporter:reporter];
-
-    [[AMAMetricaConfiguration sharedInstance].inMemory markAppMetricaStarted];
-    [self logMetricaStart:configuration.APIKey];
-
-    [self notifyModulesDidActivate:configuration];
+    [self.modulesController performActivationWithAppMetricaConfiguration:configuration
+                                                         activationBlock:^{
+        [self.configurationManager updateMainConfiguration:configuration activatedAnonymously:NO];
+        self.apiKey = configuration.APIKey;
+        
+        [self migrate];
+        
+        AMAReporter *reporter = [self setupMainReporterWithConfiguration:configuration];
+        [self activateCommonComponents:configuration reporter:reporter];
+        
+        [[AMAMetricaConfiguration sharedInstance].inMemory markAppMetricaStarted];
+        [self logMetricaStart:configuration.APIKey];
+    }];
 }
 
 - (void)scheduleAnonymousActivationIfNeeded
@@ -236,7 +234,7 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
 - (void)scheduleAnonymousActivationWithDelay:(NSTimeInterval)delay
 {
     AMADelayedExecutor *delayedExecutor = [[AMADelayedExecutor alloc] init];
-
+    
     __weak typeof(self) weakSelf = self;
     [delayedExecutor executeAfterDelay:delay block:^{
         __strong typeof(self) strongSelf = weakSelf;
@@ -248,24 +246,23 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
 
 - (void)activateAnonymously
 {
+    [self bindModuleAdProvider];
+    
     AMAAppMetricaConfiguration *configuration = [self.configurationManager anonymousConfiguration];
-    [self.configurationManager updateMainConfiguration:configuration            activatedAnonymously:YES];
-    self.apiKey = configuration.APIKey;
-    
-    [self setupAdProvider];
-    
-    [self notifyModulesWillActivate:configuration];
+    [self.modulesController
+        performActivationWithAppMetricaConfiguration:configuration
+                                     activationBlock:^{
+        [self.configurationManager updateMainConfiguration:configuration activatedAnonymously:YES];
+        self.apiKey = configuration.APIKey;
 
-    [self migrate];
-    
-    AMAReporter *reporter = [self setupMainReporterWithConfiguration:configuration];
-    [self activateCommonComponents:configuration reporter:reporter];
-    
-    [[AMAMetricaConfiguration sharedInstance].inMemory markAppMetricaStartedAnonymously];
+        [self migrate];
 
-    [self logMetricaStart:nil];
-    
-    [self notifyModulesDidActivate:configuration];
+        AMAReporter *reporter = [self setupMainReporterWithConfiguration:configuration];
+        [self activateCommonComponents:configuration reporter:reporter];
+
+        [[AMAMetricaConfiguration sharedInstance].inMemory markAppMetricaStartedAnonymously];
+        [self logMetricaStart:nil];
+    }];
 }
 
 - (void)activateReporterWithConfiguration:(AMAReporterConfiguration *)configuration
@@ -291,33 +288,19 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
 }
 
 
-- (void)notifyModulesWillActivate:(AMAAppMetricaConfiguration *)configuration
+- (void)applyModuleAdProvider:(id<AMAAdProviding>)moduleAdProvider
 {
-    AMAModuleActivationConfiguration *moduleConfig =
-            [[AMAModuleActivationConfiguration alloc] initWithApiKey:configuration.APIKey
-                                                          appVersion:configuration.appVersion
-                                                      appBuildNumber:configuration.appBuildNumber];
-
-    [self.modulesController notifyWillActivateWithConfiguration:moduleConfig];
-}
-
-- (void)notifyModulesDidActivate:(AMAAppMetricaConfiguration *)configuration
-{
-    AMAModuleActivationConfiguration *moduleConfig =
-            [[AMAModuleActivationConfiguration alloc] initWithApiKey:configuration.APIKey
-                                                          appVersion:configuration.appVersion
-                                                      appBuildNumber:configuration.appBuildNumber];
-
-    [self.modulesController notifyDidActivateWithConfiguration:moduleConfig];
-}
-
-
-- (void)setupAdProvider
-{
-    id<AMAAdProviding> adProvider = self.modulesController.adProvider;
-    if (adProvider != nil) {
-        [self.adProvider setupAdProvider:adProvider];
+    if (moduleAdProvider != nil) {
+        [self.adProviderProxy setBackingProvider:moduleAdProvider];
     }
+}
+
+- (void)bindModuleAdProvider
+{
+    __weak typeof(self) weakSelf = self;
+    [self.modulesController resolveModuleAdProviderWithHandler:^(id<AMAAdProviding> moduleAdProvider) {
+        [weakSelf applyModuleAdProvider:moduleAdProvider];
+    }];
 }
 
 - (void)logMetricaStart:(NSString *)apiKey
@@ -688,7 +671,7 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
 
 - (id<AMAAppMetricaExtendedReporting>)manualReporterForConfiguration:(AMAReporterConfiguration *)configuration
 {
-    [self setupAdProvider];
+    [self bindModuleAdProvider];
     
     return [self reporterForConfiguration:configuration];
 }
@@ -775,28 +758,15 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
 - (void)initializeModulesController
 {
     __weak typeof(self) weakSelf = self;
-    // Activation may begin before the executor processes initialization tasks.
-    self.modulesController = [[AMAModulesController alloc]
-               initWithExecutor:self.executor
-        startupParametersHandler:^(NSDictionary *params) {
-            [weakSelf addAdditionalStartupParameters:params];
-        }];
-
-    [self execute:^{
-        __strong typeof(weakSelf) strongSelf = weakSelf;
-        if (strongSelf == nil) { return; }
-
-        NSSet<Class<AMAModuleActivationDelegate>> *delegates = [AMAAppMetrica pendingActivationDelegatesAndFlush];
-        NSArray<AMAServiceConfiguration *> *services = [AMAAppMetrica pendingExternalServicesAndFlush];
-        for (Class<AMAModuleActivationDelegate> delegate in delegates) {
-            [strongSelf.modulesController.context addActivationDelegate:delegate];
-        }
-        for (AMAServiceConfiguration *config in services) {
-            [strongSelf.modulesController.context registerExternalService:config];
-        }
-
-        [strongSelf.modulesController ensureLoaded];
+    AMAModulesController *modulesController = [[AMAModulesController alloc]
+                                               initWithExecutor:self.executor
+                                               registrationCoordinator:AMAAppMetrica.legacyModuleRegistrationCoordinator
+                                               startupParametersHandler:^(NSDictionary *params) {
+        [weakSelf addAdditionalStartupParameters:params];
     }];
+
+    _modulesController = modulesController;
+    [modulesController startLoading];
 }
 
 - (void)initializeStartupController
@@ -1161,11 +1131,6 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
 - (void)notifyOnAdditionalStartupFailedWithError:(NSError *)error
 {
     [self.modulesController notifyStartupFailedWithError:error];
-}
-
-- (void)ensureModulesLoaded
-{
-    [self.modulesController ensureLoaded];
 }
 
 #pragma mark - Module registration

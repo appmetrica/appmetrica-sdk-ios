@@ -6,7 +6,7 @@
 #import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import "AMAMetricaConfiguration.h"
 #import "AMAStartupClientIdentifierFactory.h"
-#import "AMAAdProvider.h"
+#import "AMAAdProviderProxy.h"
 #import "AMAIdentifierProviderMock.h"
 
 static AMAIdentifierProviderMock *identifierManagerMock;
@@ -36,13 +36,13 @@ static AMAIdentifierProviderMock *identifierManagerMock;
 
 + (void)stubIdfaWithEnabled:(BOOL)isEnabled value:(NSString *)UUID
 {
-    AMAAdProvider *idfaMock = [AMAAdProvider mock];
+    AMAAdProviderProxy *idfaMock = [AMAAdProviderProxy mock];
     [idfaMock stub:@selector(isAdvertisingTrackingEnabled) andReturn:theValue(isEnabled)];
     NSUUID *idfa = [[NSUUID alloc] initWithUUIDString:UUID];
     [idfaMock stub:@selector(advertisingIdentifier) andReturn:idfa];
     [idfaMock stub:@selector(setIsEnabled:)];
     [idfaMock stub:@selector(markActivationCompleted)];
-    [AMAAdProvider stub:@selector(sharedInstance) andReturn:idfaMock];
+    [AMAAdProviderProxy stub:@selector(sharedInstance) andReturn:idfaMock];
 }
 
 + (void)stubUUID:(NSString *)UUID
@@ -91,7 +91,7 @@ static AMAIdentifierProviderMock *identifierManagerMock;
 
 + (void)destubIDFA
 {
-    [AMAAdProvider clearStubs];
+    [AMAAdProviderProxy clearStubs];
 }
 
 + (void)destubUUID

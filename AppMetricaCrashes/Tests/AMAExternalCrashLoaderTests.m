@@ -1,4 +1,3 @@
-
 #import <XCTest/XCTest.h>
 #import "AMAExternalCrashLoader.h"
 #import "AMACrashEvent.h"
@@ -65,6 +64,24 @@
     [self.loader registerProvider:provider];
 
     XCTAssertEqual(provider.delegate, (id<AMACrashProviderDelegate>)self.loader);
+}
+
+- (void)testRegisterPushProviderSetsDelegateOnExecutor
+{
+    AMAManualCurrentQueueExecutor *executor = [[AMAManualCurrentQueueExecutor alloc] init];
+    AMAExternalCrashLoader *loader = [[AMAExternalCrashLoader alloc]
+        initWithExecutor:executor
+              transactor:self.transactor
+               converter:self.converter];
+    AMAExternalLoaderMockPushProvider *provider = [[AMAExternalLoaderMockPushProvider alloc] init];
+
+    [loader registerProvider:provider];
+
+    XCTAssertNil(provider.delegate);
+
+    [executor execute];
+
+    XCTAssertEqual(provider.delegate, (id<AMACrashProviderDelegate>)loader);
 }
 
 - (void)testDuplicateRegistrationProcessesOnce
@@ -145,6 +162,26 @@
     XCTAssertEqual(self.crashLoaderMockDelegate.receivedCrashes.count, 3u);
     XCTAssertEqual(providerA.processedEvents.count, 1u);
     XCTAssertEqual(providerB.processedEvents.count, 2u);
+}
+
+- (void)testReportsAreNotAcknowledgedBeforeLoaderDelegateIsInstalled
+{
+    self.loader.delegate = nil;
+    AMACrashEvent *pushEvent = [self sampleEvent];
+    AMACrashEvent *pullEvent = [self sampleEvent];
+    AMAExternalLoaderMockPushProvider *pushProvider =
+        [[AMAExternalLoaderMockPushProvider alloc] init];
+    AMAExternalLoaderMockPullProvider *pullProvider =
+        [[AMAExternalLoaderMockPullProvider alloc] init];
+    pullProvider.reports = @[ pullEvent ];
+    [self.loader registerProvider:pushProvider];
+    [self.loader registerProvider:pullProvider];
+
+    [self.loader crashProvider:pushProvider didDetectCrash:pushEvent];
+    [self.loader loadCrashReports];
+
+    XCTAssertNil(pushProvider.processedEvents);
+    XCTAssertNil(pullProvider.processedEvents);
 }
 
 #pragma mark - Push Model

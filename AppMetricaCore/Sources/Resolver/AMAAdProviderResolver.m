@@ -1,20 +1,20 @@
 #import "AMAAdProviderResolver.h"
-#import "AMAAdProvider.h"
+#import "AMAAdProviderProxy.h"
 
 @implementation AMAAdProviderResolver
 
-- (instancetype)initWithAdProvider:(AMAAdProvider *)adProvider
+- (instancetype)initWithAdProviderProxy:(AMAAdProviderProxy *)adProviderProxy
 {
     self = [super init];
     if (self) {
-        _adProvider = adProvider;
+        _adProviderProxy = adProviderProxy;
     }
     return self;
 }
 
 - (void)updateWithValue:(BOOL)value
 {
-    self.adProvider.isEnabled = value;
+    self.adProviderProxy.enabled = value;
 }
 
 + (instancetype)sharedInstance
@@ -22,7 +22,7 @@
     static dispatch_once_t onceToken;
     static AMAAdProviderResolver *resolver;
     dispatch_once(&onceToken, ^{
-        resolver = [[AMAAdProviderResolver alloc] initWithAdProvider:[AMAAdProvider sharedInstance]];
+        resolver = [[AMAAdProviderResolver alloc] initWithAdProviderProxy:[AMAAdProviderProxy sharedInstance]];
     });
     return resolver;
 }

@@ -5,10 +5,10 @@
 @implementation AMAAppMetricaCrashesEntryPoint
 
 
-- (void)initModuleWithContext:(id<AMAModuleContext>)context
+- (void)registerComponentsWithRegistrar:(id<AMAModuleRegistrar>)registrar
 {
-    [context addActivationDelegate:[AMAAppMetricaCrashes class]];
-    [context addEventPollingDelegate:[AMAAppMetricaCrashes class]];
+    [registrar registerActivationDelegate:[AMAAppMetricaCrashes class]];
+    [registrar registerEventPollingDelegate:[AMAAppMetricaCrashes class]];
 }
 
 

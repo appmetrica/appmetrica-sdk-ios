@@ -16,7 +16,7 @@
                       adServices:nil
    externalAttributionSerializer:nil
         sessionExpirationHandler:nil
-                      adProvider:nil 
+                 adProviderProxy:nil
                     privacyTimer:nil
           adRevenueSourceStorage:nil];
 

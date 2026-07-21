@@ -42,7 +42,7 @@
 #import "AMAAppMetrica+Internal.h"
 #import "AMASessionExpirationHandler.h"
 #import "AMAExtrasContainer.h"
-#import "AMAAdProvider.h"
+#import "AMAAdProviderProxy.h"
 #import "AMAPrivacyTimer.h"
 #import "AMAPrivacyTimerStorage.h"
 #import "AMAExternalAttributionSerializer.h"
@@ -67,7 +67,7 @@
 @property (nonatomic, strong, readonly) AMAAdServicesDataProvider *adServices;
 @property (nonatomic, strong, readonly) AMASessionExpirationHandler *sessionExpirationHandler;
 @property (nonatomic, strong, readonly) AMAExternalAttributionSerializer *externalAttributionSerializer;
-@property (nonnull, nonatomic, strong, readonly) AMAAdProvider *adProvider;
+@property (nonnull, nonatomic, strong, readonly) AMAAdProviderProxy *adProviderProxy;
 @property (nonnull, nonatomic, strong, readonly) AMAPrivacyTimer *privacyTimer;
 @property (nonatomic) BOOL isPrivacyTimerStarted;
 
@@ -84,7 +84,7 @@
 {
     AMACancelableDelayedExecutor *executor = [[AMACancelableDelayedExecutor alloc] initWithIdentifier:self];
     
-    AMAAdProvider *adProvider = [AMAAdProvider sharedInstance];
+    AMAAdProviderProxy *adProviderProxy = [AMAAdProviderProxy sharedInstance];
     
     AMASessionExpirationHandler *sessionExpirationHandler =
         [[AMASessionExpirationHandler alloc] initWithConfiguration:[AMAMetricaConfiguration sharedInstance]
@@ -99,7 +99,7 @@
         
         privacyTimer = [[AMAPrivacyTimer alloc] initWithTimerRetryPolicy:timerStorage
                                                     delegateExecutor:executor
-                                                          adProvider:adProvider];
+                                                     adProviderProxy:adProviderProxy];
     }
     
     AMAAdServicesDataProvider *adServicesDataProvider = nil;
@@ -119,7 +119,7 @@
                      adServices:adServicesDataProvider
   externalAttributionSerializer:[[AMAExternalAttributionSerializer alloc] init]
        sessionExpirationHandler:sessionExpirationHandler
-                     adProvider:adProvider
+                adProviderProxy:adProviderProxy
                    privacyTimer:privacyTimer
          adRevenueSourceStorage:[AMAAdRevenueSourceContainer sharedInstance]
     ];
@@ -137,7 +137,7 @@
                     adServices:(AMAAdServicesDataProvider *)adServices
  externalAttributionSerializer:(AMAExternalAttributionSerializer *)externalAttributionSerializer
       sessionExpirationHandler:(AMASessionExpirationHandler *)sessionExpirationHandler
-                    adProvider:(AMAAdProvider *)adProvider
+               adProviderProxy:(AMAAdProviderProxy *)adProviderProxy
                   privacyTimer:(AMAPrivacyTimer *)privacyTimer
         adRevenueSourceStorage:(id<AMAAdRevenueSourceStorable>)adRevenueSourceStorage
 
@@ -158,7 +158,7 @@
         _eCommerceTruncator = eCommerceTruncator;
         _sessionExpirationHandler = sessionExpirationHandler;
         _externalAttributionSerializer = externalAttributionSerializer;
-        _adProvider = adProvider;
+        _adProviderProxy = adProviderProxy;
         _privacyTimer = privacyTimer;
         _adRevenueSourceStorage = adRevenueSourceStorage;
         privacyTimer.delegate = self;
@@ -1247,7 +1247,8 @@
         return;
     }
     
-    BOOL needSent = [self.adProvider isAdvertisingTrackingEnabled] && self.privacyTimer.timerStorage.isResendPeriodOutdated;
+    BOOL needSent = [self.adProviderProxy isAdvertisingTrackingEnabled] &&
+                    self.privacyTimer.timerStorage.isResendPeriodOutdated;
     AMALogInfo(@"send privacy event: %@ %d", self.apiKey, needSent);
     if (needSent) {
         NSError *error = nil;

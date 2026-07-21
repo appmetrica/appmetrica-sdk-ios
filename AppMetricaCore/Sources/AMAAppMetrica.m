@@ -5,7 +5,7 @@
 #if !TARGET_OS_TV
 #endif
 #import "AMAAppMetrica.h"
-#import "AMAAdProvider.h"
+#import "AMAAdProviderProxy.h"
 #import "AMAAdRevenueInfo.h"
 #import "AMAAppMetricaConfiguration+Internal.h"
 #import "AMAAppMetricaConfiguration.h"
@@ -30,6 +30,7 @@
 #import "AMAAdRevenueSourceContainer.h"
 #import "AMAAdProviderResolver.h"
 #import "AMALocationResolver.h"
+#import "AMALegacyModuleRegistrationCoordinator.h"
 @import AppMetricaIdentifiers;
 
 NSString *const kAMAUUIDKey = @"appmetrica_uuid";
@@ -42,7 +43,6 @@ NSString *const kAMAAttributionSourceKochava = @"kochava";
 NSString *const kAMAAttributionSourceTenjin = @"tenjin";
 NSString *const kAMAAttributionSourceAirbridge = @"airbridge";
 NSString *const kAMAAttributionSourceSingular = @"singular";
-
 
 @implementation AMAAppMetrica
 
@@ -82,7 +82,7 @@ NSString *const kAMAAttributionSourceSingular = @"singular";
 
 + (BOOL)isAdvertisingIdentifierTrackingEnabled
 {
-    return [AMAAdProvider sharedInstance].isEnabled;
+    return [AMAAdProviderProxy sharedInstance].enabled;
 }
 
 + (void)setAdvertisingIdentifierTrackingEnabled:(BOOL)enabled
@@ -263,7 +263,6 @@ NSString *const kAMAAttributionSourceSingular = @"singular";
             return;
         }
 
-        [[self sharedImpl] ensureModulesLoaded];
         [[self sharedImpl] activateWithConfiguration:configuration];
     }
 }
@@ -276,7 +275,6 @@ NSString *const kAMAAttributionSourceSingular = @"singular";
             return;
         }
 
-        [[self sharedImpl] ensureModulesLoaded];
         [[self sharedImpl] scheduleAnonymousActivationIfNeeded];
     }
 }
@@ -314,7 +312,6 @@ NSString *const kAMAAttributionSourceSingular = @"singular";
          parameters:(NSDictionary *)params
           onFailure:(void (^)(NSError *error))onFailure
 {
-    [[self sharedImpl] ensureModulesLoaded];
     if ([self isAppMetricaStartedWithLogging:onFailure]) {
         [[self sharedImpl] reportEvent:[name copy] parameters:[params copy] onFailure:onFailure];
     }
@@ -331,7 +328,6 @@ NSString *const kAMAAttributionSourceSingular = @"singular";
 
 + (void)reportUserProfile:(AMAUserProfile *)userProfile onFailure:(nullable void (^)(NSError *error))onFailure
 {
-    [[self sharedImpl] ensureModulesLoaded];
     if ([self isAppMetricaStartedWithLogging:onFailure]) {
         [[self sharedImpl] reportUserProfile:[userProfile copy] onFailure:onFailure];
     }
@@ -339,7 +335,6 @@ NSString *const kAMAAttributionSourceSingular = @"singular";
 
 + (void)reportRevenue:(AMARevenueInfo *)revenueInfo onFailure:(nullable void (^)(NSError *error))onFailure
 {
-    [[self sharedImpl] ensureModulesLoaded];
     if ([self isAppMetricaStartedWithLogging:onFailure]) {
         [[self sharedImpl] reportRevenue:revenueInfo onFailure:onFailure];
     }
@@ -347,7 +342,6 @@ NSString *const kAMAAttributionSourceSingular = @"singular";
 
 + (void)reportECommerce:(AMAECommerce *)eCommerce onFailure:(void (^)(NSError *))onFailure
 {
-    [[self sharedImpl] ensureModulesLoaded];
     if ([self isAppMetricaStartedWithLogging:onFailure]) {
         [[self sharedImpl] reportECommerce:eCommerce onFailure:onFailure];
     }
@@ -357,7 +351,6 @@ NSString *const kAMAAttributionSourceSingular = @"singular";
                            source:(AMAAttributionSource)source
                         onFailure:(nullable void (^)(NSError *error))onFailure
 {
-    [[self sharedImpl] ensureModulesLoaded];
     if ([self isAppMetricaStartedWithLogging:onFailure]) {
         [[self sharedImpl] reportExternalAttribution:attribution source:source onFailure:onFailure];
     }
@@ -372,7 +365,6 @@ NSString *const kAMAAttributionSourceSingular = @"singular";
         isAutocollected:(BOOL)isAutocollected
               onFailure:(nullable void (^)(NSError *error))onFailure
 {
-    [[self sharedImpl] ensureModulesLoaded];
     if ([self isAppMetricaStartedWithLogging:onFailure]) {
         [[self sharedImpl] reportAdRevenue:adRevenue isAutocollected:isAutocollected onFailure:onFailure];
     }
@@ -383,7 +375,6 @@ NSString *const kAMAAttributionSourceSingular = @"singular";
 + (void)setupWebViewReporting:(id<AMAJSControlling>)controller
                     onFailure:(nullable void (^)(NSError *error))onFailure
 {
-    [[self sharedImpl] ensureModulesLoaded];
     if ([self isAppMetricaStartedWithLogging:onFailure]) {
         [[self sharedImpl] setupWebViewReporting:controller];
     }
@@ -392,7 +383,6 @@ NSString *const kAMAAttributionSourceSingular = @"singular";
 
 + (void)setUserProfileID:(NSString *)userProfileID
 {
-    [[self sharedImpl] ensureModulesLoaded];
     [[self sharedImpl] setUserProfileID:[userProfileID copy]];
 }
 
@@ -408,7 +398,6 @@ NSString *const kAMAAttributionSourceSingular = @"singular";
 
 + (void)setDataSendingEnabled:(BOOL)enabled
 {
-    [[self sharedImpl] ensureModulesLoaded];
     AMADataSendingRestriction restriction = enabled
         ? AMADataSendingRestrictionAllowed
         : AMADataSendingRestrictionForbidden;
@@ -451,7 +440,6 @@ NSString *const kAMAAttributionSourceSingular = @"singular";
 
 + (void)trackOpeningURL:(NSURL *)URL
 {
-    [[self sharedImpl] ensureModulesLoaded];
     if ([self isActivated] == NO) {
         AMALogWarn(@"Metrica is not started");
         return;
@@ -461,7 +449,6 @@ NSString *const kAMAAttributionSourceSingular = @"singular";
 
 + (void)setErrorEnvironmentValue:(NSString *)value forKey:(NSString *)key
 {
-    [[self sharedImpl] ensureModulesLoaded];
     @synchronized(self) {
         if ([self isMetricaImplCreated]) {
             [[self sharedImpl] setErrorEnvironmentValue:value forKey:key];
@@ -474,26 +461,22 @@ NSString *const kAMAAttributionSourceSingular = @"singular";
 
 + (void)setAppEnvironmentValue:(NSString *)value forKey:(NSString *)key
 {
-    [[self sharedImpl] ensureModulesLoaded];
     [[self sharedImpl] setAppEnvironmentValue:value forKey:key];
 }
 
 + (void)clearAppEnvironment
 {
-    [[self sharedImpl] ensureModulesLoaded];
     [[self sharedImpl] clearAppEnvironment];
 }
 
 + (void)sendEventsBuffer
 {
-    [[self sharedImpl] ensureModulesLoaded];
     if ([self isAppMetricaStartedWithLogging:nil] == NO) { return; }
     [[self sharedImpl] sendEventsBuffer];
 }
 
 + (void)pauseSession
 {
-    [[self sharedImpl] ensureModulesLoaded];
     if ([self isAppMetricaStartedWithLogging:nil] == NO) { return; }
     if ([self metricaConfiguration].inMemory.sessionsAutoTracking) {
         [AMAErrorLogger logMetricaActivationWithAutomaticSessionsTracking];
@@ -504,7 +487,6 @@ NSString *const kAMAAttributionSourceSingular = @"singular";
 
 + (void)resumeSession
 {
-    [[self sharedImpl] ensureModulesLoaded];
     if ([self isAppMetricaStartedWithLogging:nil] == NO) { return; }
     if ([self metricaConfiguration].inMemory.sessionsAutoTracking) {
         [AMAErrorLogger logMetricaActivationWithAutomaticSessionsTracking];
@@ -535,7 +517,6 @@ NSString *const kAMAAttributionSourceSingular = @"singular";
 
 + (void)activateReporterWithConfiguration:(AMAReporterConfiguration *)configuration
 {
-    [[self sharedImpl] ensureModulesLoaded];
     if ([self isAPIKeyValid:configuration.APIKey] == NO) {
         [AMAErrorLogger logInvalidApiKeyError:configuration.APIKey];
         return;
@@ -558,7 +539,6 @@ NSString *const kAMAAttributionSourceSingular = @"singular";
 
 + (id<AMAAppMetricaExtendedReporting>)extendedReporterForApiKey:(NSString *)apiKey
 {
-    [[self sharedImpl] ensureModulesLoaded];
     if ([self isAPIKeyValid:apiKey] == NO) {
         [AMAErrorLogger logInvalidApiKeyError:apiKey];
         return nil;
@@ -578,7 +558,6 @@ NSString *const kAMAAttributionSourceSingular = @"singular";
 + (void)requestStartupIdentifiersWithCompletionQueue:(nullable dispatch_queue_t)queue
                                      completionBlock:(AMAIdentifiersCompletionBlock)block
 {
-    [[self sharedImpl] ensureModulesLoaded];
     [[self sharedImpl] requestStartupIdentifiersWithCompletionQueue:queue
                                                     completionBlock:block
                                                       notifyOnError:YES];
@@ -588,7 +567,6 @@ NSString *const kAMAAttributionSourceSingular = @"singular";
                           completionQueue:(nullable dispatch_queue_t)queue
                           completionBlock:(AMAIdentifiersCompletionBlock)block
 {
-    [[self sharedImpl] ensureModulesLoaded];
     [[self sharedImpl] requestStartupIdentifiersWithKeys:keys
                                          completionQueue:queue
                                          completionBlock:block
@@ -701,7 +679,6 @@ NSString *const kAMAAttributionSourceSingular = @"singular";
 
 + (void)subscribeForAutocollectedDataForApiKey:(NSString *)apiKey
 {
-    [[self sharedImpl] ensureModulesLoaded];
     [[self sharedImpl] addAutocollectedData:apiKey];
 }
 
@@ -760,58 +737,30 @@ NSString *const kAMAAttributionSourceSingular = @"singular";
     [[self sharedAdRevenueSourceContainer] addNativeSupportedSource:source];
 }
 
-#pragma mark - Deprecated module registration
+#pragma mark - External module registration
 
-// These methods are no-ops kept for binary compatibility.
-// Use AMAModuleContext in AMAModuleEntryPoint.initModuleWithContext: instead.
-
-static NSMutableSet<Class<AMAModuleActivationDelegate>> *sActivationDelegates = nil;
-static NSMutableArray<AMAServiceConfiguration *> *sExternalServices = nil;
++ (AMALegacyModuleRegistrationCoordinator *)legacyModuleRegistrationCoordinator
+{
+    static AMALegacyModuleRegistrationCoordinator *coordinator = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        coordinator = [[AMALegacyModuleRegistrationCoordinator alloc] init];
+    });
+    return coordinator;
+}
 
 + (void)addActivationDelegate:(Class<AMAModuleActivationDelegate>)delegate
 {
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        sActivationDelegates = [[NSMutableSet alloc] init];
-    });
-    @synchronized(self) {
-        if ([self isActivated] == NO) {
-            [sActivationDelegates addObject:delegate];
-        }
+    if ([self isActivated] == NO) {
+        [self.legacyModuleRegistrationCoordinator registerActivationDelegate:delegate];
     }
 }
 
 + (void)registerExternalService:(AMAServiceConfiguration *)configuration
 {
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        sExternalServices = [[NSMutableArray alloc] init];
-    });
-    @synchronized(self) {
-        if ([self isActivated] == NO) {
-            [sExternalServices addObject:configuration];
-        }
+    if ([self isActivated] == NO) {
+        [self.legacyModuleRegistrationCoordinator registerServiceConfiguration:configuration];
     }
-}
-
-+ (NSSet<Class<AMAModuleActivationDelegate>> *)pendingActivationDelegatesAndFlush
-{
-    NSSet *pendingDelegates = nil;
-    @synchronized(self) {
-        pendingDelegates = [sActivationDelegates copy];
-        [sActivationDelegates removeAllObjects];
-    }
-    return pendingDelegates;
-}
-
-+ (NSArray<AMAServiceConfiguration *> *)pendingExternalServicesAndFlush
-{
-    NSArray *pendingServices = nil;
-    @synchronized(self) {
-        pendingServices = [sExternalServices copy];
-        [sExternalServices removeAllObjects];
-    }
-    return pendingServices;
 }
 
 @end

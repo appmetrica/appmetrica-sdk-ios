@@ -24,7 +24,7 @@
 #import "AMAECommerceTruncator.h"
 #import "AMAAdServicesDataProvider.h"
 #import "AMASessionExpirationHandler.h"
-#import "AMAAdProvider.h"
+#import "AMAAdProviderProxy.h"
 #import "AMAPrivacyTimer.h"
 #import "AMAPrivacyTimerRetryPolicy.h"
 #import "AMAExternalAttributionSerializer.h"
@@ -41,7 +41,7 @@
 @property (nonatomic, strong, readonly) NSMutableDictionary<NSString *, AMAReporterStorage *> *reporterStorages;
 @property (nonatomic, strong, readonly) NSMutableDictionary<NSString *, AMAPrivacyTimer *> *privacyTimers;
 @property (nonatomic, strong, readonly) NSMutableDictionary<NSString *, AMAPrivacyTimerStorageMock *> *privacyTimerStorages;
-@property (nonatomic, strong, readonly) NSMutableDictionary<NSString *, AMAAdProvider *> *adProviders;
+@property (nonatomic, strong, readonly) NSMutableDictionary<NSString *, AMAAdProviderProxy *> *adProviderProxies;
 @property (nonatomic, strong, readonly) NSMutableDictionary<NSString *, AMAAdRevenueSourceContainerMock *> *adRevenueSourceStorage;
 
 @end
@@ -56,7 +56,7 @@
         _reporters = [NSMutableDictionary dictionary];
         _databases = [NSMutableDictionary dictionary];
         _reporterStorages = [NSMutableDictionary dictionary];
-        _adProviders = [NSMutableDictionary dictionary];
+        _adProviderProxies = [NSMutableDictionary dictionary];
         _privacyTimerStorages = [NSMutableDictionary dictionary];
         _privacyTimers = [NSMutableDictionary dictionary];
         _adRevenueSourceStorage = [NSMutableDictionary dictionary];
@@ -91,7 +91,7 @@
     [self.databases removeAllObjects];
     [self.privacyTimers removeAllObjects];
     [self.privacyTimerStorages removeAllObjects];
-    [self.adProviders removeAllObjects];
+    [self.adProviderProxies removeAllObjects];
     [self.adRevenueSourceStorage removeAllObjects];
 
     [AMAFileUtility clearStubs];
@@ -231,11 +231,11 @@
         [[AMASessionExpirationHandler alloc] initWithConfiguration:[AMAMetricaConfiguration sharedInstance]
                                                             APIKey:apiKey];
     
-    AMAAdProvider *adProvider = [self adProviderForApiKey:apiKey];
+    AMAAdProviderProxy *adProviderProxy = [self adProviderProxyForApiKey:apiKey];
     AMAPrivacyTimerStorageMock *privacyStorage = [self privacyTimerStorageMockForApiKey:apiKey];
     AMAPrivacyTimerMock *privacyTimer = [[AMAPrivacyTimerMock alloc] initWithTimerRetryPolicy:privacyStorage
                                                                          delegateExecutor:executor
-                                                                               adProvider:adProvider];
+                                                                          adProviderProxy:adProviderProxy];
     
     privacyTimer.disableFire = YES;
     
@@ -267,7 +267,7 @@
                                             adServices:[AMAAdServicesDataProvider nullMock]
                          externalAttributionSerializer:[AMAExternalAttributionSerializer nullMock]
                               sessionExpirationHandler:expirationHandler
-                                            adProvider:adProvider
+                                       adProviderProxy:adProviderProxy
                                           privacyTimer:privacyTimer
                                 adRevenueSourceStorage:adRevenueSourceContainerMock];
     }
@@ -338,15 +338,15 @@
     return reporterStorage;
 }
 
-- (AMAAdProvider *)adProviderForApiKey:(NSString*)apiKey
+- (AMAAdProviderProxy *)adProviderProxyForApiKey:(NSString *)apiKey
 {
-    AMAAdProvider *provider = self.adProviders[apiKey];
-    if (provider != nil) {
-        return provider;
+    AMAAdProviderProxy *proxy = self.adProviderProxies[apiKey];
+    if (proxy != nil) {
+        return proxy;
     }
-    provider = [AMAAdProvider nullMock];
-    _adProviders[apiKey] = provider;
-    return provider;
+    proxy = [AMAAdProviderProxy nullMock];
+    _adProviderProxies[apiKey] = proxy;
+    return proxy;
 }
 
 - (NSObject<AMADatabaseProtocol> *)databaseForApiKey:(NSString *)apiKey

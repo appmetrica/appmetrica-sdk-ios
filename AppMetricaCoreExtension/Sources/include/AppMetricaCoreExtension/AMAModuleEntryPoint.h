@@ -1,17 +1,14 @@
 
 #import <Foundation/Foundation.h>
-#import "AMAModuleContext.h"
-#import "AMAModuleActivationConfiguration.h"
-#import "AMAEventPollingDelegate.h"
-#import "AMAEnvironmentContainer.h"
-#import <AppMetricaStorageUtils/AppMetricaStorageUtils.h>
+#import "AMAModuleRegistrar.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
 NS_SWIFT_NAME(ModuleEntryPoint)
 @protocol AMAModuleEntryPoint <NSObject>
 
-- (void)initModuleWithContext:(id<AMAModuleContext>)context;
+- (void)registerComponentsWithRegistrar:(id<AMAModuleRegistrar>)registrar
+    NS_SWIFT_NAME(registerComponents(with:));
 
 @end
 

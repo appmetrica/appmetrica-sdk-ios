@@ -2,63 +2,63 @@
 #import <XCTest/XCTest.h>
 #import "AMAScreenshotModuleEntryPoint.h"
 #import "AMAScreenshotLoader.h"
-#import <AppMetricaTestUtils/AMAModuleContextMock.h>
+#import <AppMetricaTestUtils/AMAModuleRegistrarMock.h>
 
 @interface AMAScreenshotModuleEntryPointTests : XCTestCase
-@property (nonatomic, strong) AMAModuleContextMock *ctx;
+@property (nonatomic, strong) AMAModuleRegistrarMock *registrar;
 @end
 
 @implementation AMAScreenshotModuleEntryPointTests
 
 - (void)setUp
 {
-    self.ctx = [[AMAModuleContextMock alloc] initWithTestCase:self];
-    [[AMAScreenshotModuleEntryPoint new] initModuleWithContext:self.ctx];
+    self.registrar = [[AMAModuleRegistrarMock alloc] initWithTestCase:self];
+    [[AMAScreenshotModuleEntryPoint new] registerComponentsWithRegistrar:self.registrar];
 }
 
-- (void)testInitModuleWithContext_registersExactlyOneService
+- (void)testRegisterComponentsWithRegistrar_registersExactlyOneService
 {
-    XCTAssertEqual(self.ctx.serviceConfigurations.count, 1u);
+    XCTAssertEqual(self.registrar.serviceConfigurations.count, 1u);
 }
 
-- (void)testInitModuleWithContext_registersStartupObserver
+- (void)testRegisterComponentsWithRegistrar_registersStartupObserver
 {
-    AMAServiceConfiguration *config = self.ctx.serviceConfigurations.firstObject;
+    AMAServiceConfiguration *config = self.registrar.serviceConfigurations.firstObject;
     XCTAssertNotNil(config.startupObserver);
     XCTAssertTrue([config.startupObserver isKindOfClass:[AMAScreenshotLoader class]]);
 }
 
-- (void)testInitModuleWithContext_registersStorageController
+- (void)testRegisterComponentsWithRegistrar_registersStorageController
 {
-    AMAServiceConfiguration *config = self.ctx.serviceConfigurations.firstObject;
+    AMAServiceConfiguration *config = self.registrar.serviceConfigurations.firstObject;
     XCTAssertNotNil(config.reporterStorageController);
     XCTAssertTrue([config.reporterStorageController isKindOfClass:[AMAScreenshotLoader class]]);
 }
 
-- (void)testInitModuleWithContext_startupObserverAndStorageControllerAreSameInstance
+- (void)testRegisterComponentsWithRegistrar_startupObserverAndStorageControllerAreSameInstance
 {
-    AMAServiceConfiguration *config = self.ctx.serviceConfigurations.firstObject;
+    AMAServiceConfiguration *config = self.registrar.serviceConfigurations.firstObject;
     XCTAssertEqualObjects(config.startupObserver, config.reporterStorageController);
 }
 
-- (void)testInitModuleWithContext_doesNotRegisterActivationDelegate
+- (void)testRegisterComponentsWithRegistrar_doesNotRegisterActivationDelegate
 {
-    XCTAssertEqual(self.ctx.activationDelegates.count, 0u);
+    XCTAssertEqual(self.registrar.activationDelegates.count, 0u);
 }
 
-- (void)testInitModuleWithContext_doesNotRegisterEventPollingDelegate
+- (void)testRegisterComponentsWithRegistrar_doesNotRegisterEventPollingDelegate
 {
-    XCTAssertEqual(self.ctx.eventPollingDelegates.count, 0u);
+    XCTAssertEqual(self.registrar.eventPollingDelegates.count, 0u);
 }
 
-- (void)testInitModuleWithContext_doesNotRegisterEventFlushableDelegate
+- (void)testRegisterComponentsWithRegistrar_doesNotRegisterEventFlushableDelegate
 {
-    XCTAssertEqual(self.ctx.eventFlushableDelegates.count, 0u);
+    XCTAssertEqual(self.registrar.eventFlushableDelegates.count, 0u);
 }
 
-- (void)testInitModuleWithContext_doesNotRegisterAdProvider
+- (void)testRegisterComponentsWithRegistrar_doesNotRegisterAdProvider
 {
-    XCTAssertEqual(self.ctx.adProviders.count, 0u);
+    XCTAssertEqual(self.registrar.adProviders.count, 0u);
 }
 
 @end

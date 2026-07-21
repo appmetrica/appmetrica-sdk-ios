@@ -2,53 +2,53 @@
 #import <XCTest/XCTest.h>
 #import "AMAAppMetricaCrashesEntryPoint.h"
 #import "AMAAppMetricaCrashes.h"
-#import <AppMetricaTestUtils/AMAModuleContextMock.h>
+#import <AppMetricaTestUtils/AMAModuleRegistrarMock.h>
 
 @interface AMAAppMetricaCrashesEntryPointTests : XCTestCase
-@property (nonatomic, strong) AMAModuleContextMock *ctx;
+@property (nonatomic, strong) AMAModuleRegistrarMock *registrar;
 @end
 
 @implementation AMAAppMetricaCrashesEntryPointTests
 
 - (void)setUp
 {
-    self.ctx = [[AMAModuleContextMock alloc] initWithTestCase:self];
-    [[AMAAppMetricaCrashesEntryPoint new] initModuleWithContext:self.ctx];
+    self.registrar = [[AMAModuleRegistrarMock alloc] initWithTestCase:self];
+    [[AMAAppMetricaCrashesEntryPoint new] registerComponentsWithRegistrar:self.registrar];
 }
 
-- (void)testInitModuleWithContext_registersActivationDelegate
+- (void)testRegisterComponentsWithRegistrar_registersActivationDelegate
 {
-    XCTAssertTrue([self.ctx.activationDelegates containsObject:[AMAAppMetricaCrashes class]]);
+    XCTAssertTrue([self.registrar.activationDelegates containsObject:[AMAAppMetricaCrashes class]]);
 }
 
-- (void)testInitModuleWithContext_registersEventPollingDelegate
+- (void)testRegisterComponentsWithRegistrar_registersEventPollingDelegate
 {
-    XCTAssertTrue([self.ctx.eventPollingDelegates containsObject:[AMAAppMetricaCrashes class]]);
+    XCTAssertTrue([self.registrar.eventPollingDelegates containsObject:[AMAAppMetricaCrashes class]]);
 }
 
-- (void)testInitModuleWithContext_registersExactlyOneActivationDelegate
+- (void)testRegisterComponentsWithRegistrar_registersExactlyOneActivationDelegate
 {
-    XCTAssertEqual(self.ctx.activationDelegates.count, 1u);
+    XCTAssertEqual(self.registrar.activationDelegates.count, 1u);
 }
 
-- (void)testInitModuleWithContext_registersExactlyOnePollingDelegate
+- (void)testRegisterComponentsWithRegistrar_registersExactlyOnePollingDelegate
 {
-    XCTAssertEqual(self.ctx.eventPollingDelegates.count, 1u);
+    XCTAssertEqual(self.registrar.eventPollingDelegates.count, 1u);
 }
 
-- (void)testInitModuleWithContext_doesNotRegisterEventFlushableDelegate
+- (void)testRegisterComponentsWithRegistrar_doesNotRegisterEventFlushableDelegate
 {
-    XCTAssertEqual(self.ctx.eventFlushableDelegates.count, 0u);
+    XCTAssertEqual(self.registrar.eventFlushableDelegates.count, 0u);
 }
 
-- (void)testInitModuleWithContext_doesNotRegisterExternalService
+- (void)testRegisterComponentsWithRegistrar_doesNotRegisterServiceConfiguration
 {
-    XCTAssertEqual(self.ctx.serviceConfigurations.count, 0u);
+    XCTAssertEqual(self.registrar.serviceConfigurations.count, 0u);
 }
 
-- (void)testInitModuleWithContext_doesNotRegisterAdProvider
+- (void)testRegisterComponentsWithRegistrar_doesNotRegisterAdProvider
 {
-    XCTAssertEqual(self.ctx.adProviders.count, 0u);
+    XCTAssertEqual(self.registrar.adProviders.count, 0u);
 }
 
 @end

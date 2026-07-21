@@ -1,24 +1,35 @@
 
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
 #import "AMAAppMetricaImplTestFactory.h"
+#import "AMAAdProviderProxy.h"
 #import "AMADispatchStrategiesContainer.h"
 #import "AMAEventCountDispatchStrategy+Private.h"
 #import "AMAInternalEventsReporter.h"
 #import "AMAReporter.h"
 #import "AMAReporterTestHelper.h"
 #import "AMAEventBuilder.h"
+#import "AMAModulesController.h"
+#import "Mocks/AMAModuleEntryPointDiscovererMock.h"
 
 @interface AMAAppMetricaImpl ()
 
 @property (nonatomic, strong, readonly) AMAEnvironmentContainer *eventEnvironment;
+@property (nonatomic, strong, readonly) AMAAdProviderProxy *adProviderProxy;
+@property (nonatomic, strong, readonly) AMAModulesController *modulesController;
 
 - (void)shutdown;
+- (void)initializeModulesController;
+- (void)addAdditionalStartupParameters:(NSDictionary *)parameters;
+- (void)applyModuleAdProvider:(nullable id<AMAAdProviding>)moduleAdProvider;
 
 @end
 
 @interface AMAAppMetricaImplStub ()
 
 @property (nonatomic, strong, readonly) AMAReporterTestHelper *reporterTestHelper;
+@property (nonatomic, strong) AMAAdProviderProxy *stubbedAdProviderProxy;
+@property (nonatomic, strong) AMAModulesController *stubbedModulesController;
+@property (nonatomic, strong, readwrite) AMAModuleEntryPointDiscovererMock *moduleEntryPointDiscoverer;
 
 @end
 
@@ -32,8 +43,45 @@
                                    executor:executor];
     if (self != nil) {
         _reporterTestHelper = reporterTestHelper;
+        _stubbedAdProviderProxy = [super adProviderProxy];
     }
     return self;
+}
+
+- (AMAAdProviderProxy *)adProviderProxy
+{
+    return self.stubbedAdProviderProxy;
+}
+
+- (void)initializeModulesController
+{
+    self.moduleEntryPointDiscoverer = [[AMAModuleEntryPointDiscovererMock alloc] init];
+    __weak typeof(self) weakSelf = self;
+    AMAModulesController *modulesController = [[AMAModulesController alloc]
+        initWithExecutor:self.executor
+        discoverer:self.moduleEntryPointDiscoverer
+        registrationCoordinator:nil
+        startupParametersHandler:nil];
+    modulesController.startupParametersHandler = ^(NSDictionary *parameters) {
+        [weakSelf addAdditionalStartupParameters:parameters];
+    };
+    self.stubbedModulesController = modulesController;
+    [modulesController startLoading];
+}
+
+- (AMAModulesController *)modulesController
+{
+    return self.stubbedModulesController;
+}
+
+- (void)setModulesController:(AMAModulesController *)modulesController
+{
+    self.stubbedModulesController = modulesController;
+}
+
+- (void)setAdProviderProxy:(AMAAdProviderProxy *)adProviderProxy
+{
+    self.stubbedAdProviderProxy = adProviderProxy;
 }
 
 - (void)dealloc
@@ -137,4 +185,3 @@
 }
 
 @end
-

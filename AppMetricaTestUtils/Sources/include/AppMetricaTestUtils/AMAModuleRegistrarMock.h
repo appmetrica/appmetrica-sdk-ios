@@ -5,19 +5,21 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface AMAModuleContextMock : NSObject <AMAModuleContext>
+@interface AMAModuleRegistrarMock : NSObject <AMAModuleRegistrar>
 
+@property (nonatomic, strong, readonly) NSMutableArray<id<AMAModulePreActivationHandler>> *preActivationHandlers;
 @property (nonatomic, strong, readonly) NSMutableArray<Class> *activationDelegates;
 @property (nonatomic, strong, readonly) NSMutableArray<Class> *eventPollingDelegates;
 @property (nonatomic, strong, readonly) NSMutableArray<Class> *eventFlushableDelegates;
 @property (nonatomic, strong, readonly) NSMutableArray<id<AMAAdProviding>> *adProviders;
 @property (nonatomic, strong, readonly) NSMutableArray<AMAServiceConfiguration *> *serviceConfigurations;
 
-@property (nonatomic, strong, readonly) XCTestExpectation *addActivationDelegateExpectation;
-@property (nonatomic, strong, readonly) XCTestExpectation *addEventPollingDelegateExpectation;
-@property (nonatomic, strong, readonly) XCTestExpectation *addEventFlushableDelegateExpectation;
+@property (nonatomic, strong, readonly) XCTestExpectation *registerPreActivationHandlerExpectation;
+@property (nonatomic, strong, readonly) XCTestExpectation *registerActivationDelegateExpectation;
+@property (nonatomic, strong, readonly) XCTestExpectation *registerEventPollingDelegateExpectation;
+@property (nonatomic, strong, readonly) XCTestExpectation *registerEventFlushableDelegateExpectation;
 @property (nonatomic, strong, readonly) XCTestExpectation *registerAdProviderExpectation;
-@property (nonatomic, strong, readonly) XCTestExpectation *registerExternalServiceExpectation;
+@property (nonatomic, strong, readonly) XCTestExpectation *registerServiceConfigurationExpectation;
 
 - (instancetype)initWithTestCase:(XCTestCase *)testCase;
 

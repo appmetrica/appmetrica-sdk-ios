@@ -1,5 +1,6 @@
 
 #import <AppMetricaKiwi/AppMetricaKiwi.h>
+#import <AppMetricaCoreExtension/AppMetricaCoreExtension.h>
 #import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
 #import <AppMetricaWebKit/AppMetricaWebKit.h>
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
@@ -36,8 +37,6 @@
 #import "AMAInternalEventsReporter.h"
 #import "AMALocationManager.h"
 #import "AMAMetricaConfigurationTestUtilities.h"
-#import "AMAModuleContextImpl.h"
-#import "AMAModuleContextMocks.h"
 #import "AMAModulesController.h"
 #import "AMAPermissionsController.h"
 #import "AMAProfileAttribute.h"
@@ -61,13 +60,19 @@
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
 #import "AMAAppMetricaConfiguration+JSONSerializable.h"
 #import "AMAAnonymousActivationPolicy.h"
+#import "AMAAdProviderProxy.h"
 #import "AMADataSendingRestrictionController.h"
+#import "AMAModulesController.h"
 #import "AMAReporterAutocollectedDataProvider.h"
+#import "Mocks/AMAAdProvidingMock.h"
+#import "Mocks/AMAAdProviderProxyMock.h"
+#import "Mocks/AMAModuleEntryPointDiscovererMock.h"
+#import "Mocks/AMAModuleRegistrarMocks.h"
 
 static NSString *apiKey = @"550e8400-e29b-41d4-a716-446655440000";
 static NSString *const anonymousApiKey = @"629a824d-c717-4ba5-bc0f-3f3968554d01";
 
-@interface AMAAppMetricaImpl ()
+@interface AMAAppMetricaImpl (AsyncModulesTests)
 @property (nonatomic, strong) AMAModulesController *modulesController;
 @end
 
@@ -78,7 +83,7 @@ static NSString *const anonymousApiKey = @"629a824d-c717-4ba5-bc0f-3f3968554d01"
 @property AMAReporterTestHelper *reporterTestHelper;
 @property AMAEventStorage *eventStorage;
 @property AMAEventStorage *anomymousEventStorage;
-@property AMAAppMetricaImpl *appMetricaImpl;
+@property AMAAppMetricaImplStub *appMetricaImpl;
 @property AMAStubHostAppStateProvider *hostStateProvider;
 @property AMAStartupController *startupController;
 @property AMAPermissionsController *permissionsController;
@@ -101,8 +106,17 @@ static NSString *const anonymousApiKey = @"629a824d-c717-4ba5-bc0f-3f3968554d01"
 
 @implementation AMAAppMetricaImplAsyncTests
 
+- (void)configureModuleRegistration:
+    (void (^)(id<AMAModuleRegistrar> registrar))registrationHandler
+{
+    AMAFakeEntryPoint *entryPoint = [[AMAFakeEntryPoint alloc] init];
+    entryPoint.registrationHandler = registrationHandler;
+    self.appMetricaImpl.moduleEntryPointDiscoverer.entryPoints = @[ entryPoint ];
+}
+
 - (void)setUp
 {
+    [AMAModuleActivationDelegateMock reset];
     [AMALocationManager stub:@selector(sharedManager)];
     self.configuration = [AMAAppMetricaConfiguration nullMock];
     [self.configuration stub:@selector(APIKey) andReturn:apiKey];
@@ -155,6 +169,7 @@ static NSString *const anonymousApiKey = @"629a824d-c717-4ba5-bc0f-3f3968554d01"
 
 - (void)tearDown
 {
+    [AMAModuleActivationDelegateMock reset];
     [AMAReporterStoragesContainer clearStubs];
     [AMAExternalAttributionController clearStubs];
     [AMAReporterAutocollectedDataProvider clearStubs];
@@ -178,6 +193,90 @@ static NSString *const anonymousApiKey = @"629a824d-c717-4ba5-bc0f-3f3968554d01"
     self.appMetricaImpl = nil;
 }
 
+- (void)testActivationRunsCoreSynchronouslyAndModuleLifecycleAfterDiscovery
+{
+    XCTAssertNotNil(self.appMetricaImpl.modulesController);
+    [self configureModuleRegistration:^(id<AMAModuleRegistrar> registrar) {
+        [registrar registerActivationDelegate:AMAModuleActivationDelegateMock.class];
+    }];
+
+    AMAAppMetricaConfiguration *configuration =
+        [[AMAAppMetricaConfiguration alloc] initWithAPIKey:apiKey];
+    [self.appMetricaImpl activateWithConfiguration:configuration];
+
+    XCTAssertNotNil(self.appMetricaImpl.mainReporter);
+    XCTAssertEqual([AMAModuleActivationDelegateMock willActivateCallCount], 0);
+    XCTAssertEqual([AMAModuleActivationDelegateMock didActivateCallCount], 0);
+
+    [self.executor execute];
+
+    XCTAssertEqual([AMAModuleActivationDelegateMock willActivateCallCount], 1);
+    XCTAssertEqual([AMAModuleActivationDelegateMock didActivateCallCount], 1);
+}
+
+- (void)testModuleAdProviderIsAppliedInsideQueuedPreActivationAfterDiscovery
+{
+    AMAAdProviderProxyMock *adProviderProxy = [AMAAdProviderProxyMock new];
+    self.appMetricaImpl.adProviderProxy = adProviderProxy;
+
+    id<AMAAdProviding> moduleAdProvider = [AMAAdProvidingMock new];
+    __block BOOL providerWasAppliedBeforeWill = NO;
+    [self configureModuleRegistration:^(id<AMAModuleRegistrar> registrar) {
+        [registrar registerAdProvider:moduleAdProvider];
+        [registrar registerActivationDelegate:AMAModuleActivationDelegateMock.class];
+    }];
+    AMAModuleActivationDelegateMock.willActivateHandler =
+        ^(__unused AMAModuleActivationConfiguration *configuration) {
+        providerWasAppliedBeforeWill = adProviderProxy.lastBackingProvider == moduleAdProvider;
+    };
+
+    AMAAppMetricaConfiguration *configuration =
+        [[AMAAppMetricaConfiguration alloc] initWithAPIKey:apiKey];
+    [self.appMetricaImpl activateWithConfiguration:configuration];
+
+    XCTAssertNil(adProviderProxy.lastBackingProvider);
+
+    [self.executor execute];
+
+    XCTAssertTrue(adProviderProxy.lastBackingProvider == moduleAdProvider);
+    XCTAssertEqual(adProviderProxy.setBackingProviderCallCount, 1u);
+    XCTAssertTrue(providerWasAppliedBeforeWill);
+}
+
+- (void)testAnonymousActivationAppliesModuleAdProviderBeforeWillCallback
+{
+    AMAAdProviderProxyMock *adProviderProxy = [AMAAdProviderProxyMock new];
+    self.appMetricaImpl.adProviderProxy = adProviderProxy;
+
+    id<AMAAdProviding> moduleAdProvider = [AMAAdProvidingMock new];
+    __block BOOL providerWasAppliedBeforeWill = NO;
+    [self configureModuleRegistration:^(id<AMAModuleRegistrar> registrar) {
+        [registrar registerAdProvider:moduleAdProvider];
+        [registrar registerActivationDelegate:AMAModuleActivationDelegateMock.class];
+    }];
+    AMAModuleActivationDelegateMock.willActivateHandler =
+        ^(__unused AMAModuleActivationConfiguration *configuration) {
+        providerWasAppliedBeforeWill = adProviderProxy.lastBackingProvider == moduleAdProvider;
+    };
+    AMAAppMetricaConfiguration *anonymousConfiguration =
+        [[AMAAppMetricaConfiguration alloc] initWithAPIKey:anonymousApiKey];
+    AMAAppMetricaConfigurationManager *configurationManager =
+        [AMAAppMetricaConfigurationManager nullMock];
+    [configurationManager stub:@selector(anonymousConfiguration)
+                     andReturn:anonymousConfiguration];
+    self.appMetricaImpl.configurationManager = configurationManager;
+
+    [self.appMetricaImpl activateAnonymously];
+
+    XCTAssertNil(adProviderProxy.lastBackingProvider);
+
+    [self.executor execute];
+
+    XCTAssertTrue(providerWasAppliedBeforeWill);
+    XCTAssertTrue(adProviderProxy.lastBackingProvider == moduleAdProvider);
+    XCTAssertEqual(adProviderProxy.setBackingProviderCallCount, 1u);
+}
+
 - (void)testInitializeMainReporter
 {
     AMAAppMetricaConfiguration *config = [[AMAAppMetricaConfiguration alloc] initWithAPIKey:apiKey];
@@ -185,8 +284,6 @@ static NSString *const anonymousApiKey = @"629a824d-c717-4ba5-bc0f-3f3968554d01"
 
     XCTAssertNotNil(self.appMetricaImpl.mainReporter);
     XCTAssertEqualObjects(self.appMetricaImpl.mainReporter.apiKey, apiKey);
-
-    [self.executor execute];
 }
 
 - (void)testReportEvent
@@ -196,37 +293,18 @@ static NSString *const anonymousApiKey = @"629a824d-c717-4ba5-bc0f-3f3968554d01"
 
     XCTAssertNotNil(self.appMetricaImpl.mainReporter);
 
-    XCTestExpectation *__block onFailureExpectation1 = [self expectationWithDescription:@"should not call onFailure"];
-    XCTestExpectation *__block onFailureExpectation2 = [self expectationWithDescription:@"should not call onFailure"];
+    XCTestExpectation *onFailureExpectation = [self expectationWithDescription:@"should not call onFailure"];
     
-    onFailureExpectation1.inverted = YES;
-    onFailureExpectation2.inverted = YES;
+    onFailureExpectation.inverted = YES;
     
     [self.appMetricaImpl reportEvent:@"test" parameters:@{} onFailure:^(NSError * _Nonnull error) {
-        [onFailureExpectation1 fulfill];
-        [onFailureExpectation2 fulfill];
+        [onFailureExpectation fulfill];
     }];
-    
-    [self waitForExpectations:@[onFailureExpectation1] timeout:2];
-        
-    [self.executor execute];
-    
-    [self waitForExpectations:@[onFailureExpectation2] timeout:1];
-}
 
-- (void)testActivationBeforeExecutorFlushNotifiesModules
-{
-    [AMAModuleActivationDelegateMock reset];
-    [self.appMetricaImpl.modulesController.context
-        addActivationDelegate:[AMAModuleActivationDelegateMock class]];
-
-    AMAAppMetricaConfiguration *config =
-        [[AMAAppMetricaConfiguration alloc] initWithAPIKey:apiKey];
-    [self.appMetricaImpl activateWithConfiguration:config];
     [self.executor execute];
 
-    XCTAssertEqual(AMAModuleActivationDelegateMock.willActivateCallCount, 1);
-    XCTAssertEqual(AMAModuleActivationDelegateMock.didActivateCallCount, 1);
+    XCTAssertNotNil(self.appMetricaImpl.mainReporter);
+    [self waitForExpectations:@[ onFailureExpectation ] timeout:1];
 }
 
 - (void)testSetUserProfileIDBeforeActivationAppliesWithoutFlushingExecutor
@@ -239,7 +317,7 @@ static NSString *const anonymousApiKey = @"629a824d-c717-4ba5-bc0f-3f3968554d01"
     XCTAssertEqualObjects(self.appMetricaImpl.userProfileID, profileID);
 }
 
-- (void)testSetUserProfileIDAfterActivationDoesNotRequireImplExecutorFlush
+- (void)testSetUserProfileIDImmediatelyAfterSynchronousActivationIsApplied
 {
     AMAAppMetricaConfiguration *config = [[AMAAppMetricaConfiguration alloc] initWithAPIKey:apiKey];
     [self.appMetricaImpl activateWithConfiguration:config];
@@ -248,6 +326,8 @@ static NSString *const anonymousApiKey = @"629a824d-c717-4ba5-bc0f-3f3968554d01"
     
     self.executor.executeNonDelayedBlocksImmediately = NO;
     [self.appMetricaImpl setUserProfileID:profileID];
+
+    [self.executor execute];
 
     AMAReporter *reporter = [self.reporterTestHelper appReporterForApiKey:apiKey];
 

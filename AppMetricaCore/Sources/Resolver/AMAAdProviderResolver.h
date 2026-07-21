@@ -1,17 +1,17 @@
 #import <Foundation/Foundation.h>
 #import "AMAResolver.h"
 
-@class AMAAdProvider;
+@class AMAAdProviderProxy;
 
 NS_ASSUME_NONNULL_BEGIN
 
 @interface AMAAdProviderResolver : AMAResolver
 
-@property (nonatomic, strong) AMAAdProvider *adProvider;
+@property (nonatomic, strong) AMAAdProviderProxy *adProviderProxy;
 
 - (instancetype)init NS_UNAVAILABLE;
 + (instancetype)new NS_UNAVAILABLE;
-- (instancetype)initWithAdProvider:(AMAAdProvider *)adProvider;
+- (instancetype)initWithAdProviderProxy:(AMAAdProviderProxy *)adProviderProxy;
 
 + (instancetype)sharedInstance;
 

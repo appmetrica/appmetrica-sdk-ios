@@ -3,9 +3,14 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+@class AMAModuleInvocationRecorder;
+
 @interface AMAEventPollingDelegateMock : NSObject <AMAEventPollingDelegate>
 
 @property (class, nonatomic, strong) NSArray<AMAEventPollingParameters *> *mockedEvents;
+@property (class, nonatomic, weak, nullable) AMAModuleInvocationRecorder *invocationRecorder;
+
++ (void)reset;
 
 @end
 

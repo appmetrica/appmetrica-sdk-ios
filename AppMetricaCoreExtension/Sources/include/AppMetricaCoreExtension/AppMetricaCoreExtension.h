@@ -11,7 +11,8 @@
     #import "AMAExtendedStartupObserving.h"
     #import "AMAModuleActivationConfiguration.h"
     #import "AMAModuleActivationDelegate.h"
-    #import "AMAModuleContext.h"
+    #import "AMAModulePreActivationHandler.h"
+    #import "AMAModuleRegistrar.h"
     #import "AMAModuleEntryPoint.h"
     #import "AMAReporterStorageControlling.h"
     #import "AMAServiceConfiguration.h"
@@ -30,7 +31,8 @@
     #import <AppMetricaCoreExtension/AMAExtendedStartupObserving.h>
     #import <AppMetricaCoreExtension/AMAModuleActivationConfiguration.h>
     #import <AppMetricaCoreExtension/AMAModuleActivationDelegate.h>
-    #import <AppMetricaCoreExtension/AMAModuleContext.h>
+    #import <AppMetricaCoreExtension/AMAModulePreActivationHandler.h>
+    #import <AppMetricaCoreExtension/AMAModuleRegistrar.h>
     #import <AppMetricaCoreExtension/AMAModuleEntryPoint.h>
     #import <AppMetricaCoreExtension/AMAReporterStorageControlling.h>
     #import <AppMetricaCoreExtension/AMAServiceConfiguration.h>

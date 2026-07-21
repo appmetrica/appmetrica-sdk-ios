@@ -14,7 +14,7 @@
 #import "AMAMetricaInMemoryConfiguration.h"
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
 #import <AppMetricaPlatform/AppMetricaPlatform.h>
-#import "AMAAdProvider.h"
+#import "AMAAdProviderProxy.h"
 #import "AMAPermissionResolving.h"
 #import "AMAAdProviderResolver.h"
 #import "AMAAppMetricaLibraryAdapterConfiguration.h"
@@ -38,7 +38,7 @@ describe(@"AMAAppMetricaConfigurationManager", ^{
     AMALocationManager *__block locationManager = nil;
     id<AMAPermissionResolvingInput> __block locationResolver = nil;
     
-    AMAAdProvider *__block adProvider = nil;
+    AMAAdProviderProxy *__block adProviderProxy = nil;
     AMAAdProviderResolver *__block adResolver = nil;
     
     
@@ -55,7 +55,7 @@ describe(@"AMAAppMetricaConfigurationManager", ^{
         locationManager = [AMALocationManager nullMock];
         locationResolver = [KWMock mockForProtocol:@protocol(AMAPermissionResolvingInput)];
         
-        adProvider = [AMAAdProvider nullMock];
+        adProviderProxy = [AMAAdProviderProxy nullMock];
         adResolver = [AMAAdProviderResolver nullMock];
         
         restrictionController = [AMADataSendingRestrictionController sharedInstance];

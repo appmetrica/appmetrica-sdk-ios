@@ -57,7 +57,7 @@
 #import "AMAExtrasContainer.h"
 #import "AMAPrivacyTimer.h"
 #import "AMAPrivacyTimerStorage.h"
-#import "AMAAdProvider.h"
+#import "AMAAdProviderProxy.h"
 #import "AMAPrivacyTimerStorageMock.h"
 #import "AMAIdentifiersTestUtilities.h"
 #import "AMAPrivacyTimer.h"
@@ -2101,7 +2101,7 @@ describe(@"AMAReporter", ^{
     context(@"Creating", ^{
         __block AMAReporter *reporter = nil;
         
-        __block AMAAdProvider *adProvider = nil;
+        __block AMAAdProviderProxy *adProviderProxy = nil;
         __block AMAReporterStorage *reporterStorage = nil;
         __block AMAEventBuilder *eventBuilder = nil;
         __block AMACurrentQueueExecutor *executor = nil;
@@ -2110,8 +2110,8 @@ describe(@"AMAReporter", ^{
         __block AMAPrivacyTimer *privacyTimer = nil;
         
         beforeEach(^{
-            adProvider = [AMAAdProvider nullMock];
-            [AMAAdProvider stub:@selector(sharedInstance) andReturn:adProvider];
+            adProviderProxy = [AMAAdProviderProxy nullMock];
+            [AMAAdProviderProxy stub:@selector(sharedInstance) andReturn:adProviderProxy];
             
             reporterStorage = [AMAReporterStorage nullMock];
             eventBuilder = [AMAEventBuilder nullMock];
@@ -2123,12 +2123,13 @@ describe(@"AMAReporter", ^{
             [AMAPrivacyTimerStorage stub:@selector(alloc) andReturn:privacyTimerStorage];
             
             privacyTimer = [AMAPrivacyTimer nullMock];
-            [privacyTimer stub:@selector(initWithTimerRetryPolicy:delegateExecutor:adProvider:) andReturn:privacyTimer];
+            [privacyTimer stub:@selector(initWithTimerRetryPolicy:delegateExecutor:adProviderProxy:)
+                     andReturn:privacyTimer];
             [AMAPrivacyTimer stub:@selector(alloc) andReturn:privacyTimer];
         });
         afterEach(^{
             [AMAPrivacyTimer clearStubs];
-            [AMAAdProvider clearStubs];
+            [AMAAdProviderProxy clearStubs];
             [AMAPlatformDescription clearStubs];
             [AMAPrivacyTimerStorage clearStubs];
             [AMAPrivacyTimer clearStubs];
@@ -2177,8 +2178,8 @@ describe(@"AMAReporter", ^{
             reporter = [reporterTestHelper appReporterForApiKey:apiKey];
             privacyStorageMock = [reporterTestHelper privacyTimerStorageMockForApiKey:apiKey];
             
-            AMAAdProvider *provider = [reporterTestHelper adProviderForApiKey:apiKey];
-            [provider stub:@selector(isAdvertisingTrackingEnabled) andReturn:theValue(YES)];
+            AMAAdProviderProxy *adProviderProxy = [reporterTestHelper adProviderProxyForApiKey:apiKey];
+            [adProviderProxy stub:@selector(isAdvertisingTrackingEnabled) andReturn:theValue(YES)];
             [AMAIdentifiersTestUtilities stubIdfaWithEnabled:YES value:newIDFA.UUIDString];
             
             id<AMADatabaseProtocol> db = [reporterTestHelper databaseForApiKey:apiKey];

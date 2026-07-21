@@ -9,6 +9,8 @@ typedef NSString *(*AMAIronSourceSDKVersionIMP)(Class, SEL);
 
 @interface AMAIronSourceModuleEntryPoint ()
 @property (nonatomic, strong) AMAInfoPlistPolicy *policy;
+@property (nonatomic) NSInteger detectedMajorVersion;
+@property (nonatomic) BOOL prepared;
 @end
 
 @implementation AMAIronSourceModuleEntryPoint
@@ -27,7 +29,7 @@ typedef NSString *(*AMAIronSourceSDKVersionIMP)(Class, SEL);
     return self;
 }
 
-- (void)initModuleWithContext:(id<AMAModuleContext>)context
+- (void)registerComponentsWithRegistrar:(id<AMAModuleRegistrar>)registrar
 {
     if (self.policy.isEnabled == NO) {
         AMAIronSourceLog(@"autocollection disabled via Info.plist, skipping");
@@ -43,13 +45,27 @@ typedef NSString *(*AMAIronSourceSDKVersionIMP)(Class, SEL);
     }
 
     AMAIronSourceLog(@"IronSource SDK v%ld detected, registering", (long)major);
-    [AMAAppMetrica registerAdRevenueNativeSource:@"ironsource"];
+    self.detectedMajorVersion = major;
+    [self registerNativeSource];
+    [registrar registerPreActivationHandler:self];
+    [registrar registerActivationDelegate:[AMAIronSourceManager class]];
+}
 
-    [[AMAIronSourceManager sharedInstance] setupWithMajorVersion:major];
-    [context addActivationDelegate:[AMAIronSourceManager class]];
+- (void)handlePreActivationWithConfiguration:(AMAModuleActivationConfiguration *)configuration
+{
+    if (self.prepared || self.detectedMajorVersion < 8) {
+        return;
+    }
+    self.prepared = YES;
+    [[AMAIronSourceManager sharedInstance] setupWithMajorVersion:self.detectedMajorVersion];
 }
 
 // MARK: - Private
+
+- (void)registerNativeSource
+{
+    [AMAAppMetrica registerAdRevenueNativeSource:@"ironsource"];
+}
 
 - (nullable NSString *)sdkVersionString
 {

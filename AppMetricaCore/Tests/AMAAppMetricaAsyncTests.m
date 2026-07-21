@@ -142,7 +142,7 @@ static NSString *const anonymousApiKey = @"629a824d-c717-4ba5-bc0f-3f3968554d01"
                                                                 reporterTestHelper:self.reporterTestHelper];
     [AMAAppMetrica stub:@selector(sharedImpl) andReturn:self.appMetricaImpl];
     
-    id<AMAAsyncExecuting>executor = [AMACurrentQueueExecutor new];
+    id<AMAAsyncExecuting, AMASyncExecuting> executor = [AMACurrentQueueExecutor new];
     [AMAAppMetrica stub:@selector(sharedExecutor) andReturn:executor];
     [AMAAppMetrica stub:@selector(sharedInternalEventsReporter) andReturn:self.internalEventsReporter];
     
@@ -180,28 +180,25 @@ static NSString *const anonymousApiKey = @"629a824d-c717-4ba5-bc0f-3f3968554d01"
     self.appMetricaImpl = nil;
 }
 
-- (void)testInitializeMainReporter
+- (void)testEventImmediatelyAfterSynchronousActivationIsAccepted
 {
     AMAAppMetricaConfiguration *config = [[AMAAppMetricaConfiguration alloc] initWithAPIKey:apiKey];
-    
+
     [AMAAppMetricaMock activateWithConfiguration:config];
+
+    XCTAssertTrue([AMAAppMetricaMock isActivatedAsMain]);
+    XCTAssertNotNil(self.appMetricaImpl.mainReporter);
     
-    XCTestExpectation *failureExpectation1 = [self expectationWithDescription:@"should not be called 1"];
-    failureExpectation1.inverted = YES;
-    
-    XCTestExpectation *failureExpectation2 = [self expectationWithDescription:@"should not be called 2"];
-    failureExpectation2.inverted = YES;
+    XCTestExpectation *failureExpectation = [self expectationWithDescription:@"should not be called"];
+    failureExpectation.inverted = YES;
     
     [AMAAppMetricaMock reportEvent:@"test" onFailure:^(NSError * _Nonnull error) {
-        [failureExpectation1 fulfill];
-        [failureExpectation2 fulfill];
+        [failureExpectation fulfill];
     }];
-    
-    [self waitForExpectations:@[failureExpectation1] timeout:2];
-    
+
     [self.executor execute];
-    
-    [self waitForExpectations:@[failureExpectation2] timeout:2];
+
+    [self waitForExpectations:@[ failureExpectation ] timeout:1];
 }
 
 @end

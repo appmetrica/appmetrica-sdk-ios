@@ -45,6 +45,7 @@ static NSString *const kAMAExternalNotifyTransactionID = @"ExternalCrashNotifyRe
     if (provider == nil) {
         return;
     }
+
     [self.executor execute:^{
         [self.providers addObject:provider];
 
@@ -90,6 +91,11 @@ static NSString *const kAMAExternalNotifyTransactionID = @"ExternalCrashNotifyRe
     if ([provider respondsToSelector:@selector(pendingCrashReports)] == NO) {
         return;
     }
+
+    id<AMACrashLoaderDelegate> delegate = self.delegate;
+    if (delegate == nil) {
+        return;
+    }
     
     NSArray<AMACrashEvent *> *reports = [provider pendingCrashReports];
     if (reports.count == 0) {
@@ -106,7 +112,7 @@ static NSString *const kAMAExternalNotifyTransactionID = @"ExternalCrashNotifyRe
                                              name:transactionName
                                       transaction:^{
             AMADecodedCrash *decoded = [self.converter decodedCrashFromCrashEvent:report];
-            [self.delegate crashLoader:self didLoadCrash:decoded withError:nil];
+            [delegate crashLoader:self didLoadCrash:decoded withError:nil];
             [processedReports addObject:report];
         }];
     }
@@ -118,6 +124,11 @@ static NSString *const kAMAExternalNotifyTransactionID = @"ExternalCrashNotifyRe
         fromProvider:(id<AMACrashProviding>)provider
                isANR:(BOOL)isANR
 {
+    id<AMACrashLoaderDelegate> delegate = self.delegate;
+    if (delegate == nil) {
+        return;
+    }
+
     NSString *identifier = event.info.identifier ?: [[NSUUID UUID] UUIDString];
     NSString *transactionName = [NSString stringWithFormat:@"NotifyReport_%@", identifier];
 
@@ -127,10 +138,10 @@ static NSString *const kAMAExternalNotifyTransactionID = @"ExternalCrashNotifyRe
                                   transaction:^{
         AMADecodedCrash *decoded = [self.converter decodedCrashFromCrashEvent:event];
         if (isANR == YES) {
-            [self.delegate crashLoader:self didLoadANR:decoded withError:nil];
+            [delegate crashLoader:self didLoadANR:decoded withError:nil];
         }
         else {
-            [self.delegate crashLoader:self didLoadCrash:decoded withError:nil];
+            [delegate crashLoader:self didLoadCrash:decoded withError:nil];
         }
         processed = YES;
     }];

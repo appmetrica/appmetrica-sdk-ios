@@ -8,7 +8,7 @@
 @class AMAAppMetricaPreloadInfo;
 @class AMAPrivacyTimerStorageMock;
 @class AMAPrivacyTimer;
-@class AMAAdProvider;
+@class AMAAdProviderProxy;
 @class AMAAdRevenueSourceContainerMock;
 @protocol AMACancelableExecuting;
 @protocol AMADatabaseProtocol;
@@ -56,7 +56,7 @@
 - (NSObject<AMADatabaseProtocol> *)databaseForApiKey:(NSString *)apiKey;
 - (AMAPrivacyTimerStorageMock *)privacyTimerStorageMockForApiKey:(NSString *)apiKey;
 - (AMAPrivacyTimer *)privacyTimerForApiKey:(NSString *)apiKey;
-- (AMAAdProvider *)adProviderForApiKey:(NSString*)apiKey;
+- (AMAAdProviderProxy *)adProviderProxyForApiKey:(NSString *)apiKey;
 - (AMAAdRevenueSourceContainerMock *)adRevenueSourceStorageForApiKey:(NSString*)apiKey;
 
 - (void)initReporterAndSendEventWithParameters:(NSDictionary *)parameters;

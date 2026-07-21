@@ -1,217 +1,203 @@
-
 #import <XCTest/XCTest.h>
 #import "AMAModulesController.h"
-#import "AMAModuleContextImpl.h"
-#import "AMACoreModuleComponentsInitializer.h"
 #import <AppMetricaCoreExtension/AppMetricaCoreExtension.h>
-#import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
-#import "Mocks/AMAModuleContextMocks.h"
-
-// MARK: - Tests
+#import "Mocks/AMAAdProvidingMock.h"
+#import "Mocks/AMAModuleEntryPointDiscovererMock.h"
+#import "Mocks/AMAModuleRegistrarMocks.h"
 
 @interface AMAModulesControllerTests : XCTestCase
 @property (nonatomic, strong) AMAModulesController *controller;
+@property (nonatomic, strong) AMAModuleEntryPointDiscovererMock *discoverer;
 @end
 
 @implementation AMAModulesControllerTests
 
+static NSString *const kAMATestAPIKey = @"550e8400-e29b-41d4-a716-446655440000";
+
 - (void)setUp
 {
-    [AMACoreModuleComponentsInitializer stub:@selector(discoverAndRegisterInController:classLookup:)];
-    AMACurrentQueueExecutor *executor = [AMACurrentQueueExecutor new];
-    self.controller = [[AMAModulesController alloc] initWithExecutor:executor
-                                              startupParametersHandler:nil];
+    [super setUp];
+    AMACurrentQueueExecutor *executor = [[AMACurrentQueueExecutor alloc] init];
+    self.discoverer = [[AMAModuleEntryPointDiscovererMock alloc] init];
+    self.controller = [[AMAModulesController alloc]
+        initWithExecutor:executor
+        discoverer:self.discoverer
+        registrationCoordinator:nil
+        startupParametersHandler:nil];
     [AMAModuleActivationDelegateMock reset];
     [AMAEventFlushableDelegateMock reset];
 }
 
 - (void)tearDown
 {
-    [AMACoreModuleComponentsInitializer clearStubs];
+    [AMAModuleActivationDelegateMock reset];
+    [AMAEventFlushableDelegateMock reset];
+    self.discoverer = nil;
+    self.controller = nil;
+    [super tearDown];
 }
 
-// MARK: - Initial state
-
-- (void)testContext_notNilAfterInit
+- (AMAFakeEntryPoint *)entryPointRegistering:
+    (void (^)(id<AMAModuleRegistrar> registrar))registrationHandler
 {
-    XCTAssertNotNil(self.controller.context);
+    AMAFakeEntryPoint *entryPoint = [[AMAFakeEntryPoint alloc] init];
+    entryPoint.registrationHandler = registrationHandler;
+    self.discoverer.entryPoints = @[ entryPoint ];
+    return entryPoint;
 }
 
-- (void)testAdProvider_nilWhenNotRegistered
+- (void)testStartLoadingDiscoversEntryPointsRegistersComponentsAndPublishesOnlyOnce
 {
-    XCTAssertNil(self.controller.adProvider);
+    AMAFakeEntryPoint *entryPoint = [self entryPointRegistering:nil];
+
+    [self.controller startLoading];
+    [self.controller startLoading];
+
+    XCTAssertEqual(self.discoverer.discoverCallCount, 1u);
+    XCTAssertEqual(entryPoint.registrationCallCount, 1);
+    XCTAssertNotNil(entryPoint.receivedRegistrar);
 }
 
-// MARK: - registerModule
-
-- (void)testRegisterModule_callsInitModuleWithContext
+- (void)testFailingEntryPointDoesNotPreventFollowingEntryPointRegistration
 {
-    AMAFakeEntryPoint *ep = [AMAFakeEntryPoint new];
-    [self.controller registerModule:ep];
-    XCTAssertEqual(ep.initCallCount, 1);
+    AMAFakeEntryPoint *failingEntryPoint = [[AMAFakeEntryPoint alloc] init];
+    failingEntryPoint.registrationHandler = ^(__unused id<AMAModuleRegistrar> registrar) {
+        @throw [NSException exceptionWithName:@"test"
+                                       reason:@"expected registration failure"
+                                     userInfo:nil];
+    };
+    AMAFakeEntryPoint *followingEntryPoint = [[AMAFakeEntryPoint alloc] init];
+    followingEntryPoint.registrationHandler = ^(id<AMAModuleRegistrar> registrar) {
+        [registrar registerActivationDelegate:AMAModuleActivationDelegateMock.class];
+    };
+    self.discoverer.entryPoints = @[ failingEntryPoint, followingEntryPoint ];
+
+    [self.controller startLoading];
+    [self.controller performActivationWithAppMetricaConfiguration:
+        [[AMAAppMetricaConfiguration alloc] initWithAPIKey:kAMATestAPIKey]
+                                                  activationBlock:nil];
+
+    XCTAssertEqual(failingEntryPoint.registrationCallCount, 1);
+    XCTAssertEqual(followingEntryPoint.registrationCallCount, 1);
+    XCTAssertEqual(AMAModuleActivationDelegateMock.willActivateCallCount, 1);
+    XCTAssertEqual(AMAModuleActivationDelegateMock.didActivateCallCount, 1);
 }
 
-- (void)testRegisterModule_passesControllerContext
+- (void)testActivationAndFlushCallbacksAreRoutedFromPublishedRegistry
 {
-    AMAFakeEntryPoint *ep = [AMAFakeEntryPoint new];
-    [self.controller registerModule:ep];
-    XCTAssertTrue(ep.receivedContext == self.controller.context);
+    [self entryPointRegistering:^(id<AMAModuleRegistrar> registrar) {
+        [registrar registerActivationDelegate:AMAModuleActivationDelegateMock.class];
+        [registrar registerEventFlushableDelegate:AMAEventFlushableDelegateMock.class];
+    }];
+    AMAAppMetricaConfiguration *configuration =
+        [[AMAAppMetricaConfiguration alloc] initWithAPIKey:kAMATestAPIKey];
+
+    [self.controller startLoading];
+    [self.controller performActivationWithAppMetricaConfiguration:configuration activationBlock:nil];
+    [self.controller notifySendEventsBuffer];
+
+    XCTAssertEqual(AMAModuleActivationDelegateMock.willActivateCallCount, 1);
+    XCTAssertEqual(AMAModuleActivationDelegateMock.didActivateCallCount, 1);
+    XCTAssertEqualObjects(AMAModuleActivationDelegateMock.lastConfiguration.apiKey, configuration.APIKey);
+    XCTAssertEqual(AMAEventFlushableDelegateMock.sendEventsBufferCallCount, 1);
 }
 
-- (void)testRegisterMultipleModules_allInitialized
+- (void)testActivationCreatesModuleConfigurationSnapshot
 {
-    AMAFakeEntryPoint *ep1 = [AMAFakeEntryPoint new];
-    AMAFakeEntryPoint *ep2 = [AMAFakeEntryPoint new];
-    [self.controller registerModule:ep1];
-    [self.controller registerModule:ep2];
-    XCTAssertEqual(ep1.initCallCount, 1);
-    XCTAssertEqual(ep2.initCallCount, 1);
+    AMAModulePreActivationHandlerMock *handler = [[AMAModulePreActivationHandlerMock alloc] init];
+    [self entryPointRegistering:^(id<AMAModuleRegistrar> registrar) {
+        [registrar registerPreActivationHandler:handler];
+        [registrar registerActivationDelegate:AMAModuleActivationDelegateMock.class];
+    }];
+    __block AMAModuleActivationConfiguration *preActivationConfiguration = nil;
+    __block AMAModuleActivationConfiguration *willConfiguration = nil;
+    __block AMAModuleActivationConfiguration *didConfiguration = nil;
+    handler.preActivationBlock = ^(AMAModuleActivationConfiguration *configuration) {
+        preActivationConfiguration = configuration;
+    };
+    AMAModuleActivationDelegateMock.willActivateHandler = ^(AMAModuleActivationConfiguration *configuration) {
+        willConfiguration = configuration;
+    };
+    AMAModuleActivationDelegateMock.didActivateHandler = ^(AMAModuleActivationConfiguration *configuration) {
+        didConfiguration = configuration;
+    };
+    AMAAppMetricaConfiguration *configuration =
+        [[AMAAppMetricaConfiguration alloc] initWithAPIKey:kAMATestAPIKey];
+    configuration.appVersion = @"1.2.3";
+    configuration.appBuildNumber = @"42";
+
+    [self.controller startLoading];
+    [self.controller performActivationWithAppMetricaConfiguration:configuration
+                                                  activationBlock:^{
+        configuration.appVersion = @"changed";
+        configuration.appBuildNumber = @"43";
+    }];
+
+    XCTAssertTrue(preActivationConfiguration == willConfiguration);
+    XCTAssertTrue(willConfiguration == didConfiguration);
+    XCTAssertEqualObjects(didConfiguration.apiKey, kAMATestAPIKey);
+    XCTAssertEqualObjects(didConfiguration.appVersion, @"1.2.3");
+    XCTAssertEqualObjects(didConfiguration.appBuildNumber, @"42");
 }
 
-// MARK: - notifyWillActivateWithConfiguration
-
-- (void)testNotifyWillActivate_notifiesActivationDelegates
+- (void)testStartupCallbacksAndInitialParametersAreRoutedFromPublishedRegistry
 {
-    [self.controller.context addActivationDelegate:[AMAModuleActivationDelegateMock class]];
-    AMAModuleActivationConfiguration *config =
-        [[AMAModuleActivationConfiguration alloc] initWithApiKey:@"test-key"];
-    [self.controller notifyWillActivateWithConfiguration:config];
-    XCTAssertEqual([AMAModuleActivationDelegateMock willActivateCallCount], 1);
-}
-
-- (void)testNotifyWillActivate_passesConfiguration
-{
-    [self.controller.context addActivationDelegate:[AMAModuleActivationDelegateMock class]];
-    AMAModuleActivationConfiguration *config =
-        [[AMAModuleActivationConfiguration alloc] initWithApiKey:@"test-key"];
-    [self.controller notifyWillActivateWithConfiguration:config];
-    XCTAssertEqualObjects([AMAModuleActivationDelegateMock lastConfiguration], config);
-}
-
-// MARK: - notifyDidActivateWithConfiguration
-
-- (void)testNotifyDidActivate_notifiesActivationDelegates
-{
-    [self.controller.context addActivationDelegate:[AMAModuleActivationDelegateMock class]];
-    AMAModuleActivationConfiguration *config =
-        [[AMAModuleActivationConfiguration alloc] initWithApiKey:@"test-key"];
-    [self.controller notifyDidActivateWithConfiguration:config];
-    XCTAssertEqual([AMAModuleActivationDelegateMock didActivateCallCount], 1);
-}
-
-// MARK: - Startup observers
-
-- (void)testNotifyStartupUpdated_callsObservers
-{
-    AMAExtendedStartupObservingMock *obs = [AMAExtendedStartupObservingMock new];
-    [self.controller.context registerExternalService:[[AMAServiceConfiguration alloc]
-        initWithStartupObserver:obs reporterStorageController:nil]];
-
-    [self.controller notifyStartupUpdatedWithParameters:@{@"k": @"v"}];
-
-    XCTAssertEqual(obs.updatedCallCount, 1);
-    XCTAssertEqualObjects(obs.lastParameters[@"k"], @"v");
-}
-
-- (void)testNotifyStartupFailed_callsObservers
-{
-    AMAExtendedStartupObservingMock *obs = [AMAExtendedStartupObservingMock new];
-    [self.controller.context registerExternalService:[[AMAServiceConfiguration alloc]
-        initWithStartupObserver:obs reporterStorageController:nil]];
-
+    AMAExtendedStartupObservingMock *observer = [[AMAExtendedStartupObservingMock alloc] init];
+    observer.stubbedStartupParameters = @{ @"initial" : @"value" };
+    [self entryPointRegistering:^(id<AMAModuleRegistrar> registrar) {
+        [registrar registerServiceConfiguration:[[AMAServiceConfiguration alloc]
+            initWithStartupObserver:observer reporterStorageController:nil]];
+    }];
+    NSMutableArray<NSDictionary *> *initialParameters = [NSMutableArray array];
+    self.controller.startupParametersHandler = ^(NSDictionary *parameters) {
+        [initialParameters addObject:parameters];
+    };
     NSError *error = [NSError errorWithDomain:@"test" code:42 userInfo:nil];
+
+    [self.controller startLoading];
+    [self.controller notifyStartupUpdatedWithParameters:@{ @"updated" : @"value" }];
     [self.controller notifyStartupFailedWithError:error];
 
-    XCTAssertEqual(obs.failedCallCount, 1);
-    XCTAssertEqualObjects(obs.lastError, error);
+    XCTAssertEqual(observer.setupCallCount, 1);
+    XCTAssertEqual(observer.updatedCallCount, 1);
+    XCTAssertEqual(observer.failedCallCount, 1);
+    XCTAssertEqualObjects(observer.lastParameters, (@{ @"updated" : @"value" }));
+    XCTAssertEqualObjects(observer.lastError, error);
+    XCTAssertEqualObjects(initialParameters, (@[ @{ @"initial" : @"value" } ]));
 }
 
-// MARK: - startupParametersHandler
-
-- (void)testStartupParametersHandler_calledWithObserverParameters
+- (void)testReporterStorageControllerIsRoutedFromPublishedRegistry
 {
-    AMAExtendedStartupObservingMock *obs = [AMAExtendedStartupObservingMock new];
-    obs.stubbedStartupParameters = @{@"p": @"v"};
-    [self.controller.context registerExternalService:[[AMAServiceConfiguration alloc]
-        initWithStartupObserver:obs reporterStorageController:nil]];
+    AMAReporterStorageControllingMock *storageController =
+        [[AMAReporterStorageControllingMock alloc] init];
+    [self entryPointRegistering:^(id<AMAModuleRegistrar> registrar) {
+        [registrar registerServiceConfiguration:[[AMAServiceConfiguration alloc]
+            initWithStartupObserver:nil reporterStorageController:storageController]];
+    }];
 
-    NSMutableArray *received = [NSMutableArray array];
-    self.controller.startupParametersHandler = ^(NSDictionary *params) {
-        [received addObject:params];
-    };
-    [self.controller ensureLoaded];
+    [self.controller startLoading];
+    [self.controller setupReporterStorageWithProvider:(id<AMAKeyValueStorageProviding>)[NSObject new]
+                                                 main:YES
+                                               apiKey:@"test-key"];
 
-    XCTAssertEqual(received.count, 1u);
-    XCTAssertEqualObjects(received.firstObject[@"p"], @"v");
+    XCTAssertEqual(storageController.setupCallCount, 1);
 }
 
-- (void)testStartupParametersHandler_notCalledForEmptyParameters
+- (void)testAdProviderIsResolvedOnlyAfterEntryPointRegistration
 {
-    AMAExtendedStartupObservingMock *obs = [AMAExtendedStartupObservingMock new];
-    [self.controller.context registerExternalService:[[AMAServiceConfiguration alloc]
-        initWithStartupObserver:obs reporterStorageController:nil]];
+    AMAAdProvidingMock *provider = [[AMAAdProvidingMock alloc] init];
+    [self entryPointRegistering:^(id<AMAModuleRegistrar> registrar) {
+        [registrar registerAdProvider:provider];
+    }];
+    __block id<AMAAdProviding> resolvedProvider = nil;
 
-    __block NSInteger callCount = 0;
-    self.controller.startupParametersHandler = ^(NSDictionary *params) { callCount++; };
-    [self.controller ensureLoaded];
+    [self.controller startLoading];
+    [self.controller resolveModuleAdProviderWithHandler:^(id<AMAAdProviding> moduleAdProvider) {
+        resolvedProvider = moduleAdProvider;
+    }];
 
-    XCTAssertEqual(callCount, 0);
-}
-
-- (void)testStartupParametersHandler_calledPerObserverWithParameters
-{
-    AMAExtendedStartupObservingMock *obs1 = [AMAExtendedStartupObservingMock new];
-    obs1.stubbedStartupParameters = @{@"a": @"1"};
-    AMAExtendedStartupObservingMock *obs2 = [AMAExtendedStartupObservingMock new];
-    obs2.stubbedStartupParameters = @{@"b": @"2"};
-
-    [self.controller.context registerExternalService:[[AMAServiceConfiguration alloc]
-        initWithStartupObserver:obs1 reporterStorageController:nil]];
-    [self.controller.context registerExternalService:[[AMAServiceConfiguration alloc]
-        initWithStartupObserver:obs2 reporterStorageController:nil]];
-
-    __block NSInteger callCount = 0;
-    self.controller.startupParametersHandler = ^(NSDictionary *params) { callCount++; };
-    [self.controller ensureLoaded];
-
-    XCTAssertEqual(callCount, 2);
-}
-
-// MARK: - Reporter storage
-
-- (void)testSetupReporterStorage_callsStorageControllers
-{
-    AMAReporterStorageControllingMock *ctrl = [AMAReporterStorageControllingMock new];
-    [self.controller.context registerExternalService:[[AMAServiceConfiguration alloc]
-        initWithStartupObserver:nil reporterStorageController:ctrl]];
-
-    [self.controller setupReporterStorageWithProvider:nil main:YES apiKey:@"key"];
-
-    XCTAssertEqual(ctrl.setupCallCount, 1);
-}
-
-// MARK: - Event flushing
-
-- (void)testNotifySendEventsBuffer_callsFlushableDelegates
-{
-    [self.controller.context addEventFlushableDelegate:[AMAEventFlushableDelegateMock class]];
-    [self.controller notifySendEventsBuffer];
-    XCTAssertEqual([AMAEventFlushableDelegateMock sendEventsBufferCallCount], 1);
-}
-
-// MARK: - ensureLoaded
-
-- (void)testEnsureLoaded_isIdempotent
-{
-    AMAFakeEntryPoint *ep = [AMAFakeEntryPoint new];
-    [self.controller registerModule:ep];
-    NSInteger countAfterRegister = ep.initCallCount;
-
-    [self.controller ensureLoaded];
-    [self.controller ensureLoaded];
-
-    XCTAssertEqual(ep.initCallCount, countAfterRegister);
+    XCTAssertTrue(resolvedProvider == provider);
 }
 
 @end

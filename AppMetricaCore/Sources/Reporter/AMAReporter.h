@@ -17,7 +17,7 @@
 @protocol AMAAsyncExecuting;
 @class AMASessionExpirationHandler;
 @class AMACustomEventParameters;
-@class AMAAdProvider;
+@class AMAAdProviderProxy;
 @class AMAPrivacyTimer;
 @class AMAExternalAttributionSerializer;
 @protocol AMAAdRevenueSourceStorable;
@@ -66,7 +66,7 @@
                     adServices:(AMAAdServicesDataProvider *)adServices
  externalAttributionSerializer:(AMAExternalAttributionSerializer *)externalAttributionSerializer
       sessionExpirationHandler:(AMASessionExpirationHandler *)sessionExpirationHandler
-                    adProvider:(AMAAdProvider *)adProvider
+               adProviderProxy:(AMAAdProviderProxy *)adProviderProxy
                   privacyTimer:(AMAPrivacyTimer *)privacyTimer
         adRevenueSourceStorage:(id<AMAAdRevenueSourceStorable>)adRevenueSourceStorage;
 

@@ -1,13 +1,13 @@
 
 #import "AMAPrivacyTimer.h"
-#import "AMAAdProvider.h"
+#import "AMAAdProviderProxy.h"
 #import "AMAPrivacyTimerRetryPolicy.h"
 #import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
 
 @interface AMAPrivacyTimer () <AMAMultiTimerDelegate>
 
 @property (nonnull, readonly) id<AMACancelableExecuting> executor;
-@property (nonnull, readonly) AMAAdProvider *adProvider;
+@property (nonnull, readonly) AMAAdProviderProxy *adProviderProxy;
 
 @property (nonnull, readonly) id<AMAAsyncExecuting> delegateExecutor;
 
@@ -25,24 +25,24 @@
 
 - (instancetype)initWithTimerRetryPolicy:(id<AMAPrivacyTimerRetryPolicy>)retryPolicy
                         delegateExecutor:(id<AMAAsyncExecuting>)delegateExecutor
-                              adProvider:(AMAAdProvider*)adProvider
+                          adProviderProxy:(AMAAdProviderProxy *)adProviderProxy
 {
     AMACancelableDelayedExecutor *executor = [[AMACancelableDelayedExecutor alloc] initWithIdentifier:self];
     return [self initWithTimerRetryPolicy:retryPolicy
                                  executor:executor
                          delegateExecutor:delegateExecutor
-                               adProvider:adProvider];
+                          adProviderProxy:adProviderProxy];
 }
 
 - (instancetype)initWithTimerRetryPolicy:(id<AMAPrivacyTimerRetryPolicy>)retryPolicy
                                 executor:(id<AMACancelableExecuting>)executor
                         delegateExecutor:(id<AMAAsyncExecuting>)delegateExecutor
-                              adProvider:(AMAAdProvider *)adProvider
+                          adProviderProxy:(AMAAdProviderProxy *)adProviderProxy
 {
     self = [super init];
     if (self) {
         _timerStorage = retryPolicy;
-        _adProvider = adProvider;
+        _adProviderProxy = adProviderProxy;
         _executor = executor;
         _delegateExecutor = delegateExecutor;
     }
@@ -60,7 +60,7 @@
         return;
     }
     
-    if (self.adProvider.isAdvertisingTrackingEnabled) {
+    if (self.adProviderProxy.isAdvertisingTrackingEnabled) {
         [self fireEvent];
     }
     else {
@@ -129,7 +129,7 @@
         return;
     }
     
-    BOOL isNeedFire = [self.adProvider isAdvertisingTrackingEnabled];
+    BOOL isNeedFire = [self.adProviderProxy isAdvertisingTrackingEnabled];
     
     if (isNeedFire) {
         [self invalidateTimer];

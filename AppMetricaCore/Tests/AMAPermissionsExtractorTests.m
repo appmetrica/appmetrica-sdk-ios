@@ -4,7 +4,7 @@
 #import "AMACore.h"
 #import "AMAPermissionsExtractor.h"
 #import "AMAPermission.h"
-#import "AMAAdProvider.h"
+#import "AMAAdProviderProxy.h"
 
 SPEC_BEGIN(AMAPermissionsExtractorTests)
 
@@ -17,7 +17,7 @@ describe(@"AMAPermissionsExtractor", ^{
     });
     afterEach(^{
         [CLLocationManager clearStubs];
-        [[AMAAdProvider sharedInstance] clearStubs];
+        [[AMAAdProviderProxy sharedInstance] clearStubs];
     });
 
     AMAPermission *__block permission = nil;
@@ -236,7 +236,7 @@ describe(@"AMAPermissionsExtractor", ^{
         if (@available(iOS 14.0, tvOS 14.0, *)) {
             context(@"Authorized", ^{
                 beforeEach(^{
-                    [[AMAAdProvider sharedInstance] stub:@selector(ATTStatus)
+                    [[AMAAdProviderProxy sharedInstance] stub:@selector(ATTStatus)
                                                andReturn:theValue(AMATrackingManagerAuthorizationStatusAuthorized)];
                     permission = [extractor permissionsForKeys:@[ kAMAPermissionKeyATTStatus ]].firstObject;
                 });
@@ -252,7 +252,7 @@ describe(@"AMAPermissionsExtractor", ^{
             });
             context(@"Denied", ^{
                 beforeEach(^{
-                    [[AMAAdProvider sharedInstance] stub:@selector(ATTStatus) andReturn:theValue(AMATrackingManagerAuthorizationStatusDenied)];
+                    [[AMAAdProviderProxy sharedInstance] stub:@selector(ATTStatus) andReturn:theValue(AMATrackingManagerAuthorizationStatusDenied)];
                     permission = [extractor permissionsForKeys:@[ kAMAPermissionKeyATTStatus ]].firstObject;
                 });
                 it(@"Should have `denied` type", ^{
@@ -267,7 +267,7 @@ describe(@"AMAPermissionsExtractor", ^{
             });
             context(@"Restricted", ^{
                 beforeEach(^{
-                    [[AMAAdProvider sharedInstance] stub:@selector(ATTStatus)
+                    [[AMAAdProviderProxy sharedInstance] stub:@selector(ATTStatus)
                                                andReturn:theValue(AMATrackingManagerAuthorizationStatusRestricted)];
                     permission = [extractor permissionsForKeys:@[ kAMAPermissionKeyATTStatus ]].firstObject;
                 });
@@ -283,7 +283,7 @@ describe(@"AMAPermissionsExtractor", ^{
             });
             context(@"Not determined", ^{
                 beforeEach(^{
-                    [[AMAAdProvider sharedInstance] stub:@selector(ATTStatus)
+                    [[AMAAdProviderProxy sharedInstance] stub:@selector(ATTStatus)
                                                andReturn:theValue(AMATrackingManagerAuthorizationStatusNotDetermined)];
                     permission = [extractor permissionsForKeys:@[ kAMAPermissionKeyATTStatus ]].firstObject;
                 });
@@ -299,7 +299,7 @@ describe(@"AMAPermissionsExtractor", ^{
             });
             context(@"Unknown", ^{
                 beforeEach(^{
-                    [[AMAAdProvider sharedInstance] stub:@selector(ATTStatus) andReturn:theValue(666)];
+                    [[AMAAdProviderProxy sharedInstance] stub:@selector(ATTStatus) andReturn:theValue(666)];
                     permission = [extractor permissionsForKeys:@[ kAMAPermissionKeyATTStatus ]].firstObject;
                 });
                 it(@"Should have `not determined` type", ^{

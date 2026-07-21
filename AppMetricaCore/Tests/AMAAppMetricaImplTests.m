@@ -5,7 +5,7 @@
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
 #import <AppMetricaPlatform/AppMetricaPlatform.h>
 #import "AMAAppMetricaImpl+TestUtilities.h"
-#import "AMAAdProvider.h"
+#import "AMAAdProviderProxy.h"
 #import "AMAAdProviding.h"
 #import "AMAAdRevenueInfo.h"
 #import "AMAAdServicesReportingController.h"
@@ -31,7 +31,8 @@
 #import "AMAEventBuilder.h"
 #import "AMAEventCountDispatchStrategy.h"
 #import "AMAEventPollingDelegateMock.h"
-#import "AMAModuleContextMocks.h"
+#import "AMAModuleRegistrarMocks.h"
+#import "Mocks/AMAModuleEntryPointDiscovererMock.h"
 #import "AMAEventStorage+TestUtilities.h"
 #import "AMAExtensionsReportController.h"
 #import "AMAExtrasContainer.h"
@@ -58,7 +59,7 @@
 #import "AMAAppMetricaConfigurationManager.h"
 #import "AMAFirstActivationDetector.h"
 #import "AMAModulesController.h"
-#import "AMAModuleContextImpl.h"
+#import "AMAModuleRegistrarImpl.h"
 #import "AMAMetricaPersistentConfiguration.h"
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
 #import "AMAAppMetricaConfiguration+JSONSerializable.h"
@@ -181,6 +182,25 @@ describe(@"AMAAppMetricaImpl", ^{
         }
     };
 
+    void (^replaceModulesControllerWithRegistrationHandler)(
+        AMAAppMetricaImpl *,
+        void (^ _Nullable)(id<AMAModuleRegistrar>)
+    ) = ^(AMAAppMetricaImpl *impl,
+          void (^registrationHandler)(id<AMAModuleRegistrar>)) {
+        AMAModuleEntryPointDiscovererMock *discoverer = [[AMAModuleEntryPointDiscovererMock alloc] init];
+        if (registrationHandler != nil) {
+            AMAFakeEntryPoint *entryPoint = [[AMAFakeEntryPoint alloc] init];
+            entryPoint.registrationHandler = registrationHandler;
+            discoverer.entryPoints = @[ entryPoint ];
+        }
+        impl.modulesController = [[AMAModulesController alloc]
+            initWithExecutor:impl.executor
+            discoverer:discoverer
+            registrationCoordinator:nil
+            startupParametersHandler:nil];
+        [impl.modulesController startLoading];
+    };
+
     context(@"Database recovery event", ^{
         AMAInternalEventsReporter *__block reporter = nil;
         void (^stubConfiguration)(NSString *) = ^ void (NSString *inconsistencyData) {
@@ -260,7 +280,9 @@ describe(@"AMAAppMetricaImpl", ^{
         });
 
         beforeEach(^{
-            [impl.modulesController.context addEventPollingDelegate:[AMAEventPollingDelegateMock class]];
+            replaceModulesControllerWithRegistrationHandler(impl, ^(id<AMAModuleRegistrar> registrar) {
+                [registrar registerEventPollingDelegate:AMAEventPollingDelegateMock.class];
+            });
             AMAEventPollingDelegateMock.mockedEvents = @[];
             [AMAAppMetrica stub:@selector(sharedImpl) andReturn:appMetricaImpl];
         });
@@ -487,37 +509,48 @@ describe(@"AMAAppMetricaImpl", ^{
         });
     });
 
-    context(@"Ad provider setup", ^{
-        AMAAdProvider *__block adProvider = nil;
+    context(@"Module ad provider binding", ^{
+        AMAAdProviderProxy *__block adProviderProxy = nil;
         id<AMAAdProviding> __block moduleAdProvider = nil;
 
         beforeEach(^{
-            adProvider = [AMAAdProvider nullMock];
-            [AMAAdProvider stub:@selector(sharedInstance) andReturn:adProvider];
-            [appMetricaImpl stub:@selector(adProvider) andReturn:adProvider];
+            adProviderProxy = [AMAAdProviderProxy nullMock];
+            [AMAAdProviderProxy stub:@selector(sharedInstance) andReturn:adProviderProxy];
+            appMetricaImpl = [AMAAppMetricaImplTestFactory
+                createNoQueueImplWithReporterHelper:reporterTestHelper];
+            [AMAAppMetrica stub:@selector(sharedImpl) andReturn:appMetricaImpl];
             moduleAdProvider = [KWMock nullMockForProtocol:@protocol(AMAAdProviding)];
-            [appMetricaImpl.modulesController stub:@selector(adProvider) andReturn:moduleAdProvider];
+            AMAFakeEntryPoint *entryPoint = [[AMAFakeEntryPoint alloc] init];
+            entryPoint.registrationHandler = ^(id<AMAModuleRegistrar> registrar) {
+                [registrar registerAdProvider:moduleAdProvider];
+            };
+            ((AMAAppMetricaImplStub *)appMetricaImpl).moduleEntryPointDiscoverer.entryPoints =
+                @[ entryPoint ];
         });
         afterEach(^{
-            [AMAAdProvider clearStubs];
+            [AMAAdProviderProxy clearStubs];
         });
-        it(@"Should setup ad provider on activation", ^{
-            [[adProvider should] receive:@selector(setupAdProvider:) withArguments:moduleAdProvider];
+        it(@"Should bind module ad provider on activation", ^{
+            [[adProviderProxy should] receive:@selector(setBackingProvider:) withArguments:moduleAdProvider];
             [appMetricaImpl activateWithConfiguration:configuration];
+            [(AMAManualCurrentQueueExecutor *)appMetricaImpl.executor execute];
         });
-        it(@"Should setup ad provider on anonymous activation", ^{
-            [[adProvider should] receive:@selector(setupAdProvider:) withArguments:moduleAdProvider];
+        it(@"Should bind module ad provider on anonymous activation", ^{
+            [[adProviderProxy should] receive:@selector(setBackingProvider:) withArguments:moduleAdProvider];
             [appMetricaImpl activateAnonymously];
+            [(AMAManualCurrentQueueExecutor *)appMetricaImpl.executor execute];
         });
-        it(@"Should setup ad provider on manual reporter creation", ^{
+        it(@"Should bind module ad provider on manual reporter creation", ^{
             NSString *differentApiKey = @"220e8400-e29b-41d4-a716-446655440022";
-            [[adProvider should] receive:@selector(setupAdProvider:) withArguments:moduleAdProvider];
+            [[adProviderProxy should] receive:@selector(setBackingProvider:) withArguments:moduleAdProvider];
             [appMetricaImpl manualReporterForConfiguration:[[AMAReporterConfiguration alloc] initWithAPIKey:differentApiKey]];
+            [(AMAManualCurrentQueueExecutor *)appMetricaImpl.executor execute];
         });
-        it(@"Should not setup ad provider when none registered", ^{
-            [appMetricaImpl.modulesController stub:@selector(adProvider) andReturn:nil];
-            [[adProvider shouldNot] receive:@selector(setupAdProvider:)];
+        it(@"Should not bind module ad provider when none registered", ^{
+            ((AMAAppMetricaImplStub *)appMetricaImpl).moduleEntryPointDiscoverer.entryPoints = @[];
+            [[adProviderProxy shouldNot] receive:@selector(setBackingProvider:)];
             [appMetricaImpl activateWithConfiguration:configuration];
+            [(AMAManualCurrentQueueExecutor *)appMetricaImpl.executor execute];
         });
     });
 
@@ -1232,8 +1265,8 @@ describe(@"AMAAppMetricaImpl", ^{
                 });
                 
                 it(@"Should notify activated", ^{
-                    [[appMetricaImpl.modulesController should] receive:@selector(notifyWillActivateWithConfiguration:)];
-                    [[appMetricaImpl.modulesController should] receive:@selector(notifyDidActivateWithConfiguration:)];
+                    [[appMetricaImpl.modulesController should]
+                        receive:@selector(performActivationWithAppMetricaConfiguration:activationBlock:)];
 
                     activationBlock(anonymous);
                 });
@@ -1273,21 +1306,19 @@ describe(@"AMAAppMetricaImpl", ^{
             beforeEach(^{
                 controllers = @[[KWMock nullMockForProtocol:@protocol(AMAReporterStorageControlling)],
                                 [KWMock nullMockForProtocol:@protocol(AMAReporterStorageControlling)]];
+                replaceModulesControllerWithRegistrationHandler(appMetricaImpl, ^(id<AMAModuleRegistrar> registrar) {
+                    for (NSObject<AMAReporterStorageControlling> *controller in controllers) {
+                        AMAServiceConfiguration *config = [[AMAServiceConfiguration alloc]
+                            initWithStartupObserver:nil reporterStorageController:controller];
+                        [registrar registerServiceConfiguration:config];
+                    }
+                });
             });
-            void (^registerControllers)(void) = ^{
-                for (NSObject<AMAReporterStorageControlling> *controller in controllers) {
-                    AMAServiceConfiguration *config = [[AMAServiceConfiguration alloc]
-                        initWithStartupObserver:nil reporterStorageController:controller];
-                    [appMetricaImpl.modulesController.context registerExternalService:config];
-                }
-            };
             it(@"Should setup reporter storage controller with main reporter", ^{
                 for (NSObject<AMAReporterStorageControlling> *controller in controllers) {
                     [[controller should] receive:@selector(setupWithReporterStorage:main:forAPIKey:)
                                    withArguments:kw_any(), theValue(YES), configuration.APIKey];
                 }
-
-                registerControllers();
                 [appMetricaImpl activateWithConfiguration:configuration];
             });
             it(@"Should setup reporter storage controller with secondary reporter", ^{
@@ -1295,8 +1326,6 @@ describe(@"AMAAppMetricaImpl", ^{
                     [[controller should] receive:@selector(setupWithReporterStorage:main:forAPIKey:)
                                    withArguments:kw_any(), theValue(NO), configuration.APIKey];
                 }
-
-                registerControllers();
                 [AMAAppMetrica activateReporterWithConfiguration:[[AMAReporterConfiguration alloc] initWithAPIKey:apiKey]];
             });
             it(@"Should setup reporter storage controller with anonymous reporter", ^{
@@ -1304,18 +1333,16 @@ describe(@"AMAAppMetricaImpl", ^{
                     [[controller should] receive:@selector(setupWithReporterStorage:main:forAPIKey:)
                                    withArguments:kw_any(), theValue(YES), anonymousApiKey];
                 }
-
-                registerControllers();
                 [appMetricaImpl activateAnonymously];
             });
         });
         context(@"Event polling delegate", ^{
             it(@"Should call pollingEvents and setupAppEnvironment on main reporter activation", ^{
-                [appMetricaImpl.modulesController.context addEventPollingDelegate:[AMAEventPollingDelegateMock class]];
+                replaceModulesControllerWithRegistrationHandler(appMetricaImpl, ^(id<AMAModuleRegistrar> registrar) {
+                    [registrar registerEventPollingDelegate:AMAEventPollingDelegateMock.class];
+                });
+                [[AMAEventPollingDelegateMock should] receive:@selector(pollingEvents)];
                 [appMetricaImpl activateWithConfiguration:configuration];
-                // Class-based delegate; polling behavior verified via AMAModulesControllerTests
-                XCTAssertTrue([appMetricaImpl.modulesController.context.eventPollingDelegates
-                    containsObject:[AMAEventPollingDelegateMock class]]);
             });
         });
         

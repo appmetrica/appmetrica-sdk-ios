@@ -6,13 +6,13 @@
 @implementation AMAScreenshotModuleEntryPoint
 
 
-- (void)initModuleWithContext:(id<AMAModuleContext>)context
+- (void)registerComponentsWithRegistrar:(id<AMAModuleRegistrar>)registrar
 {
     AMAScreenshotLoader *loader = [AMAScreenshotLoader sharedInstance];
     AMAServiceConfiguration *config = [[AMAServiceConfiguration alloc]
         initWithStartupObserver:loader
         reporterStorageController:loader];
-    [context registerExternalService:config];
+    [registrar registerServiceConfiguration:config];
 }
 
 

@@ -135,8 +135,6 @@ NS_ASSUME_NONNULL_BEGIN
 #endif
 - (void)reportUrl:(NSURL *)url ofType:(NSString *)type isAuto:(BOOL)isAuto;
 
-- (void)ensureModulesLoaded;
-
 - (BOOL)isAllowedToSendData:(NSString *)apiKey;
 
 - (void)addAutocollectedData:(NSString *)apiKey;

@@ -6,13 +6,13 @@
 @implementation AMAIDSyncModuleEntryPoint
 
 
-- (void)initModuleWithContext:(id<AMAModuleContext>)context
+- (void)registerComponentsWithRegistrar:(id<AMAModuleRegistrar>)registrar
 {
     AMAIDSyncStartupController *controller = [AMAIDSyncStartupController sharedInstance];
     AMAServiceConfiguration *config = [[AMAServiceConfiguration alloc]
         initWithStartupObserver:controller
         reporterStorageController:controller];
-    [context registerExternalService:config];
+    [registrar registerServiceConfiguration:config];
 }
 
 

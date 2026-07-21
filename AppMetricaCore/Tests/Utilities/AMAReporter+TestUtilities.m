@@ -3,7 +3,7 @@
 #import "AMAAdServicesDataProvider.h"
 #import "AMASessionExpirationHandler.h"
 #import "AMAMetricaConfiguration.h"
-#import "AMAAdProvider.h"
+#import "AMAAdProviderProxy.h"
 #import "AMAECommerceSerializer.h"
 #import "AMAECommerceTruncator.h"
 #import "AMAExternalAttributionSerializer.h"
@@ -31,7 +31,7 @@
         [[AMASessionExpirationHandler alloc] initWithConfiguration:[AMAMetricaConfiguration sharedInstance]
                                                             APIKey:apiKey];
     
-    AMAAdProvider *adProvider = [AMAAdProvider sharedInstance];
+    AMAAdProviderProxy *adProviderProxy = [AMAAdProviderProxy sharedInstance];
     
     return [self initWithApiKey:apiKey
                            main:main
@@ -45,7 +45,7 @@
                      adServices:adServicesDataProvider
   externalAttributionSerializer:[[AMAExternalAttributionSerializer alloc] init]
        sessionExpirationHandler:sessionExpirationHandler
-                     adProvider:adProvider
+                adProviderProxy:adProviderProxy
                    privacyTimer:privacyTimer
          adRevenueSourceStorage:adRevenueSourceStorage];
 }
