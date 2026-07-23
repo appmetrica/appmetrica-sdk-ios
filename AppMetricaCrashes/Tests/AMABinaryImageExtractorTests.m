@@ -11,7 +11,6 @@
 
 + (NSArray *)images;
 + (NSArray<AMABinaryImage *> *)filterUserImages:(NSArray<AMABinaryImage *> *)images;
-+ (AMABinaryImage *)imageForImageIndex:(int)index;
 
 @end
 
@@ -32,7 +31,7 @@ describe(@"AMABinaryImageExtractor", ^{
         it(@"Should call image extraction images count times", ^{
             uint32_t currentCount = 0;
             ksbic_getImages(&currentCount);
-            [[AMABinaryImageExtractor should] receive:@selector(imageForImageIndex:) withCount:currentCount];
+            [[AMABinaryImageExtractor should] receive:@selector(imageForImageHeader:name:) withCount:currentCount];
             [AMABinaryImageExtractor images];
         });
 
