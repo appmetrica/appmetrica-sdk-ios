@@ -768,14 +768,15 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
 - (void)initializeModulesController
 {
     __weak typeof(self) weakSelf = self;
-    [self execute:^{
-        __strong typeof(weakSelf) strongSelf = weakSelf;
-        if (strongSelf == nil) { return; }
-        strongSelf.modulesController = [[AMAModulesController alloc]
-               initWithExecutor:strongSelf.executor
+    self.modulesController = [[AMAModulesController alloc]
+               initWithExecutor:self.executor
         startupParametersHandler:^(NSDictionary *params) {
                 [weakSelf addAdditionalStartupParameters:params];
             }];
+
+    [self execute:^{
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+        if (strongSelf == nil) { return; }
         [strongSelf.modulesController ensureLoaded];
     }];
 }
