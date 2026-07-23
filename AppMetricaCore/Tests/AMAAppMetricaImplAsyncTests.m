@@ -36,6 +36,9 @@
 #import "AMAInternalEventsReporter.h"
 #import "AMALocationManager.h"
 #import "AMAMetricaConfigurationTestUtilities.h"
+#import "AMAModuleContextImpl.h"
+#import "AMAModuleContextMocks.h"
+#import "AMAModulesController.h"
 #import "AMAPermissionsController.h"
 #import "AMAProfileAttribute.h"
 #import "AMAReporter.h"
@@ -63,6 +66,10 @@
 
 static NSString *apiKey = @"550e8400-e29b-41d4-a716-446655440000";
 static NSString *const anonymousApiKey = @"629a824d-c717-4ba5-bc0f-3f3968554d01";
+
+@interface AMAAppMetricaImpl ()
+@property (nonatomic, strong) AMAModulesController *modulesController;
+@end
 
 
 @interface AMAAppMetricaImplAsyncTests : XCTestCase
@@ -205,6 +212,21 @@ static NSString *const anonymousApiKey = @"629a824d-c717-4ba5-bc0f-3f3968554d01"
     [self.executor execute];
     
     [self waitForExpectations:@[onFailureExpectation2] timeout:1];
+}
+
+- (void)testActivationBeforeExecutorFlushNotifiesModules
+{
+    [AMAModuleActivationDelegateMock reset];
+    [self.appMetricaImpl.modulesController.context
+        addActivationDelegate:[AMAModuleActivationDelegateMock class]];
+
+    AMAAppMetricaConfiguration *config =
+        [[AMAAppMetricaConfiguration alloc] initWithAPIKey:apiKey];
+    [self.appMetricaImpl activateWithConfiguration:config];
+    [self.executor execute];
+
+    XCTAssertEqual(AMAModuleActivationDelegateMock.willActivateCallCount, 1);
+    XCTAssertEqual(AMAModuleActivationDelegateMock.didActivateCallCount, 1);
 }
 
 - (void)testSetUserProfileIDBeforeActivationAppliesWithoutFlushingExecutor

@@ -775,14 +775,16 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
 - (void)initializeModulesController
 {
     __weak typeof(self) weakSelf = self;
+    // Activation may begin before the executor processes initialization tasks.
+    self.modulesController = [[AMAModulesController alloc]
+               initWithExecutor:self.executor
+        startupParametersHandler:^(NSDictionary *params) {
+            [weakSelf addAdditionalStartupParameters:params];
+        }];
+
     [self execute:^{
         __strong typeof(weakSelf) strongSelf = weakSelf;
         if (strongSelf == nil) { return; }
-        strongSelf.modulesController = [[AMAModulesController alloc]
-               initWithExecutor:strongSelf.executor
-        startupParametersHandler:^(NSDictionary *params) {
-                [weakSelf addAdditionalStartupParameters:params];
-            }];
 
         NSSet<Class<AMAModuleActivationDelegate>> *delegates = [AMAAppMetrica pendingActivationDelegatesAndFlush];
         NSArray<AMAServiceConfiguration *> *services = [AMAAppMetrica pendingExternalServicesAndFlush];
