@@ -48,6 +48,20 @@
     AMAEventPollingDelegateMock.invocationRecorder = self.invocationRecorder;
 }
 
+- (void)performBlockAndWaitOnSerialQueueWithQoS:(qos_class_t)qos block:(dispatch_block_t)block
+{
+    dispatch_queue_attr_t attributes =
+        dispatch_queue_attr_make_with_qos_class(DISPATCH_QUEUE_SERIAL, qos, 0);
+    dispatch_queue_t queue = dispatch_queue_create(
+        [[NSString stringWithFormat:@"io.appmetrica.tests.activation-caller-%u", qos] UTF8String],
+        attributes);
+
+    dispatch_async(queue, block);
+    // A synchronous block on the same serial queue is a FIFO fence for the asynchronous block above.
+    dispatch_sync(queue, ^{
+    });
+}
+
 - (void)tearDown
 {
     [AMAModuleActivationDelegateMock reset];
@@ -113,19 +127,16 @@
         AMAManualCurrentQueueExecutor *executor = [AMAManualCurrentQueueExecutor new];
         AMAAppMetricaConfiguration *configuration = [[AMAAppMetricaConfiguration alloc]
             initWithAPIKey:kAMAModuleInvocationOrderingTestAPIKey];
-        XCTestExpectation *activationReturned = [self expectationWithDescription:@"activation returned"];
         __block BOOL activationRanOnMainThread = YES;
         __block AMAModuleInvocationOrderingAppMetricaImplStub *impl = nil;
 
-        dispatch_async(dispatch_get_global_queue(qos, 0), ^{
+        [self performBlockAndWaitOnSerialQueueWithQoS:qos block:^{
             activationRanOnMainThread = NSThread.isMainThread;
             impl = [[AMAModuleInvocationOrderingAppMetricaImplStub alloc]
                 initWithHostStateProvider:nil
                 executor:executor];
             [impl activateWithConfiguration:configuration];
-            [activationReturned fulfill];
-        });
-        [self waitForExpectations:@[ activationReturned ] timeout:2.0];
+        }];
 
         XCTAssertFalse(activationRanOnMainThread, @"QoS: %u", qos);
         XCTAssertNotNil(impl.modulesController, @"QoS: %u", qos);
@@ -154,7 +165,7 @@
 {
     // Exercise the production serial executor from background and user-initiated callers. Core activation may race
     // with discovery, so only module invariants are asserted: registration precedes will, will precedes did, and
-    // every event is delivered exactly once.
+    // every event is delivered exactly once. A synchronous FIFO fence removes scheduler latency from the test.
     [AMAMetricaConfigurationTestUtilities stubConfiguration];
     NSArray<NSNumber *> *qosClasses = @[ @(QOS_CLASS_BACKGROUND), @(QOS_CLASS_USER_INITIATED) ];
 
@@ -165,23 +176,19 @@
             initWithIdentifier:[NSString stringWithFormat:@"module-ordering-%u", qos]];
         AMAAppMetricaConfiguration *configuration = [[AMAAppMetricaConfiguration alloc]
             initWithAPIKey:kAMAModuleInvocationOrderingTestAPIKey];
-        XCTestExpectation *activationReturned = [self expectationWithDescription:@"activation returned"];
-        XCTestExpectation *didActivate = [self expectationWithDescription:@"did activate"];
-        AMAModuleActivationDelegateMock.didActivateHandler = ^(AMAModuleActivationConfiguration *moduleConfiguration) {
-            [didActivate fulfill];
-        };
         __block BOOL activationRanOnMainThread = YES;
         __block AMAModuleInvocationOrderingAppMetricaImplStub *impl = nil;
 
-        dispatch_async(dispatch_get_global_queue(qos, 0), ^{
+        [self performBlockAndWaitOnSerialQueueWithQoS:qos block:^{
             activationRanOnMainThread = NSThread.isMainThread;
             impl = [[AMAModuleInvocationOrderingAppMetricaImplStub alloc]
                 initWithHostStateProvider:nil
                 executor:executor];
             [impl activateWithConfiguration:configuration];
-            [activationReturned fulfill];
-        });
-        [self waitForExpectations:@[ activationReturned, didActivate ] timeout:2.0];
+        }];
+        [executor syncExecute:^id {
+            return nil;
+        }];
 
         NSString *registration = AMAModuleInvocation(
             AMAModuleInvocationOrderingPublicActivationEntryPoint.class,
