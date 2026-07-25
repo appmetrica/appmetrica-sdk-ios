@@ -7,12 +7,12 @@
 
 @implementation AMAAsyncCancellableExecutorMock
 
-- (void)execute:(dispatch_block_t)block
+- (void)execute:(AMAExecutingBlock)block
 {
     block();
 }
 
-- (void)executeAfterDelay:(NSTimeInterval)delay block:(dispatch_block_t)block 
+- (void)executeAfterDelay:(NSTimeInterval)delay block:(AMAExecutingBlock)block
 {
     [self.executeExpectation fulfill];
     dispatch_async(dispatch_get_main_queue(), ^{

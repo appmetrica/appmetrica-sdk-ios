@@ -51,7 +51,7 @@
     }
 }
 
-- (void)execute:(dispatch_block_t)block
+- (void)execute:(AMAExecutingBlock)block
 {
     if (block == nil) {
         return;

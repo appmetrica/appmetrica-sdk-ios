@@ -38,7 +38,7 @@
     return [self initWithQueue:queue];
 }
 
-- (void)execute:(dispatch_block_t)block
+- (void)execute:(AMAExecutingBlock)block
 {
     AMALogBacktrace(@"Async execution on queue: %@", self.queue);
     dispatch_async(self.queue, ^{
@@ -66,7 +66,7 @@
 
 @implementation AMADelayedExecutor
 
-- (void)executeAfterDelay:(NSTimeInterval)delay block:(dispatch_block_t)block
+- (void)executeAfterDelay:(NSTimeInterval)delay block:(AMAExecutingBlock)block
 {
     AMALogBacktrace(@"Delayed (%.2f) async execution on queue: %@", delay, self.queue);
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(delay * NSEC_PER_SEC)), [self queue], ^{
@@ -95,7 +95,7 @@
     return self;
 }
 
-- (void)executeAfterDelay:(NSTimeInterval)delay block:(dispatch_block_t)block
+- (void)executeAfterDelay:(NSTimeInterval)delay block:(AMAExecutingBlock)block
 {
     @synchronized (self) {
         AMALogInfo(@"Delayed (%.2f) async execution on queue: %@", delay, self.queue);
@@ -107,7 +107,7 @@
     }
 }
 
-- (AMABlockTimerBlock)callbackForBlock:(dispatch_block_t)block
+- (AMABlockTimerBlock)callbackForBlock:(AMAExecutingBlock)block
 {
     __weak __typeof(self) weakSelf = self;
     return ^(AMABlockTimer *sender) {

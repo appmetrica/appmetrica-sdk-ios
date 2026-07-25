@@ -3,14 +3,14 @@
 
 @interface AMATestDelayedManualExecutor ()
 
-@property (nonatomic, copy) dispatch_block_t executionBlock;
+@property (nonatomic, copy) AMAExecutingBlock executionBlock;
 @property (nonatomic, assign) NSTimeInterval delayInterval;
 
 @end
 
 @implementation AMATestDelayedManualExecutor
 
-- (void)executeAfterDelay:(NSTimeInterval)delay block:(dispatch_block_t)block
+- (void)executeAfterDelay:(NSTimeInterval)delay block:(AMAExecutingBlock)block
 {
     self.delayInterval = delay;
     self.executionBlock = block;
@@ -22,7 +22,7 @@
     self.delayInterval = 0;
 }
 
-- (void)execute:(dispatch_block_t)block
+- (void)execute:(AMAExecutingBlock)block
 {
     if (block != nil) {
         block();
@@ -43,12 +43,12 @@
 
 @implementation AMACurrentQueueExecutor
 
-- (void)execute:(dispatch_block_t)block
+- (void)execute:(AMAExecutingBlock)block
 {
     block();
 }
 
-- (void)executeAfterDelay:(NSTimeInterval)delay block:(dispatch_block_t)block
+- (void)executeAfterDelay:(NSTimeInterval)delay block:(AMAExecutingBlock)block
 {
     [self execute:block];
 }
@@ -88,7 +88,7 @@
     return self;
 }
 
-- (void)execute:(dispatch_block_t)block
+- (void)execute:(AMAExecutingBlock)block
 {
     @synchronized (self) {
         if (block != nil) {
@@ -112,13 +112,13 @@
     @synchronized (self) {
         NSArray *blocks = [self.blocks copy];
         [self.blocks removeAllObjects];
-        for (dispatch_block_t block in blocks) {
+        for (AMAExecutingBlock block in blocks) {
             block();
         }
     }
 }
 
-- (void)executeAfterDelay:(NSTimeInterval)delay block:(dispatch_block_t)block
+- (void)executeAfterDelay:(NSTimeInterval)delay block:(AMAExecutingBlock)block
 {
     [self execute:block];
 }

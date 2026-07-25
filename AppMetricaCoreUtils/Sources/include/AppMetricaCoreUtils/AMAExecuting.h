@@ -3,29 +3,37 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+#pragma mark - Types
+
+typedef void (^AMAExecutingBlock)(void) NS_SWIFT_SENDABLE;
+
 #pragma mark - Protocols
 
 NS_SWIFT_NAME(AsyncExecuting)
+NS_SWIFT_SENDABLE
 @protocol AMAAsyncExecuting <NSObject>
 
-- (void)execute:(dispatch_block_t)block;
+- (void)execute:(AMAExecutingBlock)block;
 
 @end
 
 NS_SWIFT_NAME(SyncExecuting)
+NS_SWIFT_SENDABLE
 @protocol AMASyncExecuting <NSObject>
 - (nullable id)syncExecute:(id _Nullable (^)(void))block;
 @end
 
 
 NS_SWIFT_NAME(DelayedExecuting)
+NS_SWIFT_SENDABLE
 @protocol AMADelayedExecuting <AMAAsyncExecuting>
 
-- (void)executeAfterDelay:(NSTimeInterval)delay block:(dispatch_block_t)block;
+- (void)executeAfterDelay:(NSTimeInterval)delay block:(AMAExecutingBlock)block;
 
 @end
 
 NS_SWIFT_NAME(CancelableExecuting)
+NS_SWIFT_SENDABLE
 @protocol AMACancelableExecuting <AMADelayedExecuting>
 
 - (void)cancelDelayed;

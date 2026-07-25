@@ -44,7 +44,7 @@ static void AMAAppMetricaCrashesEarlyTestsCallback(
 
 @implementation AMAEarlyCrashTestExecutor
 
-- (void)execute:(dispatch_block_t)block
+- (void)execute:(AMAExecutingBlock)block
 {
     @synchronized (self) {
         self.executionCount += 1;
