@@ -140,7 +140,7 @@ typedef NS_ENUM(NSUInteger, AMAAppMetricaCrashMonitoringState) {
 {
     id<AMAAppMetricaCrashReporting> crashReporter = [self.reportersContainer reporterForAPIKey:apiKey];
     if (crashReporter == nil) {
-        crashReporter = [[AMACrashReporter alloc] initWithApiKey:apiKey errorEnvironment:self.errorEnvironment];
+        crashReporter = [[AMACrashReporter alloc] initWithApiKey:apiKey];
         [self.reportersContainer setReporter:crashReporter forAPIKey:apiKey];
     }
     return crashReporter;
@@ -279,11 +279,16 @@ typedef NS_ENUM(NSUInteger, AMAAppMetricaCrashMonitoringState) {
     [self updateCrashContextAsync];
 }
 
-- (void)setupReporterWithConfiguration:(AMAModuleActivationConfiguration *)configuration
+- (void)setupMainReporterWithConfiguration:(AMAModuleActivationConfiguration *)configuration
 {
-    AMACrashReporter *crashReporter = [[AMACrashReporter alloc] initWithApiKey:configuration.apiKey
-                                                              errorEnvironment:self.errorEnvironment];
-    [self.reportersContainer setReporter:crashReporter forAPIKey:configuration.apiKey];
+    AMACrashReporter *crashReporter = (AMACrashReporter *)[self reporterForAPIKey:configuration.apiKey];
+
+    // Merge values set before activation when the main reporter was requested in advance.
+    if (crashReporter.errorEnvironment != self.errorEnvironment) {
+        [crashReporter.errorEnvironment mergeEnvironment:self.errorEnvironment.currentEnvironment
+                                         replaceExisting:YES];
+        self.errorEnvironment = crashReporter.errorEnvironment;
+    }
     self.apiKey = configuration.apiKey;
     
     [self setupCrashProcessorWithCrashReporter:crashReporter ignoredSignals:self.internalConfiguration.ignoredCrashSignals];
@@ -534,7 +539,7 @@ them while retaining external immutability. Needed for testability. */
     AMAAppMetricaCrashes *crashes = [[self class] crashes];
     [crashes prepareCrashMonitoringForActivation];
     // Initialize reporter before activation to ensure it is available when crashes are loaded.
-    [crashes setupReporterWithConfiguration:configuration];
+    [crashes setupMainReporterWithConfiguration:configuration];
     [crashes activate];
 }
 

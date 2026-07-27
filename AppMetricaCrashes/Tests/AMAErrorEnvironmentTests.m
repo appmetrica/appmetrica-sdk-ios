@@ -160,6 +160,62 @@ describe(@"AMAErrorEnvironment", ^{
             [[[result objectForKey:@"key"] should] equal:@"new_value"];
         });
     });
+
+    context(@"When merging environments", ^{
+        it(@"Should add values from another environment", ^{
+            BOOL hasValidPairs = [sut mergeEnvironment:@{ @"key" : @"value" } replaceExisting:YES];
+
+            [[theValue(hasValidPairs) should] beYes];
+            [[[sut currentEnvironment] should] equal:@{ @"key" : @"value" }];
+        });
+
+        it(@"Should replace existing values when replacing is enabled", ^{
+            [sut addValue:@"old_value" forKey:@"key"];
+
+            [sut mergeEnvironment:@{ @"key" : @"new_value" } replaceExisting:YES];
+
+            [[[[sut currentEnvironment] objectForKey:@"key"] should] equal:@"new_value"];
+        });
+
+        it(@"Should preserve existing values when replacing is disabled", ^{
+            [sut addValue:@"old_value" forKey:@"key"];
+
+            [sut mergeEnvironment:@{ @"key" : @"new_value" } replaceExisting:NO];
+
+            [[[[sut currentEnvironment] objectForKey:@"key"] should] equal:@"old_value"];
+        });
+
+        it(@"Should ignore pairs with non-string keys or values", ^{
+            NSDictionary *environment = @{
+                @"valid_key" : @"valid_value",
+                @"invalid_value" : @42,
+                @42 : @"invalid_key",
+            };
+
+            BOOL hasValidPairs = [sut mergeEnvironment:environment replaceExisting:YES];
+
+            [[theValue(hasValidPairs) should] beYes];
+            [[[sut currentEnvironment] should] equal:@{ @"valid_key" : @"valid_value" }];
+        });
+
+        it(@"Should report that an environment has no valid pairs", ^{
+            BOOL hasValidPairs = [sut mergeEnvironment:@{ @"key" : @42 } replaceExisting:YES];
+
+            [[theValue(hasValidPairs) should] beNo];
+            [[[sut currentEnvironment] should] beEmpty];
+        });
+
+        it(@"Should respect the key-pair count limit", ^{
+            NSMutableDictionary *environment = [NSMutableDictionary dictionary];
+            for (NSUInteger index = 0; index < 35; ++index) {
+                environment[[NSString stringWithFormat:@"key%lu", (unsigned long)index]] = @"value";
+            }
+
+            [sut mergeEnvironment:environment replaceExisting:YES];
+
+            [[[sut currentEnvironment] should] haveCountOf:30];
+        });
+    });
 });
 
 SPEC_END

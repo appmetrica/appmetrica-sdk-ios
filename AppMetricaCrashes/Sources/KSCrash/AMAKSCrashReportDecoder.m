@@ -198,24 +198,14 @@ NSString *const kAMASysInfoUsableMemory = @"usableMemory";
     }
 
     AMAErrorEnvironment *mergedEnvironment = [[AMAErrorEnvironment alloc] init];
-    __block BOOL hasCrashTimePairs = NO;
-    [(NSDictionary *)crashTimeEnvironment enumerateKeysAndObjectsUsingBlock:^(id key, id value, BOOL *stop) {
-        if ([key isKindOfClass:NSString.class] && [value isKindOfClass:NSString.class]) {
-            hasCrashTimePairs = YES;
-            [mergedEnvironment addValue:value forKey:key replaceExisting:YES];
-        }
-    }];
-
+    BOOL hasCrashTimePairs = [mergedEnvironment mergeEnvironment:(NSDictionary *)crashTimeEnvironment
+                                                 replaceExisting:YES];
     if (hasCrashTimePairs == NO) {
         return baselineEnvironment;
     }
 
     if ([baselineEnvironment isKindOfClass:NSDictionary.class]) {
-        [baselineEnvironment enumerateKeysAndObjectsUsingBlock:^(id key, id value, BOOL *stop) {
-            if ([key isKindOfClass:NSString.class] && [value isKindOfClass:NSString.class]) {
-                [mergedEnvironment addValue:value forKey:key replaceExisting:NO];
-            }
-        }];
+        [mergedEnvironment mergeEnvironment:baselineEnvironment replaceExisting:NO];
     }
 
     return [mergedEnvironment currentEnvironment];

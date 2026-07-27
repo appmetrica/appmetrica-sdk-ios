@@ -12,6 +12,8 @@ extern NSString *const kAppMetricaLibraryAPIKey;
 
 @interface AMACrashReporter : NSObject <AMAAppMetricaCrashReporting, AMAAppMetricaPluginReporting>
 
+@property (nonatomic, strong, readonly) AMAErrorEnvironment *errorEnvironment;
+
 - (instancetype)init NS_UNAVAILABLE;
 - (instancetype)initWithApiKey:(NSString *)apiKey;
 - (instancetype)initWithApiKey:(NSString *)apiKey

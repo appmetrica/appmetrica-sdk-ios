@@ -20,7 +20,7 @@ static NSString *const kAMATestAPIKey = @"550e8400-e29b-41d4-a716-446655440000";
 
 @interface AMAAppMetricaCrashes (SynchronizationTests)
 @property (nonatomic, strong) AMACrashProcessor *crashProcessor;
-- (void)setupReporterWithConfiguration:(AMAModuleActivationConfiguration *)configuration;
+- (void)setupMainReporterWithConfiguration:(AMAModuleActivationConfiguration *)configuration;
 @end
 
 @interface AMAKSCrashLoaderStub : AMAKSCrashLoader
@@ -110,6 +110,72 @@ static NSString *const kAMATestAPIKey = @"550e8400-e29b-41d4-a716-446655440000";
     return [[AMAModuleActivationConfiguration alloc] initWithApiKey:kAMATestAPIKey];
 }
 
+- (void)testSecondaryReportersHaveIsolatedErrorEnvironments
+{
+    AMAManualCurrentQueueExecutor *executor = [[AMAManualCurrentQueueExecutor alloc] init];
+    AMAAppMetricaCrashes *crashes = [self crashesWithExecutor:executor
+                                               ksCrashLoader:[[AMAKSCrashLoaderStub alloc] init]
+                                               configuration:[[AMAAppMetricaCrashesConfiguration alloc] init]
+                                         externalCrashLoader:nil];
+
+    AMACrashReporter *firstReporter =
+        (AMACrashReporter *)[crashes reporterForAPIKey:@"first-api-key"];
+    AMACrashReporter *secondReporter =
+        (AMACrashReporter *)[crashes reporterForAPIKey:@"second-api-key"];
+
+    [firstReporter setErrorEnvironmentValue:@"first-value" forKey:@"first-key"];
+    [secondReporter setErrorEnvironmentValue:@"second-value" forKey:@"second-key"];
+
+    XCTAssertNotEqual(firstReporter.errorEnvironment, secondReporter.errorEnvironment);
+    XCTAssertEqualObjects(firstReporter.errorEnvironment.currentEnvironment,
+                          (@{ @"first-key" : @"first-value" }));
+    XCTAssertEqualObjects(secondReporter.errorEnvironment.currentEnvironment,
+                          (@{ @"second-key" : @"second-value" }));
+
+    [firstReporter clearErrorEnvironment];
+
+    XCTAssertEqualObjects(firstReporter.errorEnvironment.currentEnvironment, @{});
+    XCTAssertEqualObjects(secondReporter.errorEnvironment.currentEnvironment,
+                          (@{ @"second-key" : @"second-value" }));
+}
+
+- (void)testMainReporterKeepsPendingEnvironmentAndIsIsolatedFromSecondaryReporter
+{
+    AMAManualCurrentQueueExecutor *executor = [[AMAManualCurrentQueueExecutor alloc] init];
+    AMAAppMetricaCrashes *crashes = [self crashesWithExecutor:executor
+                                               ksCrashLoader:[[AMAKSCrashLoaderStub alloc] init]
+                                               configuration:[[AMAAppMetricaCrashesConfiguration alloc] init]
+                                         externalCrashLoader:nil];
+
+    AMACrashReporter *mainReporterBeforeActivation =
+        (AMACrashReporter *)[crashes reporterForAPIKey:kAMATestAPIKey];
+    AMACrashReporter *secondaryReporter =
+        (AMACrashReporter *)[crashes reporterForAPIKey:@"secondary-api-key"];
+    [mainReporterBeforeActivation setErrorEnvironmentValue:@"reporter-value" forKey:@"reporter-key"];
+    [secondaryReporter setErrorEnvironmentValue:@"secondary-value" forKey:@"secondary-key"];
+    [crashes setErrorEnvironmentValue:@"main-value" forKey:@"main-key"];
+    [executor execute];
+
+    [crashes setupMainReporterWithConfiguration:self.activationConfiguration];
+
+    AMACrashReporter *mainReporterAfterActivation =
+        (AMACrashReporter *)[crashes reporterForAPIKey:kAMATestAPIKey];
+    XCTAssertEqual(mainReporterBeforeActivation, mainReporterAfterActivation);
+    XCTAssertEqualObjects(mainReporterAfterActivation.errorEnvironment.currentEnvironment,
+                          (@{
+                              @"reporter-key" : @"reporter-value",
+                              @"main-key" : @"main-value",
+                          }));
+    XCTAssertEqualObjects(secondaryReporter.errorEnvironment.currentEnvironment,
+                          (@{ @"secondary-key" : @"secondary-value" }));
+
+    [mainReporterAfterActivation clearErrorEnvironment];
+
+    XCTAssertEqualObjects(mainReporterAfterActivation.errorEnvironment.currentEnvironment, @{});
+    XCTAssertEqualObjects(secondaryReporter.errorEnvironment.currentEnvironment,
+                          (@{ @"secondary-key" : @"secondary-value" }));
+}
+
 - (void)testCrashProcessorIsReadyBeforePendingReportsAreLoaded
 {
     // Reporter setup and report loading use the same executor, so processor creation must run first.
@@ -124,7 +190,7 @@ static NSString *const kAMATestAPIKey = @"550e8400-e29b-41d4-a716-446655440000";
         crashProcessorWasReady = crashes.crashProcessor != nil;
     };
 
-    [crashes setupReporterWithConfiguration:self.activationConfiguration];
+    [crashes setupMainReporterWithConfiguration:self.activationConfiguration];
     [crashes activate];
     [executor execute];
 
@@ -150,7 +216,7 @@ static NSString *const kAMATestAPIKey = @"550e8400-e29b-41d4-a716-446655440000";
     event.threads = @[];
 
     [externalLoader registerProvider:provider];
-    [crashes setupReporterWithConfiguration:self.activationConfiguration];
+    [crashes setupMainReporterWithConfiguration:self.activationConfiguration];
     [crashExecutor execute:^{
         crashes.crashProcessor = processor;
     }];

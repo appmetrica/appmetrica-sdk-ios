@@ -67,6 +67,18 @@ static NSInteger const kAMAErrorEnvironmentTotalLengthLimit = 4500;
     self.environment[truncatedKey] = truncatedValue;
 }
 
+- (BOOL)mergeEnvironment:(NSDictionary *)environment replaceExisting:(BOOL)replaceExisting
+{
+    __block BOOL hasValidPairs = NO;
+    [environment enumerateKeysAndObjectsUsingBlock:^(id key, id value, __unused BOOL *stop) {
+        if ([key isKindOfClass:NSString.class] && [value isKindOfClass:NSString.class]) {
+            hasValidPairs = YES;
+            [self addValue:value forKey:key replaceExisting:replaceExisting];
+        }
+    }];
+    return hasValidPairs;
+}
+
 - (void)clearEnvironment 
 {
     [self.environment removeAllObjects];

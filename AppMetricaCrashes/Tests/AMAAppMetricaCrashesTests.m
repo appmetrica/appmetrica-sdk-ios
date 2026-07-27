@@ -71,7 +71,8 @@ describe(@"AMAAppMetricaCrashes", ^{
         
         crashReporter = [AMACrashReporter nullMock];
         [AMACrashReporter stub:@selector(alloc) andReturn:crashReporter];
-        [crashReporter stub:@selector(initWithApiKey:errorEnvironment:) andReturn:crashReporter];
+        [crashReporter stub:@selector(initWithApiKey:) andReturn:crashReporter];
+        [crashReporter stub:@selector(errorEnvironment) andReturn:[AMAErrorEnvironment new]];
         
         serializer = [AMADecodedCrashSerializer nullMock];
         crashLoader = [AMAKSCrashLoader nullMock];

@@ -19,8 +19,6 @@ NSString *const kAppMetricaLibraryAPIKey = @"20799a27-fa80-4b36-b2db-0f8141f2418
 @property (nonatomic, strong, readonly) AMAErrorModelFactory *errorModelFactory;
 @property (nonatomic, copy, readonly) NSString *apiKey;
 
-@property (nonatomic, strong) AMAErrorEnvironment *errorEnvironment;
-
 @end
 
 @implementation AMACrashReporter

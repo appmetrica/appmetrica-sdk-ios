@@ -13,7 +13,7 @@
 @property (nonatomic, strong, readonly) id<AMAAppMetricaReporting> libraryErrorReporter;
 @property (nonatomic, strong, readonly) id<AMAExceptionFormatting> exceptionFormatter;
 @property (nonatomic, strong, readonly) AMAErrorModelFactory *errorModelFactory;
-@property (nonatomic, strong) AMAEnvironmentContainer *errorEnvironment;
+@property (nonatomic, strong) AMAErrorEnvironment *errorEnvironment;
 @end
 
 SPEC_BEGIN(AMACrashReporterTests)
@@ -330,6 +330,30 @@ describe(@"AMACrashReporter", ^{
                 [[errorEnvironment should] receive:@selector(clearEnvironment)];
                 [crashReporter clearErrorEnvironment];
             });
+        });
+    });
+
+    context(@"Error Environment Isolation", ^{
+
+        it(@"Should use a separate error environment for each reporter", ^{
+            AMACrashReporter *anotherReporter = [[AMACrashReporter alloc] initWithApiKey:@"another-api-key"];
+
+            [crashReporter setErrorEnvironmentValue:@"first-value" forKey:@"first-key"];
+            [anotherReporter setErrorEnvironmentValue:@"second-value" forKey:@"second-key"];
+
+            [[crashReporter.errorEnvironment.currentEnvironment should] equal:@{ @"first-key" : @"first-value" }];
+            [[anotherReporter.errorEnvironment.currentEnvironment should] equal:@{ @"second-key" : @"second-value" }];
+        });
+
+        it(@"Should clear only the current reporter error environment", ^{
+            AMACrashReporter *anotherReporter = [[AMACrashReporter alloc] initWithApiKey:@"another-api-key"];
+            [crashReporter setErrorEnvironmentValue:@"first-value" forKey:@"first-key"];
+            [anotherReporter setErrorEnvironmentValue:@"second-value" forKey:@"second-key"];
+
+            [crashReporter clearErrorEnvironment];
+
+            [[crashReporter.errorEnvironment.currentEnvironment should] beEmpty];
+            [[anotherReporter.errorEnvironment.currentEnvironment should] equal:@{ @"second-key" : @"second-value" }];
         });
     });
     
