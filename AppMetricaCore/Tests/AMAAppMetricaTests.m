@@ -13,6 +13,7 @@
 #import "AMAFailureDispatcherTestHelper.h"
 #import "AMAInternalEventsReporter.h"
 #import "AMALocationManager.h"
+#import "AMAAppMetricaConfigurationManager.h"
 #import "AMAMetricaConfigurationTestUtilities.h"
 #import "AMAReporter.h"
 #import "AMAReporterTestHelper.h"
@@ -135,6 +136,36 @@ describe(@"AMAAppMetrica", ^{
         [[AMAMetricaConfiguration sharedInstance].inMemory stub:@selector(appMetricaStartedAnonymously)
                                                       andReturn:theValue(started)];
     };
+
+    context(@"Library adapter custom hosts", ^{
+        NSArray *const hosts = @[ @"https://startup.example.com" ];
+
+        beforeEach(^{
+            stubMetrica();
+        });
+
+        it(@"Should not update hosts before activation", ^{
+            [[impl.configurationManager shouldNot] receive:@selector(updateLibraryAdapterCustomHosts:)];
+
+            [AMAAppMetrica setLibraryAdapterCustomHosts:hosts];
+        });
+
+        it(@"Should update hosts after anonymous activation", ^{
+            stubMetricaStartedAnonymously(YES);
+            [[impl.configurationManager should] receive:@selector(updateLibraryAdapterCustomHosts:)
+                                          withArguments:hosts];
+
+            [AMAAppMetrica setLibraryAdapterCustomHosts:hosts];
+        });
+
+        it(@"Should update hosts after main activation", ^{
+            stubMetricaStarted(YES);
+            [[impl.configurationManager should] receive:@selector(updateLibraryAdapterCustomHosts:)
+                                          withArguments:hosts];
+
+            [AMAAppMetrica setLibraryAdapterCustomHosts:hosts];
+        });
+    });
     
     context(@"Handling Invalid APIKey", ^{
         __block AMATestAssertionHandler *handler = nil;

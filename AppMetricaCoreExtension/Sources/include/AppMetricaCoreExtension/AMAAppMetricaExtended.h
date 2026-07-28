@@ -50,6 +50,7 @@ NS_SWIFT_NAME(reportLibraryAdapterAdRevenueRelatedEvent(name:parameters:onFailur
 
 + (void)setLibraryAdapterAdvertisingIdentifierTracking:(BOOL)advertisingIdentifierTracking;
 + (void)setLibraryAdapterLocationTracking:(BOOL)locationTracking;
++ (void)setLibraryAdapterCustomHosts:(nullable NSArray<NSString *> *)customHosts;
 
 + (void)subscribeForAutocollectedDataForApiKey:(NSString *)apiKey NS_SWIFT_NAME(subscribeForAutocollectedData(apiKey:));
 

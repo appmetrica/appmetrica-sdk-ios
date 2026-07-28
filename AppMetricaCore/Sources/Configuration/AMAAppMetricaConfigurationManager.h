@@ -44,6 +44,7 @@ NS_ASSUME_NONNULL_BEGIN
                activatedAnonymously:(BOOL)calledFromActivateAnonymous;
 - (void)updateReporterConfiguration:(AMAReporterConfiguration *)configuration;
 - (void)updateAnonymousConfigurationWithLibraryAdapterConfiguration:(AMAAppMetricaLibraryAdapterConfiguration *)libraryAdapterConfiguration;
+- (void)updateLibraryAdapterCustomHosts:(nullable NSArray<NSString *> *)customHosts;
 
 @end
 

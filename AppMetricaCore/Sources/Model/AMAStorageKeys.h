@@ -24,6 +24,7 @@ extern NSString *const AMAStorageStringKeyStartupUpdateInterval;
 extern NSString *const AMAStorageStringKeyStatSendingDisabledReportingInterval;
 extern NSString *const AMAStorageStringKeyUUID;
 extern NSString *const AMAStorageStringKeyUserStartupHosts;
+extern NSString *const AMAStorageStringKeyLibraryAdapterCustomHosts;
 extern NSString *const AMAStorageStringKeyAttributionModel;
 
 extern NSString *const AMAStorageStringKeyExternalAttributionCollectingIntervalSeconds;

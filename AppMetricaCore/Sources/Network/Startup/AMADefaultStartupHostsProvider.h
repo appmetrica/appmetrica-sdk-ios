@@ -7,5 +7,7 @@
 + (instancetype)new NS_UNAVAILABLE;
 
 + (NSArray *)startupHostsWithAdditionalHosts:(NSArray *)additionalStartupHosts;
++ (NSArray *)resourceStartupHosts;
++ (NSArray *)predefinedStartupHostsWithAdditionalHosts:(NSArray *)additionalStartupHosts;
 
 @end

@@ -303,6 +303,15 @@ NSString *const kAMAAttributionSourceSingular = @"singular";
     }
 }
 
++ (void)setLibraryAdapterCustomHosts:(NSArray<NSString *> *)customHosts
+{
+    @synchronized (self) {
+        if ([self isActivated]) {
+            [[self sharedImpl].configurationManager updateLibraryAdapterCustomHosts:customHosts];
+        }
+    }
+}
+
 + (void)reportEvent:(NSString *)name onFailure:(void (^)(NSError *error))onFailure
 {
     [[self class] reportEvent:name parameters:nil onFailure:onFailure];

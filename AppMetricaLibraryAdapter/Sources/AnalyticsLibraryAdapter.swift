@@ -43,6 +43,12 @@ public final class AnalyticsLibraryAdapter: NSObject, @unchecked Sendable {
     @objc public func setLocationTracking(_ enabled: Bool) {
         appMetrica.setLibraryAdapterLocationTracking(enabled)
     }
+
+    /// Sets hosts to be used for startup requests when the host application has not configured its own hosts.
+    /// Pass an empty array or `nil` to remove previously stored hosts.
+    @objc public func setCustomHosts(_ customHosts: [String]?) {
+        appMetrica.setLibraryAdapterCustomHosts(customHosts)
+    }
     
     @objc(subscribeForAutocollectedDataForApiKey:)
     public func subscribeForAutocollectedData(apiKey: String) {
@@ -57,6 +63,9 @@ public final class AnalyticsLibraryAdapter: NSObject, @unchecked Sendable {
         }
         if let locationTrackingEnabled = config.locationTrackingEnabled {
             cfg.locationTrackingEnabled = locationTrackingEnabled
+        }
+        if let customHosts = config.customHosts {
+            cfg.customHosts = customHosts
         }
         appMetrica.setupLibraryAdapterConfiguration(cfg)
         appMetrica.activate()
@@ -91,4 +100,3 @@ public final class AnalyticsLibraryAdapter: NSObject, @unchecked Sendable {
         )
     }
 }
-

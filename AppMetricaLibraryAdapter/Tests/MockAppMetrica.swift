@@ -20,6 +20,9 @@ class MockAppMetrica: AppMetrica {
     
     static var advertisingIdentifierTrackingEnabledValue: Bool?
     static var advertisingIdentifierTrackingEnabledExpectation: XCTestExpectation = XCTestExpectation()
+
+    static var customHostsValue: [String]?
+    static var customHostsExpectation: XCTestExpectation = XCTestExpectation()
     
     static var autocollectedData: String?
     static var subscribeForAutocollectedDataExpectation: XCTestExpectation = XCTestExpectation()
@@ -41,6 +44,11 @@ class MockAppMetrica: AppMetrica {
     override class func setLibraryAdapterAdvertisingIdentifierTracking(_ advertisingIdentifierTracking: Bool) {
         advertisingIdentifierTrackingEnabledValue = advertisingIdentifierTracking
         advertisingIdentifierTrackingEnabledExpectation.fulfill()
+    }
+
+    override class func setLibraryAdapterCustomHosts(_ customHosts: [String]?) {
+        customHostsValue = customHosts
+        customHostsExpectation.fulfill()
     }
     
     override class func reportEvent(
@@ -82,7 +90,17 @@ class MockAppMetrica: AppMetrica {
 
     static func reset() {
         anonymousActivationExpectation = XCTestExpectation(description: "Should activate anonymously via extended interface")
+        setupLibraryAdapterConfigurationExpectation = XCTestExpectation(description: "Should setup library adapter configuration")
+        locationTrackingEnabledExpectation = XCTestExpectation(description: "Should set location tracking")
+        advertisingIdentifierTrackingEnabledExpectation = XCTestExpectation(description: "Should set advertising identifier tracking")
+        customHostsExpectation = XCTestExpectation(description: "Should set custom hosts")
+        subscribeForAutocollectedDataExpectation = XCTestExpectation(description: "Should subscribe for autocollected data")
         anonymousConfiguration = nil
+        libraryAdapterConfiguration = nil
+        locationTrackingEnabledValue = nil
+        advertisingIdentifierTrackingEnabledValue = nil
+        customHostsValue = nil
+        autocollectedData = nil
         
         reportEventCalled = false
         lastReportedEventName = nil

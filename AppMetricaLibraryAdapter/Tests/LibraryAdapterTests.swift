@@ -23,6 +23,7 @@ final class LibraryAdapterTests: XCTestCase {
         let config = MutableAnalyticsLibraryAdapterConfiguration()
         config.advertisingIdentifiersTrackingEnabled = true
         config.locationTrackingEnabled = true
+        config.customHosts = ["https://startup.example.com"]
         
         adapter.activate(configuration: config)
         
@@ -35,6 +36,7 @@ final class LibraryAdapterTests: XCTestCase {
         )
         XCTAssertEqual(MockAppMetrica.libraryAdapterConfiguration?.advertisingIdentifierTrackingEnabled, true)
         XCTAssertEqual(MockAppMetrica.libraryAdapterConfiguration?.locationTrackingEnabled, true)
+        XCTAssertEqual(MockAppMetrica.libraryAdapterConfiguration?.customHosts, ["https://startup.example.com"])
     }
     
     func testSetLocationTrackingEnabled() {
@@ -47,6 +49,13 @@ final class LibraryAdapterTests: XCTestCase {
         adapter.setAdvertisingTracking(true)
         wait(for: [MockAppMetrica.advertisingIdentifierTrackingEnabledExpectation], timeout: 1)
         XCTAssertEqual(MockAppMetrica.advertisingIdentifierTrackingEnabledValue, true)
+    }
+
+    func testSetCustomHosts() {
+        let hosts = ["https://startup.example.com"]
+        adapter.setCustomHosts(hosts)
+        wait(for: [MockAppMetrica.customHostsExpectation], timeout: 1)
+        XCTAssertEqual(MockAppMetrica.customHostsValue, hosts)
     }
     
     func testReportEventSuccess() {

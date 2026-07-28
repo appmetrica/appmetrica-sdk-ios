@@ -7,6 +7,7 @@ public struct AnalyticsLibraryAdapterConfig {
     public init() { }
     public var advertisingIdentifiersTrackingEnabled: Bool?
     public var locationTrackingEnabled: Bool?
+    public var customHosts: [String]?
 }
 
 @objc(AMAAnalyticsLibraryAdapterConfiguration)
@@ -31,6 +32,10 @@ public class AnalyticsLibraryAdapterConfiguration: NSObject, NSCopying, NSMutabl
         return config.locationTrackingEnabled ?? false
     }
 
+    @objc public dynamic var customHosts: [String]? {
+        return config.customHosts
+    }
+
     public dynamic func copy(with zone: NSZone? = nil) -> Any {
         return self
     }
@@ -51,6 +56,11 @@ final public class MutableAnalyticsLibraryAdapterConfiguration: AnalyticsLibrary
     @objc public dynamic override var locationTrackingEnabled: Bool {
         get { config.locationTrackingEnabled ?? false }
         set { config.locationTrackingEnabled = newValue }
+    }
+
+    @objc public dynamic override var customHosts: [String]? {
+        get { config.customHosts }
+        set { config.customHosts = newValue }
     }
     
     public dynamic override func copy(with zone: NSZone? = nil) -> Any {

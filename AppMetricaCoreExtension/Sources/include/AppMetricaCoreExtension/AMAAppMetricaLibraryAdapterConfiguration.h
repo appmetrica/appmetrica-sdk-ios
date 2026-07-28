@@ -8,6 +8,7 @@ NS_SWIFT_NAME(AppMetricaLibraryAdapterConfiguration)
 
 @property (nonatomic, assign) BOOL advertisingIdentifierTrackingEnabled;
 @property (nonatomic, assign) BOOL locationTrackingEnabled;
+@property (nonatomic, copy, nullable) NSArray<NSString *> *customHosts;
 
 @end
 

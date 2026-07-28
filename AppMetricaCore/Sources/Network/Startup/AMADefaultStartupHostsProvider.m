@@ -12,13 +12,23 @@ static NSString *const kAMADefaultStartupHostsKey = @"AMASDKStartupHosts";
 
 + (NSArray *)startupHostsWithAdditionalHosts:(NSArray *)additionalStartupHosts
 {
-    NSArray *customStartupHosts = [[self class] filteredCustomStartupHosts:[[self class] customStartupHosts]];
+    NSArray *customStartupHosts = [[self class] resourceStartupHosts];
     if (customStartupHosts.count > 0) {
         return customStartupHosts;
     }
     else {
-        return [[[self class] predefinedStartupHosts] arrayByAddingObjectsFromArray:additionalStartupHosts];
+        return [[self class] predefinedStartupHostsWithAdditionalHosts:additionalStartupHosts];
     }
+}
+
++ (NSArray *)resourceStartupHosts
+{
+    return [[self class] filteredCustomStartupHosts:[[self class] customStartupHosts]];
+}
+
++ (NSArray *)predefinedStartupHostsWithAdditionalHosts:(NSArray *)additionalStartupHosts
+{
+    return [[[self class] predefinedStartupHosts] arrayByAddingObjectsFromArray:additionalStartupHosts];
 }
 
 #pragma mark - Private -

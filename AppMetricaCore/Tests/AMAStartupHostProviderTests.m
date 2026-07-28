@@ -9,6 +9,7 @@
 
 - (NSArray *)startupHosts;
 - (NSArray *)userStartupHosts;
+- (NSArray *)libraryAdapterCustomHosts;
 
 @end
 
@@ -22,6 +23,8 @@ describe(@"AMAStartupHostProvider", ^{
     AMAStartupHostProvider * __block hostProvider = nil;
     NSArray * __block startupHosts = @[@"1", @"2", @"3"];
     NSArray * __block userHosts = @[@"4", @"5"];
+    NSArray * __block libraryAdapterHosts = @[@"6", @"7"];
+    NSArray * __block resourceHosts = @[@"8", @"9"];
     
     NSArray * (^allItemsFromProvider)(AMAStartupHostProvider *) = ^NSArray *(AMAStartupHostProvider * hostProvider) {
         NSMutableArray *items = [NSMutableArray new];
@@ -37,9 +40,12 @@ describe(@"AMAStartupHostProvider", ^{
     beforeEach(^{
         [AMAStartupHostProvider stub:@selector(startupHosts) andReturn:@[]];
         [AMAStartupHostProvider stub:@selector(userStartupHosts) andReturn:@[]];
+        [AMAStartupHostProvider stub:@selector(libraryAdapterCustomHosts) andReturn:@[]];
+        [AMADefaultStartupHostsProvider stub:@selector(resourceStartupHosts) andReturn:@[]];
     });
     afterEach(^{
         [AMAStartupHostProvider clearStubs];
+        [AMADefaultStartupHostsProvider clearStubs];
     });
     
     it(@"Should contain default startup host if no hosts provided by user or startup responce", ^{
@@ -65,7 +71,7 @@ describe(@"AMAStartupHostProvider", ^{
         [[actualValue should] equal:expected];
     });
     
-    it(@"Should contain startup hosts, user hosts and default host", ^{
+    it(@"Should contain startup and user hosts without default host", ^{
         [AMAStartupHostProvider stub:@selector(startupHosts) andReturn:startupHosts];
         [AMAStartupHostProvider stub:@selector(userStartupHosts) andReturn:userHosts];
         
@@ -74,9 +80,60 @@ describe(@"AMAStartupHostProvider", ^{
         NSArray *actualValue = allItemsFromProvider(hostProvider);
         
         NSArray *expected = [startupHosts arrayByAddingObjectsFromArray:userHosts];
-        expected = [expected arrayByAddingObjectsFromArray:predefinedHosts];
         
         [[actualValue should] equal:expected];
+    });
+
+    it(@"Should use library adapter hosts without default host", ^{
+        [AMAStartupHostProvider stub:@selector(libraryAdapterCustomHosts) andReturn:libraryAdapterHosts];
+
+        hostProvider = [AMAStartupHostProvider new];
+        [hostProvider reset];
+
+        [[allItemsFromProvider(hostProvider) should] equal:libraryAdapterHosts];
+    });
+
+    it(@"Should prepend startup hosts to library adapter hosts", ^{
+        [AMAStartupHostProvider stub:@selector(startupHosts) andReturn:startupHosts];
+        [AMAStartupHostProvider stub:@selector(libraryAdapterCustomHosts) andReturn:libraryAdapterHosts];
+
+        hostProvider = [AMAStartupHostProvider new];
+        [hostProvider reset];
+
+        NSArray *expected = [startupHosts arrayByAddingObjectsFromArray:libraryAdapterHosts];
+        [[allItemsFromProvider(hostProvider) should] equal:expected];
+    });
+
+    it(@"Should prefer user hosts over library adapter hosts", ^{
+        [AMAStartupHostProvider stub:@selector(userStartupHosts) andReturn:userHosts];
+        [AMAStartupHostProvider stub:@selector(libraryAdapterCustomHosts) andReturn:libraryAdapterHosts];
+
+        hostProvider = [AMAStartupHostProvider new];
+        [hostProvider reset];
+
+        [[allItemsFromProvider(hostProvider) should] equal:userHosts];
+    });
+
+    it(@"Should prefer resource hosts over library adapter hosts", ^{
+        [AMADefaultStartupHostsProvider stub:@selector(resourceStartupHosts) andReturn:resourceHosts];
+        [AMAStartupHostProvider stub:@selector(libraryAdapterCustomHosts) andReturn:libraryAdapterHosts];
+
+        hostProvider = [AMAStartupHostProvider new];
+        [hostProvider reset];
+
+        [[allItemsFromProvider(hostProvider) should] equal:resourceHosts];
+    });
+
+    it(@"Should combine user and resource hosts before ignoring library adapter hosts", ^{
+        [AMAStartupHostProvider stub:@selector(userStartupHosts) andReturn:userHosts];
+        [AMADefaultStartupHostsProvider stub:@selector(resourceStartupHosts) andReturn:resourceHosts];
+        [AMAStartupHostProvider stub:@selector(libraryAdapterCustomHosts) andReturn:libraryAdapterHosts];
+
+        hostProvider = [AMAStartupHostProvider new];
+        [hostProvider reset];
+
+        NSArray *expected = [userHosts arrayByAddingObjectsFromArray:resourceHosts];
+        [[allItemsFromProvider(hostProvider) should] equal:expected];
     });
     
     it(@"Should contain startup hosts and default host only once", ^{
@@ -95,13 +152,13 @@ describe(@"AMAStartupHostProvider", ^{
     it(@"Should use additional hosts with predefined on reset", ^{
         NSArray *additionalHosts = @[@"host_1", @"host_2"];
         
-        [AMADefaultStartupHostsProvider stub:@selector(startupHostsWithAdditionalHosts:)
+        [AMADefaultStartupHostsProvider stub:@selector(predefinedStartupHostsWithAdditionalHosts:)
                                    andReturn:[predefinedHosts arrayByAddingObjectsFromArray:additionalHosts]
                                withArguments:additionalHosts];
         [[AMAMetricaConfiguration sharedInstance].inMemory stub:@selector(additionalStartupHosts)
                                                       andReturn:additionalHosts];
         
-        [[AMADefaultStartupHostsProvider should] receive:@selector(startupHostsWithAdditionalHosts:)
+        [[AMADefaultStartupHostsProvider should] receive:@selector(predefinedStartupHostsWithAdditionalHosts:)
                                            withArguments:additionalHosts];
         
         hostProvider = [AMAStartupHostProvider new];

@@ -95,6 +95,23 @@ describe(@"AMAMetricaPersistentConfiguration", ^{
         });
     });
 
+    context(@"libraryAdapterCustomHosts", ^{
+        NSArray *const values = @[ @"a", @"b" ];
+        NSString *const key = @"library.adapter.custom.hosts";
+        it(@"Should return valid value", ^{
+            [database.storageProvider.syncStorage saveJSONArray:values forKey:key error:nil];
+            [[createConfig().libraryAdapterCustomHosts should] equal:values];
+        });
+        it(@"Should save value", ^{
+            createConfig().libraryAdapterCustomHosts = values;
+            [[[database.storageProvider.cachingStorage jsonArrayForKey:key error:nil] should] equal:values];
+        });
+        it(@"Should return nil for non-string values", ^{
+            [database.storageProvider.syncStorage saveString:@"[1,2]" forKey:key error:nil];
+            [[createConfig().libraryAdapterCustomHosts should] beNil];
+        });
+    });
+
     context(@"lastPermissionsUpdateDate", ^{
         NSDate *const lastPermissionsUpdateDate = [NSDate dateWithTimeIntervalSince1970:23];
         NSString *const key = @"permissions.collecting.last_update_date";

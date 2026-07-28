@@ -25,6 +25,11 @@
     return [AMAMetricaConfiguration sharedInstance].persistent.userStartupHosts;
 }
 
++ (NSArray *)libraryAdapterCustomHosts
+{
+    return [AMAMetricaConfiguration sharedInstance].persistent.libraryAdapterCustomHosts;
+}
+
 + (NSArray *)additionalStartupHosts
 {
     return [[AMAMetricaConfiguration sharedInstance].inMemory additionalStartupHosts];
@@ -45,18 +50,31 @@
     NSMutableOrderedSet *hosts = [NSMutableOrderedSet new];
 
     NSArray *array = [[self class] startupHosts];
-    if (array != nil) {
+    if (array.count > 0) {
         [hosts addObjectsFromArray:array];
     }
-    
-    array = [[self class] userStartupHosts];
-    if (array != nil) {
-        [hosts addObjectsFromArray:array];
+
+    NSArray *userHosts = [[self class] userStartupHosts];
+    NSArray *resourceHosts = [AMADefaultStartupHostsProvider resourceStartupHosts];
+    if (userHosts.count > 0 || resourceHosts.count > 0) {
+        [hosts addObjectsFromArray:userHosts ?: @[]];
+        [hosts addObjectsFromArray:resourceHosts ?: @[]];
+        self.iterator = [[AMAArrayIterator alloc] initWithArray:[hosts array]];
+        return;
     }
-    
+
+    NSArray *libraryAdapterHosts = [[self class] libraryAdapterCustomHosts];
+    if (libraryAdapterHosts.count > 0) {
+        [hosts addObjectsFromArray:libraryAdapterHosts];
+        self.iterator = [[AMAArrayIterator alloc] initWithArray:[hosts array]];
+        return;
+    }
+
     NSArray *additionalHosts = [[self class] additionalStartupHosts];
-    [hosts addObjectsFromArray:[AMADefaultStartupHostsProvider startupHostsWithAdditionalHosts:additionalHosts]];
-    
+    [hosts addObjectsFromArray:
+        [AMADefaultStartupHostsProvider predefinedStartupHostsWithAdditionalHosts:additionalHosts]
+    ];
+
     self.iterator = [[AMAArrayIterator alloc] initWithArray:[hosts array]];
 }
 

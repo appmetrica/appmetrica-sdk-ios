@@ -382,12 +382,42 @@ describe(@"AMAAppMetricaConfigurationManager", ^{
             
             [configManager updateAnonymousConfigurationWithLibraryAdapterConfiguration:adapterConfig];
         });
+
+        it(@"should persist library adapter custom hosts", ^{
+            NSArray *hosts = @[ @"https://startup.example.com" ];
+            adapterConfig.customHosts = hosts;
+            [[persistentMock should] receive:@selector(setLibraryAdapterCustomHosts:) withArguments:hosts];
+
+            [configManager updateAnonymousConfigurationWithLibraryAdapterConfiguration:adapterConfig];
+        });
+
+        it(@"should not overwrite persisted library adapter custom hosts when hosts are not provided", ^{
+            [[persistentMock shouldNot] receive:@selector(setLibraryAdapterCustomHosts:)];
+
+            [configManager updateAnonymousConfigurationWithLibraryAdapterConfiguration:adapterConfig];
+        });
         
         it(@"should return updated config as anonymousConfiguration", ^{
             [configManager updateAnonymousConfigurationWithLibraryAdapterConfiguration:adapterConfig];
             [[configManager.anonymousConfiguration should] equal:configMock];
         });
         
+    });
+
+    context(@"updateLibraryAdapterCustomHosts", ^{
+        it(@"should persist hosts and restart strategies", ^{
+            NSArray *hosts = @[ @"https://startup.example.com" ];
+            [[persistentMock should] receive:@selector(setLibraryAdapterCustomHosts:) withArguments:hosts];
+            [[strategiesContainerMock should] receive:@selector(handleConfigurationUpdate)];
+
+            [configManager updateLibraryAdapterCustomHosts:hosts];
+        });
+
+        it(@"should clear persisted hosts for an empty array", ^{
+            [[persistentMock should] receive:@selector(setLibraryAdapterCustomHosts:) withArguments:nil];
+
+            [configManager updateLibraryAdapterCustomHosts:@[]];
+        });
     });
     
     context(@"anonymousConfiguration", ^{

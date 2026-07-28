@@ -137,9 +137,18 @@
     if (isAnonConfiguration) {
         configuration.locationTracking = libraryAdapterConfiguration.locationTrackingEnabled;
         configuration.advertisingIdentifierTrackingEnabled = libraryAdapterConfiguration.advertisingIdentifierTrackingEnabled;
+        if (libraryAdapterConfiguration.customHosts != nil) {
+            [self updateLibraryAdapterCustomHosts:libraryAdapterConfiguration.customHosts];
+        }
     }
     
     self.savedAnonymousConfiguration = configuration;
+}
+
+- (void)updateLibraryAdapterCustomHosts:(NSArray<NSString *> *)customHosts
+{
+    self.metricaConfiguration.persistent.libraryAdapterCustomHosts = customHosts.count > 0 ? customHosts : nil;
+    [self handleConfigurationUpdate];
 }
 
 #pragma mark - Handle configuration

@@ -27,6 +27,7 @@
 @interface AMAStartupHostProvider ()
 + (NSArray *)startupHosts;
 + (NSArray *)userStartupHosts;
++ (NSArray *)libraryAdapterCustomHosts;
 + (NSArray *)additionalStartupHosts;
 @end
 
@@ -51,6 +52,7 @@ describe(@"AMAMetricaSessions", ^{
         reporterTestHelper = [[AMAReporterTestHelper alloc] init];
         [AMAStartupHostProvider stub:@selector(startupHosts) andReturn:@[]];
         [AMAStartupHostProvider stub:@selector(userStartupHosts) andReturn:@[]];
+        [AMAStartupHostProvider stub:@selector(libraryAdapterCustomHosts) andReturn:@[]];
         [AMAStartupHostProvider stub:@selector(additionalStartupHosts) andReturn:@[]];
         [AMADispatchStrategiesFactory stub:@selector(strategiesForStorage:typeMask:delegate:executionConditionChecker:)
                                       andReturn:@[]];

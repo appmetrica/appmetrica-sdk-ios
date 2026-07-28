@@ -6,6 +6,7 @@
 @synthesize startupUpdatedAt = _startupUpdatedAt;
 @synthesize firstStartupUpdateDate = _firstStartupUpdateDate;
 @synthesize userStartupHosts = _userStartupHosts;
+@synthesize libraryAdapterCustomHosts = _libraryAdapterCustomHosts;
 @synthesize attributionModelConfiguration = _attributionModelConfiguration;
 @synthesize externalAttributionConfigurations = _externalAttributionConfigurations;
 @synthesize extensionsLastReportDate = _extensionsLastReportDate;

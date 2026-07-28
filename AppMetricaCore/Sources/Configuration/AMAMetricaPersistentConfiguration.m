@@ -56,6 +56,22 @@
     [self.storage saveJSONArray:value forKey:AMAStorageStringKeyUserStartupHosts error:nil];
 }
 
+- (NSArray *)libraryAdapterCustomHosts
+{
+    NSArray *hosts = [self.storage jsonArrayForKey:AMAStorageStringKeyLibraryAdapterCustomHosts error:nil];
+    for (NSString *host in hosts) {
+        if ([host isKindOfClass:[NSString class]] == NO) {
+            return nil;
+        }
+    }
+    return hosts;
+}
+
+- (void)setLibraryAdapterCustomHosts:(NSArray *)value
+{
+    [self.storage saveJSONArray:value forKey:AMAStorageStringKeyLibraryAdapterCustomHosts error:nil];
+}
+
 #define PROPERTY_FOR_TYPE(returnType, getter, setter, key, storageGetter, storageSetter, setOnce) \
 - (returnType *)getter { \
     return [self.storage storageGetter:key error:NULL]; \

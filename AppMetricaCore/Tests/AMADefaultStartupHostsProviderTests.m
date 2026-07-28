@@ -33,6 +33,9 @@ describe(@"AMADefaultStartupHostsProvider", ^{
         it(@"Should return custom hosts if bundle belongs to main app", ^{
             [[extractHosts() should] equal:@[customHost]];
         });
+        it(@"Should expose custom hosts as resource hosts", ^{
+            [[[AMADefaultStartupHostsProvider resourceStartupHosts] should] equal:@[customHost]];
+        });
     });
     context(@"App extension bundle", ^{
         beforeEach(^{
@@ -79,6 +82,7 @@ describe(@"AMADefaultStartupHostsProvider", ^{
             [NSBundle stub:@selector(mainBundle) andReturn:bundle];
             
             [[extractHosts() should] equal:predefinedHosts];
+            [[[AMADefaultStartupHostsProvider resourceStartupHosts] should] beEmpty];
         });
     });
     context(@"No bundle", ^{

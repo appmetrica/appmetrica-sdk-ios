@@ -44,6 +44,7 @@ NSString *const AMAStorageStringKeyStartupUpdatedAt = @"startup.updated_at";
 NSString *const AMAStorageStringKeyStatSendingDisabledReportingInterval = @"stat.sending.disabled.reporting.interval";
 NSString *const AMAStorageStringKeyUUID = @"uuid";
 NSString *const AMAStorageStringKeyUserStartupHosts = @"user.startup.hosts";
+NSString *const AMAStorageStringKeyLibraryAdapterCustomHosts = @"library.adapter.custom.hosts";
 NSString *const AMAStorageStringKeyRegisterForAttributionTime = @"register.for.attribution.time";
 NSString *const AMAStorageStringKeyAttributionModel = @"attribution.model";
 NSString *const AMAStorageStringKeyConversionValue = @"conversion.value";

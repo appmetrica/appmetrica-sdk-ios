@@ -20,6 +20,7 @@ typedef NSDictionary<AMAAttributionSource, AMAExternalAttributionConfiguration *
 @property (nonatomic, strong) NSDate *startupUpdatedAt;
 @property (nonatomic, strong) NSDate *firstStartupUpdateDate;
 @property (nonatomic, copy) NSArray *userStartupHosts;
+@property (nonatomic, copy) NSArray *libraryAdapterCustomHosts;
 
 @property (nonatomic, strong) AMAAttributionModelConfiguration *attributionModelConfiguration;
 @property (nonatomic, strong) AMAExternalAttributionConfigurationMap *externalAttributionConfigurations;
