@@ -17,6 +17,7 @@
 #import "AMAReportHostProviderMock.h"
 #import "AMAReportRequestFactory.h"
 #import "AMAProxyReportsController.h"
+#import "AMAReportControllingMock.h"
 
 SPEC_BEGIN(AMAReportsControllerTests)
 
@@ -43,6 +44,7 @@ AMAReportRequest *__block secondReportRequest = nil;
 NSArray *__block reportRequestModels = nil;
 AMAReportEventsBatch __block *firstEventBatch = nil;
 AMAReportEventsBatch __block *secondEventBatch = nil;
+AMAEvent *__block trackingEvent = nil;
 
 AMAInternalEventsReporter *__block internalEventsReporter = nil;
 AMAHostProviderMock *__block hostProvider = nil;
@@ -145,7 +147,7 @@ void (^beforeEachProxyReporter)() = ^{
         [event stub:@selector(type) andReturn:theValue(AMAEventTypeClient)];
     }
     
-    AMAEvent *trackingEvent = [AMAEvent mock];
+    trackingEvent = [AMAEvent mock];
     [trackingEvent stub:@selector(type) andReturn:theValue(AMAEventTypeApplePrivacy)];
     [events addObject:trackingEvent];
 
@@ -174,7 +176,7 @@ void (^beforeEachProxyReporter)() = ^{
     [payloadProvider stub:@selector(generatePayloadWithRequestModel:error:) andReturn:payload];
     reportRequestModels = @[ firstReportRequestModel ];
 
-    secondReportRequestModel = [[AMAReportRequestModel alloc] init];
+    secondReportRequestModel = [firstReportRequestModel copyWithEventsBatches:@[ secondEventBatch ]];
     secondPayload = [[AMAReportPayload alloc] initWithReportModel:secondReportRequestModel data:[NSData data]];
     secondReportRequest = [AMAReportRequestMock reportRequestWithPayload:secondPayload
                                                        requestIdentifier:requestIdentifier
@@ -1314,6 +1316,66 @@ describe(@"AMAReportsControllerTests", ^{
     
     describe(@"AMAProxyRepoterController", ^{
         beforeEach(beforeEachProxyReporter);
+
+        context(@"Request models routing", ^{
+
+            AMAReportControllingMock *__block regularController = nil;
+            AMAReportControllingMock *__block trackingController = nil;
+
+            beforeEach(^{
+                regularController = [[AMAReportControllingMock alloc] init];
+                trackingController = [[AMAReportControllingMock alloc] init];
+                controller = [[AMAProxyReportsController alloc]
+                    initWithExecutor:[KWMock nullMockForProtocol:@protocol(AMAAsyncExecuting)]
+                    regularReportsController:regularController
+                    trackingReportsController:trackingController
+                ];
+            });
+
+            it(@"Should not report an empty regular model for a tracking-only request", ^{
+                AMAReportEventsBatch *trackingBatch =
+                    [[AMAReportEventsBatch alloc] initWithSession:[AMASession mock]
+                                                   appEnvironment:@{}
+                                                           events:@[ trackingEvent ]];
+                AMAReportRequestModel *trackingOnlyModel =
+                    [firstReportRequestModel copyWithEventsBatches:@[ trackingBatch ]];
+
+                [controller reportRequestModelsFromArray:@[ trackingOnlyModel ]];
+
+                [[theValue(regularController.reportCalled) should] beFalse];
+                [[theValue(trackingController.reportCalled) should] beTrue];
+                [[trackingController.reportModels should] haveCountOf:1];
+                [[trackingController.reportModels.firstObject.events should] haveCountOf:1];
+            });
+
+            it(@"Should report a regular-only request only to the regular controller", ^{
+                AMAReportRequestModel *regularOnlyModel =
+                    [firstReportRequestModel copyWithEventsBatches:@[ firstEventBatch ]];
+
+                [controller reportRequestModelsFromArray:@[ regularOnlyModel ]];
+
+                [[theValue(regularController.reportCalled) should] beTrue];
+                [[theValue(trackingController.reportCalled) should] beFalse];
+                [[regularController.reportModels should] haveCountOf:1];
+            });
+
+            it(@"Should split a mixed request between both controllers", ^{
+                AMAReportEventsBatch *trackingBatch =
+                    [[AMAReportEventsBatch alloc] initWithSession:[AMASession mock]
+                                                   appEnvironment:@{}
+                                                           events:@[ trackingEvent ]];
+                AMAReportRequestModel *mixedModel =
+                    [firstReportRequestModel copyWithEventsBatches:@[ firstEventBatch, trackingBatch ]];
+
+                [controller reportRequestModelsFromArray:@[ mixedModel ]];
+
+                [[theValue(regularController.reportCalled) should] beTrue];
+                [[theValue(trackingController.reportCalled) should] beTrue];
+                [[regularController.reportModels.firstObject.events should] haveCountOf:1];
+                [[trackingController.reportModels.firstObject.events should] haveCountOf:1];
+            });
+        });
+
         testBlock();
     });
     

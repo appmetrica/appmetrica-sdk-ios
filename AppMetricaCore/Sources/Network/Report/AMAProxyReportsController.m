@@ -94,7 +94,9 @@ trackingTimeoutRequestsController:(AMATimeoutRequestsController *)trackingTimeou
         AMAReportRequestModel *regular = model;
         AMAReportRequestModel *tracking = [AMARequestModelSplitter extractTrackingRequestModelFromModel:&regular];
         
-        [regularModels addObject:regular];
+        if (regular.events.count > 0) {
+            [regularModels addObject:regular];
+        }
         if (tracking != nil) {
             [trackingModels addObject:tracking];
         }
