@@ -9,6 +9,7 @@
 #import "AMAStartupParametersConfiguration.h"
 #import "AMADate.h"
 #import "AMADatabaseHelper.h"
+#import "AMAErrorsFactory.h"
 
 @interface AMASessionStorage ()
 
@@ -150,6 +151,11 @@
 
 - (BOOL)updateSession:(AMASession *)session appState:(AMAApplicationState *)appState error:(NSError **)error
 {
+    if (session == nil) {
+        [AMAErrorUtilities fillError:error withError:[AMAErrorsFactory sessionNotLoadedError]];
+        return NO;
+    }
+    
     NSError *internalError = nil;
     session.appState = appState;
     NSData *data = [self.serializer commonDataForSession:session error:&internalError];
@@ -312,6 +318,11 @@
                       error:(NSError **)error
                   onSuccess:(dispatch_block_t)onSuccess
 {
+    if (session.oid == nil) {
+        [AMAErrorUtilities fillError:error withError:[AMAErrorsFactory sessionNotLoadedError]];
+        return NO;
+    }
+    
     BOOL result = [AMADatabaseHelper updateFieldsWithDictionary:fieldsDictionary
                                                        keyField:kAMACommonTableFieldOID
                                                             key:session.oid

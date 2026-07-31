@@ -14,6 +14,7 @@
 #import "AMAEnvironmentContainer.h"
 #import "AMAAppStateManagerTestHelper.h"
 #import "AMAApplicationStateManager.h"
+#import "AMAErrorsFactory.h"
 #import "AMAMetricaConfigurationTestUtilities.h"
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
 
@@ -512,6 +513,26 @@ describe(@"AMASessionStorage", ^{
                 });
             });
         });
+        context(@"Invalid session", ^{
+            it(@"Should reject nil session before app state serialization", ^{
+                NSError *error = nil;
+                BOOL result = [storage updateSession:nil
+                                           appState:[AMAApplicationState nullMock]
+                                              error:&error];
+                
+                [[theValue(result) should] beNo];
+                [[error should] equal:[AMAErrorsFactory sessionNotLoadedError]];
+            });
+            it(@"Should reject session without oid before database update", ^{
+                NSError *error = nil;
+                BOOL result = [storage updateSession:[AMASession nullMock]
+                                           pauseTime:date
+                                               error:&error];
+                
+                [[theValue(result) should] beNo];
+                [[error should] equal:[AMAErrorsFactory sessionNotLoadedError]];
+            });
+        });
         context(@"Error", ^{
             NSError *const expectedError = [NSError errorWithDomain:@"DOMAIN" code:23 userInfo:nil];
             context(@"Session ID", ^{
@@ -612,4 +633,3 @@ describe(@"AMASessionStorage", ^{
 });
 
 SPEC_END
-

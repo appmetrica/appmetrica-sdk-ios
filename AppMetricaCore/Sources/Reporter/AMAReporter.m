@@ -1251,16 +1251,8 @@
                     self.privacyTimer.timerStorage.isResendPeriodOutdated;
     AMALogInfo(@"send privacy event: %@ %d", self.apiKey, needSent);
     if (needSent) {
-        NSError *error = nil;
-        AMASession *session = [self lastSession];
-        AMAApplicationState *newState = [AMAApplicationStateManager applicationState];
-        [self.reporterStorage.sessionStorage updateSession:session
-                                                  appState:newState
-                                                     error:&error];
-        
-        if (error != nil) {
-            AMALogError(@"Failed to update session %@ with appState %@ : %@", session, newState, error);
-        }
+        [self applyAppStateToSessionIfNeeded:[self lastSession]
+                                    appState:AMAApplicationStateManager.applicationState];
         
         [self reportEventWithType:AMAEventTypeApplePrivacy
                              name:nil

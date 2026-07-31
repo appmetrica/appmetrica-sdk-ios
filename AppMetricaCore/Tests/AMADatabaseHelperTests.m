@@ -2,6 +2,7 @@
 #import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import "AMADatabaseHelper.h"
 #import <AppMetricaFMDB/AppMetricaFMDB.h>
+#import "AMAErrorsFactory.h"
 
 SPEC_BEGIN(AMADatabaseHelperTests)
 
@@ -130,7 +131,25 @@ describe(@"AMADatabaseHelper", ^{
         });
     });
 
+    context(@"Update", ^{
+        it(@"Should reject nil key", ^{
+            NSError *error = nil;
+            id key = nil;
+            BOOL result = [AMADatabaseHelper updateFieldsWithDictionary:@{ @"foo": @"bar" }
+                                                               keyField:@"id"
+                                                                    key:key
+                                                              tableName:@"table"
+                                                                     db:[AMAFMDatabase nullMock]
+                                                                  error:&error];
+            
+            [[theValue(result) should] beNo];
+            NSError *expectedError =
+                [AMAErrorsFactory internalInconsistencyError:
+                    @"Database update key is nil. Table: table, key field: id, update fields: foo"];
+            [[error should] equal:expectedError];
+        });
+    });
+
 });
 
 SPEC_END
-

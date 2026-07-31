@@ -2174,7 +2174,7 @@ describe(@"AMAReporter", ^{
         __block AMAPrivacyTimerStorageMock *privacyStorageMock;
         NSUUID *newIDFA = [NSUUID UUID];
         
-        void (^prepareReporter)() = ^{
+        void (^prepareReporter)(BOOL) = ^(BOOL shouldResumeSession) {
             reporter = [reporterTestHelper appReporterForApiKey:apiKey];
             privacyStorageMock = [reporterTestHelper privacyTimerStorageMockForApiKey:apiKey];
             
@@ -2185,8 +2185,9 @@ describe(@"AMAReporter", ^{
             id<AMADatabaseProtocol> db = [reporterTestHelper databaseForApiKey:apiKey];
             privacyStorageMock.isResendPeriodOutdated = YES;
             
-            
-            [reporter resumeSession];
+            if (shouldResumeSession) {
+                [reporter resumeSession];
+            }
             [reporter privacyTimerDidFire:[reporterTestHelper privacyTimerForApiKey:apiKey]];
         };
         
@@ -2196,7 +2197,7 @@ describe(@"AMAReporter", ^{
         
         context(@"In application", ^{
             beforeEach(^{
-                prepareReporter();
+                prepareReporter(YES);
             });
             afterEach(^{
                 cleanReporter();
@@ -2210,11 +2211,24 @@ describe(@"AMAReporter", ^{
                 [[[sessionStorage() lastSessionWithError:nil].appState.IFA should] equal:newIDFA.UUIDString];
             });
         });
+
+        context(@"In application without session", ^{
+            beforeEach(^{
+                prepareReporter(NO);
+            });
+            afterEach(^{
+                cleanReporter();
+            });
+            
+            it(@"Should fire event", ^{
+                [[[eventStorage() amatest_savedEventWithType:AMAEventTypeApplePrivacy] should] beNonNil];
+            });
+        });
         
         context(@"In extension", ^{
             beforeEach(^{
                 [AMAPlatformDescription stub:@selector(isExtension) andReturn:theValue(YES)];
-                prepareReporter();
+                prepareReporter(YES);
             });
             afterEach(^{
                 cleanReporter();

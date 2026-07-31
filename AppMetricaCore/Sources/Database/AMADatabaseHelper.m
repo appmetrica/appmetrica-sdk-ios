@@ -2,6 +2,7 @@
 #import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
 #import "AMADatabaseHelper.h"
 #import <AppMetricaFMDB/AppMetricaFMDB.h>
+#import "AMAErrorsFactory.h"
 
 @implementation AMADatabaseHelper
 
@@ -88,6 +89,17 @@
                                 db:(AMAFMDatabase *)db
                              error:(NSError **)error
 {
+    if (key == nil) {
+        NSString *description = [NSString stringWithFormat:
+            @"Database update key is nil. Table: %@, key field: %@, update fields: %@",
+            tableName,
+            keyField,
+            [dictionary.allKeys componentsJoinedByString:@", "]];
+        NSError *internalError = [AMAErrorsFactory internalInconsistencyError:description];
+        [AMAErrorUtilities fillError:error withError:internalError];
+        return NO;
+    }
+    
     NSMutableArray *values = [NSMutableArray arrayWithCapacity:dictionary.count + 1];
     NSMutableString *settersString = [NSMutableString string];
     BOOL __block isFirst = YES;
