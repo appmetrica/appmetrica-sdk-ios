@@ -1,5 +1,6 @@
 
 #import "AMABinaryImage.h"
+#import <AppMetricaLog/AMALogFlags.h>
 
 @implementation AMABinaryImage
 

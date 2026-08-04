@@ -1,5 +1,6 @@
 
 #import "AMAKeychainQueryBuilder.h"
+#import <AppMetricaLog/AMALogFlags.h>
 
 @interface AMAKeychainQueryBuilder ()
 

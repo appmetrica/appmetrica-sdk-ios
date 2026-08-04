@@ -1,5 +1,6 @@
 
 #import "AMABuildUID.h"
+#import <AppMetricaLog/AMALogFlags.h>
 
 static NSString *const kAMABuildUIDDateKey = @"date";
 

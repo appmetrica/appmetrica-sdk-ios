@@ -1,5 +1,6 @@
 
 #import <AppMetricaPlatform/AppMetricaPlatform.h>
+#import <AppMetricaLog/AMALogFlags.h>
 #import "AMASession.h"
 #import "AMADate.h"
 

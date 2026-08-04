@@ -1,5 +1,6 @@
 
 #import "AMAIDSyncStartupResponse.h"
+#import <AppMetricaLog/AMALogFlags.h>
 #import "AMAIDSyncStartupConfiguration.h"
 
 @implementation AMAIDSyncStartupResponse

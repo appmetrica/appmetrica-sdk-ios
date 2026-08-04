@@ -1,5 +1,6 @@
 
 #import "AMABacktraceFrame.h"
+#import <AppMetricaLog/AMALogFlags.h>
 
 @implementation AMABacktraceFrame
 

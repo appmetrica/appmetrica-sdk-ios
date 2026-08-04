@@ -1,5 +1,6 @@
 
 #import "AMADate.h"
+#import <AppMetricaLog/AMALogFlags.h>
 
 @implementation AMADate
 

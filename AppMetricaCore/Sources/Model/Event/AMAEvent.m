@@ -1,5 +1,6 @@
 
 #import "AMAEvent.h"
+#import <AppMetricaLog/AMALogFlags.h>
 #import "AMAEventValueProtocol.h"
 
 @implementation AMAEvent

@@ -1,5 +1,6 @@
 
 #import "AMADatabaseSchemeMigration.h"
+#import <AppMetricaLog/AMALogFlags.h>
 #import "AMAMigrationUtils.h"
 
 @implementation AMADatabaseSchemeMigration

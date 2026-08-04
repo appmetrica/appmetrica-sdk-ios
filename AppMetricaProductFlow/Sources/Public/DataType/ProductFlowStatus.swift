@@ -1,7 +1,7 @@
 import Foundation
 
 /// The final outcome of a product flow, reported with ``FlowResultEventBuilder``.
-public enum ProductFlowStatus {
+public enum ProductFlowStatus: Sendable {
     /// The offer was fulfilled or the product was acquired.
     case success
 

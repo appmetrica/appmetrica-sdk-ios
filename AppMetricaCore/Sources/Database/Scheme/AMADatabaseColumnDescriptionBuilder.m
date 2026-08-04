@@ -1,5 +1,6 @@
 
 #import "AMADatabaseColumnDescriptionBuilder.h"
+#import <AppMetricaLog/AMALogFlags.h>
 
 @interface AMADatabaseColumnDescriptionBuilder ()
 

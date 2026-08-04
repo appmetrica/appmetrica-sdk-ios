@@ -1,5 +1,6 @@
 
 #import "AMADispatchStrategy.h"
+#import <AppMetricaLog/AMALogFlags.h>
 #import "AMAReporterStorage.h"
 #import "AMAReportExecutionConditionChecker.h"
 #import "AMAStartupController.h"

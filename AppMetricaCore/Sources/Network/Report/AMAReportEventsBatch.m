@@ -1,5 +1,6 @@
 
 #import "AMAReportEventsBatch.h"
+#import <AppMetricaLog/AMALogFlags.h>
 
 @implementation AMAReportEventsBatch
 

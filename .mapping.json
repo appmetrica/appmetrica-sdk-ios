@@ -1967,6 +1967,7 @@
   "AppMetricaLog/Sources/include/AppMetricaLog/AMALogChannel.h":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaLog/Sources/include/AppMetricaLog/AMALogChannel.h",
   "AppMetricaLog/Sources/include/AppMetricaLog/AMALogConfigurator.h":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaLog/Sources/include/AppMetricaLog/AMALogConfigurator.h",
   "AppMetricaLog/Sources/include/AppMetricaLog/AMALogFacade.h":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaLog/Sources/include/AppMetricaLog/AMALogFacade.h",
+  "AppMetricaLog/Sources/include/AppMetricaLog/AMALogFlags.h":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaLog/Sources/include/AppMetricaLog/AMALogFlags.h",
   "AppMetricaLog/Sources/include/AppMetricaLog/AMALogMacros.h":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaLog/Sources/include/AppMetricaLog/AMALogMacros.h",
   "AppMetricaLog/Sources/include/AppMetricaLog/AppMetricaLog.h":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaLog/Sources/include/AppMetricaLog/AppMetricaLog.h",
   "AppMetricaLog/Tests/AMABlockLogMessageFormatterTests.m":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaLog/Tests/AMABlockLogMessageFormatterTests.m",
@@ -2288,6 +2289,7 @@
   "LICENSE":"mobile/metrika/ios/appmetrica-sdk/public/LICENSE",
   "Package.resolved":"mobile/metrika/ios/appmetrica-sdk/public/Package.resolved",
   "Package.swift":"mobile/metrika/ios/appmetrica-sdk/public/Package.swift",
+  "Package@swift-6.1.swift":"mobile/metrika/ios/appmetrica-sdk/public/Package@swift-6.1.swift",
   "README.md":"mobile/metrika/ios/appmetrica-sdk/public/README.md",
   "THIRD PARTY LICENSES":"mobile/metrika/ios/appmetrica-sdk/public/THIRD PARTY LICENSES"
 }

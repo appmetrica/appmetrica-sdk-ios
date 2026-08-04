@@ -1,4 +1,4 @@
-// swift-tools-version:5.8
+// swift-tools-version:6.1
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
@@ -131,6 +131,59 @@ enum ExternalPackage: String, CaseIterable {
     }
 }
 
+
+enum AppMetricaTrait: String, CaseIterable {
+    case enableDebug = "AMAEnableDebug"
+
+    static let traitsSupportedDefineName = "AMA_SPM_TRAITS_SUPPORTED"
+
+    var trait: Trait {
+        switch self {
+        default:
+            return .trait(name: rawValue)
+        }
+    }
+
+    var defineName: String {
+        switch self {
+        case .enableDebug:
+            return "AMA_ENABLE_DEBUG"
+        }
+    }
+
+    var cSettings: [CSetting] {
+        [.define(defineName, to: "1", .when(traits: [rawValue]))]
+    }
+
+    var swiftSettings: [SwiftSetting] {
+        [.define(defineName, .when(traits: [rawValue]))]
+    }
+
+    static var allTraits: Set<Trait> {
+        Set(Self.allCases.map(\.trait))
+    }
+
+    static var packageTraits: Set<Trait> {
+        allTraits
+    }
+
+    static var defaultTraitCSettings: [CSetting] {
+        [.define(traitsSupportedDefineName, to: "1")]
+    }
+
+    static var defaultTraitSwiftSettings: [SwiftSetting] {
+        [.define(traitsSupportedDefineName)]
+    }
+    
+    static var allTraitsCSettings: [CSetting] {
+        return defaultTraitCSettings + allCases.flatMap(\.cSettings)
+    }
+    
+    static var allTraitsSwiftSettings: [SwiftSetting] {
+        return defaultTraitSwiftSettings + allCases.flatMap(\.swiftSettings)
+    }
+}
+
 let package = Package(
     name: "AppMetrica",
     platforms: [
@@ -138,6 +191,7 @@ let package = Package(
         .tvOS(.v13),
     ],
     products: AppMetricaProduct.allProducts,
+    traits: AppMetricaTrait.packageTraits,
     dependencies: ExternalPackage.allDependencies,
     targets: [
         //MARK: - AppMetrica SDK -
@@ -385,7 +439,8 @@ extension Target {
             dependencies: dependencies.map { $0.dependency } + externalDependencies.map { $0.dependency },
             path: target.path,
             resources: resources,
-            cSettings: resultSearchPath.sorted().map { .headerSearchPath($0) }
+            cSettings: resultSearchPath.sorted().map { .headerSearchPath($0) } + AppMetricaTrait.allTraitsCSettings,
+            swiftSettings: AppMetricaTrait.allTraitsSwiftSettings
         )
     }
 
@@ -403,7 +458,8 @@ extension Target {
             dependencies: dependencies.map { $0.dependency } + externalDependencies.map { $0.dependency },
             path: target.testsPath,
             resources: resources,
-            cSettings: resultSearchPath.sorted().map { .headerSearchPath($0) }
+            cSettings: resultSearchPath.sorted().map { .headerSearchPath($0) } + AppMetricaTrait.allTraitsCSettings,
+            swiftSettings: AppMetricaTrait.allTraitsSwiftSettings
         )
     }
 

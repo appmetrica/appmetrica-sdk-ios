@@ -1,4 +1,5 @@
 #import "AMAScreenshotConfiguration.h"
+#import <AppMetricaLog/AMALogFlags.h>
 #import <AppMetricaStorageUtils/AppMetricaStorageUtils.h>
 #import "AMAScreenshotStartupResponse.h"
 

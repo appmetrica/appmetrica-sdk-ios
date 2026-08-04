@@ -83,6 +83,7 @@ final class LibraryAdapterTests: XCTestCase {
         XCTAssertEqual(parameters["payload"] as? String, payload)
     }
 
+    @MainActor
     func testReportEventWithAppMetricaFailure() {
         // Given
         let expectation = self.expectation(description: "Report event with AppMetrica failure")

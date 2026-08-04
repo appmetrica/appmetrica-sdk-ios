@@ -4,28 +4,28 @@ import Foundation
 import XCTest
 
 class MockAppMetrica: AppMetrica {
-    static var reportEventCalled = false
-    static var lastReportedEventName: String?
-    static var lastReportedEventParameters: [AnyHashable: Any]?
-    static var shouldFailReporting = false
+    nonisolated(unsafe) static var reportEventCalled = false
+    nonisolated(unsafe) static var lastReportedEventName: String?
+    nonisolated(unsafe) static var lastReportedEventParameters: [AnyHashable: Any]?
+    nonisolated(unsafe) static var shouldFailReporting = false
     
-    static var anonymousConfiguration: AppMetricaConfiguration?
-    static var anonymousActivationExpectation: XCTestExpectation = XCTestExpectation()
+    nonisolated(unsafe) static var anonymousConfiguration: AppMetricaConfiguration?
+    nonisolated(unsafe) static var anonymousActivationExpectation: XCTestExpectation = XCTestExpectation()
     
-    static var libraryAdapterConfiguration: AppMetricaLibraryAdapterConfiguration?
-    static var setupLibraryAdapterConfigurationExpectation: XCTestExpectation = XCTestExpectation()
+    nonisolated(unsafe) static var libraryAdapterConfiguration: AppMetricaLibraryAdapterConfiguration?
+    nonisolated(unsafe) static var setupLibraryAdapterConfigurationExpectation: XCTestExpectation = XCTestExpectation()
     
-    static var locationTrackingEnabledValue: Bool?
-    static var locationTrackingEnabledExpectation: XCTestExpectation = XCTestExpectation()
+    nonisolated(unsafe) static var locationTrackingEnabledValue: Bool?
+    nonisolated(unsafe) static var locationTrackingEnabledExpectation: XCTestExpectation = XCTestExpectation()
     
-    static var advertisingIdentifierTrackingEnabledValue: Bool?
-    static var advertisingIdentifierTrackingEnabledExpectation: XCTestExpectation = XCTestExpectation()
+    nonisolated(unsafe) static var advertisingIdentifierTrackingEnabledValue: Bool?
+    nonisolated(unsafe) static var advertisingIdentifierTrackingEnabledExpectation: XCTestExpectation = XCTestExpectation()
 
-    static var customHostsValue: [String]?
-    static var customHostsExpectation: XCTestExpectation = XCTestExpectation()
+    nonisolated(unsafe) static var customHostsValue: [String]?
+    nonisolated(unsafe) static var customHostsExpectation: XCTestExpectation = XCTestExpectation()
     
-    static var autocollectedData: String?
-    static var subscribeForAutocollectedDataExpectation: XCTestExpectation = XCTestExpectation()
+    nonisolated(unsafe) static var autocollectedData: String?
+    nonisolated(unsafe) static var subscribeForAutocollectedDataExpectation: XCTestExpectation = XCTestExpectation()
     
     override class func activate() {
         anonymousActivationExpectation.fulfill()
@@ -50,7 +50,7 @@ class MockAppMetrica: AppMetrica {
         customHostsValue = customHosts
         customHostsExpectation.fulfill()
     }
-    
+
     override class func reportEvent(
         name: String, parameters params: [AnyHashable: Any]?, onFailure: ((any Error) -> Void)? = nil
     ) {
@@ -101,7 +101,7 @@ class MockAppMetrica: AppMetrica {
         advertisingIdentifierTrackingEnabledValue = nil
         customHostsValue = nil
         autocollectedData = nil
-        
+
         reportEventCalled = false
         lastReportedEventName = nil
         lastReportedEventParameters = nil

@@ -1,5 +1,6 @@
 
 #import "AMAPermission.h"
+#import <AppMetricaLog/AMALogFlags.h>
 
 @implementation AMAPermission
 

@@ -1,5 +1,6 @@
 
 #import "AMAUniquePriorityQueue.h"
+#import <AppMetricaLog/AMALogFlags.h>
 
 @interface AMAUniquePriorityQueue ()
 

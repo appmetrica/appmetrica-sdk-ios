@@ -1,5 +1,6 @@
 
 #import <AppMetricaStorageUtils/AppMetricaStorageUtils.h>
+#import <AppMetricaLog/AMALogFlags.h>
 #import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
 #import "AMAStartupParametersConfiguration.h"
 #import "AMAStorageKeys.h"

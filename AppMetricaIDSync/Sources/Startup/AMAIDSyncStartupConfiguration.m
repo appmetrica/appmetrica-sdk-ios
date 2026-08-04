@@ -1,5 +1,6 @@
 
 #import "AMAIDSyncStartupConfiguration.h"
+#import <AppMetricaLog/AMALogFlags.h>
 #import <AppMetricaStorageUtils/AppMetricaStorageUtils.h>
 #import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
 #import "AMAIDSyncKeys.h"

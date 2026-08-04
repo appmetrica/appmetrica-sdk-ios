@@ -1,5 +1,6 @@
 
 #import "AMALocation.h"
+#import <AppMetricaLog/AMALogFlags.h>
 
 @implementation AMALocation
 
