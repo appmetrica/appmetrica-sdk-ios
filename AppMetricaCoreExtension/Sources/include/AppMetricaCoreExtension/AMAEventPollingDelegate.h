@@ -4,8 +4,9 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @class AMAApplicationState;
+@class AMAEnvironmentContainer;
 
-NS_SWIFT_NAME(AMAEventPollingParameters)
+NS_SWIFT_NAME(EventPollingParameters)
 @interface AMAEventPollingParameters : NSObject
 
 @property (nonatomic) NSUInteger eventType;
@@ -28,7 +29,7 @@ NS_SWIFT_NAME(AMAEventPollingParameters)
 
 @end
 
-NS_SWIFT_NAME(EventFlushableDelegate)
+NS_SWIFT_NAME(EventPollingDelegate)
 @protocol AMAEventPollingDelegate <NSObject>
 
 + (NSArray<AMAEventPollingParameters *> *)pollingEvents;
