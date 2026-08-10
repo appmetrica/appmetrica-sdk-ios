@@ -39,6 +39,7 @@ dependencies: [
         // .product(name: "AppMetricaCore", package: "appmetrica-sdk-ios"),
         // .product(name: "AppMetricaCrashes", package: "appmetrica-sdk-ios"),
         // .product(name: "AppMetricaAdSupport", package: "appmetrica-sdk-ios"),
+        // .product(name: "AppMetricaProductFlow", package: "appmetrica-sdk-ios"),
     ]
 )
 ```
@@ -56,6 +57,8 @@ target 'YourAppName' do
     # If you need specific integration, skip 'AppMetricaAnalytics' and add specific modules:
     pod 'AppMetricaCore', '~> 6.0.0'
     # Add other modules like 'AppMetricaCrashes', 'AppMetricaWebKit' or 'AppMetricaAdSupport' if needed.
+    # To report product acquisition funnel events, add:
+    pod 'AppMetricaProductFlow', '~> 6.5.0'
 end
 ```
 
@@ -87,6 +90,7 @@ To meet Apple's App Store rules regarding children's privacy (like COPPA), add A
 - `AppMetricaAdSupport`: Needed for IDFA collection, don't include for children's apps.
 - `AppMetricaScreenshot`: Allows AppMetrica SDK to collect screenshot taken events.
 - `AppMetricaIDSync`: Enhances integration capabilities and improves overall system performance in cross-platform environments.
+- `AppMetricaProductFlow`: Reports offer impressions and product acquisition funnel events. This optional module is not included in `AppMetricaAnalytics` and must be added separately.
 
 ## Integration Quickstart
 
@@ -185,6 +189,38 @@ AMAAppMetricaConfiguration *configuration =
 ```
 
 ## Advanced Configuration
+
+### Track Product Flows
+
+Add the `AppMetricaProductFlow` module (available starting with version 6.5.0) to track a product acquisition funnel: an offer shown to the user, the start and intermediate steps of the flow, and its final result. Build each event and report it through the core AppMetrica API:
+
+```swift
+import AppMetricaCore
+import AppMetricaProductFlow
+
+let offerShown = ProductFlowEvents.offerShown(
+    productOfferId: "offer-1",
+    offerType: "insurance"
+).withProductId("insurance-policy").build()
+AppMetrica.report(event: offerShown, onFailure: nil)
+
+let flowStart = ProductFlowEvents.flowStart(productId: "insurance-policy").build()
+AppMetrica.report(event: flowStart, onFailure: nil)
+
+let flowStep = ProductFlowEvents.flowStep(
+    productId: "insurance-policy",
+    stepType: "payment"
+).build()
+AppMetrica.report(event: flowStep, onFailure: nil)
+
+let flowResult = ProductFlowEvents.flowResult(
+    productId: "insurance-policy",
+    status: .success
+).build()
+AppMetrica.report(event: flowResult, onFailure: nil)
+```
+
+String literals passed as product, offer, and step identifiers must not be empty. If a flow result is initially reported with the `pending` status, report another result event with the final status when it becomes known.
 
 ### Configure Sending of Events, Profile Attributes, and Revenue
 
