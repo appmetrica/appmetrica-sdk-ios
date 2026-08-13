@@ -9,6 +9,7 @@ static NSString *const kAMASchemaInconsistencyEventName = @"SchemaInconsistencyD
 static NSString *const kAMASchemaInconsistencyEventParametersDescriptionKey = @"schema: ";
 
 static NSString *const kAMASearchAdsTokenSuccessEventName = @"AppleSearchAdsTokenSuccess";
+static NSString *const kAMAModulesStatusEventName = @"modules_status";
 
 @interface AMAInternalEventsReporter ()
 
@@ -104,6 +105,11 @@ static NSString *const kAMASearchAdsTokenSuccessEventName = @"AppleSearchAdsToke
 {
     NSString *event = [NSString stringWithFormat:@"app_environment_%@_error", type];
     [self reportEvent:event parameters:parameters];
+}
+
+- (void)reportModulesStatusWithParameters:(NSDictionary *)parameters
+{
+    [self reportEvent:kAMAModulesStatusEventName parameters:parameters];
 }
 
 #pragma mark - Utils -

@@ -18,6 +18,7 @@ Pod::Spec.new do |s|
   s.frameworks = 'Foundation'
 
   s.dependency 'AppMetricaCore', '= 6.7.0'
+  s.dependency 'AppMetricaCoreExtension', '= 6.7.0'
   s.dependency 'AppMetricaCoreUtils', '= 6.7.0'
   s.dependency 'AppMetricaLog', '= 6.7.0'
 

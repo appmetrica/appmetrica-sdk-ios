@@ -40,6 +40,7 @@
 #import "AMAInternalEventsReporter.h"
 #import "AMALocationManager.h"
 #import "AMAMetricaConfigurationTestUtilities.h"
+#import "AMAModulesStatusReporter.h"
 #import "AMAPermissionsController.h"
 #import "AMAProfileAttribute.h"
 #import "AMAReporter.h"
@@ -236,6 +237,21 @@ describe(@"AMAAppMetricaImpl", ^{
             [appMetricaImpl stub:NSSelectorFromString(@"startReporter")];
             [[appMetricaImpl should] receive:@selector(reportDatabaseInconsistencyStateIfNeeded)];
             [appMetricaImpl start];
+        });
+    });
+
+    context(@"Modules status reporting", ^{
+        it(@"Should call reportModulesStatusIfNeeded on activation", ^{
+            [[appMetricaImpl should] receive:@selector(reportModulesStatusIfNeeded)];
+            [appMetricaImpl activateCommonComponents:configuration
+                                             reporter:[reporterTestHelper appReporterForApiKey:apiKey]];
+        });
+
+        it(@"Should ask modulesStatusReporter to report", ^{
+            AMAModulesStatusReporter *modulesStatusReporter = [AMAModulesStatusReporter nullMock];
+            [appMetricaImpl stub:@selector(modulesStatusReporter) andReturn:modulesStatusReporter];
+            [[modulesStatusReporter should] receive:@selector(report)];
+            [appMetricaImpl reportModulesStatusIfNeeded];
         });
     });
 

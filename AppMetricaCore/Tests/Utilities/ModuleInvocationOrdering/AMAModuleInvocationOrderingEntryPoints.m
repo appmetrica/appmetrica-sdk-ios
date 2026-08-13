@@ -61,6 +61,11 @@ id<AMAAdProviding> AMAModuleInvocationOrderingAdProvider(void)
     [registrar registerServiceConfiguration:service];
 }
 
+- (NSString *)moduleName
+{
+    return @"AMAModuleInvocationOrderingEntryPoint";
+}
+
 @end
 
 @implementation AMAModuleInvocationOrderingSecondEntryPoint
@@ -68,6 +73,11 @@ id<AMAAdProviding> AMAModuleInvocationOrderingAdProvider(void)
 - (void)registerComponentsWithRegistrar:(id<AMAModuleRegistrar>)registrar
 {
     [sModuleInvocationRecorder recordInvocationFromClass:self.class selector:_cmd];
+}
+
+- (NSString *)moduleName
+{
+    return @"AMAModuleInvocationOrderingSecondEntryPoint";
 }
 
 @end
@@ -78,6 +88,11 @@ id<AMAAdProviding> AMAModuleInvocationOrderingAdProvider(void)
 {
     [sModuleInvocationRecorder recordInvocationFromClass:self.class selector:_cmd];
     [registrar registerActivationDelegate:AMAModuleActivationDelegateMock.class];
+}
+
+- (NSString *)moduleName
+{
+    return @"AMAModuleInvocationOrderingPublicActivationEntryPoint";
 }
 
 @end

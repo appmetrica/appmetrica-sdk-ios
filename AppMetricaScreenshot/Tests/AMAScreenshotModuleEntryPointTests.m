@@ -6,6 +6,7 @@
 
 @interface AMAScreenshotModuleEntryPointTests : XCTestCase
 @property (nonatomic, strong) AMAModuleRegistrarMock *registrar;
+@property (nonatomic, strong) AMAScreenshotModuleEntryPoint *entryPoint;
 @end
 
 @implementation AMAScreenshotModuleEntryPointTests
@@ -13,7 +14,8 @@
 - (void)setUp
 {
     self.registrar = [[AMAModuleRegistrarMock alloc] initWithTestCase:self];
-    [[AMAScreenshotModuleEntryPoint new] registerComponentsWithRegistrar:self.registrar];
+    self.entryPoint = [AMAScreenshotModuleEntryPoint new];
+    [self.entryPoint registerComponentsWithRegistrar:self.registrar];
 }
 
 - (void)testRegisterComponentsWithRegistrar_registersExactlyOneService
@@ -59,6 +61,11 @@
 - (void)testRegisterComponentsWithRegistrar_doesNotRegisterAdProvider
 {
     XCTAssertEqual(self.registrar.adProviders.count, 0u);
+}
+
+- (void)testModuleName
+{
+    XCTAssertEqualObjects(self.entryPoint.moduleName, @"AppMetricaScreenshot");
 }
 
 @end

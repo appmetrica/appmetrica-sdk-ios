@@ -12,6 +12,7 @@
 #import "AMAExternalAttributionConfiguration.h"
 #import "AMAAppMetricaConfiguration+JSONSerializable.h"
 #import "AMAAppMetricaConfigurationFileStorage.h"
+#import "AMAModulesStatusReportState.h"
 
 @interface AMAMetricaPersistentConfiguration ()
 
@@ -217,6 +218,22 @@ LONG_PROPERTY(conversionValue, setConversionValue, AMAStorageStringKeyConversion
 - (void)setAutocollectedData:(NSDictionary<NSString *, NSNumber *> *)value
 {
     [self.storage saveJSONDictionary:value forKey:AMAStorageStringKeyAutocollectedData error:nil];
+}
+
+- (void)setModulesStatusReportState:(AMAModulesStatusReportState *)modulesStatusReportState
+{
+    [self.storage saveJSONDictionary:[modulesStatusReportState JSON]
+                              forKey:AMAStorageStringKeyModulesStatus
+                               error:nil];
+}
+
+- (AMAModulesStatusReportState *)modulesStatusReportState
+{
+    NSDictionary *jsonDictionary = [self.storage jsonDictionaryForKey:AMAStorageStringKeyModulesStatus error:nil];
+    if ([jsonDictionary count] == 0) {
+        return nil;
+    }
+    return [[AMAModulesStatusReportState alloc] initWithJSON:jsonDictionary];
 }
 
 @end

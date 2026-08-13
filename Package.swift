@@ -170,7 +170,7 @@ let package = Package(
         .target(
             target: .crashes,
             dependencies: [
-                .core, .log, .coreExtension, .hostState, .protobufUtils, .platform, .storageUtils,
+                .core, .log, .coreExtension, .coreUtils, .hostState, .protobufUtils, .platform, .storageUtils,
                 .encodingUtils, .protobuf,
             ],
             externalDependencies: [.ksCrashRecording]
@@ -267,7 +267,7 @@ let package = Package(
         ),
 
         //MARK: - AppMetrica WebKit
-        .target(target: .webKit, dependencies: [.core, .log, .coreUtils]),
+        .target(target: .webKit, dependencies: [.core, .coreExtension, .log, .coreUtils]),
         .testTarget(
             target: .webKit,
             dependencies: [.webKit, .testUtils],
@@ -342,7 +342,7 @@ let package = Package(
 
         //MARK: - AppMetricaLibraryAdapter
         .target(target: .libraryAdapter, dependencies: [.core, .coreExtension]),
-        .testTarget(target: .libraryAdapter, dependencies: [.libraryAdapter]),
+        .testTarget(target: .libraryAdapter, dependencies: [.libraryAdapter, .coreExtension, .testUtils]),
 
         //MARK: - AppMetricaScreenshot
         .target(target: .screenshot, dependencies: [.core, .coreExtension, .storageUtils, .log]),
@@ -356,7 +356,7 @@ let package = Package(
         .target(target: .fmdb),
 
         //MARK: - AppMetricaIDSync
-        .target(target: .idSync, dependencies: [.core, .coreExtension, .storageUtils, .coreUtils, .log, .platform]),
+        .target(target: .idSync, dependencies: [.core, .coreExtension, .storageUtils, .coreUtils, .network, .log, .platform]),
         .testTarget(
             target: .idSync,
             dependencies: [.idSync, .core, .testUtils],
@@ -490,6 +490,7 @@ extension AppMetricaTarget {
                 "./ModulesAPI/AdRevenue/IronSource",
                 "./ModulesAPI/AdRevenue/AppLovin",
                 "./ModulesAPI/AdRevenue/AppLovin/Startup",
+                "./ModulesAPI/Reporter",
                 "./Network",
                 "./Network/File",
                 "./Network/Report",

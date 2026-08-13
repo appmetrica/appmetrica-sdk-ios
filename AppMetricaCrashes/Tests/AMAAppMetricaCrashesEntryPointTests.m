@@ -6,6 +6,7 @@
 
 @interface AMAAppMetricaCrashesEntryPointTests : XCTestCase
 @property (nonatomic, strong) AMAModuleRegistrarMock *registrar;
+@property (nonatomic, strong) AMAAppMetricaCrashesEntryPoint *entryPoint;
 @end
 
 @implementation AMAAppMetricaCrashesEntryPointTests
@@ -13,7 +14,8 @@
 - (void)setUp
 {
     self.registrar = [[AMAModuleRegistrarMock alloc] initWithTestCase:self];
-    [[AMAAppMetricaCrashesEntryPoint new] registerComponentsWithRegistrar:self.registrar];
+    self.entryPoint = [AMAAppMetricaCrashesEntryPoint new];
+    [self.entryPoint registerComponentsWithRegistrar:self.registrar];
 }
 
 - (void)testRegisterComponentsWithRegistrar_registersActivationDelegate
@@ -49,6 +51,11 @@
 - (void)testRegisterComponentsWithRegistrar_doesNotRegisterAdProvider
 {
     XCTAssertEqual(self.registrar.adProviders.count, 0u);
+}
+
+- (void)testModuleName
+{
+    XCTAssertEqualObjects(self.entryPoint.moduleName, @"AppMetricaCrashes");
 }
 
 @end

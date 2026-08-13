@@ -15,5 +15,10 @@
     [registrar registerServiceConfiguration:config];
 }
 
+- (NSString *)moduleName
+{
+    return @"AppMetricaScreenshot";
+}
+
 
 @end

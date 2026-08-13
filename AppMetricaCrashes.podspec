@@ -26,6 +26,7 @@ Pod::Spec.new do |s|
   s.dependency 'AppMetricaPlatform', '= 6.7.0'
   s.dependency 'AppMetricaStorageUtils', '= 6.7.0'
   s.dependency 'AppMetricaEncodingUtils', '= 6.7.0'
+  s.dependency 'AppMetricaProtobuf', '= 6.7.0'
 
   s.dependency 'KSCrash/Recording', '>= 2.5.1', '< 2.6.0'
 

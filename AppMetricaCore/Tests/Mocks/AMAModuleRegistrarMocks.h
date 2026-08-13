@@ -15,6 +15,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, weak, nullable) id<AMAModuleRegistrar> receivedRegistrar;
 @property (nonatomic, weak, nullable) AMAModuleInvocationRecorder *invocationRecorder;
 @property (nonatomic, copy, nullable) void (^registrationHandler)(id<AMAModuleRegistrar> registrar);
+// Module status reporting. Defaults to the class name.
+@property (nonatomic, copy) NSString *moduleName;
 // Class tracking (for tests where instances are created internally via classLookup)
 + (NSInteger)registrationCallCount;
 + (void)resetCallCount;

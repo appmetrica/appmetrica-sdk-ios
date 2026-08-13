@@ -6,6 +6,7 @@
 
 @interface AMAAdSupportModuleEntryPointTests : XCTestCase
 @property (nonatomic, strong) AMAModuleRegistrarMock *registrar;
+@property (nonatomic, strong) AMAAdSupportModuleEntryPoint *entryPoint;
 @end
 
 @implementation AMAAdSupportModuleEntryPointTests
@@ -13,7 +14,8 @@
 - (void)setUp
 {
     self.registrar = [[AMAModuleRegistrarMock alloc] initWithTestCase:self];
-    [[AMAAdSupportModuleEntryPoint new] registerComponentsWithRegistrar:self.registrar];
+    self.entryPoint = [AMAAdSupportModuleEntryPoint new];
+    [self.entryPoint registerComponentsWithRegistrar:self.registrar];
 }
 
 - (void)testRegisterComponentsWithRegistrar_registersAdProvider
@@ -44,6 +46,11 @@
 - (void)testRegisterComponentsWithRegistrar_doesNotRegisterServiceConfiguration
 {
     XCTAssertEqual(self.registrar.serviceConfigurations.count, 0u);
+}
+
+- (void)testModuleName
+{
+    XCTAssertEqualObjects(self.entryPoint.moduleName, @"AppMetricaAdSupport");
 }
 
 @end

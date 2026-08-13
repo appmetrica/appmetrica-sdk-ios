@@ -185,4 +185,9 @@ static NSString *const kPolicyKey = @"io.appmetrica.ironsource_auto_ad_revenue_e
     XCTAssertEqual(gLevelPlayRegisteredDelegates.count, 1u);
 }
 
+- (void)testModuleName
+{
+    XCTAssertEqualObjects([self entryPointWithPolicyEnabled:YES].moduleName, @"AppMetricaIronSource");
+}
+
 @end

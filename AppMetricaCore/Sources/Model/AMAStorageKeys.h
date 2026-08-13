@@ -83,4 +83,6 @@ extern NSString *const AMAStorageStringKeyRecentMainApiKey;
 
 extern NSString *const AMAStorageStringKeyAutocollectedData;
 
+extern NSString *const AMAStorageStringKeyModulesStatus;
+
 NS_ASSUME_NONNULL_END

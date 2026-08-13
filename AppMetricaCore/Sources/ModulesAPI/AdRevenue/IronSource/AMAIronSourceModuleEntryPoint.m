@@ -60,6 +60,11 @@ typedef NSString *(*AMAIronSourceSDKVersionIMP)(Class, SEL);
     [[AMAIronSourceManager sharedInstance] setupWithMajorVersion:self.detectedMajorVersion];
 }
 
+- (NSString *)moduleName
+{
+    return @"AppMetricaIronSource";
+}
+
 // MARK: - Private
 
 - (void)registerNativeSource

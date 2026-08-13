@@ -9,6 +9,9 @@ static NSArray<NSString *> *AMADefaultModuleEntryPointClassNames(void)
         @"AMAScreenshotModuleEntryPoint",
         @"AMAAppLovinMaxModuleEntryPoint",
         @"AMAIronSourceModuleEntryPoint",
+        @"AMAWebKitModuleEntryPoint",
+        @"AMAApphudAdapterModuleEntryPoint",
+        @"AMALibraryAdapterModuleEntryPoint",
     ] mutableCopy];
 
     Class provider = NSClassFromString(@"AMAInternalEntryPointProvider");

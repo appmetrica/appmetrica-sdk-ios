@@ -15,5 +15,9 @@
     [registrar registerServiceConfiguration:config];
 }
 
+- (NSString *)moduleName
+{
+    return @"AppMetricaIDSync";
+}
 
 @end

@@ -3,6 +3,7 @@
 #import <AppMetricaPlatform/AppMetricaPlatform.h>
 #import <AppMetricaHostState/AppMetricaHostState.h>
 #import "AMAAppMetricaImpl.h"
+#import "AMAModulesStatusReporter.h"
 #import "AMAModulesController.h"
 #import "AMAAdServicesDataProvider.h"
 #import "AMAAdServicesReportingController.h"
@@ -100,6 +101,7 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
 @property (nonatomic, strong, readonly) AMALocationManager *locationManager;
 
 @property (nonatomic, strong) AMAModulesController *modulesController;
+@property (nonatomic, strong) AMAModulesStatusReporter *modulesStatusReporter;
 
 @property (nonatomic, strong) NSHashTable *startupCompletionObservers;
 
@@ -285,6 +287,8 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
     if (configuration.appEnvironment != nil) {
         [self applyAppEnvironment:configuration.appEnvironment];
     }
+
+    [self reportModulesStatusIfNeeded];
 }
 
 
@@ -766,6 +770,11 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
     }];
 
     _modulesController = modulesController;
+    _modulesStatusReporter =
+        [[AMAModulesStatusReporter alloc] initWithReporter:[AMAAppMetrica sharedInternalEventsReporter]
+                                          modulesController:modulesController
+                                    persistentConfiguration:[AMAMetricaConfiguration sharedInstance].persistent
+                                               dateProvider:[[AMADateProvider alloc] init]];
     [modulesController startLoading];
 }
 
@@ -795,6 +804,13 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
             [reporter reportSchemaInconsistencyWithDescription:inconsistencyDescription];
             [[AMAMetricaConfiguration sharedInstance] resetDetectedInconsistencyDescription];
         }
+    }];
+}
+
+- (void)reportModulesStatusIfNeeded
+{
+    [self execute:^{
+        [self.modulesStatusReporter report];
     }];
 }
 

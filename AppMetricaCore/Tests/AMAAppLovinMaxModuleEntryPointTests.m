@@ -141,4 +141,9 @@ static NSString *const kPolicyKey = @"io.appmetrica.applovin_auto_ad_revenue_ena
     XCTAssertTrue([observer isKindOfClass:[AMAAppLovinManager class]]);
 }
 
+- (void)testModuleName
+{
+    XCTAssertEqualObjects([self entryPointWithPolicyEnabled:YES].moduleName, @"AppMetricaAppLovinMax");
+}
+
 @end

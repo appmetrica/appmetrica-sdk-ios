@@ -5,12 +5,14 @@
 @end
 @implementation AMAModuleEntryPointDiscovererValidEntryPoint
 - (void)registerComponentsWithRegistrar:(id<AMAModuleRegistrar>)registrar {}
+- (NSString *)moduleName { return NSStringFromClass(self.class); }
 @end
 
 @interface AMAModuleEntryPointDiscovererSecondEntryPoint : NSObject <AMAModuleEntryPoint>
 @end
 @implementation AMAModuleEntryPointDiscovererSecondEntryPoint
 - (void)registerComponentsWithRegistrar:(id<AMAModuleRegistrar>)registrar {}
+- (NSString *)moduleName { return NSStringFromClass(self.class); }
 @end
 
 @interface AMAModuleEntryPointDiscovererThrowingEntryPoint : NSObject <AMAModuleEntryPoint>
@@ -18,6 +20,7 @@
 @implementation AMAModuleEntryPointDiscovererThrowingEntryPoint
 - (instancetype)init { @throw [NSException exceptionWithName:@"test" reason:@"expected" userInfo:nil]; }
 - (void)registerComponentsWithRegistrar:(id<AMAModuleRegistrar>)registrar {}
+- (NSString *)moduleName { return NSStringFromClass(self.class); }
 @end
 
 @interface AMAInternalEntryPointProvider : NSObject
@@ -88,6 +91,9 @@
                               @"AMAScreenshotModuleEntryPoint",
                               @"AMAAppLovinMaxModuleEntryPoint",
                               @"AMAIronSourceModuleEntryPoint",
+                              @"AMAWebKitModuleEntryPoint",
+                              @"AMAApphudAdapterModuleEntryPoint",
+                              @"AMALibraryAdapterModuleEntryPoint",
                               @"AMAModuleEntryPointDiscovererInternalEntryPoint",
                           ]));
 }

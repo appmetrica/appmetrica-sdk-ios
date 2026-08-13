@@ -11,6 +11,15 @@ static NSInteger sRegistrationCallCount = 0;
 + (NSInteger)registrationCallCount { return sRegistrationCallCount; }
 + (void)resetCallCount { sRegistrationCallCount = 0; }
 
+- (instancetype)init
+{
+    self = [super init];
+    if (self != nil) {
+        _moduleName = NSStringFromClass(self.class);
+    }
+    return self;
+}
+
 - (void)registerComponentsWithRegistrar:(id<AMAModuleRegistrar>)registrar
 {
     [self.invocationRecorder recordInvocationFromClass:self.class selector:_cmd];

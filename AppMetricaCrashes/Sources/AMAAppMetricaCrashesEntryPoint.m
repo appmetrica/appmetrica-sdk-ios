@@ -11,5 +11,10 @@
     [registrar registerEventPollingDelegate:[AMAAppMetricaCrashes class]];
 }
 
+- (NSString *)moduleName
+{
+    return @"AppMetricaCrashes";
+}
+
 
 @end

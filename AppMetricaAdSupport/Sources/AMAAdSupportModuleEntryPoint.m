@@ -10,5 +10,9 @@
     [registrar registerAdProvider:[[AMAAdController alloc] init]];
 }
 
+- (NSString *)moduleName
+{
+    return @"AppMetricaAdSupport";
+}
 
 @end

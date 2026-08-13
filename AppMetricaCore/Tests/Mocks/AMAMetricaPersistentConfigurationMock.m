@@ -19,6 +19,7 @@
 @synthesize eventSum = _eventSum;
 @synthesize revenueTransactionIds = _revenueTransactionIds;
 @synthesize autocollectedData = _autocollectedData;
+@synthesize modulesStatusReportState = _modulesStatusReportState;
 
 - (instancetype)init 
 {

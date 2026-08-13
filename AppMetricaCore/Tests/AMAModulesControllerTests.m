@@ -200,4 +200,37 @@ static NSString *const kAMATestAPIKey = @"550e8400-e29b-41d4-a716-446655440000";
     XCTAssertTrue(resolvedProvider == provider);
 }
 
+// MARK: - Module statuses
+
+- (void)testModuleStatusesAreEmptyBeforeDiscovery
+{
+    XCTAssertEqualObjects(self.controller.moduleStatuses, @{});
+}
+
+- (void)testStartLoadingMarksAllDiscoveredEntryPointsAsLoaded
+{
+    AMAFakeEntryPoint *publicEntryPoint = [[AMAFakeEntryPoint alloc] init];
+    publicEntryPoint.moduleName = @"AppMetricaWebKit";
+    AMAFakeEntryPoint *internalEntryPoint = [[AMAFakeEntryPoint alloc] init];
+    internalEntryPoint.moduleName = @"AppMetricaYandexCore";
+    AMAFakeEntryPoint *failing = [[AMAFakeEntryPoint alloc] init];
+    failing.moduleName = @"AppMetricaCrashes";
+    failing.registrationHandler = ^(__unused id<AMAModuleRegistrar> registrar) {
+        @throw [NSException exceptionWithName:@"test"
+                                       reason:@"expected registration failure"
+                                     userInfo:nil];
+    };
+    AMAFakeEntryPoint *unnamed = [[AMAFakeEntryPoint alloc] init];
+    unnamed.moduleName = @"";
+    self.discoverer.entryPoints = @[ publicEntryPoint, internalEntryPoint, failing, unnamed ];
+
+    [self.controller startLoading];
+
+    XCTAssertEqualObjects(self.controller.moduleStatuses, (@{
+        @"AppMetricaWebKit": @YES,
+        @"AppMetricaYandexCore": @YES,
+        @"AppMetricaCrashes": @YES,
+    }));
+}
+
 @end

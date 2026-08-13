@@ -11,6 +11,7 @@
 @class AMAAttributionModelConfiguration;
 @class AMAExternalAttributionConfiguration;
 @class AMAAppMetricaConfiguration;
+@class AMAModulesStatusReportState;
 
 typedef NSDictionary<AMAAttributionSource, AMAExternalAttributionConfiguration *> AMAExternalAttributionConfigurationMap;
 
@@ -42,6 +43,8 @@ typedef NSDictionary<AMAAttributionSource, AMAExternalAttributionConfiguration *
 @property (nonatomic, strong) AMAAppMetricaConfiguration *appMetricaClientConfiguration;
 
 @property (nonatomic, copy) NSDictionary<NSString *, NSNumber *> *autocollectedData;
+
+@property (nonatomic, copy) AMAModulesStatusReportState *modulesStatusReportState;
 
 - (instancetype)init NS_UNAVAILABLE;
 + (instancetype)new NS_UNAVAILABLE;

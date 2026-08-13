@@ -31,6 +31,9 @@ typedef void (^AMAModuleAdProviderHandler)(id<AMAAdProviding> _Nullable moduleAd
          startupParametersHandler:(nullable AMAStartupParametersHandler)startupParametersHandler
     NS_DESIGNATED_INITIALIZER;
 
+/// Maps discovered SDK module names to YES. Thread safe.
+@property (atomic, copy, readonly) NSDictionary<NSString *, NSNumber *> *moduleStatuses;
+
 /// Schedules the handler on the modules executor after discovery.
 - (void)resolveModuleAdProviderWithHandler:(AMAModuleAdProviderHandler)handler;
 

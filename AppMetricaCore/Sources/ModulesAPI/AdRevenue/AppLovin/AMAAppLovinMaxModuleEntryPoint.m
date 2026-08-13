@@ -63,6 +63,11 @@ typedef NSString *(*AMAAppLovinVersionIMP)(Class, SEL);
     [self setupManager];
 }
 
+- (NSString *)moduleName
+{
+    return @"AppMetricaAppLovinMax";
+}
+
 // MARK: - Private
 
 - (void)registerNativeSource

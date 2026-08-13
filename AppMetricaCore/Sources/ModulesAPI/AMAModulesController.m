@@ -82,17 +82,37 @@
         AMALogError(@"Ignoring entry point registration after registry publication: %@", entryPoint);
         return;
     }
-    if ([self.entryPoints containsObject:entryPoint]) {
-        return;
+    @synchronized (self.entryPoints) {
+        if ([self.entryPoints containsObject:entryPoint]) {
+            return;
+        }
+        [self.entryPoints addObject:entryPoint];
     }
 
-    [self.entryPoints addObject:entryPoint];
     @try {
         [entryPoint registerComponentsWithRegistrar:self.registrar];
     }
     @catch (NSException *exception) {
         AMALogError(@"Entry point %@ failed during component registration: %@", entryPoint, exception);
     }
+}
+
+#pragma mark - Module statuses
+
+- (NSDictionary<NSString *, NSNumber *> *)moduleStatuses
+{
+    NSMutableDictionary<NSString *, NSNumber *> *statuses = [NSMutableDictionary dictionary];
+    @synchronized (self.entryPoints) {
+        for (id<AMAModuleEntryPoint> entryPoint in self.entryPoints) {
+            NSString *moduleName = entryPoint.moduleName;
+            if (moduleName.length == 0) {
+                AMALogError(@"Module reported an empty name, skipping status update");
+                continue;
+            }
+            statuses[moduleName] = @YES;
+        }
+    }
+    return [statuses copy];
 }
 
 #pragma mark - Activation lifecycle

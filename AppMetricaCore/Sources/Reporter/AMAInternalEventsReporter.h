@@ -30,4 +30,6 @@
 
 - (void)reportAppEnvironmentError:(NSDictionary *)parameters type:(NSString *)type;
 
+- (void)reportModulesStatusWithParameters:(NSDictionary *)parameters;
+
 @end

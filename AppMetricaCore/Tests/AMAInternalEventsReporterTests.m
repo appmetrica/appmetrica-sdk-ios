@@ -135,6 +135,20 @@ describe(@"AMAInternalEventsReporter", ^{
         
     });
     
+    context(@"Modules Status", ^{
+        it(@"Should report modules status event with parameters", ^{
+            NSString *const eventName = @"modules_status";
+            NSDictionary *parameters = @{
+                @"modulesStatus": @[
+                    @{ @"moduleName": @"AppMetricaAdSupport", @"loaded": @YES },
+                ],
+            };
+            [[reporterMock should] receive:@selector(reportEvent:parameters:onFailure:)
+                             withArguments:eventName, parameters, kw_any()];
+            [reporter reportModulesStatusWithParameters:parameters];
+        });
+    });
+
     context(@"App Environment Error", ^{
         it(@"Should report app environment error with parameters", ^{
             NSDictionary *parameters = @{ @"error": @"invalid_key" };
