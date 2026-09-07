@@ -35,6 +35,18 @@ FOUNDATION_EXPORT void AMAAppMetricaCrashErrorEnvironmentWriterAddStringValue(
 NS_SWIFT_NAME(AppMetricaCrashesConfiguration)
 @interface AMAAppMetricaCrashesConfiguration : NSObject <NSCopying>
 
+/// Sets the application version used for crashes captured before AppMetrica activation.
+///
+/// If not set, the value from `CFBundleShortVersionString` is used. Empty or `nil` assignments are ignored and
+/// preserve the current value.
+@property (nonatomic, copy, nullable) NSString *preActivationAppVersion;
+
+/// Sets the application build number used for crashes captured before AppMetrica activation.
+///
+/// If not set, the value from `CFBundleVersion` is used. The value must be a numeric string between `0` and
+/// `UINT32_MAX`. Invalid or `nil` assignments are ignored and preserve the current value.
+@property (nonatomic, copy, nullable) NSString *preActivationAppBuildNumber;
+
 /// Controls the automated tracking of application crashes.
 ///
 /// If enabled, the crash reporter will automatically report application crashes.

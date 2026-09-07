@@ -412,8 +412,10 @@ them while retaining external immutability. Needed for testability. */
 
     // Avoid quickApplicationState here: it initializes Core configuration and storage before activation.
     NSDictionary *minimalAppState = @{
-        kAMAAppVersionNameKey : [AMAPlatformDescription appVersion] ?: @"",
-        kAMAAppBuildNumberKey : [AMAPlatformDescription appBuildNumber] ?: @"",
+        kAMAAppVersionNameKey : frozenConfiguration.preActivationAppVersion
+            ?: [AMAPlatformDescription appVersion] ?: @"",
+        kAMAAppBuildNumberKey : frozenConfiguration.preActivationAppBuildNumber
+            ?: [AMAPlatformDescription appBuildNumber] ?: @"",
     };
     NSDictionary *context = @{
         kAMACrashContextAppBuildUIDKey : AMABuildUID.buildUID.stringValue ?: @"",
@@ -467,15 +469,26 @@ them while retaining external immutability. Needed for testability. */
     AMAApplicationState *appState = isQuickly ?
         AMAApplicationStateManager.quickApplicationState :
         AMAApplicationStateManager.applicationState;
+    NSMutableDictionary *appStateDictionary = [appState.dictionaryRepresentation mutableCopy]
+        ?: [NSMutableDictionary dictionary];
 
-    NSDictionary *context = @{
-        kAMACrashContextAppBuildUIDKey : AMABuildUID.buildUID.stringValue ?: @"",
-        kAMACrashContextAppStateKey : appState.dictionaryRepresentation ?: @{},
-        kAMACrashContextErrorEnvironmentKey : self.errorEnvironment.currentEnvironment ?: @{},
-        kAMACrashContextAppEnvironmentKey : self.appEnvironment.dictionaryEnvironment ?: @{},
-    };
+    // Keep state selection and publication atomic with respect to early monitoring installation.
+    @synchronized (self) {
+        if (_activated == NO && self.monitoringState == AMAAppMetricaCrashMonitoringStateInstalled) {
+            appStateDictionary[kAMAAppVersionNameKey] = self.internalConfiguration.preActivationAppVersion
+                ?: [AMAPlatformDescription appVersion] ?: @"";
+            appStateDictionary[kAMAAppBuildNumberKey] = self.internalConfiguration.preActivationAppBuildNumber
+                ?: [AMAPlatformDescription appBuildNumber] ?: @"";
+        }
 
-    [AMAKSCrashLoader addCrashContext:context];
+        NSDictionary *context = @{
+            kAMACrashContextAppBuildUIDKey : AMABuildUID.buildUID.stringValue ?: @"",
+            kAMACrashContextAppStateKey : appStateDictionary,
+            kAMACrashContextErrorEnvironmentKey : self.errorEnvironment.currentEnvironment ?: @{},
+            kAMACrashContextAppEnvironmentKey : self.appEnvironment.dictionaryEnvironment ?: @{},
+        };
+        [AMAKSCrashLoader addCrashContext:context];
+    }
 }
 
 - (void)notifyState

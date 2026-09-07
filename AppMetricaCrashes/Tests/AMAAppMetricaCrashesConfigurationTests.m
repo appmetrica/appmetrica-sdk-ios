@@ -20,6 +20,9 @@ static void AMAAppMetricaCrashesConfigurationTestsAnotherCrashCallback(
 {
 }
 
+static NSString *const kAMAValidPreActivationAppVersion = @"26.8.3.701";
+static NSString *const kAMAValidPreActivationAppBuildNumber = @"701";
+
 SPEC_BEGIN(AMAAppMetricaCrashesConfigurationTests)
 
 describe(@"AMAAppMetricaCrashesConfiguration", ^{
@@ -27,6 +30,14 @@ describe(@"AMAAppMetricaCrashesConfiguration", ^{
     let(config, ^{ return [[AMAAppMetricaCrashesConfiguration alloc] init]; });
     
     context(@"Default property values", ^{
+
+        it(@"Should not have a custom app version by default", ^{
+            [[config.preActivationAppVersion should] beNil];
+        });
+
+        it(@"Should not have a custom app build number by default", ^{
+            [[config.preActivationAppBuildNumber should] beNil];
+        });
         
         it(@"Should have autoCrashTracking enabled by default", ^{
             [[theValue(config.autoCrashTracking) should] beYes];
@@ -60,6 +71,8 @@ describe(@"AMAAppMetricaCrashesConfiguration", ^{
     context(@"NSCopying behavior", ^{
         
         it(@"Should produce a correct copy with the same property values", ^{
+            config.preActivationAppVersion = kAMAValidPreActivationAppVersion;
+            config.preActivationAppBuildNumber = kAMAValidPreActivationAppBuildNumber;
             config.autoCrashTracking = NO;
             config.probablyUnhandledCrashReporting = YES;
             config.ignoredCrashSignals = @[ @SIGABRT, @SIGILL ];
@@ -70,6 +83,8 @@ describe(@"AMAAppMetricaCrashesConfiguration", ^{
             
             AMAAppMetricaCrashesConfiguration *configCopy = [config copy];
             
+            [[configCopy.preActivationAppVersion should] equal:kAMAValidPreActivationAppVersion];
+            [[configCopy.preActivationAppBuildNumber should] equal:kAMAValidPreActivationAppBuildNumber];
             [[theValue(configCopy.autoCrashTracking) should] beNo];
             [[theValue(configCopy.probablyUnhandledCrashReporting) should] beYes];
             [[configCopy.ignoredCrashSignals should] equal:@[ @SIGABRT, @SIGILL ]];
@@ -84,6 +99,12 @@ describe(@"AMAAppMetricaCrashesConfiguration", ^{
     context(@"Property mutability", ^{
         
         it(@"Should allow changing property values", ^{
+            config.preActivationAppVersion = kAMAValidPreActivationAppVersion;
+            [[config.preActivationAppVersion should] equal:kAMAValidPreActivationAppVersion];
+
+            config.preActivationAppBuildNumber = kAMAValidPreActivationAppBuildNumber;
+            [[config.preActivationAppBuildNumber should] equal:kAMAValidPreActivationAppBuildNumber];
+
             config.autoCrashTracking = NO;
             [[theValue(config.autoCrashTracking) should] beNo];
             
@@ -107,6 +128,40 @@ describe(@"AMAAppMetricaCrashesConfiguration", ^{
                        AMAAppMetricaCrashesConfigurationTestsCrashCallback) should] beYes];
         });
     });
+
+    context(@"Pre-activation app version validation", ^{
+
+        it(@"Should ignore empty and nil app versions", ^{
+            config.preActivationAppVersion = kAMAValidPreActivationAppVersion;
+            config.preActivationAppVersion = @"";
+            config.preActivationAppVersion = nil;
+
+            [[config.preActivationAppVersion should] equal:kAMAValidPreActivationAppVersion];
+        });
+
+        it(@"Should accept zero as an app build number", ^{
+            config.preActivationAppBuildNumber = @"0";
+
+            [[config.preActivationAppBuildNumber should] equal:@"0"];
+        });
+
+        it(@"Should accept the maximum unsigned 32-bit app build number", ^{
+            config.preActivationAppBuildNumber = @"4294967295";
+
+            [[config.preActivationAppBuildNumber should] equal:@"4294967295"];
+        });
+
+        it(@"Should ignore invalid and nil app build numbers", ^{
+            config.preActivationAppBuildNumber = kAMAValidPreActivationAppBuildNumber;
+            config.preActivationAppBuildNumber = @"-1";
+            config.preActivationAppBuildNumber = @"1.5";
+            config.preActivationAppBuildNumber = @"1 build";
+            config.preActivationAppBuildNumber = @"4294967296";
+            config.preActivationAppBuildNumber = nil;
+
+            [[config.preActivationAppBuildNumber should] equal:kAMAValidPreActivationAppBuildNumber];
+        });
+    });
     
     context(@"Comparison and hashing", ^{
         
@@ -127,6 +182,19 @@ describe(@"AMAAppMetricaCrashesConfiguration", ^{
             [[theValue([configA hash]) shouldNot] equal:theValue([configB hash])];
         });
 
+        it(@"Should compare app version and build number", ^{
+            AMAAppMetricaCrashesConfiguration *configA = [[AMAAppMetricaCrashesConfiguration alloc] init];
+            configA.preActivationAppVersion = @"1.0";
+            configA.preActivationAppBuildNumber = @"1";
+
+            AMAAppMetricaCrashesConfiguration *configB = [[AMAAppMetricaCrashesConfiguration alloc] init];
+            configB.preActivationAppVersion = @"2.0";
+            configB.preActivationAppBuildNumber = @"2";
+
+            [[configA shouldNot] equal:configB];
+            [[theValue([configA hash]) shouldNot] equal:theValue([configB hash])];
+        });
+
         it(@"Should not consider two configurations with different crash callbacks as equal", ^{
             AMAAppMetricaCrashesConfiguration *configA = [[AMAAppMetricaCrashesConfiguration alloc] init];
             AMAAppMetricaCrashesConfiguration *configB = [[AMAAppMetricaCrashesConfiguration alloc] init];
@@ -139,6 +207,8 @@ describe(@"AMAAppMetricaCrashesConfiguration", ^{
         
         it(@"Should produce consistent hash values for the same property configuration", ^{
             AMAAppMetricaCrashesConfiguration *configA = [[AMAAppMetricaCrashesConfiguration alloc] init];
+            configA.preActivationAppVersion = kAMAValidPreActivationAppVersion;
+            configA.preActivationAppBuildNumber = kAMAValidPreActivationAppBuildNumber;
             configA.autoCrashTracking = YES;
             configA.probablyUnhandledCrashReporting = YES;
             configA.ignoredCrashSignals = @[ @SIGABRT, @SIGILL ];
@@ -147,6 +217,8 @@ describe(@"AMAAppMetricaCrashesConfiguration", ^{
             configA.applicationNotRespondingPingInterval = 0.2;
             
             AMAAppMetricaCrashesConfiguration *configB = [[AMAAppMetricaCrashesConfiguration alloc] init];
+            configB.preActivationAppVersion = kAMAValidPreActivationAppVersion;
+            configB.preActivationAppBuildNumber = kAMAValidPreActivationAppBuildNumber;
             configB.autoCrashTracking = YES;
             configB.probablyUnhandledCrashReporting = YES;
             configB.ignoredCrashSignals = @[ @SIGABRT, @SIGILL ];

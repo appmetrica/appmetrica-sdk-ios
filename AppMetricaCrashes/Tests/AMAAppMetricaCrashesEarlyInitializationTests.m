@@ -322,15 +322,23 @@ static void AMAAppMetricaCrashesEarlyTestsCallback(
 - (void)testFirstEarlyConfigurationIsCopiedAndFrozen
 {
     AMAAppMetricaCrashesConfiguration *first = [AMAAppMetricaCrashesConfiguration new];
+    first.preActivationAppVersion = @"1.0";
+    first.preActivationAppBuildNumber = @"1";
     first.ignoredCrashSignals = @[ @SIGABRT ];
     AMAAppMetricaCrashesConfiguration *second = [AMAAppMetricaCrashesConfiguration new];
+    second.preActivationAppVersion = @"2.0";
+    second.preActivationAppBuildNumber = @"2";
     second.autoCrashTracking = NO;
 
     [self.crashes initializeCrashMonitoringWithConfiguration:first];
+    first.preActivationAppVersion = @"3.0";
+    first.preActivationAppBuildNumber = @"3";
     first.ignoredCrashSignals = @[ @SIGSEGV ];
     [self.crashes initializeCrashMonitoringWithConfiguration:second];
     [self.crashes setConfiguration:second];
 
+    XCTAssertEqualObjects(self.crashes.internalConfiguration.preActivationAppVersion, @"1.0");
+    XCTAssertEqualObjects(self.crashes.internalConfiguration.preActivationAppBuildNumber, @"1");
     XCTAssertEqualObjects(self.crashes.internalConfiguration.ignoredCrashSignals, (@[ @SIGABRT ]));
     XCTAssertTrue(self.crashes.internalConfiguration.autoCrashTracking);
     XCTAssertEqual(self.loader.fullInstallationCount, 1u);
@@ -442,6 +450,132 @@ static void AMAAppMetricaCrashesEarlyTestsCallback(
     XCTAssertEqual(quickStateRequestCount, 0u);
 }
 
+- (void)testMinimalContextUsesCustomVersionAndBuildNumber
+{
+    [AMAPlatformDescription stub:@selector(appVersion) andReturn:@"bundle-version"];
+    [AMAPlatformDescription stub:@selector(appBuildNumber) andReturn:@"100"];
+    AMAAppMetricaCrashesConfiguration *configuration = [AMAAppMetricaCrashesConfiguration new];
+    configuration.preActivationAppVersion = @"26.8.3.701";
+    configuration.preActivationAppBuildNumber = @"701";
+
+    [self.crashes initializeCrashMonitoringWithConfiguration:configuration];
+
+    NSDictionary *appState = self.contexts.lastObject[kAMACrashContextAppStateKey];
+    XCTAssertEqualObjects(appState[kAMAAppVersionNameKey], @"26.8.3.701");
+    XCTAssertEqualObjects(appState[kAMAAppBuildNumberKey], @"701");
+}
+
+- (void)testPreActivationContextUsesBundleBuildNumberWhenOnlyVersionIsCustom
+{
+    [AMAPlatformDescription stub:@selector(appVersion) andReturn:@"bundle-version"];
+    [AMAPlatformDescription stub:@selector(appBuildNumber) andReturn:@"001"];
+    AMAApplicationState *quickState = [AMAApplicationState objectWithDictionaryRepresentation:@{
+        kAMAAppVersionNameKey : @"core-version",
+        kAMAAppBuildNumberKey : @"1",
+    }];
+    [AMAApplicationStateManager stub:@selector(quickApplicationState) andReturn:quickState];
+    AMAAppMetricaCrashesConfiguration *configuration = [AMAAppMetricaCrashesConfiguration new];
+    configuration.preActivationAppVersion = @"26.8.3.701";
+
+    [self.crashes initializeCrashMonitoringWithConfiguration:configuration];
+    [self.crashes setErrorEnvironmentValue:@"value" forKey:@"key"];
+    [self.crashes clearErrorEnvironment];
+
+    XCTAssertEqual(self.contexts.count, 3u);
+    for (NSDictionary *context in self.contexts) {
+        NSDictionary *appState = context[kAMACrashContextAppStateKey];
+        XCTAssertEqualObjects(appState[kAMAAppVersionNameKey], @"26.8.3.701");
+        XCTAssertEqualObjects(appState[kAMAAppBuildNumberKey], @"001");
+    }
+}
+
+- (void)testPreActivationContextUsesBundleVersionWhenOnlyBuildNumberIsCustom
+{
+    [AMAPlatformDescription stub:@selector(appVersion) andReturn:@"bundle-version"];
+    [AMAPlatformDescription stub:@selector(appBuildNumber) andReturn:@"100"];
+    AMAApplicationState *quickState = [AMAApplicationState objectWithDictionaryRepresentation:@{
+        kAMAAppVersionNameKey : @"core-version",
+        kAMAAppBuildNumberKey : @"1",
+    }];
+    [AMAApplicationStateManager stub:@selector(quickApplicationState) andReturn:quickState];
+    AMAAppMetricaCrashesConfiguration *configuration = [AMAAppMetricaCrashesConfiguration new];
+    configuration.preActivationAppBuildNumber = @"701";
+
+    [self.crashes initializeCrashMonitoringWithConfiguration:configuration];
+    [self.crashes setErrorEnvironmentValue:@"value" forKey:@"key"];
+    [self.crashes clearErrorEnvironment];
+
+    XCTAssertEqual(self.contexts.count, 3u);
+    for (NSDictionary *context in self.contexts) {
+        NSDictionary *appState = context[kAMACrashContextAppStateKey];
+        XCTAssertEqualObjects(appState[kAMAAppVersionNameKey], @"bundle-version");
+        XCTAssertEqualObjects(appState[kAMAAppBuildNumberKey], @"701");
+    }
+}
+
+- (void)testPreActivationContextUsesEmptyStringsWhenBundleVersionsAreMissing
+{
+    [AMAPlatformDescription stub:@selector(appVersion) andReturn:nil];
+    [AMAPlatformDescription stub:@selector(appBuildNumber) andReturn:nil];
+    AMAApplicationState *quickState = [AMAApplicationState objectWithDictionaryRepresentation:@{
+        kAMAAppVersionNameKey : @"core-version",
+        kAMAAppBuildNumberKey : @"0",
+    }];
+    [AMAApplicationStateManager stub:@selector(quickApplicationState) andReturn:quickState];
+
+    [self.crashes initializeCrashMonitoringWithConfiguration:[AMAAppMetricaCrashesConfiguration new]];
+    [self.crashes setErrorEnvironmentValue:@"value" forKey:@"key"];
+    [self.crashes clearErrorEnvironment];
+
+    XCTAssertEqual(self.contexts.count, 3u);
+    for (NSDictionary *context in self.contexts) {
+        NSDictionary *appState = context[kAMACrashContextAppStateKey];
+        XCTAssertEqualObjects(appState[kAMAAppVersionNameKey], @"");
+        XCTAssertEqualObjects(appState[kAMAAppBuildNumberKey], @"");
+    }
+}
+
+- (void)testPreActivationErrorEnvironmentUpdatesRefreshAppStateAndPreserveVersions
+{
+    AMAMutableApplicationState *quickState = [AMAMutableApplicationState new];
+    quickState.appVersionName = @"core-version";
+    quickState.appBuildNumber = @"1";
+    quickState.OSAPILevel = 17;
+    quickState.kitBuildNumber = 123;
+    __block NSUInteger quickStateRequestCount = 0;
+    [AMAApplicationStateManager stub:@selector(quickApplicationState) withBlock:^id(__unused NSArray *params) {
+        quickStateRequestCount += 1;
+        return quickState;
+    }];
+    AMAAppMetricaCrashesConfiguration *configuration = [AMAAppMetricaCrashesConfiguration new];
+    configuration.preActivationAppVersion = @"26.8.3.701";
+    configuration.preActivationAppBuildNumber = @"701";
+    [self.crashes initializeCrashMonitoringWithConfiguration:configuration];
+    configuration.preActivationAppVersion = @"changed-version";
+    configuration.preActivationAppBuildNumber = @"999";
+
+    [self.crashes setErrorEnvironmentValue:@"value" forKey:@"key"];
+
+    NSMutableDictionary *expectedState = [quickState.dictionaryRepresentation mutableCopy];
+    expectedState[kAMAAppVersionNameKey] = @"26.8.3.701";
+    expectedState[kAMAAppBuildNumberKey] = @"701";
+    XCTAssertEqualObjects(self.contexts.lastObject[kAMACrashContextAppStateKey], expectedState);
+    XCTAssertEqualObjects(self.contexts.lastObject[kAMACrashContextErrorEnvironmentKey], (@{ @"key" : @"value" }));
+
+    quickState.OSAPILevel = 18;
+    quickState.kitBuildNumber = 124;
+    [self.crashes clearErrorEnvironment];
+
+    expectedState[kAMAOSAPILevelKey] = @"18";
+    expectedState[kAMAKitBuildNumberKey] = @"124";
+    XCTAssertEqual(self.contexts.count, 3u);
+    XCTAssertEqualObjects(self.contexts.lastObject[kAMACrashContextAppStateKey], expectedState);
+    XCTAssertEqualObjects(self.contexts.lastObject[kAMACrashContextErrorEnvironmentKey], @{});
+    XCTAssertEqual(quickStateRequestCount, 2u);
+    XCTAssertEqualObjects(quickState.appVersionName, @"core-version");
+    XCTAssertEqualObjects(quickState.appBuildNumber, @"1");
+}
+
 - (void)testEarlyInitializationDoesNotRunActivationDependentWork
 {
     AMAAppMetricaCrashesConfiguration *configuration = [AMAAppMetricaCrashesConfiguration new];
@@ -525,21 +659,93 @@ static void AMAAppMetricaCrashesEarlyTestsCallback(
 
 - (void)testFullActivationReplacesMinimalApplicationState
 {
-    [AMAPlatformDescription stub:@selector(appVersion) andReturn:@"1.2.3"];
-    [AMAPlatformDescription stub:@selector(appBuildNumber) andReturn:@"42"];
-    AMAApplicationState *applicationState = [AMAApplicationState nullMock];
-    NSDictionary *fullState = @{ kAMAOSAPILevelKey : @17 };
-    [applicationState stub:@selector(dictionaryRepresentation) andReturn:fullState];
+    AMAAppMetricaCrashesConfiguration *configuration = [AMAAppMetricaCrashesConfiguration new];
+    configuration.preActivationAppVersion = @"1.2.3";
+    configuration.preActivationAppBuildNumber = @"42";
+    AMAApplicationState *applicationState = [AMAApplicationState objectWithDictionaryRepresentation:@{
+        kAMAAppVersionNameKey : @"activated-version",
+        kAMAAppBuildNumberKey : @"100",
+        kAMAOSAPILevelKey : @"17",
+    }];
     [AMAApplicationStateManager stub:@selector(applicationState) andReturn:applicationState];
+    [AMAApplicationStateManager stub:@selector(quickApplicationState) andReturn:applicationState];
 
-    [self.crashes initializeCrashMonitoringWithConfiguration:[AMAAppMetricaCrashesConfiguration new]];
+    [self.crashes initializeCrashMonitoringWithConfiguration:configuration];
     [self.crashes activate];
+    [self.crashes setErrorEnvironmentValue:@"value" forKey:@"key"];
+    [self.crashes clearErrorEnvironment];
 
     XCTAssertEqualObjects(self.contexts[0][kAMACrashContextAppStateKey], (@{
         kAMAAppVersionNameKey : @"1.2.3",
         kAMAAppBuildNumberKey : @"42",
     }));
-    XCTAssertEqualObjects(self.contexts[1][kAMACrashContextAppStateKey], fullState);
+    XCTAssertEqual(self.contexts.count, 4u);
+    for (NSUInteger index = 1; index < self.contexts.count; ++index) {
+        XCTAssertEqualObjects(self.contexts[index][kAMACrashContextAppStateKey], applicationState.dictionaryRepresentation);
+    }
+}
+
+- (void)testEarlyInitializationWaitsForErrorEnvironmentContextPublication
+{
+    AMAApplicationState *quickState = [AMAApplicationState objectWithDictionaryRepresentation:@{
+        kAMAAppVersionNameKey : @"core-version",
+        kAMAAppBuildNumberKey : @"1",
+    }];
+    [AMAApplicationStateManager stub:@selector(quickApplicationState) andReturn:quickState];
+    AMAAppMetricaCrashesConfiguration *configuration = [AMAAppMetricaCrashesConfiguration new];
+    configuration.preActivationAppVersion = @"early-version";
+    configuration.preActivationAppBuildNumber = @"42";
+    [self.crashes setConfiguration:configuration];
+
+    dispatch_semaphore_t publicationEntered = dispatch_semaphore_create(0);
+    dispatch_semaphore_t continuePublication = dispatch_semaphore_create(0);
+    __block long publicationWaitResult = 0;
+    NSMutableArray<NSDictionary *> *contexts = self.contexts;
+    [AMAKSCrashLoader stub:@selector(addCrashContext:) withBlock:^id(NSArray *params) {
+        NSDictionary *context = params[0];
+        if (context[kAMACrashContextErrorEnvironmentKey] != nil) {
+            dispatch_semaphore_signal(publicationEntered);
+            publicationWaitResult = dispatch_semaphore_wait(continuePublication, AMAEarlyCrashTestTimeout());
+        }
+        @synchronized (contexts) {
+            [contexts addObject:[context copy]];
+        }
+        return nil;
+    }];
+
+    dispatch_group_t group = dispatch_group_create();
+    dispatch_queue_t queue = dispatch_queue_create("io.appmetrica.early-crash-environment-test",
+                                                    DISPATCH_QUEUE_CONCURRENT);
+    dispatch_group_async(group, queue, ^{
+        [self.crashes setErrorEnvironmentValue:@"value" forKey:@"key"];
+    });
+    long publicationEnteredResult = dispatch_semaphore_wait(publicationEntered, AMAEarlyCrashTestTimeout());
+    dispatch_semaphore_t initializationStarted = dispatch_semaphore_create(0);
+    dispatch_semaphore_t initializationFinished = dispatch_semaphore_create(0);
+    dispatch_group_async(group, queue, ^{
+        dispatch_semaphore_signal(initializationStarted);
+        [self.crashes initializeCrashMonitoringWithConfiguration:configuration];
+        dispatch_semaphore_signal(initializationFinished);
+    });
+    long initializationStartedResult = dispatch_semaphore_wait(initializationStarted, AMAEarlyCrashTestTimeout());
+    long initializationFinishedBeforePublication = dispatch_semaphore_wait(initializationFinished,
+        dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC));
+
+    dispatch_semaphore_signal(continuePublication);
+    long groupResult = dispatch_group_wait(group, AMAEarlyCrashTestTimeout());
+
+    XCTAssertEqual(publicationEnteredResult, 0l);
+    XCTAssertEqual(initializationStartedResult, 0l);
+    XCTAssertNotEqual(initializationFinishedBeforePublication, 0l);
+    XCTAssertEqual(publicationWaitResult, 0l);
+    XCTAssertEqual(groupResult, 0l);
+    XCTAssertEqual(self.loader.fullInstallationCount, 1u);
+    XCTAssertEqual(self.contexts.count, 2u);
+    XCTAssertEqualObjects(self.contexts.firstObject[kAMACrashContextAppStateKey], quickState.dictionaryRepresentation);
+    XCTAssertEqualObjects(self.contexts.lastObject[kAMACrashContextAppStateKey], (@{
+        kAMAAppVersionNameKey : @"early-version",
+        kAMAAppBuildNumberKey : @"42",
+    }));
 }
 
 - (void)testActivationWaitsForEarlyInstallation
