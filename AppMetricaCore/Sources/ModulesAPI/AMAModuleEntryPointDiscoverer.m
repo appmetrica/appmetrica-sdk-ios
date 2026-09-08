@@ -5,7 +5,6 @@ static NSArray<NSString *> *AMADefaultModuleEntryPointClassNames(void)
     NSMutableArray<NSString *> *names = [@[
         @"AMAAppMetricaCrashesEntryPoint",
         @"AMAAdSupportModuleEntryPoint",
-        @"AMAIDSyncModuleEntryPoint",
         @"AMAScreenshotModuleEntryPoint",
         @"AMAAppLovinMaxModuleEntryPoint",
         @"AMAIronSourceModuleEntryPoint",

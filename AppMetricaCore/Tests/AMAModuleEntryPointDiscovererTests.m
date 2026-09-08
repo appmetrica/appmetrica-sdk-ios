@@ -87,7 +87,6 @@
                           (@[
                               @"AMAAppMetricaCrashesEntryPoint",
                               @"AMAAdSupportModuleEntryPoint",
-                              @"AMAIDSyncModuleEntryPoint",
                               @"AMAScreenshotModuleEntryPoint",
                               @"AMAAppLovinMaxModuleEntryPoint",
                               @"AMAIronSourceModuleEntryPoint",
