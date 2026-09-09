@@ -89,7 +89,6 @@ To meet Apple's App Store rules regarding children's privacy (like COPPA), add A
 - `AppMetricaWebKit`: Used for handling events from WebKit.
 - `AppMetricaAdSupport`: Needed for IDFA collection, don't include for children's apps.
 - `AppMetricaScreenshot`: Allows AppMetrica SDK to collect screenshot taken events.
-- `AppMetricaIDSync`: Enhances integration capabilities and improves overall system performance in cross-platform environments.
 - `AppMetricaProductFlow`: Reports offer impressions and product acquisition funnel events. This optional module is not included in `AppMetricaAnalytics` and must be added separately.
 
 ## Integration Quickstart
