@@ -47,7 +47,9 @@ NSString *const kAMADatabaseIntegrityStepNewDatabase = @"new-database";
     NSArray *issues = nil;
 
     if (issueStrings != nil) {
-        AMALogError(@"DB integrity check found issues: %@", issueStrings);
+        if (issueStrings.count > 0) {
+            AMALogError(@"DB integrity check found issues: %@", issueStrings);
+        }
         issues = [AMACollectionUtilities mapArray:issueStrings withBlock:^id(NSString *issueString) {
             return [self.parser issueForIntegityIssueString:issueString];
         }];

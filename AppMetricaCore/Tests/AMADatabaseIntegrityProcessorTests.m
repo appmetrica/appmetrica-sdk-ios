@@ -7,6 +7,7 @@
 #import "AMADatabaseIntegrityReport.h"
 #import "AMASQLiteIntegrityIssueParser.h"
 #import "AMASQLiteIntegrityIssue.h"
+#import "AMALogSpy.h"
 #import <AppMetricaFMDB/AppMetricaFMDB.h>
 
 SPEC_BEGIN(AMADatabaseIntegrityProcessorTests)
@@ -72,8 +73,11 @@ describe(@"AMADatabaseIntegrityProcessor", ^{
     context(@"Check integrity", ^{
         NSString *const lastAppliedStep = @"LAST_APPLIED_STEP";
         NSArray *__block problems = nil;
+        AMALogSpy *__block logSpy = nil;
 
         beforeEach(^{
+            logSpy = [[AMALogSpy alloc] init];
+            [AMALogFacade stub:@selector(sharedLog) andReturn:logSpy];
             problems = @[];
             [AMADatabaseIntegrityQueries stub:@selector(integrityIssuesForDBQueue:error:) withBlock:^id(NSArray *params) {
                 [AMATestUtilities fillObjectPointerParameter:params[1] withValue:error];
@@ -82,6 +86,7 @@ describe(@"AMADatabaseIntegrityProcessor", ^{
         });
         afterEach(^{
             [AMADatabaseIntegrityQueries clearStubs];
+            [AMALogFacade clearStubs];
         });
 
         context(@"Nil database", ^{
@@ -106,8 +111,9 @@ describe(@"AMADatabaseIntegrityProcessor", ^{
             });
         });
         context(@"No problems", ^{
-            it(@"Should return YES", ^{
+            it(@"Should return YES without logging errors", ^{
                 [[theValue([processor checkIntegrityIssuesForDatabase:database report:report]) should] beYes];
+                [[logSpy.messages should] beEmpty];
             });
             it(@"Should not parse issues", ^{
                 [[parser shouldNot] receive:@selector(issueForIntegityIssueString:)];
@@ -134,6 +140,15 @@ describe(@"AMADatabaseIntegrityProcessor", ^{
         context(@"Some problem", ^{
             beforeEach(^{
                 problems = @[ @"PROBLEM" ];
+            });
+
+            it(@"Should log the integrity issues as an error", ^{
+                [processor checkIntegrityIssuesForDatabase:database report:report];
+                NSString *text = [NSString stringWithFormat:@"DB integrity check found issues: %@", problems];
+                AMALogMessageSpy *message = [AMALogMessageSpy messageWithText:text
+                                                                   channel:@"AppMetricaCore"
+                                                                     level:AMALogLevelError];
+                [[logSpy.messages should] equal:@[ message ]];
             });
 
             context(@"Critical", ^{
@@ -216,9 +231,14 @@ describe(@"AMADatabaseIntegrityProcessor", ^{
                 [[parser shouldNot] receive:@selector(issueForIntegityIssueString:)];
                 [processor checkIntegrityIssuesForDatabase:database report:report];
             });
-            it(@"Should parse error", ^{
+            it(@"Should parse and log the error", ^{
                 [[parser should] receive:@selector(issueForError:) withArguments:error];
                 [processor checkIntegrityIssuesForDatabase:database report:report];
+                NSString *text = [NSString stringWithFormat:@"DB integrity check failed: %@", error];
+                AMALogMessageSpy *message = [AMALogMessageSpy messageWithText:text
+                                                                   channel:@"AppMetricaCore"
+                                                                     level:AMALogLevelError];
+                [[logSpy.messages should] equal:@[ message ]];
             });
             it(@"Should store initial step", ^{
                 [processor checkIntegrityIssuesForDatabase:database report:report];

@@ -214,6 +214,80 @@ describe(@"AMADiskFileStorage", ^{
         });
     });
 
+    context(@"No-backup lifecycle", ^{
+        NSData *__block readData = nil;
+        BOOL __block writeResult = YES;
+        BOOL __block attributeResult = YES;
+        NSUInteger __block attributeAttempts = 0;
+        NSError *__block storageError = nil;
+
+        beforeEach(^{
+            storage = [[AMADiskFileStorage alloc] initWithPath:path options:AMADiskFileStorageOptionNoBackup];
+            readData = fileData;
+            writeResult = YES;
+            attributeResult = YES;
+            attributeAttempts = 0;
+            storageError = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileReadNoPermissionError userInfo:nil];
+            [AMAFileUtility stub:@selector(rawContentAtFilePath:error:) withBlock:^id(NSArray *params) {
+                if (readData == nil) {
+                    [AMATestUtilities fillObjectPointerParameter:params[1] withValue:storageError];
+                }
+                return readData;
+            }];
+            [AMAFileUtility stub:@selector(writeData:filePath:error:) withBlock:^id(NSArray *params) {
+                if (writeResult == NO) {
+                    [AMATestUtilities fillObjectPointerParameter:params[2] withValue:storageError];
+                }
+                return theValue(writeResult);
+            }];
+            [AMAFileUtility stub:@selector(setSkipBackupAttributesOnPath:) withBlock:^id(NSArray *params) {
+                ++attributeAttempts;
+                return theValue(attributeResult);
+            }];
+        });
+
+        it(@"Should preserve failed reads and writes and set the attribute on the next successful operation", ^{
+            readData = nil;
+            writeResult = NO;
+            NSError *error = nil;
+            [[[storage readDataWithError:&error] should] beNil];
+            [[error should] equal:storageError];
+            error = nil;
+            [[theValue([storage writeData:fileData error:&error]) should] beNo];
+            [[error should] equal:storageError];
+            [[theValue(attributeAttempts) should] beZero];
+
+            writeResult = YES;
+            [[theValue([storage writeData:fileData error:NULL]) should] beYes];
+            [[theValue(attributeAttempts) should] equal:theValue(1)];
+            readData = fileData;
+            [storage readDataWithError:NULL];
+            [[theValue(attributeAttempts) should] equal:theValue(1)];
+        });
+
+        it(@"Should retry a failed attribute update and cache only a successful update", ^{
+            attributeResult = NO;
+            NSError *error = nil;
+            [[[storage readDataWithError:&error] should] equal:fileData];
+            [[error should] beNil];
+            [[theValue(attributeAttempts) should] equal:theValue(1)];
+
+            attributeResult = YES;
+            [[theValue([storage writeData:fileData error:&error]) should] beYes];
+            [[error should] beNil];
+            [[theValue(attributeAttempts) should] equal:theValue(2)];
+            [storage readDataWithError:NULL];
+            [storage writeData:fileData error:NULL];
+            [[theValue(attributeAttempts) should] equal:theValue(2)];
+        });
+
+        it(@"Should set the attribute after reading an empty file", ^{
+            readData = [NSData data];
+            [[[storage readDataWithError:NULL] should] equal:readData];
+            [[theValue(attributeAttempts) should] equal:theValue(1)];
+        });
+    });
+
 });
 
 SPEC_END

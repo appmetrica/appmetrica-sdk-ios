@@ -43,6 +43,10 @@
 
 - (AMAEventNameHashesCollection *)loadCollection
 {
+    if (self.fileStorage.fileExists == NO) {
+        return nil;
+    }
+
     AMAEventNameHashesCollection *collection = nil;
     NSError *error = nil;
     NSData *data = [self.fileStorage readDataWithError:&error];

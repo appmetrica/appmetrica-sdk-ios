@@ -5,6 +5,7 @@
 #import "AMAEventNameHashesSerializer.h"
 #import "AMAEventNameHashesCollection.h"
 #import "AMACore.h"
+#import "AMALogSpy.h"
 
 SPEC_BEGIN(AMAEventNameHashesStorageTests)
 
@@ -16,16 +17,24 @@ describe(@"AMAEventNameHashesStorage", ^{
     NSObject<AMAFileStorage> *__block fileStorage = nil;
     AMAEventNameHashesSerializer *__block serializer = nil;
     AMAEventNameHashesStorage *__block storage = nil;
+    AMALogSpy *__block logSpy = nil;
 
     beforeEach(^{
+        logSpy = [[AMALogSpy alloc] init];
+        [AMALogFacade stub:@selector(sharedLog) andReturn:logSpy];
         collection = [AMAEventNameHashesCollection nullMock];
         fileStorage = [KWMock nullMockForProtocol:@protocol(AMAFileStorage)];
         serializer = [AMAEventNameHashesSerializer nullMock];
         storage = [[AMAEventNameHashesStorage alloc] initWithFileStorage:fileStorage serializer:serializer];
     });
 
+    afterEach(^{
+        [AMALogFacade clearStubs];
+    });
+
     context(@"Load", ^{
         beforeEach(^{
+            [fileStorage stub:@selector(fileExists) andReturn:theValue(YES)];
             [fileStorage stub:@selector(readDataWithError:) andReturn:serializedData];
             [serializer stub:@selector(collectionForData:) andReturn:collection];
         });
@@ -40,17 +49,36 @@ describe(@"AMAEventNameHashesStorage", ^{
         it(@"Should return collection", ^{
             [[[storage loadCollection] should] equal:collection];
         });
-        context(@"Read error", ^{
-            beforeEach(^{
+        it(@"Should preserve read errors after the file existence check", ^{
+            [[serializer shouldNot] receive:@selector(collectionForData:)];
+            NSArray *errorCodes = @[ @(NSFileReadNoPermissionError), @(NSFileReadNoSuchFileError) ];
+            for (NSNumber *errorCode in errorCodes) {
+                logSpy = [[AMALogSpy alloc] init];
+                [AMALogFacade stub:@selector(sharedLog) andReturn:logSpy];
+                NSError *readError = [NSError errorWithDomain:NSCocoaErrorDomain
+                                                        code:errorCode.integerValue
+                                                    userInfo:nil];
                 [fileStorage stub:@selector(readDataWithError:) withBlock:^id(NSArray *params) {
-                    [AMATestUtilities fillObjectPointerParameter:params[0]
-                                                       withValue:[NSError errorWithDomain:@"" code:0 userInfo:nil]];
+                    [AMATestUtilities fillObjectPointerParameter:params[0] withValue:readError];
                     return nil;
                 }];
-            });
-            it(@"Should return nil", ^{
                 [[[storage loadCollection] should] beNil];
-            });
+                NSString *text = [NSString stringWithFormat:@"Failed to read event name hashes collection: %@", readError];
+                AMALogMessageSpy *message = [AMALogMessageSpy messageWithText:text
+                                                                   channel:@"AppMetricaCore"
+                                                                     level:AMALogLevelWarning];
+                [[logSpy.messages should] equal:@[ message ]];
+            }
+        });
+    });
+
+    context(@"Missing file", ^{
+        it(@"Should return nil without reading, deserializing or logging", ^{
+            [fileStorage stub:@selector(fileExists) andReturn:theValue(NO)];
+            [[fileStorage shouldNot] receive:@selector(readDataWithError:)];
+            [[serializer shouldNot] receive:@selector(collectionForData:)];
+            [[[storage loadCollection] should] beNil];
+            [[logSpy.messages should] beEmpty];
         });
     });
 

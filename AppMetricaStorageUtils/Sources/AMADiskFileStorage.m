@@ -37,7 +37,9 @@
 - (NSData *)readDataWithError:(NSError **)error
 {
     NSData *data = [AMAFileUtility rawContentAtFilePath:self.path error:error];
-    [self checkNoBackupFlag];
+    if (data != nil) {
+        [self checkNoBackupFlag];
+    }
     return data;
 }
 
@@ -49,7 +51,9 @@
     }
 
     BOOL result = [AMAFileUtility writeData:data filePath:self.path error:error];
-    [self checkNoBackupFlag];
+    if (result) {
+        [self checkNoBackupFlag];
+    }
 
     return result;
 }
@@ -62,8 +66,7 @@
 - (void)checkNoBackupFlag
 {
     if ((self.options & AMADiskFileStorageOptionNoBackup) != 0 && self.noBackupAttibuteEnsured == NO) {
-        [AMAFileUtility setSkipBackupAttributesOnPath:self.path];
-        self.noBackupAttibuteEnsured = YES;
+        self.noBackupAttibuteEnsured = [AMAFileUtility setSkipBackupAttributesOnPath:self.path];
     }
 }
 
