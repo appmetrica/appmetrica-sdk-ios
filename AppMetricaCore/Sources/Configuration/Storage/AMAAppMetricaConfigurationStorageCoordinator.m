@@ -1,5 +1,6 @@
 #import "AMAAppMetricaConfigurationStorageCoordinator.h"
 #import "AMAAppMetricaConfigurationFileStorage.h"
+#import "AMAAppMetricaConfigurationSnapshot.h"
 #import "AMAAppGroupIdentifierProvider.h"
 #import <AppMetricaPlatform/AppMetricaPlatform.h>
 #import <AppMetricaStorageUtils/AppMetricaStorageUtils.h>
@@ -25,22 +26,45 @@
     return self;
 }
 
-- (AMAAppMetricaConfiguration *)loadConfiguration
+- (AMAAppMetricaConfigurationSnapshot *)loadSnapshot
 {
-    AMAAppMetricaConfiguration *configuration = [self.privateStorage loadConfiguration];
-    if (configuration == nil) {
-        configuration = [self.groupStorage loadConfiguration];
+    AMAAppMetricaConfigurationSnapshot *privateSnapshot = [self.privateStorage loadSnapshot];
+    if (privateSnapshot.configuration != nil) {
+        return [[AMAAppMetricaConfigurationSnapshot alloc] initWithConfiguration:privateSnapshot.configuration
+                                                                         savedAt:privateSnapshot.savedAt
+                                                                          source:AMAAppMetricaConfigurationSnapshotSourcePrivate];
     }
-    return configuration;
+
+    AMAAppMetricaConfigurationSnapshot *groupSnapshot = [self.groupStorage loadSnapshot];
+    if (groupSnapshot.configuration != nil) {
+        return [[AMAAppMetricaConfigurationSnapshot alloc] initWithConfiguration:groupSnapshot.configuration
+                                                                         savedAt:groupSnapshot.savedAt
+                                                                          source:AMAAppMetricaConfigurationSnapshotSourceGroup];
+    }
+    return nil;
 }
 
-- (void)saveConfiguration:(nonnull AMAAppMetricaConfiguration *)configuration
+- (void)saveSnapshot:(AMAAppMetricaConfigurationSnapshot *)snapshot
 {
-    [self.privateStorage saveConfiguration:configuration];
+    if (snapshot.source == AMAAppMetricaConfigurationSnapshotSourceGroup) {
+        [self.groupStorage saveSnapshot:snapshot];
+        return;
+    }
+
+    [self.privateStorage saveSnapshot:snapshot];
 
     if ([AMAPlatformDescription runEnvronment] == AMARunEnvironmentMainApp) {
-        [self.groupStorage saveConfiguration:configuration];
+        [self.groupStorage saveSnapshot:snapshot];
     }
+}
+
+- (void)clearSnapshot:(AMAAppMetricaConfigurationSnapshot *)snapshot
+{
+    if (snapshot.source == AMAAppMetricaConfigurationSnapshotSourceGroup) {
+        [self.groupStorage clearSnapshot:snapshot];
+        return;
+    }
+    [self.privateStorage clearSnapshot:snapshot];
 }
 
 @end

@@ -2,6 +2,7 @@
 #import <XCTest/XCTest.h>
 #import "AMAAppMetricaConfigurationFileStorage.h"
 #import "AMAAppMetricaConfiguration+JSONSerializable.h"
+#import "AMAAppMetricaConfigurationSnapshot.h"
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
 #import <AppMetricaStorageUtils/AppMetricaStorageUtils.h>
 #import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
@@ -45,237 +46,232 @@
     return config;
 }
 
-- (NSData *)jsonDataForConfiguration:(AMAAppMetricaConfiguration *)configuration
+- (AMAAppMetricaConfigurationSnapshot *)privateSnapshotWithConfiguration:(AMAAppMetricaConfiguration *)configuration
+                                                                 savedAt:(NSDate *)savedAt
+{
+    return [[AMAAppMetricaConfigurationSnapshot alloc] initWithConfiguration:configuration
+                                                                     savedAt:savedAt
+                                                                      source:AMAAppMetricaConfigurationSnapshotSourcePrivate];
+}
+
+- (NSData *)legacyJsonDataForConfiguration:(AMAAppMetricaConfiguration *)configuration
 {
     NSDictionary *json = [configuration JSON];
     return [AMAJSONSerialization dataWithJSONObject:json error:nil];
 }
 
-#pragma mark - AMAAppMetricaConfigurationProvider Tests
+#pragma mark - Init
 
 - (void)testInitWithFileStorage
 {
-    // Given
     AMAStorageMock *storage = [AMAStorageMock new];
-    
-    // When
-    AMAAppMetricaConfigurationFileStorage *provider = [[AMAAppMetricaConfigurationFileStorage alloc] initWithFileStorage:storage];
-    
-    // Then
-    XCTAssertNotNil(provider, @"Provider should be initialized");
-    XCTAssertEqual(provider.fileStorage, storage, @"File storage should be set correctly");
+
+    AMAAppMetricaConfigurationFileStorage *provider =
+        [[AMAAppMetricaConfigurationFileStorage alloc] initWithFileStorage:storage];
+
+    XCTAssertNotNil(provider);
+    XCTAssertEqual(provider.fileStorage, storage);
 }
 
 - (void)testConvenienceInitializer
 {
-    // Given
     AMAStorageMock *storage = [AMAStorageMock new];
-    
-    // When
-    AMAAppMetricaConfigurationFileStorage *provider = [AMAAppMetricaConfigurationFileStorage appMetricaConfigurationFileStorageWithFileStorage:storage];
-    
-    // Then
-    XCTAssertNotNil(provider, @"Provider should be initialized");
-    XCTAssertEqual(provider.fileStorage, storage, @"File storage should be set correctly");
+
+    AMAAppMetricaConfigurationFileStorage *provider =
+        [AMAAppMetricaConfigurationFileStorage appMetricaConfigurationFileStorageWithFileStorage:storage];
+
+    XCTAssertNotNil(provider);
+    XCTAssertEqual(provider.fileStorage, storage);
 }
 
-- (void)testLoadConfigurationReturnsNilWhenNoData
+#pragma mark - Load Snapshot
+
+- (void)testLoadSnapshotReturnsNilWhenNoData
 {
-    // Given
     self.mockStorage.mockedData = nil;
-    
-    // When
-    AMAAppMetricaConfiguration *config = [self.provider loadConfiguration];
-    
-    // Then
-    XCTAssertNil(config, @"Should return nil when no data exists");
+
+    XCTAssertNil([self.provider loadSnapshot]);
 }
 
-- (void)testLoadConfigurationReturnsNilWhenInvalidJSON
+- (void)testLoadSnapshotReturnsNilWhenInvalidJSON
 {
-    // Given
     self.mockStorage.mockedData = [@"invalid json" dataUsingEncoding:NSUTF8StringEncoding];
-    
-    // When
-    AMAAppMetricaConfiguration *config = [self.provider loadConfiguration];
-    
-    // Then
-    XCTAssertNil(config, @"Should return nil when JSON is invalid");
+
+    XCTAssertNil([self.provider loadSnapshot]);
 }
 
-- (void)testLoadConfigurationParsesJSONCorrectly
+- (void)testLoadSnapshotParsesLegacyJSONCorrectly
 {
-    // Given
     AMAAppMetricaConfiguration *originalConfig = [self createTestConfiguration];
-    self.mockStorage.mockedData = [self jsonDataForConfiguration:originalConfig];
-    
-    // When
-    AMAAppMetricaConfiguration *loadedConfig = [self.provider loadConfiguration];
-    
-    // Then
-    XCTAssertNotNil(loadedConfig, @"Should load configuration");
-    XCTAssertEqualObjects(loadedConfig.APIKey, originalConfig.APIKey, @"API key should match");
-    XCTAssertEqual(loadedConfig.sessionTimeout, originalConfig.sessionTimeout, @"Session timeout should match");
-    XCTAssertEqual(loadedConfig.maxReportsCount, originalConfig.maxReportsCount, @"Max reports count should match");
-    XCTAssertEqual(loadedConfig.logsEnabled, originalConfig.logsEnabled, @"Logs enabled should match");
+    self.mockStorage.mockedData = [self legacyJsonDataForConfiguration:originalConfig];
+
+    AMAAppMetricaConfigurationSnapshot *loaded = [self.provider loadSnapshot];
+
+    XCTAssertNotNil(loaded);
+    XCTAssertEqualObjects(loaded.configuration.APIKey, originalConfig.APIKey);
+    XCTAssertEqual(loaded.configuration.sessionTimeout, originalConfig.sessionTimeout);
+    XCTAssertEqual(loaded.configuration.maxReportsCount, originalConfig.maxReportsCount);
+    XCTAssertEqual(loaded.configuration.logsEnabled, originalConfig.logsEnabled);
+    XCTAssertNil(loaded.savedAt);
+    XCTAssertEqual(loaded.source, AMAAppMetricaConfigurationSnapshotSourcePrivate);
 }
 
-- (void)testLoadConfigurationCachesResult
+- (void)testLoadSnapshotCachesResult
 {
-    // Given
     AMAAppMetricaConfiguration *originalConfig = [self createTestConfiguration];
-    self.mockStorage.mockedData = [self jsonDataForConfiguration:originalConfig];
-    
-    // When
-    AMAAppMetricaConfiguration *firstLoad = [self.provider loadConfiguration];
-    self.mockStorage.mockedData = nil; // Clear storage data
-    AMAAppMetricaConfiguration *secondLoad = [self.provider loadConfiguration];
-    
-    // Then
-    XCTAssertNotNil(firstLoad, @"First load should succeed");
-    XCTAssertNotNil(secondLoad, @"Second load should return cached value");
-    XCTAssertEqualObjects(firstLoad, secondLoad, @"Both loads should return same configuration");
+    self.mockStorage.mockedData = [self legacyJsonDataForConfiguration:originalConfig];
+
+    AMAAppMetricaConfigurationSnapshot *firstLoad = [self.provider loadSnapshot];
+    self.mockStorage.mockedData = nil;
+    AMAAppMetricaConfigurationSnapshot *secondLoad = [self.provider loadSnapshot];
+
+    XCTAssertNotNil(firstLoad);
+    XCTAssertNotNil(secondLoad);
+    XCTAssertEqualObjects(firstLoad.configuration, secondLoad.configuration);
+    XCTAssertEqualObjects(firstLoad.savedAt, secondLoad.savedAt);
 }
 
-- (void)testLoadConfigurationReturnsCopy
+- (void)testLoadSnapshotReturnsCopy
 {
-    // Given
     AMAAppMetricaConfiguration *originalConfig = [self createTestConfiguration];
-    self.mockStorage.mockedData = [self jsonDataForConfiguration:originalConfig];
-    
-    // When
-    AMAAppMetricaConfiguration *firstLoad = [self.provider loadConfiguration];
-    AMAAppMetricaConfiguration *secondLoad = [self.provider loadConfiguration];
-    
-    // Then
-    XCTAssertNotNil(firstLoad, @"First load should succeed");
-    XCTAssertNotNil(secondLoad, @"Second load should succeed");
-    XCTAssertNotEqual(firstLoad, secondLoad, @"Should return different instances (copies)");
-    XCTAssertEqualObjects(firstLoad, secondLoad, @"But configurations should be equal");
+    self.mockStorage.mockedData = [self legacyJsonDataForConfiguration:originalConfig];
+
+    AMAAppMetricaConfigurationSnapshot *firstLoad = [self.provider loadSnapshot];
+    AMAAppMetricaConfigurationSnapshot *secondLoad = [self.provider loadSnapshot];
+
+    XCTAssertNotNil(firstLoad);
+    XCTAssertNotNil(secondLoad);
+    XCTAssertNotEqual(firstLoad, secondLoad);
+    XCTAssertNotEqual(firstLoad.configuration, secondLoad.configuration);
+    XCTAssertEqualObjects(firstLoad.configuration, secondLoad.configuration);
 }
 
-- (void)testSaveConfigurationWritesToStorage
+#pragma mark - Save Snapshot
+
+- (void)testSaveSnapshotWritesToStorage
 {
-    // Given
     AMAAppMetricaConfiguration *config = [self createTestConfiguration];
-    
-    // When
-    [self.provider saveConfiguration:config];
-    
-    // Then
-    XCTAssertNil(self.mockStorage.mockedData, @"Should not write to storage due to executor");
-    
+    AMAAppMetricaConfigurationSnapshot *snapshot =
+        [self privateSnapshotWithConfiguration:config savedAt:[NSDate dateWithTimeIntervalSince1970:7]];
+
+    [self.provider saveSnapshot:snapshot];
+
+    XCTAssertNil(self.mockStorage.mockedData);
     [self.executor execute];
-    XCTAssertNotNil(self.mockStorage.mockedData, @"Should write data to storage");
-    
-    // Verify written data can be parsed back
+    XCTAssertNotNil(self.mockStorage.mockedData);
+
     NSDictionary *writtenJSON = [AMAJSONSerialization dictionaryWithJSONData:self.mockStorage.mockedData error:nil];
-    XCTAssertNotNil(writtenJSON, @"Written data should be valid JSON");
-    XCTAssertEqualObjects(writtenJSON, [config JSON], @"Written API key should match");
+    XCTAssertEqualObjects(writtenJSON[@"configuration"], [config JSON]);
+    XCTAssertEqualObjects(writtenJSON[@"savedAt"], @7);
 }
 
-- (void)testSaveConfigurationSkipsWhenEqual
+- (void)testSaveSnapshotSkipsWhenEqual
 {
-    // Given
     AMAAppMetricaConfiguration *config = [self createTestConfiguration];
-    self.mockStorage.mockedData = [self jsonDataForConfiguration:config];
-    
-    // Load to cache the configuration
-    [self.provider loadConfiguration];
-    
-    // Clear written data
+    self.mockStorage.mockedData = [self legacyJsonDataForConfiguration:config];
+    [self.provider loadSnapshot];
     self.mockStorage.mockedData = nil;
-    
-    // When - save the same configuration
-    [self.provider saveConfiguration:config];
+
+    [self.provider saveSnapshot:[self privateSnapshotWithConfiguration:config savedAt:nil]];
     [self.executor execute];
-    
-    // Then
-    XCTAssertNil(self.mockStorage.mockedData, @"Should not write when configuration is equal");
+
+    XCTAssertNil(self.mockStorage.mockedData);
 }
 
-- (void)testSaveConfigurationWritesWhenDifferent
+- (void)testSaveSnapshotWritesWhenSavedAtChanges
 {
-    // Given
+    AMAAppMetricaConfiguration *config = [self createTestConfiguration];
+    self.mockStorage.mockedData = [self legacyJsonDataForConfiguration:config];
+    [self.provider loadSnapshot];
+    self.mockStorage.mockedData = nil;
+
+    AMAAppMetricaConfigurationSnapshot *snapshot =
+        [self privateSnapshotWithConfiguration:config savedAt:[NSDate dateWithTimeIntervalSince1970:42]];
+
+    [self.provider saveSnapshot:snapshot];
+    [self.executor execute];
+
+    XCTAssertNotNil(self.mockStorage.mockedData);
+    NSDictionary *writtenJSON = [AMAJSONSerialization dictionaryWithJSONData:self.mockStorage.mockedData error:nil];
+    XCTAssertEqualObjects(writtenJSON[@"savedAt"], @42);
+}
+
+- (void)testSaveSnapshotWritesWhenDifferent
+{
     AMAAppMetricaConfiguration *config1 = [self createTestConfiguration];
-    self.mockStorage.mockedData = [self jsonDataForConfiguration:config1];
-    
-    // Load to cache the configuration
-    [self.provider loadConfiguration];
-    
-    // Create a different configuration
+    self.mockStorage.mockedData = [self legacyJsonDataForConfiguration:config1];
+    [self.provider loadSnapshot];
+
     AMAAppMetricaConfiguration *config2 = [self createTestConfiguration];
-    config2.sessionTimeout = 240; // Different value
-    
-    // Clear written data
+    config2.sessionTimeout = 240;
     self.mockStorage.mockedData = nil;
-    
-    // When
-    [self.provider saveConfiguration:config2];
+
+    [self.provider saveSnapshot:[self privateSnapshotWithConfiguration:config2 savedAt:nil]];
     [self.executor execute];
-    
-    // Then
-    XCTAssertNotNil(self.mockStorage.mockedData, @"Should write when configuration is different");
+
+    XCTAssertNotNil(self.mockStorage.mockedData);
 }
 
-- (void)testSaveConfigurationUpdatesCache
+- (void)testSaveSnapshotUpdatesCache
 {
-    // Given
     AMAAppMetricaConfiguration *config = [self createTestConfiguration];
-    
-    // When
-    [self.provider saveConfiguration:config];
+    NSDate *savedAt = [NSDate dateWithTimeIntervalSince1970:9];
+    [self.provider saveSnapshot:[self privateSnapshotWithConfiguration:config savedAt:savedAt]];
     [self.executor execute];
-    
-    // Clear storage to ensure we're reading from cache
+
     self.mockStorage.mockedData = nil;
-    AMAAppMetricaConfiguration *loadedConfig = [self.provider loadConfiguration];
-    
-    // Then
-    XCTAssertNotNil(loadedConfig, @"Should load from cache");
-    XCTAssertEqualObjects(loadedConfig, config, @"Cached configuration should match saved one");
+    AMAAppMetricaConfigurationSnapshot *loaded = [self.provider loadSnapshot];
+
+    XCTAssertNotNil(loaded);
+    XCTAssertEqualObjects(loaded.configuration, config);
+    XCTAssertEqualObjects(loaded.savedAt, savedAt);
 }
 
-- (void)testSaveConfigurationCreatesACopy
+- (void)testSaveSnapshotCreatesACopy
 {
-    // Given
     AMAAppMetricaConfiguration *config = [self createTestConfiguration];
-    
-    // When
-    [self.provider saveConfiguration:config];
+    [self.provider saveSnapshot:[self privateSnapshotWithConfiguration:config savedAt:nil]];
     [self.executor execute];
-    
-    // Modify original config
+
     config.sessionTimeout = 999;
-    
-    // Load from cache
     self.mockStorage.mockedData = nil;
-    AMAAppMetricaConfiguration *loadedConfig = [self.provider loadConfiguration];
-    
-    // Then
-    XCTAssertNotEqual(loadedConfig.sessionTimeout, 999, @"Cached configuration should not be affected by changes to original");
+    AMAAppMetricaConfigurationSnapshot *loaded = [self.provider loadSnapshot];
+
+    XCTAssertNotEqual(loaded.configuration.sessionTimeout, 999);
 }
 
-- (void)testThreadSafetyOfLoadConfiguration
+- (void)testClearSnapshotRemovesCacheAndFile
 {
-    // Given
     AMAAppMetricaConfiguration *config = [self createTestConfiguration];
-    self.mockStorage.mockedData = [self jsonDataForConfiguration:config];
-    
+    AMAAppMetricaConfigurationSnapshot *snapshot =
+        [self privateSnapshotWithConfiguration:config savedAt:[NSDate date]];
+    [self.provider saveSnapshot:snapshot];
+    [self.executor execute];
+    XCTAssertNotNil([self.provider loadSnapshot]);
+
+    [self.provider clearSnapshot:snapshot];
+
+    XCTAssertNil(self.mockStorage.mockedData);
+    XCTAssertNil([self.provider loadSnapshot]);
+}
+
+- (void)testThreadSafetyOfLoadSnapshot
+{
+    AMAAppMetricaConfiguration *config = [self createTestConfiguration];
+    self.mockStorage.mockedData = [self legacyJsonDataForConfiguration:config];
+
     XCTestExpectation *expectation = [self expectationWithDescription:@"Concurrent loads"];
     expectation.expectedFulfillmentCount = 10;
-    
-    // When - perform concurrent loads
+
     dispatch_queue_t queue = dispatch_queue_create("test.concurrent", DISPATCH_QUEUE_CONCURRENT);
     for (int i = 0; i < 10; i++) {
         dispatch_async(queue, ^{
-            AMAAppMetricaConfiguration *loadedConfig = [self.provider loadConfiguration];
-            XCTAssertNotNil(loadedConfig, @"Should load configuration");
+            AMAAppMetricaConfigurationSnapshot *loaded = [self.provider loadSnapshot];
+            XCTAssertNotNil(loaded);
             [expectation fulfill];
         });
     }
-    
-    // Then
+
     [self waitForExpectations:@[expectation] timeout:5.0];
 }
 

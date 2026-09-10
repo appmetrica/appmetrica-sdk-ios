@@ -12,6 +12,7 @@
 #import "AMAExternalAttributionConfiguration.h"
 #import "AMAAppMetricaConfiguration+JSONSerializable.h"
 #import "AMAAppMetricaConfigurationFileStorage.h"
+#import "AMAAppMetricaConfigurationSnapshot.h"
 #import "AMAModulesStatusReportState.h"
 
 @interface AMAMetricaPersistentConfiguration ()
@@ -188,14 +189,19 @@ LONG_PROPERTY(conversionValue, setConversionValue, AMAStorageStringKeyConversion
                                error:NULL];
 }
 
-- (AMAAppMetricaConfiguration *)appMetricaClientConfiguration
+- (AMAAppMetricaConfigurationSnapshot *)appMetricaClientConfigurationSnapshot
 {
-    return [self.appMetricaConfigurationStorage loadConfiguration];
+    return [self.appMetricaConfigurationStorage loadSnapshot];
 }
 
-- (void)setAppMetricaClientConfiguration:(AMAAppMetricaConfiguration *)appMetricaClientConfiguration
+- (void)saveAppMetricaClientConfigurationSnapshot:(AMAAppMetricaConfigurationSnapshot *)snapshot
 {
-    [self.appMetricaConfigurationStorage saveConfiguration:appMetricaClientConfiguration];
+    [self.appMetricaConfigurationStorage saveSnapshot:snapshot];
+}
+
+- (void)clearAppMetricaClientConfigurationSnapshot:(AMAAppMetricaConfigurationSnapshot *)snapshot
+{
+    [self.appMetricaConfigurationStorage clearSnapshot:snapshot];
 }
 
 - (NSString *)recentMainApiKey

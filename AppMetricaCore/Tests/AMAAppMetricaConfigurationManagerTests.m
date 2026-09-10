@@ -18,6 +18,7 @@
 #import "AMAPermissionResolving.h"
 #import "AMAAdProviderResolver.h"
 #import "AMAAppMetricaLibraryAdapterConfiguration.h"
+#import "AMASavedAppMetricaConfigRepository.h"
 
 SPEC_BEGIN(AMAAppMetricaConfigurationManagerTests)
 
@@ -34,6 +35,7 @@ describe(@"AMAAppMetricaConfigurationManager", ^{
     AMAMetricaInMemoryConfiguration *__block inMemoryConfig = nil;
     AMADataSendingRestrictionController *__block restrictionController = nil;
     AMAConfigForAnonymousActivationProvider *__block anonymousConfigProviderMock = nil;
+    AMASavedAppMetricaConfigRepository *__block savedConfigRepositoryMock = nil;
     
     AMALocationManager *__block locationManager = nil;
     id<AMAPermissionResolvingInput> __block locationResolver = nil;
@@ -60,6 +62,8 @@ describe(@"AMAAppMetricaConfigurationManager", ^{
         
         restrictionController = [AMADataSendingRestrictionController sharedInstance];
         anonymousConfigProviderMock = [AMAConfigForAnonymousActivationProvider nullMock];
+        savedConfigRepositoryMock = [AMASavedAppMetricaConfigRepository nullMock];
+        [anonymousConfigProviderMock stub:@selector(repository) andReturn:savedConfigRepositoryMock];
         
         [AMAMetricaConfiguration stub:@selector(sharedInstance) andReturn:metricaConfigurationMock];
 
@@ -100,8 +104,9 @@ describe(@"AMAAppMetricaConfigurationManager", ^{
                     
                     [configManager updateMainConfiguration:mockConfig            activatedAnonymously:NO];
                 });
-                it(@"should update client configuration in local storage", ^{
-                    [[persistentMock should] receive:@selector(setAppMetricaClientConfiguration:) withArguments:mockConfig];
+                it(@"should save client configuration with TTL refresh", ^{
+                    [[savedConfigRepositoryMock should] receive:@selector(saveConfiguration:refreshTTL:)
+                                                  withArguments:mockConfig, theValue(YES)];
                     
                     [configManager updateMainConfiguration:mockConfig            activatedAnonymously:NO];
                 });
@@ -114,8 +119,9 @@ describe(@"AMAAppMetricaConfigurationManager", ^{
                     
                     [configManager updateMainConfiguration:mockConfig            activatedAnonymously:YES];
                 });
-                it(@"should update client configuration in local storage", ^{
-                    [[persistentMock should] receive:@selector(setAppMetricaClientConfiguration:) withArguments:mockConfig];
+                it(@"should save client configuration without TTL refresh", ^{
+                    [[savedConfigRepositoryMock should] receive:@selector(saveConfiguration:refreshTTL:)
+                                                  withArguments:mockConfig, theValue(NO)];
                     
                     [configManager updateMainConfiguration:mockConfig            activatedAnonymously:YES];
                 });
@@ -136,8 +142,9 @@ describe(@"AMAAppMetricaConfigurationManager", ^{
                     
                     [configManager updateMainConfiguration:mockConfig            activatedAnonymously:NO];
                 });
-                it(@"should update client configuration in local storage", ^{
-                    [[persistentMock should] receive:@selector(setAppMetricaClientConfiguration:) withArguments:mockConfig];
+                it(@"should save client configuration with TTL refresh", ^{
+                    [[savedConfigRepositoryMock should] receive:@selector(saveConfiguration:refreshTTL:)
+                                                  withArguments:mockConfig, theValue(YES)];
                     
                     [configManager updateMainConfiguration:mockConfig            activatedAnonymously:NO];
                 });
@@ -150,8 +157,8 @@ describe(@"AMAAppMetricaConfigurationManager", ^{
                     
                     [configManager updateMainConfiguration:mockConfig            activatedAnonymously:YES];
                 });
-                it(@"should update client configuration in local storage", ^{
-                    [[persistentMock shouldNot] receive:@selector(setAppMetricaClientConfiguration:) withArguments:mockConfig];
+                it(@"should not save client configuration", ^{
+                    [[savedConfigRepositoryMock shouldNot] receive:@selector(saveConfiguration:refreshTTL:)];
                     
                     [configManager updateMainConfiguration:mockConfig            activatedAnonymously:YES];
                 });

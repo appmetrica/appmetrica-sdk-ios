@@ -18,6 +18,7 @@
 #import "AMAStartupController.h"
 #import "AMASessionStorage+AMATestUtilities.h"
 #import "AMAReporterTestHelper.h"
+#import "AMALocationManager.h"
 
 @interface AMAAppMetricaImpl ()
 @property (nonatomic, strong) AMAStartupController *startupController;
@@ -45,6 +46,7 @@ describe(@"AMAMetricaSessions", ^{
 
     void (^stubSharedImpl)(void) = ^{
         [NSURLProtocol registerClass:[AMATestURLProtocol class]];
+        [AMALocationManager stub:@selector(sharedManager)];
         [AMAMetricaConfigurationTestUtilities stubConfigurationWithAppVersion:@"1.00" buildNumber:100];
         hostStateProvider = [AMAStubHostAppStateProvider new];
         hostStateProvider.hostState = AMAHostAppStateBackground;
@@ -84,6 +86,7 @@ describe(@"AMAMetricaSessions", ^{
     afterEach(^{
         [appMetricaImpl shutdown];
         [AMAMetricaConfigurationTestUtilities destubConfiguration];
+        [AMALocationManager clearStubs];
         [AMAAppMetrica clearStubs];
         [AMADispatchStrategiesFactory clearStubs];
         [AMAStartupHostProvider clearStubs];

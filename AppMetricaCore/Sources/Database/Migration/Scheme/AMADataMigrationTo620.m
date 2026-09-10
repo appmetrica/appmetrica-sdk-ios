@@ -6,6 +6,7 @@
 #import "AMAMetricaConfiguration.h"
 #import "AMAMetricaPersistentConfiguration.h"
 #import "AMAAppMetricaConfigurationFileStorage.h"
+#import "AMAAppMetricaConfigurationSnapshot.h"
 #import "AMAAppMetricaConfiguration+JSONSerializable.h"
 
 @implementation AMADataMigrationTo620
@@ -25,7 +26,16 @@
     AMAAppMetricaConfiguration *configuration = [[AMAAppMetricaConfiguration alloc] initWithJSON:dictionary];
     
     if (configuration != nil) {
-        persistent.appMetricaClientConfiguration = configuration;
+        AMAAppMetricaConfigurationSnapshot *current =
+            [persistent appMetricaClientConfigurationSnapshot];
+
+        AMAAppMetricaConfigurationSnapshot *snapshot =
+            [[AMAAppMetricaConfigurationSnapshot alloc]
+                initWithConfiguration:configuration
+                              savedAt:current.savedAt
+                               source:AMAAppMetricaConfigurationSnapshotSourcePrivate];
+
+        [persistent saveAppMetricaClientConfigurationSnapshot:snapshot];
     }
 }
 

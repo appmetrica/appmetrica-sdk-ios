@@ -10,41 +10,41 @@
 @class AMAMetricaInMemoryConfiguration;
 @class AMAAttributionModelConfiguration;
 @class AMAExternalAttributionConfiguration;
-@class AMAAppMetricaConfiguration;
+@class AMAAppMetricaConfigurationSnapshot;
 @class AMAModulesStatusReportState;
 
 typedef NSDictionary<AMAAttributionSource, AMAExternalAttributionConfiguration *> AMAExternalAttributionConfigurationMap;
 
+NS_ASSUME_NONNULL_BEGIN
+
 @interface AMAMetricaPersistentConfiguration : NSObject
 
 @property (nonatomic, assign) BOOL hadFirstStartup;
-@property (nonatomic, strong) NSDate *startupUpdatedAt;
-@property (nonatomic, strong) NSDate *firstStartupUpdateDate;
-@property (nonatomic, copy) NSArray *userStartupHosts;
-@property (nonatomic, copy) NSArray *libraryAdapterCustomHosts;
+@property (nonatomic, strong, nullable) NSDate *startupUpdatedAt;
+@property (nonatomic, strong, nullable) NSDate *firstStartupUpdateDate;
+@property (nonatomic, copy, nullable) NSArray *userStartupHosts;
+@property (nonatomic, copy, nullable) NSArray *libraryAdapterCustomHosts;
 
-@property (nonatomic, strong) AMAAttributionModelConfiguration *attributionModelConfiguration;
-@property (nonatomic, strong) AMAExternalAttributionConfigurationMap *externalAttributionConfigurations;
+@property (nonatomic, strong, nullable) AMAAttributionModelConfiguration *attributionModelConfiguration;
+@property (nonatomic, strong, nullable) AMAExternalAttributionConfigurationMap *externalAttributionConfigurations;
 
-@property (nonatomic, strong) NSDate *extensionsLastReportDate;
+@property (nonatomic, strong, nullable) NSDate *extensionsLastReportDate;
 
 @property (nonatomic, strong, readonly) AMAPersistentTimeoutConfiguration *timeoutConfiguration;
 
-@property (nonatomic, strong) NSDate *lastPermissionsUpdateDate;
+@property (nonatomic, strong, nullable) NSDate *lastPermissionsUpdateDate;
 
-@property (nonatomic, strong) NSDate *registerForAttributionTime;
-@property (nonatomic, assign) NSNumber *conversionValue;
+@property (nonatomic, strong, nullable) NSDate *registerForAttributionTime;
+@property (nonatomic, assign, nullable) NSNumber *conversionValue;
 @property (nonatomic, assign) BOOL checkedInitialAttribution;
-@property (nonatomic, strong) NSDictionary<NSString *, NSNumber *> *eventCountsByKey;
-@property (nonatomic, strong) NSDecimalNumber *eventSum;
-@property (nonatomic, copy) NSArray<NSString *> *revenueTransactionIds;
-@property (nonatomic, copy) NSString *recentMainApiKey;
+@property (nonatomic, strong, nullable) NSDictionary<NSString *, NSNumber *> *eventCountsByKey;
+@property (nonatomic, strong, nullable) NSDecimalNumber *eventSum;
+@property (nonatomic, copy, nullable) NSArray<NSString *> *revenueTransactionIds;
+@property (nonatomic, copy, nullable) NSString *recentMainApiKey;
 
-@property (nonatomic, strong) AMAAppMetricaConfiguration *appMetricaClientConfiguration;
+@property (nonatomic, copy, nullable) NSDictionary<NSString *, NSNumber *> *autocollectedData;
 
-@property (nonatomic, copy) NSDictionary<NSString *, NSNumber *> *autocollectedData;
-
-@property (nonatomic, copy) AMAModulesStatusReportState *modulesStatusReportState;
+@property (nonatomic, copy, nullable) AMAModulesStatusReportState *modulesStatusReportState;
 
 - (instancetype)init NS_UNAVAILABLE;
 + (instancetype)new NS_UNAVAILABLE;
@@ -53,4 +53,10 @@ typedef NSDictionary<AMAAttributionSource, AMAExternalAttributionConfiguration *
           inMemoryConfiguration:(AMAMetricaInMemoryConfiguration *)inMemoryConfiguration
  appMetricaConfigurationStorage:(id<AMAAppMetricaConfigurationStoring>)appMetricaConfigurationStoring;
 
+- (nullable AMAAppMetricaConfigurationSnapshot *)appMetricaClientConfigurationSnapshot;
+- (void)saveAppMetricaClientConfigurationSnapshot:(AMAAppMetricaConfigurationSnapshot *)snapshot;
+- (void)clearAppMetricaClientConfigurationSnapshot:(AMAAppMetricaConfigurationSnapshot *)snapshot;
+
 @end
+
+NS_ASSUME_NONNULL_END

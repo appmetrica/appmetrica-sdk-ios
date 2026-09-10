@@ -6,10 +6,13 @@
 @class AMAAppMetricaConfiguration;
 @class AMAFirstActivationDetector;
 @class AMAAppMetricaLibraryAdapterConfiguration;
+@class AMASavedAppMetricaConfigRepository;
 
 NS_ASSUME_NONNULL_BEGIN
 
 @interface AMAConfigForAnonymousActivationProvider : NSObject
+
+@property (nonatomic, strong, readonly) AMASavedAppMetricaConfigRepository *repository;
 
 - (instancetype)init NS_UNAVAILABLE;
 + (instancetype)new NS_UNAVAILABLE;
@@ -18,6 +21,10 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)initWithStorage:(AMAMetricaPersistentConfiguration *)persistent
                 defaultProvider:(AMADefaultAnonymousConfigProvider *)defaultProvider
         firstActivationDetector:(AMAFirstActivationDetector *)firstActivationDetector;
+- (instancetype)initWithStorage:(AMAMetricaPersistentConfiguration *)persistent
+                defaultProvider:(AMADefaultAnonymousConfigProvider *)defaultProvider
+        firstActivationDetector:(AMAFirstActivationDetector *)firstActivationDetector
+                     repository:(AMASavedAppMetricaConfigRepository *)repository;
 
 - (AMAAppMetricaConfiguration *)configuration;
 

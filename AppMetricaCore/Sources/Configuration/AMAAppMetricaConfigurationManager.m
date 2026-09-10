@@ -20,6 +20,7 @@
 #import "AMALocationResolver.h"
 #import "AMAAdProviderResolver.h"
 #import "AMAActivationTypeResolver.h"
+#import "AMASavedAppMetricaConfigRepository.h"
 #import <AppMetricaPlatform/AppMetricaPlatform.h>
 
 @interface AMAAppMetricaConfigurationManager ()
@@ -101,7 +102,10 @@
     [self importCustomVersionConfiguration:configuration];
     
     if ([AMAPlatformDescription runEnvronment] == AMARunEnvironmentMainApp || calledFromActivateAnonymous == NO) {
-        self.metricaConfiguration.persistent.appMetricaClientConfiguration = configuration;
+        // Timestamp only on ordinary activation. Anonymous MainApp also persists config,
+        // but must not refresh TTL — otherwise Ads SDK anonymous restarts would extend it forever.
+        [self.anonymousConfigProvider.repository saveConfiguration:configuration
+                                                        refreshTTL:(calledFromActivateAnonymous == NO)];
     }
     self.metricaConfiguration.persistent.recentMainApiKey = configuration.APIKey;
     

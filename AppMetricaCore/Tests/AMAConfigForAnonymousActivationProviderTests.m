@@ -1,10 +1,10 @@
-
 #import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import "AMAConfigForAnonymousActivationProvider.h"
 #import "AMADefaultAnonymousConfigProvider.h"
 #import "AMAMetricaPersistentConfiguration.h"
 #import "AMAAppMetricaConfiguration.h"
 #import "AMAFirstActivationDetector.h"
+#import "AMASavedAppMetricaConfigRepository.h"
 
 SPEC_BEGIN(AMAConfigForAnonymousActivationProviderTests)
 
@@ -14,27 +14,34 @@ describe(@"AMAConfigForAnonymousActivationProvider", ^{
     AMAMetricaPersistentConfiguration *__block persistentMock = nil;
     AMADefaultAnonymousConfigProvider *__block defaultProvider = nil;
     AMAFirstActivationDetector *__block firstActivationDetector = nil;
+    AMASavedAppMetricaConfigRepository *__block repository = nil;
 
     beforeEach(^{
         persistentMock = [AMAMetricaPersistentConfiguration nullMock];
         defaultProvider = [[AMADefaultAnonymousConfigProvider alloc] init];
         firstActivationDetector = [[AMAFirstActivationDetector alloc] init];
+        repository = [AMASavedAppMetricaConfigRepository nullMock];
         
         provider = [[AMAConfigForAnonymousActivationProvider alloc] initWithStorage:persistentMock
                                                                     defaultProvider:defaultProvider
-                                                            firstActivationDetector:firstActivationDetector];
+                                                            firstActivationDetector:firstActivationDetector
+                                                                         repository:repository];
     });
     
-    context(@"With stored configuration", ^{
-        it(@"should return the persistent configuration", ^{
+    context(@"With valid saved configuration", ^{
+        it(@"should return the repository configuration", ^{
             AMAAppMetricaConfiguration *configurationMock = [AMAAppMetricaConfiguration nullMock];
-            [persistentMock stub:@selector(appMetricaClientConfiguration) andReturn:configurationMock];
+            [repository stub:@selector(validSavedConfig) andReturn:configurationMock];
             
             [[[provider configuration] should] equal:configurationMock];
         });
     });
     
-    context(@"Without stored configuration", ^{
+    context(@"Without valid saved configuration", ^{
+        beforeEach(^{
+            [repository stub:@selector(validSavedConfig) andReturn:nil];
+        });
+
         it(@"should return the default provider configuration", ^{
             [[[provider configuration].APIKey should] equal:[defaultProvider configuration].APIKey];
         });

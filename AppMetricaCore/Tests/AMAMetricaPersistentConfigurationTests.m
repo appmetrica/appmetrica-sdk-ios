@@ -12,6 +12,7 @@
 #import "AMAStartupPermission.h"
 #import "AMAStorageKeys.h"
 #import "AMAAppMetricaConfigurationProviderMock.h"
+#import "AMAAppMetricaConfigurationSnapshot.h"
 
 SPEC_BEGIN(AMAMetricaPersistentConfigurationTests)
 
@@ -522,34 +523,52 @@ describe(@"AMAMetricaPersistentConfiguration", ^{
         });
     });
     
-    context(@"appMetricaClientConfiguration", ^{
-        NSDictionary *const json = @{ @"foo" : @"bar" };
-        NSString *const key = @"appmetrica.client.confugiration";
+    context(@"appMetricaClientConfigurationSnapshot", ^{
         AMAAppMetricaConfiguration *__block mockConfiguration = nil;
         AMAMetricaPersistentConfiguration *__block configuration = nil;
         beforeEach(^{
-            [storage stub:@selector(jsonDictionaryForKey:error:) andReturn:json];
             configuration = createConfig();
             mockConfiguration = [AMAAppMetricaConfiguration nullMock];
+            [mockConfiguration stub:@selector(copyWithZone:) andReturn:mockConfiguration];
         });
-        
-        it(@"Should use valid key", ^{
-            [[configurationProviderMock should] receive:@selector(loadConfiguration)];
-            [configuration appMetricaClientConfiguration];
+
+        it(@"Should load snapshot from storage", ^{
+            [[configurationProviderMock should] receive:@selector(loadSnapshot)];
+            [configuration appMetricaClientConfigurationSnapshot];
         });
-        it(@"Should return config with json", ^{
-            AMAAppMetricaConfiguration *mockConfiguration = [AMAAppMetricaConfiguration stubbedNullMockForInit:@selector(initWithJSON:)];
-            [configurationProviderMock stub:@selector(loadConfiguration) andReturn:mockConfiguration];
-            [[configuration.appMetricaClientConfiguration should] equal:mockConfiguration];
-            
-            [AMAAppMetricaConfiguration clearStubs];
+        it(@"Should return snapshot from storage", ^{
+            NSDate *savedAt = [NSDate dateWithTimeIntervalSince1970:123.0];
+            AMAAppMetricaConfigurationSnapshot *snapshot =
+                [[AMAAppMetricaConfigurationSnapshot alloc] initWithConfiguration:mockConfiguration
+                                                                          savedAt:savedAt
+                                                                           source:AMAAppMetricaConfigurationSnapshotSourcePrivate];
+            [configurationProviderMock stub:@selector(loadSnapshot) andReturn:snapshot];
+
+            AMAAppMetricaConfigurationSnapshot *loaded = [configuration appMetricaClientConfigurationSnapshot];
+            [[loaded.configuration should] equal:mockConfiguration];
+            [[theValue(loaded.savedAt.timeIntervalSince1970) should] equal:savedAt.timeIntervalSince1970
+                                                                withDelta:floatingComparisonDelta];
         });
-        it(@"Should save valid config", ^{
-            [mockConfiguration stub:@selector(JSON) andReturn:json];
-            [mockConfiguration stub:@selector(copy) andReturn:mockConfiguration];
-            
-            [[configurationProviderMock should] receive:@selector(saveConfiguration:) withArguments:mockConfiguration];
-            configuration.appMetricaClientConfiguration = mockConfiguration;
+        it(@"Should save snapshot", ^{
+            AMAAppMetricaConfigurationSnapshot *snapshot =
+                [[AMAAppMetricaConfigurationSnapshot alloc] initWithConfiguration:mockConfiguration
+                                                                          savedAt:[NSDate dateWithTimeIntervalSince1970:42.0]
+                                                                           source:AMAAppMetricaConfigurationSnapshotSourcePrivate];
+            [[configurationProviderMock should] receive:@selector(saveSnapshot:) withArguments:snapshot];
+            [configuration saveAppMetricaClientConfigurationSnapshot:snapshot];
+        });
+        it(@"Should clear snapshot", ^{
+            configurationProviderMock.configuration = mockConfiguration;
+            configurationProviderMock.savedAt = [NSDate dateWithTimeIntervalSince1970:42.0];
+            AMAAppMetricaConfigurationSnapshot *snapshot =
+                [[AMAAppMetricaConfigurationSnapshot alloc] initWithConfiguration:mockConfiguration
+                                                                          savedAt:configurationProviderMock.savedAt
+                                                                           source:AMAAppMetricaConfigurationSnapshotSourcePrivate];
+
+            [configuration clearAppMetricaClientConfigurationSnapshot:snapshot];
+
+            [[configurationProviderMock.configuration should] beNil];
+            [[configurationProviderMock.savedAt should] beNil];
         });
     });
 });

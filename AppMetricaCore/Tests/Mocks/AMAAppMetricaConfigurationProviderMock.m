@@ -1,17 +1,30 @@
 #import "AMAAppMetricaConfigurationProviderMock.h"
+#import "AMAAppMetricaConfigurationSnapshot.h"
 
 @implementation AMAAppMetricaConfigurationProviderMock
 
-- (AMAAppMetricaConfiguration *)loadConfiguration
+- (AMAAppMetricaConfigurationSnapshot *)loadSnapshot
 {
-    [self.loadConfigurationExpectation fulfill];
-    return self.configuration;
+    [self.loadSnapshotExpectation fulfill];
+    if (self.configuration == nil && self.savedAt == nil) {
+        return nil;
+    }
+    return [[AMAAppMetricaConfigurationSnapshot alloc] initWithConfiguration:self.configuration
+                                                                     savedAt:self.savedAt
+                                                                      source:AMAAppMetricaConfigurationSnapshotSourcePrivate];
 }
 
-- (void)saveConfiguration:(AMAAppMetricaConfiguration *)configuration
+- (void)saveSnapshot:(AMAAppMetricaConfigurationSnapshot *)snapshot
 {
-    [self.saveConfigurationExpectation fulfill];
-    self.configuration = configuration;
+    [self.saveSnapshotExpectation fulfill];
+    self.configuration = snapshot.configuration;
+    self.savedAt = snapshot.savedAt;
+}
+
+- (void)clearSnapshot:(AMAAppMetricaConfigurationSnapshot *)snapshot
+{
+    self.configuration = nil;
+    self.savedAt = nil;
 }
 
 @end

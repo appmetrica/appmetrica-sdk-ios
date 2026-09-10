@@ -2,12 +2,13 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@class AMAAppMetricaConfiguration;
+@class AMAAppMetricaConfigurationSnapshot;
 
 @protocol AMAAppMetricaConfigurationStoring <NSObject>
 
-- (nullable AMAAppMetricaConfiguration *)loadConfiguration;
-- (void)saveConfiguration:(nonnull AMAAppMetricaConfiguration *)configuration;
+- (nullable AMAAppMetricaConfigurationSnapshot *)loadSnapshot;
+- (void)saveSnapshot:(nonnull AMAAppMetricaConfigurationSnapshot *)snapshot;
+- (void)clearSnapshot:(nonnull AMAAppMetricaConfigurationSnapshot *)snapshot;
 
 @end
 

@@ -6,9 +6,12 @@
 {
     [self.deleteExpectation fulfill];
     NSError *me = self.mockError;
-    
+
     if (error != nil) {
         *error = self.mockError;
+    }
+    if (me == nil) {
+        self.mockedData = nil;
     }
     return me != nil;
 }
