@@ -47,7 +47,7 @@
     #import <AppMetricaTestUtils/CLLocation+TestUtilities.h>
     #import <AppMetricaTestUtils/NSObject+Swizzling.h>
     #import <AppMetricaTestUtils/AMAKeyValueStorageDataProvidingMock.h>
-    #import <AppMetricaTestUtils/AMAKeychainMoch.h>
+    #import <AppMetricaTestUtils/AMAKeychainMock.h>
     #import <AppMetricaTestUtils/AMAKeyValueStorageMock.h>
     #import <AppMetricaTestUtils/AMAStorageMock.h>
     #import <AppMetricaTestUtils/AMAModuleRegistrarMock.h>
