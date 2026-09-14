@@ -1,6 +1,36 @@
 #import <XCTest/XCTest.h>
 #import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
+#import <AppMetricaLog/AppMetricaLog.h>
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
+
+@interface AMAJSONSerializationInvalidObject : NSObject
+
+@property (nonatomic, assign) NSUInteger descriptionCallCount;
+
+@end
+
+@implementation AMAJSONSerializationInvalidObject
+
+- (NSString *)description
+{
+    self.descriptionCallCount++;
+    return @"Invalid JSON object";
+}
+
+@end
+
+@interface AMAJSONSerializationInvalidUTF8Data : AMAJSONSerialization
+@end
+
+@implementation AMAJSONSerializationInvalidUTF8Data
+
++ (NSData *)dataWithJSONObject:(id)object error:(NSError **)error
+{
+    const uint8_t invalidUTF8[] = { 0xFF };
+    return [NSData dataWithBytes:invalidUTF8 length:sizeof(invalidUTF8)];
+}
+
+@end
 
 @interface AMAJSONSerializationTests : XCTestCase
 
@@ -41,7 +71,7 @@
     XCTAssertEqualObjects(error.domain, AMAAppMetricaInternalErrorDomain, @"Should fill error domain");
     XCTAssertEqual(error.code, AMAAppMetricaInternalEventErrorCodeJsonSerialization, @"Should fill error code");
     XCTAssertEqualObjects(error.localizedDescription,
-                          @"Passed dictionary is not a valid serializable JSON object: {\n    \"Wrong JSON object\" = abc;\n}",
+                          @"Passed object is not a valid serializable JSON object",
                           @"Should have correct description");
 
     [handler endAssertIgnoring];
@@ -69,10 +99,75 @@
     XCTAssertEqualObjects(error.domain, AMAAppMetricaInternalErrorDomain, @"Should fill error domain");
     XCTAssertEqual(error.code, AMAAppMetricaInternalEventErrorCodeJsonSerialization, @"Should fill error code");
     XCTAssertEqualObjects(error.localizedDescription,
-                          @"Passed dictionary is not a valid serializable JSON object: {\n    \"Wrong JSON object\" = abc;\n}",
+                          @"Passed object is not a valid serializable JSON object",
                           @"Should have correct description");
     
     [handler endAssertIgnoring];
+}
+
+- (void)testInvalidObjectsAreNotDescribed
+{
+    AMAJSONSerializationInvalidObject *invalidObject = [AMAJSONSerializationInvalidObject new];
+    AMATestAssertionHandler *handler = [AMATestAssertionHandler new];
+    [handler beginAssertIgnoring];
+
+    AMALogFacade *log = [AMALogFacade sharedLog];
+    NSString *channel = @"AppMetricaCoreUtils";
+    NSArray *previousOutputs = [log outputsWithChannel:channel];
+    AMALogConfigurator *configurator = [[AMALogConfigurator alloc] initWithLog:log];
+    [configurator setupLogWithChannel:channel];
+    @try {
+        for (id object in @[ @{ @"value": invalidObject }, @[ invalidObject ] ]) {
+            NSError *dataError = nil;
+            XCTAssertNil([AMAJSONSerialization dataWithJSONObject:object error:&dataError]);
+            XCTAssertEqualObjects(dataError.domain, AMAAppMetricaInternalErrorDomain);
+            XCTAssertEqual(dataError.code, AMAAppMetricaInternalEventErrorCodeJsonSerialization);
+
+            NSError *stringError = nil;
+            XCTAssertNil([AMAJSONSerialization stringWithJSONObject:object error:&stringError]);
+            XCTAssertEqualObjects(stringError.domain, AMAAppMetricaInternalErrorDomain);
+            XCTAssertEqual(stringError.code, AMAAppMetricaInternalEventErrorCodeJsonSerialization);
+        }
+        XCTAssertEqual(invalidObject.descriptionCallCount, 0U);
+    }
+    @finally {
+        for (AMALogOutput *output in [log outputsWithChannel:channel]) {
+            if ([previousOutputs containsObject:output] == NO) {
+                [log removeOutput:output];
+            }
+        }
+        [handler endAssertIgnoring];
+    }
+}
+
+- (void)testUTF8ConversionErrorsPreserveInputDescriptions
+{
+    AMATestAssertionHandler *handler = [AMATestAssertionHandler new];
+    [handler beginAssertIgnoring];
+    @try {
+        NSError *decodingError = nil;
+        XCTAssertNil([AMAJSONSerializationInvalidUTF8Data stringWithJSONObject:self.dict error:&decodingError]);
+        XCTAssertEqualObjects(decodingError.domain, AMAAppMetricaInternalErrorDomain);
+        XCTAssertEqual(decodingError.code, AMAAppMetricaInternalEventErrorCodeJsonSerialization);
+        NSString *decodingDetails = [@{ @"Can't deserialize data": self.dict } description];
+        XCTAssertTrue([decodingError.localizedDescription containsString:decodingDetails],
+                      @"UTF-8 decoding errors should preserve the original object description");
+
+        const unichar unpairedSurrogate = 0xD800;
+        NSString *invalidString = [NSString stringWithCharacters:&unpairedSurrogate length:1];
+        XCTAssertNotNil(invalidString);
+        XCTAssertNil([invalidString dataUsingEncoding:NSUTF8StringEncoding]);
+        NSError *encodingError = nil;
+        XCTAssertNil([AMAJSONSerialization dictionaryWithJSONString:invalidString error:&encodingError]);
+        XCTAssertEqualObjects(encodingError.domain, AMAAppMetricaInternalErrorDomain);
+        XCTAssertEqual(encodingError.code, AMAAppMetricaInternalEventErrorCodeJsonSerialization);
+        NSString *encodingDetails = [@{ @"Can't serialize data": invalidString } description];
+        XCTAssertTrue([encodingError.localizedDescription containsString:encodingDetails],
+                      @"UTF-8 encoding errors should preserve the original string description");
+    }
+    @finally {
+        [handler endAssertIgnoring];
+    }
 }
 
 - (void)testDictionaryWithJSONString

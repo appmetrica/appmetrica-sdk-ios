@@ -29,9 +29,11 @@
     }
     
     if ([NSJSONSerialization isValidJSONObject:object] == NO) {
-        AMALogAssert(@"Failed to serialize object into JSON: %@", object);
-        [AMAErrorUtilities fillError:error
-                           withError:[[self class] malformedJSONError:@{@"Wrong JSON object" : object}]];
+        AMALogAssert(@"Failed to serialize object into JSON");
+        NSError *serializationError =
+            [AMAErrorUtilities internalErrorWithCode:AMAAppMetricaInternalEventErrorCodeJsonSerialization
+                                        description:@"Passed object is not a valid serializable JSON object"];
+        [AMAErrorUtilities fillError:error withError:serializationError];
         return nil;
     }
     

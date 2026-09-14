@@ -122,9 +122,7 @@ describe(@"AMAAdRevenueInfoConverter", ^{
                 adRevenueInfo.payload = payload;
             });
             it(@"Should fill error", ^{
-                NSString *desription =
-                @"Passed dictionary is not a valid serializable JSON object: {\n    \"Wrong JSON object\" ="
-                "     {\n                (\n            foo,\n            bar\n        ) = bar;\n    };\n}";
+                NSString *desription = @"Passed object is not a valid serializable JSON object";
                 NSError *expectedError = [NSError errorWithDomain:AMAAppMetricaInternalErrorDomain
                                                              code:AMAAppMetricaInternalEventErrorCodeJsonSerialization
                                                          userInfo:@{ NSLocalizedDescriptionKey: desription }];
