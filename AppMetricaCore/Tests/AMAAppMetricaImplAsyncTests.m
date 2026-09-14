@@ -193,6 +193,28 @@ static NSString *const anonymousApiKey = @"629a824d-c717-4ba5-bc0f-3f3968554d01"
     self.appMetricaImpl = nil;
 }
 
+- (void)testErrorEnvironmentIsCopiedBeforeQueuedUpdatesAndRemovals
+{
+    AMAEnvironmentContainer *environment = [AMAEnvironmentContainer new];
+    AMAReporterStoragesContainer *storages = [AMAReporterStoragesContainer nullMock];
+    [AMAReporterStoragesContainer stub:@selector(sharedInstance) andReturn:storages];
+    [storages stub:@selector(eventEnvironment) andReturn:environment];
+
+    NSMutableString *key = [@"key" mutableCopy];
+    NSMutableString *value = [@"value" mutableCopy];
+    [self.appMetricaImpl setErrorEnvironmentValue:value forKey:key];
+    [key setString:@"changed_key"];
+    [value setString:@"changed_value"];
+    [self.executor execute];
+    XCTAssertEqualObjects(environment.dictionaryEnvironment, (@{ @"key": @"value" }));
+
+    [key setString:@"key"];
+    [self.appMetricaImpl setErrorEnvironmentValue:nil forKey:key];
+    [key setString:@"changed_key"];
+    [self.executor execute];
+    XCTAssertEqual(environment.dictionaryEnvironment.count, 0U);
+}
+
 - (void)testActivationRunsCoreSynchronouslyAndModuleLifecycleAfterDiscovery
 {
     XCTAssertNotNil(self.appMetricaImpl.modulesController);

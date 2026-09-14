@@ -29,7 +29,9 @@
 {
     self = [super init];
     if (self) {
-        _environment = dictionaryEnvironment ? [dictionaryEnvironment copy] : @{};
+        _environment = dictionaryEnvironment
+            ? [[NSDictionary alloc] initWithDictionary:dictionaryEnvironment copyItems:YES]
+            : @{};
         _limiter = limiter;
         _observers = [[NSMapTable alloc] initWithKeyOptions:NSPointerFunctionsWeakMemory
                                                valueOptions:NSPointerFunctionsStrongMemory
@@ -44,6 +46,9 @@
 
 - (void)addValue:(nullable NSString *)value forKey:(NSString *)key
 {
+    key = [key copy];
+    value = [value copy];
+
     if (key.length == 0) {
         return;
     }

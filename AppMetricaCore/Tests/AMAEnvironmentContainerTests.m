@@ -66,6 +66,28 @@ describe(@"AMAEnvironmentContainer", ^{
         });
     });
 
+    it(@"should snapshot mutable values when initialized and updated", ^{
+        NSMutableString *initialValue = [@"initial" mutableCopy];
+        NSMutableDictionary *initialEnvironment = [@{ @"initial_key": initialValue } mutableCopy];
+        AMAEnvironmentContainer *container =
+            [[AMAEnvironmentContainer alloc] initWithDictionaryEnvironment:initialEnvironment];
+        [initialValue setString:@"changed"];
+        [initialEnvironment removeAllObjects];
+        [[container.dictionaryEnvironment should] equal:@{ @"initial_key": @"initial" }];
+
+        NSMutableString *key = [@"added_key" mutableCopy];
+        NSMutableString *value = [@"added_value" mutableCopy];
+        [container addValue:value forKey:key];
+        NSDictionary *snapshot = container.dictionaryEnvironment;
+        [key setString:@"changed_key"];
+        [value setString:@"changed_value"];
+        [[snapshot should] equal:@{ @"initial_key": @"initial", @"added_key": @"added_value" }];
+
+        [container addValue:nil forKey:@"added_key"];
+        [[container.dictionaryEnvironment should] equal:@{ @"initial_key": @"initial" }];
+        [[snapshot should] equal:@{ @"initial_key": @"initial", @"added_key": @"added_value" }];
+    });
+
     context(@"by default", ^{
         let(container, ^{
             return [AMAEnvironmentContainer new];

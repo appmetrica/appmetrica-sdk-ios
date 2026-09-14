@@ -1227,6 +1227,9 @@
 
 - (void)setAppEnvironmentValue:(NSString *)value forKey:(NSString *)key
 {
+    key = [key copy];
+    value = [value copy];
+
     [self execute:^{
         [self.reporterStorage.stateStorage.appEnvironment addValue:value forKey:key];
     }];

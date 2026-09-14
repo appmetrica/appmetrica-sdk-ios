@@ -1254,6 +1254,9 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
 
 - (void)setErrorEnvironmentValue:(NSString *)value forKey:(NSString *)key
 {
+    key = [key copy];
+    value = [value copy];
+
     [self execute:^{
         [[self class] syncSetErrorEnvironmentValue:value forKey:key];
     }];

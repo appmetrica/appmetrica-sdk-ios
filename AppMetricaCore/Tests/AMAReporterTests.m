@@ -1778,6 +1778,29 @@ describe(@"AMAReporter", ^{
     });
 
     context(@"Environment data handling", ^{
+        it(@"Should snapshot app environment before queued updates and removals", ^{
+            AMAReporter *reporter = [reporterTestHelper appReporterForApiKey:apiKey];
+            AMAManualCurrentQueueExecutor *executor = [AMAManualCurrentQueueExecutor new];
+            [reporter stub:NSSelectorFromString(@"execute:") withBlock:^id(NSArray *params) {
+                [executor execute:params.firstObject];
+                return nil;
+            }];
+
+            NSMutableString *key = [@"key" mutableCopy];
+            NSMutableString *value = [@"value" mutableCopy];
+            [reporter setAppEnvironmentValue:value forKey:key];
+            [key setString:@"changed_key"];
+            [value setString:@"changed_value"];
+            [executor execute];
+            [[reporter.reporterStorage.stateStorage.appEnvironment.dictionaryEnvironment should]
+                equal:@{ @"key": @"value" }];
+
+            [key setString:@"key"];
+            [reporter setAppEnvironmentValue:nil forKey:key];
+            [key setString:@"changed_key"];
+            [executor execute];
+            [[reporter.reporterStorage.stateStorage.appEnvironment.dictionaryEnvironment should] beEmpty];
+        });
         it(@"Should use event environment dictionary", ^{
             __block AMAEvent *userEvent = nil;
             AMAReporter *reporter = [reporterTestHelper appReporterForApiKey:apiKey];
