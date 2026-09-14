@@ -428,49 +428,32 @@ describe(@"AMAEventSerializer", ^{
                                                                              has:eventData->has_event_environment];
                 [[jsonString should] equal:@"{\"foo\":\"bar\"}"];
             });
-            context(@"Extras", ^{
-                NSString *const key1 = @"KEY_1";
-                NSString *const value1raw = @"test value 1";
-                NSData *const value1 = [value1raw dataUsingEncoding:NSUTF8StringEncoding];
-
-                NSString *const key2 = @"KEY_EMPTY";
-                NSData *const value2 = [NSData new];
-
-                NSDictionary<NSString *, NSData *> *const extras = @{
-                        key1: value1,
-                        key2: value2,
-                };
-
-                beforeEach(^{
+            it(@"Should round-trip extras of different sizes", ^{
+                for (NSNumber *count in @[ @0, @1, @2, @16 ]) {
+                    NSMutableDictionary<NSString *, NSData *> *extras = [NSMutableDictionary dictionary];
+                    for (NSUInteger i = 0; i < count.unsignedIntegerValue; i++) {
+                        NSString *key = [NSString stringWithFormat:@"KEY_%lu", (unsigned long)i];
+                        NSString *value = [NSString stringWithFormat:@"VALUE_%lu", (unsigned long)i];
+                        extras[key] = i % 2 == 0 ? [value dataUsingEncoding:NSUTF8StringEncoding] : [NSData data];
+                    }
                     event.extras = extras;
                     fillEventData();
-                });
-                it(@"Should have extras", ^{
-                    [[thePointerValue(eventData->extras) shouldNot] equal:thePointerValue(NULL)];
-                    [[theValue(eventData->n_extras) should] equal:theValue(2)];
 
-                    NSString *eventKey1 = [AMAProtobufUtilities stringForBinaryData:&eventData->extras[0]->key];
-                    NSData *eventValue1 = [AMAProtobufUtilities dataForBinaryData:&eventData->extras[0]->value];
+                    [[theValue(eventData->n_extras) should] equal:theValue(extras.count)];
+                    if (extras.count == 0) {
+                        [[thePointerValue(eventData->extras) should] equal:thePointerValue(NULL)];
+                    }
+                    else {
+                        [[thePointerValue(eventData->extras) shouldNot] equal:thePointerValue(NULL)];
+                    }
 
-                    NSString *eventKey2 = [AMAProtobufUtilities stringForBinaryData:&eventData->extras[1]->key];
-                    NSData *eventValue2 = [AMAProtobufUtilities dataForBinaryData:&eventData->extras[1]->value];
-
-                    NSDictionary<NSString *, NSData *> *eventExtras = @{
-                        eventKey1: eventValue1,
-                        eventKey2: eventValue2,
-                    };
-
-                    [[eventExtras should] equal:extras];
-                });
-            });
-            context(@"Empty extras", ^{
-                beforeEach(^{
-                    event.extras = [NSDictionary dictionary];
-                    fillEventData();
-                });
-                it(@"Should have extras", ^{
-                    [[thePointerValue(eventData->extras) should] equal:thePointerValue(NULL)];
-                });
+                    NSMutableDictionary<NSString *, NSData *> *decodedExtras = [NSMutableDictionary dictionary];
+                    for (size_t i = 0; i < eventData->n_extras; i++) {
+                        NSString *key = [AMAProtobufUtilities stringForBinaryData:&eventData->extras[i]->key];
+                        decodedExtras[key] = [AMAProtobufUtilities dataForBinaryData:&eventData->extras[i]->value];
+                    }
+                    [[decodedExtras should] equal:extras];
+                }
             });
             it(@"Should have valid profile ID", ^{
                 NSString *expectedProfileID = @"PROFILE_ID";

@@ -231,7 +231,8 @@
         return 0;
     }
 
-    Ama__EventData__ExtraEntry **extrasArray = [tracker allocateSize:sizeof(Ama__EventData__ExtraEntry *)];
+    Ama__EventData__ExtraEntry **extrasArray =
+        [tracker allocateSize:dictionary.count * sizeof(Ama__EventData__ExtraEntry *)];
     size_t i = 0;
 
     for (NSString *key in dictionary.keyEnumerator) {
