@@ -38,7 +38,6 @@ public final class UnfairLocker<T> {
     var _rawValue: T
     public let lock = UnfairLock()
 
-    @inlinable
     public init(value: T) {
         self._rawValue = value
     }
