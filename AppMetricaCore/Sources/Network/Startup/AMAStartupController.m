@@ -11,6 +11,7 @@
 #import "AMAErrorsFactory.h"
 #import "AMATimeoutRequestsController.h"
 #import "AMAAttributionController.h"
+#import "AMAStartupStateProviding.h"
 @import AppMetricaIdentifiers;
 
 static NSTimeInterval const kAMAStartupDefaultRequestsInterval = 1 * AMA_DAYS;
@@ -21,6 +22,7 @@ NSErrorDomain const AMAStartupRequestsErrorDomain = @"AMAStartupRequestsErrorDom
 @property (nonatomic, strong) id<AMACancelableExecuting> executor;
 @property (nonatomic, strong) id<AMAResettableIterable> hostProvider;
 @property (nonatomic, strong) AMAStartupRequest *startupRequest;
+@property (nonatomic, strong, readonly) id<AMAStartupStateProviding> stateProvider;
 @property (nonatomic, strong) AMAHTTPRequestor *currentHTTPRequestor;
 @property (nonatomic, strong, readonly) id<AMADelayStrategy> delayStrategy;
 @property (nonatomic, strong, readonly) AMATimeoutRequestsController *timeoutRequestsController;
@@ -33,10 +35,11 @@ NSErrorDomain const AMAStartupRequestsErrorDomain = @"AMAStartupRequestsErrorDom
 
 @implementation AMAStartupController
 
-@dynamic upToDate;
+@dynamic startupUpdateRequired;
 
 - (instancetype)initWithTimeoutRequestsController:(AMATimeoutRequestsController *)timeoutRequestsController
                              attributionController:(AMAAttributionController *)attributionController
+                                     stateProvider:(id<AMAStartupStateProviding>)stateProvider
 {
     id<AMACancelableExecuting> executor = [[AMACancelableDelayedExecutor alloc] initWithIdentifier:self];
     AMAStartupHostProvider *hostProvider = [[AMAStartupHostProvider alloc] init];
@@ -45,7 +48,8 @@ NSErrorDomain const AMAStartupRequestsErrorDomain = @"AMAStartupRequestsErrorDom
         timeoutRequestsController:timeoutRequestsController
             startupResponseParser:[[AMAStartupResponseParser alloc] init]
             attributionController:attributionController
-             metricaConfiguration:[AMAMetricaConfiguration sharedInstance]];
+             metricaConfiguration:[AMAMetricaConfiguration sharedInstance]
+                    stateProvider:stateProvider];
 }
 
 - (instancetype)initWithExecutor:(id<AMACancelableExecuting>)executor
@@ -54,6 +58,23 @@ NSErrorDomain const AMAStartupRequestsErrorDomain = @"AMAStartupRequestsErrorDom
            startupResponseParser:(AMAStartupResponseParser *)startupResponseParser
            attributionController:(AMAAttributionController *)attributionController
            metricaConfiguration:(AMAMetricaConfiguration *)metricaConfiguration
+{
+    return [self initWithExecutor:executor
+                    hostProvider:hostProvider
+       timeoutRequestsController:timeoutRequestsController
+           startupResponseParser:startupResponseParser
+           attributionController:attributionController
+            metricaConfiguration:metricaConfiguration
+                   stateProvider:nil];
+}
+
+- (instancetype)initWithExecutor:(id<AMACancelableExecuting>)executor
+                    hostProvider:(id<AMAResettableIterable>)hostProvider
+       timeoutRequestsController:(AMATimeoutRequestsController *)timeoutRequestsController
+           startupResponseParser:(AMAStartupResponseParser *)startupResponseParser
+           attributionController:(AMAAttributionController *)attributionController
+            metricaConfiguration:(AMAMetricaConfiguration *)metricaConfiguration
+                   stateProvider:(id<AMAStartupStateProviding>)stateProvider
 {
     self = [super init];
     if (self != nil) {
@@ -66,6 +87,7 @@ NSErrorDomain const AMAStartupRequestsErrorDomain = @"AMAStartupRequestsErrorDom
         _requestsFactory = [[AMAHTTPRequestsFactory alloc] init];
         _attributionController = attributionController;
         _metricaConfiguration = metricaConfiguration;
+        _stateProvider = stateProvider;
     }
 
     return self;
@@ -73,7 +95,17 @@ NSErrorDomain const AMAStartupRequestsErrorDomain = @"AMAStartupRequestsErrorDom
 
 #pragma mark - Public -
 
-- (BOOL)upToDate
+- (BOOL)startupUpdateRequired
+{
+    return [self startupUpdateRequiredForParameters:[self.stateProvider startupParameters]];
+}
+
+- (BOOL)startupUpdateRequiredForParameters:(NSDictionary *)parameters
+{
+    return self.startupConfigurationUpToDate == NO || [self.stateProvider requiresUpdateForParameters:parameters];
+}
+
+- (BOOL)startupConfigurationUpToDate
 {
     BOOL isUpToDate = NO;
     AMAMetricaConfiguration *configuration = self.metricaConfiguration;
@@ -89,7 +121,12 @@ NSErrorDomain const AMAStartupRequestsErrorDomain = @"AMAStartupRequestsErrorDom
 - (void)update
 {
     @synchronized (self) {
-        if (self.upToDate == NO && self.currentHTTPRequestor == nil) {
+        if (self.currentHTTPRequestor != nil) {
+            return;
+        }
+        NSDictionary *parameters = [self.stateProvider startupParameters];
+        if ([self startupUpdateRequiredForParameters:parameters]) {
+            [self.startupRequest addAdditionalStartupParameters:parameters];
             [self.hostProvider reset];
             [self executeRequest];
         }
@@ -108,7 +145,9 @@ NSErrorDomain const AMAStartupRequestsErrorDomain = @"AMAStartupRequestsErrorDom
 - (void)addAdditionalStartupParameters:(NSDictionary *)parameters
 {
     @synchronized (self) {
-        [self.startupRequest addAdditionalStartupParameters:parameters];
+        NSMutableDictionary *additionalParameters = [parameters mutableCopy];
+        [additionalParameters removeObjectsForKeys:self.stateProvider.reservedParameterKeys.allObjects ?: @[]];
+        [self.startupRequest addAdditionalStartupParameters:additionalParameters];
     }
 }
 
@@ -285,7 +324,9 @@ NSErrorDomain const AMAStartupRequestsErrorDomain = @"AMAStartupRequestsErrorDom
             }
             else {
                 canAcceptResponse = YES;
+                NSDictionary *sentParameters = requestor.request.GETParameters;
                 [self handleStartupResponse:startupResponse];
+                [self.stateProvider startupDidSucceedWithParameters:sentParameters];
                 [self cancel];
             }
         }

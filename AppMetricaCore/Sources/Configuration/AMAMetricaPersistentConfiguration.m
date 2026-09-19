@@ -101,6 +101,8 @@ BOOL_PROPERTY(checkedInitialAttribution, setCheckedInitialAttribution, AMAStorag
 
 DATE_SET_ONCE_PROPERTY(firstStartupUpdateDate, setFirstStartupUpdateDate, AMAStorageStringKeyFirstStartupUpdateDate);
 DATE_PROPERTY(startupUpdatedAt, setStartupUpdatedAt, AMAStorageStringKeyStartupUpdatedAt);
+PROPERTY_FOR_TYPE(NSNumber, lastStartupYandexAdsOnlyState, setLastStartupYandexAdsOnlyState,
+                  AMAStorageStringKeyLastStartupYandexAdsOnlyState, boolNumberForKey, saveBoolNumber, NO);
 DATE_PROPERTY(extensionsLastReportDate, setExtensionsLastReportDate, AMAStorageStringKeyExtensionsLastReportDate);
 DATE_PROPERTY(lastPermissionsUpdateDate, setLastPermissionsUpdateDate, AMAStorageStringKeyPermissionsLastUpdateDate);
 DATE_PROPERTY(registerForAttributionTime, setRegisterForAttributionTime, AMAStorageStringKeyRegisterForAttributionTime);

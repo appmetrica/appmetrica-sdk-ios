@@ -15,7 +15,7 @@ describe(@"AMADefaultReportExecutionConditionChecker", ^{
     context(@"Can be executed", ^{
         context(@"Startup is up-to-date", ^{
             beforeEach(^{
-                [controller stub:@selector(upToDate) andReturn:theValue(YES)];
+                [controller stub:@selector(startupUpdateRequired) andReturn:theValue(NO)];
             });
             it(@"Should return YES", ^{
                 [[theValue([conditionChecker canBeExecuted:controller]) should] beYes];
@@ -27,7 +27,7 @@ describe(@"AMADefaultReportExecutionConditionChecker", ^{
         });
         context(@"Startup is not up-to-date", ^{
             beforeEach(^{
-                [controller stub:@selector(upToDate) andReturn:theValue(NO)];
+                [controller stub:@selector(startupUpdateRequired) andReturn:theValue(YES)];
             });
             it(@"Should return NO", ^{
                 [[theValue([conditionChecker canBeExecuted:controller]) should] beNo];
@@ -37,10 +37,10 @@ describe(@"AMADefaultReportExecutionConditionChecker", ^{
                 [conditionChecker canBeExecuted:controller];
             });
             it(@"Should return YES if startup was updated", ^{
-                [controller stub:@selector(upToDate)
-                       andReturn:theValue(NO)
+                [controller stub:@selector(startupUpdateRequired)
+                       andReturn:theValue(YES)
                            times:@1
-                 afterThatReturn:theValue(YES)];
+                 afterThatReturn:theValue(NO)];
                 [[theValue([conditionChecker canBeExecuted:controller]) should] beYes];
             });
         });

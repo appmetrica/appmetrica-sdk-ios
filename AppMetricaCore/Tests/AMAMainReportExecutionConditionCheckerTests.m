@@ -27,7 +27,7 @@ describe(@"AMAMainReportExecutionConditionChecker", ^{
     context(@"Can be executed", ^{
         context(@"Startup is not up-to-date", ^{
             beforeEach(^{
-                [startupController stub:@selector(upToDate) andReturn:theValue(NO)];
+                [startupController stub:@selector(startupUpdateRequired) andReturn:theValue(YES)];
                 [persistentConfiguration stub:@selector(checkedInitialAttribution) andReturn:theValue(YES)];
             });
             it(@"Should be NO", ^{
@@ -38,18 +38,18 @@ describe(@"AMAMainReportExecutionConditionChecker", ^{
                 [checker canBeExecuted:startupController];
             });
             it(@"Should be YES if startup was updated", ^{
-                [startupController stub:@selector(upToDate) andReturn:theValue(NO) times:@1 afterThatReturn:theValue(YES)];
+                [startupController stub:@selector(startupUpdateRequired) andReturn:theValue(YES) times:@1 afterThatReturn:theValue(NO)];
                 [[theValue([checker canBeExecuted:startupController]) should] beYes];
             });
             it(@"Should be YES if startup was updated but attribution was not checked", ^{
                 [persistentConfiguration stub:@selector(checkedInitialAttribution) andReturn:theValue(NO)];
-                [startupController stub:@selector(upToDate) andReturn:theValue(NO) times:@1 afterThatReturn:theValue(YES)];
+                [startupController stub:@selector(startupUpdateRequired) andReturn:theValue(YES) times:@1 afterThatReturn:theValue(NO)];
                 [[theValue([checker canBeExecuted:startupController]) should] beNo];
             });
         });
         context(@"Startup is up-to-date", ^{
             beforeEach(^{
-                [startupController stub:@selector(upToDate) andReturn:theValue(YES)];
+                [startupController stub:@selector(startupUpdateRequired) andReturn:theValue(NO)];
             });
             it(@"Should not update startup", ^{
                 [[startupController shouldNot] receive:@selector(update)];

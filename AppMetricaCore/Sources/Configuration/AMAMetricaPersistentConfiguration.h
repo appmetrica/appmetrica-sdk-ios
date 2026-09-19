@@ -21,6 +21,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, assign) BOOL hadFirstStartup;
 @property (nonatomic, strong, nullable) NSDate *startupUpdatedAt;
+@property (nonatomic, strong, nullable) NSNumber *lastStartupYandexAdsOnlyState;
 @property (nonatomic, strong, nullable) NSDate *firstStartupUpdateDate;
 @property (nonatomic, copy, nullable) NSArray *userStartupHosts;
 @property (nonatomic, copy, nullable) NSArray *libraryAdapterCustomHosts;

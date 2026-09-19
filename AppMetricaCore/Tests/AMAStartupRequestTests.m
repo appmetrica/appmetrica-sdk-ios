@@ -89,6 +89,21 @@ describe(@"AMAStartupRequest", ^{
             [[keys shouldNot] contain:@""];
             [[keys shouldNot] contain:@"empty"];
         });
+        it(@"Should serialize the Yandex Ads state from additional parameters", ^{
+            [request addAdditionalStartupParameters:@{@"module": @"value", @"features": @"extra"}];
+            for (NSString *state in @[@"1", @"0", @"1"]) {
+                [request addAdditionalStartupParameters:@{@"hoyas": state}];
+                NSURLRequest *urlRequest = [request buildURLRequest];
+                NSArray<NSURLQueryItem *> *items =
+                    [NSURLComponents componentsWithURL:urlRequest.URL resolvingAgainstBaseURL:NO].queryItems;
+                NSPredicate *parameterName = [NSPredicate predicateWithFormat:@"name == %@", @"hoyas"];
+                NSArray<NSURLQueryItem *> *stateItems = [items filteredArrayUsingPredicate:parameterName];
+                [[theValue(stateItems.count) should] equal:theValue(1u)];
+                [[stateItems.firstObject.value should] equal:state];
+                [[request.GETParameters[@"module"] should] equal:@"value"];
+                [[request.GETParameters[@"features"] should] containString:@"extra"];
+            }
+        });
         it(@"Should be subclass of AMAGenericRequest", ^{
             [[request should] beKindOfClass:AMAGenericRequest.class];
         });

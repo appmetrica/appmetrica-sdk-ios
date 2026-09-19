@@ -36,6 +36,19 @@ describe(@"AMAMetricaPersistentConfiguration", ^{
         configurationProviderMock = [[AMAAppMetricaConfigurationProviderMock alloc] init];
     });
 
+    context(@"Last successful Yandex Ads state snapshot", ^{
+        it(@"Should preserve absence and both boolean values across configuration recreation", ^{
+            [[createConfig().lastStartupYandexAdsOnlyState should] beNil];
+            for (NSNumber *value in @[@NO, @YES, @NO]) {
+                createConfig().lastStartupYandexAdsOnlyState = value;
+                [[createConfig().lastStartupYandexAdsOnlyState should] equal:value];
+                [[[storage boolNumberForKey:AMAStorageStringKeyLastStartupYandexAdsOnlyState error:nil] should] equal:value];
+            }
+            createConfig().lastStartupYandexAdsOnlyState = nil;
+            [[createConfig().lastStartupYandexAdsOnlyState should] beNil];
+        });
+    });
+
     context(@"Saves startup update date", ^{
         NSString *const key = @"startup.updated_at";
         NSDate *updateDate = [NSDate date];

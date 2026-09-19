@@ -6,7 +6,7 @@
 
 - (BOOL)canBeExecuted:(AMAStartupController *)startupController
 {
-    return startupController.upToDate;
+    return startupController.startupUpdateRequired == NO;
 }
 
 @end

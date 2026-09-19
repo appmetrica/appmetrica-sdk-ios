@@ -9,11 +9,11 @@
 
 - (BOOL)canBeExecuted:(AMAStartupController *)startupController
 {
-    if (startupController.upToDate == NO) {
+    if (startupController.startupUpdateRequired) {
         [startupController update];
     }
 
-    return startupController.upToDate && [AMAMetricaConfiguration sharedInstance].persistent.checkedInitialAttribution;
+    return startupController.startupUpdateRequired == NO && [AMAMetricaConfiguration sharedInstance].persistent.checkedInitialAttribution;
 }
 
 

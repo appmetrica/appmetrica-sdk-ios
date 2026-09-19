@@ -17,7 +17,7 @@ describe(@"AMASelfReportExecutionConditionChecker", ^{
     context(@"Can be executed", ^{
         context(@"Startup is not up-to-date", ^{
             beforeEach(^{
-                [controller stub:@selector(upToDate) andReturn:theValue(NO)];
+                [controller stub:@selector(startupUpdateRequired) andReturn:theValue(YES)];
             });
             it(@"Should be NO", ^{
                 [[theValue([checker canBeExecuted:controller]) should] beNo];
@@ -29,7 +29,7 @@ describe(@"AMASelfReportExecutionConditionChecker", ^{
         });
         context(@"Startup is up-to-date", ^{
             beforeEach(^{
-                [controller stub:@selector(upToDate) andReturn:theValue(YES)];
+                [controller stub:@selector(startupUpdateRequired) andReturn:theValue(NO)];
             });
             it(@"Should be NO", ^{
                 [[theValue([checker canBeExecuted:controller]) should] beYes];

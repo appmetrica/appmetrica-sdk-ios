@@ -20,6 +20,7 @@ extern NSString *const AMAStorageStringKeyServerTimeOffset;
 extern NSString *const AMAStorageStringKeyStartupHosts;
 extern NSString *const AMAStorageStringKeyStartupPermissions;
 extern NSString *const AMAStorageStringKeyStartupUpdatedAt;
+extern NSString *const AMAStorageStringKeyLastStartupYandexAdsOnlyState;
 extern NSString *const AMAStorageStringKeyStartupUpdateInterval;
 extern NSString *const AMAStorageStringKeyStatSendingDisabledReportingInterval;
 extern NSString *const AMAStorageStringKeyUUID;

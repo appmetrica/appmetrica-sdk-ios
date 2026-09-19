@@ -8,6 +8,7 @@
 @class AMAStartupResponseParser;
 @class AMAMetricaConfiguration;
 @class AMAAttributionController;
+@protocol AMAStartupStateProviding;
 
 extern NSErrorDomain const AMAStartupRequestsErrorDomain;
 typedef NS_ERROR_ENUM(AMAStartupRequestsErrorDomain, AMAStartupRequestsErrorCode) {
@@ -32,7 +33,9 @@ typedef NS_ERROR_ENUM(AMAStartupRequestsErrorDomain, AMAStartupRequestsErrorCode
 
 @interface AMAStartupController : NSObject
 
-@property (nonatomic, assign, readonly) BOOL upToDate;
+@property (nonatomic, assign, readonly) BOOL startupUpdateRequired;
+// Freshness of the received configuration, independent of pending request parameter updates.
+@property (nonatomic, assign, readonly) BOOL startupConfigurationUpToDate;
 @property (nonatomic, weak) id<AMAStartupControllerDelegate> delegate;
 @property (nonatomic, weak) id<AMAExtendedStartupObservingDelegate> extendedDelegate;
 
@@ -40,7 +43,8 @@ typedef NS_ERROR_ENUM(AMAStartupRequestsErrorDomain, AMAStartupRequestsErrorCode
 + (instancetype)new NS_UNAVAILABLE;
 
 - (instancetype)initWithTimeoutRequestsController:(AMATimeoutRequestsController *)timeoutRequestsController
-                             attributionController:(AMAAttributionController *)attributionController;
+                             attributionController:(AMAAttributionController *)attributionController
+                                     stateProvider:(id<AMAStartupStateProviding>)stateProvider;
 
 - (instancetype)initWithExecutor:(id<AMACancelableExecuting>)executor
                     hostProvider:(id<AMAResettableIterable>)hostProvider
@@ -50,6 +54,14 @@ typedef NS_ERROR_ENUM(AMAStartupRequestsErrorDomain, AMAStartupRequestsErrorCode
            metricaConfiguration:(AMAMetricaConfiguration *)metricaConfiguration;
 
 - (void)addAdditionalStartupParameters:(NSDictionary *)parameters;
+
+- (instancetype)initWithExecutor:(id<AMACancelableExecuting>)executor
+                    hostProvider:(id<AMAResettableIterable>)hostProvider
+       timeoutRequestsController:(AMATimeoutRequestsController *)timeoutRequestsController
+           startupResponseParser:(AMAStartupResponseParser *)startupResponseParser
+           attributionController:(AMAAttributionController *)attributionController
+            metricaConfiguration:(AMAMetricaConfiguration *)metricaConfiguration
+                   stateProvider:(id<AMAStartupStateProviding>)stateProvider;
 
 - (void)update;
 - (void)cancel;

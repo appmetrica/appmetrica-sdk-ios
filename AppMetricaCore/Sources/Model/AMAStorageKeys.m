@@ -41,6 +41,7 @@ NSString *const AMAStorageStringKeyServerTimeOffset = @"server.time.offset";
 NSString *const AMAStorageStringKeyStartupHosts = @"startup.hosts";
 NSString *const AMAStorageStringKeyStartupPermissions = @"startup.permissions";
 NSString *const AMAStorageStringKeyStartupUpdatedAt = @"startup.updated_at";
+NSString *const AMAStorageStringKeyLastStartupYandexAdsOnlyState = @"startup.last_hoyas";
 NSString *const AMAStorageStringKeyStatSendingDisabledReportingInterval = @"stat.sending.disabled.reporting.interval";
 NSString *const AMAStorageStringKeyUUID = @"uuid";
 NSString *const AMAStorageStringKeyUserStartupHosts = @"user.startup.hosts";

@@ -67,6 +67,9 @@
 #import "AMAReporterAutocollectedDataProvider.h"
 #import "AMAAppMetricaConfigurationFileStorage.h"
 #import "AMAAppGroupIdentifierProvider.h"
+#import "AMAYandexAdsStartupStateProvider.h"
+#import "AMAYandexAdsSDKDetector.h"
+#import "AMASavedAppMetricaConfigRepository.h"
 
 static NSTimeInterval const kAMAAnonymousActivationDelay = 0.1;
 static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
@@ -787,9 +790,17 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
         configuration = [AMAMetricaConfiguration sharedInstance].persistent.timeoutConfiguration;
         timeoutController = [[AMATimeoutRequestsController alloc] initWithHostType:AMAStartupHostType
                                                                      configuration:configuration];
+        AMAMetricaPersistentConfiguration *persistent = [AMAMetricaConfiguration sharedInstance].persistent;
+        AMASavedAppMetricaConfigRepository *repository =
+            [[AMASavedAppMetricaConfigRepository alloc] initWithPersistentConfiguration:persistent];
+        AMAYandexAdsStartupStateProvider *stateProvider =
+            [[AMAYandexAdsStartupStateProvider alloc] initWithRepository:repository
+                                                               detector:[AMAYandexAdsSDKDetector sharedInstance]
+                                                persistentConfiguration:persistent];
         self.startupController =
             [[AMAStartupController alloc] initWithTimeoutRequestsController:timeoutController
-                                                       attributionController:self.attributionController];
+                                                       attributionController:self.attributionController
+                                                               stateProvider:stateProvider];
         self.startupController.delegate = self;
         self.startupController.extendedDelegate = self;
     }];
@@ -1114,7 +1125,7 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
 - (void)notifyOnStartupCompleted
 {
     [self execute:^{
-        if (self.startupController.upToDate) {
+        if (self.startupController.startupConfigurationUpToDate) {
             AMALogInfo(@"Notify about startup %lu observers",
                        (unsigned long)self.startupCompletionObservers.count);
             for (id<AMAStartupCompletionObserving> observer in self.startupCompletionObservers) {
@@ -1139,7 +1150,7 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
 
 - (void)notifyOnAdditionalStartupCompleted:(NSDictionary *)response
 {
-    if (self.startupController.upToDate) {
+    if (self.startupController.startupConfigurationUpToDate) {
         [self.modulesController notifyStartupUpdatedWithParameters:response];
     }
 }

@@ -5,6 +5,7 @@
 #import <AppMetricaPlatform/AppMetricaPlatform.h>
 #import "AMATime.h"
 #import "AMAStartupController.h"
+#import "AMAStartupStateProviding.h"
 #import "AMAMetricaConfigurationTestUtilities.h"
 #import "AMAStartupResponse.h"
 #import "AMAAppStateManagerTestHelper.h"
@@ -34,6 +35,7 @@ describe(@"AMAStartupController", ^{
     AMAStartupResponseParser *__block startupResponseParser = nil;
     AMAAppStateManagerTestHelper *__block appStateManagerTestHelper;
     AMAAttributionController *__block testAttributionController = nil;
+    id<AMAStartupStateProviding> __block stateProvider = nil;
 
     void (^stubAppState)(void) = ^{
         appStateManagerTestHelper = [[AMAAppStateManagerTestHelper alloc] init];
@@ -56,7 +58,8 @@ describe(@"AMAStartupController", ^{
                                     timeoutRequestsController:timeoutController
                                         startupResponseParser:startupResponseParser
                                         attributionController:attributionController
-                                        metricaConfiguration:[AMAMetricaConfiguration sharedInstance]];
+                                        metricaConfiguration:[AMAMetricaConfiguration sharedInstance]
+                                               stateProvider:stateProvider];
     };
     beforeAll(^{
         [AMATestNetwork stubHTTPRequestWithBlock:nil];
@@ -70,6 +73,7 @@ describe(@"AMAStartupController", ^{
         timeoutController = [AMATimeoutRequestsController nullMock];
         [timeoutController stub:@selector(isAllowed) andReturn:theValue(YES)];
         testAttributionController = nil;
+        stateProvider = nil;
     });
     afterEach(^{
         [NSDate clearStubs];
@@ -256,7 +260,7 @@ describe(@"AMAStartupController", ^{
             }];
 
             AMAStartupController *controller = currentQueueStartupController();
-            [controller stub:@selector(upToDate) andReturn:theValue(YES)];
+            [controller stub:@selector(startupConfigurationUpToDate) andReturn:theValue(YES)];
             [controller update];
 
             [[theValue(sent) should] beNo];
@@ -570,6 +574,92 @@ describe(@"AMAStartupController", ^{
             [[request should] receive:@selector(addAdditionalStartupParameters:)
                         withArguments:parameters];
             [controller addAdditionalStartupParameters:parameters];
+        });
+    });
+
+    context(@"Startup state provider", ^{
+        AMAStartupController *__block controller;
+        NSMutableArray<AMAHTTPRequestor *> *__block requests;
+        NSDictionary *__block currentParameters;
+        NSString *__block acknowledgedState;
+
+        beforeEach(^{
+            stubAppState();
+            [[AMAIdentifiersTestUtilities stubIdentifierProviderIfNeeded] fillRandom];
+            requests = [NSMutableArray array];
+            currentParameters = @{@"test_state": @"first"};
+            acknowledgedState = nil;
+            stateProvider = [KWMock nullMockForProtocol:@protocol(AMAStartupStateProviding)];
+            [(NSObject *)stateProvider stub:@selector(reservedParameterKeys)
+                                 andReturn:[NSSet setWithObject:@"test_state"]];
+            [(NSObject *)stateProvider stub:@selector(startupParameters) withBlock:^id(NSArray *arguments) {
+                return currentParameters;
+            }];
+            [(NSObject *)stateProvider stub:@selector(requiresUpdateForParameters:) withBlock:^id(NSArray *arguments) {
+                NSString *state = arguments.firstObject[@"test_state"];
+                return theValue([state isEqualToString:acknowledgedState] == NO);
+            }];
+            [(NSObject *)stateProvider stub:@selector(startupDidSucceedWithParameters:) withBlock:^id(NSArray *arguments) {
+                acknowledgedState = arguments.firstObject[@"test_state"];
+                return nil;
+            }];
+            [AMAHTTPRequestor stub:@selector(requestorWithRequest:) withBlock:^id(NSArray *arguments) {
+                AMAHTTPRequestor *requestor = [[AMAHTTPRequestor alloc] initWithRequest:arguments.firstObject];
+                [requestor stub:@selector(start)];
+                [requests addObject:requestor];
+                return requestor;
+            }];
+            controller = currentQueueStartupController();
+            [controller stub:@selector(startupConfigurationUpToDate) andReturn:theValue(YES)];
+        });
+        afterEach(^{
+            [controller cancel];
+            [AMAHTTPRequestor clearStubs];
+            [AMAIdentifiersTestUtilities destubIdentifierProvider];
+            destubAppState();
+        });
+
+        it(@"Should protect provider parameters and acknowledge the sent state before notifying observers", ^{
+            [controller addAdditionalStartupParameters:@{@"test_state": @"override", @"module": @"first"}];
+            [[theValue(controller.startupUpdateRequired) should] beYes];
+            [controller update];
+            currentParameters = @{@"test_state": @"second"};
+            [controller addAdditionalStartupParameters:@{@"test_state": @"override", @"module": @"second"}];
+            [controller update];
+            [[theValue(requests.count) should] equal:theValue(1u)];
+            [[requests.lastObject.request.GETParameters[@"test_state"] should] equal:@"first"];
+            [[requests.lastObject.request.GETParameters[@"module"] should] equal:@"second"];
+
+            id<AMAStartupControllerDelegate> delegate = [KWMock nullMockForProtocol:@protocol(AMAStartupControllerDelegate)];
+            __block BOOL notified = NO;
+            [(NSObject *)delegate stub:@selector(startupControllerDidFinishWithSuccess:) withBlock:^id(NSArray *arguments) {
+                [[acknowledgedState should] equal:@"first"];
+                notified = YES;
+                return nil;
+            }];
+            controller.delegate = delegate;
+            AMAStartupResponse *parsed = [[AMAStartupResponse alloc]
+                initWithStartupConfiguration:[AMAMetricaConfiguration sharedInstance].startup];
+            [startupResponseParser stub:@selector(startupResponseWithHTTPResponse:data:error:) andReturn:parsed];
+            NSHTTPURLResponse *response = [[NSHTTPURLResponse alloc]
+                initWithURL:[NSURL URLWithString:@"https://startup.test"] statusCode:200 HTTPVersion:nil headerFields:nil];
+            [requests.lastObject.delegate httpRequestor:requests.lastObject didFinishWithData:[NSData data] response:response];
+            [[theValue(notified) should] beYes];
+            [[theValue(controller.startupUpdateRequired) should] beYes];
+            [controller update];
+            [[theValue(requests.count) should] equal:theValue(2u)];
+            [[requests.lastObject.request.GETParameters[@"test_state"] should] equal:@"second"];
+        });
+
+        it(@"Should use the same parameter snapshot for freshness and the request", ^{
+            [(NSObject *)stateProvider stub:@selector(requiresUpdateForParameters:) withBlock:^id(NSArray *arguments) {
+                [[arguments.firstObject should] equal:@{@"test_state": @"first"}];
+                currentParameters = @{@"test_state": @"second"};
+                return theValue(YES);
+            }];
+            [controller update];
+            [[theValue(requests.count) should] equal:theValue(1u)];
+            [[requests.lastObject.request.GETParameters[@"test_state"] should] equal:@"first"];
         });
     });
 

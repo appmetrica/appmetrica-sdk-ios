@@ -107,7 +107,8 @@ describe(@"AMAAppMetricaImpl", ^{
         [AMALocationManager stub:@selector(sharedManager)];
         configuration = [AMAAppMetricaConfiguration nullMock];
         [configuration stub:@selector(APIKey) andReturn:apiKey];
-        startupController = [AMAStartupController stubbedNullMockForInit:@selector(initWithTimeoutRequestsController:attributionController:)];
+        startupController = [AMAStartupController stubbedNullMockForInit:
+            @selector(initWithTimeoutRequestsController:attributionController:stateProvider:)];
         permissionsController = [AMAPermissionsController stubbedNullMockForInit:@selector(initWithConfiguration:
                                                                                            extrcator:
                                                                                            dateProvider:)];
@@ -1119,19 +1120,19 @@ describe(@"AMAAppMetricaImpl", ^{
 
     context(@"Startup triggers", ^{
         it(@"Should dispatch startup update to extensions controller", ^{
-            [startupController stub:@selector(upToDate) andReturn:theValue(YES)];
+            [startupController stub:@selector(startupConfigurationUpToDate) andReturn:theValue(YES)];
             [[extensionsReportController should] receive:@selector(startupUpdateCompletedWithConfiguration:)];
             [appMetricaImpl startupControllerDidFinishWithSuccess:startupController];
         });
 
         it(@"Should dispatch startup update to strategies controller", ^{
-            [startupController stub:@selector(upToDate) andReturn:theValue(YES)];
+            [startupController stub:@selector(startupConfigurationUpToDate) andReturn:theValue(YES)];
             [[dispatchStrategiesContainer should] receive:@selector(dispatchMoreIfNeeded)];
             [appMetricaImpl startupControllerDidFinishWithSuccess:startupController];
         });
 
         it(@"Should dispatch startup update to permissions controller", ^{
-            [startupController stub:@selector(upToDate) andReturn:theValue(YES)];
+            [startupController stub:@selector(startupConfigurationUpToDate) andReturn:theValue(YES)];
             [[permissionsController should] receive:@selector(updateIfNeeded)];
             [appMetricaImpl startupControllerDidFinishWithSuccess:startupController];
         });
@@ -1292,8 +1293,9 @@ describe(@"AMAAppMetricaImpl", ^{
                     [appMetricaImpl sendEventsBuffer];
                 });
                 
-                it(@"Should dispatch startup response", ^{
-                    [startupController stub:@selector(upToDate) andReturn:theValue(YES)];
+                it(@"Should dispatch a valid startup response even if a Yandex Ads state correction is pending", ^{
+                    [startupController stub:@selector(startupConfigurationUpToDate) andReturn:theValue(YES)];
+                    [startupController stub:@selector(startupUpdateRequired) andReturn:theValue(YES)];
                     
                     
                     [[appMetricaImpl.modulesController should] receive:@selector(notifyStartupUpdatedWithParameters:)
