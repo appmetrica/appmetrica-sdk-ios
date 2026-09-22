@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name = "AppMetricaIDSync"
-  s.version = '6.8.0'
+  s.version = '7.0.0'
   s.summary = "Integrate multiple user identifier provider infrastructure"
 
   s.homepage = 'https://appmetrica.io'
@@ -17,13 +17,13 @@ Pod::Spec.new do |s|
 
   s.frameworks = 'Foundation'
 
-  s.dependency 'AppMetricaCore', '= 6.8.0'
-  s.dependency 'AppMetricaCoreExtension', '= 6.8.0'
-  s.dependency 'AppMetricaCoreUtils', '= 6.8.0'
-  s.dependency 'AppMetricaStorageUtils', '= 6.8.0'
-  s.dependency 'AppMetricaNetwork', '= 6.8.0'
-  s.dependency 'AppMetricaPlatform', '= 6.8.0'
-  s.dependency 'AppMetricaLog', '= 6.8.0'
+  s.dependency 'AppMetricaCore', '= 7.0.0'
+  s.dependency 'AppMetricaCoreExtension', '= 7.0.0'
+  s.dependency 'AppMetricaCoreUtils', '= 7.0.0'
+  s.dependency 'AppMetricaStorageUtils', '= 7.0.0'
+  s.dependency 'AppMetricaNetwork', '= 7.0.0'
+  s.dependency 'AppMetricaPlatform', '= 7.0.0'
+  s.dependency 'AppMetricaLog', '= 7.0.0'
   
   s.header_dir = s.name
   s.source_files = "#{s.name}/Sources/**/*.{h,m}"
