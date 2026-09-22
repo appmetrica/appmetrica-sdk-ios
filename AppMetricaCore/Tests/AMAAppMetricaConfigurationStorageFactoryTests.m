@@ -6,6 +6,8 @@
 #import "AMAAppMetricaConfigurationFileStorage.h"
 #import "AMAAppGroupIdentifierProvider.h"
 
+@import AppMetricaSynchronization;
+
 SPEC_BEGIN(AMAAppMetricaConfigurationStorageFactoryTests)
 
 describe(@"AMAAppMetricaConfigurationStorageFactory", ^{
@@ -14,39 +16,41 @@ describe(@"AMAAppMetricaConfigurationStorageFactory", ^{
     NSString *const kGroupPath   = @"/group/persistent/path";
     NSString *const kAppGroupID  = @"group.io.appmetrica.test";
     NSString *const kFileName    = @"configuration.json";
+    NSString *const kLockFileName = @"configuration.lock";
+    AMADiskFileStorageOptions const kExpectedOptions =
+        AMADiskFileStorageOptionNoBackup | AMADiskFileStorageOptionCreateDirectory;
 
     AMAAppGroupIdentifierProvider *__block providerMock = nil;
-
-    AMAAppMetricaConfigurationStorageCoordinator *__block coordinatorMock    = nil;
+    AMAAppMetricaConfigurationStorageCoordinator *__block coordinatorMock = nil;
+    AMAFileLockExecutor *__block lockMock = nil;
 
     beforeEach(^{
-        // Stub AMAAppGroupIdentifierProvider.sharedInstance
         providerMock = [AMAAppGroupIdentifierProvider nullMock];
         [AMAAppGroupIdentifierProvider stub:@selector(sharedInstance) andReturn:providerMock];
 
-        // Stub AMAFileUtility paths
         [AMAFileUtility stub:@selector(persistentPath) andReturn:kPrivatePath];
         [AMAFileUtility stub:@selector(persistentPathForApplicationGroup:) andReturn:kGroupPath];
 
-        // Capture coordinator alloc/init so we can inspect arguments
-        coordinatorMock = [AMAAppMetricaConfigurationStorageCoordinator stubbedNullMockForInit:@selector(initWithPrivateStorage:groupStorage:)];
+        coordinatorMock = [AMAAppMetricaConfigurationStorageCoordinator
+            stubbedNullMockForInit:@selector(initWithPrivateStorage:groupStorage:lock:)];
+        lockMock = [AMAFileLockExecutor stubbedNullMockForInit:@selector(initWithFilePath:)];
     });
 
     afterEach(^{
         [AMAAppGroupIdentifierProvider clearStubs];
         [AMAFileUtility clearStubs];
         [AMAAppMetricaConfigurationStorageCoordinator clearStubs];
+        [AMAFileLockExecutor clearStubs];
     });
 
-    // MARK: - Return type
-    
     context(@"creating", ^{
         beforeEach(^{
             [providerMock stub:@selector(appGroupIdentifier) andReturn:nil];
         });
-        
+
         it(@"should return an object conforming to AMAAppMetricaConfigurationStoring", ^{
-            id<AMAAppMetricaConfigurationStoring> storage = [AMAAppMetricaConfigurationStorageFactory configurationStorage];
+            id<AMAAppMetricaConfigurationStoring> storage =
+                [AMAAppMetricaConfigurationStorageFactory configurationStorage];
 
             [[(NSObject *)storage shouldNot] beNil];
             [[(NSObject *)storage should] conformToProtocol:@protocol(AMAAppMetricaConfigurationStoring)];
@@ -54,32 +58,19 @@ describe(@"AMAAppMetricaConfigurationStorageFactory", ^{
 
         it(@"should return AMAAppMetricaConfigurationStorageCoordinator", ^{
             id result = [AMAAppMetricaConfigurationStorageFactory configurationStorage];
-
             [[(NSObject *)result should] equal:coordinatorMock];
         });
     });
-
-    // MARK: - Private storage path
 
     it(@"should build private storage with the correct file path", ^{
         [providerMock stub:@selector(appGroupIdentifier) andReturn:nil];
 
         NSString *expectedPath = [NSString stringWithFormat:@"%@/%@", kPrivatePath, kFileName];
-
-        AMADiskFileStorage *capturedStorage = nil;
-        [[coordinatorMock should] receive:@selector(initWithPrivateStorage:groupStorage:)
-                            withArguments:kw_any(), kw_any()];
-
-        // Capture via a block stub on AMADiskFileStorage
-        AMADiskFileStorage *diskStorageMock = [AMADiskFileStorage stubbedNullMockForInit:@selector(diskFileStorageWithPath:options:)];
-        
         [[AMADiskFileStorage should] receive:@selector(diskFileStorageWithPath:options:)
-                               withArguments:expectedPath, theValue(AMADiskFileStorageOptionNoBackup)];
+                               withArguments:expectedPath, theValue(kExpectedOptions)];
 
         [AMAAppMetricaConfigurationStorageFactory configurationStorage];
     });
-
-    // MARK: - Without app group
 
     context(@"when appGroupIdentifier is nil", ^{
         beforeEach(^{
@@ -87,72 +78,53 @@ describe(@"AMAAppMetricaConfigurationStorageFactory", ^{
         });
 
         it(@"should pass nil as groupStorage to coordinator", ^{
-            [[coordinatorMock should] receive:@selector(initWithPrivateStorage:groupStorage:)
-                                withArguments:kw_any(), nil];
+            [[coordinatorMock should] receive:@selector(initWithPrivateStorage:groupStorage:lock:)
+                                withArguments:kw_any(), nil, kw_any()];
 
             [AMAAppMetricaConfigurationStorageFactory configurationStorage];
         });
 
-        it(@"should not call persistentPathForApplicationGroup:", ^{
-            [[AMAFileUtility shouldNot] receive:@selector(persistentPathForApplicationGroup:)];
+        it(@"should create lock in private directory", ^{
+            NSString *expectedLockPath = [NSString stringWithFormat:@"%@/%@", kPrivatePath, kLockFileName];
+            [[lockMock should] receive:@selector(initWithFilePath:) withArguments:expectedLockPath];
 
             [AMAAppMetricaConfigurationStorageFactory configurationStorage];
         });
     });
-
-    // MARK: - With app group
 
     context(@"when appGroupIdentifier is set", ^{
         beforeEach(^{
             [providerMock stub:@selector(appGroupIdentifier) andReturn:kAppGroupID];
         });
 
-        it(@"should call persistentPathForApplicationGroup: with the group identifier", ^{
-            [[AMAFileUtility should] receive:@selector(persistentPathForApplicationGroup:)
-                               withArguments:kAppGroupID];
+        it(@"should build group storage with the correct file path", ^{
+            NSString *expectedPath = [NSString stringWithFormat:@"%@/%@", kGroupPath, kFileName];
+            [[AMADiskFileStorage should] receive:@selector(diskFileStorageWithPath:options:)
+                                   withArguments:expectedPath, theValue(kExpectedOptions)];
 
             [AMAAppMetricaConfigurationStorageFactory configurationStorage];
         });
 
-        it(@"should build group storage with the correct file path", ^{
-            NSString *expectedPath = [NSString stringWithFormat:@"%@/%@", kGroupPath, kFileName];
-
-            [[AMADiskFileStorage should] receive:@selector(diskFileStorageWithPath:options:)
-                                   withArguments:expectedPath, theValue(AMADiskFileStorageOptionNoBackup)];
+        it(@"should create lock in group directory", ^{
+            NSString *expectedLockPath = [NSString stringWithFormat:@"%@/%@", kGroupPath, kLockFileName];
+            [[lockMock should] receive:@selector(initWithFilePath:) withArguments:expectedLockPath];
 
             [AMAAppMetricaConfigurationStorageFactory configurationStorage];
         });
 
         it(@"should pass non-nil groupStorage to coordinator", ^{
-            [[coordinatorMock should] receive:@selector(initWithPrivateStorage:groupStorage:)
-                                withArguments:kw_any(), kw_any()];
+            [[coordinatorMock should] receive:@selector(initWithPrivateStorage:groupStorage:lock:)
+                                withArguments:kw_any(), kw_any(), kw_any()];
 
             [AMAAppMetricaConfigurationStorageFactory configurationStorage];
-        });
-
-        it(@"should pass an AMAAppMetricaConfigurationFileStorage as groupStorage", ^{
-            __block id capturedGroupStorage = nil;
-
-            [coordinatorMock stub:@selector(initWithPrivateStorage:groupStorage:)
-                        withBlock:^id(NSArray *params) {
-                capturedGroupStorage = params[1];
-                return coordinatorMock;
-            }];
-
-            [AMAAppMetricaConfigurationStorageFactory configurationStorage];
-
-            [[(NSObject *)capturedGroupStorage should] beKindOfClass:[AMAAppMetricaConfigurationFileStorage class]];
         });
     });
-
-    // MARK: - Private storage type
 
     it(@"should pass an AMAAppMetricaConfigurationFileStorage as privateStorage", ^{
         [providerMock stub:@selector(appGroupIdentifier) andReturn:nil];
 
         __block id capturedPrivateStorage = nil;
-
-        [coordinatorMock stub:@selector(initWithPrivateStorage:groupStorage:)
+        [coordinatorMock stub:@selector(initWithPrivateStorage:groupStorage:lock:)
                     withBlock:^id(NSArray *params) {
             capturedPrivateStorage = params[0];
             return coordinatorMock;
@@ -161,17 +133,6 @@ describe(@"AMAAppMetricaConfigurationStorageFactory", ^{
         [AMAAppMetricaConfigurationStorageFactory configurationStorage];
 
         [[(NSObject *)capturedPrivateStorage should] beKindOfClass:[AMAAppMetricaConfigurationFileStorage class]];
-    });
-
-    // MARK: - Private storage options
-
-    it(@"should create private disk storage with NoBackup option", ^{
-        [providerMock stub:@selector(appGroupIdentifier) andReturn:nil];
-
-        [[AMADiskFileStorage should] receive:@selector(diskFileStorageWithPath:options:)
-                               withArguments:kw_any(), theValue(AMADiskFileStorageOptionNoBackup)];
-
-        [AMAAppMetricaConfigurationStorageFactory configurationStorage];
     });
 });
 

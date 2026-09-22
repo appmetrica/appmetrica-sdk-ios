@@ -26,16 +26,13 @@
     AMAAppMetricaConfiguration *configuration = [[AMAAppMetricaConfiguration alloc] initWithJSON:dictionary];
     
     if (configuration != nil) {
-        AMAAppMetricaConfigurationSnapshot *current =
-            [persistent appMetricaClientConfigurationSnapshot];
-
-        AMAAppMetricaConfigurationSnapshot *snapshot =
-            [[AMAAppMetricaConfigurationSnapshot alloc]
-                initWithConfiguration:configuration
-                              savedAt:current.savedAt
-                               source:AMAAppMetricaConfigurationSnapshotSourcePrivate];
-
-        [persistent saveAppMetricaClientConfigurationSnapshot:snapshot];
+        [persistent saveAppMetricaClientConfigurationSnapshotUsingCurrent:
+            ^AMAAppMetricaConfigurationSnapshot *(AMAAppMetricaConfigurationSnapshot *current) {
+                return [[AMAAppMetricaConfigurationSnapshot alloc]
+                    initWithConfiguration:configuration
+                                  savedAt:current.savedAt
+                                   source:AMAAppMetricaConfigurationSnapshotSourcePrivate];
+            }];
     }
 }
 

@@ -16,6 +16,20 @@ describe(@"AMASavedAppMetricaConfigRepository", ^{
     AMAAppMetricaConfiguration *__block configuration = nil;
     NSDate *__block now = nil;
 
+    void (^stubUpdateWithCurrent)(AMAAppMetricaConfigurationSnapshot *, BOOL) =
+        ^(AMAAppMetricaConfigurationSnapshot *current, BOOL didUpdate) {
+            [persistent stub:@selector(updateAppMetricaClientConfigurationSnapshot:result:)
+                   withBlock:^id(NSArray *params) {
+                AMAConfigurationSnapshotUpdate update = params[0];
+                AMAAppMetricaConfigurationSnapshot *updated = nil;
+                if (current != nil) {
+                    updated = update(current);
+                }
+                [AMATestUtilities fillObjectPointerParameter:params[1] withValue:updated];
+                return theValue(didUpdate);
+            }];
+        };
+
     beforeEach(^{
         persistent = [AMAMetricaPersistentConfiguration nullMock];
         dateProvider = [[AMADateProviderMock alloc] init];
@@ -27,10 +41,17 @@ describe(@"AMASavedAppMetricaConfigRepository", ^{
     });
 
     it(@"Should return nil when config is absent", ^{
-        [persistent stub:@selector(appMetricaClientConfigurationSnapshot) andReturn:nil];
-        [[persistent shouldNot] receive:@selector(clearAppMetricaClientConfigurationSnapshot:)];
+        stubUpdateWithCurrent(nil, YES);
+        BOOL didUpdate = NO;
+        [[[repository validSavedConfigDidUpdate:&didUpdate] should] beNil];
+        [[theValue(didUpdate) should] beYes];
+    });
 
-        [[[repository validSavedConfig] should] beNil];
+    it(@"Should report didUpdate NO when lock update fails", ^{
+        stubUpdateWithCurrent(nil, NO);
+        BOOL didUpdate = YES;
+        [[[repository validSavedConfigDidUpdate:&didUpdate] should] beNil];
+        [[theValue(didUpdate) should] beNo];
     });
 
     it(@"Should lazy-migrate missing timestamp into the same snapshot", ^{
@@ -38,11 +59,20 @@ describe(@"AMASavedAppMetricaConfigRepository", ^{
             [[AMAAppMetricaConfigurationSnapshot alloc] initWithConfiguration:configuration
                                                                       savedAt:nil
                                                                        source:AMAAppMetricaConfigurationSnapshotSourceGroup];
-        [persistent stub:@selector(appMetricaClientConfigurationSnapshot) andReturn:snapshot];
-        [[persistent should] receive:@selector(saveAppMetricaClientConfigurationSnapshot:) withArguments:kw_any()];
-        [[persistent shouldNot] receive:@selector(clearAppMetricaClientConfigurationSnapshot:)];
+        __block AMAAppMetricaConfigurationSnapshot *updatedSnapshot = nil;
+        [persistent stub:@selector(updateAppMetricaClientConfigurationSnapshot:result:)
+               withBlock:^id(NSArray *params) {
+            AMAConfigurationSnapshotUpdate update = params[0];
+            updatedSnapshot = update(snapshot);
+            [AMATestUtilities fillObjectPointerParameter:params[1] withValue:updatedSnapshot];
+            return theValue(YES);
+        }];
 
-        [[[repository validSavedConfig] should] equal:configuration];
+        BOOL didUpdate = NO;
+        [[[repository validSavedConfigDidUpdate:&didUpdate] should] equal:configuration];
+        [[updatedSnapshot.savedAt should] equal:now];
+        [[theValue(updatedSnapshot.source) should] equal:theValue(AMAAppMetricaConfigurationSnapshotSourceGroup)];
+        [[theValue(didUpdate) should] beYes];
     });
 
     it(@"Should return valid config within TTL", ^{
@@ -51,23 +81,28 @@ describe(@"AMASavedAppMetricaConfigRepository", ^{
             [[AMAAppMetricaConfigurationSnapshot alloc] initWithConfiguration:configuration
                                                                       savedAt:savedAt
                                                                        source:AMAAppMetricaConfigurationSnapshotSourcePrivate];
-        [persistent stub:@selector(appMetricaClientConfigurationSnapshot) andReturn:snapshot];
-        [[persistent shouldNot] receive:@selector(clearAppMetricaClientConfigurationSnapshot:)];
-        [[persistent shouldNot] receive:@selector(saveAppMetricaClientConfigurationSnapshot:)];
+        stubUpdateWithCurrent(snapshot, YES);
 
-        [[[repository validSavedConfig] should] equal:configuration];
+        [[[repository validSavedConfigDidUpdate:NULL] should] equal:configuration];
     });
 
-    it(@"Should keep config when clock skews backwards", ^{
-        NSDate *savedAt = [now dateByAddingTimeInterval:1.0];
+    it(@"Should not expire when clock skews backwards", ^{
+        NSDate *savedAt = [now dateByAddingTimeInterval:60.0];
         AMAAppMetricaConfigurationSnapshot *snapshot =
             [[AMAAppMetricaConfigurationSnapshot alloc] initWithConfiguration:configuration
                                                                       savedAt:savedAt
                                                                        source:AMAAppMetricaConfigurationSnapshotSourcePrivate];
-        [persistent stub:@selector(appMetricaClientConfigurationSnapshot) andReturn:snapshot];
-        [[persistent shouldNot] receive:@selector(clearAppMetricaClientConfigurationSnapshot:)];
+        __block AMAAppMetricaConfigurationSnapshot *updatedSnapshot = nil;
+        [persistent stub:@selector(updateAppMetricaClientConfigurationSnapshot:result:)
+               withBlock:^id(NSArray *params) {
+            AMAConfigurationSnapshotUpdate update = params[0];
+            updatedSnapshot = update(snapshot);
+            [AMATestUtilities fillObjectPointerParameter:params[1] withValue:updatedSnapshot];
+            return theValue(YES);
+        }];
 
-        [[[repository validSavedConfig] should] equal:configuration];
+        [[[repository validSavedConfigDidUpdate:NULL] should] equal:configuration];
+        [[updatedSnapshot.savedAt should] equal:savedAt];
     });
 
     it(@"Should clear expired config for the snapshot source", ^{
@@ -76,19 +111,22 @@ describe(@"AMASavedAppMetricaConfigRepository", ^{
             [[AMAAppMetricaConfigurationSnapshot alloc] initWithConfiguration:configuration
                                                                       savedAt:savedAt
                                                                        source:AMAAppMetricaConfigurationSnapshotSourceGroup];
-        [persistent stub:@selector(appMetricaClientConfigurationSnapshot) andReturn:snapshot];
-        [[persistent should] receive:@selector(clearAppMetricaClientConfigurationSnapshot:) withArguments:snapshot];
+        __block AMAAppMetricaConfigurationSnapshot *updatedSnapshot = (id)[NSNull null];
+        [persistent stub:@selector(updateAppMetricaClientConfigurationSnapshot:result:)
+               withBlock:^id(NSArray *params) {
+            AMAConfigurationSnapshotUpdate update = params[0];
+            updatedSnapshot = update(snapshot);
+            [AMATestUtilities fillObjectPointerParameter:params[1] withValue:updatedSnapshot];
+            return theValue(YES);
+        }];
 
-        [[[repository validSavedConfig] should] beNil];
+        [[[repository validSavedConfigDidUpdate:NULL] should] beNil];
+        [[updatedSnapshot should] beNil];
     });
 
     it(@"Should save configuration and refresh TTL", ^{
-        AMAAppMetricaConfigurationSnapshot *current =
-            [[AMAAppMetricaConfigurationSnapshot alloc] initWithConfiguration:configuration
-                                                                      savedAt:[now dateByAddingTimeInterval:-10]
-                                                                       source:AMAAppMetricaConfigurationSnapshotSourcePrivate];
-        [persistent stub:@selector(appMetricaClientConfigurationSnapshot) andReturn:current];
-        [[persistent should] receive:@selector(saveAppMetricaClientConfigurationSnapshot:) withArguments:kw_any()];
+        [[persistent should] receive:@selector(saveAppMetricaClientConfigurationSnapshot:)
+                       withArguments:kw_any()];
 
         [repository saveConfiguration:configuration refreshTTL:YES];
     });
@@ -99,12 +137,16 @@ describe(@"AMASavedAppMetricaConfigRepository", ^{
             [[AMAAppMetricaConfigurationSnapshot alloc] initWithConfiguration:configuration
                                                                       savedAt:savedAt
                                                                        source:AMAAppMetricaConfigurationSnapshotSourcePrivate];
-        [persistent stub:@selector(appMetricaClientConfigurationSnapshot) andReturn:current];
-        KWCaptureSpy *spy = [persistent captureArgument:@selector(saveAppMetricaClientConfigurationSnapshot:) atIndex:0];
+        __block AMAAppMetricaConfigurationSnapshot *saved = nil;
+        [persistent stub:@selector(saveAppMetricaClientConfigurationSnapshotUsingCurrent:)
+               withBlock:^id(NSArray *params) {
+            AMAConfigurationSnapshotBuilder builder = params[0];
+            saved = builder(current);
+            return nil;
+        }];
 
         [repository saveConfiguration:configuration refreshTTL:NO];
 
-        AMAAppMetricaConfigurationSnapshot *saved = spy.argument;
         [[saved.savedAt should] equal:savedAt];
         [[saved.configuration should] equal:configuration];
     });

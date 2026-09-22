@@ -8,12 +8,6 @@
 static NSString *const kAMAConfigurationSnapshotConfigurationKey = @"configuration";
 static NSString *const kAMAConfigurationSnapshotSavedAtKey = @"savedAt";
 
-@interface AMAAppMetricaConfigurationFileStorage ()
-
-@property (atomic, nullable, strong) AMAAppMetricaConfigurationSnapshot *cachedSnapshot;
-
-@end
-
 @implementation AMAAppMetricaConfigurationFileStorage
 
 - (instancetype)initWithFileStorage:(id<AMAFileStorage>)fileStorage
@@ -21,18 +15,6 @@ static NSString *const kAMAConfigurationSnapshotSavedAtKey = @"savedAt";
     self = [super init];
     if (self) {
         _fileStorage = fileStorage;
-        _executor = [[AMAExecutor alloc] initWithIdentifier:self];
-    }
-    return self;
-}
-
-- (instancetype)initWithFileStorage:(id<AMAFileStorage>)fileStorage
-                           executor:(id<AMAAsyncExecuting>)executor
-{
-    self = [super init];
-    if (self) {
-        _fileStorage = fileStorage;
-        _executor = executor;
     }
     return self;
 }
@@ -42,14 +24,8 @@ static NSString *const kAMAConfigurationSnapshotSavedAtKey = @"savedAt";
     return [[self alloc] initWithFileStorage:fileStorage];
 }
 
-- (AMAAppMetricaConfigurationSnapshot *)loadSnapshotFromFile
+- (AMAAppMetricaConfigurationSnapshot *)snapshotFromData:(NSData *)data
 {
-    AMAAppMetricaConfigurationSnapshot *snapshot = self.cachedSnapshot;
-    if (snapshot != nil) {
-        return snapshot;
-    }
-
-    NSData *data = [self.fileStorage readDataWithError:nil];
     if ([data length] == 0) {
         return nil;
     }
@@ -78,27 +54,15 @@ static NSString *const kAMAConfigurationSnapshotSavedAtKey = @"savedAt";
         return nil;
     }
 
-    snapshot = [[AMAAppMetricaConfigurationSnapshot alloc] initWithConfiguration:configuration
-                                                                         savedAt:savedAt
-                                                                          source:AMAAppMetricaConfigurationSnapshotSourcePrivate];
-    self.cachedSnapshot = snapshot;
-    return snapshot;
+    return [[AMAAppMetricaConfigurationSnapshot alloc] initWithConfiguration:configuration
+                                                                     savedAt:savedAt
+                                                                      source:AMAAppMetricaConfigurationSnapshotSourcePrivate];
 }
 
 - (AMAAppMetricaConfigurationSnapshot *)loadSnapshot
 {
-    AMAAppMetricaConfigurationSnapshot *snapshot = self.cachedSnapshot;
-    if (snapshot == nil) {
-        @synchronized (self) {
-            snapshot = [self loadSnapshotFromFile];
-        }
-    }
-    if (snapshot == nil) {
-        return nil;
-    }
-    return [[AMAAppMetricaConfigurationSnapshot alloc] initWithConfiguration:snapshot.configuration
-                                                                     savedAt:snapshot.savedAt
-                                                                      source:snapshot.source];
+    NSData *data = [self.fileStorage readDataWithError:nil];
+    return [self snapshotFromData:data];
 }
 
 - (NSDictionary *)JSONDictionaryForSnapshot:(AMAAppMetricaConfigurationSnapshot *)snapshot
@@ -116,31 +80,16 @@ static NSString *const kAMAConfigurationSnapshotSavedAtKey = @"savedAt";
 
 - (void)saveSnapshot:(AMAAppMetricaConfigurationSnapshot *)snapshot
 {
-    AMAAppMetricaConfigurationSnapshot *toSave =
-        [[AMAAppMetricaConfigurationSnapshot alloc] initWithConfiguration:snapshot.configuration
-                                                                  savedAt:snapshot.savedAt
-                                                                   source:AMAAppMetricaConfigurationSnapshotSourcePrivate];
-
-    @synchronized (self) {
-        AMAAppMetricaConfigurationSnapshot *currentSnapshot = [self loadSnapshotFromFile];
-        if ([toSave isEqualToSnapshot:currentSnapshot]) {
-            return;
-        }
-        self.cachedSnapshot = toSave;
+    NSDictionary *json = [self JSONDictionaryForSnapshot:snapshot];
+    NSData *data = [AMAJSONSerialization dataWithJSONObject:json error:nil];
+    if (data == nil) {
+        return;
     }
-
-    [self.executor execute:^{
-        NSDictionary *jsonData = [self JSONDictionaryForSnapshot:toSave];
-        NSData *data = [AMAJSONSerialization dataWithJSONObject:jsonData error:nil];
-        [self.fileStorage writeData:data error:nil];
-    }];
+    [self.fileStorage writeData:data error:nil];
 }
 
-- (void)clearSnapshot:(AMAAppMetricaConfigurationSnapshot *)snapshot
+- (void)deleteSnapshot
 {
-    @synchronized (self) {
-        self.cachedSnapshot = nil;
-    }
     [self.fileStorage deleteFileWithError:nil];
 }
 

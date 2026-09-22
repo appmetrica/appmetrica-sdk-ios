@@ -11,7 +11,6 @@
 @interface AMAAppMetricaConfigurationFileStorageTests : XCTestCase
 
 @property (nonatomic, strong) AMAStorageMock *mockStorage;
-@property (nonatomic, strong) AMAManualCurrentQueueExecutor *executor;
 @property (nonatomic, strong) AMAAppMetricaConfigurationFileStorage *provider;
 
 @end
@@ -22,15 +21,12 @@
 {
     [super setUp];
     self.mockStorage = [AMAStorageMock new];
-    self.executor = [AMAManualCurrentQueueExecutor new];
-    self.provider = [[AMAAppMetricaConfigurationFileStorage alloc] initWithFileStorage:self.mockStorage
-                                                                              executor:self.executor];
+    self.provider = [[AMAAppMetricaConfigurationFileStorage alloc] initWithFileStorage:self.mockStorage];
 }
 
 - (void)tearDown
 {
     self.mockStorage = nil;
-    self.executor = nil;
     self.provider = nil;
     [super tearDown];
 }
@@ -116,7 +112,7 @@
     XCTAssertEqual(loaded.source, AMAAppMetricaConfigurationSnapshotSourcePrivate);
 }
 
-- (void)testLoadSnapshotCachesResult
+- (void)testLoadSnapshotDoesNotCacheResult
 {
     AMAAppMetricaConfiguration *originalConfig = [self createTestConfiguration];
     self.mockStorage.mockedData = [self legacyJsonDataForConfiguration:originalConfig];
@@ -126,9 +122,7 @@
     AMAAppMetricaConfigurationSnapshot *secondLoad = [self.provider loadSnapshot];
 
     XCTAssertNotNil(firstLoad);
-    XCTAssertNotNil(secondLoad);
-    XCTAssertEqualObjects(firstLoad.configuration, secondLoad.configuration);
-    XCTAssertEqualObjects(firstLoad.savedAt, secondLoad.savedAt);
+    XCTAssertNil(secondLoad);
 }
 
 - (void)testLoadSnapshotReturnsCopy
@@ -156,8 +150,6 @@
 
     [self.provider saveSnapshot:snapshot];
 
-    XCTAssertNil(self.mockStorage.mockedData);
-    [self.executor execute];
     XCTAssertNotNil(self.mockStorage.mockedData);
 
     NSDictionary *writtenJSON = [AMAJSONSerialization dictionaryWithJSONData:self.mockStorage.mockedData error:nil];
@@ -165,7 +157,7 @@
     XCTAssertEqualObjects(writtenJSON[@"savedAt"], @7);
 }
 
-- (void)testSaveSnapshotSkipsWhenEqual
+- (void)testSaveSnapshotWritesEvenWhenEqual
 {
     AMAAppMetricaConfiguration *config = [self createTestConfiguration];
     self.mockStorage.mockedData = [self legacyJsonDataForConfiguration:config];
@@ -173,9 +165,8 @@
     self.mockStorage.mockedData = nil;
 
     [self.provider saveSnapshot:[self privateSnapshotWithConfiguration:config savedAt:nil]];
-    [self.executor execute];
 
-    XCTAssertNil(self.mockStorage.mockedData);
+    XCTAssertNotNil(self.mockStorage.mockedData);
 }
 
 - (void)testSaveSnapshotWritesWhenSavedAtChanges
@@ -189,7 +180,6 @@
         [self privateSnapshotWithConfiguration:config savedAt:[NSDate dateWithTimeIntervalSince1970:42]];
 
     [self.provider saveSnapshot:snapshot];
-    [self.executor execute];
 
     XCTAssertNotNil(self.mockStorage.mockedData);
     NSDictionary *writtenJSON = [AMAJSONSerialization dictionaryWithJSONData:self.mockStorage.mockedData error:nil];
@@ -207,19 +197,16 @@
     self.mockStorage.mockedData = nil;
 
     [self.provider saveSnapshot:[self privateSnapshotWithConfiguration:config2 savedAt:nil]];
-    [self.executor execute];
 
     XCTAssertNotNil(self.mockStorage.mockedData);
 }
 
-- (void)testSaveSnapshotUpdatesCache
+- (void)testSaveSnapshotRoundtrip
 {
     AMAAppMetricaConfiguration *config = [self createTestConfiguration];
     NSDate *savedAt = [NSDate dateWithTimeIntervalSince1970:9];
     [self.provider saveSnapshot:[self privateSnapshotWithConfiguration:config savedAt:savedAt]];
-    [self.executor execute];
 
-    self.mockStorage.mockedData = nil;
     AMAAppMetricaConfigurationSnapshot *loaded = [self.provider loadSnapshot];
 
     XCTAssertNotNil(loaded);
@@ -231,25 +218,22 @@
 {
     AMAAppMetricaConfiguration *config = [self createTestConfiguration];
     [self.provider saveSnapshot:[self privateSnapshotWithConfiguration:config savedAt:nil]];
-    [self.executor execute];
 
     config.sessionTimeout = 999;
-    self.mockStorage.mockedData = nil;
     AMAAppMetricaConfigurationSnapshot *loaded = [self.provider loadSnapshot];
 
     XCTAssertNotEqual(loaded.configuration.sessionTimeout, 999);
 }
 
-- (void)testClearSnapshotRemovesCacheAndFile
+- (void)testDeleteSnapshotRemovesFile
 {
     AMAAppMetricaConfiguration *config = [self createTestConfiguration];
     AMAAppMetricaConfigurationSnapshot *snapshot =
         [self privateSnapshotWithConfiguration:config savedAt:[NSDate date]];
     [self.provider saveSnapshot:snapshot];
-    [self.executor execute];
     XCTAssertNotNil([self.provider loadSnapshot]);
 
-    [self.provider clearSnapshot:snapshot];
+    [self.provider deleteSnapshot];
 
     XCTAssertNil(self.mockStorage.mockedData);
     XCTAssertNil([self.provider loadSnapshot]);

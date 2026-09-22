@@ -26,7 +26,7 @@ NS_ASSUME_NONNULL_BEGIN
         firstActivationDetector:(AMAFirstActivationDetector *)firstActivationDetector
                      repository:(AMASavedAppMetricaConfigRepository *)repository;
 
-- (AMAAppMetricaConfiguration *)configuration;
+- (AMAAppMetricaConfiguration *)configurationCanPersist:(nullable BOOL *)canPersist;
 
 @end
 

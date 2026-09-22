@@ -15,7 +15,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)initWithPersistentConfiguration:(AMAMetricaPersistentConfiguration *)persistent
                                    dateProvider:(id<AMADateProviding>)dateProvider NS_DESIGNATED_INITIALIZER;
 
-- (nullable AMAAppMetricaConfiguration *)validSavedConfig;
+- (nullable AMAAppMetricaConfiguration *)validSavedConfigDidUpdate:(nullable BOOL *)didUpdate;
 - (void)saveConfiguration:(AMAAppMetricaConfiguration *)configuration
                refreshTTL:(BOOL)refreshTTL;
 

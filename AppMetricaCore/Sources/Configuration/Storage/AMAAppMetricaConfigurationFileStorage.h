@@ -4,17 +4,12 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @protocol AMAFileStorage;
-@protocol AMAAsyncExecuting;
 
-@interface AMAAppMetricaConfigurationFileStorage : NSObject <AMAAppMetricaConfigurationStoring>
+@interface AMAAppMetricaConfigurationFileStorage : NSObject <AMAAppMetricaConfigurationFileStoring>
 
 @property (nonatomic, readonly, nonnull) id<AMAFileStorage> fileStorage;
-@property (nonatomic, readonly, nonnull) id<AMAAsyncExecuting> executor;
 
 - (instancetype)initWithFileStorage:(id<AMAFileStorage>)fileStorage;
-
-- (instancetype)initWithFileStorage:(id<AMAFileStorage>)fileStorage
-                           executor:(id<AMAAsyncExecuting>)executor;
 
 + (instancetype)appMetricaConfigurationFileStorageWithFileStorage:(id<AMAFileStorage>)fileStorage;
 

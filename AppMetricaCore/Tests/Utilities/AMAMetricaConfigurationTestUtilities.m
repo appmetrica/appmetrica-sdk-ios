@@ -7,6 +7,8 @@
 #import "AMAAppGroupIdentifierProvider.h"
 #import <AppMetricaPlatform/AppMetricaPlatform.h>
 #import "AMAAppMetricaConfigurationProviderMock.h"
+#import "AMAAppMetricaConfigurationStorageCoordinator.h"
+#import "AMAImmediateExclusiveLock.h"
 @import AppMetricaIdentifiers;
 
 @implementation AMAMetricaConfigurationTestUtilities
@@ -22,13 +24,17 @@
 {
     AMAKeychainBridge *keychainBridge = [[AMAKeychainBridgeMock alloc] init];
     id<AMADatabaseProtocol> database = [AMAMockDatabase configurationDatabase];
-    AMAAppMetricaConfigurationProviderMock *storingMock = [AMAAppMetricaConfigurationProviderMock new];
+    AMAAppMetricaConfigurationProviderMock *fileStorageMock = [AMAAppMetricaConfigurationProviderMock new];
+    id<AMAAppMetricaConfigurationStoring> storing =
+        [[AMAAppMetricaConfigurationStorageCoordinator alloc] initWithPrivateStorage:fileStorageMock
+                                                                        groupStorage:nil
+                                                                                lock:[AMAImmediateExclusiveLock new]];
     
     AMAMetricaConfiguration *config =
         [[AMAMetricaConfiguration alloc] initWithKeychainBridge:keychainBridge
                                                        database:database
                                      appGroupIdentifierProvider:[AMAAppGroupIdentifierProvider new]
-                                 appMetricaConfigurationStorage:storingMock];
+                                 appMetricaConfigurationStorage:storing];
     [AMAMetricaConfiguration stub:@selector(sharedInstance) andReturn:config];
 }
 

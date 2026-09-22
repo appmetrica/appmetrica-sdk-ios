@@ -32,6 +32,7 @@ Pod::Spec.new do |s|
   s.dependency 'AppMetricaFMDB', '= 6.7.0'
   s.dependency 'AppMetricaKeychain', '= 6.7.0'
   s.dependency 'AppMetricaIdentifiers', '= 6.7.0'
+  s.dependency 'AppMetricaSynchronization', '= 6.7.0'
   
   s.header_dir = s.name
   s.source_files = [

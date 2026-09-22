@@ -7,6 +7,8 @@
 #import "AMAMetricaInMemoryConfiguration.h"
 #import "AMAMockDatabase.h"
 #import "AMAAppMetricaConfigurationProviderMock.h"
+#import "AMAAppMetricaConfigurationStorageCoordinator.h"
+#import "AMAImmediateExclusiveLock.h"
 #import "AMAAppMetricaConfiguration.h"
 #import "AMADefaultAnonymousConfigProvider.h"
 
@@ -25,10 +27,14 @@
     [super setUp];
     self.database = [AMAMockDatabase configurationDatabase];
     self.configStorage = [[AMAAppMetricaConfigurationProviderMock alloc] init];
+    id<AMAAppMetricaConfigurationStoring> storing =
+        [[AMAAppMetricaConfigurationStorageCoordinator alloc] initWithPrivateStorage:self.configStorage
+                                                                        groupStorage:nil
+                                                                                lock:[AMAImmediateExclusiveLock new]];
     self.persistent = [[AMAMetricaPersistentConfiguration alloc]
         initWithStorage:self.database.storageProvider.syncStorage
         inMemoryConfiguration:[[AMAMetricaInMemoryConfiguration alloc] init]
-        appMetricaConfigurationStorage:self.configStorage];
+        appMetricaConfigurationStorage:storing];
     self.dateProvider = [[AMADateProviderMock alloc] init];
     [self.dateProvider freezeWithDate:[NSDate dateWithTimeIntervalSince1970:1700000000]];
     self.repository = [[AMASavedAppMetricaConfigRepository alloc]

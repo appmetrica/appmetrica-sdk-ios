@@ -31,6 +31,7 @@
 @property (nonatomic, strong) AMADataSendingRestrictionController *restrictionController;
 @property (nonatomic, strong) AMADispatchStrategiesContainer *strategiesContainer;
 @property (nonatomic, strong) AMAAppMetricaConfiguration *savedAnonymousConfiguration;
+@property (nonatomic, assign) BOOL savedAnonymousConfigurationCanPersist;
 @property (nonatomic, strong) AMALocationManager *locationManager;
 @property (nonatomic, strong) id<AMAPermissionResolvingInput> adProvidingResolver;
 @property (nonatomic, strong) id<AMAPermissionResolvingInput> locationResolver;
@@ -104,8 +105,15 @@
     if ([AMAPlatformDescription runEnvronment] == AMARunEnvironmentMainApp || calledFromActivateAnonymous == NO) {
         // Timestamp only on ordinary activation. Anonymous MainApp also persists config,
         // but must not refresh TTL — otherwise Ads SDK anonymous restarts would extend it forever.
-        [self.anonymousConfigProvider.repository saveConfiguration:configuration
-                                                        refreshTTL:(calledFromActivateAnonymous == NO)];
+        // Anonymous fallback resolved after a failed lock must not overwrite an existing file.
+        BOOL shouldSave = YES;
+        if (calledFromActivateAnonymous && self.savedAnonymousConfiguration != nil) {
+            shouldSave = self.savedAnonymousConfigurationCanPersist;
+        }
+        if (shouldSave) {
+            [self.anonymousConfigProvider.repository saveConfiguration:configuration
+                                                            refreshTTL:(calledFromActivateAnonymous == NO)];
+        }
     }
     self.metricaConfiguration.persistent.recentMainApiKey = configuration.APIKey;
     
@@ -130,12 +138,29 @@
 
 - (AMAAppMetricaConfiguration *)anonymousConfiguration
 {
-    return self.savedAnonymousConfiguration ?: [self.anonymousConfigProvider configuration];
+    if (self.savedAnonymousConfiguration != nil) {
+        return self.savedAnonymousConfiguration;
+    }
+
+    BOOL canPersist = NO;
+    AMAAppMetricaConfiguration *configuration =
+        [self.anonymousConfigProvider configurationCanPersist:&canPersist];
+    self.savedAnonymousConfiguration = configuration;
+    self.savedAnonymousConfigurationCanPersist = canPersist;
+    return configuration;
 }
 
 - (void)updateAnonymousConfigurationWithLibraryAdapterConfiguration:(AMAAppMetricaLibraryAdapterConfiguration *)libraryAdapterConfiguration
 {
-    AMAAppMetricaConfiguration *configuration = [self.anonymousConfigProvider configuration];
+    BOOL canPersist = NO;
+    AMAAppMetricaConfiguration *configuration = nil;
+    if (self.savedAnonymousConfiguration != nil) {
+        configuration = self.savedAnonymousConfiguration;
+        canPersist = self.savedAnonymousConfigurationCanPersist;
+    }
+    else {
+        configuration = [self.anonymousConfigProvider configurationCanPersist:&canPersist];
+    }
     BOOL isAnonConfiguration = [AMAActivationTypeResolver isAnonymousConfiguration:configuration];
     
     if (isAnonConfiguration) {
@@ -147,6 +172,7 @@
     }
     
     self.savedAnonymousConfiguration = configuration;
+    self.savedAnonymousConfigurationCanPersist = canPersist;
 }
 
 - (void)updateLibraryAdapterCustomHosts:(NSArray<NSString *> *)customHosts

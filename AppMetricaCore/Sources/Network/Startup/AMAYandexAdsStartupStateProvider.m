@@ -34,7 +34,7 @@ static NSString *const kAMAStartupYandexAdsOnlyParameter = @"hoyas";
     if (self.detector.isPresent == NO) {
         return NO;
     }
-    AMAAppMetricaConfiguration *configuration = [self.repository validSavedConfig];
+    AMAAppMetricaConfiguration *configuration = [self.repository validSavedConfigDidUpdate:NULL];
     BOOL hasOrdinaryConfiguration = configuration != nil &&
         [AMAActivationTypeResolver isAnonymousConfiguration:configuration] == NO;
     return hasOrdinaryConfiguration == NO;

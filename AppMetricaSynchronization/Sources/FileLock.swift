@@ -47,6 +47,15 @@ public final class FileLock {
     public func lockExclusive() {
         flockWithBlocking(mode: LOCK_EX)
     }
+
+    public func lockExclusiveOrThrow() throws {
+        while flock(fd, LOCK_EX) == -1 {
+            let code = errno
+            guard code == EINTR else {
+                throw FileLockError.system(code: code)
+            }
+        }
+    }
     
     public func lockShared() {
         flockWithBlocking(mode: LOCK_SH)

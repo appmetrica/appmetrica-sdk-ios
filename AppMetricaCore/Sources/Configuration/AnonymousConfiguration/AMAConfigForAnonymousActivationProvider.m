@@ -52,17 +52,25 @@
     return self;
 }
 
-- (AMAAppMetricaConfiguration *)configuration
+- (AMAAppMetricaConfiguration *)configurationCanPersist:(BOOL *)canPersist
 {
-    AMAAppMetricaConfiguration *configuration = [self.repository validSavedConfig];
+    BOOL didUpdate = NO;
+    AMAAppMetricaConfiguration *configuration = [self.repository validSavedConfigDidUpdate:&didUpdate];
 
-    if (configuration == nil) {
-        configuration = [self.defaultProvider configuration];
-        if ([self.firstActivationDetector isFirstLibraryReporterActivation] == NO) {
-            configuration.handleFirstActivationAsUpdate = true;
+    if (configuration != nil) {
+        if (canPersist != NULL) {
+            *canPersist = YES;
         }
+        return configuration;
     }
 
+    configuration = [self.defaultProvider configuration];
+    if ([self.firstActivationDetector isFirstLibraryReporterActivation] == NO) {
+        configuration.handleFirstActivationAsUpdate = true;
+    }
+    if (canPersist != NULL) {
+        *canPersist = didUpdate;
+    }
     return configuration;
 }
 

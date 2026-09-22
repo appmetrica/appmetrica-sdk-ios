@@ -31,43 +31,53 @@
     return self;
 }
 
-- (AMAAppMetricaConfiguration *)validSavedConfig
+- (AMAAppMetricaConfiguration *)validSavedConfigDidUpdate:(BOOL *)didUpdate
 {
-    AMAAppMetricaConfigurationSnapshot *snapshot = [self.persistent appMetricaClientConfigurationSnapshot];
-    if (snapshot.configuration == nil) {
-        return nil;
-    }
+    __block AMAAppMetricaConfigurationSnapshot *snapshot = nil;
+    BOOL updated = [self.persistent updateAppMetricaClientConfigurationSnapshot:
+        ^AMAAppMetricaConfigurationSnapshot *(AMAAppMetricaConfigurationSnapshot *current) {
+            NSDate *now = self.dateProvider.currentDate;
 
-    NSDate *savedAt = snapshot.savedAt;
-    NSDate *now = self.dateProvider.currentDate;
-    if (savedAt == nil) {
-        // Existing released configuration.json has no savedAt yet — stamp now into the same snapshot.
-        AMALogInfo(@"No timestamp for saved config. Lazy migrate with now=%@", now);
-        AMAAppMetricaConfigurationSnapshot *migrated = [snapshot snapshotByUpdatingSavedAt:now];
-        [self.persistent saveAppMetricaClientConfigurationSnapshot:migrated];
-        return snapshot.configuration;
-    }
+            if (current.savedAt == nil) {
+                AMALogInfo(@"No timestamp for saved config. Lazy migrate with now=%@", now);
+                return [current snapshotByUpdatingSavedAt:now];
+            }
 
-    if ([AMASavedAppMetricaConfigTtlChecker isExpiredForSavedAt:savedAt now:now]) {
-        AMALogInfo(@"Saved config expired. savedAt=%@, now=%@. Clearing source=%ld.",
-                   savedAt, now, (long)snapshot.source);
-        [self.persistent clearAppMetricaClientConfigurationSnapshot:snapshot];
-        return nil;
-    }
+            if ([AMASavedAppMetricaConfigTtlChecker isExpiredForSavedAt:current.savedAt now:now]) {
+                AMALogInfo(@"Saved config expired. savedAt=%@, now=%@. Clearing source=%ld.",
+                           current.savedAt, now, (long)current.source);
+                return nil;
+            }
 
+            return current;
+        }
+        result:&snapshot
+    ];
+    if (didUpdate != NULL) {
+        *didUpdate = updated;
+    }
     return snapshot.configuration;
 }
 
 - (void)saveConfiguration:(AMAAppMetricaConfiguration *)configuration
                refreshTTL:(BOOL)refreshTTL
 {
-    AMAAppMetricaConfigurationSnapshot *current = [self.persistent appMetricaClientConfigurationSnapshot];
-    NSDate *savedAt = refreshTTL ? self.dateProvider.currentDate : current.savedAt;
-    AMAAppMetricaConfigurationSnapshot *updated =
-        [[AMAAppMetricaConfigurationSnapshot alloc] initWithConfiguration:configuration
-                                                                  savedAt:savedAt
-                                                                   source:AMAAppMetricaConfigurationSnapshotSourcePrivate];
-    [self.persistent saveAppMetricaClientConfigurationSnapshot:updated];
+    if (refreshTTL) {
+        AMAAppMetricaConfigurationSnapshot *snapshot =
+            [[AMAAppMetricaConfigurationSnapshot alloc] initWithConfiguration:configuration
+                                                                      savedAt:self.dateProvider.currentDate
+                                                                       source:AMAAppMetricaConfigurationSnapshotSourcePrivate];
+        [self.persistent saveAppMetricaClientConfigurationSnapshot:snapshot];
+        return;
+    }
+
+    [self.persistent saveAppMetricaClientConfigurationSnapshotUsingCurrent:
+        ^AMAAppMetricaConfigurationSnapshot *(AMAAppMetricaConfigurationSnapshot *current) {
+            return [[AMAAppMetricaConfigurationSnapshot alloc] initWithConfiguration:configuration
+                                                                              savedAt:current.savedAt
+                                                                               source:AMAAppMetricaConfigurationSnapshotSourcePrivate];
+        }
+    ];
 }
 
 @end

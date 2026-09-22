@@ -191,19 +191,20 @@ LONG_PROPERTY(conversionValue, setConversionValue, AMAStorageStringKeyConversion
                                error:NULL];
 }
 
-- (AMAAppMetricaConfigurationSnapshot *)appMetricaClientConfigurationSnapshot
-{
-    return [self.appMetricaConfigurationStorage loadSnapshot];
-}
-
 - (void)saveAppMetricaClientConfigurationSnapshot:(AMAAppMetricaConfigurationSnapshot *)snapshot
 {
     [self.appMetricaConfigurationStorage saveSnapshot:snapshot];
 }
 
-- (void)clearAppMetricaClientConfigurationSnapshot:(AMAAppMetricaConfigurationSnapshot *)snapshot
+- (BOOL)updateAppMetricaClientConfigurationSnapshot:(AMAConfigurationSnapshotUpdate)update
+                                             result:(AMAAppMetricaConfigurationSnapshot **)result
 {
-    [self.appMetricaConfigurationStorage clearSnapshot:snapshot];
+    return [self.appMetricaConfigurationStorage updateLoadedSnapshot:update result:result];
+}
+
+- (void)saveAppMetricaClientConfigurationSnapshotUsingCurrent:(AMAConfigurationSnapshotBuilder)builder
+{
+    [self.appMetricaConfigurationStorage saveSnapshotUsingCurrent:builder];
 }
 
 - (NSString *)recentMainApiKey

@@ -1,16 +1,19 @@
 #import <Foundation/Foundation.h>
-#import <AppMetricaPlatform/AppMetricaPlatform.h>
 #import "AMAAppMetricaConfigurationStoring.h"
 
 NS_ASSUME_NONNULL_BEGIN
+
+@protocol AMAExclusiveLocking;
+@protocol AMAAppMetricaConfigurationFileStoring;
 
 @interface AMAAppMetricaConfigurationStorageCoordinator : NSObject <AMAAppMetricaConfigurationStoring>
 
 - (instancetype)init NS_UNAVAILABLE;
 + (instancetype)new NS_UNAVAILABLE;
 
-- (instancetype)initWithPrivateStorage:(nonnull id<AMAAppMetricaConfigurationStoring>)privateStorage
-                          groupStorage:(nullable id<AMAAppMetricaConfigurationStoring>)groupStorage;
+- (instancetype)initWithPrivateStorage:(id<AMAAppMetricaConfigurationFileStoring>)privateStorage
+                          groupStorage:(nullable id<AMAAppMetricaConfigurationFileStoring>)groupStorage
+                                  lock:(id<AMAExclusiveLocking>)lock;
 
 @end
 

@@ -21,8 +21,9 @@
     self.savedAt = snapshot.savedAt;
 }
 
-- (void)clearSnapshot:(AMAAppMetricaConfigurationSnapshot *)snapshot
+- (void)deleteSnapshot
 {
+    [self.deleteSnapshotExpectation fulfill];
     self.configuration = nil;
     self.savedAt = nil;
 }

@@ -1,10 +1,10 @@
 #import <Foundation/Foundation.h>
 
 #import <AppMetricaCore/AppMetricaCore.h>
+#import "AMAAppMetricaConfigurationStoring.h"
 
 @protocol AMAKeyValueStoring;
 @protocol AMAKeychainStoring;
-@protocol AMAAppMetricaConfigurationStoring;
 
 @class AMAPersistentTimeoutConfiguration;
 @class AMAMetricaInMemoryConfiguration;
@@ -54,9 +54,10 @@ NS_ASSUME_NONNULL_BEGIN
           inMemoryConfiguration:(AMAMetricaInMemoryConfiguration *)inMemoryConfiguration
  appMetricaConfigurationStorage:(id<AMAAppMetricaConfigurationStoring>)appMetricaConfigurationStoring;
 
-- (nullable AMAAppMetricaConfigurationSnapshot *)appMetricaClientConfigurationSnapshot;
 - (void)saveAppMetricaClientConfigurationSnapshot:(AMAAppMetricaConfigurationSnapshot *)snapshot;
-- (void)clearAppMetricaClientConfigurationSnapshot:(AMAAppMetricaConfigurationSnapshot *)snapshot;
+- (BOOL)updateAppMetricaClientConfigurationSnapshot:(AMAConfigurationSnapshotUpdate)update
+                                             result:(AMAAppMetricaConfigurationSnapshot * _Nullable * _Nullable)result;
+- (void)saveAppMetricaClientConfigurationSnapshotUsingCurrent:(AMAConfigurationSnapshotBuilder)builder;
 
 @end
 

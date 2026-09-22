@@ -9,6 +9,9 @@
 #import "AMAAppMetricaConfigurationSnapshot.h"
 #import "AMAAppMetricaConfigurationFileStorage.h"
 #import "AMAAppMetricaConfigurationStorageCoordinator.h"
+#import "AMAImmediateExclusiveLock.h"
+
+@import AppMetricaSynchronization;
 
 SPEC_BEGIN(AMASavedAppMetricaConfigRepositoryAppGroupTests)
 
@@ -19,9 +22,6 @@ describe(@"AMASavedAppMetricaConfigRepository App Group TTL", ^{
 
     AMADateProviderMock *__block dateProvider = nil;
     AMAStorageMock *__block sharedGroupBackend = nil;
-    AMAManualCurrentQueueExecutor *__block groupExecutor = nil;
-    AMAManualCurrentQueueExecutor *__block mainPrivateExecutor = nil;
-    AMAManualCurrentQueueExecutor *__block extensionPrivateExecutor = nil;
 
     AMAAppMetricaConfigurationFileStorage *__block mainPrivateStorage = nil;
     AMAAppMetricaConfigurationFileStorage *__block extensionPrivateStorage = nil;
@@ -41,41 +41,30 @@ describe(@"AMASavedAppMetricaConfigRepository App Group TTL", ^{
 
     NSDate *__block day0 = nil;
 
-    void (^flushExecutors)(void) = ^{
-        [mainPrivateExecutor execute];
-        [extensionPrivateExecutor execute];
-        [groupExecutor execute];
-    };
-
     beforeEach(^{
         day0 = [NSDate dateWithTimeIntervalSince1970:1700000000.0];
         dateProvider = [[AMADateProviderMock alloc] init];
         [dateProvider freezeWithDate:day0];
 
         sharedGroupBackend = [AMAStorageMock new];
-        groupExecutor = [AMAManualCurrentQueueExecutor new];
-        mainPrivateExecutor = [AMAManualCurrentQueueExecutor new];
-        extensionPrivateExecutor = [AMAManualCurrentQueueExecutor new];
 
         mainPrivateStorage = [[AMAAppMetricaConfigurationFileStorage alloc]
-                              initWithFileStorage:[AMAStorageMock new]
-                              executor:mainPrivateExecutor];
+                              initWithFileStorage:[AMAStorageMock new]];
         extensionPrivateStorage = [[AMAAppMetricaConfigurationFileStorage alloc]
-                                   initWithFileStorage:[AMAStorageMock new]
-                                   executor:extensionPrivateExecutor];
+                                   initWithFileStorage:[AMAStorageMock new]];
         mainGroupStorage = [[AMAAppMetricaConfigurationFileStorage alloc]
-                            initWithFileStorage:sharedGroupBackend
-                            executor:groupExecutor];
+                            initWithFileStorage:sharedGroupBackend];
         extensionGroupStorage = [[AMAAppMetricaConfigurationFileStorage alloc]
-                                 initWithFileStorage:sharedGroupBackend
-                                 executor:groupExecutor];
+                                 initWithFileStorage:sharedGroupBackend];
 
         mainCoordinator = [[AMAAppMetricaConfigurationStorageCoordinator alloc]
                            initWithPrivateStorage:mainPrivateStorage
-                           groupStorage:mainGroupStorage];
+                                     groupStorage:mainGroupStorage
+                                             lock:[AMAImmediateExclusiveLock new]];
         extensionCoordinator = [[AMAAppMetricaConfigurationStorageCoordinator alloc]
                                 initWithPrivateStorage:extensionPrivateStorage
-                                groupStorage:extensionGroupStorage];
+                                          groupStorage:extensionGroupStorage
+                                                  lock:[AMAImmediateExclusiveLock new]];
 
         mainKV = [AMAKeyValueStorageMock new];
         extensionKV = [AMAKeyValueStorageMock new];
@@ -104,11 +93,9 @@ describe(@"AMASavedAppMetricaConfigRepository App Group TTL", ^{
             [[AMAAppMetricaConfigurationSnapshot alloc] initWithConfiguration:v1
                                                                       savedAt:day0
                                                                        source:AMAAppMetricaConfigurationSnapshotSourcePrivate]];
-        flushExecutors();
 
         [AMAPlatformDescription stub:@selector(runEnvronment) andReturn:theValue(AMARunEnvironmentExtension)];
-        AMAAppMetricaConfiguration *extensionDay0 = [extensionRepository validSavedConfig];
-        flushExecutors();
+        AMAAppMetricaConfiguration *extensionDay0 = [extensionRepository validSavedConfigDidUpdate:NULL];
         [[extensionDay0.APIKey should] equal:apiKeyV1];
 
         [AMAPlatformDescription stub:@selector(runEnvronment) andReturn:theValue(AMARunEnvironmentMainApp)];
@@ -120,18 +107,16 @@ describe(@"AMASavedAppMetricaConfigRepository App Group TTL", ^{
             [[AMAAppMetricaConfigurationSnapshot alloc] initWithConfiguration:v2
                                                                       savedAt:day20
                                                                        source:AMAAppMetricaConfigurationSnapshotSourcePrivate]];
-        flushExecutors();
 
         // Cold start extension: recreate file storages keeping backends.
         extensionPrivateStorage = [[AMAAppMetricaConfigurationFileStorage alloc]
-                                   initWithFileStorage:extensionPrivateStorage.fileStorage
-                                   executor:extensionPrivateExecutor];
+                                   initWithFileStorage:extensionPrivateStorage.fileStorage];
         extensionGroupStorage = [[AMAAppMetricaConfigurationFileStorage alloc]
-                                 initWithFileStorage:sharedGroupBackend
-                                 executor:groupExecutor];
+                                 initWithFileStorage:sharedGroupBackend];
         extensionCoordinator = [[AMAAppMetricaConfigurationStorageCoordinator alloc]
                                 initWithPrivateStorage:extensionPrivateStorage
-                                groupStorage:extensionGroupStorage];
+                                          groupStorage:extensionGroupStorage
+                                                  lock:[AMAImmediateExclusiveLock new]];
         extensionPersistent = [[AMAMetricaPersistentConfiguration alloc] initWithStorage:extensionKV
                                                                    inMemoryConfiguration:inMemory
                                                           appMetricaConfigurationStorage:extensionCoordinator];
@@ -143,16 +128,168 @@ describe(@"AMASavedAppMetricaConfigRepository App Group TTL", ^{
         NSDate *day31 = [day0 dateByAddingTimeInterval:31.0 * 24.0 * 60.0 * 60.0];
         [dateProvider freezeWithDate:day31];
 
-        AMAAppMetricaConfiguration *extensionDay31 = [extensionRepository validSavedConfig];
-        flushExecutors();
+        AMAAppMetricaConfiguration *extensionDay31 = [extensionRepository validSavedConfigDidUpdate:NULL];
 
         [[extensionDay31.APIKey should] equal:apiKeyV2];
         [[extensionDay31.customHosts should] equal:@[ @"https://example.test" ]];
 
         AMAAppMetricaConfigurationFileStorage *freshGroupReader =
-            [[AMAAppMetricaConfigurationFileStorage alloc] initWithFileStorage:sharedGroupBackend
-                                                                      executor:groupExecutor];
+            [[AMAAppMetricaConfigurationFileStorage alloc] initWithFileStorage:sharedGroupBackend];
         [[[freshGroupReader loadSnapshot].configuration.APIKey should] equal:apiKeyV2];
+    });
+
+    it(@"shouldWaitForExclusiveLockBeforeSavingWhileExtensionUpdatesExpiredConfig", ^{
+        NSString *lockPath = [NSTemporaryDirectory() stringByAppendingPathComponent:
+                              [NSString stringWithFormat:@"ama-config-race-%@.lock", NSUUID.UUID.UUIDString]];
+        AMAFileLockExecutor *mainLock = [[AMAFileLockExecutor alloc] initWithFilePath:lockPath];
+        AMAFileLockExecutor *extensionLock = [[AMAFileLockExecutor alloc] initWithFilePath:lockPath];
+
+        mainCoordinator = [[AMAAppMetricaConfigurationStorageCoordinator alloc]
+                           initWithPrivateStorage:mainPrivateStorage
+                                     groupStorage:mainGroupStorage
+                                             lock:mainLock];
+        extensionCoordinator = [[AMAAppMetricaConfigurationStorageCoordinator alloc]
+                                initWithPrivateStorage:extensionPrivateStorage
+                                          groupStorage:extensionGroupStorage
+                                                  lock:extensionLock];
+        mainPersistent = [[AMAMetricaPersistentConfiguration alloc] initWithStorage:mainKV
+                                                              inMemoryConfiguration:inMemory
+                                                     appMetricaConfigurationStorage:mainCoordinator];
+        extensionPersistent = [[AMAMetricaPersistentConfiguration alloc] initWithStorage:extensionKV
+                                                                   inMemoryConfiguration:inMemory
+                                                          appMetricaConfigurationStorage:extensionCoordinator];
+        extensionRepository = [[AMASavedAppMetricaConfigRepository alloc]
+                               initWithPersistentConfiguration:extensionPersistent
+                               dateProvider:dateProvider];
+
+        [AMAPlatformDescription stub:@selector(runEnvronment) andReturn:theValue(AMARunEnvironmentMainApp)];
+        AMAAppMetricaConfiguration *v1 = [[AMAAppMetricaConfiguration alloc] initWithAPIKey:apiKeyV1];
+        [mainPersistent saveAppMetricaClientConfigurationSnapshot:
+            [[AMAAppMetricaConfigurationSnapshot alloc] initWithConfiguration:v1
+                                                                      savedAt:day0
+                                                                       source:AMAAppMetricaConfigurationSnapshotSourcePrivate]];
+
+        NSDate *day31 = [day0 dateByAddingTimeInterval:31.0 * 24.0 * 60.0 * 60.0];
+        [dateProvider freezeWithDate:day31];
+
+        dispatch_semaphore_t enteredDate = dispatch_semaphore_create(0);
+        dispatch_semaphore_t resumeDate = dispatch_semaphore_create(0);
+        [dateProvider stub:@selector(currentDate) withBlock:^id(NSArray *params) {
+            dispatch_semaphore_signal(enteredDate);
+            dispatch_semaphore_wait(resumeDate, DISPATCH_TIME_FOREVER);
+            return day31;
+        }];
+
+        __block AMAAppMetricaConfiguration *extensionResult = (id)[NSNull null];
+        dispatch_semaphore_t extensionDone = dispatch_semaphore_create(0);
+        dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0), ^{
+            [AMAPlatformDescription stub:@selector(runEnvronment) andReturn:theValue(AMARunEnvironmentExtension)];
+            extensionResult = [extensionRepository validSavedConfigDidUpdate:NULL];
+            dispatch_semaphore_signal(extensionDone);
+        });
+
+        [[theValue(dispatch_semaphore_wait(enteredDate, dispatch_time(DISPATCH_TIME_NOW, (int64_t)(5 * NSEC_PER_SEC)))) should] equal:theValue(0)];
+
+        AMAAppMetricaConfiguration *v2 = [[AMAAppMetricaConfiguration alloc] initWithAPIKey:apiKeyV2];
+        dispatch_semaphore_t saveDone = dispatch_semaphore_create(0);
+        dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0), ^{
+            [AMAPlatformDescription stub:@selector(runEnvronment) andReturn:theValue(AMARunEnvironmentMainApp)];
+            [mainPersistent saveAppMetricaClientConfigurationSnapshot:
+                [[AMAAppMetricaConfigurationSnapshot alloc] initWithConfiguration:v2
+                                                                          savedAt:day31
+                                                                           source:AMAAppMetricaConfigurationSnapshotSourcePrivate]];
+            dispatch_semaphore_signal(saveDone);
+        });
+
+        // Give the save a chance to race; it must block on flock until resume.
+        [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.2]];
+        // Non-zero = still blocked (historically 1; modern Darwin returns KERN_OPERATION_TIMED_OUT / 49).
+        [[theValue(dispatch_semaphore_wait(saveDone, DISPATCH_TIME_NOW)) shouldNot] equal:theValue(0)];
+
+        dispatch_semaphore_signal(resumeDate);
+        [[theValue(dispatch_semaphore_wait(extensionDone, dispatch_time(DISPATCH_TIME_NOW, (int64_t)(5 * NSEC_PER_SEC)))) should] equal:theValue(0)];
+        [[theValue(dispatch_semaphore_wait(saveDone, dispatch_time(DISPATCH_TIME_NOW, (int64_t)(5 * NSEC_PER_SEC)))) should] equal:theValue(0)];
+
+        [[extensionResult should] beNil];
+        AMAAppMetricaConfigurationFileStorage *freshGroupReader =
+            [[AMAAppMetricaConfigurationFileStorage alloc] initWithFileStorage:sharedGroupBackend];
+        [[[freshGroupReader loadSnapshot].configuration.APIKey should] equal:apiKeyV2];
+        [[NSFileManager defaultManager] removeItemAtPath:lockPath error:nil];
+    });
+
+    it(@"shouldNotOverwriteConcurrentSaveWithLazyTimestampMigration", ^{
+        NSString *lockPath = [NSTemporaryDirectory() stringByAppendingPathComponent:
+                              [NSString stringWithFormat:@"ama-config-lazy-%@.lock", NSUUID.UUID.UUIDString]];
+        AMAFileLockExecutor *mainLock = [[AMAFileLockExecutor alloc] initWithFilePath:lockPath];
+        AMAFileLockExecutor *extensionLock = [[AMAFileLockExecutor alloc] initWithFilePath:lockPath];
+
+        mainCoordinator = [[AMAAppMetricaConfigurationStorageCoordinator alloc]
+                           initWithPrivateStorage:mainPrivateStorage
+                                     groupStorage:mainGroupStorage
+                                             lock:mainLock];
+        extensionCoordinator = [[AMAAppMetricaConfigurationStorageCoordinator alloc]
+                                initWithPrivateStorage:extensionPrivateStorage
+                                          groupStorage:extensionGroupStorage
+                                                  lock:extensionLock];
+        mainPersistent = [[AMAMetricaPersistentConfiguration alloc] initWithStorage:mainKV
+                                                              inMemoryConfiguration:inMemory
+                                                     appMetricaConfigurationStorage:mainCoordinator];
+        extensionPersistent = [[AMAMetricaPersistentConfiguration alloc] initWithStorage:extensionKV
+                                                                   inMemoryConfiguration:inMemory
+                                                          appMetricaConfigurationStorage:extensionCoordinator];
+        extensionRepository = [[AMASavedAppMetricaConfigRepository alloc]
+                               initWithPersistentConfiguration:extensionPersistent
+                               dateProvider:dateProvider];
+
+        [AMAPlatformDescription stub:@selector(runEnvronment) andReturn:theValue(AMARunEnvironmentMainApp)];
+        AMAAppMetricaConfiguration *v1 = [[AMAAppMetricaConfiguration alloc] initWithAPIKey:apiKeyV1];
+        [mainPersistent saveAppMetricaClientConfigurationSnapshot:
+            [[AMAAppMetricaConfigurationSnapshot alloc] initWithConfiguration:v1
+                                                                      savedAt:nil
+                                                                       source:AMAAppMetricaConfigurationSnapshotSourcePrivate]];
+
+        dispatch_semaphore_t enteredDate = dispatch_semaphore_create(0);
+        dispatch_semaphore_t resumeDate = dispatch_semaphore_create(0);
+        [dateProvider stub:@selector(currentDate) withBlock:^id(NSArray *params) {
+            dispatch_semaphore_signal(enteredDate);
+            dispatch_semaphore_wait(resumeDate, DISPATCH_TIME_FOREVER);
+            return day0;
+        }];
+
+        __block AMAAppMetricaConfiguration *extensionResult = nil;
+        dispatch_semaphore_t extensionDone = dispatch_semaphore_create(0);
+        dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0), ^{
+            [AMAPlatformDescription stub:@selector(runEnvronment) andReturn:theValue(AMARunEnvironmentExtension)];
+            extensionResult = [extensionRepository validSavedConfigDidUpdate:NULL];
+            dispatch_semaphore_signal(extensionDone);
+        });
+
+        [[theValue(dispatch_semaphore_wait(enteredDate, dispatch_time(DISPATCH_TIME_NOW, (int64_t)(5 * NSEC_PER_SEC)))) should] equal:theValue(0)];
+
+        NSDate *day20 = [day0 dateByAddingTimeInterval:20.0 * 24.0 * 60.0 * 60.0];
+        AMAAppMetricaConfiguration *v2 = [[AMAAppMetricaConfiguration alloc] initWithAPIKey:apiKeyV2];
+        dispatch_semaphore_t saveDone = dispatch_semaphore_create(0);
+        dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0), ^{
+            [AMAPlatformDescription stub:@selector(runEnvronment) andReturn:theValue(AMARunEnvironmentMainApp)];
+            [mainPersistent saveAppMetricaClientConfigurationSnapshot:
+                [[AMAAppMetricaConfigurationSnapshot alloc] initWithConfiguration:v2
+                                                                          savedAt:day20
+                                                                           source:AMAAppMetricaConfigurationSnapshotSourcePrivate]];
+            dispatch_semaphore_signal(saveDone);
+        });
+
+        [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.2]];
+        [[theValue(dispatch_semaphore_wait(saveDone, DISPATCH_TIME_NOW)) shouldNot] equal:theValue(0)];
+
+        dispatch_semaphore_signal(resumeDate);
+        [[theValue(dispatch_semaphore_wait(extensionDone, dispatch_time(DISPATCH_TIME_NOW, (int64_t)(5 * NSEC_PER_SEC)))) should] equal:theValue(0)];
+        [[theValue(dispatch_semaphore_wait(saveDone, dispatch_time(DISPATCH_TIME_NOW, (int64_t)(5 * NSEC_PER_SEC)))) should] equal:theValue(0)];
+
+        [[extensionResult.APIKey should] equal:apiKeyV1];
+        AMAAppMetricaConfigurationFileStorage *freshGroupReader =
+            [[AMAAppMetricaConfigurationFileStorage alloc] initWithFileStorage:sharedGroupBackend];
+        [[[freshGroupReader loadSnapshot].configuration.APIKey should] equal:apiKeyV2];
+        [[NSFileManager defaultManager] removeItemAtPath:lockPath error:nil];
     });
 
 });

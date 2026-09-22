@@ -13,6 +13,8 @@
 #import "AMAStorageKeys.h"
 #import "AMAAppMetricaConfigurationProviderMock.h"
 #import "AMAAppMetricaConfigurationSnapshot.h"
+#import "AMAAppMetricaConfigurationStorageCoordinator.h"
+#import "AMAImmediateExclusiveLock.h"
 
 SPEC_BEGIN(AMAMetricaPersistentConfigurationTests)
 
@@ -21,19 +23,22 @@ describe(@"AMAMetricaPersistentConfiguration", ^{
     id<AMADatabaseProtocol> __block database = nil;
     AMAMetricaInMemoryConfiguration *__block inMemory = nil;
     NSObject<AMAKeyValueStoring> *__block storage = nil;
-    AMAAppMetricaConfigurationProviderMock *__block configurationProviderMock = nil;
+    id<AMAAppMetricaConfigurationStoring> __block configurationStorage = nil;
 
     AMAMetricaPersistentConfiguration *(^createConfig)(void) = ^{
         return [[AMAMetricaPersistentConfiguration alloc] initWithStorage:database.storageProvider.syncStorage
                                                     inMemoryConfiguration:inMemory
-                                           appMetricaConfigurationStorage:configurationProviderMock];
+                                           appMetricaConfigurationStorage:configurationStorage];
     };
 
     beforeEach(^{
         database = [AMAMockDatabase configurationDatabase];
         inMemory = [AMAMetricaInMemoryConfiguration nullMock];
         storage = (NSObject<AMAKeyValueStoring> *)database.storageProvider.syncStorage;
-        configurationProviderMock = [[AMAAppMetricaConfigurationProviderMock alloc] init];
+        configurationStorage =
+            [[AMAAppMetricaConfigurationStorageCoordinator alloc] initWithPrivateStorage:[AMAAppMetricaConfigurationProviderMock new]
+                                                                            groupStorage:nil
+                                                                                    lock:[AMAImmediateExclusiveLock new]];
     });
 
     context(@"Last successful Yandex Ads state snapshot", ^{
@@ -538,50 +543,67 @@ describe(@"AMAMetricaPersistentConfiguration", ^{
     
     context(@"appMetricaClientConfigurationSnapshot", ^{
         AMAAppMetricaConfiguration *__block mockConfiguration = nil;
+        id __block storingMock = nil;
         AMAMetricaPersistentConfiguration *__block configuration = nil;
+
         beforeEach(^{
-            configuration = createConfig();
             mockConfiguration = [AMAAppMetricaConfiguration nullMock];
             [mockConfiguration stub:@selector(copyWithZone:) andReturn:mockConfiguration];
+            storingMock = [KWMock mockForProtocol:@protocol(AMAAppMetricaConfigurationStoring)];
+            configuration = [[AMAMetricaPersistentConfiguration alloc] initWithStorage:database.storageProvider.syncStorage
+                                                                 inMemoryConfiguration:inMemory
+                                                        appMetricaConfigurationStorage:storingMock];
         });
 
-        it(@"Should load snapshot from storage", ^{
-            [[configurationProviderMock should] receive:@selector(loadSnapshot)];
-            [configuration appMetricaClientConfigurationSnapshot];
-        });
-        it(@"Should return snapshot from storage", ^{
-            NSDate *savedAt = [NSDate dateWithTimeIntervalSince1970:123.0];
-            AMAAppMetricaConfigurationSnapshot *snapshot =
-                [[AMAAppMetricaConfigurationSnapshot alloc] initWithConfiguration:mockConfiguration
-                                                                          savedAt:savedAt
-                                                                           source:AMAAppMetricaConfigurationSnapshotSourcePrivate];
-            [configurationProviderMock stub:@selector(loadSnapshot) andReturn:snapshot];
-
-            AMAAppMetricaConfigurationSnapshot *loaded = [configuration appMetricaClientConfigurationSnapshot];
-            [[loaded.configuration should] equal:mockConfiguration];
-            [[theValue(loaded.savedAt.timeIntervalSince1970) should] equal:savedAt.timeIntervalSince1970
-                                                                withDelta:floatingComparisonDelta];
-        });
         it(@"Should save snapshot", ^{
             AMAAppMetricaConfigurationSnapshot *snapshot =
                 [[AMAAppMetricaConfigurationSnapshot alloc] initWithConfiguration:mockConfiguration
                                                                           savedAt:[NSDate dateWithTimeIntervalSince1970:42.0]
                                                                            source:AMAAppMetricaConfigurationSnapshotSourcePrivate];
-            [[configurationProviderMock should] receive:@selector(saveSnapshot:) withArguments:snapshot];
+            [[storingMock should] receive:@selector(saveSnapshot:) withArguments:snapshot];
             [configuration saveAppMetricaClientConfigurationSnapshot:snapshot];
         });
-        it(@"Should clear snapshot", ^{
-            configurationProviderMock.configuration = mockConfiguration;
-            configurationProviderMock.savedAt = [NSDate dateWithTimeIntervalSince1970:42.0];
+
+        it(@"Should forward update success", ^{
             AMAAppMetricaConfigurationSnapshot *snapshot =
                 [[AMAAppMetricaConfigurationSnapshot alloc] initWithConfiguration:mockConfiguration
-                                                                          savedAt:configurationProviderMock.savedAt
+                                                                          savedAt:[NSDate dateWithTimeIntervalSince1970:42.0]
                                                                            source:AMAAppMetricaConfigurationSnapshotSourcePrivate];
+            [storingMock stub:@selector(updateLoadedSnapshot:result:) withBlock:^id(NSArray *params) {
+                [AMATestUtilities fillObjectPointerParameter:params[1] withValue:snapshot];
+                return theValue(YES);
+            }];
 
-            [configuration clearAppMetricaClientConfigurationSnapshot:snapshot];
+            AMAAppMetricaConfigurationSnapshot *result = nil;
+            BOOL updated = [configuration updateAppMetricaClientConfigurationSnapshot:
+                ^AMAAppMetricaConfigurationSnapshot *(AMAAppMetricaConfigurationSnapshot *current) {
+                    return current;
+                } result:&result];
+            [[theValue(updated) should] beYes];
+            [[result should] equal:snapshot];
+        });
 
-            [[configurationProviderMock.configuration should] beNil];
-            [[configurationProviderMock.savedAt should] beNil];
+        it(@"Should forward update failure", ^{
+            [storingMock stub:@selector(updateLoadedSnapshot:result:) withBlock:^id(NSArray *params) {
+                [AMATestUtilities fillObjectPointerParameter:params[1] withValue:nil];
+                return theValue(NO);
+            }];
+
+            AMAAppMetricaConfigurationSnapshot *result = (id)[NSNull null];
+            BOOL updated = [configuration updateAppMetricaClientConfigurationSnapshot:
+                ^AMAAppMetricaConfigurationSnapshot *(AMAAppMetricaConfigurationSnapshot *current) {
+                    return current;
+                } result:&result];
+            [[theValue(updated) should] beNo];
+            [[result should] beNil];
+        });
+
+        it(@"Should forward save using current", ^{
+            [[storingMock should] receive:@selector(saveSnapshotUsingCurrent:)];
+            [configuration saveAppMetricaClientConfigurationSnapshotUsingCurrent:
+                ^AMAAppMetricaConfigurationSnapshot *(AMAAppMetricaConfigurationSnapshot *current) {
+                    return current;
+                }];
         });
     });
 });

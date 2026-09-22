@@ -202,7 +202,7 @@ let package = Package(
             target: .core,
             dependencies: [
                 .network, .log, .coreUtils, .hostState, .protobufUtils, .platform, .storageUtils,
-                .encodingUtils, .protobuf, .fmdb, .keychain, .identifiers,
+                .encodingUtils, .protobuf, .fmdb, .keychain, .identifiers, .synchronization,
             ],
             searchPaths: [
                 "../../AppMetricaCoreExtension/Sources/include/AppMetricaCoreExtension"
@@ -212,6 +212,7 @@ let package = Package(
             target: .core,
             dependencies: [
                 .core, .coreExtension, .webKit, .testUtils, .hostState, .protobufUtils, .platform,
+                .synchronization,
             ],
             externalDependencies: [.kiwi],
             searchPaths: [

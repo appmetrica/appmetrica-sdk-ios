@@ -373,7 +373,13 @@ describe(@"AMAAppMetricaConfigurationManager", ^{
         beforeEach(^{
             configMock = [AMAAppMetricaConfiguration nullMock];
             [configMock stub:@selector(APIKey) andReturn:@"629a824d-c717-4ba5-bc0f-3f3968554d01"];
-            [anonymousConfigProviderMock stub:@selector(configuration) andReturn:configMock];
+            [anonymousConfigProviderMock stub:@selector(configurationCanPersist:) withBlock:^id(NSArray *params) {
+                BOOL *canPersistPtr = [params[0] pointerValue];
+                if (canPersistPtr != NULL) {
+                    *canPersistPtr = YES;
+                }
+                return configMock;
+            }];
             
             [configMock stub:@selector(setAdvertisingIdentifierTrackingEnabled:)];
             [configMock stub:@selector(setLocationTracking:)];
@@ -430,9 +436,61 @@ describe(@"AMAAppMetricaConfigurationManager", ^{
     context(@"anonymousConfiguration", ^{
         it(@"should return the anonymous configuration from the provider", ^{
             AMAAppMetricaConfiguration *configMock = [AMAAppMetricaConfiguration nullMock];
-            [anonymousConfigProviderMock stub:@selector(configuration) andReturn:configMock];
+            [anonymousConfigProviderMock stub:@selector(configurationCanPersist:) withBlock:^id(NSArray *params) {
+                BOOL *canPersistPtr = [params[0] pointerValue];
+                if (canPersistPtr != NULL) {
+                    *canPersistPtr = YES;
+                }
+                return configMock;
+            }];
             
             [[[configManager anonymousConfiguration] should] equal:configMock];
+        });
+    });
+
+    context(@"anonymous activation without persist permission", ^{
+        beforeEach(^{
+            [AMAPlatformDescription stub:@selector(runEnvronment) andReturn:theValue(AMARunEnvironmentMainApp)];
+        });
+
+        it(@"should not save fallback after failed lock", ^{
+            AMAAppMetricaConfiguration *configMock = [AMAAppMetricaConfiguration nullMock];
+            [anonymousConfigProviderMock stub:@selector(configurationCanPersist:) withBlock:^id(NSArray *params) {
+                BOOL *canPersistPtr = [params[0] pointerValue];
+                if (canPersistPtr != NULL) {
+                    *canPersistPtr = NO;
+                }
+                return configMock;
+            }];
+            [(NSObject *)locationResolver stub:@selector(updateBoolValue:isAnonymous:)];
+            [(NSObject *)adResolver stub:@selector(updateBoolValue:isAnonymous:)];
+
+            (void)[configManager anonymousConfiguration];
+            [[savedConfigRepositoryMock shouldNot] receive:@selector(saveConfiguration:refreshTTL:)];
+            [configManager updateMainConfiguration:configMock activatedAnonymously:YES];
+        });
+
+        it(@"should keep canPersist NO after library adapter update", ^{
+            AMAAppMetricaConfiguration *configMock = [AMAAppMetricaConfiguration nullMock];
+            [configMock stub:@selector(APIKey) andReturn:anonymousApiKey];
+            [configMock stub:@selector(setAdvertisingIdentifierTrackingEnabled:)];
+            [configMock stub:@selector(setLocationTracking:)];
+            [anonymousConfigProviderMock stub:@selector(configurationCanPersist:) withBlock:^id(NSArray *params) {
+                BOOL *canPersistPtr = [params[0] pointerValue];
+                if (canPersistPtr != NULL) {
+                    *canPersistPtr = NO;
+                }
+                return configMock;
+            }];
+            [(NSObject *)locationResolver stub:@selector(updateBoolValue:isAnonymous:)];
+            [(NSObject *)adResolver stub:@selector(updateBoolValue:isAnonymous:)];
+
+            AMAAppMetricaLibraryAdapterConfiguration *adapterConfig = [AMAAppMetricaLibraryAdapterConfiguration new];
+            adapterConfig.locationTrackingEnabled = YES;
+            [configManager updateAnonymousConfigurationWithLibraryAdapterConfiguration:adapterConfig];
+
+            [[savedConfigRepositoryMock shouldNot] receive:@selector(saveConfiguration:refreshTTL:)];
+            [configManager updateMainConfiguration:configMock activatedAnonymously:YES];
         });
     });
 });
