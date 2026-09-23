@@ -68,7 +68,9 @@ describe(@"AMACollectionUtilities", ^{
                 [keyValuePairs addObject:@[ key, value ]];
                 return YES;
             }];
-            [[keyValuePairs should] equal:@[ @[@"foo", @"bar"], @[@"bar", @"foo"] ]];
+            [[theValue(keyValuePairs.count) should] equal:theValue(source.count)];
+            [[[NSSet setWithArray:keyValuePairs] should]
+                equal:[NSSet setWithArray:@[ @[@"foo", @"bar"], @[@"bar", @"foo"] ]]];
         });
     });
 

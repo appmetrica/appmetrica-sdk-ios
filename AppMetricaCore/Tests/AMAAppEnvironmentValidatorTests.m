@@ -56,7 +56,7 @@ describe(@"AMAAppEnvironmentValidator", ^{
             NSNumber *invalidKey = @(123);
             
             [[mockReporter should] receive:@selector(reportAppEnvironmentError:type:)
-                               withArguments:@{ @"invalid_type": @"__NSCFNumber" }, @"key"];
+                               withArguments:@{ @"invalid_type": NSStringFromClass([invalidKey class]) }, @"key"];
             
             BOOL result = [validator validateAppEnvironmentKey:invalidKey];
             [[theValue(result) should] beNo];
@@ -104,7 +104,7 @@ describe(@"AMAAppEnvironmentValidator", ^{
             NSArray *invalidValue = @[ @"value1", @"value2" ];
             
             [[mockReporter should] receive:@selector(reportAppEnvironmentError:type:)
-                               withArguments:@{ @"invalid_type": @"__NSArrayI" }, @"value"];
+                               withArguments:@{ @"invalid_type": NSStringFromClass([invalidValue class]) }, @"value"];
             
             BOOL result = [validator validateAppEnvironmentValue:invalidValue];
             [[theValue(result) should] beNo];

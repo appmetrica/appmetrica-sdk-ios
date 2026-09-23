@@ -41,7 +41,6 @@ describe(@"AMADeviceDescription", ^{
                 }
                 else {
                     NSArray *jailChecks = @[
-                        @(AMA_KFOpenURL),
                         @(AMA_KFCydia),
                         @(AMA_KFIFC),
                         @(AMA_KFPlist),

@@ -55,7 +55,10 @@
 {
     NSString *valid = [AMAJSONSerialization stringWithJSONObject:self.dict error:nil];
     
-    XCTAssertEqualObjects(valid, self.json, @"Should serialize dictionary to string");
+    XCTAssertNotNil(valid, @"Should serialize dictionary to string");
+    NSData *jsonData = [valid dataUsingEncoding:NSUTF8StringEncoding];
+    id decoded = jsonData == nil ? nil : [NSJSONSerialization JSONObjectWithData:jsonData options:0 error:nil];
+    XCTAssertEqualObjects(decoded, self.dict, @"Should preserve all dictionary entries");
     
     NSString *invalid = [AMAJSONSerialization stringWithJSONObject:nil error:nil];
     

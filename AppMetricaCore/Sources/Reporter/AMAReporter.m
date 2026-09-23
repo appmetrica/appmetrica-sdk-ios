@@ -102,10 +102,7 @@
                                                      adProviderProxy:adProviderProxy];
     }
     
-    AMAAdServicesDataProvider *adServicesDataProvider = nil;
-    if (@available(iOS 14.3, *)) {
-        adServicesDataProvider = [[AMAAdServicesDataProvider alloc] init];
-    }
+    AMAAdServicesDataProvider *adServicesDataProvider = [[AMAAdServicesDataProvider alloc] init];
     
     return [self initWithApiKey:apiKey
                            main:main
@@ -1101,19 +1098,17 @@
 - (NSDictionary *)evenInitAdditionalParams
 {
     NSMutableDictionary *initAdditionalParams = [NSMutableDictionary dictionaryWithCapacity:1];
-    if (@available(iOS 14.3, *)) {
-        NSError *error = nil;
-        NSString *token = [self.adServices tokenWithError:&error];
+    NSError *error = nil;
+    NSString *token = [self.adServices tokenWithError:&error];
 
-        AMAReporter *sdkReporter = (AMAReporter *)[AMAAppMetrica reporterForAPIKey:kAMAMetricaLibraryApiKey];
-        if (token != nil) {
-            initAdditionalParams[@"asaToken"] = token;
-            [sdkReporter reportEvent:@"AppleSearchAdsTokenSuccess" onFailure:nil]; //TODO: Move to proper place
-        }
+    AMAReporter *sdkReporter = (AMAReporter *)[AMAAppMetrica reporterForAPIKey:kAMAMetricaLibraryApiKey];
+    if (token != nil) {
+        initAdditionalParams[@"asaToken"] = token;
+        [sdkReporter reportEvent:@"AppleSearchAdsTokenSuccess" onFailure:nil]; //TODO: Move to proper place
+    }
 //        else if (error != nil) { //TODO: (Crashes) handle error
 //            [sdkReporter reportNSError:error onFailure:nil];
 //        }
-    }
     return [initAdditionalParams copy];
 }
 

@@ -233,86 +233,84 @@ describe(@"AMAPermissionsExtractor", ^{
     });
 
     context(@"ATTStatus", ^{
-        if (@available(iOS 14.0, tvOS 14.0, *)) {
-            context(@"Authorized", ^{
-                beforeEach(^{
-                    [[AMAAdProviderProxy sharedInstance] stub:@selector(ATTStatus)
-                                               andReturn:theValue(AMATrackingManagerAuthorizationStatusAuthorized)];
-                    permission = [extractor permissionsForKeys:@[ kAMAPermissionKeyATTStatus ]].firstObject;
-                });
-                it(@"Should have `authorized` type", ^{
-                    [[theValue(permission.grantType) should] equal:theValue(AMAPermissionGrantTypeAuthorized)];
-                });
-                it(@"Should have requested name", ^{
-                    [[permission.name should] equal:kAMAPermissionKeyATTStatus];
-                });
-                it(@"Should be granted", ^{
-                    [[theValue(permission.isGranted) should] beYes];
-                });
+        context(@"Authorized", ^{
+            beforeEach(^{
+                [[AMAAdProviderProxy sharedInstance] stub:@selector(ATTStatus)
+                                           andReturn:theValue(AMATrackingManagerAuthorizationStatusAuthorized)];
+                permission = [extractor permissionsForKeys:@[ kAMAPermissionKeyATTStatus ]].firstObject;
             });
-            context(@"Denied", ^{
-                beforeEach(^{
-                    [[AMAAdProviderProxy sharedInstance] stub:@selector(ATTStatus) andReturn:theValue(AMATrackingManagerAuthorizationStatusDenied)];
-                    permission = [extractor permissionsForKeys:@[ kAMAPermissionKeyATTStatus ]].firstObject;
-                });
-                it(@"Should have `denied` type", ^{
-                    [[theValue(permission.grantType) should] equal:theValue(AMAPermissionGrantTypeDenied)];
-                });
-                it(@"Should have requested name", ^{
-                    [[permission.name should] equal:kAMAPermissionKeyATTStatus];
-                });
-                it(@"Should not be granted", ^{
-                    [[theValue(permission.isGranted) should] beNo];
-                });
+            it(@"Should have `authorized` type", ^{
+                [[theValue(permission.grantType) should] equal:theValue(AMAPermissionGrantTypeAuthorized)];
             });
-            context(@"Restricted", ^{
-                beforeEach(^{
-                    [[AMAAdProviderProxy sharedInstance] stub:@selector(ATTStatus)
-                                               andReturn:theValue(AMATrackingManagerAuthorizationStatusRestricted)];
-                    permission = [extractor permissionsForKeys:@[ kAMAPermissionKeyATTStatus ]].firstObject;
-                });
-                it(@"Should have `restricted` type", ^{
-                    [[theValue(permission.grantType) should] equal:theValue(AMAPermissionGrantTypeRestricted)];
-                });
-                it(@"Should have requested name", ^{
-                    [[permission.name should] equal:kAMAPermissionKeyATTStatus];
-                });
-                it(@"Should not be granted", ^{
-                    [[theValue(permission.isGranted) should] beNo];
-                });
+            it(@"Should have requested name", ^{
+                [[permission.name should] equal:kAMAPermissionKeyATTStatus];
             });
-            context(@"Not determined", ^{
-                beforeEach(^{
-                    [[AMAAdProviderProxy sharedInstance] stub:@selector(ATTStatus)
-                                               andReturn:theValue(AMATrackingManagerAuthorizationStatusNotDetermined)];
-                    permission = [extractor permissionsForKeys:@[ kAMAPermissionKeyATTStatus ]].firstObject;
-                });
-                it(@"Should have `ot determined` type", ^{
-                    [[theValue(permission.grantType) should] equal:theValue(AMAPermissionGrantTypeNotDetermined)];
-                });
-                it(@"Should have requested name", ^{
-                    [[permission.name should] equal:kAMAPermissionKeyATTStatus];
-                });
-                it(@"Should not be granted", ^{
-                    [[theValue(permission.isGranted) should] beNo];
-                });
+            it(@"Should be granted", ^{
+                [[theValue(permission.isGranted) should] beYes];
             });
-            context(@"Unknown", ^{
-                beforeEach(^{
-                    [[AMAAdProviderProxy sharedInstance] stub:@selector(ATTStatus) andReturn:theValue(666)];
-                    permission = [extractor permissionsForKeys:@[ kAMAPermissionKeyATTStatus ]].firstObject;
-                });
-                it(@"Should have `not determined` type", ^{
-                    [[theValue(permission.grantType) should] equal:theValue(AMAPermissionGrantTypeNotDetermined)];
-                });
-                it(@"Should have requested name", ^{
-                    [[permission.name should] equal:kAMAPermissionKeyATTStatus];
-                });
-                it(@"Should not be granted", ^{
-                    [[theValue(permission.isGranted) should] beNo];
-                });
+        });
+        context(@"Denied", ^{
+            beforeEach(^{
+                [[AMAAdProviderProxy sharedInstance] stub:@selector(ATTStatus) andReturn:theValue(AMATrackingManagerAuthorizationStatusDenied)];
+                permission = [extractor permissionsForKeys:@[ kAMAPermissionKeyATTStatus ]].firstObject;
             });
-        }
+            it(@"Should have `denied` type", ^{
+                [[theValue(permission.grantType) should] equal:theValue(AMAPermissionGrantTypeDenied)];
+            });
+            it(@"Should have requested name", ^{
+                [[permission.name should] equal:kAMAPermissionKeyATTStatus];
+            });
+            it(@"Should not be granted", ^{
+                [[theValue(permission.isGranted) should] beNo];
+            });
+        });
+        context(@"Restricted", ^{
+            beforeEach(^{
+                [[AMAAdProviderProxy sharedInstance] stub:@selector(ATTStatus)
+                                           andReturn:theValue(AMATrackingManagerAuthorizationStatusRestricted)];
+                permission = [extractor permissionsForKeys:@[ kAMAPermissionKeyATTStatus ]].firstObject;
+            });
+            it(@"Should have `restricted` type", ^{
+                [[theValue(permission.grantType) should] equal:theValue(AMAPermissionGrantTypeRestricted)];
+            });
+            it(@"Should have requested name", ^{
+                [[permission.name should] equal:kAMAPermissionKeyATTStatus];
+            });
+            it(@"Should not be granted", ^{
+                [[theValue(permission.isGranted) should] beNo];
+            });
+        });
+        context(@"Not determined", ^{
+            beforeEach(^{
+                [[AMAAdProviderProxy sharedInstance] stub:@selector(ATTStatus)
+                                           andReturn:theValue(AMATrackingManagerAuthorizationStatusNotDetermined)];
+                permission = [extractor permissionsForKeys:@[ kAMAPermissionKeyATTStatus ]].firstObject;
+            });
+            it(@"Should have `ot determined` type", ^{
+                [[theValue(permission.grantType) should] equal:theValue(AMAPermissionGrantTypeNotDetermined)];
+            });
+            it(@"Should have requested name", ^{
+                [[permission.name should] equal:kAMAPermissionKeyATTStatus];
+            });
+            it(@"Should not be granted", ^{
+                [[theValue(permission.isGranted) should] beNo];
+            });
+        });
+        context(@"Unknown", ^{
+            beforeEach(^{
+                [[AMAAdProviderProxy sharedInstance] stub:@selector(ATTStatus) andReturn:theValue(666)];
+                permission = [extractor permissionsForKeys:@[ kAMAPermissionKeyATTStatus ]].firstObject;
+            });
+            it(@"Should have `not determined` type", ^{
+                [[theValue(permission.grantType) should] equal:theValue(AMAPermissionGrantTypeNotDetermined)];
+            });
+            it(@"Should have requested name", ^{
+                [[permission.name should] equal:kAMAPermissionKeyATTStatus];
+            });
+            it(@"Should not be granted", ^{
+                [[theValue(permission.isGranted) should] beNo];
+            });
+        });
     });
 });
 

@@ -963,11 +963,9 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
 
 - (void)postSetupMainReporterWithStorage:(AMAReporterStorage *)reporterStorage
 {
-    if (@available(iOS 14.3, *)) {
-        self.adServicesController = [[AMAAdServicesReportingController alloc] initWithApiKey:self.apiKey
-                                                                        reporterStateStorage:reporterStorage.stateStorage];
-        [self triggerASATokenReporting];
-    }
+    self.adServicesController = [[AMAAdServicesReportingController alloc] initWithApiKey:self.apiKey
+                                                                    reporterStateStorage:reporterStorage.stateStorage];
+    [self triggerASATokenReporting];
 }
 
 - (void)triggerSessionStartIfNeeded

@@ -10,17 +10,11 @@
 
 #import "AMAJailbreakCheck.h"
 
-// UIKit
-#import <UIKit/UIKit.h>
-
 // stat
 #import <sys/stat.h>
 
 // sysctl
 #import <sys/sysctl.h>
-
-// System Version Less Than
-#define SYSTEM_VERSION_LESS_THAN(v)                 ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] == NSOrderedAscending)
 
 // Failed jailbroken checks
 /* Jailbreak Check Definitions */
@@ -33,7 +27,6 @@
 #define PLISTPATH [[NSBundle mainBundle] infoDictionary]
 
 // Jailbreak Check Definitions
-#define CYDIAPACKAGE    @"cydia://package/com.fake.package"
 #define CYDIALOC        @"/Applications/Cydia.app"
 #define HIDDENFILES     [NSArray arrayWithObjects:@"/Applications/RockApp.app",@"/Applications/Icy.app",@"/usr/sbin/sshd",@"/usr/bin/sshd",@"/usr/libexec/sftp-server",@"/Applications/WinterBoard.app",@"/Applications/SBSettings.app",@"/Applications/MxTube.app",@"/Applications/IntelliScreen.app",@"/Library/MobileSubstrate/DynamicLibraries/Veency.plist",@"/Library/MobileSubstrate/DynamicLibraries/LiveClock.plist",@"/private/var/lib/apt",@"/private/var/stash",@"/System/Library/LaunchDaemons/com.ikey.bbot.plist",@"/System/Library/LaunchDaemons/com.saurik.Cydia.Startup.plist",@"/private/var/tmp/cydia.log",@"/private/var/lib/cydia", @"/etc/clutch.conf", @"/var/cache/clutch.plist", @"/etc/clutch_cracked.plist", @"/var/cache/clutch_cracked.plist", @"/var/lib/clutch/overdrive.dylib", @"/var/root/Documents/Cracked/", nil]
 
@@ -47,16 +40,7 @@
     
     // Make an int to monitor how many checks are failed
     int motzart = 0;
-    
-    // Check if iOS 8 or lower
-    if (SYSTEM_VERSION_LESS_THAN(@"9.0")) {
-        // URL Check
-        if ([self urlCheck] != NOTJAIL) {
-            // Jailbroken
-            motzart += 3;
-        }
-    }
-    
+
     // Cydia Check
     if ([self cydiaCheck] != NOTJAIL) {
         // Jailbroken
@@ -92,24 +76,6 @@
 }
 
 #pragma mark - Static Jailbreak Checks
-
-// UIApplication CanOpenURL Check
-+ (int)urlCheck {
-    @try {
-        #if !(defined(__has_feature) && __has_feature(attribute_availability_app_extension))
-            // Create a fake url for cydia
-            NSURL *fakeURL = [NSURL URLWithString:CYDIAPACKAGE];
-            // Return whether or not cydia's openurl item exists
-            if ([[UIApplication sharedApplication] canOpenURL:fakeURL])
-               return KFOpenURL;
-        #endif
-    }
-    @catch (NSException *exception) {
-        // Error, return false
-        return NOTJAIL;
-    }
-    return NOTJAIL;
-}
 
 // Cydia Check
 + (int)cydiaCheck {

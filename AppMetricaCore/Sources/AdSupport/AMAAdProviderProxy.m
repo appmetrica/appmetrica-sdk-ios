@@ -57,7 +57,7 @@
     }
 }
 
-- (AMATrackingManagerAuthorizationStatus)ATTStatus API_AVAILABLE(ios(14.0), tvos(14.0))
+- (AMATrackingManagerAuthorizationStatus)ATTStatus
 {
     @synchronized (self) {
         if (self.enabled && self.backingProvider != nil) {

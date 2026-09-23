@@ -25,10 +25,8 @@ describe(@"AMAAdProviderProxy", ^{
         });
         
         it(@"Should return AuthorizationStatusNotDetermined on ATTStatus", ^{
-            if (@available(iOS 14.0, tvOS 14.0, *)) {
-                [[theValue([adProviderProxy ATTStatus]) should]
-                 equal:theValue(AMATrackingManagerAuthorizationStatusNotDetermined)];
-            }
+            [[theValue([adProviderProxy ATTStatus]) should]
+             equal:theValue(AMATrackingManagerAuthorizationStatusNotDetermined)];
         });
     });
     
@@ -47,10 +45,8 @@ describe(@"AMAAdProviderProxy", ^{
         });
         
         it(@"Should return AuthorizationStatusNotDetermined on ATTStatus", ^{
-            if (@available(iOS 14.0, tvOS 14.0, *)) {
-                [[theValue([adProviderProxy ATTStatus]) should]
-                 equal:theValue(AMATrackingManagerAuthorizationStatusNotDetermined)];
-            }
+            [[theValue([adProviderProxy ATTStatus]) should]
+             equal:theValue(AMATrackingManagerAuthorizationStatusNotDetermined)];
         });
     });
     
@@ -73,12 +69,10 @@ describe(@"AMAAdProviderProxy", ^{
         });
         
         it(@"Should call backing provider on ATTStatus", ^{
-            if (@available(iOS 14.0, tvOS 14.0, *)) {
-                NSUInteger statusValue = arc4random_uniform(4);
-                [backingProvider stub:@selector(ATTStatus) andReturn:theValue(statusValue)];
-                
-                [[theValue([adProviderProxy ATTStatus]) should] equal:theValue(statusValue)];
-            }
+            NSUInteger statusValue = arc4random_uniform(4);
+            [backingProvider stub:@selector(ATTStatus) andReturn:theValue(statusValue)];
+            
+            [[theValue([adProviderProxy ATTStatus]) should] equal:theValue(statusValue)];
         });
     });
 });

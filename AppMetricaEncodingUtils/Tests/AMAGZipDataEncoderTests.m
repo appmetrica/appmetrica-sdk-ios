@@ -7,8 +7,7 @@ SPEC_BEGIN(AMAGZipDataEncoderTests)
 describe(@"AMAGZipDataEncoder", ^{
 
     NSString *dataString = @"Data to zip. 0000000000000000000000000000000000";
-    NSString *gzippedDataStringAfterIOS11 = @"H4sIAAAAAAAAE3NJLElUKMlXqMos0FMwIAgAFPBYaS8AAAA=";
-    NSString *gzippedDataStringPreIOS11 = @"H4sIAAAAAAAAA3NJLElUKMlXqMos0FMwIAgAFPBYaS8AAAA=";
+    NSString *gzippedDataString = @"H4sIAAAAAAAAE3NJLElUKMlXqMos0FMwIAgAFPBYaS8AAAA=";
     
     NSData *validSourceData = [dataString dataUsingEncoding:NSUTF8StringEncoding];
     NSData *__block validGzippedData = nil;
@@ -20,13 +19,6 @@ describe(@"AMAGZipDataEncoder", ^{
     });
 
     beforeAll(^{
-        NSString *gzippedDataString = nil;
-        if ([AMAVersionUtils isOSVersionMajorAtLeast:11] == NO) {
-            gzippedDataString = gzippedDataStringPreIOS11;
-        }
-        else {
-            gzippedDataString = gzippedDataStringAfterIOS11;
-        }
         validGzippedData = [[NSData alloc] initWithBase64EncodedString:gzippedDataString options:0];
     });
 

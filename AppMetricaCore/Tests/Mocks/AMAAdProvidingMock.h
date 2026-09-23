@@ -7,8 +7,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, assign, getter=isAdvertisingTrackingEnabled) BOOL advertisingTrackingEnabled;
 @property (nonatomic, strong, nullable) NSUUID *advertisingIdentifier;
-@property (nonatomic, assign) AMATrackingManagerAuthorizationStatus ATTStatus
-    API_AVAILABLE(ios(14.0), tvos(14.0));
+@property (nonatomic, assign) AMATrackingManagerAuthorizationStatus ATTStatus;
 
 @end
 

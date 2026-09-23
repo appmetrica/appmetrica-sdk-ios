@@ -16,8 +16,6 @@
 enum {
     // Failed the Jailbreak Check
     AMA_KFJailbroken = 3429542,
-    // Failed the OpenURL Check
-    AMA_KFOpenURL = 321,
     // Failed the Cydia Check
     AMA_KFCydia = 432,
     // Failed the Inaccessible Files Check

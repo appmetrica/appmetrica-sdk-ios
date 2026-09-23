@@ -34,10 +34,6 @@ NS_ASSUME_NONNULL_BEGIN
     #endif
 #endif
 
-#if !__has_feature(objc_instancetype)
-    #define instancetype id
-#endif
-
 /**
  Callback block used by @c executeStatements:withResultBlock:
  */

@@ -33,7 +33,7 @@
     return [self.attStatusProvider isAdvertisingTrackingEnabled];
 }
 
-- (AMATrackingManagerAuthorizationStatus)ATTStatus API_AVAILABLE(ios(14.0), tvos(14.0))
+- (AMATrackingManagerAuthorizationStatus)ATTStatus
 {
     return [self.attStatusProvider ATTStatus];
 }

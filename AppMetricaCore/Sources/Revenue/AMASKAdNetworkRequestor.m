@@ -39,8 +39,6 @@
 
 #pragma mark - Public -
 
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "UnavailableInDeploymentTarget"
 #if !TARGET_OS_TV
 - (void)registerForAdNetworkAttribution
 {
@@ -57,18 +55,14 @@
 
 - (BOOL)updateConversionValue:(NSInteger)value
 {
-#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 140000
 #if !TARGET_OS_TV
-    if (@available(iOS 14.0, *)) {
-        AMALogInfo(@"Updating conversion value: %ld", (long) value);
-        [SKAdNetwork updateConversionValue:value];
-        return YES;
-    }
-#endif
-#endif
+    AMALogInfo(@"Updating conversion value: %ld", (long) value);
+    [SKAdNetwork updateConversionValue:value];
+    return YES;
+#else
     return NO;
+#endif
 }
-#pragma clang diagnostic pop
 
 #pragma mark - Private -
 

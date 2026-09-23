@@ -81,18 +81,16 @@
         AMALogInfo(@"No config");
         return;
     }
-    if (@available(iOS 14.0, *)) {
-        NSDate *registerForAttributionTime = [AMAMetricaConfiguration sharedInstance].persistent.registerForAttributionTime;
-        AMAIntervalExecutionCondition *condition = [[AMAIntervalExecutionCondition alloc]
-            initWithLastExecuted:registerForAttributionTime
-                        interval:[AMATimeUtilities intervalWithNumber:config.stopSendingTimeSeconds defaultInterval:0]
-             underlyingCondition:nil
-        ];
-        BOOL shouldExecute = condition.shouldExecute == NO;
-        AMALogInfo(@"should execute? %d", shouldExecute);
-        if (shouldExecute) {
-            reporter.attributionChecker = [[AMAAttributionChecker alloc] initWithConfig:config reporter:reporter];
-        }
+    NSDate *registerForAttributionTime = [AMAMetricaConfiguration sharedInstance].persistent.registerForAttributionTime;
+    AMAIntervalExecutionCondition *condition = [[AMAIntervalExecutionCondition alloc]
+        initWithLastExecuted:registerForAttributionTime
+                    interval:[AMATimeUtilities intervalWithNumber:config.stopSendingTimeSeconds defaultInterval:0]
+         underlyingCondition:nil
+    ];
+    BOOL shouldExecute = condition.shouldExecute == NO;
+    AMALogInfo(@"should execute? %d", shouldExecute);
+    if (shouldExecute) {
+        reporter.attributionChecker = [[AMAAttributionChecker alloc] initWithConfig:config reporter:reporter];
     }
     self.inited = YES;
 }

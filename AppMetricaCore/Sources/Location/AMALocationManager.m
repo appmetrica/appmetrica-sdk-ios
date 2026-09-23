@@ -347,13 +347,8 @@
 - (void)updateAuthorizationStatusFromLocationManager
 {
     CLAuthorizationStatus status = kCLAuthorizationStatusNotDetermined;
-    if (@available(iOS 14.0, tvOS 14.0, *)) {
-        if (self.locationManager != nil) {
-            status = self.locationManager.authorizationStatus;
-        }
-    }
-    else {
-        status = [CLLocationManager authorizationStatus];
+    if (self.locationManager != nil) {
+        status = self.locationManager.authorizationStatus;
     }
     
     @synchronized (self) {
@@ -428,14 +423,7 @@
 
 #pragma mark - CLLocationManagerDelegate -
 
-- (void)locationManager:(CLLocationManager *)manager didChangeAuthorizationStatus:(CLAuthorizationStatus)status
-{
-    AMALogInfo(@"Authorization status changed to %d", status);
-    [self updateAuthorizationStatusFromLocationManager];
-    [self updateLocationManagerForCurrentStatus];
-}
-
-- (void)locationManagerDidChangeAuthorization:(CLLocationManager *)manager API_AVAILABLE(ios(14.0), macos(11.0), watchos(7.0), tvos(14.0))
+- (void)locationManagerDidChangeAuthorization:(CLLocationManager *)manager
 {
     AMALogInfo(@"Authorization status changed to %d", manager.authorizationStatus);
     [self updateAuthorizationStatusFromLocationManager];

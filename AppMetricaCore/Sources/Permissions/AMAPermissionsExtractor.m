@@ -5,12 +5,6 @@
 #import "AMAPermission.h"
 #import "AMAAdProviderProxy.h"
 
-@interface AMAPermissionsExtractor ()
-
-- (AMAPermissionGrantType)ATTStatus API_AVAILABLE(ios(14.0));
-
-@end
-
 @implementation AMAPermissionsExtractor
 
 #pragma mark - Public -
@@ -45,11 +39,8 @@
 
 - (AMAPermission *)ATTStatusPermission
 {
-    if (@available(iOS 14, tvOS 14, *)) {
-        return [AMAPermission permissionWithName:kAMAPermissionKeyATTStatus
-                                       grantType:[self ATTStatus]];
-    }
-    return nil;
+    return [AMAPermission permissionWithName:kAMAPermissionKeyATTStatus
+                                   grantType:[self ATTStatus]];
 }
 
 - (AMAPermissionGrantType)locationGrantTypeForPermission:(AMAPermissionKey)permission

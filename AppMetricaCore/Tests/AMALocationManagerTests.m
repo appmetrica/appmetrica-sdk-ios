@@ -19,10 +19,9 @@ describe(@"AMALocationManager", ^{
         SEL __block startUpdatingLocationSelector = @selector(startUpdatingLocation);
 
         __auto_type setAuthorizationStatus = ^(CLAuthorizationStatus status, BOOL notifyDelegate) {
-            [CLLocationManager stub:@selector(authorizationStatus) andReturn:theValue(status)];
             [stubLocationManager stub:@selector(authorizationStatus) andReturn:theValue(status)];
             if (notifyDelegate) {
-                [delegate locationManager:stubLocationManager didChangeAuthorizationStatus:status];
+                [delegate locationManagerDidChangeAuthorization:stubLocationManager];
             }
         };
         __auto_type stubSystemLocationManagerWithBlock = ^(void(^block)(CLLocationManager *)){
@@ -264,7 +263,6 @@ describe(@"AMALocationManager", ^{
         });
 #if !TARGET_OS_TV
         context(@"Allow background updates", ^{
-            BOOL hasProperAPILevel = [CLLocationManager instancesRespondToSelector:@selector(setAllowsBackgroundLocationUpdates:)];
             beforeEach(^{
                 stubSystemLocationManager();
                 setAuthorizationStatus(kCLAuthorizationStatusAuthorizedAlways, YES);
@@ -313,36 +311,28 @@ describe(@"AMALocationManager", ^{
                 [[AMALocationManager sharedManager] start];
             });
             it(@"Should pass flag value to the system before start", ^{
-                if (hasProperAPILevel) {
-                    [AMALocationManager sharedManager].allowsBackgroundLocationUpdates = YES;
-                    [[AMALocationManager sharedManager] start];
-                    setAuthorizationStatus(kCLAuthorizationStatusAuthorizedAlways, YES);
-                    BOOL actual = [AMALocationManager sharedManager].allowsBackgroundLocationUpdates;
-                    [[theValue(actual) should] beYes];
-                }
+                [AMALocationManager sharedManager].allowsBackgroundLocationUpdates = YES;
+                [[AMALocationManager sharedManager] start];
+                setAuthorizationStatus(kCLAuthorizationStatusAuthorizedAlways, YES);
+                BOOL actual = [AMALocationManager sharedManager].allowsBackgroundLocationUpdates;
+                [[theValue(actual) should] beYes];
             });
             it(@"Should return flag value before start", ^{
-                if (hasProperAPILevel) {
-                    [AMALocationManager sharedManager].allowsBackgroundLocationUpdates = YES;
-                    [[AMALocationManager sharedManager] start];
-                    setAuthorizationStatus(kCLAuthorizationStatusAuthorizedAlways, YES);
-                    [[theValue(systemAllowsBackgroundLocationUpdates) should] beYes];
-                }
+                [AMALocationManager sharedManager].allowsBackgroundLocationUpdates = YES;
+                [[AMALocationManager sharedManager] start];
+                setAuthorizationStatus(kCLAuthorizationStatusAuthorizedAlways, YES);
+                [[theValue(systemAllowsBackgroundLocationUpdates) should] beYes];
             });
             it(@"Should pass flag value to the system after start", ^{
-                if (hasProperAPILevel) {
-                    [[AMALocationManager sharedManager] start];
-                    [AMALocationManager sharedManager].allowsBackgroundLocationUpdates = YES;
-                    [[theValue(systemAllowsBackgroundLocationUpdates) should] beYes];
-                }
+                [[AMALocationManager sharedManager] start];
+                [AMALocationManager sharedManager].allowsBackgroundLocationUpdates = YES;
+                [[theValue(systemAllowsBackgroundLocationUpdates) should] beYes];
             });
             it(@"Should return flag value after start", ^{
-                if (hasProperAPILevel) {
-                    [[AMALocationManager sharedManager] start];
-                    [AMALocationManager sharedManager].allowsBackgroundLocationUpdates = YES;
-                    BOOL actual = [AMALocationManager sharedManager].allowsBackgroundLocationUpdates;
-                    [[theValue(actual) should] beYes];
-                }
+                [[AMALocationManager sharedManager] start];
+                [AMALocationManager sharedManager].allowsBackgroundLocationUpdates = YES;
+                BOOL actual = [AMALocationManager sharedManager].allowsBackgroundLocationUpdates;
+                [[theValue(actual) should] beYes];
             });
             it(@"Should indicate the system value is NO by default", ^{
                 [[AMALocationManager sharedManager] start];

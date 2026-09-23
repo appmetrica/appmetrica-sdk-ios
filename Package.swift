@@ -134,8 +134,8 @@ enum ExternalPackage: String, CaseIterable {
 let package = Package(
     name: "AppMetrica",
     platforms: [
-        .iOS(.v13),
-        .tvOS(.v13),
+        .iOS(.v15),
+        .tvOS(.v15),
     ],
     products: AppMetricaProduct.allProducts,
     dependencies: ExternalPackage.allDependencies,

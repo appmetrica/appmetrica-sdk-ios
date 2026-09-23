@@ -22,10 +22,7 @@
 {
     AMACancelableDelayedExecutor *executor = [[AMACancelableDelayedExecutor alloc] initWithIdentifier:self];
 
-    AMAAdServicesDataProvider *adServicesDataProvider = nil;
-    if (@available(iOS 14.3, *)) {
-        adServicesDataProvider = [[AMAAdServicesDataProvider alloc] init];
-    }
+    AMAAdServicesDataProvider *adServicesDataProvider = [[AMAAdServicesDataProvider alloc] init];
     
     AMASessionExpirationHandler *sessionExpirationHandler =
         [[AMASessionExpirationHandler alloc] initWithConfiguration:[AMAMetricaConfiguration sharedInstance]

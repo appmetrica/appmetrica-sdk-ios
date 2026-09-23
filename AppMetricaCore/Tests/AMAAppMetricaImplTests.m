@@ -926,16 +926,14 @@ describe(@"AMAAppMetricaImpl", ^{
             [AMAAppMetrica stub:@selector(sharedImpl) andReturn:appMetricaImpl];
         });
 
-        if (@available(iOS 14.3, *)) {
-            it(@"Should report ASA token for main reporter", ^{
-                [[adServicesReportingController should] receive:@selector(reportTokenIfNeeded)];
-                [appMetricaImpl activateWithConfiguration:configuration];
-            });
-            it(@"Should report ASA token for main reporter after anonymous activation", ^{
-                [[adServicesReportingController should] receive:@selector(reportTokenIfNeeded)];
-                [appMetricaImpl activateAnonymously];
-            });
-        }
+        it(@"Should report ASA token for main reporter", ^{
+            [[adServicesReportingController should] receive:@selector(reportTokenIfNeeded)];
+            [appMetricaImpl activateWithConfiguration:configuration];
+        });
+        it(@"Should report ASA token for main reporter after anonymous activation", ^{
+            [[adServicesReportingController should] receive:@selector(reportTokenIfNeeded)];
+            [appMetricaImpl activateAnonymously];
+        });
         
         it(@"Should mark metrica started", ^{
             [appMetricaImpl activateWithConfiguration:configuration];

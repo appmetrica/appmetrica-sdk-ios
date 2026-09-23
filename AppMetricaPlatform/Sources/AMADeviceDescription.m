@@ -138,11 +138,7 @@
 //FIXME: mainScreen deprecated
 + (CGFloat)screenScale
 {
-    CGFloat screenScale = 1.0f;
-    if ([[UIScreen mainScreen] respondsToSelector:@selector(scale)]) {
-        screenScale = [[UIScreen mainScreen] scale];
-    }
-    return screenScale;
+    return [[UIScreen mainScreen] scale];
 }
 
 + (NSDictionary<NSString *, NSNumber *> *)dpiValues
