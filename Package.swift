@@ -24,7 +24,6 @@ enum AppMetricaTarget: String {
     case identifiers = "AppMetricaIdentifiers"
     case synchronization = "AppMetricaSynchronization"
     case screenshot = "AppMetricaScreenshot"
-    case idSync = "AppMetricaIDSync"
     case analytics = "AppMetricaAnalytics"
     case productFlow = "AppMetricaProductFlow"
 
@@ -45,7 +44,6 @@ enum AppMetricaProduct: String, CaseIterable {
     case webKit = "AppMetricaWebKit"
     case libraryAdapter = "AppMetricaLibraryAdapter"
     case screenshot = "AppMetricaScreenshot"
-    case idSync = "AppMetricaIDSync"
     case analytics = "AppMetricaAnalytics"
     case productFlow = "AppMetricaProductFlow"
 
@@ -59,7 +57,6 @@ enum AppMetricaProduct: String, CaseIterable {
         case .webKit: return [.webKit]
         case .libraryAdapter: return [.libraryAdapter]
         case .screenshot: return [.screenshot]
-        case .idSync: return [.idSync]
         case .analytics: return [.analytics]
         case .productFlow: return [.productFlow]
         }
@@ -141,7 +138,7 @@ let package = Package(
     dependencies: ExternalPackage.allDependencies,
     targets: [
         //MARK: - AppMetrica SDK -
-        .target(target: .analytics, dependencies: [.core, .crashes, .adSupport, .webKit, .screenshot, .idSync]),
+        .target(target: .analytics, dependencies: [.core, .crashes, .adSupport, .webKit, .screenshot]),
 
         //MARK: - AppMetrica Core
         .target(
@@ -355,14 +352,6 @@ let package = Package(
 
         //MARK: - AppMetrica FMDB
         .target(target: .fmdb),
-
-        //MARK: - AppMetricaIDSync
-        .target(target: .idSync, dependencies: [.core, .coreExtension, .storageUtils, .coreUtils, .network, .log, .platform]),
-        .testTarget(
-            target: .idSync,
-            dependencies: [.idSync, .core, .testUtils],
-            externalDependencies: [.kiwi]
-        ),
     ]
 )
 
@@ -554,13 +543,6 @@ extension AppMetricaTarget {
                 "./Reporter",
                 "./Configuration",
             ]
-        case .idSync:
-            return [
-                "./IDSync",
-                "./Startup",
-                "./Configuration",
-                "./Network",
-            ]
         case .productFlow:
             return [
                 ".",
@@ -596,7 +578,7 @@ extension AppMetricaTarget {
             return [
                 "Utilities",
             ]
-        case .platform, .protobufUtils, .log, .idSync:
+        case .platform, .protobufUtils, .log:
             return [
                 "Mocks",
             ]

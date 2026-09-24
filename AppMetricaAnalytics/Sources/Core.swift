@@ -4,4 +4,3 @@
 @_exported import AppMetricaWebKit
 @_exported import AppMetricaCrashes
 @_exported import AppMetricaScreenshot
-@_exported import AppMetricaIDSync

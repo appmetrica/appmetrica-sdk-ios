@@ -22,7 +22,6 @@ Pod::Spec.new do |s|
   s.dependency 'AppMetricaWebKit', '= 7.0.0'
   s.dependency 'AppMetricaCrashes', '= 7.0.0'
   s.dependency 'AppMetricaScreenshot', '= 7.0.0'
-  s.dependency 'AppMetricaIDSync', '= 7.0.0'
 
   s.source_files = "#{s.name}/Sources/**/*.swift"
 
