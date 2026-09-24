@@ -62,6 +62,8 @@ NS_SWIFT_NAME(PlatformDescription)
 + (NSNumber *)bootTimestamp;
 
 // Device //
+// Legacy synchronous access on the calling thread; MainActor migration: https://nda.ya.ru/t/_vrlTZ4f7sQBcC
++ (nullable NSString *)identifierForVendor;
 + (NSString *)manufacturer;
 + (NSString *)model;
 + (NSString *)screenDPI;

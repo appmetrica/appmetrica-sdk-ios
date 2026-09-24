@@ -1,5 +1,6 @@
 
 #import <AppMetricaPlatform/AppMetricaPlatform.h>
+#import <UIKit/UIKit.h>
 #import "AMAPlatformCore.h"
 #include <sys/sysctl.h>
 #import "AMAAppVersionProvider.h"
@@ -210,6 +211,11 @@ NSString *const kAMADeviceTypeWatch = @"watch";
 }
 
 #pragma mark - Device
+
++ (NSString *)identifierForVendor
+{
+    return UIDevice.currentDevice.identifierForVendor.UUIDString;
+}
 
 + (NSString *)manufacturer
 {

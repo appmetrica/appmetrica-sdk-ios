@@ -2,6 +2,7 @@
 #import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
 #import <AppMetricaPlatform/AppMetricaPlatform.h>
+#import <UIKit/UIKit.h>
 #import "AMAAppVersionProvider.h"
 #import "Mocks/AMAAppVersionProviderMock.h"
 #import "AMADeviceDescription.h"
@@ -23,6 +24,30 @@ describe(@"AMAPlatformDescription", ^{
         [NSFileManager clearStubs];
         [NSBundle clearStubs];
         [[NSBundle mainBundle] clearStubs];
+    });
+
+    context(@"Identifier for vendor", ^{
+        __block UIDevice *device = nil;
+        beforeEach(^{
+            device = [UIDevice nullMock];
+            [UIDevice stub:@selector(currentDevice) andReturn:device];
+        });
+        afterEach(^{
+            [UIDevice clearStubs];
+        });
+        it(@"Returns the vendor UUID string", ^{
+            NSUUID *uuid = [[NSUUID alloc] initWithUUIDString:@"A0B1C2D3-E4F5-4678-9012-3456789ABCDE"];
+            [device stub:@selector(identifierForVendor) andReturn:uuid];
+            [[[AMAPlatformDescription identifierForVendor] should] equal:uuid.UUIDString];
+        });
+        it(@"Does not cache an unavailable identifier", ^{
+            [device stub:@selector(identifierForVendor) andReturn:nil];
+            [[AMAPlatformDescription identifierForVendor] shouldBeNil];
+
+            NSUUID *uuid = [NSUUID UUID];
+            [device stub:@selector(identifierForVendor) andReturn:uuid];
+            [[[AMAPlatformDescription identifierForVendor] should] equal:uuid.UUIDString];
+        });
     });
 
     context(@"Build type", ^{
