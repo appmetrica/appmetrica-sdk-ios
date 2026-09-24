@@ -10,8 +10,6 @@
 static NSString *const kAMAKeyFirstEventSent = @"session_first_event_sent";
 static NSString *const kAMAKeyInitEventSent = @"session_init_event_sent";
 static NSString *const kAMAKeyUpdateEventSent = @"session_update_event_sent";
-static NSString *const kAMAKeyReferrerEventSent = @"session_referrer_event_sent";
-static NSString *const kAMAKeyEmptyReferrerReceived = @"session_referrer_is_empty";
 
 static NSString *const kAMAKeyAppEnvironment = @"app_environment";
 static NSString *const kAMAKeyProfileID = @"profile_id";
@@ -30,8 +28,6 @@ static NSString *const kAMAKeyLastPrivacySendDate = @"last_privacy_send_date";
 @property (nonatomic, assign, readwrite) BOOL firstEventSent;
 @property (nonatomic, assign, readwrite) BOOL initEventSent;
 @property (nonatomic, assign, readwrite) BOOL updateEventSent;
-@property (nonatomic, assign, readwrite) BOOL referrerEventSent;
-@property (nonatomic, assign, readwrite) BOOL emptyReferrerEventSent;
 @property (nonatomic, strong, readwrite) AMAEnvironmentContainer *appEnvironment;
 @property (nonatomic, strong, readwrite) NSDate *lastStateSendDate;
 @property (nonatomic, strong, readwrite) NSDate *lastASATokenSendDate;
@@ -77,8 +73,6 @@ static NSString *const kAMAKeyLastPrivacySendDate = @"last_privacy_send_date";
         kAMAKeyFirstEventSent,
         kAMAKeyInitEventSent,
         kAMAKeyUpdateEventSent,
-        kAMAKeyReferrerEventSent,
-        kAMAKeyEmptyReferrerReceived,
         kAMAKeyAppEnvironment,
         kAMAKeyProfileID,
     ];
@@ -120,8 +114,6 @@ static NSString *const kAMAKeyLastPrivacySendDate = @"last_privacy_send_date";
     self.firstEventSent = [loadedStorage boolNumberForKey:kAMAKeyFirstEventSent error:nil].boolValue;
     self.initEventSent = [loadedStorage boolNumberForKey:kAMAKeyInitEventSent error:nil].boolValue;
     self.updateEventSent = [loadedStorage boolNumberForKey:kAMAKeyUpdateEventSent error:nil].boolValue;
-    self.referrerEventSent = [loadedStorage boolNumberForKey:kAMAKeyReferrerEventSent error:nil].boolValue;
-    self.emptyReferrerEventSent = [loadedStorage boolNumberForKey:kAMAKeyEmptyReferrerReceived error:nil].boolValue;
 
     [self.sessionIDStorage restoreFromStorage:loadedStorage];
     [self.attributionIDStorage restoreFromStorage:loadedStorage];
@@ -169,22 +161,6 @@ static NSString *const kAMAKeyLastPrivacySendDate = @"last_privacy_send_date";
     if (self.updateEventSent == NO) {
         self.updateEventSent = YES;
         [self saveTrueForKey:kAMAKeyUpdateEventSent];
-    }
-}
-
-- (void)markReferrerEventSent
-{
-    if (self.referrerEventSent == NO) {
-        self.referrerEventSent = YES;
-        [self saveTrueForKey:kAMAKeyReferrerEventSent];
-    }
-}
-
-- (void)markEmptyReferrerEventSent
-{
-    if (self.emptyReferrerEventSent == NO) {
-        self.emptyReferrerEventSent = YES;
-        [self saveTrueForKey:kAMAKeyEmptyReferrerReceived];
     }
 }
 

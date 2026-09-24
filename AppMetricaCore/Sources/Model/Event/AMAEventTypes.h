@@ -3,7 +3,7 @@ typedef NS_ENUM(NSUInteger, AMAEventType) {
     AMAEventTypeInit = 1,
     AMAEventTypeStart = 2,
     AMAEventTypeClient = 4,
-    AMAEventTypeReferrer __attribute__((deprecated("This event type is no longer supported"))) = 5,
+    // Value 5 is reserved for legacy referrer events.
     AMAEventTypeAlive = 7,
     AMAEventTypeFirst = 13,
     AMAEventTypeOpen = 16,

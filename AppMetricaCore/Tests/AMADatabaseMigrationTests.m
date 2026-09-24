@@ -459,8 +459,6 @@ describe(@"AMADatabaseMigrationTests", ^{
                 database = [AMADatabaseMigrationTestsUtils databaseForName:@"storage-version-10"
                                                           migrationManager:migrationManager];
             });
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
             context(@"Crash reports moved in events table", ^{
                 NSString *crashName = @"migration_test_crash"; // hardcoded in storage-version-10 errors table
                 NSDictionary *__block eventDictionary = nil;
@@ -483,7 +481,6 @@ describe(@"AMADatabaseMigrationTests", ^{
                     [[theValue([eventDictionary[@"type"] integerValue]) should] equal:theValue(3)];
                 });
             });
-#pragma clang diagnostic pop
             it(@"Should drop errors table", ^{
                 [database inDatabase:^(AMAFMDatabase *db) {
                     [[theValue([db tableExists:@"errors"]) should] beNo];
@@ -1021,12 +1018,12 @@ describe(@"AMADatabaseMigrationTests", ^{
                         it(@"Should have first event sent", ^{
                             [[theValue(stateStorage.firstEventSent) should] beYes];
                         });
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-                        it(@"Should have empty referrer event sent", ^{
-                            [[theValue(stateStorage.emptyReferrerEventSent) should] beYes];
+                        it(@"Should not migrate obsolete referrer flags", ^{
+                            [storage storageInDatabase:^(id<AMAKeyValueStoring> keyValueStorage) {
+                                [[[keyValueStorage boolNumberForKey:@"session_referrer_event_sent" error:nil] should] beNil];
+                                [[[keyValueStorage boolNumberForKey:@"session_referrer_is_empty" error:nil] should] beNil];
+                            }];
                         });
-#pragma clang diagnostic pop
                         it(@"Should have valid app environment", ^{
                             [[stateStorage.appEnvironment.dictionaryEnvironment should] equal:@{@"foo": @"bar"}];
                         });

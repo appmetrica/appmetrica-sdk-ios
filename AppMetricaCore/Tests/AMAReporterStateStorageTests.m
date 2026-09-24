@@ -48,8 +48,6 @@ describe(@"AMAReporterStateStorage", ^{
             @"session_first_event_sent",
             @"session_init_event_sent",
             @"session_update_event_sent",
-            @"session_referrer_event_sent",
-            @"session_referrer_is_empty",
             @"app_environment",
             @"profile_id",
             @"attribution.id",
@@ -59,6 +57,22 @@ describe(@"AMAReporterStateStorage", ^{
             @"open.id",
             @"extras",
         ]]];
+    });
+
+    it(@"Should ignore legacy referrer flags while restoring supported state", ^{
+        id<AMAKeyValueStoring> legacyStorage = database.storageProvider.emptyNonPersistentStorage;
+        [legacyStorage saveBoolNumber:@YES forKey:@"session_referrer_event_sent" error:nil];
+        [legacyStorage saveBoolNumber:@YES forKey:@"session_referrer_is_empty" error:nil];
+        [legacyStorage saveBoolNumber:@YES forKey:@"session_first_event_sent" error:nil];
+        [((NSObject *)database.storageProvider) stub:@selector(nonPersistentStorageForKeys:error:)
+                                         withBlock:^id(NSArray *params) {
+            [[params[0] shouldNot] contain:@"session_referrer_event_sent"];
+            [[params[0] shouldNot] contain:@"session_referrer_is_empty"];
+            return legacyStorage;
+        }];
+        [storage restoreState];
+        [[theValue(storage.firstEventSent) should] beYes];
+        [[theValue(storage.initEventSent) should] beNo];
     });
 
     context(@"Restore", ^{
@@ -75,15 +89,6 @@ describe(@"AMAReporterStateStorage", ^{
             it(@"Should have valid update event sent", ^{
                 [[theValue(storage.updateEventSent) should] beNo];
             });
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-            it(@"Should have valid referrer event sent", ^{
-                [[theValue(storage.referrerEventSent) should] beNo];
-            });
-            it(@"Should have valid empty referrer event sent", ^{
-                [[theValue(storage.emptyReferrerEventSent) should] beNo];
-            });
-#pragma clang diagnostic pop
             it(@"Should have valid session ID", ^{
                 NSNumber *number = [storage.sessionIDStorage valueWithStorage:database.storageProvider.syncStorage];
                 [[number should] equal:@9999999999];
@@ -186,15 +191,6 @@ describe(@"AMAReporterStateStorage", ^{
             it(@"Should have valid update event sent", ^{
                 [[theValue(storage.updateEventSent) should] beYes];
             });
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-            it(@"Should have valid referrer event sent", ^{
-                [[theValue(storage.referrerEventSent) should] beYes];
-            });
-            it(@"Should have valid empty referrer event sent", ^{
-                [[theValue(storage.emptyReferrerEventSent) should] beYes];
-            });
-#pragma clang diagnostic pop
             it(@"Should have valid session ID", ^{
                 NSNumber *number = [storage.sessionIDStorage valueWithStorage:database.storageProvider.syncStorage];
                 [[number should] equal:sessionID];
@@ -290,45 +286,6 @@ describe(@"AMAReporterStateStorage", ^{
                     [storage markUpdateEventSent];
                 });
             });
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-            context(@"Referrer", ^{
-                it(@"Should initially be NO", ^{
-                    [[theValue(storage.referrerEventSent) should] beNo];
-                });
-                it(@"Should be YES after marked", ^{
-                    [storage markReferrerEventSent];
-                    [[theValue(storage.referrerEventSent) should] beYes];
-                });
-                it(@"Should be YES in database", ^{
-                    [storage markReferrerEventSent];
-                    [[[database.storageProvider.syncStorage boolNumberForKey:@"session_referrer_event_sent" error:nil] should] equal:@YES];
-                });
-                it(@"Should not save twice", ^{
-                    [storage markReferrerEventSent];
-                    [[(NSObject *)database.storageProvider.syncStorage shouldNot] receive:@selector(saveBoolNumber:forKey:error:)];
-                    [storage markReferrerEventSent];
-                });
-            });
-            context(@"Empty referrer", ^{
-                it(@"Should initially be NO", ^{
-                    [[theValue(storage.emptyReferrerEventSent) should] beNo];
-                });
-                it(@"Should be YES after marked", ^{
-                    [storage markEmptyReferrerEventSent];
-                    [[theValue(storage.emptyReferrerEventSent) should] beYes];
-                });
-                it(@"Should be YES in database", ^{
-                    [storage markEmptyReferrerEventSent];
-                    [[[database.storageProvider.syncStorage boolNumberForKey:@"session_referrer_is_empty" error:nil] should] equal:@YES];
-                });
-                it(@"Should not save twice", ^{
-                    [storage markEmptyReferrerEventSent];
-                    [[(NSObject *)database.storageProvider.syncStorage shouldNot] receive:@selector(saveBoolNumber:forKey:error:)];
-                    [storage markEmptyReferrerEventSent];
-                });
-            });
-#pragma clang diagnostic pop
         });
         context(@"App environment", ^{
             it(@"Should save in database", ^{

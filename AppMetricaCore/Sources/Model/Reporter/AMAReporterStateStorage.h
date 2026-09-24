@@ -14,10 +14,6 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign, readonly) BOOL firstEventSent;
 @property (nonatomic, assign, readonly) BOOL initEventSent;
 @property (nonatomic, assign, readonly) BOOL updateEventSent;
-@property (nonatomic, assign, readonly) BOOL referrerEventSent
-    __attribute__((deprecated("Used only for migration to version 19")));
-@property (nonatomic, assign, readonly) BOOL emptyReferrerEventSent
-    __attribute__((deprecated("Used only for migration to version 19")));
 
 @property (nonatomic, strong, readonly) AMAIncrementableValueStorage *sessionIDStorage;
 @property (nonatomic, strong, readonly) AMAIncrementableValueStorage *attributionIDStorage;
@@ -50,8 +46,6 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)markFirstEventSent;
 - (void)markInitEventSent;
 - (void)markUpdateEventSent;
-- (void)markReferrerEventSent __attribute__((deprecated("Used only for migration to version 19")));
-- (void)markEmptyReferrerEventSent __attribute__((deprecated("Used only for migration to version 19")));
 
 - (void)markStateSentNow;
 

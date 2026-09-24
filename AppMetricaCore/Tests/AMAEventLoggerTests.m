@@ -163,13 +163,12 @@ describe(@"AMAEventLogger", ^{
                 logEventSentWithType(AMAEventTypeStart);
                 [[logSpy.messages should] equal:@[ message(textForEventWithTypeName(@"Start")) ]];
             });
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-            it(@"Should log referrer event", ^{
-                logEventSentWithType(AMAEventTypeReferrer);
-                [[logSpy.messages should] equal:@[ message(textForEventWithTypeName(@"Referrer")) ]];
+            it(@"Should log legacy referrer events by their numeric type", ^{
+                logEventSentWithType((AMAEventType)5);
+                NSString *text = @"Event [5] is sent: eventOid 16, sessionOid 23, "
+                                  "sequenceNumber 42, name 'EVENT_NAME'.";
+                [[logSpy.messages should] equal:@[ message(textWithApiKeySuffix(text)) ]];
             });
-#pragma clang diagnostic pop
             it(@"Should alive event", ^{
                 logEventSentWithType(AMAEventTypeAlive);
                 [[logSpy.messages should] equal:@[ message(textForEventWithTypeName(@"Alive")) ]];
@@ -299,13 +298,12 @@ describe(@"AMAEventLogger", ^{
                 logEventSentWithType(AMAEventTypeStart);
                 [[logSpy.messages should] equal:@[ message(textForEventWithTypeName(@"Start")) ]];
             });
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-            it(@"Should log referrer event", ^{
-                logEventSentWithType(AMAEventTypeReferrer);
-                [[logSpy.messages should] equal:@[ message(textForEventWithTypeName(@"Referrer")) ]];
+            it(@"Should log legacy referrer events by their numeric type", ^{
+                logEventSentWithType((AMAEventType)5);
+                NSString *text = @"Event [5] is sent: eventOid 16, sessionOid 23, "
+                                  "sequenceNumber 42, name 'EVENT_NAME'.";
+                [[logSpy.messages should] equal:@[ message(textWithApiKeySuffix(text)) ]];
             });
-#pragma clang diagnostic pop
             it(@"Should alive event", ^{
                 logEventSentWithType(AMAEventTypeAlive);
                 [[logSpy.messages should] equal:@[ message(textForEventWithTypeName(@"Alive")) ]];
