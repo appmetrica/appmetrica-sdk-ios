@@ -105,6 +105,17 @@
 }
 #endif
 
+- (CLAuthorizationStatus)currentAuthorizationStatus
+{
+    NSNumber *status = [self.executor syncExecute:^id {
+        // CoreLocation objects belong to a run-loop thread. Reading permissions must not
+        // start location collection or install a delegate when tracking is disabled.
+        CLLocationManager *manager = self.locationManager ?: [[CLLocationManager alloc] init];
+        return @(manager.authorizationStatus);
+    }];
+    return (CLAuthorizationStatus)status.intValue;
+}
+
 - (void)setLocation:(CLLocation *)location
 {
     @synchronized (self) {

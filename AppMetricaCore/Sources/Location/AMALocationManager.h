@@ -27,6 +27,7 @@ NS_ASSUME_NONNULL_BEGIN
     locationCollectingController:(AMALocationCollectingController *)locationCollectingController;
 
 - (CLLocation *)currentLocation;
+- (CLAuthorizationStatus)currentAuthorizationStatus;
 #if TARGET_OS_IOS
 - (void)sendMockVisit:(CLVisit *)visit;
 # endif

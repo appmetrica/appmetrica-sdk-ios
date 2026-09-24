@@ -4,6 +4,7 @@
 #import "AMAPermissionsExtractor.h"
 #import "AMAPermission.h"
 #import "AMAAdProviderProxy.h"
+#import "AMALocationManager.h"
 
 @implementation AMAPermissionsExtractor
 
@@ -45,7 +46,7 @@
 
 - (AMAPermissionGrantType)locationGrantTypeForPermission:(AMAPermissionKey)permission
 {
-    switch ([CLLocationManager authorizationStatus]) {
+    switch ([[AMALocationManager sharedManager] currentAuthorizationStatus]) {
         case kCLAuthorizationStatusNotDetermined:
             return AMAPermissionGrantTypeNotDetermined;
         case kCLAuthorizationStatusRestricted:

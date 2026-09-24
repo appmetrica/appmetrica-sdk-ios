@@ -80,6 +80,31 @@ describe(@"AMALocationManager", ^{
             [AMALocationManager clearStubs];
         });
         
+        it(@"Should read authorization without starting collection when tracking is forbidden", ^{
+            [startupPermissionController stub:@selector(isLocationCollectingGranted) andReturn:theValue(NO)];
+            stubSystemLocationManager();
+            setAuthorizationStatus(kCLAuthorizationStatusAuthorizedWhenInUse, NO);
+            [[stubLocationManager shouldNot] receive:startUpdatingLocationSelector];
+            [[stubLocationManager shouldNot] receive:@selector(setDelegate:)];
+            BOOL __block readOnExecutor = NO;
+            [executor stub:@selector(syncExecute:) withBlock:^id(NSArray *params) {
+                readOnExecutor = YES;
+                id (^block)(void) = params[0];
+                return block();
+            }];
+            CLAuthorizationStatus status = [[AMALocationManager sharedManager] currentAuthorizationStatus];
+            [[theValue(status) should] equal:theValue(kCLAuthorizationStatusAuthorizedWhenInUse)];
+            [[theValue(readOnExecutor) should] beYes];
+            [[delegate should] beNil];
+        });
+        it(@"Should reuse the initialized manager for current authorization", ^{
+            stubSystemLocationManager();
+            [[AMALocationManager sharedManager] start];
+            setAuthorizationStatus(kCLAuthorizationStatusDenied, NO);
+            [[CLLocationManager shouldNot] receive:@selector(alloc)];
+            CLAuthorizationStatus status = [[AMALocationManager sharedManager] currentAuthorizationStatus];
+            [[theValue(status) should] equal:theValue(kCLAuthorizationStatusDenied)];
+        });
         it(@"Should create location manager on start if location permission not granted", ^{
             stubSystemLocationManager();
             [[AMALocationManager sharedManager] start];

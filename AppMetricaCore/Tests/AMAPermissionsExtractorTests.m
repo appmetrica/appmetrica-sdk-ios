@@ -5,18 +5,22 @@
 #import "AMAPermissionsExtractor.h"
 #import "AMAPermission.h"
 #import "AMAAdProviderProxy.h"
+#import "AMALocationManager.h"
 
 SPEC_BEGIN(AMAPermissionsExtractorTests)
 
 describe(@"AMAPermissionsExtractor", ^{
     
     AMAPermissionsExtractor *__block extractor = nil;
+    AMALocationManager *__block locationManager = nil;
 
     beforeEach(^{
+        locationManager = [AMALocationManager nullMock];
+        [AMALocationManager stub:@selector(sharedManager) andReturn:locationManager];
         extractor = [[AMAPermissionsExtractor alloc] init];
     });
     afterEach(^{
-        [CLLocationManager clearStubs];
+        [AMALocationManager clearStubs];
         [[AMAAdProviderProxy sharedInstance] clearStubs];
     });
 
@@ -25,7 +29,7 @@ describe(@"AMAPermissionsExtractor", ^{
     context(@"Location `When in use` permission", ^{
 
         beforeEach(^{
-            [CLLocationManager stub:@selector(authorizationStatus)
+            [locationManager stub:@selector(currentAuthorizationStatus)
                           andReturn:theValue(kCLAuthorizationStatusAuthorizedWhenInUse)];
         });
         
@@ -67,7 +71,7 @@ describe(@"AMAPermissionsExtractor", ^{
     context(@"Location `Always` permission", ^{
 
         beforeEach(^{
-            [CLLocationManager stub:@selector(authorizationStatus)
+            [locationManager stub:@selector(currentAuthorizationStatus)
                           andReturn:theValue(kCLAuthorizationStatusAuthorizedAlways)];
         });
         
@@ -109,7 +113,7 @@ describe(@"AMAPermissionsExtractor", ^{
     context(@"Location `Denied` permission", ^{
 
         beforeEach(^{
-            [CLLocationManager stub:@selector(authorizationStatus)
+            [locationManager stub:@selector(currentAuthorizationStatus)
                           andReturn:theValue(kCLAuthorizationStatusDenied)];
         });
         
@@ -151,7 +155,7 @@ describe(@"AMAPermissionsExtractor", ^{
     context(@"Location `Restriced` permission", ^{
 
         beforeEach(^{
-            [CLLocationManager stub:@selector(authorizationStatus)
+            [locationManager stub:@selector(currentAuthorizationStatus)
                           andReturn:theValue(kCLAuthorizationStatusRestricted)];
         });
         
@@ -193,7 +197,7 @@ describe(@"AMAPermissionsExtractor", ^{
     context(@"Location `Not determined` permission", ^{
 
         beforeEach(^{
-            [CLLocationManager stub:@selector(authorizationStatus)
+            [locationManager stub:@selector(currentAuthorizationStatus)
                           andReturn:theValue(kCLAuthorizationStatusNotDetermined)];
         });
 
