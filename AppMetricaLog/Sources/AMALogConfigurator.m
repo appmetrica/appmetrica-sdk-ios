@@ -1,7 +1,6 @@
 
 #include <sys/sysctl.h>
 #import <AppMetricaLog/AppMetricaLog.h>
-#import "AMAASLLogMiddleware.h"
 #import "AMATTYLogMiddleware.h"
 #import "AMAOSLogMiddleware.h"
 #import "AMALogFileManager.h"
@@ -26,7 +25,6 @@ static const NSUInteger AMALogControllerMaxAllowedLogFilesCount = 20;
 
 @property (nonatomic, strong) AMALogFacade *log;
 
-@property (nonatomic, strong) id<AMALogMiddleware> aslMiddleware;
 @property (nonatomic, strong) id<AMALogMiddleware> ttyMiddleware;
 @property (nonatomic, strong) id<AMALogMiddleware> fileMiddleware;
 @property (nonatomic, strong) NSMutableDictionary<AMALogChannel, id<AMALogMiddleware>> *osMiddleware;
@@ -139,9 +137,6 @@ static const NSUInteger AMALogControllerMaxAllowedLogFilesCount = 20;
         [outputs addObject:[self osOutputWithChannel:channel middleware:osMiddleware]];
         shouldAddTTYLog = [self isDebuggerAttached] == NO;
     }
-    else {
-        [outputs addObject:[self aslOutputWithChannel:channel]];
-    }
     if (shouldAddTTYLog) {
         [outputs addObject:[self ttyOutputWithChannel:channel]];
     }
@@ -165,17 +160,6 @@ static const NSUInteger AMALogControllerMaxAllowedLogFilesCount = 20;
         @(AMALogFormatPartBacktrace)
     ];
     return [self outputForChannel:channel format:format middleware:osMiddleware];
-}
-
-- (AMALogOutput *)aslOutputWithChannel:(AMALogChannel)channel
-{
-    NSArray *format = @[
-        @(AMALogFormatPartPublicPrefix),
-        @(AMALogFormatPartOrigin),
-        @(AMALogFormatPartContent),
-        @(AMALogFormatPartBacktrace)
-    ];
-    return [self outputForChannel:channel format:format middleware:self.aslMiddleware];
 }
 
 - (AMALogOutput *)ttyOutputWithChannel:(AMALogChannel)channel
@@ -203,16 +187,6 @@ static const NSUInteger AMALogControllerMaxAllowedLogFilesCount = 20;
 #endif // AMA_ENABLE_FILE_LOG
 
 #pragma mark - Middleware
-
-- (id<AMALogMiddleware>)aslMiddleware
-{
-    @synchronized (self) {
-        if (_aslMiddleware == nil) {
-            _aslMiddleware = [AMAASLLogMiddleware new];
-        }
-        return _aslMiddleware;
-    }
-}
 
 - (id<AMALogMiddleware>)ttyMiddleware
 {

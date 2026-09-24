@@ -1,7 +1,6 @@
 
 #import "AMALogOutput.h"
 #import "AMALogFacadeMock.h"
-#import "AMAASLLogMiddleware.h"
 #import "AMAFileLogMiddleware.h"
 #import "AMAOSLogMiddleware.h"
 #import "AMATTYLogMiddleware.h"
@@ -75,11 +74,6 @@
 - (NSArray<AMALogOutput *> *)TTYOutputs
 {
     return [self outputsWithMiddlewareClass:AMATTYLogMiddleware.class];
-}
-
-- (NSArray<AMALogOutput *> *)ASLOutputs
-{
-    return [self outputsWithMiddlewareClass:AMAASLLogMiddleware.class];
 }
 
 #ifdef AMA_ENABLE_FILE_LOG

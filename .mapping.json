@@ -1898,8 +1898,6 @@
   "AppMetricaLibraryAdapter/Tests/LibraryAdapterTests.swift":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaLibraryAdapter/Tests/LibraryAdapterTests.swift",
   "AppMetricaLibraryAdapter/Tests/MockAppMetrica.swift":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaLibraryAdapter/Tests/MockAppMetrica.swift",
   "AppMetricaLog.podspec":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaLog.podspec",
-  "AppMetricaLog/Sources/AMAASLLogMiddleware.h":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaLog/Sources/AMAASLLogMiddleware.h",
-  "AppMetricaLog/Sources/AMAASLLogMiddleware.m":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaLog/Sources/AMAASLLogMiddleware.m",
   "AppMetricaLog/Sources/AMABlockLogMessageFormatter.h":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaLog/Sources/AMABlockLogMessageFormatter.h",
   "AppMetricaLog/Sources/AMABlockLogMessageFormatter.m":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaLog/Sources/AMABlockLogMessageFormatter.m",
   "AppMetricaLog/Sources/AMAComposedLogMessageFormatter.h":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaLog/Sources/AMAComposedLogMessageFormatter.h",
