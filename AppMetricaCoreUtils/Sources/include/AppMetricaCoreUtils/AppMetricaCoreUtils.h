@@ -13,7 +13,6 @@
     #import "AMADecimalUtils.h"
     #import "AMADictionaryRepresentation.h"
     #import "AMAErrorUtilities.h"
-    #import "AMAErrorUtilitiesDeprecated.h"
     #import "AMAExecuting.h"
     #import "AMAExecutionCondition.h"
     #import "AMAFailureDispatcher.h"
@@ -53,7 +52,6 @@
     #import <AppMetricaCoreUtils/AMADecimalUtils.h>
     #import <AppMetricaCoreUtils/AMADictionaryRepresentation.h>
     #import <AppMetricaCoreUtils/AMAErrorUtilities.h>
-    #import <AppMetricaCoreUtils/AMAErrorUtilitiesDeprecated.h>
     #import <AppMetricaCoreUtils/AMAExecuting.h>
     #import <AppMetricaCoreUtils/AMAExecutionCondition.h>
     #import <AppMetricaCoreUtils/AMAFailureDispatcher.h>

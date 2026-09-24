@@ -7,6 +7,15 @@
 
 @implementation AMAErrorUtilitiesTests
 
+- (void)testEventErrorTypePreservesDomainAndCodes
+{
+    AMAAppMetricaEventError const code = AMAAppMetricaEventErrorCodeIsNotActivated;
+    NSError *error = [AMAErrorUtilities errorWithCode:code description:@"Not activated"];
+    XCTAssertEqualObjects(error.domain, @"io.appmetrica");
+    XCTAssertEqual(error.code, 1000);
+    XCTAssertEqual(AMAAppMetricaEventErrorCodeSessionNotLoad, 1008);
+}
+
 - (void)testFillErrorWithError
 {
     NSError *const sourceError = [NSError errorWithDomain:@"domain" code:0 userInfo:nil];

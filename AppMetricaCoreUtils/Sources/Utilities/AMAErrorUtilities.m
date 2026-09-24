@@ -2,10 +2,6 @@
 #import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
 #import "AMACoreUtilsLogging.h"
 
-NSErrorDomain const kAMAAppMetricaErrorDomain = @"io.appmetrica";
-NSErrorDomain const kAMAAppMetricaInternalErrorDomain = @"AppMetricaInternalErrorDomain";
-NSErrorDomain const kAMAAppMetricaDatabaseErrorDomain = @"AppMetricaDatabaseErrorDomain";
-
 NSErrorDomain const AMAAppMetricaEventErrorDomain = @"io.appmetrica";
 NSErrorDomain const AMAAppMetricaInternalErrorDomain = @"AppMetricaInternalErrorDomain";
 NSErrorDomain const AMAAppMetricaDatabaseErrorDomain = @"AppMetricaDatabaseErrorDomain";

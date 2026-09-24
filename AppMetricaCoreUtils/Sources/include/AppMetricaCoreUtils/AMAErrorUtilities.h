@@ -7,25 +7,25 @@ extern NSErrorDomain const AMAAppMetricaInternalErrorDomain NS_SWIFT_NAME(AppMet
 extern NSErrorDomain const AMAAppMetricaDatabaseErrorDomain NS_SWIFT_NAME(AMAAppMetricaDatabaseErrorDomain);
 extern NSString *const kAMAAppMetricaInternalErrorResultObjectKey NS_SWIFT_NAME(AppMetricaInternalErrorResultObjectKey);
 
-typedef NS_ERROR_ENUM(AMAAppMetricaEventErrorDomain, AMAAppMetricaEventErrorCode) {
+typedef NS_ERROR_ENUM(AMAAppMetricaEventErrorDomain, AMAAppMetricaEventError) {
     /** activateWithApiKey: or activateWithConfiguration: has not been called yet. */
-    AMAAppMetricaEventErrorCodeIsNotActivated = 1000,
+    AMAAppMetricaEventErrorCodeIsNotActivated NS_SWIFT_NAME(isNotActivated) = 1000,
     /** Event name, error message, deep link URL, or event type is invalid or empty. */
-    AMAAppMetricaEventErrorCodeInvalidName = 1001,
+    AMAAppMetricaEventErrorCodeInvalidName NS_SWIFT_NAME(invalidName) = 1001,
     /** Revenue info contains invalid data (e.g. non-ISO 4217 currency code or zero quantity). */
-    AMAAppMetricaEventErrorCodeInvalidRevenueInfo = 1002,
+    AMAAppMetricaEventErrorCodeInvalidRevenueInfo NS_SWIFT_NAME(invalidRevenueInfo) = 1002,
     /** User profile update is empty; all attributes may have been ignored. */
-    AMAAppMetricaEventErrorCodeEmptyUserProfile = 1003,
+    AMAAppMetricaEventErrorCodeEmptyUserProfile NS_SWIFT_NAME(emptyUserProfile) = 1003,
     /** Backtrace provided for a crash or error report is null or empty. */
-    AMAAppMetricaEventErrorCodeInvalidBacktrace = 1004,
+    AMAAppMetricaEventErrorCodeInvalidBacktrace NS_SWIFT_NAME(invalidBacktrace) = 1004,
     /** Ad revenue info contains invalid data (e.g. non-ISO 4217 currency code). */
-    AMAAppMetricaEventErrorCodeInvalidAdRevenueInfo = 1005,
+    AMAAppMetricaEventErrorCodeInvalidAdRevenueInfo NS_SWIFT_NAME(invalidAdRevenueInfo) = 1005,
     /** External attribution data has invalid contents and cannot be converted to JSON. */
-    AMAAppMetricaEventErrorCodeInvalidExternalAttributionContents = 1006,
+    AMAAppMetricaEventErrorCodeInvalidExternalAttributionContents NS_SWIFT_NAME(invalidExternalAttributionContents) = 1006,
     /** AppMetrica activation was called, but the main reporter is not ready yet. */
-    AMAAppMetricaEventErrorCodeMainReporterNotReady = 1007,
+    AMAAppMetricaEventErrorCodeMainReporterNotReady NS_SWIFT_NAME(mainReporterNotReady) = 1007,
     /** Session failed to load from the database. */
-    AMAAppMetricaEventErrorCodeSessionNotLoad = 1008,
+    AMAAppMetricaEventErrorCodeSessionNotLoad NS_SWIFT_NAME(sessionNotLoad) = 1008,
 } NS_SWIFT_NAME(AppMetricaEventError);
 
 typedef NS_ERROR_ENUM(AMAAppMetricaInternalErrorDomain, AMAAppMetricaInternalEventErrorCode) {
