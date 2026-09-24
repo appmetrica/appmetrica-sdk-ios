@@ -4,8 +4,6 @@
 
 NSString *const kAMARSACrypterErrorDomain = @"io.appmetrica.AMARSACrypter";
 
-typedef OSStatus (*AMARSACryptoFunction)(SecKeyRef, SecPadding, const uint8_t *, size_t, uint8_t *, size_t *);
-
 @implementation AMARSACrypter
 
 + (void)setError:(NSError **)pError withErrorStatus:(OSStatus)status
@@ -48,38 +46,43 @@ typedef OSStatus (*AMARSACryptoFunction)(SecKeyRef, SecPadding, const uint8_t *,
 
 - (NSData *)processData:(NSData *)data
              withKeyRef:(SecKeyRef)keyRef
-     processingFunction:(AMARSACryptoFunction)processingFunction
+              encrypting:(BOOL)encrypting
                   error:(NSError **)error
 {
     const uint8_t *sourceDataBytes = (const uint8_t *)[data bytes];
     size_t sourceSize = (size_t)data.length;
 
-    size_t blockSize = SecKeyGetBlockSize(keyRef) * sizeof(uint8_t);
-    size_t sourceBlockSize = processingFunction == SecKeyEncrypt ? blockSize - 11 : blockSize;
+    size_t blockSize = SecKeyGetBlockSize(keyRef);
+    size_t sourceBlockSize = encrypting ? blockSize - 11 : blockSize;
 
-    void *bufferBytes = malloc(blockSize);
     NSMutableData *result = [[NSMutableData alloc] initWithCapacity:blockSize];
     NSUInteger position = 0;
     while (position != sourceSize) {
         size_t currentBlockSize = MIN(sourceBlockSize, sourceSize - position);
-        size_t resultBlockSize = blockSize;
-        OSStatus status = noErr;
-
-        status = processingFunction(keyRef, kSecPaddingPKCS1,
-                                    sourceDataBytes + position, currentBlockSize,
-                                    bufferBytes, &resultBlockSize);
-        if (status == noErr) {
-            [result appendBytes:bufferBytes length:resultBlockSize];
+        NSData *block = [NSData dataWithBytes:sourceDataBytes + position length:currentBlockSize];
+        CFErrorRef processingError = NULL;
+        CFDataRef processedBlock = encrypting
+            ? SecKeyCreateEncryptedData(keyRef, kSecKeyAlgorithmRSAEncryptionPKCS1,
+                                        (__bridge CFDataRef)block, &processingError)
+            : SecKeyCreateDecryptedData(keyRef, kSecKeyAlgorithmRSAEncryptionPKCS1,
+                                        (__bridge CFDataRef)block, &processingError);
+        if (processedBlock != NULL) {
+            [result appendData:CFBridgingRelease(processedBlock)];
         }
         else {
+            OSStatus status = processingError != NULL ? (OSStatus)CFErrorGetCode(processingError) : errSecInternalError;
             [[self class] setError:error withErrorStatus:status];
             result = nil;
+        }
+        if (processingError != NULL) {
+            CFRelease(processingError);
+        }
+        if (result == nil) {
             break;
         }
         position += currentBlockSize;
     }
     
-    free(bufferBytes);
     return [result copy];
 }
 
@@ -90,7 +93,7 @@ typedef OSStatus (*AMARSACryptoFunction)(SecKeyRef, SecPadding, const uint8_t *,
 
     SecKeyRef keyRef = [self keyForKey:self.publicKey error:&currentError];
     if (currentError == nil) {
-        encryptedData = [self processData:data withKeyRef:keyRef processingFunction:SecKeyEncrypt error:&currentError];
+        encryptedData = [self processData:data withKeyRef:keyRef encrypting:YES error:&currentError];
         CFRelease(keyRef);
     }
 
@@ -110,7 +113,7 @@ typedef OSStatus (*AMARSACryptoFunction)(SecKeyRef, SecPadding, const uint8_t *,
 
     SecKeyRef keyRef = [self keyForKey:self.privateKey error:&currentError];
     if (currentError == nil) {
-        decryptedData = [self processData:data withKeyRef:keyRef processingFunction:SecKeyDecrypt error:&currentError];
+        decryptedData = [self processData:data withKeyRef:keyRef encrypting:NO error:&currentError];
         CFRelease(keyRef);
     }
 

@@ -42,6 +42,19 @@ describe(@"AMARSACrypter", ^{
         NSData *decodedData = [crypter decodeData:encodedData error:NULL];
         [[decodedData should] equal:data];
     });
+    it(@"Should preserve empty input and PKCS1 block boundaries", ^{
+        for (NSNumber *length in @[ @0, @1, @117, @118, @234, @235, @1024 ]) {
+            NSMutableData *plainData = [NSMutableData dataWithLength:length.unsignedIntegerValue];
+            memset(plainData.mutableBytes, 0x5a, plainData.length);
+            NSError *error = nil;
+            NSData *encryptedData = [crypter encodeData:plainData error:&error];
+            [[error should] beNil];
+            [[theValue(encryptedData.length) should] equal:theValue(((plainData.length + 116) / 117) * 128)];
+            NSData *decodedData = [crypter decodeData:encryptedData error:&error];
+            [[error should] beNil];
+            [[decodedData should] equal:plainData];
+        }
+    });
     context(@"Decode invalid data", ^{
         NSData *const encodedData = [@"WRONG DATA" dataUsingEncoding:NSUTF8StringEncoding];
         it(@"Should return nil", ^{
