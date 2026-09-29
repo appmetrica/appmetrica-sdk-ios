@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name = "AppMetricaPlatform"
-  s.version = '7.0.0'
+  s.version = '7.1.0'
   s.summary = "AppMetricaPlatform offers essential tools for gathering platform and device information"
 
   s.homepage = 'https://appmetrica.io'
@@ -18,8 +18,8 @@ Pod::Spec.new do |s|
 
   s.frameworks = 'Foundation', 'Security', 'UIKit'
 
-  s.dependency 'AppMetricaLog', '= 7.0.0'
-  s.dependency 'AppMetricaCoreUtils', '= 7.0.0'
+  s.dependency 'AppMetricaLog', '= 7.1.0'
+  s.dependency 'AppMetricaCoreUtils', '= 7.1.0'
 
   s.header_dir = s.name
   s.source_files = "#{s.name}/Sources/**/*.{h,m}"

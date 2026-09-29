@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name = "AppMetricaProductFlow"
-  s.version = '7.0.0'
+  s.version = '7.1.0'
   s.summary = "Reports product flow events for offers and product acquisition flows in vertical applications"
 
   s.homepage = 'https://appmetrica.io'
@@ -17,10 +17,10 @@ Pod::Spec.new do |s|
 
   s.frameworks = 'Foundation'
 
-  s.dependency 'AppMetricaCore', '= 7.0.0'
-  s.dependency 'AppMetricaCoreExtension', '= 7.0.0'
-  s.dependency 'AppMetricaCoreUtils', '= 7.0.0'
-  s.dependency 'AppMetricaSynchronization', '= 7.0.0'
+  s.dependency 'AppMetricaCore', '= 7.1.0'
+  s.dependency 'AppMetricaCoreExtension', '= 7.1.0'
+  s.dependency 'AppMetricaCoreUtils', '= 7.1.0'
+  s.dependency 'AppMetricaSynchronization', '= 7.1.0'
   s.dependency 'SwiftProtobuf', '~> 1.30'
 
   s.header_dir = s.name
