@@ -5,11 +5,10 @@
 @class AMAStartupParametersConfiguration;
 @class AMAReporter;
 @protocol AMAAsyncExecuting;
-@class AMADeepLinkController;
 
 @interface AMAAppOpenWatcher : NSObject
 
 - (instancetype)initWithNotificationCenter:(NSNotificationCenter *)center;
-- (void)startWatchingWithDeeplinkController:(AMADeepLinkController *)controller;
+- (void)startWatchingWithReporter:(AMAReporter *)reporter;
 
 @end

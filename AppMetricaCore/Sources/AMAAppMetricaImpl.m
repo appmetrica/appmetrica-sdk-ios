@@ -13,7 +13,7 @@
 #import "AMAAutoPurchasesWatcher.h"
 #import "AMACachingStorageProvider.h"
 #import "AMADatabaseKeyValueStorageProviding.h"
-#import "AMADeepLinkController.h"
+#import "AMADeepLinkProcessor.h"
 #import "AMADefaultReportExecutionConditionChecker.h"
 #import "AMADispatchStrategiesContainer.h"
 #import "AMADispatchStrategiesFactory.h"
@@ -96,7 +96,6 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
 @property (nonatomic, strong) AMAExtensionsReportController *extensionsReportController;
 @property (nonatomic, strong) AMAPermissionsController *permissionsController;
 @property (nonatomic, strong, readonly) AMAAppOpenWatcher *appOpenWatcher;
-@property (nonatomic, strong, readonly) AMADeepLinkController *deeplinkController;
 @property (atomic, strong) AMAExternalAttributionController *externalAttributionController;
 @property (nonatomic, strong, readonly) AMAAutoPurchasesWatcher *autoPurchasesWatcher;
 @property (nonatomic, strong, readonly) AMAFirstActivationDetector *firstActivationDetector;
@@ -139,7 +138,6 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
         _extensionsReportController = [[AMAExtensionsReportController alloc] init];
         _permissionsController = [[AMAPermissionsController alloc] init];
         _appOpenWatcher = [[AMAAppOpenWatcher alloc] init];
-        _deeplinkController = [[AMADeepLinkController alloc] initWithExecutor:executor];
         // auto in app reporting executor should be the same as usual events reporting executor for conversion value flow to work
         _autoPurchasesWatcher = [[AMAAutoPurchasesWatcher alloc] initWithExecutor:executor];
         _adProviderProxy = [AMAAdProviderProxy sharedInstance];
@@ -279,10 +277,9 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
 - (void)activateCommonComponents:(AMAAppMetricaConfiguration *)configuration
                         reporter:(AMAReporter *)reporter
 {
-    [self.deeplinkController updateReporter:reporter];
     [self setupExternalAttributionControllerWithReporter:reporter];
     if (configuration.appOpenTrackingEnabled) {
-        [self.appOpenWatcher startWatchingWithDeeplinkController:self.deeplinkController];
+        [self.appOpenWatcher startWatchingWithReporter:reporter];
     }
     if (configuration.revenueAutoTrackingEnabled) {
         [self.autoPurchasesWatcher startWatchingWithReporter:reporter];
@@ -1316,7 +1313,7 @@ static NSTimeInterval const kAMAReporterAnonymousActivationDelay = 10.0;
 
 - (void)reportUrl:(NSURL *)url ofType:(NSString *)type isAuto:(BOOL)isAuto
 {
-    [self.deeplinkController reportUrl:url ofType:type isAuto:isAuto];
+    [self.mainReporter reportUrl:url ofType:type isAuto:isAuto];
 }
 
 - (BOOL)isAllowedToSendData:(NSString *)apiKey

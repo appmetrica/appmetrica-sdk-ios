@@ -5,7 +5,6 @@
 #import "AMAStartupParametersConfiguration.h"
 #import "AMAMetricaConfiguration.h"
 #import "AMAMetricaConfigurationTestUtilities.h"
-#import "AMADeepLinkController.h"
 
 @interface AMAAppOpenWatcher ()
 
@@ -17,14 +16,14 @@ SPEC_BEGIN(AMAAppOpenWatcherTests)
 
 describe(@"AMAAppOpenWatcher", ^{
 
-    AMADeepLinkController *__block deeplinkController = nil;
+    AMAReporter *__block reporter = nil;
     AMAAppOpenWatcher *__block appOpenWatcher = nil;
     NSNotificationCenter *__block notificationCenter = nil;
     AMAStartupParametersConfiguration *__block startup = nil;
 
     beforeEach(^{
         notificationCenter = [NSNotificationCenter nullMock];
-        deeplinkController = [AMADeepLinkController nullMock];
+        reporter = [AMAReporter nullMock];
         startup = [AMAStartupParametersConfiguration nullMock];
         [AMAMetricaConfigurationTestUtilities stubConfigurationWithNullMock];
         [AMAMetricaConfiguration.sharedInstance stub:@selector(startup) andReturn:startup];
@@ -41,8 +40,25 @@ describe(@"AMAAppOpenWatcher", ^{
             [[notificationCenter should] receive:@selector(addObserver:selector:name:object:)
                                    withArguments:appOpenWatcher, kw_any(),
                                                  UIApplicationDidFinishLaunchingNotification, nil];
-            [appOpenWatcher startWatchingWithDeeplinkController:deeplinkController];
+            [appOpenWatcher startWatchingWithReporter:reporter];
         });
+    });
+
+    it(@"Should update the reporter without registering the observer twice", ^{
+        appOpenWatcher = [[AMAAppOpenWatcher alloc] initWithNotificationCenter:notificationCenter];
+        [appOpenWatcher startWatchingWithReporter:reporter];
+        AMAReporter *newReporter = [AMAReporter nullMock];
+        [[notificationCenter shouldNot] receive:@selector(addObserver:selector:name:object:)];
+        [appOpenWatcher startWatchingWithReporter:newReporter];
+
+        NSURL *URL = [NSURL URLWithString:@"app://after-restart"];
+        [[reporter shouldNot] receive:@selector(reportUrl:ofType:isAuto:)];
+        [[newReporter should] receive:@selector(reportUrl:ofType:isAuto:)
+                        withArguments:URL, @"open", theValue(YES)];
+        [appOpenWatcher didFinishLaunching:
+            [NSNotification notificationWithName:UIApplicationDidFinishLaunchingNotification
+                                          object:nil
+                                        userInfo:@{ UIApplicationLaunchOptionsURLKey: URL }]];
     });
 
     context(@"DidFinishLaunching", ^{
@@ -52,27 +68,27 @@ describe(@"AMAAppOpenWatcher", ^{
         beforeEach(^{
             notification = [NSNotification nullMock];
             appOpenWatcher = [[AMAAppOpenWatcher alloc] initWithNotificationCenter:notificationCenter];
-            [appOpenWatcher startWatchingWithDeeplinkController:deeplinkController];
+            [appOpenWatcher startWatchingWithReporter:reporter];
         });
 
         it (@"Null notification", ^{
-            [[deeplinkController should] receive:@selector(reportUrl:ofType:isAuto:) withArguments:nil, @"open", theValue(YES)];
+            [[reporter should] receive:@selector(reportUrl:ofType:isAuto:) withArguments:nil, @"open", theValue(YES)];
             [appOpenWatcher didFinishLaunching:nil];
         });
         it (@"No user info", ^{
             [notification stub:@selector(userInfo) andReturn:nil];
-            [[deeplinkController should] receive:@selector(reportUrl:ofType:isAuto:) withArguments:nil, @"open", theValue(YES)];
+            [[reporter should] receive:@selector(reportUrl:ofType:isAuto:) withArguments:nil, @"open", theValue(YES)];
             [appOpenWatcher didFinishLaunching:notification];
         });
         it (@"Empty user info", ^{
             [notification stub:@selector(userInfo) andReturn:@{}];
-            [[deeplinkController should] receive:@selector(reportUrl:ofType:isAuto:) withArguments:nil, @"open", theValue(YES)];
+            [[reporter should] receive:@selector(reportUrl:ofType:isAuto:) withArguments:nil, @"open", theValue(YES)];
             [appOpenWatcher didFinishLaunching:notification];
         });
         it (@"Empty userActivity dictionary", ^{
             NSDictionary *userInfo = @{ UIApplicationLaunchOptionsUserActivityDictionaryKey : @{} };
             [notification stub:@selector(userInfo) andReturn:userInfo];
-            [[deeplinkController should] receive:@selector(reportUrl:ofType:isAuto:) withArguments:nil, @"open", theValue(YES)];
+            [[reporter should] receive:@selector(reportUrl:ofType:isAuto:) withArguments:nil, @"open", theValue(YES)];
             [appOpenWatcher didFinishLaunching:notification];
         });
         it (@"Null webpage url", ^{
@@ -84,7 +100,7 @@ describe(@"AMAAppOpenWatcher", ^{
                 }
             };
             [notification stub:@selector(userInfo) andReturn:userInfo];
-            [[deeplinkController should] receive:@selector(reportUrl:ofType:isAuto:) withArguments:nil, @"open", theValue(YES)];
+            [[reporter should] receive:@selector(reportUrl:ofType:isAuto:) withArguments:nil, @"open", theValue(YES)];
             [appOpenWatcher didFinishLaunching:notification];
         });
         it (@"User activity is not NSUserActivity", ^{
@@ -94,7 +110,7 @@ describe(@"AMAAppOpenWatcher", ^{
                 }
             };
             [notification stub:@selector(userInfo) andReturn:userInfo];
-            [[deeplinkController should] receive:@selector(reportUrl:ofType:isAuto:) withArguments:nil, @"open", theValue(YES)];
+            [[reporter should] receive:@selector(reportUrl:ofType:isAuto:) withArguments:nil, @"open", theValue(YES)];
             [appOpenWatcher didFinishLaunching:notification];
         });
         it (@"NSUserActivity has strange key", ^{
@@ -109,7 +125,7 @@ describe(@"AMAAppOpenWatcher", ^{
                 }
             };
             [notification stub:@selector(userInfo) andReturn:userInfo];
-            [[deeplinkController should] receive:@selector(reportUrl:ofType:isAuto:)
+            [[reporter should] receive:@selector(reportUrl:ofType:isAuto:)
                                    withArguments:url, @"open", theValue(YES)];
             [appOpenWatcher didFinishLaunching:notification];
         });
@@ -126,7 +142,7 @@ describe(@"AMAAppOpenWatcher", ^{
                 }
             };
             [notification stub:@selector(userInfo) andReturn:userInfo];
-            [[deeplinkController should] receive:@selector(reportUrl:ofType:isAuto:)
+            [[reporter should] receive:@selector(reportUrl:ofType:isAuto:)
                                    withArguments:url, @"open", theValue(YES)];
             [appOpenWatcher didFinishLaunching:notification];
         });
@@ -142,7 +158,7 @@ describe(@"AMAAppOpenWatcher", ^{
                 }
             };
             [notification stub:@selector(userInfo) andReturn:userInfo];
-            [[deeplinkController should] receive:@selector(reportUrl:ofType:isAuto:)
+            [[reporter should] receive:@selector(reportUrl:ofType:isAuto:)
                                    withArguments:url, @"open", theValue(YES)];
             [appOpenWatcher didFinishLaunching:notification];
         });
@@ -151,7 +167,7 @@ describe(@"AMAAppOpenWatcher", ^{
             NSURL *url = [[NSURL alloc] initWithString:deeplink];
             NSDictionary *userInfo = @{ UIApplicationLaunchOptionsURLKey : url };
             [notification stub:@selector(userInfo) andReturn:userInfo];
-            [[deeplinkController should] receive:@selector(reportUrl:ofType:isAuto:)
+            [[reporter should] receive:@selector(reportUrl:ofType:isAuto:)
                                    withArguments:url, @"open", theValue(YES)];
             [appOpenWatcher didFinishLaunching:notification];
         });
@@ -169,7 +185,7 @@ describe(@"AMAAppOpenWatcher", ^{
                 UIApplicationLaunchOptionsURLKey : deeplinkURL
             };
             [notification stub:@selector(userInfo) andReturn:userInfo];
-            [[deeplinkController should] receive:@selector(reportUrl:ofType:isAuto:)
+            [[reporter should] receive:@selector(reportUrl:ofType:isAuto:)
                                    withArguments:deeplinkURL, @"open", theValue(YES)];
             [appOpenWatcher didFinishLaunching:notification];
         });

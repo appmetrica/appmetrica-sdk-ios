@@ -1,28 +1,25 @@
 
 #import <AppMetricaCoreUtils/AppMetricaCoreUtils.h>
-#import "AMADeepLinkController.h"
+#import "AMADeepLinkProcessor.h"
+#import "AMACore.h"
 #import "AMADeepLinkPayloadFactory.h"
-#import "AMAReporter.h"
 #import "AMAMetricaConfiguration.h"
 #import "AMAStartupParametersConfiguration.h"
 
-NSString *const kAMADLControllerUrlTypeOpen = @"open";
+NSString *const kAMADeepLinkTypeOpen = @"open";
 
-@interface AMADeepLinkController ()
+@interface AMADeepLinkProcessor ()
 
-@property (nonatomic, strong, readwrite) AMAReporter *reporter;
-@property (nonatomic, strong, readonly) id<AMAAsyncExecuting> executor;
 @property (nonatomic, strong, readonly) NSMutableSet<NSString *> *reportedURLs;
 
 @end
 
-@implementation AMADeepLinkController
+@implementation AMADeepLinkProcessor
 
-- (instancetype)initWithExecutor:(id<AMAAsyncExecuting>)executor
+- (instancetype)init
 {
     self = [super init];
     if (self != nil) {
-        _executor = executor;
         _reportedURLs = [NSMutableSet set];
     }
     return self;
@@ -30,43 +27,34 @@ NSString *const kAMADLControllerUrlTypeOpen = @"open";
 
 #pragma mark - Public -
 
-- (void)updateReporter:(AMAReporter *)reporter
+- (NSDictionary *)consumeURL:(NSURL *)url
+                      ofType:(NSString *)type
+                      isAuto:(BOOL)isAuto
+               reattribution:(BOOL *)reattribution
 {
-    [self.executor execute:^{
-        if (self.reporter == nil || [reporter.apiKey isEqualToString:self.reporter.apiKey] == NO) {
-            [self.reportedURLs removeAllObjects];
-        }
-        
-        self.reporter = reporter;
-    }];
-}
+    if (reattribution != NULL) {
+        *reattribution = NO;
+    }
 
-- (void)reportUrl:(NSURL *)url ofType:(NSString *)type isAuto:(BOOL)isAuto
-{
-    [self.executor execute:^{
-        if (self.reporter == nil) {
-            AMALogWarn(@"reporter is nil");
-            return;
-        }
-        
-        NSError *error = nil;
-        NSDictionary *payload =
-            [AMADeepLinkPayloadFactory deepLinkPayloadForURL:url ofType:type isAuto:isAuto error:&error];
-        if (error != nil) {
-            AMALogWarn(@"Failed to report URL: %@", error);
-        }
-        else {
-            NSString *urlString = url.absoluteString ?: @"";
-            if ([self.reportedURLs containsObject:urlString]) {
-                AMALogWarn(@"URL has already been reported: %@", urlString);
-            }
-            else {
-                [self.reportedURLs addObject:urlString];
-                [self.reporter reportOpenEvent:payload reattribution:[self isReatributionURL:url] onFailure:nil];
-                AMALogInfo(@"Reported %@ URL event: '%@'", type, url);
-            }
-        }
-    }];
+    NSError *error = nil;
+    NSDictionary *payload =
+        [AMADeepLinkPayloadFactory deepLinkPayloadForURL:url ofType:type isAuto:isAuto error:&error];
+    if (payload == nil) {
+        AMALogWarn(@"Failed to process URL: %@", error);
+        return nil;
+    }
+
+    NSString *urlString = url.absoluteString ?: @"";
+    if ([self.reportedURLs containsObject:urlString]) {
+        AMALogWarn(@"URL has already been reported: %@", urlString);
+        return nil;
+    }
+
+    [self.reportedURLs addObject:urlString];
+    if (reattribution != NULL) {
+        *reattribution = [self isReatributionURL:url];
+    }
+    return payload;
 }
 
 #pragma mark - Private -

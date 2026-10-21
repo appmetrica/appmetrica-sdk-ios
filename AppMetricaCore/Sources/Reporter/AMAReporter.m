@@ -50,6 +50,7 @@
 #import "NSMutableDictionary+AdRevenueHelper.h"
 #import "AMAAdRevenueSourceContainer.h"
 #import "AMASQLiteIntegrityIssue.h"
+#import "AMADeepLinkProcessor.h"
 
 @interface AMAReporter () <AMAPrivacyTimerDelegate>
 
@@ -163,6 +164,7 @@
         AMAEventNameHashesStorage *eventHashesStorage = [AMAEventNameHashesStorageFactory storageForApiKey:self.apiKey main:main];
         _occurrenceController = [[AMAEventFirstOccurrenceController alloc] initWithStorage:eventHashesStorage];
         _adServices = adServices;
+        _deepLinkProcessor = [[AMADeepLinkProcessor alloc] init];
     }
     return self;
 }
@@ -233,6 +235,11 @@
 }
 
 #pragma mark - AMAAppMetricaReporting protocol
+
+- (void)trackOpeningURL:(NSURL *)URL
+{
+    [self reportUrl:URL ofType:kAMADeepLinkTypeOpen isAuto:NO];
+}
 
 - (void)resumeSession
 {
@@ -608,27 +615,50 @@
     }];
 }
 
+- (void)reportUrl:(NSURL *)url ofType:(NSString *)type isAuto:(BOOL)isAuto
+{
+    [self stampedExecute:^(NSDate *date) {
+        BOOL reattribution = NO;
+        NSDictionary *payload = [self.deepLinkProcessor consumeURL:url
+                                                            ofType:type
+                                                            isAuto:isAuto
+                                                     reattribution:&reattribution];
+        if (payload != nil) {
+            [self reportOpenEvent:payload reattribution:reattribution createdAt:date onFailure:nil];
+            AMALogInfo(@"Reported %@ URL event: '%@'", type, url);
+        }
+    }];
+}
+
 - (void)reportOpenEvent:(NSDictionary *)parameters
           reattribution:(BOOL)reattribution
               onFailure:(void (^)(NSError *error))onFailure
 {
     [self stampedExecute:^(NSDate *date) {
-        AMASession *session = nil;
-        [self.reporterStorage.stateStorage incrementOpenID];
-        if (reattribution) {
-            NSError *error = nil;
-            session = [self startNewSessionWithNextAttributionIDForDate:date error:&error];
-            if (session == nil) {
-                AMALogError(@"Failed to create new session for reattribution: %@", error);
-            }
-            [self.occurrenceController resetHashes];
-        }
-        [self reportCommonEventWithBlock:^AMAEvent *(NSError **error) {
-            return [self.eventBuilder eventOpen:parameters
-                           attributionIDChanged:reattribution
-                                          error:error];
-        }                        session:session date:date appState:nil onFailure:onFailure];
+        [self reportOpenEvent:parameters reattribution:reattribution createdAt:date onFailure:onFailure];
     }];
+}
+
+- (void)reportOpenEvent:(NSDictionary *)parameters
+          reattribution:(BOOL)reattribution
+              createdAt:(NSDate *)date
+              onFailure:(void (^)(NSError *error))onFailure
+{
+    AMASession *session = nil;
+    [self.reporterStorage.stateStorage incrementOpenID];
+    if (reattribution) {
+        NSError *error = nil;
+        session = [self startNewSessionWithNextAttributionIDForDate:date error:&error];
+        if (session == nil) {
+            AMALogError(@"Failed to create new session for reattribution: %@", error);
+        }
+        [self.occurrenceController resetHashes];
+    }
+    [self reportCommonEventWithBlock:^AMAEvent *(NSError **error) {
+        return [self.eventBuilder eventOpen:parameters
+                       attributionIDChanged:reattribution
+                                      error:error];
+    }                        session:session date:date appState:nil onFailure:onFailure];
 }
 
 - (void)reportCommonEventWithBlock:(AMAEvent *(^)(NSError **error))eventCreationBlock

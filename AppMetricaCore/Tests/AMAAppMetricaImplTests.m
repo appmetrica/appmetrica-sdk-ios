@@ -19,7 +19,7 @@
 #import "AMAAttributionController.h"
 #import "AMAAutoPurchasesWatcher.h"
 #import "AMACachingStorageProvider.h"
-#import "AMADeepLinkController.h"
+#import "AMADeepLinkProcessor.h"
 #import "AMADispatchStrategiesContainer.h"
 #import "AMADispatchStrategy+Private.h"
 #import "AMADispatchStrategyMask.h"
@@ -95,7 +95,7 @@ describe(@"AMAAppMetricaImpl", ^{
     AMAAdServicesReportingController *__block adServicesReportingController = nil;
     AMAAutoPurchasesWatcher *__block autoPurchasesWatcher = nil;
     AMADispatchingController *__block dispatchingController = nil;
-    AMADeepLinkController *__block deeplinkController = nil;
+    AMADeepLinkProcessor *__block deepLinkProcessor = nil;
     AMAInternalEventsReporter *__block internalEventsReporter = nil;
     AMAStartupItemsChangedNotifier *__block startupNotifier = nil;
     AMAExternalAttributionController *__block externalAttributionController = nil;
@@ -120,7 +120,7 @@ describe(@"AMAAppMetricaImpl", ^{
         
         appOpenWatcher = [AMAAppOpenWatcher stubbedNullMockForDefaultInit];
         autoPurchasesWatcher = [AMAAutoPurchasesWatcher stubbedNullMockForInit:@selector(initWithExecutor:)];
-        deeplinkController = [AMADeepLinkController stubbedNullMockForInit:@selector(initWithExecutor:)];
+        deepLinkProcessor = [AMADeepLinkProcessor stubbedNullMockForDefaultInit];
         adServicesReportingController = [AMAAdServicesReportingController stubbedNullMockForInit:@selector(initWithApiKey:
                                                                                                            reporterStateStorage:)];
         dispatchingController = [AMADispatchingController stubbedNullMockForInit:@selector(initWithTimeoutConfiguration:)];
@@ -156,7 +156,7 @@ describe(@"AMAAppMetricaImpl", ^{
         [AMAExternalAttributionController clearStubs];
         [AMAReporterAutocollectedDataProvider clearStubs];
         [AMAAdServicesReportingController clearStubs];
-        [AMADeepLinkController clearStubs];
+        [AMADeepLinkProcessor clearStubs];
         [AMAAutoPurchasesWatcher clearStubs];
         [AMAPermissionsController clearStubs];
         [AMAStartupController clearStubs];
@@ -511,17 +511,19 @@ describe(@"AMAAppMetricaImpl", ^{
     context(@"AppWatcher watching", ^{
         it(@"Should start if enabled", ^{
             [configuration stub:@selector(appOpenTrackingEnabled) andReturn:theValue(YES)];
-            [[appOpenWatcher should] receive:@selector(startWatchingWithDeeplinkController:) withArguments:deeplinkController];
+            [[appOpenWatcher should] receive:@selector(startWatchingWithReporter:)
+                              withArguments:[reporterTestHelper appReporterForApiKey:apiKey]];
             [appMetricaImpl activateWithConfiguration:configuration];
         });
         it(@"Should start if enabled anonymously", ^{
             [configuration stub:@selector(appOpenTrackingEnabled) andReturn:theValue(YES)];
-            [[appOpenWatcher should] receive:@selector(startWatchingWithDeeplinkController:) withArguments:deeplinkController];
+            [[appOpenWatcher should] receive:@selector(startWatchingWithReporter:)
+                              withArguments:[reporterTestHelper appReporterForApiKey:anonymousApiKey]];
             [appMetricaImpl activateAnonymously];
         });
         it(@"Should not start if disabled", ^{
             [configuration stub:@selector(appOpenTrackingEnabled) andReturn:theValue(NO)];
-            [[appOpenWatcher shouldNot] receive:@selector(startWatchingWithDeeplinkController:)];
+            [[appOpenWatcher shouldNot] receive:@selector(startWatchingWithReporter:)];
             [appMetricaImpl activateWithConfiguration:configuration];
         });
     });
@@ -571,12 +573,14 @@ describe(@"AMAAppMetricaImpl", ^{
         });
     });
 
-    context(@"activateCommonComponents deeplinkController", ^{
-        it(@"Should call updateReporter on activateCommonComponents", ^{
+    context(@"activateCommonComponents URL tracking", ^{
+        it(@"Should watch URLs using the main reporter", ^{
             [appMetricaImpl activateWithConfiguration:configuration];
             AMAReporter *reporter = appMetricaImpl.mainReporter;
+            [configuration stub:@selector(appOpenTrackingEnabled) andReturn:theValue(YES)];
 
-            [[deeplinkController should] receive:@selector(updateReporter:) withArguments:reporter];
+            [[appOpenWatcher should] receive:@selector(startWatchingWithReporter:)
+                              withArguments:reporter];
             [appMetricaImpl activateCommonComponents:configuration reporter:reporter];
         });
     });
@@ -1242,18 +1246,153 @@ describe(@"AMAAppMetricaImpl", ^{
         });
     });
 
+    context(@"Reporter opening URL integration", ^{
+        beforeEach(^{
+            [AMADeepLinkProcessor clearStubs];
+            [reporterTestHelper destub];
+            reporterTestHelper = [[AMAReporterTestHelper alloc] init];
+            appMetricaImpl = [AMAAppMetricaImplTestFactory createCurrentQueueImplWithReporterHelper:reporterTestHelper
+                                                                               hostStateProvider:hostStateProvider];
+            [AMAAppMetrica stub:@selector(sharedImpl) andReturn:appMetricaImpl];
+            [AMAAppMetrica stub:@selector(isActivated) andReturn:theValue(YES)];
+        });
+
+        it(@"Should track an additional reporter before main activation and keep API keys independent", ^{
+            NSString *additionalAPIKey = [AMAReporterTestHelper octopusApiKey];
+            id<AMAAppMetricaReporting> additionalReporter = [AMAAppMetrica reporterForAPIKey:additionalAPIKey];
+            NSURL *URL = [NSURL URLWithString:@"app://additional-opening"];
+            [additionalReporter trackOpeningURL:URL];
+            [[appMetricaImpl.mainReporter should] beNil];
+
+            [appMetricaImpl activateWithConfiguration:configuration];
+            [[[appMetricaImpl.mainReporter.reporterStorage.eventStorage
+                amatest_allSavedEventsWithType:AMAEventTypeOpen name:nil] should] beEmpty];
+            [additionalReporter trackOpeningURL:URL];
+            [AMAAppMetrica trackOpeningURL:URL];
+
+            AMAReporter *additional = [reporterTestHelper appReporterForApiKey:additionalAPIKey];
+            [[[additional.reporterStorage.eventStorage
+                amatest_allSavedEventsWithType:AMAEventTypeOpen name:nil] should] haveCountOf:1];
+            [[[appMetricaImpl.mainReporter.reporterStorage.eventStorage
+                amatest_allSavedEventsWithType:AMAEventTypeOpen name:nil] should] haveCountOf:1];
+        });
+
+        it(@"Should share deduplication between static, main reporter and automatic URL tracking", ^{
+            [appMetricaImpl activateWithConfiguration:configuration];
+            id<AMAAppMetricaReporting> reporter = [AMAAppMetrica reporterForAPIKey:apiKey];
+            [[(id)reporter should] equal:appMetricaImpl.mainReporter];
+            NSURL *URL = [NSURL URLWithString:@"app://static-first"];
+            [AMAAppMetrica trackOpeningURL:URL];
+            [reporter trackOpeningURL:URL];
+            [appMetricaImpl reportUrl:URL ofType:kAMADeepLinkTypeOpen isAuto:YES];
+
+            URL = [NSURL URLWithString:@"app://reporter-first"];
+            [reporter trackOpeningURL:URL];
+            [AMAAppMetrica trackOpeningURL:URL];
+            [appMetricaImpl reportUrl:URL ofType:kAMADeepLinkTypeOpen isAuto:YES];
+
+            URL = [NSURL URLWithString:@"app://automatic-first"];
+            [appMetricaImpl reportUrl:URL ofType:kAMADeepLinkTypeOpen isAuto:YES];
+            [AMAAppMetrica trackOpeningURL:URL];
+            [reporter trackOpeningURL:URL];
+
+            [[[appMetricaImpl.mainReporter.reporterStorage.eventStorage
+                amatest_allSavedEventsWithType:AMAEventTypeOpen name:nil] should] haveCountOf:3];
+        });
+
+        it(@"Should ignore URLs before main activation without consuming them", ^{
+            NSURL *URL = [NSURL URLWithString:@"app://before-activation"];
+            [appMetricaImpl reportUrl:URL ofType:kAMADeepLinkTypeOpen isAuto:NO];
+            [[appMetricaImpl.mainReporter should] beNil];
+
+            [appMetricaImpl activateWithConfiguration:configuration];
+            [AMAAppMetrica trackOpeningURL:URL];
+
+            [[[appMetricaImpl.mainReporter.reporterStorage.eventStorage
+                amatest_allSavedEventsWithType:AMAEventTypeOpen name:nil] should] haveCountOf:1];
+        });
+
+        for (NSNumber *usesSavedKey in @[@YES, @NO]) {
+            context(usesSavedKey.boolValue ? @"Anonymous activation with the saved main key"
+                                          : @"Anonymous activation with the anonymous key", ^{
+                it(@"Should retain automatic URL deduplication through common activation", ^{
+                    // METRIKALIB-10205: automatic opening before common activation, manual opening afterwards.
+                    NSString *initialAPIKey = usesSavedKey.boolValue ? apiKey : anonymousApiKey;
+                    AMAAppMetricaConfiguration *anonymousConfiguration =
+                        [[AMAAppMetricaConfiguration alloc] initWithAPIKey:initialAPIKey];
+                    anonymousConfiguration.appOpenTrackingEnabled = YES;
+                    [appMetricaImpl.configurationManager stub:@selector(anonymousConfiguration)
+                                                   andReturn:anonymousConfiguration];
+                    [configuration stub:@selector(appOpenTrackingEnabled) andReturn:theValue(YES)];
+
+                    [AMAAppOpenWatcher clearStubs];
+                    NSNotificationCenter *center = [[NSNotificationCenter alloc] init];
+                    AMAAppOpenWatcher *watcher = [[AMAAppOpenWatcher alloc] initWithNotificationCenter:center];
+                    [appMetricaImpl stub:@selector(appOpenWatcher) andReturn:watcher];
+                    [appMetricaImpl activateAnonymously];
+                    AMAReporter *reporter = appMetricaImpl.mainReporter;
+                    AMADeepLinkProcessor *processor = reporter.deepLinkProcessor;
+                    NSURL *URL = [NSURL URLWithString:@"app://launch?referrer=reattribution%3D1"];
+
+                    [center postNotificationName:UIApplicationDidFinishLaunchingNotification
+                                          object:nil
+                                        userInfo:@{ UIApplicationLaunchOptionsURLKey: URL }];
+                    [[[reporter.reporterStorage.eventStorage
+                        amatest_allSavedEventsWithType:AMAEventTypeOpen name:nil] should] haveCountOf:1];
+                    NSUInteger openID = reporter.reporterStorage.stateStorage.openID;
+
+                    [appMetricaImpl activateWithConfiguration:configuration];
+                    [[appMetricaImpl.mainReporter should] equal:reporter];
+                    [[reporter.deepLinkProcessor should] equal:processor];
+                    [[reporter.apiKey should] equal:apiKey];
+                    [AMAAppMetrica trackOpeningURL:URL];
+                    [[AMAAppMetrica reporterForAPIKey:apiKey] trackOpeningURL:URL];
+                    [center postNotificationName:UIApplicationDidFinishLaunchingNotification
+                                          object:nil
+                                        userInfo:@{ UIApplicationLaunchOptionsURLKey: URL }];
+
+                    [[[reporter.reporterStorage.eventStorage
+                        amatest_allSavedEventsWithType:AMAEventTypeOpen name:nil] should] haveCountOf:1];
+                    [[theValue(reporter.reporterStorage.stateStorage.openID) should] equal:theValue(openID)];
+
+                    [center postNotificationName:UIApplicationDidFinishLaunchingNotification
+                                          object:nil
+                                        userInfo:@{ UIApplicationLaunchOptionsURLKey:
+                                                        [NSURL URLWithString:@"app://another-launch"] }];
+                    [[[reporter.reporterStorage.eventStorage
+                        amatest_allSavedEventsWithType:AMAEventTypeOpen name:nil] should] haveCountOf:2];
+                });
+            });
+        }
+
+        it(@"Should retain main reporter deduplication when anonymous activation changes the API key", ^{
+            [appMetricaImpl activateAnonymously];
+            AMAReporter *anonymousReporter = appMetricaImpl.mainReporter;
+            NSURL *URL = [NSURL URLWithString:@"app://anonymous-opening"];
+            [AMAAppMetrica trackOpeningURL:URL];
+
+            [appMetricaImpl activateWithConfiguration:configuration];
+            [[appMetricaImpl.mainReporter should] equal:anonymousReporter];
+            [[appMetricaImpl.mainReporter.apiKey should] equal:apiKey];
+            [[anonymousReporter shouldNot] receive:@selector(reportOpenEvent:reattribution:createdAt:onFailure:)];
+            [[AMAAppMetrica reporterForAPIKey:apiKey] trackOpeningURL:URL];
+            [AMAAppMetrica trackOpeningURL:URL];
+        });
+    });
     context(@"Report URL", ^{
         it(@"Should report URL", ^{
             NSURL *url = [[NSURL alloc] initWithString:@"https://appmetrica.io"];
             NSString *type = @"open";
-            [[deeplinkController should] receive:@selector(reportUrl:ofType:isAuto:) withArguments:url, type, theValue(YES)];
+            [[deepLinkProcessor should] receive:@selector(consumeURL:ofType:isAuto:reattribution:)
+                                  withArguments:url, type, theValue(YES), kw_any()];
             [appMetricaImpl activateWithConfiguration:configuration];
             [appMetricaImpl reportUrl:url ofType:type isAuto:YES];
         });
         it(@"Should report URL after anonymous activation", ^{
             NSURL *url = [[NSURL alloc] initWithString:@"https://appmetrica.io"];
             NSString *type = @"open";
-            [[deeplinkController should] receive:@selector(reportUrl:ofType:isAuto:) withArguments:url, type, theValue(YES)];
+            [[deepLinkProcessor should] receive:@selector(consumeURL:ofType:isAuto:reattribution:)
+                                  withArguments:url, type, theValue(YES), kw_any()];
             [appMetricaImpl activateAnonymously];
             [appMetricaImpl reportUrl:url ofType:type isAuto:YES];
         });

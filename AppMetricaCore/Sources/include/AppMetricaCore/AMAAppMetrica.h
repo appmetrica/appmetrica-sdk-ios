@@ -328,7 +328,10 @@ NS_SWIFT_NAME(setupWebViewReporting(with:onFailure:));
 //MARK: - URL Tracking
 
 /** Handles the URL that has opened the application.
- Reports the URL for deep links tracking.
+ Reports the URL for deep links tracking on the main API key after activation.
+ Nil URLs and URLs with an empty absolute string are ignored. Each URL is reported only once
+ during the main reporter's lifetime, even if other URLs are reported between repeated calls.
+ Deduplication is shared with automatic URL tracking and the main API key's reporter.
 
  @param URL URL that has opened the application.
  */

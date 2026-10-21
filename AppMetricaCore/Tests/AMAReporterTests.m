@@ -64,6 +64,7 @@
 #import "AMAAdRevenueSourceContainerMock.h"
 #import "AMASQLiteIntegrityIssue.h"
 #import "AMAReporterStoragesContainer.h"
+#import "AMADeepLinkProcessor.h"
 
 @interface AMAReporterStorage (Test)
 
@@ -1118,6 +1119,100 @@ describe(@"AMAReporter", ^{
             [reporter reportASATokenEventWithParameters:@{@"asaToken":@"123456789"} onFailure:nil];
             NSArray *eventsOpen = [eventStorage() amatest_allSavedEventsWithType:AMAEventTypeASAToken name:nil];
             [[eventsOpen should] haveCountOfAtLeast:1];
+        });
+    });
+    context(@"Tracks opening URLs", ^{
+        NSURL *const URL = [NSURL URLWithString:@"app://product?referrer=reattribution%3D1"];
+
+        it(@"Should report only to the selected API key and deduplicate independently", ^{
+            AMAReporter *mainReporter = [reporterTestHelper mainAppReporterForApiKey:apiKey];
+            AMAReporter *reporter = [reporterTestHelper appReporterForApiKey:[AMAReporterTestHelper octopusApiKey]];
+            NSUInteger mainOpenID = mainReporter.reporterStorage.stateStorage.openID;
+            NSUInteger reporterOpenID = reporter.reporterStorage.stateStorage.openID;
+
+            [(id<AMAAppMetricaReporting>)reporter trackOpeningURL:URL];
+            [reporter trackOpeningURL:URL];
+
+            NSArray<AMAEvent *> *events =
+                [reporter.reporterStorage.eventStorage amatest_allSavedEventsWithType:AMAEventTypeOpen name:nil];
+            [[events should] haveCountOf:1];
+            AMAEvent *event = events.firstObject;
+            NSString *value = ((AMAStringEventValue *)event.value).value;
+            NSDictionary *payload = [NSJSONSerialization JSONObjectWithData:[value dataUsingEncoding:NSUTF8StringEncoding]
+                                                                    options:0 error:nil];
+            [[payload should] equal:@{ @"link": URL.absoluteString, @"type": @"open", @"auto": @NO }];
+            [[theValue(event.attributionIDChanged) should] beYes];
+            [[event.openID should] equal:@(reporterOpenID + 1)];
+            [[[mainReporter.reporterStorage.eventStorage amatest_allSavedEventsWithType:AMAEventTypeOpen name:nil]
+                should] beEmpty];
+            [[theValue(mainReporter.reporterStorage.stateStorage.openID) should] equal:theValue(mainOpenID)];
+
+            [mainReporter trackOpeningURL:URL];
+            [[[mainReporter.reporterStorage.eventStorage amatest_allSavedEventsWithType:AMAEventTypeOpen name:nil]
+                should] haveCountOf:1];
+            [[[reporter.reporterStorage.eventStorage amatest_allSavedEventsWithType:AMAEventTypeOpen name:nil]
+                should] haveCountOf:1];
+        });
+
+        it(@"Should ignore invalid URLs and all repeats without suppressing the next valid URL", ^{
+            AMAReporter *reporter = [reporterTestHelper appReporterForApiKey:apiKey];
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wnonnull"
+            [reporter trackOpeningURL:nil];
+#pragma clang diagnostic pop
+            [reporter trackOpeningURL:[NSURL URLWithString:@""]];
+            [reporter trackOpeningURL:URL];
+            [reporter trackOpeningURL:[NSURL URLWithString:@""]];
+            [reporter trackOpeningURL:URL];
+            [reporter trackOpeningURL:[NSURL URLWithString:@"app://another-product"]];
+            [reporter trackOpeningURL:URL];
+
+            NSArray<AMAEvent *> *events =
+                [reporter.reporterStorage.eventStorage amatest_allSavedEventsWithType:AMAEventTypeOpen name:nil];
+            [[events should] haveCountOf:2];
+            [[[events filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"attributionIDChanged == NO"]]
+                should] haveCountOf:1];
+        });
+
+        it(@"Should record the opening before subsequent e-commerce on the reporter queue", ^{
+            AMAManualCurrentQueueExecutor *executor = [[AMAManualCurrentQueueExecutor alloc] init];
+            AMAReporter *reporter = [reporterTestHelper appReporterForApiKey:apiKey
+                                                                       main:NO
+                                                                   executor:executor
+                                                                   inMemory:YES
+                                                                preloadInfo:nil
+                                                   attributionCheckExecutor:nil];
+            [executor execute];
+            NSDate *openingDate = [NSDate date];
+            [NSDate stub:@selector(date) andReturn:openingDate];
+            [reporter trackOpeningURL:URL];
+            [NSDate stub:@selector(date) andReturn:[openingDate dateByAddingTimeInterval:1]];
+            AMAECommerceScreen *screen = [[AMAECommerceScreen alloc] initWithName:@"product"];
+            [reporter reportECommerce:[AMAECommerce showScreenEventWithScreen:screen] onFailure:nil];
+            [NSDate stub:@selector(date) andReturn:[openingDate dateByAddingTimeInterval:2]];
+            [executor execute];
+
+            AMAEvent *opening = [reporter.reporterStorage.eventStorage amatest_savedEventWithType:AMAEventTypeOpen];
+            AMAEvent *eCommerce = [reporter.reporterStorage.eventStorage amatest_savedEventWithType:AMAEventTypeECommerce];
+            [[opening shouldNot] beNil];
+            [[eCommerce shouldNot] beNil];
+            [[opening.createdAt should] equal:openingDate];
+            [[theValue(opening.oid.unsignedIntegerValue) should] beLessThan:theValue(eCommerce.oid.unsignedIntegerValue)];
+            [[eCommerce.openID should] equal:opening.openID];
+            [[eCommerce.sessionOid should] equal:opening.sessionOid];
+        });
+
+        it(@"Should not retain the reporter through its deep link processor", ^{
+            __weak AMAReporter *weakReporter = nil;
+            AMADeepLinkProcessor *processor = nil;
+            @autoreleasepool {
+                AMAReporter *reporter = [reporterTestHelper appReporterForApiKey:apiKey];
+                weakReporter = reporter;
+                processor = reporter.deepLinkProcessor;
+                [reporterTestHelper destub];
+            }
+            [[processor shouldNot] beNil];
+            [[weakReporter should] beNil];
         });
     });
     context(@"Sends OPEN events", ^{

@@ -18,6 +18,20 @@ NS_ASSUME_NONNULL_BEGIN
 NS_SWIFT_NAME(AppMetricaReporting)
 @protocol AMAAppMetricaReporting  <NSObject>
 
+//MARK: - URL Tracking
+
+/** Handles the URL that has opened the application for this reporter's API key.
+
+ Reports the URL for deep links tracking without reporting an opening for other API keys.
+ Nil URLs and URLs with an empty absolute string are ignored. Each URL is reported only once
+ during this reporter's lifetime, even if other URLs are reported between repeated calls.
+ For the main API key, this method shares deduplication with `AMAAppMetrica.trackOpeningURL:`
+ and automatic URL tracking.
+
+ @param URL URL that has opened the application.
+ */
+- (void)trackOpeningURL:(NSURL *)URL NS_SWIFT_NAME(trackOpeningURL(_:));
+
 //MARK: - Event Reporting
 
 /** Reports a custom event.

@@ -22,6 +22,7 @@
 @class AMAExternalAttributionSerializer;
 @protocol AMAAdRevenueSourceStorable;
 @class AMAEventPollingParameters;
+@class AMADeepLinkProcessor;
 
 @protocol AMAReporterDelegate <NSObject>
 
@@ -41,6 +42,7 @@
 @property (nonatomic, weak) id<AMAReporterDelegate> delegate;
 @property (nonatomic, strong, readonly) AMAReporterStorage *reporterStorage;
 @property (nonatomic, assign, readonly) BOOL main;
+@property (nonatomic, strong, readonly) AMADeepLinkProcessor *deepLinkProcessor;
 @property (nonatomic, strong, readwrite) AMAAttributionChecker *attributionChecker;
 @property (nonatomic, strong, readonly) id<AMAAdRevenueSourceStorable> adRevenueSourceStorage;
 
@@ -82,6 +84,12 @@
 - (void)reportFirstEventIfNeeded;
 - (void)reportOpenEvent:(NSDictionary *)parameters
           reattribution:(BOOL)reattribution
+              onFailure:(void (^)(NSError *error))onFailure;
+- (void)reportUrl:(NSURL *)url ofType:(NSString *)type isAuto:(BOOL)isAuto;
+// Must be called on this reporter's executor.
+- (void)reportOpenEvent:(NSDictionary *)parameters
+          reattribution:(BOOL)reattribution
+              createdAt:(NSDate *)date
               onFailure:(void (^)(NSError *error))onFailure;
 - (void)reportPermissionsEventWithPermissions:(NSString *)permissions onFailure:(void (^)(NSError *error))onFailure;
 - (void)reportCleanupEvent:(NSDictionary *)parameters onFailure:(void (^)(NSError *error))onFailure;

@@ -12,7 +12,7 @@
 #import "AMAAppMetricaImpl.h"
 #import "AMADataSendingRestrictionController.h"
 #import "AMADatabaseQueueProvider.h"
-#import "AMADeepLinkController.h"
+#import "AMADeepLinkProcessor.h"
 #import "AMAErrorLogger.h"
 #import "AMAInternalEventsReporter.h"
 #import "AMALocationManager.h"
@@ -453,7 +453,7 @@ NSString *const kAMAAttributionSourceSingular = @"singular";
         AMALogWarn(@"Metrica is not started");
         return;
     }
-    [[self sharedImpl] reportUrl:URL ofType:kAMADLControllerUrlTypeOpen isAuto:NO];
+    [[self sharedImpl] reportUrl:URL ofType:kAMADeepLinkTypeOpen isAuto:NO];
 }
 
 + (void)setErrorEnvironmentValue:(NSString *)value forKey:(NSString *)key

@@ -18,7 +18,7 @@
 #import "AMAAttributionController.h"
 #import "AMAAutoPurchasesWatcher.h"
 #import "AMACachingStorageProvider.h"
-#import "AMADeepLinkController.h"
+#import "AMADeepLinkProcessor.h"
 #import "AMADispatchStrategiesContainer.h"
 #import "AMADispatchStrategy+Private.h"
 #import "AMADispatchStrategyMask.h"
@@ -93,7 +93,7 @@ static NSString *const anonymousApiKey = @"629a824d-c717-4ba5-bc0f-3f3968554d01"
 @property AMAAdServicesReportingController *adServicesReportingController;
 @property AMAAutoPurchasesWatcher *autoPurchasesWatcher;
 @property AMADispatchingController *dispatchingController;
-@property AMADeepLinkController *deeplinkController;
+@property AMADeepLinkProcessor *deepLinkProcessor;
 @property AMAInternalEventsReporter *internalEventsReporter;
 @property AMAStartupItemsChangedNotifier *startupNotifier;
 @property AMAExternalAttributionController *externalAttributionController;
@@ -133,7 +133,7 @@ static NSString *const anonymousApiKey = @"629a824d-c717-4ba5-bc0f-3f3968554d01"
     
     self.appOpenWatcher = [AMAAppOpenWatcher stubbedNullMockForDefaultInit];
     self.autoPurchasesWatcher = [AMAAutoPurchasesWatcher stubbedNullMockForInit:@selector(initWithExecutor:)];
-    self.deeplinkController = [AMADeepLinkController stubbedNullMockForInit:@selector(initWithExecutor:)];
+    self.deepLinkProcessor = [AMADeepLinkProcessor stubbedNullMockForDefaultInit];
     self.adServicesReportingController = [AMAAdServicesReportingController stubbedNullMockForInit:@selector(initWithApiKey:
                                                                                                        reporterStateStorage:)];
     self.dispatchingController = [AMADispatchingController stubbedNullMockForInit:@selector(initWithTimeoutConfiguration:)];
@@ -175,7 +175,7 @@ static NSString *const anonymousApiKey = @"629a824d-c717-4ba5-bc0f-3f3968554d01"
     [AMAExternalAttributionController clearStubs];
     [AMAReporterAutocollectedDataProvider clearStubs];
     [AMAAdServicesReportingController clearStubs];
-    [AMADeepLinkController clearStubs];
+    [AMADeepLinkProcessor clearStubs];
     [AMAAutoPurchasesWatcher clearStubs];
     [AMAPermissionsController clearStubs];
     [AMAStartupController clearStubs];

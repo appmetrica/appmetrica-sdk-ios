@@ -1,13 +1,14 @@
 
 #import "AMACore.h"
 #import "AMAAppOpenWatcher.h"
-#import "AMADeepLinkController.h"
+#import "AMADeepLinkProcessor.h"
+#import "AMAReporter.h"
 #import <UIKit/UIKit.h>
 
 @interface AMAAppOpenWatcher ()
 
 @property (nonatomic, strong, readonly) NSNotificationCenter *notificationCenter;
-@property (atomic, strong) AMADeepLinkController *deepLinkController;
+@property (atomic, strong) AMAReporter *reporter;
 @property (atomic, assign) BOOL isObserving;
 
 @end
@@ -31,10 +32,10 @@
     return self;
 }
 
-- (void)startWatchingWithDeeplinkController:(AMADeepLinkController *)controller
+- (void)startWatchingWithReporter:(AMAReporter *)reporter
 {
     AMALogInfo(@"Start");
-    self.deepLinkController = controller;
+    self.reporter = reporter;
     if (self.isObserving == NO) {
         self.isObserving = YES;
         [self.notificationCenter addObserver:self
@@ -50,7 +51,7 @@
 {
     AMALogInfo(@"User info: %@", notification.userInfo);
     NSURL *url = [self extractDeeplink:notification.userInfo];
-    [self.deepLinkController reportUrl:url ofType:kAMADLControllerUrlTypeOpen isAuto:YES];
+    [self.reporter reportUrl:url ofType:kAMADeepLinkTypeOpen isAuto:YES];
 }
 
 #pragma mark - Private -
