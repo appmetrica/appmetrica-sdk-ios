@@ -129,14 +129,18 @@
     cfg.dispatchPeriod = self.dispatchPeriod;
     cfg.customLocation = self.customLocation;
     cfg.sessionTimeout = self.sessionTimeout;
-    cfg.appVersion = self.appVersion;
+    if (self.appVersion != nil) {
+        cfg.appVersion = self.appVersion;
+    }
     cfg.logsEnabled = self.logsEnabled;
     cfg.preloadInfo = [self.preloadInfo copy];
     cfg.revenueAutoTrackingEnabled = self.revenueAutoTrackingEnabled;
     cfg.appOpenTrackingEnabled = self.appOpenTrackingEnabled;
     cfg.userProfileID = self.userProfileID;
     cfg.maxReportsCount = self.maxReportsCount;
-    cfg.appBuildNumber = self.appBuildNumber;
+    if (self.appBuildNumber != nil) {
+        cfg.appBuildNumber = self.appBuildNumber;
+    }
     cfg.customHosts = self.customHosts;
     cfg.appEnvironment = self.appEnvironment;
     

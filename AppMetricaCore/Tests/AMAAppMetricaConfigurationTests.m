@@ -5,6 +5,7 @@
 #import "AMAAppMetricaConfiguration+Internal.h"
 #import "AMAAppMetricaPreloadInfo+JSONSerializable.h"
 #import "AMAMetricaInMemoryConfiguration.h"
+#import "AMAErrorLogger.h"
 
 static NSString *const kAMAValidAppVersion = @"v1.32";
 static NSString *const kAMAValidAppBuildNumber = @"3417";
@@ -125,6 +126,7 @@ describe(@"AMAAppMetricaConfiguration", ^{
         it(@"Should ignore attempt to set nil as appVersion", ^{
             AMAAppMetricaConfiguration *config = [[AMAAppMetricaConfiguration alloc] initWithAPIKey:apiKey];
             config.appVersion = kAMAValidAppVersion;
+            [[AMAErrorLogger should] receive:@selector(logInvalidCustomAppVersionError)];
             config.appVersion = nil;
             
             [[config.appVersion should] equal:kAMAValidAppVersion];
@@ -148,6 +150,7 @@ describe(@"AMAAppMetricaConfiguration", ^{
             AMAAppMetricaConfiguration *config = [[AMAAppMetricaConfiguration alloc] initWithAPIKey:apiKey];
             
             config.appBuildNumber = kAMAValidAppBuildNumber;
+            [[AMAErrorLogger should] receive:@selector(logInvalidCustomAppBuildNumberError)];
             config.appBuildNumber = nil;
             
             [[config.appBuildNumber should] equal:kAMAValidAppBuildNumber];
@@ -212,6 +215,33 @@ describe(@"AMAAppMetricaConfiguration", ^{
         });
     });
     
+    context(@"Copying", ^{
+        it(@"Should preserve optional version fields without logging validation errors", ^{
+            [[AMAErrorLogger shouldNot] receive:@selector(logInvalidCustomAppVersionError)];
+            [[AMAErrorLogger shouldNot] receive:@selector(logInvalidCustomAppBuildNumberError)];
+
+            for (id appVersion in @[NSNull.null, kAMAValidAppVersion]) {
+                for (id appBuildNumber in @[NSNull.null, kAMAValidAppBuildNumber]) {
+                    AMAAppMetricaConfiguration *config = [[AMAAppMetricaConfiguration alloc] initWithAPIKey:apiKey];
+                    if (appVersion != NSNull.null) {
+                        config.appVersion = appVersion;
+                    }
+                    if (appBuildNumber != NSNull.null) {
+                        config.appBuildNumber = appBuildNumber;
+                    }
+
+                    AMAAppMetricaConfiguration *copiedConfig = [config copy];
+
+                    [[copiedConfig shouldNot] beIdenticalTo:config];
+                    [[copiedConfig should] equal:config];
+                    [[(copiedConfig.appVersion ?: NSNull.null) should] equal:appVersion];
+                    [[(copiedConfig.appBuildNumber ?: NSNull.null) should] equal:appBuildNumber];
+                    [[[copiedConfig copy] should] equal:config];
+                }
+            }
+        });
+    });
+
     context(@"JSON", ^{
         NSDictionary *const preloadInfoJson = @{
             kAMATrackingID: @"trackingID",
