@@ -115,14 +115,12 @@ static NSString *const kAMAMetricaFallbackPrefix = @"fallback-keychain";
 
 - (id<AMAIdentifierProviding>)identifierProvider
 {
-    if (_identifierProvider == nil) {
-        @synchronized (self.identifierProviderLock) {
-            if (_identifierProvider == nil) {
-                _identifierProvider = [self createIdentifierProvider];
-            }
+    @synchronized (self.identifierProviderLock) {
+        if (_identifierProvider == nil) {
+            _identifierProvider = [self createIdentifierProvider];
         }
+        return _identifierProvider;
     }
-    return _identifierProvider;
 }
 
 - (NSString *)appMetricaUUID
