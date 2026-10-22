@@ -9,6 +9,7 @@
 #import "AMAMetricaPersistentConfiguration.h"
 #import "AMAMockDatabase.h"
 #import "AMAKeychainBridgeMock.h"
+#import "AMAIdentifierProviderMock.h"
 #import "AMAInstantFeaturesConfiguration.h"
 #import "AMAReporterTestHelper.h"
 #import <AppMetricaKeychain/AppMetricaKeychain.h>
@@ -20,6 +21,20 @@
 - (id<AMAIdentifierProviding>)createIdentifierProvider;
 - (NSString *)groupLockPath;
 - (id<AMAFileStorage>)groupIdentifiersFileStorage;
+@end
+
+@interface AMAIdentifierProviderConcurrencyConfiguration : AMAMetricaConfiguration
+@property (nonatomic, assign) NSUInteger providerCreationCount;
+@end
+
+@implementation AMAIdentifierProviderConcurrencyConfiguration
+
+- (id<AMAIdentifierProviding>)createIdentifierProvider
+{
+    self.providerCreationCount += 1;
+    return [[AMAIdentifierProviderMock alloc] init];
+}
+
 @end
 
 SPEC_BEGIN(AMAMetricaConfigurationTests)
@@ -43,6 +58,35 @@ describe(@"AMAMetricaConfiguration", ^{
                                                             database:database
                                          appGroupIdentifierProvider:appGroupIdentifierProvider
                                       appMetricaConfigurationStorage:storingMock];
+    });
+
+    it(@"Should share one identifier provider across concurrent first accesses", ^{
+        // Repeated first accesses also exercise publication under Thread Sanitizer.
+        for (NSUInteger attempt = 0; attempt < 32; ++attempt) {
+            AMAIdentifierProviderConcurrencyConfiguration *concurrentConfiguration =
+                [[AMAIdentifierProviderConcurrencyConfiguration alloc] initWithKeychainBridge:keychainBridge
+                                                                                     database:database
+                                                                   appGroupIdentifierProvider:appGroupIdentifierProvider
+                                                                appMetricaConfigurationStorage:nil];
+            NSMutableArray *providers = [NSMutableArray array];
+            dispatch_group_t group = dispatch_group_create();
+            dispatch_queue_t queue = dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0);
+            for (NSUInteger worker = 0; worker < 16; ++worker) {
+                dispatch_group_async(group, queue, ^{
+                    id<AMAIdentifierProviding> provider = concurrentConfiguration.identifierProvider;
+                    @synchronized (providers) {
+                        [providers addObject:provider];
+                    }
+                });
+            }
+            dispatch_group_wait(group, DISPATCH_TIME_FOREVER);
+
+            [[theValue(concurrentConfiguration.providerCreationCount) should] equal:theValue(1)];
+            [[theValue(providers.count) should] equal:theValue(16)];
+            for (id provider in providers) {
+                [[provider should] beIdenticalTo:concurrentConfiguration.identifierProvider];
+            }
+        }
     });
 
     it(@"Should add nessesary backup keys", ^{
