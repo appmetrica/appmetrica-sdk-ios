@@ -302,7 +302,8 @@ static NSString *const kAMAMetricaFallbackPrefix = @"fallback-keychain";
 - (id<AMAKeyValueStoring>)UUIDOldStorage
 {
     [self ensureMigrated];
-    return [self storageProvider].cachingStorage;
+    // Legacy UUID migration holds the database lock and must not acquire cache locks.
+    return [self storageProvider].syncStorage;
 }
 
 #pragma mark - Private -

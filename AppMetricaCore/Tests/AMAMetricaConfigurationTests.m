@@ -123,13 +123,13 @@ describe(@"AMAMetricaConfiguration", ^{
             [[mockedDatabase should] receive:@selector(ensureMigrated)];
             [configuration UUIDOldStorage];
         });
-        it (@"Should return valid storage", ^{
-            id storageProvider = [KWMock nullMockForProtocol:@protocol(AMADatabaseProtocol)];
-            id cachingStorage = [KWMock nullMockForProtocol:@protocol(AMAKeychainStoring)];
+        it (@"Should return synchronous storage for legacy UUID", ^{
+            id storageProvider = [KWMock nullMockForProtocol:@protocol(AMAKeyValueStorageProviding)];
+            id syncStorage = [KWMock nullMockForProtocol:@protocol(AMAKeyValueStoring)];
             [mockedDatabase stub:@selector(storageProvider) andReturn:storageProvider];
-            [storageProvider stub:@selector(cachingStorage) andReturn:cachingStorage];
+            [storageProvider stub:@selector(syncStorage) andReturn:syncStorage];
             id storage = configuration.UUIDOldStorage;
-            [[storage should] equal:cachingStorage];
+            [[storage should] equal:syncStorage];
         });
     });
     context(@"Migration-safe identifiers", ^{
@@ -290,7 +290,7 @@ describe(@"AMAMetricaConfiguration", ^{
         it(@"Should return UUIDOldStorage", ^{
             [[(NSObject *)database should] receive:@selector(ensureMigrated)];
             
-            [[(NSObject *)[configuration UUIDOldStorage] should] equal:database.storageProvider.cachingStorage];
+            [[(NSObject *)[configuration UUIDOldStorage] should] equal:database.storageProvider.syncStorage];
         });
     });
     

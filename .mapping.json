@@ -992,6 +992,7 @@
   "AppMetricaCore/Tests/AMACounterAttributeValueUpdateTests.m":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCore/Tests/AMACounterAttributeValueUpdateTests.m",
   "AppMetricaCore/Tests/AMACurrencyMappingTests.m":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCore/Tests/AMACurrencyMappingTests.m",
   "AppMetricaCore/Tests/AMACustomAttributeUserProfileUpdateProviderTests.m":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCore/Tests/AMACustomAttributeUserProfileUpdateProviderTests.m",
+  "AppMetricaCore/Tests/AMADataMigrationConcurrencyTests.m":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCore/Tests/AMADataMigrationConcurrencyTests.m",
   "AppMetricaCore/Tests/AMADataMigrationTo5140Tests.m":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCore/Tests/AMADataMigrationTo5140Tests.m",
   "AppMetricaCore/Tests/AMADataMigrationsTests.m":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCore/Tests/AMADataMigrationsTests.m",
   "AppMetricaCore/Tests/AMADataSendingRestrictionControllerTests.m":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCore/Tests/AMADataSendingRestrictionControllerTests.m",

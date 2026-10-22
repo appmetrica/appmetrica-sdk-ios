@@ -40,7 +40,8 @@
 - (void)migrateDeviceID:(id<AMADatabaseProtocol>)database
      identifierProvider:(id<AMAIdentifierProviding>)identifierProvider
 {
-    id<AMAKeyValueStoring> storage = database.storageProvider.cachingStorage;
+    // Migrations hold the database lock; a concurrent cache reader may be waiting for this database.
+    id<AMAKeyValueStoring> storage = database.storageProvider.syncStorage;
     
     NSString *(^dbStorageKey)(NSString *) = ^NSString *(NSString *key) {
         return [NSString stringWithFormat:@"fallback-keychain-%@", key];
