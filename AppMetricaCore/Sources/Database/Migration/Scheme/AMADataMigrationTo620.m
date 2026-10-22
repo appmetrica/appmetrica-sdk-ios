@@ -20,7 +20,8 @@
 {
     AMAMetricaPersistentConfiguration *persistent = [AMAMetricaConfiguration sharedInstance].persistent;
     
-    id<AMAKeyValueStoring> kvStorage = database.storageProvider.cachingStorage;
+    // Migrations hold the database lock; a concurrent cache reader may be waiting for this database.
+    id<AMAKeyValueStoring> kvStorage = database.storageProvider.syncStorage;
     
     NSDictionary *dictionary = [kvStorage jsonDictionaryForKey:AMAStorageStringKeyAppMetricaClientConfiguration error:nil];
     AMAAppMetricaConfiguration *configuration = [[AMAAppMetricaConfiguration alloc] initWithJSON:dictionary];

@@ -465,17 +465,15 @@ describe(@"AMADataMigrationsTests", ^{
                     return [NSString stringWithFormat:@"fallback-keychain-%@", key];
                 };
                 
+                [migrationDatabase inDatabase:^(AMAFMDatabase *db) {
+                    id<AMAKeyValueStoring> storage = [migrationDatabase.storageProvider storageForDB:db];
+                    [storage saveString:expectedDeviceID
+                                 forKey:dbStorageKey(AMAAppMetricaIdentifiersKeys.deviceID) error:nil];
+                    [storage saveString:expectedDeviceIDHash
+                                 forKey:dbStorageKey(AMAAppMetricaIdentifiersKeys.deviceIDHash) error:nil];
+                }];
+                
                 id<AMADatabaseProtocol> migratedDB = [AMADatabaseFactory configurationDatabase];
-                id<AMAKeyValueStoring> dbStorage = migratedDB.storageProvider.cachingStorage;
-                
-                [(NSObject *)dbStorage stub:@selector(stringForKey:error:)
-                                  andReturn:expectedDeviceID
-                              withArguments:dbStorageKey(AMAAppMetricaIdentifiersKeys.deviceID), kw_any()];
-                
-                [(NSObject *)dbStorage stub:@selector(stringForKey:error:)
-                                  andReturn:expectedDeviceIDHash
-                              withArguments:dbStorageKey(AMAAppMetricaIdentifiersKeys.deviceIDHash), kw_any()];
-                
                 [migratedDB inDatabase:^(AMAFMDatabase *db) {
                     id<AMAKeyValueStoring> storage = [migratedDB.storageProvider storageForDB:db];
                     [[[storage stringForKey:migration.migrationKey error:nil] should] equal:@"1"];
