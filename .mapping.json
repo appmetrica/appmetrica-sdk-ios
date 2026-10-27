@@ -1683,6 +1683,7 @@
   "AppMetricaCrashes/Tests/AMAAppMetricaCrashesTests.m":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCrashes/Tests/AMAAppMetricaCrashesTests.m",
   "AppMetricaCrashes/Tests/AMAAppMetricaPluginsTests.m":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCrashes/Tests/AMAAppMetricaPluginsTests.m",
   "AppMetricaCrashes/Tests/AMABacktraceFrameTest.m":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCrashes/Tests/AMABacktraceFrameTest.m",
+  "AppMetricaCrashes/Tests/AMABacktraceSymbolicatorPerformanceTests.m":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCrashes/Tests/AMABacktraceSymbolicatorPerformanceTests.m",
   "AppMetricaCrashes/Tests/AMABacktraceSymbolicatorTests.m":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCrashes/Tests/AMABacktraceSymbolicatorTests.m",
   "AppMetricaCrashes/Tests/AMABinaryImageExtractorTests.m":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCrashes/Tests/AMABinaryImageExtractorTests.m",
   "AppMetricaCrashes/Tests/AMABuildUIDTests.m":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCrashes/Tests/AMABuildUIDTests.m",

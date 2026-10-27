@@ -211,6 +211,9 @@ describe(@"AMABacktraceSymbolicator", ^{
         it(@"Should have at least 3 frames", ^{
             [[backtrace.frames should] haveCountOfAtLeast:3];
         });
+        it(@"Should resolve binary images via shared images fallback", ^{
+            [[binaryImages should] haveCountOfAtLeast:1];
+        });
         context(@"Top frame", ^{
             AMABacktraceFrame * __block frame = nil;
             beforeEach(^{
@@ -241,6 +244,72 @@ describe(@"AMABacktraceSymbolicator", ^{
             it(@"Should have no line of code", ^{
                 [[frame.lineOfCode should] beNil];
             });
+        });
+    });
+
+    context(@"Repeated addresses in one backtrace", ^{
+        it(@"Should keep consistent binary images for recycled frames", ^{
+            NSArray *seed = fooB();
+            NSMutableArray *addresses = [NSMutableArray arrayWithCapacity:50];
+            // Recycle only the top frames from our test binary (not XCTest frames deeper in the stack).
+            NSUInteger recycleCount = MIN((NSUInteger)3, seed.count);
+            for (NSUInteger i = 0; i < 50; i++) {
+                [addresses addObject:seed[i % recycleCount]];
+            }
+            backtrace = [symbolicator backtraceForInstructionAddresses:addresses binaryImages:&binaryImages];
+            [[backtrace.frames should] haveCountOf:50];
+            [[binaryImages should] haveCountOfAtLeast:1];
+            [[backtrace.frames.firstObject.objectName should] equal:@"AppMetricaCrashesTests"];
+            [[backtrace.frames.lastObject.objectName should] equal:@"AppMetricaCrashesTests"];
+        });
+
+        it(@"Should resolve two distinct images for A→A→B→A without mixing cache entries", ^{
+            // Return addresses so dladdr maps into two real images (test binary + Foundation).
+            NSNumber *addressA = @((uintptr_t)&fooA + 4);
+            NSNumber *addressB = @((uintptr_t)&NSLog + 4);
+            NSArray *addresses = @[ addressA, addressA, addressB, addressA ];
+
+            backtrace = [symbolicator backtraceForInstructionAddresses:addresses binaryImages:&binaryImages];
+
+            [[backtrace.frames should] haveCountOf:4];
+            [[binaryImages should] haveCountOf:2];
+
+            NSNumber *objectA = backtrace.frames[0].objectAddress;
+            NSNumber *objectB = backtrace.frames[2].objectAddress;
+            [[objectA shouldNot] beNil];
+            [[objectB shouldNot] beNil];
+            [[objectA shouldNot] equal:objectB];
+            [[backtrace.frames[1].objectAddress should] equal:objectA];
+            [[backtrace.frames[3].objectAddress should] equal:objectA];
+
+            AMABinaryImage *imageA = nil;
+            AMABinaryImage *imageB = nil;
+            for (AMABinaryImage *image in binaryImages) {
+                if (image.address == objectA.unsignedIntegerValue) {
+                    imageA = image;
+                }
+                else if (image.address == objectB.unsignedIntegerValue) {
+                    imageB = image;
+                }
+            }
+            [[imageA shouldNot] beNil];
+            [[imageB shouldNot] beNil];
+            [[imageA.UUID shouldNot] beNil];
+            [[imageB.UUID shouldNot] beNil];
+            [[theValue([imageA.UUID isEqualToString:imageB.UUID]) should] beNo];
+            [[imageA.name.lastPathComponent should] equal:@"AppMetricaCrashesTests"];
+        });
+    });
+
+    context(@"Unmapped address", ^{
+        it(@"Should keep objectAddress @0 when no binary image is found", ^{
+            // Low unmapped address: dladdr fails and sharedImages scan finds nothing.
+            NSArray *addresses = @[ @0x1000ULL ];
+            backtrace = [symbolicator backtraceForInstructionAddresses:addresses binaryImages:&binaryImages];
+            [[backtrace.frames should] haveCountOf:1];
+            [[backtrace.frames.firstObject.objectAddress should] equal:@0];
+            [[backtrace.frames.firstObject.objectName should] beNil];
+            [[binaryImages should] beEmpty];
         });
     });
 
