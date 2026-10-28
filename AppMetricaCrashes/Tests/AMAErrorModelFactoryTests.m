@@ -2,6 +2,7 @@
 #import <AppMetricaKiwi/AppMetricaKiwi.h>
 #import <AppMetricaTestUtils/AppMetricaTestUtils.h>
 #import "AMAErrorModelFactory.h"
+#import "AMAErrorBacktraceLimits.h"
 #import "AMAErrorRepresentable.h"
 #import "AMAError.h"
 #import "AMAErrorCustomData.h"
@@ -911,6 +912,59 @@ describe(@"AMAErrorModelFactory", ^{
                 });
 
             });
+        });
+    });
+
+    context(@"Default backtrace frames limit", ^{
+        // Skip report-call backtrace so bytesTruncated reflects only user-provided frame truncation.
+        AMAErrorReportingOptions const options = AMAErrorReportingOptionsNoBacktrace;
+
+        __auto_type makeAddresses = ^NSArray<NSNumber *> *(NSUInteger count) {
+            NSMutableArray<NSNumber *> *addresses = [NSMutableArray arrayWithCapacity:count];
+            for (NSUInteger idx = 0; idx < count; idx++) {
+                [addresses addObject:@(idx + 1)];
+            }
+            return [addresses copy];
+        };
+
+        it(@"Should keep short user-provided backtrace and report zero bytesTruncated", ^{
+            AMAError *error = [AMAError errorWithIdentifier:@"id"
+                                                    message:nil
+                                                 parameters:nil
+                                                  backtrace:makeAddresses(3)
+                                            underlyingError:nil];
+            model = amaModelForErrorRepresentable(factory, error, options);
+
+            [[model.userProvidedBacktrace should] equal:makeAddresses(3)];
+            [[theValue(model.bytesTruncated) should] beZero];
+        });
+
+        it(@"Should truncate user-provided backtrace to AMAErrorMaxBacktraceFramesCount", ^{
+            NSUInteger const extraFrames = 5;
+            NSArray<NSNumber *> *backtrace = makeAddresses(AMAErrorMaxBacktraceFramesCount + extraFrames);
+            AMAError *error = [AMAError errorWithIdentifier:@"id"
+                                                    message:nil
+                                                 parameters:nil
+                                                  backtrace:backtrace
+                                            underlyingError:nil];
+            model = amaModelForErrorRepresentable(factory, error, options);
+
+            [[theValue(model.userProvidedBacktrace.count) should] equal:theValue(AMAErrorMaxBacktraceFramesCount)];
+            [[model.userProvidedBacktrace should]
+                equal:[backtrace subarrayWithRange:NSMakeRange(0, AMAErrorMaxBacktraceFramesCount)]];
+            [[theValue(model.bytesTruncated) should] equal:theValue(extraFrames * sizeof(uintptr_t))];
+        });
+
+        it(@"Should truncate NSError AMABacktraceErrorKey to AMAErrorMaxBacktraceFramesCount", ^{
+            NSUInteger const extraFrames = 7;
+            NSArray<NSNumber *> *backtrace = makeAddresses(AMAErrorMaxBacktraceFramesCount + extraFrames);
+            NSError *error = [NSError errorWithDomain:@"domain"
+                                                 code:1
+                                             userInfo:@{ AMABacktraceErrorKey: backtrace }];
+            model = amaModelForNSError(factory, error, options);
+
+            [[theValue(model.userProvidedBacktrace.count) should] equal:theValue(AMAErrorMaxBacktraceFramesCount)];
+            [[theValue(model.bytesTruncated) should] equal:theValue(extraFrames * sizeof(uintptr_t))];
         });
     });
 });

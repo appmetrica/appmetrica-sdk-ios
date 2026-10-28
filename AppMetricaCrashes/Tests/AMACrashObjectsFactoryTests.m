@@ -8,6 +8,7 @@
 #import "AMAStackTraceElement.h"
 #import "AMACrashObjectsFactory.h"
 #import "AMABacktraceFrame.h"
+#import "AMAErrorBacktraceLimits.h"
 
 SPEC_BEGIN(AMACrashObjectsFactoryTests)
 
@@ -493,6 +494,38 @@ describe(@"AMACrashObjectsFactory", ^{
 
         });
 
+    });
+
+    context(@"Default backtrace frames limit", ^{
+        __auto_type makeFrames = ^NSArray<AMAStackTraceElement *> *(NSUInteger count) {
+            NSMutableArray<AMAStackTraceElement *> *frames = [NSMutableArray arrayWithCapacity:count];
+            for (NSUInteger idx = 0; idx < count; idx++) {
+                [frames addObject:[[AMAStackTraceElement alloc] initWithClassName:[NSString stringWithFormat:@"c%lu", (unsigned long)idx]
+                                                                         fileName:@"f"
+                                                                             line:@(idx)
+                                                                           column:@0
+                                                                       methodName:@"m"]];
+            }
+            return [frames copy];
+        };
+
+        it(@"Should keep short backtrace and report zero bytesTruncated", ^{
+            NSUInteger bytesTruncated = 0;
+            AMABacktrace *result = [factory backtraceFrom:makeFrames(3) bytesTruncated:&bytesTruncated];
+
+            [[theValue(result.frames.count) should] equal:theValue(3)];
+            [[theValue(bytesTruncated) should] beZero];
+        });
+
+        it(@"Should truncate backtrace to AMAErrorMaxBacktraceFramesCount", ^{
+            NSUInteger const extraFrames = 5;
+            NSUInteger bytesTruncated = 0;
+            AMABacktrace *result = [factory backtraceFrom:makeFrames(AMAErrorMaxBacktraceFramesCount + extraFrames)
+                                           bytesTruncated:&bytesTruncated];
+
+            [[theValue(result.frames.count) should] equal:theValue(AMAErrorMaxBacktraceFramesCount)];
+            [[theValue(bytesTruncated) should] equal:theValue(extraFrames * sizeof(uintptr_t))];
+        });
     });
 
 });

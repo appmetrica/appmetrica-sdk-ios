@@ -1552,6 +1552,7 @@
   "AppMetricaCrashes/Sources/AMADecodedCrashValidator.h":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCrashes/Sources/AMADecodedCrashValidator.h",
   "AppMetricaCrashes/Sources/AMADecodedCrashValidator.m":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCrashes/Sources/AMADecodedCrashValidator.m",
   "AppMetricaCrashes/Sources/AMAError.m":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCrashes/Sources/AMAError.m",
+  "AppMetricaCrashes/Sources/AMAErrorBacktraceLimits.h":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCrashes/Sources/AMAErrorBacktraceLimits.h",
   "AppMetricaCrashes/Sources/AMAErrorEnvironment.h":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCrashes/Sources/AMAErrorEnvironment.h",
   "AppMetricaCrashes/Sources/AMAErrorEnvironment.m":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCrashes/Sources/AMAErrorEnvironment.m",
   "AppMetricaCrashes/Sources/AMAErrorRepresentable.m":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCrashes/Sources/AMAErrorRepresentable.m",

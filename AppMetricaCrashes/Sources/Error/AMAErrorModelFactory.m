@@ -1,6 +1,7 @@
 
 #import "AMAErrorModelFactory.h"
 
+#import "AMAErrorBacktraceLimits.h"
 #import "AMAErrorModel.h"
 #import "AMAErrorNSErrorData.h"
 #import "AMAErrorCustomData.h"
@@ -30,8 +31,8 @@
                         messageTruncator:[[AMALengthStringTruncator alloc] initWithMaxLength:1000]
                     environmentTruncator:[[AMAEnvironmentTruncator alloc] init]
                     shortStringTruncator:[[AMALengthStringTruncator alloc] initWithMaxLength:100]
-                maxUnderlyingErrorsCount:10
-                 maxBacktraceFramesCount:200];
+                maxUnderlyingErrorsCount:AMAErrorMaxUnderlyingErrorsCount
+                 maxBacktraceFramesCount:AMAErrorMaxBacktraceFramesCount];
 }
 
 - (instancetype)initWithDomainTruncator:(id<AMAStringTruncating>)domainTruncator

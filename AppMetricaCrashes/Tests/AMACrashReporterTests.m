@@ -6,6 +6,7 @@
 #import "AMACrashEventType.h"
 #import "AMAExceptionFormatter.h"
 #import "AMAErrorEnvironment.h"
+#import "AMAErrorModel.h"
 #import "AMAErrorModelFactory.h"
 
 // FIXME: Fix exposing properties
@@ -112,9 +113,22 @@ describe(@"AMACrashReporter", ^{
             [crashReporter stub:@selector(exceptionFormatter) andReturn:exceptionFormatter];
             [crashReporter stub:@selector(errorModelFactory) andReturn:errorModelFactory];
             [exceptionFormatter stub:@selector(formattedError:error:) andReturn:[NSData data]];
+
+            NSUInteger const expectedBytesTruncated = 42;
+            AMAErrorModel *model = [[AMAErrorModel alloc] initWithType:AMAErrorModelTypeCustom
+                                                            customData:nil
+                                                           nsErrorData:nil
+                                                      parametersString:nil
+                                                   reportCallBacktrace:nil
+                                                 userProvidedBacktrace:nil
+                                                   virtualMachineError:nil
+                                                       underlyingError:nil
+                                                        bytesTruncated:expectedBytesTruncated];
             
             id errorModel = [KWMock nullMockForProtocol:@protocol(AMAErrorRepresentable)];
-            [[errorModelFactory should] receive:@selector(modelForErrorRepresentable:options:) withArguments:errorModel, kw_any()];
+            [errorModelFactory stub:@selector(modelForErrorRepresentable:options:)
+                          andReturn:model
+                      withArguments:errorModel, kw_any()];
             
             [[extendedReporter should] receive:@selector(reportBinaryEventWithType:
                                                          data:
@@ -126,7 +140,7 @@ describe(@"AMACrashReporter", ^{
                                                          bytesTruncated:
                                                          onFailure:)
                                  withArguments:theValue(AMACrashEventTypeError), kw_any(), kw_any(),
-             theValue(YES), kw_any(), kw_any(), kw_any(), theValue(0), kw_any(), kw_any()];
+             theValue(YES), kw_any(), kw_any(), kw_any(), theValue(expectedBytesTruncated), kw_any(), kw_any()];
             
             [crashReporter reportError:errorModel onFailure:nil];
         });
@@ -135,9 +149,22 @@ describe(@"AMACrashReporter", ^{
             [crashReporter stub:@selector(exceptionFormatter) andReturn:exceptionFormatter];
             [crashReporter stub:@selector(errorModelFactory) andReturn:errorModelFactory];
             [exceptionFormatter stub:@selector(formattedError:error:) andReturn:[NSData data]];
+
+            NSUInteger const expectedBytesTruncated = 56;
+            AMAErrorModel *model = [[AMAErrorModel alloc] initWithType:AMAErrorModelTypeNSError
+                                                            customData:nil
+                                                           nsErrorData:nil
+                                                      parametersString:nil
+                                                   reportCallBacktrace:nil
+                                                 userProvidedBacktrace:nil
+                                                   virtualMachineError:nil
+                                                       underlyingError:nil
+                                                        bytesTruncated:expectedBytesTruncated];
             
             NSError *error = [NSError nullMock];
-            [[errorModelFactory should] receive:@selector(modelForNSError:options:) withArguments:error, kw_any()];
+            [errorModelFactory stub:@selector(modelForNSError:options:)
+                          andReturn:model
+                      withArguments:error, kw_any()];
             
             [[extendedReporter should] receive:@selector(reportBinaryEventWithType:
                                                          data:
@@ -149,7 +176,7 @@ describe(@"AMACrashReporter", ^{
                                                          bytesTruncated:
                                                          onFailure:)
                                  withArguments:theValue(AMACrashEventTypeError), kw_any(), kw_any(),
-             theValue(YES), kw_any(), kw_any(), kw_any(), theValue(0), kw_any(), kw_any()];
+             theValue(YES), kw_any(), kw_any(), kw_any(), theValue(expectedBytesTruncated), kw_any(), kw_any()];
             
             [crashReporter reportNSError:error onFailure:nil];
         });

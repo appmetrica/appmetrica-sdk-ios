@@ -5,6 +5,7 @@
 #import "AMABacktrace.h"
 #import "AMABacktraceFrame.h"
 #import "AMAEnvironmentTruncator.h"
+#import "AMAErrorBacktraceLimits.h"
 #import "AMAPluginErrorDetails.h"
 #import "AMAStackTraceElement.h"
 #import "AMAVirtualMachineCrash.h"
@@ -26,7 +27,7 @@
     return [self initWithMessageTruncator:[[AMALengthStringTruncator alloc] initWithMaxLength:1000]
                      environmentTruncator:[[AMAEnvironmentTruncator alloc] init]
                      shortStringTruncator:[[AMALengthStringTruncator alloc] initWithMaxLength:100]
-                  maxBacktraceFramesCount:200];
+                  maxBacktraceFramesCount:AMAErrorMaxBacktraceFramesCount];
 }
 
 - (instancetype)initWithMessageTruncator:(id<AMAStringTruncating>)messageTruncator

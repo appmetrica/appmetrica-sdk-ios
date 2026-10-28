@@ -297,7 +297,7 @@ NSString *const kAppMetricaLibraryAPIKey = @"20799a27-fa80-4b36-b2db-0f8141f2418
                        eventEnvironment:self.errorEnvironment.currentEnvironment
                          appEnvironment:nil
                                  extras:nil
-                         bytesTruncated:0
+                         bytesTruncated:error.bytesTruncated
                               onFailure:onFailure];
 }
 
