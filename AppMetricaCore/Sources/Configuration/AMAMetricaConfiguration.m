@@ -166,22 +166,22 @@ static NSString *const kAMAMetricaFallbackPrefix = @"fallback-keychain";
 
 - (AMAStartupParametersConfiguration *)startup
 {
-    if (_startup == nil) {
-        @synchronized (self.startupConfigurationLock) {
-            if (_startup == nil) {
-                NSError *__block error = nil;
-                id<AMAKeyValueStoring> storage =
-                [[self storageProvider] nonPersistentStorageForKeys:[AMAStartupParametersConfiguration allKeys]
-                                                              error:&error];
-                if (error != nil) {
-                    AMALogError(@"Failed to load startup parameters");
-                    storage = [self storageProvider].emptyNonPersistentStorage;
-                }
-                _startup = [[AMAStartupParametersConfiguration alloc] initWithStorage:storage];
+    AMAStartupParametersConfiguration *configuration = nil;
+    @synchronized (self.startupConfigurationLock) {
+        if (_startup == nil) {
+            NSError *__block error = nil;
+            id<AMAKeyValueStoring> storage =
+            [[self storageProvider] nonPersistentStorageForKeys:[AMAStartupParametersConfiguration allKeys]
+                                                          error:&error];
+            if (error != nil) {
+                AMALogError(@"Failed to load startup parameters");
+                storage = [self storageProvider].emptyNonPersistentStorage;
             }
+            _startup = [[AMAStartupParametersConfiguration alloc] initWithStorage:storage];
         }
+        configuration = _startup;
     }
-    return _startup;
+    return configuration;
 }
 
 - (AMAStartupParametersConfiguration *)startupCopy

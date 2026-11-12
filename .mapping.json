@@ -1107,6 +1107,7 @@
   "AppMetricaCore/Tests/AMALocationSerializerTests.m":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCore/Tests/AMALocationSerializerTests.m",
   "AppMetricaCore/Tests/AMALocationStorageTests.m":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCore/Tests/AMALocationStorageTests.m",
   "AppMetricaCore/Tests/AMAMainReportExecutionConditionCheckerTests.m":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCore/Tests/AMAMainReportExecutionConditionCheckerTests.m",
+  "AppMetricaCore/Tests/AMAMetricaConfigurationConcurrencyTests.m":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCore/Tests/AMAMetricaConfigurationConcurrencyTests.m",
   "AppMetricaCore/Tests/AMAMetricaConfigurationTests.m":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCore/Tests/AMAMetricaConfigurationTests.m",
   "AppMetricaCore/Tests/AMAMetricaInMemoryConfigurationTests.m":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCore/Tests/AMAMetricaInMemoryConfigurationTests.m",
   "AppMetricaCore/Tests/AMAMetricaParametersScannerTests.m":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCore/Tests/AMAMetricaParametersScannerTests.m",
