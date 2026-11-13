@@ -1704,6 +1704,7 @@
   "AppMetricaCrashes/Tests/AMADecodedCrashTests.m":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCrashes/Tests/AMADecodedCrashTests.m",
   "AppMetricaCrashes/Tests/AMADecodedCrashValidatorTests.m":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCrashes/Tests/AMADecodedCrashValidatorTests.m",
   "AppMetricaCrashes/Tests/AMAEnvironmentTruncatorTests.m":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCrashes/Tests/AMAEnvironmentTruncatorTests.m",
+  "AppMetricaCrashes/Tests/AMAErrorEnvironmentSynchronizationTests.m":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCrashes/Tests/AMAErrorEnvironmentSynchronizationTests.m",
   "AppMetricaCrashes/Tests/AMAErrorEnvironmentTests.m":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCrashes/Tests/AMAErrorEnvironmentTests.m",
   "AppMetricaCrashes/Tests/AMAErrorModelFactoryTests.m":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCrashes/Tests/AMAErrorModelFactoryTests.m",
   "AppMetricaCrashes/Tests/AMAExceptionFormatterTests.m":"mobile/metrika/ios/appmetrica-sdk/public/AppMetricaCrashes/Tests/AMAExceptionFormatterTests.m",

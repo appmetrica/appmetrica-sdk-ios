@@ -31,62 +31,70 @@ static NSInteger const kAMAErrorEnvironmentTotalLengthLimit = 4500;
 
 - (void)addValue:(NSString *)value forKey:(NSString *)key replaceExisting:(BOOL)replaceExisting
 {
-    if (key.length == 0) {
-        return;
-    }
-
-    NSString *truncatedKey = (key.length > kAMAErrorEnvironmentKeyLengthLimit)
-        ? [key substringToIndex:kAMAErrorEnvironmentKeyLengthLimit]
-        : key;
-    if (replaceExisting == NO && self.environment[truncatedKey] != nil) {
-        return;
-    }
-
-    NSString *truncatedValue = (value.length > kAMAErrorEnvironmentValueLengthLimit) 
-        ? [value substringToIndex:kAMAErrorEnvironmentValueLengthLimit]
-        : value;
-
-    if (self.environment.count >= kAMAErrorEnvironmentCountLimit && self.environment[truncatedKey] == nil) {
-        AMALogWarn(@"Failed to add environment key %@ with value %@, pairs limit hit", truncatedKey, truncatedValue);
-        return;
-    }
-
-    __block NSUInteger totalLength = truncatedKey.length + truncatedValue.length;
-    [self.environment enumerateKeysAndObjectsUsingBlock:^(NSString *key, NSString *value, BOOL *stop) {
-        if ([key isEqualToString:truncatedKey] == NO) {
-            totalLength += key.length + value.length;
+    @synchronized (self) {
+        if (key.length == 0) {
+            return;
         }
-    }];
 
-    if (totalLength > kAMAErrorEnvironmentTotalLengthLimit) {
-        AMALogWarn(@"Failed to add environment key %@ with value %@, total length limit hit",
-                   truncatedKey, truncatedValue);
-        return;
+        NSString *truncatedKey = (key.length > kAMAErrorEnvironmentKeyLengthLimit)
+            ? [key substringToIndex:kAMAErrorEnvironmentKeyLengthLimit]
+            : key;
+        if (replaceExisting == NO && self.environment[truncatedKey] != nil) {
+            return;
+        }
+
+        NSString *truncatedValue = (value.length > kAMAErrorEnvironmentValueLengthLimit)
+            ? [value substringToIndex:kAMAErrorEnvironmentValueLengthLimit]
+            : value;
+
+        if (self.environment.count >= kAMAErrorEnvironmentCountLimit && self.environment[truncatedKey] == nil) {
+            AMALogWarn(@"Failed to add environment key %@ with value %@, pairs limit hit", truncatedKey, truncatedValue);
+            return;
+        }
+
+        __block NSUInteger totalLength = truncatedKey.length + truncatedValue.length;
+        [self.environment enumerateKeysAndObjectsUsingBlock:^(NSString *key, NSString *value, BOOL *stop) {
+            if ([key isEqualToString:truncatedKey] == NO) {
+                totalLength += key.length + value.length;
+            }
+        }];
+
+        if (totalLength > kAMAErrorEnvironmentTotalLengthLimit) {
+            AMALogWarn(@"Failed to add environment key %@ with value %@, total length limit hit",
+                       truncatedKey, truncatedValue);
+            return;
+        }
+
+        self.environment[truncatedKey] = truncatedValue;
     }
-
-    self.environment[truncatedKey] = truncatedValue;
 }
 
 - (BOOL)mergeEnvironment:(NSDictionary *)environment replaceExisting:(BOOL)replaceExisting
 {
-    __block BOOL hasValidPairs = NO;
-    [environment enumerateKeysAndObjectsUsingBlock:^(id key, id value, __unused BOOL *stop) {
-        if ([key isKindOfClass:NSString.class] && [value isKindOfClass:NSString.class]) {
-            hasValidPairs = YES;
-            [self addValue:value forKey:key replaceExisting:replaceExisting];
-        }
-    }];
-    return hasValidPairs;
+    @synchronized (self) {
+        __block BOOL hasValidPairs = NO;
+        [environment enumerateKeysAndObjectsUsingBlock:^(id key, id value, __unused BOOL *stop) {
+            if ([key isKindOfClass:NSString.class] && [value isKindOfClass:NSString.class]) {
+                hasValidPairs = YES;
+                [self addValue:value forKey:key replaceExisting:replaceExisting];
+            }
+        }];
+        return hasValidPairs;
+    }
 }
 
 - (void)clearEnvironment 
 {
-    [self.environment removeAllObjects];
+    @synchronized (self) {
+        [self.environment removeAllObjects];
+    }
 }
 
 - (NSDictionary *)currentEnvironment 
 {
-    return [self.environment copy];
+    @synchronized (self) {
+        return [self.environment copy];
+    }
 }
 
 @end

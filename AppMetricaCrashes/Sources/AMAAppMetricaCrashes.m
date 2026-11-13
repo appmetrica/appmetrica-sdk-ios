@@ -210,8 +210,10 @@ typedef NS_ENUM(NSUInteger, AMAAppMetricaCrashMonitoringState) {
 - (void)setErrorEnvironmentValue:(NSString *)value forKey:(NSString *)key
 {
     [self execute:^{
-        [self.errorEnvironment addValue:value forKey:key];
-        [self.mainCrashReporter setErrorEnvironmentValue:value forKey:key];
+        @synchronized (self) {
+            [self.errorEnvironment addValue:value forKey:key];
+            [self.mainCrashReporter setErrorEnvironmentValue:value forKey:key];
+        }
         [self updateCrashContextQuickly:YES];
         
     }];
@@ -220,8 +222,10 @@ typedef NS_ENUM(NSUInteger, AMAAppMetricaCrashMonitoringState) {
 - (void)clearErrorEnvironment
 {
     [self execute:^{
-        [self.errorEnvironment clearEnvironment];
-        [self.mainCrashReporter clearErrorEnvironment];
+        @synchronized (self) {
+            [self.errorEnvironment clearEnvironment];
+            [self.mainCrashReporter clearErrorEnvironment];
+        }
         [self updateCrashContextQuickly:YES];
         
     }];
@@ -283,13 +287,15 @@ typedef NS_ENUM(NSUInteger, AMAAppMetricaCrashMonitoringState) {
 {
     AMACrashReporter *crashReporter = (AMACrashReporter *)[self reporterForAPIKey:configuration.apiKey];
 
-    // Merge values set before activation when the main reporter was requested in advance.
-    if (crashReporter.errorEnvironment != self.errorEnvironment) {
-        [crashReporter.errorEnvironment mergeEnvironment:self.errorEnvironment.currentEnvironment
-                                         replaceExisting:YES];
-        self.errorEnvironment = crashReporter.errorEnvironment;
+    // Keep the snapshot, merge and replacement atomic with respect to environment updates.
+    @synchronized (self) {
+        if (crashReporter.errorEnvironment != self.errorEnvironment) {
+            [crashReporter.errorEnvironment mergeEnvironment:self.errorEnvironment.currentEnvironment
+                                             replaceExisting:YES];
+            self.errorEnvironment = crashReporter.errorEnvironment;
+        }
+        self.apiKey = configuration.apiKey;
     }
-    self.apiKey = configuration.apiKey;
     
     [self setupCrashProcessorWithCrashReporter:crashReporter ignoredSignals:self.internalConfiguration.ignoredCrashSignals];
     
@@ -331,10 +337,12 @@ typedef NS_ENUM(NSUInteger, AMAAppMetricaCrashMonitoringState) {
 
 - (id<AMAAppMetricaCrashReporting>)mainCrashReporter
 {
-    if (self.apiKey != nil) {
-        return [self reporterForAPIKey:self.apiKey];
+    @synchronized (self) {
+        if (self.apiKey != nil) {
+            return [self reporterForAPIKey:self.apiKey];
+        }
+        return nil;
     }
-    return nil;
 }
 
 #pragma mark - Properties
