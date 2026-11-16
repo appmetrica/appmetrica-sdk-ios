@@ -176,10 +176,14 @@ public final class IdentifierProvider: NSObject, IdentifierProviding {
         
         // this method is used in startup handling, don't use file lock due to ios kill app going to suspend with active flock
         // this method are expected to call with current DeviceID and new(maybe) DeviceIDHash
-        let result: Identifiers = syncManager.update(deviceID: deviceIDValue, deviceIDHash: deviceIDHashValue)
-        
-        if result.isValid {
-            identifierData.value = result
+        do {
+            let result = try syncManager.update(deviceID: deviceIDValue, deviceIDHash: deviceIDHashValue)
+            if result.isValid {
+                identifierData.value = result
+            }
+        } catch {
+            identifierData.value = nil
+            logger.error(error)
         }
     }
     

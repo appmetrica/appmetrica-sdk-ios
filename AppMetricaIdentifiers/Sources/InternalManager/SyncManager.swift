@@ -2,6 +2,7 @@
 import AppMetricaPlatform
 
 enum SyncManagerError: Error {
+    case identifiersUnavailable
     case writingIdentifiers(Error?)
     case underlying(Error)
 }
@@ -9,6 +10,7 @@ enum SyncManagerError: Error {
 private struct IdentifiersSyncData {
     var identifiers: Identifiers
     var sourcesToUpdate: IdentifierSourceSet
+    var persistedIdentifiers: IdentifierSet<IdentifiersStorageData>
     
     var shouldUpdate: Bool {
         return !sourcesToUpdate.isEmpty
@@ -52,23 +54,30 @@ final class SyncManager {
 extension SyncManager {
     
     func loadAndSyncIfNeeded() throws -> Identifiers {
-        let syncData = internalLoadIfNeeded()
-        guard syncData.shouldUpdate else { return syncData.identifiers }
-        let newSyncData = try sync(input: syncData)
-        return newSyncData
+        do {
+            let syncData = try internalLoadIfNeeded()
+            guard syncData.shouldUpdate else { return syncData.identifiers }
+            return try sync(input: syncData)
+        } catch {
+            // A retry must read the original identifiers after storage access recovers.
+            self.syncData = nil
+            throw error
+        }
     }
     
 }
 
 extension SyncManager {
     
-    func loadIfNeeded() -> Identifiers {
-        internalLoadIfNeeded().identifiers
+    func loadIfNeeded() throws -> Identifiers {
+        try internalLoadIfNeeded().identifiers
     }
     
-    func update(deviceID: DeviceID, deviceIDHash: DeviceIDHash?) -> Identifiers {
+    func update(deviceID: DeviceID, deviceIDHash: DeviceIDHash?) throws -> Identifiers {
         
+        self.syncData = nil
         var ids = IdentifierLoader.loadIdentifiers(providers: providers)
+        guard !ids.hasUnavailableSources else { throw SyncManagerError.identifiersUnavailable }
         let modifiedSources: IdentifierSourceSet = ids.update(deviceID: deviceID, deviceIDHash: deviceIDHash)
         
         for i in modifiedSources {
@@ -77,15 +86,18 @@ extension SyncManager {
             case .data(let d):
                 do {
                     try providers[i]?.saveIdentifiers(d)
+                } catch IdentifierStorageError.deviceIDMismatch where i.isProtectedForRewriting {
+                    // The vendor identifier cannot be replaced by a startup response.
+                    continue
                 } catch let e {
-                    logger.error(e)
+                    throw SyncManagerError.writingIdentifiers(e)
                 }
             default:
                 break
             }
         }
         
-        return internalLoad().identifiers
+        return try internalLoad().identifiers
         
     }
     
@@ -93,22 +105,30 @@ extension SyncManager {
 
 private extension SyncManager {
     
-    func internalLoadIfNeeded() -> IdentifiersSyncData {
+    func internalLoadIfNeeded() throws -> IdentifiersSyncData {
         if let syncData = syncData, syncData.identifiers.isValid {
             return syncData
         } else {
-            return internalLoad()
+            return try internalLoad()
         }
     }
     
     @discardableResult
-    func internalLoad() -> IdentifiersSyncData {
+    func internalLoad() throws -> IdentifiersSyncData {
         let ids = IdentifierLoader.loadIdentifiers(providers: providers)
+        guard !ids.hasUnavailableSources else { throw SyncManagerError.identifiersUnavailable }
         var idsData = ids.identifierSet
         if let appIdentifiersData = appMigrationData {
             idsData[.migrationData] = .data(appIdentifiersData)
         }
         var result = IdentifierResolver.resolve(runEnvionment: runEnv, input: idsData)
+        if !ids.corruptedSources.isEmpty {
+            // Recover a corrupted copy only from existing identifiers.
+            guard result.resultDeviceID != nil, result.resultAppMetricaUUID != nil else {
+                throw SyncManagerError.identifiersUnavailable
+            }
+            result.sourcesToUpdate.formUnion(ids.corruptedSources)
+        }
         
         let rUUID: AppMetricaUUID
         
@@ -119,6 +139,8 @@ private extension SyncManager {
             result.sourcesToUpdate.formUnion(IdentifierSource.deviceIDSources)
         }
         
+        guard result.resultDeviceID != nil else { throw SyncManagerError.identifiersUnavailable }
+
         if let rAppMetricaUUID = result.resultAppMetricaUUID {
             rUUID = rAppMetricaUUID
         } else {
@@ -134,7 +156,8 @@ private extension SyncManager {
         )
         let syncData = IdentifiersSyncData(
             identifiers: identifierData,
-            sourcesToUpdate: result.sourcesToUpdate
+            sourcesToUpdate: result.sourcesToUpdate,
+            persistedIdentifiers: ids.identifierSet.map { $0.data }
         )
         
         self.syncData = syncData
@@ -157,7 +180,8 @@ private extension SyncManager {
                     providers: providers,
                     id: result.storageData,
                     sourcesToUpdate: result.sourcesToUpdate,
-                    handleVendorError: handleVendorError
+                    handleVendorError: handleVendorError,
+                    persistedIdentifiers: result.persistedIdentifiers
                 )
             } catch let e as IdentifierUpdateError {
                 switch e {
@@ -182,7 +206,7 @@ private extension SyncManager {
             throw SyncManagerError.writingIdentifiers(err)
         case .needUpdate:
             
-            let new = internalLoad()
+            let new = try internalLoad()
             // this update must write identifier in any cases or they will be lost, so just ignore if vendor keychain throws error
             let newUpdateResult = update(result: new, handleVendorError: false)
             switch newUpdateResult {

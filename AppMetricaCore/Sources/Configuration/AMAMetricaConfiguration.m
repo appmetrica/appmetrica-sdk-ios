@@ -360,7 +360,7 @@ static NSString *const kAMAMetricaFallbackPrefix = @"fallback-keychain";
     AMAKeychain *vendorKeychain = [[AMAKeychain alloc] initWithService:kAMAMetricaKeychainVendorServiceIdentifier
                                                            accessGroup:accessGroup
                                                                 bridge:self.keychainBridge];
-    if (vendorKeychain.isAvailable == NO) {
+    if (vendorKeychain.isAvailableOrLocked == NO) {
         return nil;
     }
 
@@ -447,7 +447,7 @@ static NSString *const kAMAMetricaFallbackPrefix = @"fallback-keychain";
     AMAKeychain *groupKeychain = [[AMAKeychain alloc] initWithService:kAMAMetricaKeychainGroupServiceIdentifier
                                                           accessGroup:accessGroup
                                                                bridge:self.keychainBridge];
-    if (groupKeychain.isAvailable == NO) {
+    if (groupKeychain.isAvailableOrLocked == NO) {
         return nil;
     }
     

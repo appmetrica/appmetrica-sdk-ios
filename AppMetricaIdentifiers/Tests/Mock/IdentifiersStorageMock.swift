@@ -8,6 +8,7 @@ final class IdentifiersStorageMock: MutableIdentifiersStorable {
     var fetchError: Error?
     var fetchExpectation: XCTestExpectation?
     
+    var saveCallCount = 0
     var saveError: Error?
     var saveExpectation: XCTestExpectation?
     
@@ -22,6 +23,7 @@ final class IdentifiersStorageMock: MutableIdentifiersStorable {
     }
     
     func saveIdentifiers(_ ids: IdentifiersStorageData) throws {
+        saveCallCount += 1
         saveExpectation?.fulfill()
         if let saveError = saveError {
             throw saveError

@@ -5,6 +5,12 @@ struct IdentifierLoaderData {
     typealias Element = KeychainValueState<IdentifiersStorageData>
     
     var identifierSet: IdentifierSet<Element>
+    var failedSources: IdentifierSourceSet = []
+    var corruptedSources: IdentifierSourceSet = []
+
+    var hasUnavailableSources: Bool {
+        !failedSources.subtracting(corruptedSources).isEmpty || identifierSet.contains { $0.isLocked }
+    }
     
     subscript(_ index: IdentifierSource) -> Element? {
         return identifierSet[index]
@@ -37,15 +43,21 @@ struct IdentifierLoaderData {
 enum IdentifierLoader {
     
     static func loadIdentifiers(providers: IdentifierSet<MutableIdentifiersStorable>) -> IdentifierLoaderData {
-        let identifierSet =  providers.map {
+        var failedSources = IdentifierSourceSet()
+        var corruptedSources = IdentifierSourceSet()
+        let identifierSet = providers.enumeratedMap { source, provider in
             do {
-                return try $0.fetchIdentifiers()
+                return try provider.fetchIdentifiers()
             } catch let e {
                 logger.error(e)
+                failedSources.insert(source)
+                if case IdentifierStorageError.corrupted = e {
+                    corruptedSources.insert(source)
+                }
                 return nil
             }
         }
-        return .init(identifierSet: identifierSet)
+        return .init(identifierSet: identifierSet, failedSources: failedSources, corruptedSources: corruptedSources)
     }
     
 }

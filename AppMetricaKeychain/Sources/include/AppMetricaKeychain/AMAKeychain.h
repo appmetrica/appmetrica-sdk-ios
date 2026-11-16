@@ -23,6 +23,9 @@ NS_SWIFT_NAME(Keychain)
 
 - (BOOL)isAvailable;
 
+// Keeps temporarily locked access groups available for subsequent reads.
+- (BOOL)isAvailableOrLocked;
+
 @end
 
 NS_ASSUME_NONNULL_END

@@ -12,11 +12,13 @@ enum IdentifierUpdater {
         providers: IdentifierSet<MutableIdentifiersStorable>,
         id: IdentifiersStorageData,
         sourcesToUpdate: IdentifierSourceSet,
-        handleVendorError: Bool
+        handleVendorError: Bool,
+        persistedIdentifiers: IdentifierSet<IdentifiersStorageData> = .init()
     ) throws {
         guard !sourcesToUpdate.isEmpty else { return }
         
-        var items = sourcesToUpdate.intersection(providers.filledSources)
+        let attemptedSources = sourcesToUpdate.intersection(providers.filledSources)
+        var items = attemptedSources
         
         var deviceErrors: [Error] = []
         var uuidErrors: [Error] = []
@@ -52,14 +54,31 @@ enum IdentifierUpdater {
             }
         }
         
+        // Failure to write an additional copy does not invalidate already persisted values.
+        var persistedTypes: Set<IdentifierType> = []
+        let unchangedSources = providers.filledSources.subtracting(attemptedSources)
+        for source in unchangedSources {
+            guard let stored = persistedIdentifiers[source] else { continue }
+            if IdentifierType.device.allowedStorages.contains(source),
+               let deviceID = stored.deviceID, deviceID == id.deviceID,
+               stored.deviceIDHash == id.deviceIDHash {
+                persistedTypes.insert(.device)
+            }
+            if IdentifierType.uuid.allowedStorages.contains(source),
+               let uuid = stored.appMetricaUUID, uuid == id.appMetricaUUID {
+                persistedTypes.insert(.uuid)
+            }
+        }
+
         var writingErrorTypes: Set<IdentifierType> = []
-        if deviceErrors.count > 0 && sourcesToUpdate.union(IdentifierType.device.allowedStorages).count == deviceErrors.count {
+        if deviceErrors.count > 0 && attemptedSources.intersection(IdentifierType.device.allowedStorages).count == deviceErrors.count {
             writingErrorTypes.insert(.device)
         }
-        if uuidErrors.count > 0 && sourcesToUpdate.union(IdentifierType.uuid.allowedStorages).count == uuidErrors.count {
+        if uuidErrors.count > 0 && attemptedSources.intersection(IdentifierType.uuid.allowedStorages).count == uuidErrors.count {
             writingErrorTypes.insert(.uuid)
         }
         
+        writingErrorTypes.subtract(persistedTypes)
         if !writingErrorTypes.isEmpty {
             throw IdentifierUpdateError.writingToAllStorage(writingErrorTypes, deviceErrors + uuidErrors)
         }

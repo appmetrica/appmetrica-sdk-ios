@@ -1,4 +1,6 @@
 
+import Foundation
+
 // If the data storage format and location change, you must notify https://nda.ya.ru/t/94XNTaaf7LkVFu
 private struct RawJSONIdentifierStorageData: Codable {
     var deviceID: String?
@@ -38,6 +40,8 @@ final class JSONIdentifiersStorage: MutableIdentifiersStorable {
             } else {
                 return .none
             }
+        } catch let e as DecodingError {
+            throw IdentifierStorageError.corrupted(e)
         } catch let e {
             throw IdentifierStorageError.underlying(e)
         }

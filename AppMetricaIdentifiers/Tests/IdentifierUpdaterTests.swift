@@ -155,4 +155,49 @@ final class IdentifierUpdaterTests: XCTestCase {
         }
     }
     
+    func testFailuresAreCountedForConfiguredIdentifierStorages() {
+        for appOnly in [false, true] {
+            if appOnly { createAppOnlySourceSet() } else { createSourceSet() }
+            for failDeviceStores in [false, true] {
+                for source in sourcesSet.filledSources {
+                    sourcesSet[source]?.saveError = failDeviceStores || IdentifierSource.appMetricaUUIDSources.contains(source)
+                        ? CustomError() : nil
+                }
+                XCTAssertThrowsError(try IdentifierUpdater.updateIdentifiers(
+                    providers: providerSet, id: .generateISD(),
+                    sourcesToUpdate: IdentifierSource.allActualSet, handleVendorError: true
+                )) { error in
+                    guard case IdentifierUpdateError.writingToAllStorage(let types, _) = error else {
+                        return XCTFail("Unexpected error: \(error)")
+                    }
+                    XCTAssertEqual(types, failDeviceStores ? [.device, .uuid] : [.uuid])
+                }
+            }
+        }
+    }
+
+    func testPersistedCopiesOnlyCoverMatchingIdentifierTypes() {
+        createSourceSet()
+        let desired = IdentifiersStorageData.generateISD()
+        groupSettings.saveError = CustomError()
+        let cases: [(IdentifiersStorageData, Set<IdentifierType>)] = [
+            (desired.withoutAppMetricaUUID, [.uuid]),
+            (IdentifiersStorageData(appMetricaUUID: desired.appMetricaUUID), [.device]),
+            (IdentifiersStorageData.generateISD(), [.device, .uuid])
+        ]
+        for (stored, expectedErrors) in cases {
+            var persisted = IdentifierSet<IdentifiersStorageData>()
+            persisted[.privateFile] = stored
+            XCTAssertThrowsError(try IdentifierUpdater.updateIdentifiers(
+                providers: providerSet, id: desired, sourcesToUpdate: [.groupFile],
+                handleVendorError: true, persistedIdentifiers: persisted
+            )) { error in
+                guard case IdentifierUpdateError.writingToAllStorage(let types, _) = error else {
+                    return XCTFail("Unexpected error: \(error)")
+                }
+                XCTAssertEqual(types, expectedErrors)
+            }
+        }
+    }
+
 }

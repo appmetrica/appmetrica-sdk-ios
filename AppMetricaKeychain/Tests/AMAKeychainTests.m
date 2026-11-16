@@ -69,6 +69,17 @@ describe(@"AMAKeychainTests", ^{
             [[theValue(keychain.isAvailable) should] beTrue];
         });
 
+        it(@"should retain locked access groups but reject unavailable ones", ^{
+            for (NSNumber *status in @[ @(errSecInteractionNotAllowed), @(errSecDatabaseLocked), @(errSecMissingEntitlement) ]) {
+                [bridge stub:@selector(addEntryWithAttributes:) andReturn:theValue(status.intValue)];
+                [[theValue(keychain.isAvailable) should] beFalse];
+                BOOL expectedAvailability = status.intValue != errSecMissingEntitlement;
+                [[theValue(keychain.isAvailableOrLocked) should] equal:theValue(expectedAvailability)];
+            }
+            [bridge clearStubs];
+            [[theValue(keychain.isAvailableOrLocked) should] beTrue];
+        });
+
         context(@"Errors", ^{
             OSStatus const errorStatus = errSecBadReq;
             NSError *__block error = nil;

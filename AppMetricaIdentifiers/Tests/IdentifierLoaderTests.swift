@@ -78,6 +78,8 @@ final class IdentifierLoaderTests: XCTestCase {
         wait(for: Array(sourcesSet).map { $0!.fetchExpectation! })
         
         XCTAssertEqual(result.identifierSet.filledSources.count, 0)
+        XCTAssertEqual(result.failedSources, providers.filledSources)
+        XCTAssertTrue(result.hasUnavailableSources)
     }
     
     func testLocked() {
@@ -98,6 +100,8 @@ final class IdentifierLoaderTests: XCTestCase {
         
         wait(for: Array(sourcesSet).compactMap { $0!.fetchExpectation })
         
+        XCTAssertTrue(result.hasUnavailableSources)
+        XCTAssertTrue(result.failedSources.isEmpty)
         XCTAssertEqual(result.identifierSet[.privateKeychain], KeychainValueState.locked)
         XCTAssertEqual(result.identifierSet[.groupKeychain], KeychainValueState.locked)
         XCTAssertEqual(result.identifierSet[.vendorKeychain], KeychainValueState.locked)

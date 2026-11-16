@@ -14,6 +14,14 @@
 #import "AMAReportRequestModel.h"
 #import "AMADataSendingRestrictionController.h"
 #import "AMAReporterStoragesContainer.h"
+#import "AMAKeychainBridgeMock.h"
+#import "AMADispatchingController.h"
+#import "AMAPersistentTimeoutConfiguration.h"
+#import "AMATimerDispatchStrategy.h"
+#import "AMAReportExecutionConditionChecker.h"
+@import AppMetricaIdentifiers;
+@import AppMetricaPlatform;
+@import AppMetricaStorageUtils;
 
 @interface AMADispatcher (Test) <AMAReportsControllerDelegate>
 
@@ -103,6 +111,112 @@ describe(@"AMADispatcher", ^{
         [AMAMetricaConfiguration.sharedInstance.persistent clearStubs];
         
     });
+
+    for (NSNumber *hasStoredIdentifiers in @[@NO, @YES]) {
+        it(hasStoredIdentifiers.boolValue
+           ? @"Resumes timer dispatch with unchanged identifiers after keychain unlock"
+           : @"Resumes timer dispatch after the first identifier read while keychain is locked", ^{
+            NSString *path = [NSTemporaryDirectory() stringByAppendingPathComponent:NSUUID.UUID.UUIDString];
+            AMAKeychainBridgeMock *bridge = [AMAKeychainBridgeMock new];
+            AMAKeychain *keychain = [[AMAKeychain alloc] initWithService:@"retry-test"
+                                                          accessGroup:@"retry-test"
+                                                               bridge:bridge];
+            AMADiskFileStorage *file = [[AMADiskFileStorage alloc] initWithPath:path options:0];
+            AMAIdentifierProviderConfiguration *identifierConfig =
+                [[AMAIdentifierProviderConfiguration alloc] initWithPrivateKeychain:keychain privateFileStorage:file];
+            NSString *originalDeviceID = nil;
+            NSString *originalUUID = nil;
+            if (hasStoredIdentifiers.boolValue) {
+                AMAIdentifierProvider *initialProvider = [[AMAIdentifierProvider alloc] initWithConfig:identifierConfig
+                                                                                                 env:AMARunEnvironmentMainApp];
+                originalDeviceID = initialProvider.deviceID;
+                originalUUID = initialProvider.appMetricaUUID;
+                [[theValue(originalDeviceID.length) should] beGreaterThan:theValue(0)];
+                [[theValue(originalUUID.length) should] beGreaterThan:theValue(0)];
+            }
+            NSData *originalFile = [NSData dataWithContentsOfFile:path];
+            [bridge stub:@selector(copyMatchingEntryWithQuery:resultData:)
+               andReturn:theValue(errSecInteractionNotAllowed)];
+            AMAIdentifierProvider *identifiers = [[AMAIdentifierProvider alloc] initWithConfig:identifierConfig
+                                                                                         env:AMARunEnvironmentMainApp];
+            [configuration stub:@selector(deviceID) withBlock:^id(NSArray *params) {
+                return identifiers.deviceID;
+            }];
+            AMADispatchingController *controller = [[AMADispatchingController alloc]
+                initWithTimeoutConfiguration:[AMAPersistentTimeoutConfiguration nullMock]];
+            NSMutableDictionary *dispatchers = [controller valueForKey:@"dispatchers"];
+            dispatchers[apiKey] = dispatcher;
+            dispatcher.delegate = (id<AMADispatcherDelegate>)controller;
+            controller.proxyDelegate = delegate;
+            [controller start];
+
+            AMAMutableReporterConfiguration *reporterConfiguration =
+                [[AMAMutableReporterConfiguration alloc] initWithAPIKey:@"550e8400-e29b-41d4-a716-446655440000"];
+            reporterConfiguration.dispatchPeriod = 1;
+            [configuration stub:@selector(configurationForApiKey:) andReturn:reporterConfiguration];
+            id timerDelegate = [KWMock nullMockForProtocol:@protocol(AMADispatchStrategyDelegate)];
+            [timerDelegate stub:@selector(dispatchStrategyWantsReportingToHappen:) withBlock:^id(NSArray *params) {
+                [controller performReportForApiKey:apiKey forced:NO];
+                return nil;
+            }];
+            AMATestDelayedManualExecutor *timerExecutor = [AMATestDelayedManualExecutor new];
+            AMATimerDispatchStrategy *timer = [[AMATimerDispatchStrategy alloc]
+                initWithDelegate:timerDelegate storage:reporterStorage executor:timerExecutor
+                executionConditionChecker:[KWMock nullMockForProtocol:@protocol(AMAReportExecutionConditionChecker)]];
+            __block NSUInteger reports = 0;
+            __block NSUInteger failures = 0;
+            [reportsController stub:@selector(reportRequestModelsFromArray:) withBlock:^id(NSArray *params) {
+                [[params.firstObject should] equal:requestModels];
+                reports++;
+                [dispatcher reportsControllerDidFinishWithSuccess:reportsController];
+                return nil;
+            }];
+            [(id)delegate stub:@selector(dispatcher:didFailToReportWithError:) withBlock:^id(NSArray *params) {
+                NSError *error = params[1];
+                [[theValue(error.code) should] equal:theValue(AMADispatcherReportErrorNoDeviceId)];
+                failures++;
+                return nil;
+            }];
+            [[cleaner shouldNot] receive:@selector(purgeSessionWithRequestModel:reason:)];
+            [timer start];
+            [[theValue(timerExecutor.delayInterval) should] equal:theValue(1.0)];
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wnonnull"
+            [timerExecutor execute:nil];
+            [timerExecutor execute:nil];
+            [[theValue(reports) should] equal:theValue(0)];
+            [[theValue(failures) should] equal:theValue(2)];
+            [[identifiers.deviceID should] beNil];
+            [[identifiers.appMetricaUUID should] equal:@""];
+            if (originalFile != nil) {
+                [[[NSData dataWithContentsOfFile:path] should] equal:originalFile];
+            }
+            else {
+                [[theValue([[NSFileManager defaultManager] fileExistsAtPath:path]) should] beNo];
+            }
+
+            [bridge clearStubs];
+            [timerExecutor execute:nil];
+            [[theValue(reports) should] equal:theValue(1)];
+            [[theValue(identifiers.deviceID.length) should] beGreaterThan:theValue(0)];
+            [[theValue(identifiers.appMetricaUUID.length) should] beGreaterThan:theValue(0)];
+            if (hasStoredIdentifiers.boolValue) {
+                [[identifiers.deviceID should] equal:originalDeviceID];
+                [[identifiers.appMetricaUUID should] equal:originalUUID];
+            }
+            AMAIdentifierProvider *reloaded = [[AMAIdentifierProvider alloc] initWithConfig:identifierConfig
+                                                                                      env:AMARunEnvironmentMainApp];
+            [[reloaded.deviceID should] equal:identifiers.deviceID];
+            [[reloaded.appMetricaUUID should] equal:identifiers.appMetricaUUID];
+            [timerExecutor execute:nil];
+#pragma clang diagnostic pop
+            [[theValue(reports) should] equal:theValue(2)];
+            [[theValue(failures) should] equal:theValue(2)];
+            [timer shutdown];
+            [controller shutdown];
+            [[NSFileManager defaultManager] removeItemAtPath:path error:nil];
+        });
+    }
 
     context(@"Active", ^{
 

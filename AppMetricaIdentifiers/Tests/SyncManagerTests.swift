@@ -58,7 +58,7 @@ class SyncManagerTests: XCTestCase {
             sourcesSet[i]?.saveExpectation?.isInverted = true
         }
         
-        let id = syncManager.loadIfNeeded()
+        let id = try syncManager.loadIfNeeded()
         XCTAssertEqual(id.deviceID, deviceID)
         XCTAssertEqual(id.appMetricaUUID, appMetricaUUID)
         XCTAssertNil(id.deviceHashID)
@@ -142,7 +142,7 @@ class SyncManagerTests: XCTestCase {
         XCTAssertEqual(lid.deviceIDHash, syncId.deviceHashID)
         XCTAssertEqual(lid.appMetricaUUID, syncId.appMetricaUUID)
         
-        let newSyncId = syncManager.update(deviceID: lid2.deviceID!, deviceIDHash: lid2.deviceIDHash)
+        let newSyncId = try syncManager.update(deviceID: lid2.deviceID!, deviceIDHash: lid2.deviceIDHash)
         XCTAssertEqual(newSyncId.deviceID, lid2.deviceID)
         XCTAssertEqual(newSyncId.deviceHashID, lid2.deviceIDHash)
         XCTAssertEqual(newSyncId.appMetricaUUID, lid.appMetricaUUID)
@@ -188,4 +188,135 @@ class SyncManagerTests: XCTestCase {
         checkISD(idSet: sourcesSet, isd: resultIdentifiers)
     }
     
+    func testUnavailableSourcesDoNotGenerateOrWriteIdentifiers() throws {
+        for source in IdentifierSource.allActualSet {
+            for readFails in [false, true] {
+                let storage = IdentifiersStorageMock()
+                storage.value = .locked
+                storage.fetchError = readFails ? CustomError() : nil
+                var providers = IdentifierSet<MutableIdentifiersStorable>()
+                providers[source] = storage
+                let manager = SyncManager(providers: providers, runEnv: .mainApp,
+                                          deviceIDGenerator: deviceIDGenerator,
+                                          appMetricaUUIDGenerator: appMetricaUUIDGenerator)
+                XCTAssertThrowsError(try manager.loadAndSyncIfNeeded())
+                XCTAssertEqual(storage.saveCallCount, 0)
+                let original = IdentifiersStorageData.generateISD()
+                storage.fetchError = nil
+                storage.value = .data(original)
+                let recovered = try manager.loadAndSyncIfNeeded()
+                XCTAssertEqual(recovered.deviceID, original.deviceID)
+                XCTAssertEqual(recovered.appMetricaUUID, original.appMetricaUUID)
+            }
+        }
+    }
+
+    func testRetryAfterFailedWriteReadsOriginalIdentifiers() throws {
+        for storage in sourcesSet.compactMap({ $0 }) {
+            storage.saveError = CustomError()
+        }
+        XCTAssertThrowsError(try syncManager.loadAndSyncIfNeeded())
+
+        let original = IdentifiersStorageData.generateISD()
+        for storage in sourcesSet.compactMap({ $0 }) {
+            storage.saveError = nil
+            storage.value = .data(storage.storeAppMetricaUUID ? original : original.withoutAppMetricaUUID)
+        }
+        let recovered = try syncManager.loadAndSyncIfNeeded()
+        XCTAssertEqual(recovered.deviceID, original.deviceID)
+        XCTAssertEqual(recovered.appMetricaUUID, original.appMetricaUUID)
+        checkISD(idSet: sourcesSet, isd: original)
+    }
+
+    func testMissingDeviceIDDoesNotPersistNewUUID() throws {
+        deviceIDGenerator.deviceID = nil
+        XCTAssertThrowsError(try syncManager.loadAndSyncIfNeeded())
+        for storage in sourcesSet.compactMap({ $0 }) {
+            XCTAssertEqual(storage.saveCallCount, 0)
+        }
+    }
+
+    func testStartupUpdateHandlesVendorMismatchButPropagatesWriteFailures() throws {
+        let original = IdentifiersStorageData.generateISD()
+        appSettings.value = .data(original)
+        _ = try syncManager.loadAndSyncIfNeeded()
+        let replacement = IdentifiersStorageData.generateISD()
+        vendorKeychain.saveError = IdentifierStorageError.deviceIDMismatch
+        let updated = try syncManager.update(deviceID: replacement.deviceID!,
+                                             deviceIDHash: replacement.deviceIDHash)
+        XCTAssertEqual(updated.deviceID, replacement.deviceID)
+        XCTAssertEqual(updated.deviceHashID, replacement.deviceIDHash)
+        XCTAssertEqual(updated.appMetricaUUID, original.appMetricaUUID)
+
+        vendorKeychain.saveError = IdentifierStorageError.locked
+        let next = IdentifiersStorageData.generateISD()
+        XCTAssertThrowsError(try syncManager.update(deviceID: next.deviceID!,
+                                                   deviceIDHash: next.deviceIDHash))
+    }
+
+    func testStartupUpdateWaitsForUnavailableSources() throws {
+        let original = IdentifiersStorageData.generateISD()
+        appSettings.value = .data(original)
+        appKeychain.value = .locked
+        let replacement = IdentifiersStorageData.generateISD()
+        XCTAssertThrowsError(try syncManager.update(deviceID: replacement.deviceID!,
+                                                   deviceIDHash: replacement.deviceIDHash))
+        for storage in sourcesSet.compactMap({ $0 }) {
+            XCTAssertEqual(storage.saveCallCount, 0)
+        }
+        appKeychain.value = .data(original.withoutAppMetricaUUID)
+        let recovered = try syncManager.loadAndSyncIfNeeded()
+        XCTAssertEqual(recovered.deviceID, original.deviceID)
+        XCTAssertEqual(recovered.appMetricaUUID, original.appMetricaUUID)
+    }
+
+    func testFailedSecondaryRepairPreservesPersistedIdentifiers() throws {
+        for healthySource in [IdentifierSource.privateFile, .groupFile] {
+            let original = IdentifiersStorageData.generateISD()
+            let healthy = IdentifiersStorageMock()
+            healthy.value = .data(original)
+            let secondary = IdentifiersStorageMock()
+            secondary.saveError = CustomError()
+            var providers = IdentifierSet<MutableIdentifiersStorable>()
+            providers[healthySource] = healthy
+            providers[healthySource == .privateFile ? .groupFile : .privateFile] = secondary
+            let manager = SyncManager(providers: providers, runEnv: .mainApp,
+                                      deviceIDGenerator: deviceIDGenerator,
+                                      appMetricaUUIDGenerator: appMetricaUUIDGenerator)
+            for _ in 0..<2 {
+                let result = try manager.loadAndSyncIfNeeded()
+                XCTAssertEqual(result.deviceID, original.deviceID)
+                XCTAssertEqual(result.appMetricaUUID, original.appMetricaUUID)
+            }
+            XCTAssertEqual(healthy.value.data, original)
+            XCTAssertEqual(healthy.saveCallCount, 0)
+            XCTAssertGreaterThan(secondary.saveCallCount, 0)
+        }
+    }
+
+    func testCorruptedSecondaryWithFailedRepairPreservesPrimaryIdentifiers() throws {
+        let original = IdentifiersStorageData.generateISD()
+        appSettings.value = .data(original)
+        groupSettings.fetchError = IdentifierStorageError.corrupted(CustomError())
+        groupSettings.saveError = CustomError()
+        let result = try syncManager.loadAndSyncIfNeeded()
+        XCTAssertEqual(result.deviceID, original.deviceID)
+        XCTAssertEqual(result.appMetricaUUID, original.appMetricaUUID)
+        XCTAssertEqual(appSettings.saveCallCount, 0)
+    }
+
+    func testUnavailableSecondaryStillPreventsSynchronization() throws {
+        let original = IdentifiersStorageData.generateISD()
+        appSettings.value = .data(original)
+        for readFails in [false, true] {
+            groupSettings.value = .locked
+            groupSettings.fetchError = readFails ? CustomError() : nil
+            XCTAssertThrowsError(try syncManager.loadAndSyncIfNeeded())
+            XCTAssertEqual(appSettings.value.data, original)
+            for storage in sourcesSet.compactMap({ $0 }) {
+                XCTAssertEqual(storage.saveCallCount, 0)
+            }
+        }
+    }
+
 }

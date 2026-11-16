@@ -85,4 +85,45 @@ class JSONIdentifiersStorageTests: XCTestCase {
         XCTAssertEqual(newLid, rLid)
     }
     
+    func testCorruptedFileIsRecoveredFromExistingIdentifiers() throws {
+        for corruptedSource in [IdentifierSource.privateFile, .groupFile] {
+            try Data("{invalid JSON".utf8).write(to: URL(fileURLWithPath: filePath))
+            let original = IdentifiersStorageData.generateISD()
+            let healthyStorage = IdentifiersStorageMock()
+            healthyStorage.value = .data(original)
+            var providers = IdentifierSet<MutableIdentifiersStorable>()
+            providers[corruptedSource] = provider
+            providers[corruptedSource == .privateFile ? .groupFile : .privateFile] = healthyStorage
+
+            let loaded = IdentifierLoader.loadIdentifiers(providers: providers)
+            XCTAssertEqual(loaded.corruptedSources, [corruptedSource])
+            XCTAssertFalse(loaded.hasUnavailableSources)
+            let manager = SyncManager(providers: providers, runEnv: .mainApp,
+                                      deviceIDGenerator: DeviceIDGeneratorMock(deviceID: original.deviceID!),
+                                      appMetricaUUIDGenerator: AppMetricaUUIDGeneratorMock(value: original.appMetricaUUID!))
+            let recovered = try manager.loadAndSyncIfNeeded()
+            XCTAssertEqual(recovered.deviceID, original.deviceID)
+            XCTAssertEqual(recovered.appMetricaUUID, original.appMetricaUUID)
+            XCTAssertEqual(try provider.fetchIdentifiers().data, original)
+            XCTAssertEqual(healthyStorage.saveCallCount, 0)
+        }
+    }
+
+    func testCorruptedFileWithoutBackupDoesNotGenerateIdentifiers() throws {
+        let corruptedData = Data("{invalid JSON".utf8)
+        try corruptedData.write(to: URL(fileURLWithPath: filePath))
+        let original = IdentifiersStorageData.generateISD()
+        let keychain = IdentifiersStorageMock().emulateKeychain()
+        keychain.value = .data(original.withoutAppMetricaUUID)
+        var providers = IdentifierSet<MutableIdentifiersStorable>()
+        providers[.privateFile] = provider
+        providers[.privateKeychain] = keychain
+        let manager = SyncManager(providers: providers, runEnv: .mainApp,
+                                  deviceIDGenerator: DeviceIDGeneratorMock(deviceID: original.deviceID!),
+                                  appMetricaUUIDGenerator: AppMetricaUUIDGeneratorMock(value: original.appMetricaUUID!))
+        XCTAssertThrowsError(try manager.loadAndSyncIfNeeded())
+        XCTAssertEqual(try Data(contentsOf: URL(fileURLWithPath: filePath)), corruptedData)
+        XCTAssertEqual(keychain.saveCallCount, 0)
+    }
+
 }

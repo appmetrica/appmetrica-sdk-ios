@@ -53,7 +53,7 @@ final class IdentifierProviderRaceTests: XCTestCase {
     func test_vendorDuplicate_subsequentLoadReturnsPersistedUUID() throws {
         _ = try syncManager.loadAndSyncIfNeeded()
         
-        let cachedAfterSync = syncManager.loadIfNeeded()
+        let cachedAfterSync = try syncManager.loadIfNeeded()
         XCTAssertEqual(cachedAfterSync.appMetricaUUID, appSettings.value.data?.appMetricaUUID,
                        "loadIfNeeded() must return the same UUID that is persisted on disk")
         XCTAssertEqual(cachedAfterSync.appMetricaUUID, groupSettings.value.data?.appMetricaUUID,

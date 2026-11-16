@@ -64,6 +64,16 @@ static NSString *const AMAKeychainAvailabilityCheckObject = @"AMAKeychainAvailab
 
 - (BOOL)isAvailable
 {
+    return [self checkAvailabilityAllowingLocked:NO];
+}
+
+- (BOOL)isAvailableOrLocked
+{
+    return [self checkAvailabilityAllowingLocked:YES];
+}
+
+- (BOOL)checkAvailabilityAllowingLocked:(BOOL)allowLocked
+{
     NSError *error = nil;
     NSString *savedValue = nil;
 
@@ -73,6 +83,10 @@ static NSString *const AMAKeychainAvailabilityCheckObject = @"AMAKeychainAvailab
         [self removeStringValueForKey:AMAKeychainAvailabilityCheckObjectKey error:nil];
     }
 
+    if (allowLocked && [error.domain isEqualToString:kAMAKeychainErrorDomain] &&
+        error.code == AMAKeychainErrorCodeLocked) {
+        return YES;
+    }
     return error == nil && [savedValue isEqual:AMAKeychainAvailabilityCheckObject];
 }
 
