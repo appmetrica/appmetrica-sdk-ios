@@ -72,27 +72,45 @@ describe(@"AMADatabaseMigrationTests", ^{
     context(@"Migration", ^{
         NSString *apiKey = @"1111"; // this key is hardcoded in storage backups
 
-// TODO: fix test in https://nda.ya.ru/t/-41ZPniX7FFYn8
-//        it(@"Should perform full stack migrations", ^{
-//            NSString *initialStorageName = @"storage-version-2"; // We don't support first migration
-//            NSString *storagePath = [AMADatabaseMigrationTestsUtils pathForDatabase:initialStorageName];
-//            database = [AMADatabaseFactory configurationDatabase];
-//
-//            NSFileManager *fileManager = [NSFileManager defaultManager];
-//            [fileManager removeItemAtPath:database.databasePath error:nil];
-//            [fileManager copyItemAtPath:storagePath toPath:database.databasePath error:nil];
-//
-//            [database migrateToMainApiKey:apiKey];
-//
-//            AMAReporterStorage *storage = reporterTestHelper.appReporter.reporterStorage;
-//            AMASessionStorage *sessionStorage = storage.sessionStorage;
-//            AMAEventStorage *eventStorage = storage.eventStorage;
-//
-//            AMASession *session = [sessionStorage lastGeneralSessionWithError:nil];
-//            [[session should] beNonNil];
-//            AMAEvent *event = [[eventStorage amatest_allSavedEvents] firstObject];
-//            [[event should] beNonNil];
-//        });
+        it(@"Should perform full stack migrations", ^{
+            NSString *initialStorageName = @"storage-version-2"; // We don't support first migration
+            NSString *storagePath = [AMADatabaseMigrationTestsUtils pathForDatabase:initialStorageName];
+            NSFileManager *fileManager = [NSFileManager defaultManager];
+            database = [AMADatabaseFactory configurationDatabase];
+
+            NSError *error = nil;
+            [[storagePath should] beNonNil];
+            // Remove the previous database together with its WAL before copying the fixture.
+            for (NSString *suffix in @[@"", @"-wal", @"-shm"]) {
+                NSString *path = [database.databasePath stringByAppendingString:suffix];
+                error = nil;
+                BOOL removed = [fileManager removeItemAtPath:path error:&error];
+                BOOL missing = [error.domain isEqualToString:NSCocoaErrorDomain] && error.code == NSFileNoSuchFileError;
+                [[theValue(removed || missing) should] beYes];
+            }
+            error = nil;
+            BOOL created = [fileManager createDirectoryAtPath:[database.databasePath stringByDeletingLastPathComponent]
+                                 withIntermediateDirectories:YES
+                                                  attributes:nil
+                                                       error:&error];
+            [[theValue(created) should] beYes];
+            [[error should] beNil];
+            BOOL copied = [fileManager copyItemAtPath:storagePath toPath:database.databasePath error:&error];
+            [[theValue(copied) should] beYes];
+            [[error should] beNil];
+
+            [database migrateToMainApiKey:apiKey];
+
+            AMAReporterStorage *storage = reporterTestHelper.appReporter.reporterStorage;
+            AMASessionStorage *sessionStorage = storage.sessionStorage;
+            AMAEventStorage *eventStorage = storage.eventStorage;
+
+            AMASession *session = [sessionStorage lastGeneralSessionWithError:&error];
+            [[error should] beNil];
+            [[session should] beNonNil];
+            AMAEvent *event = [[eventStorage amatest_allSavedEvents] firstObject];
+            [[event should] beNonNil];
+        });
 
         context(@"Migration from scheme version 1 to 2", ^{
             beforeAll(^{
